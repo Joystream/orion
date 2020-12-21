@@ -1,4 +1,4 @@
-import { VideoEvent, VideoEventsBucketModel, VideoEventType } from './models/VideoEvent'
+import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from './models/VideoEvent'
 
 export class VideoAggregate {
   private videoViewsMap: Record<string, number> = {}
@@ -24,7 +24,7 @@ export class VideoAggregate {
     })
   }
 
-  public applyEvent(event: VideoEvent) {
+  public applyEvent(event: UnsequencedVideoEvent) {
     switch (event.eventType) {
       case VideoEventType.AddView:
         this.applyAddViewEvent(event)
@@ -34,7 +34,7 @@ export class VideoAggregate {
     }
   }
 
-  private applyAddViewEvent(event: VideoEvent) {
+  private applyAddViewEvent(event: UnsequencedVideoEvent) {
     const currentVideoViews = this.videoViewsMap[event.videoId] || 0
     const currentChannelViews = this.channelViewsMap[event.channelId] || 0
 

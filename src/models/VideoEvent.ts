@@ -9,7 +9,7 @@ export enum VideoEventType {
 
 export class VideoEvent {
   @prop({ required: true, index: true, unique: true })
-  eventId?: number
+  eventId: number
 
   @prop({ required: true, index: true })
   videoId: string
@@ -23,6 +23,8 @@ export class VideoEvent {
   @prop({ required: true, index: true, enum: VideoEventType })
   eventType: VideoEventType
 }
+
+export type UnsequencedVideoEvent = Omit<VideoEvent, 'eventId'>
 
 @plugin(AutoIncrementID, { field: 'bucketId' })
 class VideoEventsBucket {
@@ -46,11 +48,14 @@ export const VideoEventsBucketModel = getModelForClass(VideoEventsBucket, {
   schemaOptions: { collection: 'videoEvents' },
 })
 
-export const insertVideoEventIntoBucket = async (event: VideoEvent) => {
+export const insertVideoEventIntoBucket = async (unsequencedVideoEvent: UnsequencedVideoEvent) => {
   // TODO: possibly cache the last bucket
   const lastBucket = await VideoEventsBucketModel.findOne().sort({ bucketId: -1 })
   const lastEventId = lastBucket ? lastBucket.events[lastBucket.events.length - 1].eventId || 0 : 0
-  event.eventId = lastEventId + 1
+  const event: VideoEvent = {
+    ...unsequencedVideoEvent,
+    eventId: lastEventId + 1,
+  }
 
   if (!lastBucket || lastBucket.bucketSize >= MAX_BUCKET_SIZE) {
     return await createNewBucketFromEvent(event)
