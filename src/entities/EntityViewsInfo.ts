@@ -1,9 +1,9 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 
 @ObjectType()
-export class VideoViewsInfo {
+export class EntityViewsInfo {
   @Field(() => ID, { name: 'id' })
-  videoId: string
+  id: string
 
   @Field(() => Int)
   views: number

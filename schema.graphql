@@ -3,20 +3,26 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type EntityViewsInfo {
+  id: ID!
+  views: Int!
+}
+
 type Mutation {
   """Add a single view to the target video's count"""
-  addVideoView(channelId: ID!, videoId: ID!): VideoViewsInfo!
+  addVideoView(channelId: ID!, videoId: ID!): EntityViewsInfo!
 }
 
 type Query {
+  """Get views counts for a list of channels"""
+  batchedChannelsViews(channelIdList: [ID!]!): [EntityViewsInfo]!
+
   """Get views counts for a list of videos"""
-  batchedVideoViews(videoIdList: [ID!]!): [VideoViewsInfo]!
+  batchedVideoViews(videoIdList: [ID!]!): [EntityViewsInfo]!
+
+  """Get views count for a single channel"""
+  channelViews(channelId: ID!): EntityViewsInfo
 
   """Get views count for a single video"""
-  videoViews(videoId: ID!): VideoViewsInfo
-}
-
-type VideoViewsInfo {
-  id: ID!
-  views: Int!
+  videoViews(videoId: ID!): EntityViewsInfo
 }

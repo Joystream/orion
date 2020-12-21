@@ -3,9 +3,9 @@ import { ApolloServer } from 'apollo-server-express'
 import Express from 'express'
 import { connect } from 'mongoose'
 import { buildSchema } from 'type-graphql'
-import { VideoViewsInfosResolver } from './resolvers/videoViewsInfos'
+import { VideoViewsInfosResolver } from './resolvers/viewsInfo'
 import config from './config'
-import { videoAggregate } from './aggregate'
+import { viewsAggregate } from './aggregates/views'
 
 const main = async () => {
   await getMongooseConnection()
@@ -46,7 +46,7 @@ const getMongooseConnection = async () => {
 const rebuildAggregates = async () => {
   process.stdout.write('Rebuilding video events aggregate...')
   try {
-    await videoAggregate.rebuild()
+    await viewsAggregate.rebuild()
   } catch (error) {
     process.stdout.write(' Failed!\n')
     console.error(error)
