@@ -1,7 +1,7 @@
 import { Args, ArgsType, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { VideoViewsInfo } from '../entities/VideoViewsInfo'
 import { videoAggregate } from '../aggregate'
-import { insertVideoEventIntoBucket, VideoEvent, VideoEventType } from '../models/VideoEvent'
+import { insertVideoEventIntoBucket, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
 
 @ArgsType()
 class VideoViewsArgs {
@@ -55,7 +55,7 @@ export class VideoViewsInfosResolver {
 
   @Mutation(() => VideoViewsInfo, { description: "Add a single view to the target video's count" })
   async addVideoView(@Args() { videoId, channelId }: AddVideoViewArgs): Promise<VideoViewsInfo> {
-    const event: VideoEvent = {
+    const event: UnsequencedVideoEvent = {
       videoId,
       channelId,
       eventType: VideoEventType.AddView,
