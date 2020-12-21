@@ -1,5 +1,9 @@
 import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from './models/VideoEvent'
 
+type VideoEventsAggregationResult = {
+  events?: VideoEvent[]
+}[]
+
 export class VideoAggregate {
   private videoViewsMap: Record<string, number> = {}
   private channelViewsMap: Record<string, number> = {}
@@ -13,13 +17,15 @@ export class VideoAggregate {
   }
 
   public async rebuild() {
-    const aggregation = (await VideoEventsBucketModel.aggregate([
+    const aggregation: VideoEventsAggregationResult = await VideoEventsBucketModel.aggregate([
       { $unwind: '$events' },
       { $group: { _id: null, allEvents: { $push: '$events' } } },
       { $project: { events: '$allEvents' } },
-    ])) as { events: VideoEvent[] }[]
+    ])
 
-    aggregation[0].events.forEach((event) => {
+    const events = aggregation[0]?.events || []
+
+    events.forEach((event) => {
       this.applyEvent(event)
     })
   }
