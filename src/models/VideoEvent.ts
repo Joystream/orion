@@ -17,6 +17,7 @@ export class VideoEvent {
   @prop({ required: true, index: true })
   channelId: string
 
+  @prop({ required: true })
   timestamp: Date
 
   @prop({ required: true, index: true, enum: VideoEventType })
