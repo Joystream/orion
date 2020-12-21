@@ -39,7 +39,7 @@ export class VideoAggregate {
     const currentChannelViews = this.channelViewsMap[event.channelId] || 0
 
     this.videoViewsMap[event.videoId] = currentVideoViews + 1
-    this.channelViewsMap[event.videoId] = currentChannelViews + 1
+    this.channelViewsMap[event.channelId] = currentChannelViews + 1
   }
 }
 
