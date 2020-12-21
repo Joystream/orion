@@ -1,10 +1,10 @@
-import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from './models/VideoEvent'
+import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from '../models/VideoEvent'
 
 type VideoEventsAggregationResult = {
   events?: VideoEvent[]
 }[]
 
-export class VideoAggregate {
+export class ViewsAggregate {
   private videoViewsMap: Record<string, number> = {}
   private channelViewsMap: Record<string, number> = {}
 
@@ -49,4 +49,4 @@ export class VideoAggregate {
   }
 }
 
-export const videoAggregate = new VideoAggregate()
+export const viewsAggregate = new ViewsAggregate()
