@@ -3,16 +3,17 @@ import { ApolloServer } from 'apollo-server-express'
 import Express from 'express'
 import { connect } from 'mongoose'
 import { buildSchema } from 'type-graphql'
-import { VideoViewsInfosResolver } from './resolvers/viewsInfo'
+
 import config from './config'
-import { viewsAggregate } from './aggregates/views'
+import { followsAggregate, viewsAggregate } from './aggregates'
+import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
 
 const main = async () => {
   await getMongooseConnection()
   await rebuildAggregates()
 
   const schema = await buildSchema({
-    resolvers: [VideoViewsInfosResolver],
+    resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver],
     emitSchemaFile: 'schema.graphql',
     validate: false,
   })
@@ -26,27 +27,34 @@ const main = async () => {
 }
 
 const getMongooseConnection = async () => {
-  process.stdout.write(`Connecting to MongoDB at "${config.mongoDBUri}"...`)
-  try {
+  const task = async () => {
     const mongoose = await connect(config.mongoDBUri, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
       useCreateIndex: true,
     })
     await mongoose.connection
-  } catch (error) {
-    process.stdout.write(' Failed!\n')
-    console.error(error)
-    process.exit()
-    return
   }
-  process.stdout.write(' Done.\n')
+  await wrapTask(`Connecting to MongoDB at "${config.mongoDBUri}"`, task)
 }
 
 const rebuildAggregates = async () => {
-  process.stdout.write('Rebuilding video events aggregate...')
-  try {
+  const viewEventsTask = async () => {
     await viewsAggregate.rebuild()
+  }
+
+  const followEventsTask = async () => {
+    await followsAggregate.rebuild()
+  }
+
+  await wrapTask('Rebuiliding view events aggregate', viewEventsTask)
+  await wrapTask('Rebuiliding follow events aggregate', followEventsTask)
+}
+
+const wrapTask = async (message: string, task: () => Promise<void>) => {
+  process.stdout.write(`${message}...`)
+  try {
+    await task()
   } catch (error) {
     process.stdout.write(' Failed!\n')
     console.error(error)
