@@ -17,8 +17,9 @@
     "url": "https://github.com/Joystream/joystream/issues"
   },
   "scripts": {
+    "clean": "rm -rf dist",
     "dev": "NODE_ENV=development ts-node-dev --respawn src/server.ts",
-    "build": "tsc",
+    "build": "yarn clean && yarn tsc",
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts"
   },

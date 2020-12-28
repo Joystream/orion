@@ -1,10 +1,10 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 
 @ObjectType()
-export class EntityViewsInfo {
+export class ChannelFollowsInfo {
   @Field(() => ID)
   id: string
 
   @Field(() => Int)
-  views: number
+  follows: number
 }
