@@ -16,7 +16,15 @@ export class ViewsAggregate {
     return this.channelViewsMap[channelId] ?? null
   }
 
-  public async rebuild() {
+  public getVideoViewsMap() {
+    return Object.freeze(this.videoViewsMap)
+  }
+
+  public getChannelViewsMap() {
+    return Object.freeze(this.channelViewsMap)
+  }
+
+  public static async Build() {
     const aggregation: VideoEventsAggregationResult = await VideoEventsBucketModel.aggregate([
       { $unwind: '$events' },
       { $group: { _id: null, allEvents: { $push: '$events' } } },
@@ -25,9 +33,11 @@ export class ViewsAggregate {
 
     const events = aggregation[0]?.events || []
 
+    const aggregate = new ViewsAggregate()
     events.forEach((event) => {
-      this.applyEvent(event)
+      aggregate.applyEvent(event)
     })
+    return aggregate
   }
 
   public applyEvent(event: UnsequencedVideoEvent) {
@@ -44,5 +54,3 @@ export class ViewsAggregate {
     }
   }
 }
-
-export const viewsAggregate = new ViewsAggregate()

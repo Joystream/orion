@@ -1,6 +1,5 @@
 import { DocumentType, prop, ReturnModelType } from '@typegoose/typegoose'
-
-const MAX_BUCKET_SIZE = 50000
+import config from '../config'
 
 export class GenericEvent {
   @prop()
@@ -41,7 +40,7 @@ export const insertEventIntoBucket = async (
     _id: lastEventId + 1,
   }
 
-  if (!lastBucket || lastBucket.size >= MAX_BUCKET_SIZE) {
+  if (!lastBucket || lastBucket.size >= config.bucketSize) {
     return await createNewBucketFromEvent(lastBucket, event, bucketModel)
   }
 

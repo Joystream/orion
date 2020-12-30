@@ -18,9 +18,9 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "dev": "NODE_ENV=development ts-node-dev --respawn src/server.ts",
-    "build": "yarn clean && yarn tsc",
-    "start": "node dist/server.js",
+    "dev": "NODE_ENV=development ts-node-dev --respawn src/main.ts",
+    "build": "yarn clean && yarn tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
     "lint": "eslint . --ext .ts"
   },
   "lint-staged": {

@@ -1,4 +1,4 @@
-import { followsAggregate } from './follows'
-import { viewsAggregate } from './views'
+import { FollowsAggregate } from './follows'
+import { ViewsAggregate } from './views'
 
-export { followsAggregate, viewsAggregate }
+export { FollowsAggregate, ViewsAggregate }
