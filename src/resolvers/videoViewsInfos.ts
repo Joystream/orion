@@ -1,49 +1,74 @@
 import { Args, ArgsType, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
-import { VideoViewsInfo, VideoViewsInfoModel } from '../entities/VideoViewsInfo'
+import { VideoViewsInfo } from '../entities/VideoViewsInfo'
+import { videoAggregate } from '../aggregate'
+import { insertVideoEventIntoBucket, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
 
 @ArgsType()
 class VideoViewsArgs {
   @Field(() => ID)
-  videoID: string
+  videoId: string
 }
 
 @ArgsType()
 class BatchedVideoViewsArgs {
   @Field(() => [ID])
-  videoIDList: string[]
+  videoIdList: string[]
 }
 
 @ArgsType()
 class AddVideoViewArgs {
   @Field(() => ID)
-  videoID: string
+  videoId: string
+
+  @Field(() => ID)
+  channelId: string
 }
 
 @Resolver()
 export class VideoViewsInfosResolver {
   @Query(() => VideoViewsInfo, { nullable: true, description: 'Get views count for a single video' })
-  async videoViews(@Args() { videoID }: VideoViewsArgs) {
-    return VideoViewsInfoModel.findOne({ videoID: videoID })
+  async videoViews(@Args() { videoId }: VideoViewsArgs): Promise<VideoViewsInfo | null> {
+    const views = videoAggregate.videoViews(videoId)
+    if (views) {
+      return {
+        videoId,
+        views,
+      }
+    }
+    return null
   }
 
   @Query(() => [VideoViewsInfo], { description: 'Get views counts for a list of videos', nullable: 'items' })
-  async batchedVideoViews(@Args() { videoIDList }: BatchedVideoViewsArgs) {
-    const results = await VideoViewsInfoModel.find({
-      videoID: {
-        $in: videoIDList,
-      },
+  async batchedVideoViews(@Args() { videoIdList }: BatchedVideoViewsArgs): Promise<(VideoViewsInfo | null)[]> {
+    return videoIdList.map((videoId) => {
+      const videoViews = videoAggregate.videoViews(videoId)
+      if (videoViews) {
+        const videoViewsInfo: VideoViewsInfo = {
+          videoId,
+          views: videoViews,
+        }
+        return videoViewsInfo
+      }
+      return null
     })
-
-    const resultsLookup = results.reduce((acc, result) => {
-      acc[result.videoID] = result
-      return acc
-    }, {} as Record<string, VideoViewsInfo>)
-
-    return videoIDList.map((id) => resultsLookup[id] || null)
   }
 
   @Mutation(() => VideoViewsInfo, { description: "Add a single view to the target video's count" })
-  async addVideoView(@Args() { videoID }: AddVideoViewArgs) {
-    return VideoViewsInfoModel.findOneAndUpdate({ videoID }, { $inc: { views: 1 } }, { new: true, upsert: true })
+  async addVideoView(@Args() { videoId, channelId }: AddVideoViewArgs): Promise<VideoViewsInfo> {
+    const event: UnsequencedVideoEvent = {
+      videoId,
+      channelId,
+      eventType: VideoEventType.AddView,
+      timestamp: new Date(),
+    }
+
+    await insertVideoEventIntoBucket(event)
+    videoAggregate.applyEvent(event)
+
+    const views = videoAggregate.videoViews(videoId)
+    return {
+      videoId,
+      views,
+    }
   }
 }
