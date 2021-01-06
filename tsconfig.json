@@ -9,7 +9,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "outDir": "dist",
-    "rootDir": "src",
     "sourceMap": true,
     "strict": true,
     "emitDecoratorMetadata": true,
