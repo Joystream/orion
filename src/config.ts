@@ -1,7 +1,5 @@
 import dotenv from 'dotenv'
 
-dotenv.config()
-
 const isDev = process.env.NODE_ENV === 'development'
 
 type LoadEnvVarOpts = {
@@ -25,16 +23,39 @@ const loadEnvVar = (name: string, { defaultValue, devDefaultValue }: LoadEnvVarO
   throw new Error(`Required env variable "${name}" is missing from the environment`)
 }
 
-const rawPort = loadEnvVar('ORION_PORT', { defaultValue: '6116' })
-const port = parseInt(rawPort)
+export class Config {
+  private _port: number
+  private _bucketSize: number
+  private _mongoDBUri: string
 
-const mongoHostname = loadEnvVar('ORION_MONGO_HOSTNAME', { devDefaultValue: 'localhost' })
-const rawMongoPort = loadEnvVar('ORION_MONGO_PORT', { defaultValue: '27017' })
-const mongoDatabase = loadEnvVar('ORION_MONGO_DATABASE', { defaultValue: 'orion' })
+  get port(): number {
+    return this._port
+  }
 
-const mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
+  get bucketSize(): number {
+    return this._bucketSize
+  }
 
-export default {
-  port,
-  mongoDBUri,
+  get mongoDBUri(): string {
+    return this._mongoDBUri
+  }
+
+  loadConfig() {
+    dotenv.config()
+
+    const rawPort = loadEnvVar('ORION_PORT', { defaultValue: '6116' })
+    this._port = parseInt(rawPort)
+
+    const rawBucketSize = loadEnvVar('ORION_BUCKET_SIZE', { defaultValue: '50000' })
+    this._bucketSize = parseInt(rawBucketSize)
+
+    const mongoHostname = loadEnvVar('ORION_MONGO_HOSTNAME', { devDefaultValue: 'localhost' })
+    const rawMongoPort = loadEnvVar('ORION_MONGO_PORT', { defaultValue: '27017' })
+    const mongoDatabase = loadEnvVar('ORION_MONGO_DATABASE', { defaultValue: 'orion' })
+
+    this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
+  }
 }
+
+const config = new Config()
+export default config

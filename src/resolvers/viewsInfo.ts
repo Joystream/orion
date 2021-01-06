@@ -1,7 +1,7 @@
-import { Args, ArgsType, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
+import { Args, ArgsType, Ctx, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
-import { viewsAggregate } from '../aggregates'
 import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
+import { Context } from '../types'
 
 @ArgsType()
 class VideoViewsArgs {
@@ -39,27 +39,33 @@ class AddVideoViewArgs {
 @Resolver()
 export class VideoViewsInfosResolver {
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single video' })
-  async videoViews(@Args() { videoId }: VideoViewsArgs): Promise<EntityViewsInfo | null> {
-    return getVideoViewsInfo(videoId)
+  async videoViews(@Args() { videoId }: VideoViewsArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo | null> {
+    return getVideoViewsInfo(videoId, ctx)
   }
 
   @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of videos', nullable: 'items' })
-  async batchedVideoViews(@Args() { videoIdList }: BatchedVideoViewsArgs): Promise<(EntityViewsInfo | null)[]> {
-    return videoIdList.map((videoId) => getVideoViewsInfo(videoId))
+  async batchedVideoViews(
+    @Args() { videoIdList }: BatchedVideoViewsArgs,
+    @Ctx() ctx: Context
+  ): Promise<(EntityViewsInfo | null)[]> {
+    return videoIdList.map((videoId) => getVideoViewsInfo(videoId, ctx))
   }
 
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
-  async channelViews(@Args() { channelId }: ChannelViewsArgs): Promise<EntityViewsInfo | null> {
-    return getChannelViewsInfo(channelId)
+  async channelViews(@Args() { channelId }: ChannelViewsArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo | null> {
+    return getChannelViewsInfo(channelId, ctx)
   }
 
   @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of channels', nullable: 'items' })
-  async batchedChannelsViews(@Args() { channelIdList }: BatchedChannelViewsArgs): Promise<(EntityViewsInfo | null)[]> {
-    return channelIdList.map((channelId) => getChannelViewsInfo(channelId))
+  async batchedChannelsViews(
+    @Args() { channelIdList }: BatchedChannelViewsArgs,
+    @Ctx() ctx: Context
+  ): Promise<(EntityViewsInfo | null)[]> {
+    return channelIdList.map((channelId) => getChannelViewsInfo(channelId, ctx))
   }
 
   @Mutation(() => EntityViewsInfo, { description: "Add a single view to the target video's count" })
-  async addVideoView(@Args() { videoId, channelId }: AddVideoViewArgs): Promise<EntityViewsInfo> {
+  async addVideoView(@Args() { videoId, channelId }: AddVideoViewArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo> {
     const event: UnsequencedVideoEvent = {
       videoId,
       channelId,
@@ -68,9 +74,9 @@ export class VideoViewsInfosResolver {
     }
 
     await saveVideoEvent(event)
-    viewsAggregate.applyEvent(event)
+    ctx.viewsAggregate.applyEvent(event)
 
-    return getVideoViewsInfo(videoId)!
+    return getVideoViewsInfo(videoId, ctx)!
   }
 }
 
@@ -84,12 +90,12 @@ const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | n
   return null
 }
 
-const getVideoViewsInfo = (videoId: string): EntityViewsInfo | null => {
-  const views = viewsAggregate.videoViews(videoId)
+const getVideoViewsInfo = (videoId: string, ctx: Context): EntityViewsInfo | null => {
+  const views = ctx.viewsAggregate.videoViews(videoId)
   return buildViewsObject(videoId, views)
 }
 
-const getChannelViewsInfo = (channelId: string): EntityViewsInfo | null => {
-  const views = viewsAggregate.channelViews(channelId)
+const getChannelViewsInfo = (channelId: string, ctx: Context): EntityViewsInfo | null => {
+  const views = ctx.viewsAggregate.channelViews(channelId)
   return buildViewsObject(channelId, views)
 }

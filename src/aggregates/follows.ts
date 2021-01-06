@@ -10,14 +10,18 @@ type ChannelEventsAggregationResult = {
   events?: ChannelEvent[]
 }[]
 
-export class FollowsAggregate extends GenericAggregate<ChannelEvent> {
+export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   private channelFollowsMap: Record<string, number> = {}
 
   public channelFollows(channelId: string): number | null {
     return this.channelFollowsMap[channelId] ?? null
   }
 
-  public async rebuild() {
+  public getChannelFollowsMap() {
+    return Object.freeze(this.channelFollowsMap)
+  }
+
+  public static async Build(): Promise<FollowsAggregate> {
     const aggregation: ChannelEventsAggregationResult = await ChannelEventsBucketModel.aggregate([
       { $unwind: '$events' },
       { $group: { _id: null, allEvents: { $push: '$events' } } },
@@ -26,9 +30,11 @@ export class FollowsAggregate extends GenericAggregate<ChannelEvent> {
 
     const events = aggregation[0]?.events || []
 
+    const aggregate = new FollowsAggregate()
     events.forEach((event) => {
-      this.applyEvent(event)
+      aggregate.applyEvent(event)
     })
+    return aggregate
   }
 
   public applyEvent(event: UnsequencedChannelEvent) {
@@ -46,5 +52,3 @@ export class FollowsAggregate extends GenericAggregate<ChannelEvent> {
     }
   }
 }
-
-export const followsAggregate = new FollowsAggregate()
