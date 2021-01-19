@@ -1,12 +1,16 @@
-version: "3.8"
+version: '3.3'
 services:
   orion:
     image: orion:latest
     environment:
-    - ORION_PORT=6116
-    - ORION_MONGO_HOSTNAME=mongo
+      - ORION_PORT=6116
+      - ORION_MONGO_HOSTNAME=mongo
     ports:
-    - "6116:6116"
+      - '127.0.0.1:6116:6116'
     restart: always
   mongo:
+    container_name: mongo
+    restart: always
     image: library/mongo:4.4
+    volumes:
+      - ./db:/data/db
