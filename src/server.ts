@@ -20,7 +20,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
 
   const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({
     ...aggregates,
-    remoteHost: req.ip,
+    remoteHost: req?.ip,
   })
 
   return new ApolloServer({
