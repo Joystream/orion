@@ -5,4 +5,6 @@ export type Aggregates = {
   followsAggregate: FollowsAggregate
 }
 
-export type Context = Aggregates
+export type OrionContext = {
+  remoteHost?: string
+} & Aggregates

@@ -8,6 +8,9 @@ export class GenericEvent {
   @prop({ required: true })
   timestamp: Date
 
+  @prop({ required: false, index: true })
+  actorId?: string
+
   type: unknown
 }
 
