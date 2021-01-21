@@ -1,11 +1,13 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server-express'
+import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
+import { ContextFunction } from 'apollo-server-core'
 import { connect, Mongoose } from 'mongoose'
 import { buildSchema } from 'type-graphql'
 
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
-import { Aggregates, Context } from './types'
+import { Aggregates, OrionContext } from './types'
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) => {
   await mongoose.connection
@@ -16,11 +18,15 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
     validate: false,
   })
 
-  const context: Context = {
+  const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({
     ...aggregates,
-  }
+    remoteHost: req?.ip,
+  })
 
-  return new ApolloServer({ schema, context })
+  return new ApolloServer({
+    schema,
+    context: contextFn,
+  })
 }
 
 export const connectMongoose = async (connectionUri: string) => {

@@ -1,7 +1,7 @@
 import { Args, ArgsType, Ctx, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
 import { ChannelEventType, saveChannelEvent, UnsequencedChannelEvent } from '../models/ChannelEvent'
-import { Context } from '../types'
+import { OrionContext } from '../types'
 
 @ArgsType()
 class ChannelFollowsArgs {
@@ -26,7 +26,7 @@ export class ChannelFollowsInfosResolver {
   @Query(() => ChannelFollowsInfo, { nullable: true, description: 'Get follows count for a single channel' })
   async channelFollows(
     @Args() { channelId }: ChannelFollowsArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: OrionContext
   ): Promise<ChannelFollowsInfo | null> {
     return getFollowsInfo(channelId, ctx)
   }
@@ -34,17 +34,18 @@ export class ChannelFollowsInfosResolver {
   @Query(() => [ChannelFollowsInfo], { description: 'Get follows counts for a list of channels', nullable: 'items' })
   async batchedChannelFollows(
     @Args() { channelIdList }: BatchedChannelFollowsArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: OrionContext
   ): Promise<(ChannelFollowsInfo | null)[]> {
     return channelIdList.map((channelId) => getFollowsInfo(channelId, ctx))
   }
 
   @Mutation(() => ChannelFollowsInfo, { description: 'Add a single follow to the target channel' })
-  async followChannel(@Args() { channelId }: FollowChannelArgs, @Ctx() ctx: Context): Promise<ChannelFollowsInfo> {
+  async followChannel(@Args() { channelId }: FollowChannelArgs, @Ctx() ctx: OrionContext): Promise<ChannelFollowsInfo> {
     const event: UnsequencedChannelEvent = {
       channelId,
       type: ChannelEventType.FollowChannel,
       timestamp: new Date(),
+      actorId: ctx.remoteHost,
     }
 
     await saveChannelEvent(event)
@@ -54,11 +55,15 @@ export class ChannelFollowsInfosResolver {
   }
 
   @Mutation(() => ChannelFollowsInfo, { description: 'Remove a single follow from the target channel' })
-  async unfollowChannel(@Args() { channelId }: UnfollowChannelArgs, @Ctx() ctx: Context): Promise<ChannelFollowsInfo> {
+  async unfollowChannel(
+    @Args() { channelId }: UnfollowChannelArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<ChannelFollowsInfo> {
     const event: UnsequencedChannelEvent = {
       channelId,
       type: ChannelEventType.UnfollowChannel,
       timestamp: new Date(),
+      actorId: ctx.remoteHost,
     }
 
     await saveChannelEvent(event)
@@ -68,7 +73,7 @@ export class ChannelFollowsInfosResolver {
   }
 }
 
-const getFollowsInfo = (channelId: string, ctx: Context): ChannelFollowsInfo | null => {
+const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
   const follows = ctx.followsAggregate.channelFollows(channelId)
   if (follows != null) {
     return {
