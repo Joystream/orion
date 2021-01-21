@@ -14,6 +14,8 @@ const main = async () => {
   const server = await createServer(mongoose, aggregates)
   const app = Express()
   server.applyMiddleware({ app })
+
+  app.enable('trust proxy')
   app.listen({ port: config.port }, () =>
     console.log(`🚀 Server listening at ==> http://localhost:${config.port}${server.graphqlPath}`)
   )

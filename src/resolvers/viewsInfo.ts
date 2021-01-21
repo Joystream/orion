@@ -1,7 +1,7 @@
 import { Args, ArgsType, Ctx, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
-import { Context } from '../types'
+import { OrionContext } from '../types'
 
 @ArgsType()
 class VideoViewsArgs {
@@ -39,38 +39,45 @@ class AddVideoViewArgs {
 @Resolver()
 export class VideoViewsInfosResolver {
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single video' })
-  async videoViews(@Args() { videoId }: VideoViewsArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo | null> {
+  async videoViews(@Args() { videoId }: VideoViewsArgs, @Ctx() ctx: OrionContext): Promise<EntityViewsInfo | null> {
     return getVideoViewsInfo(videoId, ctx)
   }
 
   @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of videos', nullable: 'items' })
   async batchedVideoViews(
     @Args() { videoIdList }: BatchedVideoViewsArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: OrionContext
   ): Promise<(EntityViewsInfo | null)[]> {
     return videoIdList.map((videoId) => getVideoViewsInfo(videoId, ctx))
   }
 
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
-  async channelViews(@Args() { channelId }: ChannelViewsArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo | null> {
+  async channelViews(
+    @Args() { channelId }: ChannelViewsArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo | null> {
     return getChannelViewsInfo(channelId, ctx)
   }
 
   @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of channels', nullable: 'items' })
   async batchedChannelsViews(
     @Args() { channelIdList }: BatchedChannelViewsArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: OrionContext
   ): Promise<(EntityViewsInfo | null)[]> {
     return channelIdList.map((channelId) => getChannelViewsInfo(channelId, ctx))
   }
 
   @Mutation(() => EntityViewsInfo, { description: "Add a single view to the target video's count" })
-  async addVideoView(@Args() { videoId, channelId }: AddVideoViewArgs, @Ctx() ctx: Context): Promise<EntityViewsInfo> {
+  async addVideoView(
+    @Args() { videoId, channelId }: AddVideoViewArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo> {
     const event: UnsequencedVideoEvent = {
       videoId,
       channelId,
       type: VideoEventType.AddView,
       timestamp: new Date(),
+      actorId: ctx.remoteHost,
     }
 
     await saveVideoEvent(event)
@@ -90,12 +97,12 @@ const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | n
   return null
 }
 
-const getVideoViewsInfo = (videoId: string, ctx: Context): EntityViewsInfo | null => {
+const getVideoViewsInfo = (videoId: string, ctx: OrionContext): EntityViewsInfo | null => {
   const views = ctx.viewsAggregate.videoViews(videoId)
   return buildViewsObject(videoId, views)
 }
 
-const getChannelViewsInfo = (channelId: string, ctx: Context): EntityViewsInfo | null => {
+const getChannelViewsInfo = (channelId: string, ctx: OrionContext): EntityViewsInfo | null => {
   const views = ctx.viewsAggregate.channelViews(channelId)
   return buildViewsObject(channelId, views)
 }
