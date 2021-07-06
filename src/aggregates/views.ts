@@ -7,6 +7,7 @@ type VideoEventsAggregationResult = {
 export class ViewsAggregate {
   private videoViewsMap: Record<string, number> = {}
   private channelViewsMap: Record<string, number> = {}
+  private allViewsEvents: Partial<UnsequencedVideoEvent>[] = []
 
   public videoViews(videoId: string): number | null {
     return this.videoViewsMap[videoId] ?? null
@@ -14,6 +15,10 @@ export class ViewsAggregate {
 
   public channelViews(channelId: string): number | null {
     return this.channelViewsMap[channelId] ?? null
+  }
+
+  public getAllViewsEvents() {
+    return this.allViewsEvents
   }
 
   public getVideoViewsMap() {
@@ -41,6 +46,7 @@ export class ViewsAggregate {
   }
 
   public applyEvent(event: UnsequencedVideoEvent) {
+    const { videoId, channelId, timestamp } = event
     const currentVideoViews = this.videoViewsMap[event.videoId] || 0
     const currentChannelViews = this.channelViewsMap[event.channelId] || 0
 
@@ -48,6 +54,7 @@ export class ViewsAggregate {
       case VideoEventType.AddView:
         this.videoViewsMap[event.videoId] = currentVideoViews + 1
         this.channelViewsMap[event.channelId] = currentChannelViews + 1
+        this.allViewsEvents = [...this.allViewsEvents, { videoId, channelId, timestamp }]
         break
       default:
         console.error(`Parsing unknown video event: ${event.type}`)

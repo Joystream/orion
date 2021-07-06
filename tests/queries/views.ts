@@ -9,11 +9,26 @@ export const GET_VIDEO_VIEWS = gql`
     }
   }
 `
+
+export const GET_MOST_VIEWED_VIDEOS = gql`
+  query GetMostViewedVideos($period: Int) {
+    mostViewedVideos(period: $period) {
+      id
+      views
+    }
+  }
+`
 export type GetVideoViews = {
   videoViews: EntityViewsInfo | null
 }
+export type GetMostViewedVideos = {
+  mostViewedVideos: EntityViewsInfo[]
+}
 export type GetVideoViewsArgs = {
   videoId: string
+}
+export type GetMostViewedVideosArgs = {
+  period?: number
 }
 
 export const GET_CHANNEL_VIEWS = gql`
@@ -24,11 +39,26 @@ export const GET_CHANNEL_VIEWS = gql`
     }
   }
 `
+
+export const GET_MOST_VIEWED_CHANNELS = gql`
+  query GetMostViewedChannels($period: Int) {
+    mostViewedChannels(period: $period) {
+      id
+      views
+    }
+  }
+`
 export type GetChannelViews = {
   channelViews: EntityViewsInfo | null
 }
+export type GetMostViewedChannels = {
+  mostViewedChannels: EntityViewsInfo[]
+}
 export type GetChannelViewsArgs = {
   channelId: string
+}
+export type GetMostViewedChannelsArgs = {
+  period?: number
 }
 
 export const ADD_VIDEO_VIEW = gql`
