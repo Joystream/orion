@@ -1,4 +1,5 @@
-import { Args, ArgsType, Ctx, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
+import { Args, ArgsType, Ctx, Field, ID, Int, Mutation, Query, Resolver } from 'type-graphql'
+import { differenceInCalendarDays } from 'date-fns'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
 import { OrionContext } from '../types'
@@ -13,6 +14,24 @@ class VideoViewsArgs {
 class BatchedVideoViewsArgs {
   @Field(() => [ID])
   videoIdList: string[]
+}
+
+@ArgsType()
+class MostViewedVideosArgs {
+  @Field(() => Int, { nullable: true })
+  period?: number
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
+}
+
+@ArgsType()
+class MostViewedChannelArgs {
+  @Field(() => Int, { nullable: true })
+  period?: number
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
 }
 
 @ArgsType()
@@ -51,6 +70,22 @@ export class VideoViewsInfosResolver {
     return videoIdList.map((videoId) => getVideoViewsInfo(videoId, ctx))
   }
 
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of videos' })
+  async mostViewedVideos(
+    @Args() { period, limit }: MostViewedVideosArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return mapMostViewedArray(buildMostViewedVideosArray(ctx, period), limit)
+  }
+
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of channels' })
+  async mostViewedChannels(
+    @Args() { period, limit }: MostViewedChannelArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return mapMostViewedArray(buildMostViewedChannelsArray(ctx, period), limit)
+  }
+
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
   async channelViews(
     @Args() { channelId }: ChannelViewsArgs,
@@ -86,6 +121,33 @@ export class VideoViewsInfosResolver {
     return getVideoViewsInfo(videoId, ctx)!
   }
 }
+
+const mapMostViewedArray = (views: Record<string, number>, limit?: number) =>
+  Object.keys(views)
+    .map((id) => ({ id, views: views[id] }))
+    .sort((a, b) => (a.views > b.views ? -1 : 1))
+    .slice(0, limit)
+
+const filterAllViewsByPeriod = (ctx: OrionContext, period?: number): Partial<UnsequencedVideoEvent>[] => {
+  const views = ctx.viewsAggregate.getAllViewsEvents()
+  if (!period) return views
+  return views.filter(({ timestamp }) => {
+    if (!period) return true
+    return timestamp && differenceInCalendarDays(new Date(), timestamp) <= period
+  })
+}
+
+const buildMostViewedVideosArray = (ctx: OrionContext, period?: number) =>
+  filterAllViewsByPeriod(ctx, period).reduce(
+    (entity: Record<string, number>, { videoId = '' }) => ({ ...entity, [videoId]: (entity[videoId] || 0) + 1 }),
+    {}
+  )
+
+const buildMostViewedChannelsArray = (ctx: OrionContext, period?: number) =>
+  filterAllViewsByPeriod(ctx, period).reduce(
+    (entity: Record<string, number>, { channelId = '' }) => ({ ...entity, [channelId]: (entity[channelId] || 0) + 1 }),
+    {}
+  )
 
 const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | null => {
   if (views != null) {
