@@ -47,12 +47,24 @@ class BatchedChannelViewsArgs {
 }
 
 @ArgsType()
+class MostViewedCategoriesArgs {
+  @Field(() => Int, { nullable: true })
+  period?: number
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
+}
+
+@ArgsType()
 class AddVideoViewArgs {
   @Field(() => ID)
   videoId: string
 
   @Field(() => ID)
   channelId: string
+
+  @Field(() => ID, { nullable: true })
+  categoryId?: string
 }
 
 @Resolver()
@@ -86,6 +98,14 @@ export class VideoViewsInfosResolver {
     return mapMostViewedArray(buildMostViewedChannelsArray(ctx, period), limit)
   }
 
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of categories' })
+  async mostViewedCategories(
+    @Args() { period, limit }: MostViewedCategoriesArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return mapMostViewedArray(buildMostViewedCategoriesArray(ctx, period), limit)
+  }
+
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
   async channelViews(
     @Args() { channelId }: ChannelViewsArgs,
@@ -104,12 +124,13 @@ export class VideoViewsInfosResolver {
 
   @Mutation(() => EntityViewsInfo, { description: "Add a single view to the target video's count" })
   async addVideoView(
-    @Args() { videoId, channelId }: AddVideoViewArgs,
+    @Args() { videoId, channelId, categoryId }: AddVideoViewArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo> {
     const event: UnsequencedVideoEvent = {
       videoId,
       channelId,
+      categoryId,
       type: VideoEventType.AddView,
       timestamp: new Date(),
       actorId: ctx.remoteHost,
@@ -123,10 +144,12 @@ export class VideoViewsInfosResolver {
 }
 
 const mapMostViewedArray = (views: Record<string, number>, limit?: number) =>
-  Object.keys(views)
-    .map((id) => ({ id, views: views[id] }))
-    .sort((a, b) => (a.views > b.views ? -1 : 1))
-    .slice(0, limit)
+  views
+    ? Object.keys(views)
+        .map((id) => ({ id, views: views[id] }))
+        .sort((a, b) => (a.views > b.views ? -1 : 1))
+        .slice(0, limit)
+    : []
 
 const filterAllViewsByPeriod = (ctx: OrionContext, period?: number): Partial<UnsequencedVideoEvent>[] => {
   const views = ctx.viewsAggregate.getAllViewsEvents()
@@ -148,6 +171,11 @@ const buildMostViewedChannelsArray = (ctx: OrionContext, period?: number) =>
     (entity: Record<string, number>, { channelId = '' }) => ({ ...entity, [channelId]: (entity[channelId] || 0) + 1 }),
     {}
   )
+
+const buildMostViewedCategoriesArray = (ctx: OrionContext, period?: number) =>
+  filterAllViewsByPeriod(ctx, period).reduce((entity: Record<string, number>, { categoryId }) => {
+    return categoryId ? { ...entity, [categoryId]: (entity[categoryId] || 0) + 1 } : entity
+  }, {})
 
 const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | null => {
   if (views != null) {
