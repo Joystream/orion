@@ -12,6 +12,7 @@ import {
   GET_MOST_VIEWED_CHANNELS,
   GET_VIDEO_VIEWS,
   GET_MOST_VIEWED_VIDEOS,
+  GET_MOST_VIEWED_CATEGORIES,
   GetChannelViews,
   GetChannelViewsArgs,
   GetVideoViews,
@@ -20,6 +21,8 @@ import {
   GetMostViewedChannelsArgs,
   GetMostViewedVideos,
   GetMostViewedChannels,
+  GetMostViewedCategoriessArgs,
+  GetMostViewedCategories,
 } from './queries/views'
 import { EntityViewsInfo } from '../src/entities/EntityViewsInfo'
 import { VideoEventsBucketModel } from '../src/models/VideoEvent'
@@ -29,6 +32,7 @@ const FIRST_VIDEO_ID = '12'
 const SECOND_VIDEO_ID = '13'
 const FIRST_CHANNEL_ID = '22'
 const SECOND_CHANNEL_ID = '23'
+const FIRST_CATEGORY_ID = '32'
 
 describe('Video and channel views resolver', () => {
   let server: ApolloServer
@@ -52,10 +56,10 @@ describe('Video and channel views resolver', () => {
     await mongoose.disconnect()
   })
 
-  const addVideoView = async (videoId: string, channelId: string) => {
+  const addVideoView = async (videoId: string, channelId: string, categoryId?: string) => {
     const addVideoViewResponse = await mutate<AddVideoView, AddVideoViewArgs>({
       mutation: ADD_VIDEO_VIEW,
-      variables: { videoId, channelId },
+      variables: { videoId, channelId, categoryId },
     })
     expect(addVideoViewResponse.errors).toBeUndefined()
     return addVideoViewResponse.data?.addVideoView
@@ -97,16 +101,27 @@ describe('Video and channel views resolver', () => {
     return mostViewedChannelsResponse.data?.mostViewedChannels
   }
 
-  it('should return null for unknown video and channel views', async () => {
+  const getMostViewedCategories = async (period?: number) => {
+    const mostViewedCategoriesResponse = await query<GetMostViewedCategories, GetMostViewedCategoriessArgs>({
+      query: GET_MOST_VIEWED_CATEGORIES,
+      variables: { period },
+    })
+    expect(mostViewedCategoriesResponse.errors).toBeUndefined()
+    return mostViewedCategoriesResponse.data?.mostViewedCategories
+  }
+
+  it('should return null for unknown video, channel and category views', async () => {
     const videoViews = await getVideoViews(FIRST_VIDEO_ID)
     const mostViewedVideos = await getMostViewedVideos()
     const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
     const mostViewedChannels = await getMostViewedChannels()
+    const mostViewedCategories = await getMostViewedCategories()
 
     expect(videoViews).toBeNull()
     expect(mostViewedVideos).toHaveLength(0)
     expect(channelViews).toBeNull()
     expect(mostViewedChannels).toHaveLength(0)
+    expect(mostViewedCategories).toHaveLength(0)
   })
 
   it('should properly save video and channel views', async () => {
@@ -118,27 +133,34 @@ describe('Video and channel views resolver', () => {
       id: FIRST_CHANNEL_ID,
       views: 1,
     }
+    const expectedCategoryViews: EntityViewsInfo = {
+      id: FIRST_CATEGORY_ID,
+      views: 1,
+    }
     const checkViews = async () => {
       const videoViews = await getVideoViews(FIRST_VIDEO_ID)
       const mostViewedVideos = await getMostViewedVideos()
       const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
       const mostViewedChannels = await getMostViewedChannels()
+      const mostViewedCategories = await getMostViewedCategories()
 
       expect(videoViews).toEqual(expectedVideoViews)
       expect(mostViewedVideos).toEqual([expectedVideoViews])
       expect(channelViews).toEqual(expectedChannelViews)
       expect(mostViewedChannels).toEqual([expectedChannelViews])
+      expect(mostViewedCategories).toEqual([expectedCategoryViews])
     }
 
-    let addVideoViewData = await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
+    let addVideoViewData = await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
     expect(addVideoViewData).toEqual(expectedVideoViews)
 
     await checkViews()
 
     expectedVideoViews.views++
     expectedChannelViews.views++
+    expectedCategoryViews.views++
 
-    addVideoViewData = await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
+    addVideoViewData = await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
     expect(addVideoViewData).toEqual(expectedVideoViews)
 
     await checkViews()
@@ -211,6 +233,20 @@ describe('Video and channel views resolver', () => {
     expect(mostViewedChannels).toEqual([expectedChannelViews])
   })
 
+  it('should properly aggregate views of a category', async () => {
+    const expectedChannelViews: EntityViewsInfo = {
+      id: FIRST_CATEGORY_ID,
+      views: 2,
+    }
+
+    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+
+    const mostViewedCategories = await getMostViewedCategories()
+
+    expect(mostViewedCategories).toEqual([expectedChannelViews])
+  })
+
   it('should properly rebuild the aggregate', async () => {
     const expectedFirstVideoViews: EntityViewsInfo = {
       id: FIRST_VIDEO_ID,
@@ -224,6 +260,10 @@ describe('Video and channel views resolver', () => {
       id: FIRST_CHANNEL_ID,
       views: 7,
     }
+    const expectedCategoryViews: EntityViewsInfo = {
+      id: FIRST_CATEGORY_ID,
+      views: 7,
+    }
 
     const checkViews = async () => {
       const firstVideoViews = await getVideoViews(FIRST_VIDEO_ID)
@@ -231,22 +271,24 @@ describe('Video and channel views resolver', () => {
       const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
       const mostViewedVideos = await getMostViewedVideos()
       const mostViewedChannels = await getMostViewedChannels()
+      const mostViewedCategories = await getMostViewedCategories()
 
       expect(firstVideoViews).toEqual(expectedFirstVideoViews)
       expect(secondVideoViews).toEqual(expectedSecondVideoViews)
       expect(mostViewedVideos).toEqual([expectedSecondVideoViews, expectedFirstVideoViews])
       expect(channelViews).toEqual(expectedChannelViews)
       expect(mostViewedChannels).toEqual([expectedChannelViews])
+      expect(mostViewedCategories).toEqual([expectedCategoryViews])
     }
 
-    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
-    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
-    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
+    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
 
-    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID)
-    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID)
-    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID)
-    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID)
+    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
+    await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID, FIRST_CATEGORY_ID)
 
     await checkViews()
 

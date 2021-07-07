@@ -61,9 +61,25 @@ export type GetMostViewedChannelsArgs = {
   period?: number
 }
 
+export const GET_MOST_VIEWED_CATEGORIES = gql`
+  query GetMostViewedCategories($period: Int) {
+    mostViewedCategories(period: $period) {
+      id
+      views
+    }
+  }
+`
+
+export type GetMostViewedCategories = {
+  mostViewedCategories: EntityViewsInfo[]
+}
+export type GetMostViewedCategoriessArgs = {
+  period?: number
+}
+
 export const ADD_VIDEO_VIEW = gql`
-  mutation AddVideoView($videoId: ID!, $channelId: ID!) {
-    addVideoView(videoId: $videoId, channelId: $channelId) {
+  mutation AddVideoView($videoId: ID!, $channelId: ID!, $categoryId: ID) {
+    addVideoView(videoId: $videoId, channelId: $channelId, categoryId: $categoryId) {
       id
       views
     }
@@ -75,4 +91,5 @@ export type AddVideoView = {
 export type AddVideoViewArgs = {
   videoId: string
   channelId: string
+  categoryId?: string
 }
