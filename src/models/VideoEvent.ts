@@ -12,6 +12,9 @@ export class VideoEvent extends GenericEvent {
   @prop({ required: true, index: true })
   channelId: string
 
+  @prop({ required: false, index: true })
+  categoryId?: string
+
   @prop({ required: true, index: true, enum: VideoEventType })
   type: VideoEventType
 }

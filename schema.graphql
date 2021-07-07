@@ -15,7 +15,7 @@ type EntityViewsInfo {
 
 type Mutation {
   """Add a single view to the target video's count"""
-  addVideoView(channelId: ID!, videoId: ID!): EntityViewsInfo!
+  addVideoView(categoryId: ID, channelId: ID!, videoId: ID!): EntityViewsInfo!
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
@@ -39,6 +39,9 @@ type Query {
 
   """Get views count for a single channel"""
   channelViews(channelId: ID!): EntityViewsInfo
+
+  """Get most viewed list of categories"""
+  mostViewedCategories(limit: Int, period: Int): [EntityViewsInfo!]
 
   """Get most viewed list of channels"""
   mostViewedChannels(limit: Int, period: Int): [EntityViewsInfo!]
