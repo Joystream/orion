@@ -15,7 +15,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
   const schema = await buildSchema({
     resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver],
     emitSchemaFile: 'schema.graphql',
-    validate: false,
+    validate: true,
   })
 
   const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({
