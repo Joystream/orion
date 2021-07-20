@@ -48,13 +48,13 @@ export class ViewsAggregate {
 
   public applyEvent(event: UnsequencedVideoEvent) {
     const { videoId, channelId, categoryId, timestamp, type } = event
-    const currentVideoViews = this.videoViewsMap[videoId] || 0
-    const currentChannelViews = this.channelViewsMap[channelId] || 0
+    const currentVideoViews = videoId ? this.videoViewsMap[videoId] || 0 : 0
+    const currentChannelViews = channelId ? this.channelViewsMap[channelId] || 0 : 0
     const currentCategoryViews = categoryId ? this.categoryViewsMap[categoryId] || 0 : 0
     switch (type) {
       case VideoEventType.AddView:
-        this.videoViewsMap[videoId] = currentVideoViews + 1
-        this.channelViewsMap[channelId] = currentChannelViews + 1
+        if (videoId) this.videoViewsMap[videoId] = currentVideoViews + 1
+        if (channelId) this.channelViewsMap[channelId] = currentChannelViews + 1
         if (categoryId) this.categoryViewsMap[categoryId] = currentCategoryViews + 1
         this.allViewsEvents = [...this.allViewsEvents, { videoId, channelId, categoryId, timestamp }]
         break
