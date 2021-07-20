@@ -47,20 +47,19 @@ export class ViewsAggregate {
   }
 
   public applyEvent(event: UnsequencedVideoEvent) {
-    const { videoId, channelId, categoryId, timestamp } = event
-    const currentVideoViews = this.videoViewsMap[event.videoId] || 0
-    const currentChannelViews = this.channelViewsMap[event.channelId] || 0
-    const currentCategoryViews =
-      event.categoryId && this.categoryViewsMap[event.categoryId] ? this.categoryViewsMap[event.categoryId] : 0
-    switch (event.type) {
+    const { videoId, channelId, categoryId, timestamp, type } = event
+    const currentVideoViews = this.videoViewsMap[videoId] || 0
+    const currentChannelViews = this.channelViewsMap[channelId] || 0
+    const currentCategoryViews = categoryId ? this.categoryViewsMap[categoryId] || 0 : 0
+    switch (type) {
       case VideoEventType.AddView:
-        this.videoViewsMap[event.videoId] = currentVideoViews + 1
-        this.channelViewsMap[event.channelId] = currentChannelViews + 1
-        if (event.categoryId) this.categoryViewsMap[event.categoryId] = currentCategoryViews + 1
+        this.videoViewsMap[videoId] = currentVideoViews + 1
+        this.channelViewsMap[channelId] = currentChannelViews + 1
+        if (categoryId) this.categoryViewsMap[categoryId] = currentCategoryViews + 1
         this.allViewsEvents = [...this.allViewsEvents, { videoId, channelId, categoryId, timestamp }]
         break
       default:
-        console.error(`Parsing unknown video event: ${event.type}`)
+        console.error(`Parsing unknown video event: ${type}`)
     }
   }
 }
