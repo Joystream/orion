@@ -41,13 +41,13 @@ type Query {
   channelViews(channelId: ID!): EntityViewsInfo
 
   """Get most viewed list of categories"""
-  mostViewedCategories(limit: Int, period: Int): [EntityViewsInfo!]
+  mostViewedCategories(limit: Int, period: Int!): [EntityViewsInfo!]
 
   """Get most viewed list of channels"""
-  mostViewedChannels(limit: Int, period: Int): [EntityViewsInfo!]
+  mostViewedChannels(limit: Int, period: Int!): [EntityViewsInfo!]
 
   """Get most viewed list of videos"""
-  mostViewedVideos(limit: Int, period: Int): [EntityViewsInfo!]
+  mostViewedVideos(limit: Int, period: Int!): [EntityViewsInfo!]
 
   """Get views count for a single video"""
   videoViews(videoId: ID!): EntityViewsInfo

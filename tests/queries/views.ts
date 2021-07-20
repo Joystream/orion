@@ -11,7 +11,7 @@ export const GET_VIDEO_VIEWS = gql`
 `
 
 export const GET_MOST_VIEWED_VIDEOS = gql`
-  query GetMostViewedVideos($period: Int) {
+  query GetMostViewedVideos($period: Int!) {
     mostViewedVideos(period: $period) {
       id
       views
@@ -28,7 +28,7 @@ export type GetVideoViewsArgs = {
   videoId: string
 }
 export type GetMostViewedVideosArgs = {
-  period?: number
+  period: number
 }
 
 export const GET_CHANNEL_VIEWS = gql`
@@ -41,7 +41,7 @@ export const GET_CHANNEL_VIEWS = gql`
 `
 
 export const GET_MOST_VIEWED_CHANNELS = gql`
-  query GetMostViewedChannels($period: Int) {
+  query GetMostViewedChannels($period: Int!) {
     mostViewedChannels(period: $period) {
       id
       views
@@ -58,11 +58,11 @@ export type GetChannelViewsArgs = {
   channelId: string
 }
 export type GetMostViewedChannelsArgs = {
-  period?: number
+  period: number
 }
 
 export const GET_MOST_VIEWED_CATEGORIES = gql`
-  query GetMostViewedCategories($period: Int) {
+  query GetMostViewedCategories($period: Int!) {
     mostViewedCategories(period: $period) {
       id
       views
@@ -74,7 +74,7 @@ export type GetMostViewedCategories = {
   mostViewedCategories: EntityViewsInfo[]
 }
 export type GetMostViewedCategoriessArgs = {
-  period?: number
+  period: number
 }
 
 export const ADD_VIDEO_VIEW = gql`
