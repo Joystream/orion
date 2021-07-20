@@ -152,12 +152,17 @@ const mapMostViewedArray = (views: Record<string, number>, limit?: number) =>
     : []
 
 const filterAllViewsByPeriod = (ctx: OrionContext, period?: number): Partial<UnsequencedVideoEvent>[] => {
-  const views = ctx.viewsAggregate.getAllViewsEvents()
+  const views = [...ctx.viewsAggregate.getAllViewsEvents()].reverse()
+  const filteredViews = []
   if (!period) return views
-  return views.filter(({ timestamp }) => {
-    if (!period) return true
-    return timestamp && differenceInCalendarDays(new Date(), timestamp) <= period
-  })
+
+  for (const view of views) {
+    const { timestamp } = view
+    if (timestamp && differenceInCalendarDays(new Date(), timestamp) > period) break
+    filteredViews.push(view)
+  }
+
+  return filteredViews
 }
 
 const buildMostViewedVideosArray = (ctx: OrionContext, period?: number) =>
