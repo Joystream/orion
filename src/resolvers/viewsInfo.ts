@@ -74,6 +74,14 @@ class AddVideoViewArgs {
   categoryId?: string
 }
 
+@ArgsType()
+class MostViewedAllTimeArgs {
+  @Min(1)
+  @Max(200)
+  @Field(() => Int)
+  limit: number
+}
+
 @Resolver()
 export class VideoViewsInfosResolver {
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single video' })
@@ -97,6 +105,14 @@ export class VideoViewsInfosResolver {
     return mapMostViewedArray(buildMostViewedVideosArray(ctx, period), limit)
   }
 
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of videos of all time' })
+  async mostViewedVideosAllTime(
+    @Args() { limit }: MostViewedAllTimeArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return sortAndLimitViews(ctx.viewsAggregate.getAllVideoViews(), limit)
+  }
+
   @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of channels' })
   async mostViewedChannels(
     @Args() { period, limit }: MostViewedChannelArgs,
@@ -105,12 +121,28 @@ export class VideoViewsInfosResolver {
     return mapMostViewedArray(buildMostViewedChannelsArray(ctx, period), limit)
   }
 
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of channels of all time' })
+  async mostViewedChannelsAllTime(
+    @Args() { limit }: MostViewedAllTimeArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return sortAndLimitViews(ctx.viewsAggregate.getAllChannelViews(), limit)
+  }
+
   @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of categories' })
   async mostViewedCategories(
     @Args() { period, limit }: MostViewedCategoriesArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
     return mapMostViewedArray(buildMostViewedCategoriesArray(ctx, period), limit)
+  }
+
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of categories of all time' })
+  async mostViewedCategoriesAllTime(
+    @Args() { limit }: MostViewedAllTimeArgs,
+    @Ctx() ctx: OrionContext
+  ): Promise<EntityViewsInfo[]> {
+    return sortAndLimitViews(ctx.viewsAggregate.getAllCategoryViews(), limit)
   }
 
   @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
@@ -157,6 +189,10 @@ const mapMostViewedArray = (views: Record<string, number>, limit?: number) =>
         .sort((a, b) => (a.views > b.views ? -1 : 1))
         .slice(0, limit)
     : []
+
+const sortAndLimitViews = (views: EntityViewsInfo[], limit: number) => {
+  return views.sort((a, b) => (a.views > b.views ? -1 : 1)).slice(0, limit)
+}
 
 const filterAllViewsByPeriod = (ctx: OrionContext, period: number): Partial<UnsequencedVideoEvent>[] => {
   const views = ctx.viewsAggregate.getAllViewsEvents()

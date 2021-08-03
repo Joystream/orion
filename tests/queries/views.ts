@@ -18,6 +18,15 @@ export const GET_MOST_VIEWED_VIDEOS = gql`
     }
   }
 `
+
+export const GET_MOST_VIEWED_VIDEOS_ALL_TIME = gql`
+  query GetMostViewedVideosAllTime($limit: Int!) {
+    mostViewedVideosAllTime(limit: $limit) {
+      id
+      views
+    }
+  }
+`
 export type GetVideoViews = {
   videoViews: EntityViewsInfo | null
 }
@@ -29,6 +38,12 @@ export type GetVideoViewsArgs = {
 }
 export type GetMostViewedVideosArgs = {
   period: number
+}
+export type GetMostViewedVideosAllTimeArgs = {
+  limit: number
+}
+export type GetMostViewedVideosAllTime = {
+  mostViewedVideosAllTime: EntityViewsInfo[]
 }
 
 export const GET_CHANNEL_VIEWS = gql`
@@ -48,6 +63,15 @@ export const GET_MOST_VIEWED_CHANNELS = gql`
     }
   }
 `
+
+export const GET_MOST_VIEWED_CHANNELS_ALL_TIME = gql`
+  query GetMostViewedVideosAllTime($limit: Int!) {
+    mostViewedChannelsAllTime(limit: $limit) {
+      id
+      views
+    }
+  }
+`
 export type GetChannelViews = {
   channelViews: EntityViewsInfo | null
 }
@@ -60,6 +84,12 @@ export type GetChannelViewsArgs = {
 export type GetMostViewedChannelsArgs = {
   period: number
 }
+export type GetMostViewedChannelsAllTimeArgs = {
+  limit: number
+}
+export type GetMostViewedChannelsAllTime = {
+  mostViewedChannelsAllTime: EntityViewsInfo[]
+}
 
 export const GET_MOST_VIEWED_CATEGORIES = gql`
   query GetMostViewedCategories($period: Int!) {
@@ -70,11 +100,25 @@ export const GET_MOST_VIEWED_CATEGORIES = gql`
   }
 `
 
+export const GET_MOST_VIEWED_CATEGORIES_ALL_TIME = gql`
+  query GetMostViewedVideosAllTime($limit: Int!) {
+    mostViewedCategoriesAllTime(limit: $limit) {
+      id
+      views
+    }
+  }
+`
 export type GetMostViewedCategories = {
   mostViewedCategories: EntityViewsInfo[]
 }
-export type GetMostViewedCategoriessArgs = {
+export type GetMostViewedCategoriesArgs = {
   period: number
+}
+export type GetMostViewedCategoriesAllTimeArgs = {
+  limit: number
+}
+export type GetMostViewedCategoriesAllTime = {
+  mostViewedCategoriesAllTime: EntityViewsInfo[]
 }
 
 export const ADD_VIDEO_VIEW = gql`
