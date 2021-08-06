@@ -6,12 +6,39 @@ import {
   UnsequencedChannelEvent,
 } from '../models/ChannelEvent'
 
+import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
+
 type ChannelEventsAggregationResult = {
   events?: ChannelEvent[]
 }[]
 
 export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   private channelFollowsMap: Record<string, number> = {}
+  private allChannelFollowEvents: Partial<UnsequencedChannelEvent>[] = []
+  private allChannelFollows: ChannelFollowsInfo[] = []
+
+  private addOrUpdateFollows(id: string, eventType: ChannelEventType): void {
+    const i = this.allChannelFollows.findIndex((element) => element.id === id)
+    if (i > -1) {
+      if (!this.allChannelFollows[i].follows && eventType === ChannelEventType.UnfollowChannel) return
+      this.allChannelFollows[i].follows =
+        eventType === ChannelEventType.FollowChannel
+          ? this.allChannelFollows[i].follows + 1
+          : this.allChannelFollows[i].follows - 1
+    } else this.allChannelFollows.push({ id, follows: eventType === ChannelEventType.UnfollowChannel ? 0 : 1 })
+  }
+
+  private addOrRemoveFollowEvent(eventType: ChannelEventType, { channelId, timestamp }: UnsequencedChannelEvent): void {
+    if (eventType === ChannelEventType.FollowChannel) {
+      this.allChannelFollowEvents = [...this.allChannelFollowEvents, { channelId, timestamp }]
+    }
+    if (eventType === ChannelEventType.UnfollowChannel) {
+      const index = this.allChannelFollowEvents.findIndex((item) => item.channelId === channelId)
+      if (index >= 0) {
+        this.allChannelFollowEvents.splice(index, 1)
+      }
+    }
+  }
 
   public channelFollows(channelId: string): number | null {
     return this.channelFollowsMap[channelId] ?? null
@@ -19,6 +46,14 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
 
   public getChannelFollowsMap() {
     return Object.freeze(this.channelFollowsMap)
+  }
+
+  public getAllFollowEvents() {
+    return this.allChannelFollowEvents
+  }
+
+  public getAllChannelFollows() {
+    return this.allChannelFollows
   }
 
   public static async Build(): Promise<FollowsAggregate> {
@@ -38,17 +73,22 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   }
 
   public applyEvent(event: UnsequencedChannelEvent) {
-    const currentChannelFollows = this.channelFollowsMap[event.channelId] || 0
+    const { channelId, type } = event
+    const currentChannelFollows = this.channelFollowsMap[channelId] || 0
 
     switch (event.type) {
       case ChannelEventType.FollowChannel:
-        this.channelFollowsMap[event.channelId] = currentChannelFollows + 1
+        this.channelFollowsMap[channelId] = currentChannelFollows + 1
+        this.addOrUpdateFollows(channelId, ChannelEventType.FollowChannel)
+        this.addOrRemoveFollowEvent(ChannelEventType.FollowChannel, event)
         break
       case ChannelEventType.UnfollowChannel:
-        this.channelFollowsMap[event.channelId] = Math.max(currentChannelFollows - 1, 0)
+        this.channelFollowsMap[channelId] = Math.max(currentChannelFollows - 1, 0)
+        this.addOrUpdateFollows(channelId, ChannelEventType.UnfollowChannel)
+        this.addOrRemoveFollowEvent(ChannelEventType.UnfollowChannel, event)
         break
       default:
-        console.error(`Parsing unknown channel event: ${event.type}`)
+        console.error(`Parsing unknown channel event: ${type}`)
     }
   }
 }
