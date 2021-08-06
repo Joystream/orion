@@ -33,10 +33,10 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
       this.allChannelFollowEvents = [...this.allChannelFollowEvents, { channelId, timestamp }]
     }
     if (eventType === ChannelEventType.UnfollowChannel) {
-      this.allChannelFollowEvents.splice(
-        this.allChannelFollowEvents.findIndex((item) => item.channelId === channelId),
-        1
-      )
+      const index = this.allChannelFollowEvents.findIndex((item) => item.channelId === channelId)
+      if (index >= 0) {
+        this.allChannelFollowEvents.splice(index, 1)
+      }
     }
   }
 
