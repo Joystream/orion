@@ -165,7 +165,7 @@ describe('Channel follows resolver', () => {
     mostFollowedChannels = await getMostFollowedChannels(10)
     mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
     expect(channelFollows).toEqual(expectedChannelFollows)
-    expect(mostFollowedChannels).toEqual([{ ...expectedChannelFollows, follows: 5 }])
+    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
     expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
   })
 
@@ -186,7 +186,7 @@ describe('Channel follows resolver', () => {
     const mostFollowedChannels = await getMostFollowedChannels(10)
     const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
     expect(channelFollows).toEqual(expectedChannelFollows)
-    expect(mostFollowedChannels).toEqual([{ ...expectedChannelFollows, follows: 2 }])
+    expect(mostFollowedChannels).toHaveLength(0)
     expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
   })
 
@@ -239,10 +239,7 @@ describe('Channel follows resolver', () => {
 
       expect(firstChannelFollows).toEqual(expectedFirstChannelFollows)
       expect(secondChannelFollows).toEqual(expectedSecondChannelFollows)
-      expect(mostFollowedChannels).toEqual([
-        { ...expectedSecondChannelFollows, follows: 5 },
-        { ...expectedFirstChannelFollows, follows: 3 },
-      ])
+      expect(mostFollowedChannels).toEqual([expectedSecondChannelFollows, expectedFirstChannelFollows])
       expect(mostFollowedChannelsAllTime).toEqual([expectedSecondChannelFollows, expectedFirstChannelFollows])
     }
 

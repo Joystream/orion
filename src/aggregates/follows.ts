@@ -17,12 +17,27 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   private allChannelFollowEvents: Partial<UnsequencedChannelEvent>[] = []
   private allChannelFollows: ChannelFollowsInfo[] = []
 
-  private addOrUpdateFollows(array: ChannelFollowsInfo[], id: string, eventType: ChannelEventType): void {
-    const i = array.findIndex((element) => element.id === id)
+  private addOrUpdateFollows(id: string, eventType: ChannelEventType): void {
+    const i = this.allChannelFollows.findIndex((element) => element.id === id)
     if (i > -1) {
-      if (!array[i].follows && eventType === ChannelEventType.UnfollowChannel) return
-      array[i].follows = eventType === ChannelEventType.FollowChannel ? array[i].follows + 1 : array[i].follows - 1
-    } else array.push({ id, follows: eventType === ChannelEventType.UnfollowChannel ? 0 : 1 })
+      if (!this.allChannelFollows[i].follows && eventType === ChannelEventType.UnfollowChannel) return
+      this.allChannelFollows[i].follows =
+        eventType === ChannelEventType.FollowChannel
+          ? this.allChannelFollows[i].follows + 1
+          : this.allChannelFollows[i].follows - 1
+    } else this.allChannelFollows.push({ id, follows: eventType === ChannelEventType.UnfollowChannel ? 0 : 1 })
+  }
+
+  private addOrRemoveFollowEvent(eventType: ChannelEventType, { channelId, timestamp }: UnsequencedChannelEvent): void {
+    if (eventType === ChannelEventType.FollowChannel) {
+      this.allChannelFollowEvents = [...this.allChannelFollowEvents, { channelId, timestamp }]
+    }
+    if (eventType === ChannelEventType.UnfollowChannel) {
+      const followEvent = this.allChannelFollowEvents.find((item) => item.channelId === channelId)
+      if (followEvent) {
+        this.allChannelFollowEvents.splice(this.allChannelFollowEvents.indexOf(followEvent), 1)
+      }
+    }
   }
 
   public channelFollows(channelId: string): number | null {
@@ -58,18 +73,19 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   }
 
   public applyEvent(event: UnsequencedChannelEvent) {
-    const { channelId, type, timestamp } = event
+    const { channelId, type } = event
     const currentChannelFollows = this.channelFollowsMap[channelId] || 0
 
     switch (event.type) {
       case ChannelEventType.FollowChannel:
         this.channelFollowsMap[channelId] = currentChannelFollows + 1
-        this.addOrUpdateFollows(this.allChannelFollows, channelId, ChannelEventType.FollowChannel)
-        this.allChannelFollowEvents = [...this.allChannelFollowEvents, { channelId, timestamp }]
+        this.addOrUpdateFollows(channelId, ChannelEventType.FollowChannel)
+        this.addOrRemoveFollowEvent(ChannelEventType.FollowChannel, event)
         break
       case ChannelEventType.UnfollowChannel:
         this.channelFollowsMap[channelId] = Math.max(currentChannelFollows - 1, 0)
-        this.addOrUpdateFollows(this.allChannelFollows, channelId, ChannelEventType.UnfollowChannel)
+        this.addOrUpdateFollows(channelId, ChannelEventType.UnfollowChannel)
+        this.addOrRemoveFollowEvent(ChannelEventType.UnfollowChannel, event)
         break
       default:
         console.error(`Parsing unknown channel event: ${type}`)
