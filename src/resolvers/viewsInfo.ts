@@ -5,6 +5,8 @@ import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
 import { OrionContext } from '../types'
 
+const MAXIMUM_PERIOD = 30
+
 @ArgsType()
 class VideoViewsArgs {
   @Field(() => ID)
@@ -21,7 +23,7 @@ class BatchedVideoViewsArgs {
 class MostViewedVideosArgs {
   @Field(() => Int)
   @Min(1)
-  @Max(30)
+  @Max(MAXIMUM_PERIOD)
   period: number
 
   @Field(() => Int, { nullable: true })
@@ -32,7 +34,7 @@ class MostViewedVideosArgs {
 class MostViewedChannelArgs {
   @Field(() => Int)
   @Min(1)
-  @Max(30)
+  @Max(MAXIMUM_PERIOD)
   period: number
 
   @Field(() => Int, { nullable: true })
@@ -55,7 +57,7 @@ class BatchedChannelViewsArgs {
 class MostViewedCategoriesArgs {
   @Field(() => Int)
   @Min(1)
-  @Max(30)
+  @Max(MAXIMUM_PERIOD)
   period: number
 
   @Field(() => Int, { nullable: true })
