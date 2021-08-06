@@ -54,7 +54,7 @@ export class ChannelFollowsInfosResolver {
     return getFollowsInfo(channelId, ctx)
   }
 
-  @Query(() => [ChannelFollowsInfo], { description: 'Get most followed list of channels' })
+  @Query(() => [ChannelFollowsInfo], { description: 'Get list of most followed channels' })
   async mostFollowedChannels(
     @Args() { period, limit }: MostFollowedChannelsArgs,
     @Ctx() ctx: OrionContext
@@ -62,7 +62,7 @@ export class ChannelFollowsInfosResolver {
     return mapMostFollowedArray(buildMostFollowedChannelsArray(ctx, period), limit)
   }
 
-  @Query(() => [ChannelFollowsInfo], { nullable: true, description: 'Get most followed list of channels of all time' })
+  @Query(() => [ChannelFollowsInfo], { nullable: true, description: 'Get list of most followed channels of all time' })
   async mostFollowedChannelsAllTime(
     @Args() { limit }: MostFollowedChannelsAllTimeArgs,
     @Ctx() ctx: OrionContext
@@ -125,7 +125,7 @@ const sortAndLimitFollows = (follows: ChannelFollowsInfo[], limit: number) => {
 }
 
 const filterAllFollowsByPeriod = (ctx: OrionContext, period: number): Partial<UnsequencedChannelEvent>[] => {
-  const follows = ctx.followsAggregate.getAllFollowsEvents()
+  const follows = ctx.followsAggregate.getAllFollowEvents()
   const filteredFollows = []
 
   for (let i = follows.length - 1; i >= 0; i--) {

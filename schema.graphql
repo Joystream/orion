@@ -40,10 +40,10 @@ type Query {
   """Get views count for a single channel"""
   channelViews(channelId: ID!): EntityViewsInfo
 
-  """Get most followed list of channels"""
+  """Get list of most followed channels"""
   mostFollowedChannels(limit: Int, period: Int!): [ChannelFollowsInfo!]!
 
-  """Get most followed list of channels of all time"""
+  """Get list of most followed channels of all time"""
   mostFollowedChannelsAllTime(limit: Int!): [ChannelFollowsInfo!]
 
   """Get most viewed list of categories"""

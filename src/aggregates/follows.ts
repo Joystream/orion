@@ -14,15 +14,15 @@ type ChannelEventsAggregationResult = {
 
 export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   private channelFollowsMap: Record<string, number> = {}
-  private allChannelFollowsEvents: Partial<UnsequencedChannelEvent>[] = []
+  private allChannelFollowEvents: Partial<UnsequencedChannelEvent>[] = []
   private allChannelFollows: ChannelFollowsInfo[] = []
 
-  private addOrUpdateFollows(array: ChannelFollowsInfo[], id: string, event: ChannelEventType): void {
+  private addOrUpdateFollows(array: ChannelFollowsInfo[], id: string, eventType: ChannelEventType): void {
     const i = array.findIndex((element) => element.id === id)
     if (i > -1) {
-      if (!array[i].follows && event === ChannelEventType.UnfollowChannel) return
-      array[i].follows = event === ChannelEventType.FollowChannel ? array[i].follows + 1 : array[i].follows - 1
-    } else array.push({ id, follows: 1 })
+      if (!array[i].follows && eventType === ChannelEventType.UnfollowChannel) return
+      array[i].follows = eventType === ChannelEventType.FollowChannel ? array[i].follows + 1 : array[i].follows - 1
+    } else array.push({ id, follows: eventType === ChannelEventType.UnfollowChannel ? 0 : 1 })
   }
 
   public channelFollows(channelId: string): number | null {
@@ -33,8 +33,8 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
     return Object.freeze(this.channelFollowsMap)
   }
 
-  public getAllFollowsEvents() {
-    return this.allChannelFollowsEvents
+  public getAllFollowEvents() {
+    return this.allChannelFollowEvents
   }
 
   public getAllChannelFollows() {
@@ -65,7 +65,7 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
       case ChannelEventType.FollowChannel:
         this.channelFollowsMap[channelId] = currentChannelFollows + 1
         this.addOrUpdateFollows(this.allChannelFollows, channelId, ChannelEventType.FollowChannel)
-        this.allChannelFollowsEvents = [...this.allChannelFollowsEvents, { channelId, timestamp }]
+        this.allChannelFollowEvents = [...this.allChannelFollowEvents, { channelId, timestamp }]
         break
       case ChannelEventType.UnfollowChannel:
         this.channelFollowsMap[channelId] = Math.max(currentChannelFollows - 1, 0)
