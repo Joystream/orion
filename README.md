@@ -19,4 +19,14 @@ Orion requires a MongoDB instance to work properly. The following env variables 
 
 #### Docker
 
-For ease of deployment the app was dockerized. There's also the `docker-compose.yml` which will be the easiest to deploy as it contains the Orion and MongoDB and also sets all the required parameters. 
+For ease of deployment the app was dockerized. There's also the `docker-compose.yml` which will be the easiest to deploy as it contains the Orion and MongoDB and also sets all the required parameters.
+
+First you will need to build the `orion` image:
+```shell
+docker build --tag orion .
+```
+
+Then you can run the `docker-compose` with Orion and MongoDB:
+```shell
+docker-compose up
+```
