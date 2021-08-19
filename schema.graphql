@@ -50,9 +50,7 @@ type Query {
   mostViewedCategories(
     limit: Int
 
-    """
-    Period is specified in days and must take one of the following values: 7, 30
-    """
+    """timePeriodDays must take one of the following values: 7, 30"""
     timePeriodDays: Int!
   ): [EntityViewsInfo!]
 
@@ -63,9 +61,7 @@ type Query {
   mostViewedChannels(
     limit: Int
 
-    """
-    Period is specified in days and must take one of the following values: 7, 30
-    """
+    """timePeriodDays must take one of the following values: 7, 30"""
     timePeriodDays: Int!
   ): [EntityViewsInfo!]
 
@@ -76,9 +72,7 @@ type Query {
   mostViewedVideos(
     limit: Int
 
-    """
-    Period is specified in days and must take one of the following values: 7, 30
-    """
+    """timePeriodDays must take one of the following values: 7, 30"""
     timePeriodDays: Int!
   ): [EntityViewsInfo!]
 

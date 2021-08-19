@@ -21,7 +21,7 @@ class BatchedVideoViewsArgs {
 @ArgsType()
 class MostViewedArgs {
   @Field(() => Int, {
-    description: 'Period is specified in days and must take one of the following values: 7, 30',
+    description: 'timePeriodDays must take one of the following values: 7, 30',
   })
   @IsIn([7, 30])
   timePeriodDays: number
