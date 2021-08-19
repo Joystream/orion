@@ -19,24 +19,12 @@ class BatchedVideoViewsArgs {
 }
 
 @ArgsType()
-class MostViewedVideosArgs {
+class MostViewedArgs {
   @Field(() => Int, {
     description: 'Period is specified in days and must take one of the following values: 7, 30',
   })
   @IsIn([7, 30])
-  period: number
-
-  @Field(() => Int, { nullable: true })
-  limit?: number
-}
-
-@ArgsType()
-class MostViewedChannelArgs {
-  @Field(() => Int, {
-    description: 'Period is specified in days and must take one of the following values: 7, 30',
-  })
-  @IsIn([7, 30])
-  period: number
+  timePeriodDays: number
 
   @Field(() => Int, { nullable: true })
   limit?: number
@@ -52,18 +40,6 @@ class ChannelViewsArgs {
 class BatchedChannelViewsArgs {
   @Field(() => [ID])
   channelIdList: string[]
-}
-
-@ArgsType()
-class MostViewedCategoriesArgs {
-  @Field(() => Int, {
-    description: 'Period is specified in days and must take one of the following values: 7, 30',
-  })
-  @IsIn([7, 30])
-  period: number
-
-  @Field(() => Int, { nullable: true })
-  limit?: number
 }
 
 @ArgsType()
@@ -101,16 +77,19 @@ export class VideoViewsInfosResolver {
     return videoIdList.map((videoId) => getVideoViewsInfo(videoId, ctx))
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of videos' })
+  @Query(() => [EntityViewsInfo], {
+    nullable: true,
+    description: 'Get list of most viewed videos in a given time period',
+  })
   async mostViewedVideos(
-    @Args() { period, limit }: MostViewedVideosArgs,
+    @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(period)
-    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(period)], limit)
+    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(timePeriodDays)], limit)
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of videos of all time' })
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed videos of all time' })
   async mostViewedVideosAllTime(
     @Args() { limit }: MostViewedAllTimeArgs,
     @Ctx() ctx: OrionContext
@@ -118,16 +97,19 @@ export class VideoViewsInfosResolver {
     return sortAndLimitViews(ctx.viewsAggregate.getAllVideoViews(), limit)
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of channels' })
+  @Query(() => [EntityViewsInfo], {
+    nullable: true,
+    description: 'Get list of most viewed channels in a given time period',
+  })
   async mostViewedChannels(
-    @Args() { period, limit }: MostViewedChannelArgs,
+    @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(period)
-    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(period)], limit)
+    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(timePeriodDays)], limit)
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of channels of all time' })
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed channels of all time' })
   async mostViewedChannelsAllTime(
     @Args() { limit }: MostViewedAllTimeArgs,
     @Ctx() ctx: OrionContext
@@ -135,16 +117,19 @@ export class VideoViewsInfosResolver {
     return sortAndLimitViews(ctx.viewsAggregate.getAllChannelViews(), limit)
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of categories' })
+  @Query(() => [EntityViewsInfo], {
+    nullable: true,
+    description: 'Get list of most viewed categories in a given time period',
+  })
   async mostViewedCategories(
-    @Args() { period, limit }: MostViewedCategoriesArgs,
+    @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(period)
-    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodCategoryViews()[mapPeriods(period)], limit)
+    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    return sortAndLimitViews(ctx.viewsAggregate.getTimePeriodCategoryViews()[mapPeriods(timePeriodDays)], limit)
   }
 
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get most viewed list of categories of all time' })
+  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed categories of all time' })
   async mostViewedCategoriesAllTime(
     @Args() { limit }: MostViewedAllTimeArgs,
     @Ctx() ctx: OrionContext

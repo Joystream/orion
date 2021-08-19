@@ -46,43 +46,43 @@ type Query {
   """Get list of most followed channels of all time"""
   mostFollowedChannelsAllTime(limit: Int!): [ChannelFollowsInfo!]
 
-  """Get most viewed list of categories"""
+  """Get list of most viewed categories in a given time period"""
   mostViewedCategories(
     limit: Int
 
     """
     Period is specified in days and must take one of the following values: 7, 30
     """
-    period: Int!
+    timePeriodDays: Int!
   ): [EntityViewsInfo!]
 
-  """Get most viewed list of categories of all time"""
+  """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
 
-  """Get most viewed list of channels"""
+  """Get list of most viewed channels in a given time period"""
   mostViewedChannels(
     limit: Int
 
     """
     Period is specified in days and must take one of the following values: 7, 30
     """
-    period: Int!
+    timePeriodDays: Int!
   ): [EntityViewsInfo!]
 
-  """Get most viewed list of channels of all time"""
+  """Get list of most viewed channels of all time"""
   mostViewedChannelsAllTime(limit: Int!): [EntityViewsInfo!]
 
-  """Get most viewed list of videos"""
+  """Get list of most viewed videos in a given time period"""
   mostViewedVideos(
     limit: Int
 
     """
     Period is specified in days and must take one of the following values: 7, 30
     """
-    period: Int!
+    timePeriodDays: Int!
   ): [EntityViewsInfo!]
 
-  """Get most viewed list of videos of all time"""
+  """Get list of most viewed videos of all time"""
   mostViewedVideosAllTime(limit: Int!): [EntityViewsInfo!]
 
   """Get views count for a single video"""

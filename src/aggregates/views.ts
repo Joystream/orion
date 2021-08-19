@@ -54,15 +54,15 @@ export class ViewsAggregate {
     } else array.push({ id, views: action === 'add' ? 1 : 0 })
   }
 
-  public filterEventsByPeriod(period: number) {
+  public filterEventsByPeriod(timePeriodDays: number) {
     const filteredEvents = []
-    const mappedPeriod = mapPeriods(period)
+    const mappedPeriod = mapPeriods(timePeriodDays)
     const views = this.timePeriodEvents[mappedPeriod]
 
-    if (views.find(({ timestamp }) => timestamp && differenceInCalendarDays(new Date(), timestamp) > period)) {
+    if (views.find(({ timestamp }) => timestamp && differenceInCalendarDays(new Date(), timestamp) > timePeriodDays)) {
       for (let i = 0; i < views.length; i++) {
         const { timestamp, videoId, channelId, categoryId } = views[i]
-        if (timestamp && differenceInCalendarDays(new Date(), timestamp) <= period) {
+        if (timestamp && differenceInCalendarDays(new Date(), timestamp) <= timePeriodDays) {
           filteredEvents.push(views[i])
         } else if (videoId) {
           videoId && this.addOrUpdateViews(this.timePeriodVideoViews[mappedPeriod], videoId, 'remove')
