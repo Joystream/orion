@@ -52,6 +52,7 @@ export class ViewsAggregate {
       if (!array[i].views && action === 'remove') return
       array[i].views = action === 'add' ? array[i].views + 1 : array[i].views - 1
     } else array.push({ id, views: action === 'add' ? 1 : 0 })
+    array.sort((a, b) => (a.views > b.views ? -1 : 1))
   }
 
   public filterEventsByPeriod(timePeriodDays: number) {
