@@ -47,19 +47,40 @@ type Query {
   mostFollowedChannelsAllTime(limit: Int!): [ChannelFollowsInfo!]
 
   """Get most viewed list of categories"""
-  mostViewedCategories(limit: Int, period: Int!): [EntityViewsInfo!]
+  mostViewedCategories(
+    limit: Int
+
+    """
+    Period is specified in days and must take one of the following values: 7, 30
+    """
+    period: Int!
+  ): [EntityViewsInfo!]
 
   """Get most viewed list of categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
 
   """Get most viewed list of channels"""
-  mostViewedChannels(limit: Int, period: Int!): [EntityViewsInfo!]
+  mostViewedChannels(
+    limit: Int
+
+    """
+    Period is specified in days and must take one of the following values: 7, 30
+    """
+    period: Int!
+  ): [EntityViewsInfo!]
 
   """Get most viewed list of channels of all time"""
   mostViewedChannelsAllTime(limit: Int!): [EntityViewsInfo!]
 
   """Get most viewed list of videos"""
-  mostViewedVideos(limit: Int, period: Int!): [EntityViewsInfo!]
+  mostViewedVideos(
+    limit: Int
+
+    """
+    Period is specified in days and must take one of the following values: 7, 30
+    """
+    period: Int!
+  ): [EntityViewsInfo!]
 
   """Get most viewed list of videos of all time"""
   mostViewedVideosAllTime(limit: Int!): [EntityViewsInfo!]
