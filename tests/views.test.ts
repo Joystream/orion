@@ -83,10 +83,10 @@ describe('Video and channel views resolver', () => {
     return videoViewsResponse.data?.videoViews
   }
 
-  const getMostViewedVideos = async (period: number) => {
+  const getMostViewedVideos = async (timePeriodDays: number) => {
     const mostViewedVideosResponse = await query<GetMostViewedVideos, GetMostViewedVideosArgs>({
       query: GET_MOST_VIEWED_VIDEOS,
-      variables: { period },
+      variables: { timePeriodDays },
     })
     expect(mostViewedVideosResponse.errors).toBeUndefined()
     return mostViewedVideosResponse.data?.mostViewedVideos
@@ -110,10 +110,10 @@ describe('Video and channel views resolver', () => {
     return channelViewsResponse.data?.channelViews
   }
 
-  const getMostViewedChannels = async (period: number) => {
+  const getMostViewedChannels = async (timePeriodDays: number) => {
     const mostViewedChannelsResponse = await query<GetMostViewedChannels, GetMostViewedChannelsArgs>({
       query: GET_MOST_VIEWED_CHANNELS,
-      variables: { period },
+      variables: { timePeriodDays },
     })
     expect(mostViewedChannelsResponse.errors).toBeUndefined()
     return mostViewedChannelsResponse.data?.mostViewedChannels
@@ -131,10 +131,10 @@ describe('Video and channel views resolver', () => {
     return mostViewedChannelsAllTimeResponse.data?.mostViewedChannelsAllTime
   }
 
-  const getMostViewedCategories = async (period: number) => {
+  const getMostViewedCategories = async (timePeriodDays: number) => {
     const mostViewedCategoriesResponse = await query<GetMostViewedCategories, GetMostViewedCategoriesArgs>({
       query: GET_MOST_VIEWED_CATEGORIES,
-      variables: { period },
+      variables: { timePeriodDays },
     })
     expect(mostViewedCategoriesResponse.errors).toBeUndefined()
     return mostViewedCategoriesResponse.data?.mostViewedCategories
