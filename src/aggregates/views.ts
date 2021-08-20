@@ -65,7 +65,7 @@ export class ViewsAggregate {
     array.sort((a, b) => (a.views > b.views ? -1 : 1))
   }
 
-  public filterEventsByPeriod(timePeriodDays: number) {
+  public filterEventsByPeriod(timePeriodDays: 7 | 30) {
     const mappedPeriod = mapPeriods(timePeriodDays)
     const viewEvents = this.timePeriodEvents[mappedPeriod]
 
@@ -150,6 +150,10 @@ export class ViewsAggregate {
     events.forEach((event) => {
       aggregate.applyEvent(event)
     })
+
+    aggregate.filterEventsByPeriod(7)
+    aggregate.filterEventsByPeriod(30)
+
     return aggregate
   }
 

@@ -24,7 +24,7 @@ class MostViewedArgs {
     description: 'timePeriodDays must take one of the following values: 7, 30',
   })
   @IsIn([7, 30])
-  timePeriodDays: number
+  timePeriodDays: 7 | 30
 
   @Field(() => Int, { nullable: true })
   limit?: number
