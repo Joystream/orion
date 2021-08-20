@@ -122,6 +122,10 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
     events.forEach((event) => {
       aggregate.applyEvent(event)
     })
+
+    aggregate.filterEventsByPeriod(7)
+    aggregate.filterEventsByPeriod(30)
+
     return aggregate
   }
 
@@ -138,8 +142,6 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
         this.addOrUpdateFollows(this.timePeriodChannelFollows.thirtyDays, channelId)
         this.addOrRemoveFollowEvent(this.timePeriodEvents.sevenDays, ChannelEventType.FollowChannel, event)
         this.addOrRemoveFollowEvent(this.timePeriodEvents.thirtyDays, ChannelEventType.FollowChannel, event)
-        this.timePeriodEvents.sevenDays.push(eventWithoutType)
-        this.timePeriodEvents.thirtyDays.push(eventWithoutType)
         break
       case ChannelEventType.UnfollowChannel:
         this.channelFollowsMap[channelId] = Math.max(currentChannelFollows - 1, 0)
