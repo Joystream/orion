@@ -26,12 +26,10 @@ describe('The server', () => {
   it('should start with empty aggregates', async () => {
     const videoViewsMap = aggregates.viewsAggregate.getVideoViewsMap()
     const channelViewsMap = aggregates.viewsAggregate.getChannelViewsMap()
-    const allViewsEvents = aggregates.viewsAggregate.getAllViewsEvents()
     const channelFollowsMap = aggregates.followsAggregate.getChannelFollowsMap()
 
     expect(videoViewsMap).toEqual({})
     expect(channelViewsMap).toEqual({})
     expect(channelFollowsMap).toEqual({})
-    expect(allViewsEvents).toHaveLength(0)
   })
 })

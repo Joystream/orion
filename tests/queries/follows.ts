@@ -10,8 +10,8 @@ export const GET_CHANNEL_FOLLOWS = gql`
   }
 `
 export const GET_MOST_FOLLOWED_CHANNELS = gql`
-  query GetMostFollowedChannels($period: Int!) {
-    mostFollowedChannels(period: $period) {
+  query GetMostFollowedChannels($timePeriodDays: Int!) {
+    mostFollowedChannels(timePeriodDays: $timePeriodDays) {
       id
       follows
     }
@@ -33,7 +33,7 @@ export type GetChannelFollowsArgs = {
   channelId: string
 }
 export type GetMostFollowedChannelsArgs = {
-  period: number
+  timePeriodDays: number
 }
 export type GetMostFollowedChannels = {
   mostFollowedChannels: ChannelFollowsInfo[]
