@@ -1,11 +1,9 @@
 import { Args, ArgsType, Ctx, Field, ID, Int, Mutation, Query, Resolver } from 'type-graphql'
-import { Min, Max } from 'class-validator'
+import { Min, Max, IsIn } from 'class-validator'
 import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
 import { ChannelEventType, saveChannelEvent, UnsequencedChannelEvent } from '../models/ChannelEvent'
 import { OrionContext } from '../types'
-import { differenceInCalendarDays } from 'date-fns'
-
-const MAXIMUM_PERIOD = 30
+import { mapPeriods } from '../helpers'
 
 @ArgsType()
 class ChannelFollowsArgs {
@@ -14,11 +12,12 @@ class ChannelFollowsArgs {
 }
 
 @ArgsType()
-class MostFollowedChannelsArgs {
-  @Field(() => Int)
-  @Min(1)
-  @Max(MAXIMUM_PERIOD)
-  period: number
+class MostFollowedArgs {
+  @Field(() => Int, {
+    description: 'timePeriodDays must take one of the following values: 7, 30',
+  })
+  @IsIn([7, 30])
+  timePeriodDays: 7 | 30
 
   @Field(() => Int, { nullable: true })
   limit?: number
@@ -56,10 +55,11 @@ export class ChannelFollowsInfosResolver {
 
   @Query(() => [ChannelFollowsInfo], { description: 'Get list of most followed channels' })
   async mostFollowedChannels(
-    @Args() { period, limit }: MostFollowedChannelsArgs,
+    @Args() { timePeriodDays, limit }: MostFollowedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<ChannelFollowsInfo[]> {
-    return mapMostFollowedArray(buildMostFollowedChannelsArray(ctx, period), limit)
+    ctx.followsAggregate.filterEventsByPeriod(timePeriodDays)
+    return limitFollows(ctx.followsAggregate.getTimePeriodChannelFollows()[mapPeriods(timePeriodDays)], limit)
   }
 
   @Query(() => [ChannelFollowsInfo], { nullable: true, description: 'Get list of most followed channels of all time' })
@@ -67,7 +67,7 @@ export class ChannelFollowsInfosResolver {
     @Args() { limit }: MostFollowedChannelsAllTimeArgs,
     @Ctx() ctx: OrionContext
   ): Promise<ChannelFollowsInfo[]> {
-    return sortAndLimitFollows(ctx.followsAggregate.getAllChannelFollows(), limit)
+    return limitFollows(ctx.followsAggregate.getAllChannelFollows(), limit)
   }
 
   @Query(() => [ChannelFollowsInfo], { description: 'Get follows counts for a list of channels', nullable: 'items' })
@@ -112,36 +112,9 @@ export class ChannelFollowsInfosResolver {
   }
 }
 
-const mapMostFollowedArray = (follows: Record<string, number>, limit?: number) =>
-  follows
-    ? Object.keys(follows)
-        .map((id) => ({ id, follows: follows[id] }))
-        .sort((a, b) => (a.follows > b.follows ? -1 : 1))
-        .slice(0, limit)
-    : []
-
-const sortAndLimitFollows = (follows: ChannelFollowsInfo[], limit: number) => {
+const limitFollows = (follows: ChannelFollowsInfo[], limit?: number) => {
   return follows.sort((a, b) => (a.follows > b.follows ? -1 : 1)).slice(0, limit)
 }
-
-const filterAllFollowsByPeriod = (ctx: OrionContext, period: number): Partial<UnsequencedChannelEvent>[] => {
-  const follows = ctx.followsAggregate.getAllFollowEvents()
-  const filteredFollows = []
-
-  for (let i = follows.length - 1; i >= 0; i--) {
-    const { timestamp } = follows[i]
-    if (timestamp && differenceInCalendarDays(new Date(), timestamp) > period) break
-    filteredFollows.push(follows[i])
-  }
-
-  return filteredFollows
-}
-
-const buildMostFollowedChannelsArray = (ctx: OrionContext, period: number) =>
-  filterAllFollowsByPeriod(ctx, period).reduce(
-    (entity: Record<string, number>, { channelId = '' }) => ({ ...entity, [channelId]: (entity[channelId] || 0) + 1 }),
-    {}
-  )
 
 const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
   const follows = ctx.followsAggregate.channelFollows(channelId)
