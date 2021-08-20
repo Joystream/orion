@@ -21,6 +21,7 @@ export class ViewsAggregate {
   private videoViewsMap: Record<string, number> = {}
   private channelViewsMap: Record<string, number> = {}
   private categoryViewsMap: Record<string, number> = {}
+
   private timePeriodEvents: TimePeriodEventsData = {
     sevenDays: [],
     thirtyDays: [],
@@ -46,33 +47,50 @@ export class ViewsAggregate {
   private allChannelViews: EntityViewsInfo[] = []
   private allCategoryViews: EntityViewsInfo[] = []
 
-  private addOrUpdateViews(array: EntityViewsInfo[], id: string, action: 'add' | 'remove'): void {
-    const i = array.findIndex((element) => element.id === id)
-    if (i > -1) {
-      if (!array[i].views && action === 'remove') return
-      array[i].views = action === 'add' ? array[i].views + 1 : array[i].views - 1
-    } else array.push({ id, views: action === 'add' ? 1 : 0 })
+  private addOrUpdateViews(array: EntityViewsInfo[], id: string, shouldAdd = true): void {
+    const viewsObject = array.find((element) => element.id === id)
+
+    if (viewsObject) {
+      if (!viewsObject.views && !shouldAdd) return
+
+      if (shouldAdd) {
+        viewsObject.views++
+      } else {
+        viewsObject.views--
+      }
+    } else {
+      array.push({ id, views: shouldAdd ? 1 : 0 })
+    }
+
     array.sort((a, b) => (a.views > b.views ? -1 : 1))
   }
 
   public filterEventsByPeriod(timePeriodDays: number) {
-    const filteredEvents = []
     const mappedPeriod = mapPeriods(timePeriodDays)
-    const views = this.timePeriodEvents[mappedPeriod]
+    const viewEvents = this.timePeriodEvents[mappedPeriod]
 
-    if (views.find(({ timestamp }) => timestamp && differenceInCalendarDays(new Date(), timestamp) > timePeriodDays)) {
-      for (let i = 0; i < views.length; i++) {
-        const { timestamp, videoId, channelId, categoryId } = views[i]
-        if (timestamp && differenceInCalendarDays(new Date(), timestamp) <= timePeriodDays) {
-          filteredEvents.push(views[i])
-        } else if (videoId) {
-          videoId && this.addOrUpdateViews(this.timePeriodVideoViews[mappedPeriod], videoId, 'remove')
-          channelId && this.addOrUpdateViews(this.timePeriodChannelViews[mappedPeriod], channelId, 'remove')
-          categoryId && this.addOrUpdateViews(this.timePeriodCategoryViews[mappedPeriod], categoryId, 'remove')
-        }
+    // find index of first event that should be kept
+    const firstEventToIncludeIdx = viewEvents.findIndex(
+      (view) => view.timestamp && differenceInCalendarDays(new Date(), view.timestamp) <= timePeriodDays
+    )
+
+    // update views with all of the events that should be removed
+    for (let i = 0; i < firstEventToIncludeIdx; i++) {
+      const { videoId, channelId, categoryId } = viewEvents[i]
+
+      if (videoId) {
+        this.addOrUpdateViews(this.timePeriodVideoViews[mappedPeriod], videoId, false)
       }
-      this.timePeriodEvents[mappedPeriod] = filteredEvents
+      if (channelId) {
+        this.addOrUpdateViews(this.timePeriodChannelViews[mappedPeriod], channelId, false)
+      }
+      if (categoryId) {
+        this.addOrUpdateViews(this.timePeriodCategoryViews[mappedPeriod], categoryId, false)
+      }
     }
+
+    // remove older events
+    this.timePeriodEvents[mappedPeriod] = viewEvents.slice(firstEventToIncludeIdx)
   }
 
   public videoViews(videoId: string): number | null {
@@ -136,7 +154,8 @@ export class ViewsAggregate {
   }
 
   public applyEvent(event: UnsequencedVideoEvent) {
-    const { videoId, channelId, categoryId, timestamp, type } = event
+    const { type, ...eventWithoutType } = event
+    const { videoId, channelId, categoryId } = eventWithoutType
     const currentVideoViews = videoId ? this.videoViewsMap[videoId] || 0 : 0
     const currentChannelViews = channelId ? this.channelViewsMap[channelId] || 0 : 0
     const currentCategoryViews = categoryId ? this.categoryViewsMap[categoryId] || 0 : 0
@@ -144,27 +163,27 @@ export class ViewsAggregate {
     switch (type) {
       case VideoEventType.AddView:
         if (videoId) {
-          this.addOrUpdateViews(this.timePeriodVideoViews.sevenDays, videoId, 'add')
-          this.addOrUpdateViews(this.timePeriodVideoViews.thirtyDays, videoId, 'add')
-          this.addOrUpdateViews(this.allVideoViews, videoId, 'add')
+          this.addOrUpdateViews(this.timePeriodVideoViews.sevenDays, videoId)
+          this.addOrUpdateViews(this.timePeriodVideoViews.thirtyDays, videoId)
+          this.addOrUpdateViews(this.allVideoViews, videoId)
           this.videoViewsMap[videoId] = currentVideoViews + 1
         }
         if (channelId) {
-          this.addOrUpdateViews(this.timePeriodChannelViews.sevenDays, channelId, 'add')
-          this.addOrUpdateViews(this.timePeriodChannelViews.thirtyDays, channelId, 'add')
-          this.addOrUpdateViews(this.allChannelViews, channelId, 'add')
+          this.addOrUpdateViews(this.timePeriodChannelViews.sevenDays, channelId)
+          this.addOrUpdateViews(this.timePeriodChannelViews.thirtyDays, channelId)
+          this.addOrUpdateViews(this.allChannelViews, channelId)
           this.channelViewsMap[channelId] = currentChannelViews + 1
         }
         if (categoryId) {
-          this.addOrUpdateViews(this.timePeriodCategoryViews.sevenDays, categoryId, 'add')
-          this.addOrUpdateViews(this.timePeriodCategoryViews.thirtyDays, categoryId, 'add')
-          this.addOrUpdateViews(this.allCategoryViews, categoryId, 'add')
+          this.addOrUpdateViews(this.timePeriodCategoryViews.sevenDays, categoryId)
+          this.addOrUpdateViews(this.timePeriodCategoryViews.thirtyDays, categoryId)
+          this.addOrUpdateViews(this.allCategoryViews, categoryId)
           this.categoryViewsMap[categoryId] = currentCategoryViews + 1
         }
-        this.timePeriodEvents = {
-          sevenDays: [...this.timePeriodEvents.sevenDays, { videoId, channelId, categoryId, timestamp }],
-          thirtyDays: [...this.timePeriodEvents.thirtyDays, { videoId, channelId, categoryId, timestamp }],
-        }
+
+        this.timePeriodEvents.sevenDays.push(eventWithoutType)
+        this.timePeriodEvents.thirtyDays.push(eventWithoutType)
+
         break
       default:
         console.error(`Parsing unknown video event: ${type}`)

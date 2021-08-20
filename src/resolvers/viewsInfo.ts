@@ -85,7 +85,7 @@ export class VideoViewsInfosResolver {
     @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
     return limitViews(ctx.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(timePeriodDays)], limit)
   }
 
@@ -105,7 +105,7 @@ export class VideoViewsInfosResolver {
     @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
     return limitViews(ctx.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(timePeriodDays)], limit)
   }
 
@@ -125,7 +125,7 @@ export class VideoViewsInfosResolver {
     @Args() { timePeriodDays, limit }: MostViewedArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    await ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
+    ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
     return limitViews(ctx.viewsAggregate.getTimePeriodCategoryViews()[mapPeriods(timePeriodDays)], limit)
   }
 
