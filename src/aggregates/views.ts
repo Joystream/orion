@@ -1,6 +1,6 @@
 import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from '../models/VideoEvent'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
-import { mapPeriods } from '../resolvers/viewsInfo'
+import { mapPeriods } from '../helpers'
 import { differenceInCalendarDays } from 'date-fns'
 
 type VideoEventsAggregationResult = {
@@ -42,7 +42,6 @@ export class ViewsAggregate {
     thirtyDays: [],
   }
 
-  private allViewsEvents: Partial<UnsequencedVideoEvent>[] = []
   private allVideoViews: EntityViewsInfo[] = []
   private allChannelViews: EntityViewsInfo[] = []
   private allCategoryViews: EntityViewsInfo[] = []
@@ -99,10 +98,6 @@ export class ViewsAggregate {
 
   public channelViews(channelId: string): number | null {
     return this.channelViewsMap[channelId] ?? null
-  }
-
-  public getAllViewsEvents() {
-    return this.allViewsEvents
   }
 
   public getVideoViewsMap() {

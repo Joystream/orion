@@ -3,8 +3,7 @@ import { Min, Max, IsIn } from 'class-validator'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
 import { OrionContext } from '../types'
-
-export const mapPeriods = (period: number) => (period === 7 ? 'sevenDays' : 'thirtyDays')
+import { mapPeriods } from '../helpers'
 
 @ArgsType()
 class VideoViewsArgs {
