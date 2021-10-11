@@ -6,7 +6,7 @@ type LoadEnvVarOpts = {
   defaultValue?: string
   devDefaultValue?: string
 }
-const loadEnvVar = (name: string, { defaultValue, devDefaultValue }: LoadEnvVarOpts): string => {
+const loadEnvVar = (name: string, { defaultValue, devDefaultValue }: LoadEnvVarOpts = {}): string => {
   const value = process.env[name]
   if (value) {
     return value
@@ -27,6 +27,7 @@ export class Config {
   private _port: number
   private _bucketSize: number
   private _mongoDBUri: string
+  private _featuredContentSecret: string
 
   get port(): number {
     return this._port
@@ -38,6 +39,10 @@ export class Config {
 
   get mongoDBUri(): string {
     return this._mongoDBUri
+  }
+
+  get featuredContentSecret(): string {
+    return this._featuredContentSecret
   }
 
   loadConfig() {
@@ -54,6 +59,8 @@ export class Config {
     const mongoDatabase = loadEnvVar('ORION_MONGO_DATABASE', { defaultValue: 'orion' })
 
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
+
+    this._featuredContentSecret = loadEnvVar('FEATURED_CONTENT_SECRET')
   }
 }
 

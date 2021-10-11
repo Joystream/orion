@@ -1,6 +1,7 @@
 import config from './config'
 import Express from 'express'
 import { buildAggregates, connectMongoose, createServer } from './server'
+import { FeaturedContent, FeaturedContentModel } from './models/FeaturedContent'
 
 const main = async () => {
   config.loadConfig()
@@ -10,6 +11,20 @@ const main = async () => {
   )
 
   const aggregates = await wrapTask('Rebuilding aggregates', buildAggregates)
+
+  const featuredContentDoc = await FeaturedContentModel.findOne()
+  if (!featuredContentDoc) {
+    await wrapTask('Inserting default featured content doc', async () => {
+      const newFeaturedContentDoc: FeaturedContent = {
+        videoHero: {
+          videoId: '0',
+          heroTitle: 'Change Me',
+          heroVideoCutUrl: 'https://google.com',
+        },
+      }
+      await FeaturedContentModel.create(newFeaturedContentDoc)
+    })
+  }
 
   const server = await createServer(mongoose, aggregates)
   const app = Express()
