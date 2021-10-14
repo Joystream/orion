@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server-express'
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
-import { ContextFunction } from 'apollo-server-core'
+import { ContextFunction, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 import { connect, Mongoose } from 'mongoose'
 import { buildSchema } from 'type-graphql'
 
@@ -30,15 +30,12 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
   return new ApolloServer({
     schema,
     context: contextFn,
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
   })
 }
 
 export const connectMongoose = async (connectionUri: string) => {
-  const mongoose = await connect(connectionUri, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useCreateIndex: true,
-  })
+  const mongoose = await connect(connectionUri)
   await mongoose.connection
   return mongoose
 }

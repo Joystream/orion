@@ -27,6 +27,7 @@ const main = async () => {
   }
 
   const server = await createServer(mongoose, aggregates)
+  await server.start()
   const app = Express()
   server.applyMiddleware({ app })
 
