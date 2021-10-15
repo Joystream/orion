@@ -1,17 +1,6 @@
-import {
-  Arg,
-  Args,
-  ArgsType,
-  Authorized,
-  Field,
-  ID,
-  InputType,
-  Mutation,
-  ObjectType,
-  Query,
-  Resolver,
-} from 'type-graphql'
+import { Arg, Args, ArgsType, Authorized, Field, ID, InputType, Mutation, Query, Resolver } from 'type-graphql'
 import { FeaturedVideo, getFeaturedContentDoc, VideoHero } from '../models/FeaturedContent'
+import { CategoryFeaturedVideos } from '../entities/CategoryFeaturedVideos'
 
 @InputType()
 class FeaturedVideoInput implements FeaturedVideo {
@@ -29,15 +18,6 @@ class SetCategoryFeaturedVideoArgs {
 
   @Field(() => [FeaturedVideoInput])
   videos!: FeaturedVideoInput[]
-}
-
-@ObjectType()
-class CategoryFeaturedVideos {
-  @Field(() => ID)
-  categoryId!: string
-
-  @Field(() => [FeaturedVideo])
-  videos!: FeaturedVideo[]
 }
 
 @Resolver()

@@ -41,7 +41,7 @@ export const FeaturedContentModel = getModelForClass(FeaturedContent, {
   schemaOptions: { collection: 'featuredContent' },
 })
 
-const DEFAULT_FEATURED_CONTENT_DOC: FeaturedContent = {
+export const DEFAULT_FEATURED_CONTENT_DOC: FeaturedContent = {
   videoHero: {
     videoId: '0',
     heroTitle: 'Change Me',

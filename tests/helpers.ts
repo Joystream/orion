@@ -8,10 +8,10 @@ type TypedGraphQLResponse<TResult> = GraphQLResponse & {
 export const createQueryFn = (server: ApolloServer) => {
   type QueryOpts<TVars> = {
     query: Parameters<typeof server.executeOperation>[0]['query']
-    variables: TVars
-  }
+    // eslint-disable-next-line @typescript-eslint/ban-types
+  } & (TVars extends undefined ? {} : { variables: TVars })
 
-  return async <TResult, TVars>(opts: QueryOpts<TVars>) => {
+  return async <TResult, TVars = undefined>(opts: QueryOpts<TVars>) => {
     const result = await server.executeOperation(opts)
     return result as TypedGraphQLResponse<TResult>
   }
