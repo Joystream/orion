@@ -24,11 +24,11 @@ class FeaturedVideoInput implements FeaturedVideo {
 
 @ArgsType()
 class SetCategoryFeaturedVideoArgs {
-  @Field()
-  categoryId: string
+  @Field(() => ID)
+  categoryId!: string
 
   @Field(() => [FeaturedVideoInput])
-  videos: FeaturedVideoInput[]
+  videos!: FeaturedVideoInput[]
 }
 
 @ObjectType()
@@ -48,7 +48,7 @@ export class FeaturedContentResolver {
   }
 
   @Query(() => [FeaturedVideo], { nullable: false, description: 'Get featured videos for a given video category' })
-  async categoryFeaturedVideos(@Arg('categoryId') categoryId: string) {
+  async categoryFeaturedVideos(@Arg('categoryId', () => ID) categoryId: string) {
     const featuredContent = await getFeaturedContentDoc()
     return featuredContent.featuredVideosPerCategory.get(categoryId) || []
   }

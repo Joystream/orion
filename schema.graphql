@@ -34,7 +34,7 @@ type Mutation {
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
-  setCategoryFeaturedVideos(categoryId: String!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
+  setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setVideoHero(heroTitle: String!, heroVideoCutUrl: String!, videoId: ID!): VideoHero!
 
   """Remove a single follow from the target channel"""
@@ -55,7 +55,7 @@ type Query {
   batchedVideoViews(videoIdList: [ID!]!): [EntityViewsInfo]!
 
   """Get featured videos for a given video category"""
-  categoryFeaturedVideos(categoryId: String!): [FeaturedVideo!]!
+  categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
 
   """Get follows count for a single channel"""
   channelFollows(channelId: ID!): ChannelFollowsInfo
