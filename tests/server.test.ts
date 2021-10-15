@@ -12,6 +12,7 @@ describe('The server', () => {
     mongoose = await connectMongoose(process.env.MONGO_URL!)
     aggregates = await buildAggregates()
     server = await createServer(mongoose, aggregates)
+    await server.start()
   })
 
   afterEach(async () => {

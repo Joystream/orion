@@ -1,9 +1,7 @@
 import { ApolloServer } from 'apollo-server-express'
 import { Mongoose } from 'mongoose'
 import { Aggregates } from '../src/types'
-import { ApolloServerTestClient } from 'apollo-server-testing/dist/createTestClient'
 import { buildAggregates, connectMongoose, createServer } from '../src/server'
-import { createTestClient } from 'apollo-server-testing'
 import {
   ADD_VIDEO_VIEW,
   AddVideoView,
@@ -36,6 +34,7 @@ import {
 import { EntityViewsInfo } from '../src/entities/EntityViewsInfo'
 import { VideoEventsBucketModel } from '../src/models/VideoEvent'
 import { TEST_BUCKET_SIZE } from './setup'
+import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 
 const FIRST_VIDEO_ID = '12'
 const SECOND_VIDEO_ID = '13'
@@ -47,16 +46,15 @@ describe('Video and channel views resolver', () => {
   let server: ApolloServer
   let mongoose: Mongoose
   let aggregates: Aggregates
-  let query: ApolloServerTestClient['query']
-  let mutate: ApolloServerTestClient['mutate']
+  let query: QueryFn
+  let mutate: MutationFn
 
   beforeEach(async () => {
     mongoose = await connectMongoose(process.env.MONGO_URL!)
     aggregates = await buildAggregates()
     server = await createServer(mongoose, aggregates)
-    const testClient = createTestClient(server)
-    query = testClient.query
-    mutate = testClient.mutate
+    query = createQueryFn(server)
+    mutate = createMutationFn(server)
   })
 
   afterEach(async () => {
@@ -363,9 +361,8 @@ describe('Video and channel views resolver', () => {
     await server.stop()
     aggregates = await buildAggregates()
     server = await createServer(mongoose, aggregates)
-    const testClient = createTestClient(server)
-    query = testClient.query
-    mutate = testClient.mutate
+    query = createQueryFn(server)
+    mutate = createMutationFn(server)
 
     await checkViews()
   })

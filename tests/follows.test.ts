@@ -1,9 +1,7 @@
 import { ApolloServer } from 'apollo-server-express'
 import { Mongoose } from 'mongoose'
 import { Aggregates } from '../src/types'
-import { ApolloServerTestClient } from 'apollo-server-testing/dist/createTestClient'
 import { buildAggregates, connectMongoose, createServer } from '../src/server'
-import { createTestClient } from 'apollo-server-testing'
 import {
   FOLLOW_CHANNEL,
   FollowChannel,
@@ -24,6 +22,7 @@ import {
 import { ChannelFollowsInfo } from '../src/entities/ChannelFollowsInfo'
 import { ChannelEventsBucketModel } from '../src/models/ChannelEvent'
 import { TEST_BUCKET_SIZE } from './setup'
+import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 
 const FIRST_CHANNEL_ID = '22'
 const SECOND_CHANNEL_ID = '23'
@@ -32,16 +31,15 @@ describe('Channel follows resolver', () => {
   let server: ApolloServer
   let mongoose: Mongoose
   let aggregates: Aggregates
-  let query: ApolloServerTestClient['query']
-  let mutate: ApolloServerTestClient['mutate']
+  let query: QueryFn
+  let mutate: MutationFn
 
   beforeEach(async () => {
     mongoose = await connectMongoose(process.env.MONGO_URL!)
     aggregates = await buildAggregates()
     server = await createServer(mongoose, aggregates)
-    const testClient = createTestClient(server)
-    query = testClient.query
-    mutate = testClient.mutate
+    query = createQueryFn(server)
+    mutate = createMutationFn(server)
   })
 
   afterEach(async () => {
@@ -259,9 +257,8 @@ describe('Channel follows resolver', () => {
     await server.stop()
     aggregates = await buildAggregates()
     server = await createServer(mongoose, aggregates)
-    const testClient = createTestClient(server)
-    query = testClient.query
-    mutate = testClient.mutate
+    query = createQueryFn(server)
+    mutate = createMutationFn(server)
 
     await checkFollows()
   })
