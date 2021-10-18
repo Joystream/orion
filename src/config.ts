@@ -60,7 +60,7 @@ export class Config {
 
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
 
-    this._featuredContentSecret = loadEnvVar('FEATURED_CONTENT_SECRET')
+    this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
   }
 }
 
