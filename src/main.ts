@@ -12,6 +12,7 @@ const main = async () => {
   const aggregates = await wrapTask('Rebuilding aggregates', buildAggregates)
 
   const server = await createServer(mongoose, aggregates)
+  await server.start()
   const app = Express()
   server.applyMiddleware({ app })
 

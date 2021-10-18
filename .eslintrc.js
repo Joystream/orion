@@ -1,7 +1,8 @@
 module.exports = {
-  extends: ['@joystream/eslint-config'],
+  extends: ['@joystream/eslint-config', 'plugin:jest/recommended'],
   rules: {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {
@@ -37,7 +38,4 @@ module.exports = {
     ],
   },
   plugins: ['jest'],
-  env: {
-    'jest/globals': true,
-  },
 }
