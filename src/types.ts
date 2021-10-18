@@ -7,4 +7,5 @@ export type Aggregates = {
 
 export type OrionContext = {
   remoteHost?: string
+  authorization?: string
 } & Aggregates
