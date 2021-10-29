@@ -7,6 +7,7 @@ export const GET_VIDEO_HERO = gql`
     videoHero {
       heroTitle
       heroVideoCutUrl
+      heroPosterUrl
       videoId
     }
   }
@@ -46,11 +47,12 @@ export type GetAllCategoriesFeaturedVideos = {
 }
 
 export const SET_VIDEO_HERO = gql`
-  mutation SetVideoHero($videoId: ID!, $heroTitle: String!, $heroVideoCutUrl: String!) {
-    setVideoHero(videoId: $videoId, heroTitle: $heroTitle, heroVideoCutUrl: $heroVideoCutUrl) {
+  mutation SetVideoHero($newVideoHero: VideoHeroInput!) {
+    setVideoHero(newVideoHero: $newVideoHero) {
       videoId
       heroTitle
       heroVideoCutUrl
+      heroPosterUrl
     }
   }
 `
@@ -58,9 +60,12 @@ export type SetVideoHero = {
   setVideoHero: VideoHero
 }
 export type SetVideoHeroArgs = {
-  videoId: string
-  heroTitle: string
-  heroVideoCutUrl: string
+  newVideoHero: {
+    videoId: string
+    heroTitle: string
+    heroVideoCutUrl: string
+    heroPosterUrl: string
+  }
 }
 
 export const SET_CATEGORY_FEATURED_VIDEOS = gql`
