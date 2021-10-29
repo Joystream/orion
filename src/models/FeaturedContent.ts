@@ -16,6 +16,10 @@ export class VideoHero {
   @prop({ required: true })
   @Field()
   heroVideoCutUrl!: string
+
+  @prop({ required: true })
+  @Field()
+  heroPosterUrl!: string
 }
 
 @ObjectType()
@@ -46,6 +50,7 @@ export const DEFAULT_FEATURED_CONTENT_DOC: FeaturedContent = {
     videoId: '0',
     heroTitle: 'Change Me',
     heroVideoCutUrl: 'https://google.com',
+    heroPosterUrl: 'https://google.com',
   },
   featuredVideosPerCategory: new Map<string, FeaturedVideo[]>(),
 }

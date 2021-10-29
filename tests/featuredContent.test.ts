@@ -92,10 +92,11 @@ describe('Featured content resolver', () => {
       videoId: '1111',
       heroTitle: 'Hello darkness my old friend',
       heroVideoCutUrl: 'example_url',
+      heroPosterUrl: 'example_url_2',
     }
     await mutate<SetVideoHero, SetVideoHeroArgs>({
       mutation: SET_VIDEO_HERO,
-      variables: { ...newVideoHero },
+      variables: { newVideoHero },
     })
 
     const videoHero = await getVideoHero()
