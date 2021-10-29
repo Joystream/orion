@@ -1,4 +1,4 @@
-FROM node:12 AS build
+FROM node:14.18 AS build
 
 WORKDIR /usr/src/orion
 
@@ -7,7 +7,7 @@ RUN yarn install --frozen-lockfile
 RUN yarn run build
 
 
-FROM node:12
+FROM node:14.18
 
 WORKDIR /usr/src/orion
 
