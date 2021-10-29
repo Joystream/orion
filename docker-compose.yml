@@ -5,6 +5,7 @@ services:
     environment:
       - ORION_PORT=6116
       - ORION_MONGO_HOSTNAME=mongo
+      - ORION_FEATURED_CONTENT_SECRET=change_me_please
     ports:
       - '127.0.0.1:6116:6116'
     restart: always
