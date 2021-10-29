@@ -11,6 +11,21 @@ class FeaturedVideoInput implements FeaturedVideo {
   videoCutUrl?: string
 }
 
+@InputType()
+class VideoHeroInput implements VideoHero {
+  @Field(() => ID)
+  videoId!: string
+
+  @Field()
+  heroPosterUrl!: string
+
+  @Field()
+  heroTitle!: string
+
+  @Field()
+  heroVideoCutUrl!: string
+}
+
 @ArgsType()
 class SetCategoryFeaturedVideoArgs {
   @Field(() => ID)
@@ -50,7 +65,7 @@ export class FeaturedContentResolver {
 
   @Mutation(() => VideoHero, { nullable: false })
   @Authorized()
-  async setVideoHero(@Args() newVideoHero: VideoHero) {
+  async setVideoHero(@Arg('newVideoHero', () => VideoHeroInput) newVideoHero: VideoHeroInput) {
     const featuredContent = await getFeaturedContentDoc()
     featuredContent.videoHero = newVideoHero
     await featuredContent.save()
