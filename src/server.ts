@@ -1,24 +1,60 @@
-import 'reflect-metadata'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { stitchSchemas } from '@graphql-tools/stitch'
+import { introspectSchema, wrapSchema } from '@graphql-tools/wrap'
+import { ApolloServerPluginLandingPageGraphQLPlayground, ContextFunction } from 'apollo-server-core'
 import { ApolloServer } from 'apollo-server-express'
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
-import { ContextFunction, ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
+import fetch from 'cross-undici-fetch'
+import { readFileSync } from 'fs'
+import { print } from 'graphql'
 import { connect, Mongoose } from 'mongoose'
+import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
-
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
-import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
-import { Aggregates, OrionContext } from './types'
-import { FeaturedContentResolver } from './resolvers/featuredContent'
+import config from './config'
 import { customAuthChecker } from './helpers/auth'
+import { queryNodeStitchingResolvers } from './queryNodeStiching/resolvers'
+import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
+import { FeaturedContentResolver } from './resolvers/featuredContent'
+import { Aggregates, OrionContext } from './types'
+import type { ExecutionRequest } from '@graphql-tools/utils'
+
+const executor = async ({ document, variables }: ExecutionRequest) => {
+  const query = print(document)
+  const fetchResult = await fetch(config.queryNodeUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+  })
+  return fetchResult.json()
+}
+
+const extendedQueryNode = readFileSync('./extendedQueryNode.graphql', { encoding: 'utf-8' })
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) => {
   await mongoose.connection
 
-  const schema = await buildSchema({
+  const orionSchema = await buildSchema({
     resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver, FeaturedContentResolver],
     authChecker: customAuthChecker,
     emitSchemaFile: 'schema.graphql',
     validate: true,
+  })
+
+  const queryNodeSchema = wrapSchema({
+    schema: await introspectSchema(executor),
+    executor,
+  })
+
+  const extendedQueryNodeSchema = makeExecutableSchema({
+    typeDefs: extendedQueryNode,
+  })
+
+  const schema = stitchSchemas({
+    subschemas: [orionSchema, queryNodeSchema, extendedQueryNodeSchema],
+    resolvers: queryNodeStitchingResolvers(queryNodeSchema, orionSchema),
   })
 
   const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({

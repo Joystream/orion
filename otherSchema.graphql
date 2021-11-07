@@ -1,0 +1,8 @@
+type Video {
+  views: Int
+}
+
+type Channel {
+  follows: Int
+  views: Int
+}
