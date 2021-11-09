@@ -6,7 +6,7 @@ export const RemoveQueryNodeChannelFollowsField: Transform = {
     request.document = {
       ...request.document,
       definitions: request.document.definitions.map((definition) => {
-        if (definition.kind === 'FragmentDefinition' && definition.name.value === 'AllChannelFields') {
+        if (definition.kind === 'FragmentDefinition') {
           return {
             ...definition,
             selectionSet: {
