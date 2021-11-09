@@ -20,6 +20,8 @@ import {
   TransformOrionVideoViewsField,
 } from './transforms'
 
+import { Channel, ChannelEdge, SearchFtsOutput, Video, VideoEdge } from '../types'
+
 export const createResolverWithTransforms = (
   schema: GraphQLSchema,
   fieldName: string,
@@ -57,14 +59,14 @@ export const queryNodeStitchingResolvers = (
         const batchedVideoViews = await batchedVideoViewsResolver(
           parent,
           {
-            videoIdList: videos.map((video: any) => video.id),
+            videoIdList: videos.map((video: Video) => video.id),
           },
           context,
           info
         )
 
         const viewsLookup = createLookup<{ id: string; views: number }>(batchedVideoViews || [])
-        return videos.map((video: any) => ({ ...video, views: viewsLookup[video.id]?.views || 0 }))
+        return videos.map((video: Video) => ({ ...video, views: viewsLookup[video.id]?.views || 0 }))
       } catch (error) {
         console.error('Failed to resolve video views', 'videos resolver', error)
         return videos
@@ -91,7 +93,7 @@ export const queryNodeStitchingResolvers = (
         const batchedChannelFollowsPromise = batchedChannelFollowsResolver(
           parent,
           {
-            channelIdList: channels.map((channel: any) => channel.id),
+            channelIdList: channels.map((channel: Channel) => channel.id),
           },
           context,
           info
@@ -105,7 +107,7 @@ export const queryNodeStitchingResolvers = (
         const batchedChannelViewsPromise = batchedChannelViewsResolver(
           parent,
           {
-            channelIdList: channels.map((channel: any) => channel.id),
+            channelIdList: channels.map((channel: Channel) => channel.id),
           },
           context,
           info
@@ -119,7 +121,7 @@ export const queryNodeStitchingResolvers = (
         const followsLookup = createLookup<{ id: string; follows: number }>(batchedChannelFollows || [])
         const viewsLookup = createLookup<{ id: string; views: number }>(batchedChannelViews || [])
 
-        return channels.map((channel: any) => ({
+        return channels.map((channel: Channel) => ({
           ...channel,
           follows: followsLookup[channel.id]?.follows || 0,
           views: viewsLookup[channel.id]?.views || 0,
@@ -142,8 +144,8 @@ export const queryNodeStitchingResolvers = (
       const search = await searchResolver(parent, args, context, info)
       try {
         const channelIdList = search
-          .filter((result: any) => result.item.__typename === 'Channel')
-          .map((result: any) => result.item.id)
+          .filter((result: SearchFtsOutput) => result.item.__typename === 'Channel')
+          .map((result: SearchFtsOutput) => result.item.id)
 
         const batchedChannelFollowsResolver = createResolverWithTransforms(
           orionSchema,
@@ -174,8 +176,8 @@ export const queryNodeStitchingResolvers = (
         )
 
         const videoIdList = search
-          .filter((result: any) => result.item.__typename === 'Video')
-          .map((result: any) => result.item.id)
+          .filter((result: SearchFtsOutput) => result.item.__typename === 'Video')
+          .map((result: SearchFtsOutput) => result.item.id)
 
         const batchedVideoViewsResolver = createResolverWithTransforms(orionSchema, ORION_BATCHED_VIEWS_QUERY_NAME, [
           TransformBatchedOrionVideoViewsField,
@@ -199,7 +201,7 @@ export const queryNodeStitchingResolvers = (
         const channelViewsLookup = createLookup<{ id: string; views: number }>(batchedChannelViews || [])
         const viewsLookup = createLookup<{ id: string; views: number }>(batchedVideoViews || [])
 
-        const searchWithFollowsAndViews = search.map((searchOutput: any) => {
+        const searchWithFollowsAndViews = search.map((searchOutput: SearchFtsOutput) => {
           if (searchOutput.item.__typename === 'Channel') {
             return {
               ...searchOutput,
@@ -257,14 +259,14 @@ export const queryNodeStitchingResolvers = (
       try {
         const batchedVideoViews = await batchedVideoViewsResolver(
           parent,
-          { videoIdList: parent.edges.map((edge: any) => edge.node.id) },
+          { videoIdList: parent.edges.map((edge: VideoEdge) => edge.node.id) },
           context,
           info
         )
 
         const viewsLookup = createLookup<{ id: string; views: number }>(batchedVideoViews || [])
 
-        return parent.edges.map((edge: any) => ({
+        return parent.edges.map((edge: VideoEdge) => ({
           ...edge,
           node: {
             ...edge.node,
@@ -325,7 +327,7 @@ export const queryNodeStitchingResolvers = (
       const batchedChannelFollowsPromise = batchedChannelFollowsResolver(
         parent,
         {
-          channelIdList: parent.edges.map((edge: any) => edge.node.id),
+          channelIdList: parent.edges.map((edge: ChannelEdge) => edge.node.id),
         },
         context,
         info
@@ -340,7 +342,7 @@ export const queryNodeStitchingResolvers = (
         const batchedChannelViewsPromise = batchedChannelViewsResolver(
           parent,
           {
-            channelIdList: parent.edges.map((edge: any) => edge.node.id),
+            channelIdList: parent.edges.map((edge: ChannelEdge) => edge.node.id),
           },
           context,
           info
@@ -353,7 +355,7 @@ export const queryNodeStitchingResolvers = (
 
         const followsLookup = createLookup<{ id: string; follows: number }>(batchedChannelFollows || [])
         const viewsLookup = createLookup<{ id: string; views: number }>(batchedChannelViews || [])
-        return parent.edges.map((edge: any) => ({
+        return parent.edges.map((edge: ChannelEdge) => ({
           ...edge,
           node: {
             ...edge.node,
