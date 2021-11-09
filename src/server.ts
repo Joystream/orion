@@ -14,8 +14,8 @@ import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import config from './config'
 import { customAuthChecker } from './helpers'
-import { queryNodeStitchingResolvers } from './queryNodeStiching/resolvers'
-import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
+import { queryNodeStitchingResolvers, ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
+
 import { FeaturedContentResolver } from './resolvers/featuredContent'
 import { Aggregates, OrionContext } from './types'
 
