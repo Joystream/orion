@@ -31,7 +31,7 @@ const executor = async ({ document, variables }: ExecutionRequest) => {
   return fetchResult.json()
 }
 
-const extendedQueryNode = readFileSync('./extendedQueryNode.graphql', { encoding: 'utf-8' })
+const extendedQueryNode = readFileSync('./otherSchema.graphql', { encoding: 'utf-8' })
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) => {
   await mongoose.connection
@@ -43,7 +43,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
     validate: true,
   })
 
-  const queryNodeSchema = wrapSchema({
+  const remoteQueryNodeSchema = wrapSchema({
     schema: await introspectSchema(executor),
     executor,
   })
@@ -53,8 +53,8 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
   })
 
   const schema = stitchSchemas({
-    subschemas: [orionSchema, queryNodeSchema, extendedQueryNodeSchema],
-    resolvers: queryNodeStitchingResolvers(queryNodeSchema, orionSchema),
+    subschemas: [orionSchema, remoteQueryNodeSchema, extendedQueryNodeSchema],
+    resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema, orionSchema),
   })
 
   const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({
