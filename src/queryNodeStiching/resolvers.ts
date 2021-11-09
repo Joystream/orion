@@ -1,6 +1,7 @@
 import { Transform, delegateToSchema } from '@graphql-tools/delegate'
 import type { IResolvers, ISchemaLevelResolver } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
+import { createLookup } from '../helpers'
 
 import {
   ORION_BATCHED_CHANNEL_VIEWS_QUERY_NAME,
@@ -19,19 +20,6 @@ import {
   TransformOrionFollowsField,
   TransformOrionVideoViewsField,
 } from './transforms'
-
-type HasId = {
-  id: string
-}
-
-export const createLookup = <T extends HasId>(data: T[]): Record<string, T> => {
-  return data.reduce((acc, item) => {
-    if (item) {
-      acc[item.id] = item
-    }
-    return acc
-  }, {} as Record<string, T>)
-}
 
 export const createResolverWithTransforms = (
   schema: GraphQLSchema,

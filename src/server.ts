@@ -1,5 +1,6 @@
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { stitchSchemas } from '@graphql-tools/stitch'
+import type { ExecutionRequest } from '@graphql-tools/utils'
 import { introspectSchema, wrapSchema } from '@graphql-tools/wrap'
 import { ApolloServerPluginLandingPageGraphQLPlayground, ContextFunction } from 'apollo-server-core'
 import { ApolloServer } from 'apollo-server-express'
@@ -12,12 +13,11 @@ import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import config from './config'
-import { customAuthChecker } from './helpers/auth'
+import { customAuthChecker } from './helpers'
 import { queryNodeStitchingResolvers } from './queryNodeStiching/resolvers'
 import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
 import { FeaturedContentResolver } from './resolvers/featuredContent'
 import { Aggregates, OrionContext } from './types'
-import type { ExecutionRequest } from '@graphql-tools/utils'
 
 const executor = async ({ document, variables }: ExecutionRequest) => {
   const query = print(document)
@@ -30,8 +30,6 @@ const executor = async ({ document, variables }: ExecutionRequest) => {
   })
   return fetchResult.json()
 }
-
-const extendedQueryNode = readFileSync('./otherSchema.graphql', { encoding: 'utf-8' })
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) => {
   await mongoose.connection
@@ -49,7 +47,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
   })
 
   const extendedQueryNodeSchema = makeExecutableSchema({
-    typeDefs: extendedQueryNode,
+    typeDefs: readFileSync('./extendedQueryNodeSchema.graphql', { encoding: 'utf-8' }),
   })
 
   const schema = stitchSchemas({

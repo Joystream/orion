@@ -30,8 +30,6 @@
     ]
   },
   "dependencies": {
-    "@graphql-tools/links": "^8.2.1",
-    "@graphql-tools/merge": "^8.2.1",
     "@graphql-tools/schema": "^8.3.1",
     "@graphql-tools/stitch": "^8.4.1",
     "@graphql-tools/wrap": "^8.3.1",
