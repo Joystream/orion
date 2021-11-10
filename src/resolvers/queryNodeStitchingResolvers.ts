@@ -1,8 +1,9 @@
-import { Transform, delegateToSchema } from '@graphql-tools/delegate'
+import { delegateToSchema, Transform } from '@graphql-tools/delegate'
 import type { IResolvers, ISchemaLevelResolver } from '@graphql-tools/utils'
-import { GraphQLSchema } from 'graphql'
+import { WrapQuery } from '@graphql-tools/wrap'
+import { GraphQLSchema, Kind, SelectionSetNode } from 'graphql'
 import { createLookup } from '../helpers'
-
+import { Channel, ChannelEdge, SearchFtsOutput, Video, VideoEdge } from '../types'
 import {
   ORION_BATCHED_CHANNEL_VIEWS_QUERY_NAME,
   ORION_BATCHED_FOLLOWS_QUERY_NAME,
@@ -20,7 +21,29 @@ import {
   TransformOrionVideoViewsField,
 } from './transforms'
 
-import { Channel, ChannelEdge, SearchFtsOutput, Video, VideoEdge } from '../types'
+// found here: https://gist.github.com/Jalle19/1ca5081f220e83e1015fd661ee4e877c
+const createSelectionSetAppendingTransform = (parentFieldName: string, appendedFieldName: string) => {
+  return new WrapQuery(
+    // Modify the specified field's selection set
+    [parentFieldName],
+    (selectionSet: SelectionSetNode) => {
+      const newSelection = {
+        kind: Kind.FIELD,
+        name: {
+          kind: Kind.NAME,
+          value: appendedFieldName,
+        },
+      }
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore the selection set is technically read only
+      selectionSet.selections.push(newSelection)
+
+      return selectionSet
+    },
+    (result) => result
+  )
+}
 
 export const createResolverWithTransforms = (
   schema: GraphQLSchema,
@@ -36,7 +59,8 @@ export const createResolverWithTransforms = (
       args,
       context,
       info,
-      transforms,
+      // createSelectionSetAppendingTransform will allow getting views and follows without passing id field
+      transforms: [...transforms, createSelectionSetAppendingTransform(fieldName, 'id')],
     })
 }
 
