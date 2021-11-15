@@ -6,3 +6,52 @@ type Channel {
   follows: Int
   views: Int
 }
+
+type Query {
+  mostFollowedChannels(
+    limit: Int
+    """
+    timePeriodDays must take one of the following values: 7, 30
+    """
+    timePeriodDays: Int!
+  ): [Channel]!
+
+  """
+  Get list of most followed channels of all time
+  """
+  mostFollowedChannelsAllTime(limit: Int!): [Channel!]
+
+  """
+  Get list of most viewed channels in a given time period
+  """
+  mostViewedChannels(
+    limit: Int
+
+    """
+    timePeriodDays must take one of the following values: 7, 30
+    """
+    timePeriodDays: Int!
+  ): [Channel!]
+
+  """
+  Get list of most viewed channels of all time
+  """
+  mostViewedChannelsAllTime(limit: Int!): [Channel!]
+
+  """
+  Get list of most viewed videos in a given time period
+  """
+  mostViewedVideos(
+    limit: Int
+
+    """
+    timePeriodDays must take one of the following values: 7, 30
+    """
+    timePeriodDays: Int!
+  ): [Video!]
+
+  """
+  Get list of most viewed videos of all time
+  """
+  mostViewedVideosAllTime(limit: Int!): [Video!]
+}

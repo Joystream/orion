@@ -78,46 +78,6 @@ export class VideoViewsInfosResolver {
 
   @Query(() => [EntityViewsInfo], {
     nullable: true,
-    description: 'Get list of most viewed videos in a given time period',
-  })
-  async mostViewedVideos(
-    @Args() { timePeriodDays, limit }: MostViewedArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<EntityViewsInfo[]> {
-    ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
-    return limitViews(ctx.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(timePeriodDays)], limit)
-  }
-
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed videos of all time' })
-  async mostViewedVideosAllTime(
-    @Args() { limit }: MostViewedAllTimeArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<EntityViewsInfo[]> {
-    return limitViews(ctx.viewsAggregate.getAllVideoViews(), limit)
-  }
-
-  @Query(() => [EntityViewsInfo], {
-    nullable: true,
-    description: 'Get list of most viewed channels in a given time period',
-  })
-  async mostViewedChannels(
-    @Args() { timePeriodDays, limit }: MostViewedArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<EntityViewsInfo[]> {
-    ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
-    return limitViews(ctx.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(timePeriodDays)], limit)
-  }
-
-  @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed channels of all time' })
-  async mostViewedChannelsAllTime(
-    @Args() { limit }: MostViewedAllTimeArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<EntityViewsInfo[]> {
-    return limitViews(ctx.viewsAggregate.getAllChannelViews(), limit)
-  }
-
-  @Query(() => [EntityViewsInfo], {
-    nullable: true,
     description: 'Get list of most viewed categories in a given time period',
   })
   async mostViewedCategories(
@@ -173,7 +133,7 @@ export class VideoViewsInfosResolver {
   }
 }
 
-const limitViews = (views: EntityViewsInfo[], limit?: number) => {
+export const limitViews = (views: EntityViewsInfo[], limit?: number) => {
   return views.slice(0, limit)
 }
 

@@ -1,9 +1,10 @@
 import { delegateToSchema, Transform } from '@graphql-tools/delegate'
 import type { IResolvers, ISchemaLevelResolver } from '@graphql-tools/utils'
 import { WrapQuery } from '@graphql-tools/wrap'
-import { GraphQLSchema, Kind, SelectionSetNode } from 'graphql'
-import { createLookup } from '../helpers'
-import { Channel, ChannelEdge, SearchFtsOutput, Video, VideoEdge } from '../types'
+import { GraphQLResolveInfo, GraphQLSchema, Kind, SelectionSetNode } from 'graphql'
+import { createLookup, mapPeriods } from '../helpers'
+import { Channel, ChannelEdge, OrionContext, SearchFtsOutput, Video, VideoEdge } from '../types'
+import { limitFollows } from './followsInfo'
 import {
   ORION_BATCHED_CHANNEL_VIEWS_QUERY_NAME,
   ORION_BATCHED_FOLLOWS_QUERY_NAME,
@@ -20,6 +21,7 @@ import {
   TransformOrionFollowsField,
   TransformOrionVideoViewsField,
 } from './transforms'
+import { limitViews } from './viewsInfo'
 
 // found here: https://gist.github.com/Jalle19/1ca5081f220e83e1015fd661ee4e877c
 const createSelectionSetAppendingTransform = (parentFieldName: string, appendedFieldName: string) => {
@@ -64,6 +66,57 @@ export const createResolverWithTransforms = (
     })
 }
 
+const getSortedChannelsBasedOnOrion = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parent: any,
+  ids: string[],
+  context: OrionContext,
+  info: GraphQLResolveInfo,
+  schema: GraphQLSchema
+) => {
+  const channelsResolver = createResolverWithTransforms(schema, 'channels', [])
+  console.log(context)
+  const channels = await channelsResolver(
+    parent,
+    {
+      where: {
+        id_in: ids,
+      },
+    },
+    context,
+    info
+  )
+  const sortedChannels = [...channels].sort((a: Channel, b: Channel) => {
+    return ids.indexOf(a.id) - ids.indexOf(b.id)
+  })
+  return sortedChannels
+}
+
+const getSortedVideosBasedOnOrion = async (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parent: any,
+  ids: string[],
+  context: OrionContext,
+  info: GraphQLResolveInfo,
+  schema: GraphQLSchema
+) => {
+  const videosResolver = createResolverWithTransforms(schema, 'videos', [])
+  const channels = await videosResolver(
+    parent,
+    {
+      where: {
+        id_in: ids,
+      },
+    },
+    context,
+    info
+  )
+  const sortedChannels = [...channels].sort((a: Video, b: Video) => {
+    return ids.indexOf(a.id) - ids.indexOf(b.id)
+  })
+  return sortedChannels
+}
+
 export const queryNodeStitchingResolvers = (
   queryNodeSchema: GraphQLSchema,
   orionSchema: GraphQLSchema
@@ -73,6 +126,7 @@ export const queryNodeStitchingResolvers = (
     videoByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
       RemoveQueryNodeViewsField,
     ]),
+
     videos: async (parent, args, context, info) => {
       const videosResolver = createResolverWithTransforms(queryNodeSchema, 'videos', [RemoveQueryNodeViewsField])
       const videos = await videosResolver(parent, args, context, info)
@@ -95,6 +149,20 @@ export const queryNodeStitchingResolvers = (
         console.error('Failed to resolve video views', 'videos resolver', error)
         return videos
       }
+    },
+    mostViewedVideos: async (parent, args, context, info) => {
+      context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
+      const mostViewedVideosIds = limitViews(
+        context.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(args.timePeriodDays)],
+        args.limit
+      ).map((entity) => entity.id)
+      return getSortedVideosBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema)
+    },
+    mostViewedVideosAllTime: async (parent, args, context, info) => {
+      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit).map(
+        (entity) => entity.id
+      )
+      return getSortedVideosBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema)
     },
     videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection', [RemoveQueryNodeViewsField]),
     // channel queries
@@ -154,6 +222,39 @@ export const queryNodeStitchingResolvers = (
         console.error('Failed to resolve channel views or follows', 'channels resolver', error)
         return channels
       }
+    },
+    mostFollowedChannels: async (parent, args, context, info) => {
+      context.followsAggregate.filterEventsByPeriod(args.timePeriodDays)
+      const mostFollowedChannels = limitFollows(
+        context.followsAggregate.getTimePeriodChannelFollows()[mapPeriods(args.timePeriodDays)],
+        args.limit
+      )
+      const mostFollowedIds = mostFollowedChannels.map((entity) => entity.id)
+      const channels = await getSortedChannelsBasedOnOrion(parent, mostFollowedIds, context, info, queryNodeSchema)
+      return channels
+    },
+    mostFollowedChannelsAllTime: async (parent, args, context, info) => {
+      const mostFollowedChannels = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit)
+      const mostFollowedIds = mostFollowedChannels.map((entity) => entity.id)
+      console.log(args)
+      const channels = await getSortedChannelsBasedOnOrion(parent, mostFollowedIds, context, info, queryNodeSchema)
+      return channels
+    },
+    mostViewedChannels: async (parent, args, context, info) => {
+      context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
+      const mostViewedChannels = limitViews(
+        context.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(args.timePeriodDays)],
+        args.limit
+      )
+      const mostViewedIds = mostViewedChannels.map((entity) => entity.id)
+      const channels = await getSortedChannelsBasedOnOrion(parent, mostViewedIds, context, info, queryNodeSchema)
+      return channels
+    },
+    mostViewedChannelsAllTime: async (parent, args, context, info) => {
+      const mostViewedChannels = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit)
+      const mostViewedIds = mostViewedChannels.map((entity) => entity.id)
+      const channels = await getSortedChannelsBasedOnOrion(parent, mostViewedIds, context, info, queryNodeSchema)
+      return channels
     },
     channelsConnection: createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [
       RemoveQueryNodeChannelFollowsField,
