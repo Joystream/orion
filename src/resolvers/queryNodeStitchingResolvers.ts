@@ -66,42 +66,20 @@ export const createResolverWithTransforms = (
     })
 }
 
-const getSortedChannelsBasedOnOrion = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parent: any,
-  ids: string[],
-  context: OrionContext,
-  info: GraphQLResolveInfo,
-  schema: GraphQLSchema
-) => {
-  const channelsResolver = createResolverWithTransforms(schema, 'channels', [])
-  console.log(context)
-  const channels = await channelsResolver(
-    parent,
-    {
-      where: {
-        id_in: ids,
-      },
-    },
-    context,
-    info
-  )
-  const sortedChannels = [...channels].sort((a: Channel, b: Channel) => {
-    return ids.indexOf(a.id) - ids.indexOf(b.id)
-  })
-  return sortedChannels
+type Entity = {
+  id: string
 }
-
-const getSortedVideosBasedOnOrion = async (
+const getSortedEntitiesBasedOnOrion = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parent: any,
   ids: string[],
   context: OrionContext,
   info: GraphQLResolveInfo,
-  schema: GraphQLSchema
+  schema: GraphQLSchema,
+  queryName: 'videos' | 'channels'
 ) => {
-  const videosResolver = createResolverWithTransforms(schema, 'videos', [])
-  const channels = await videosResolver(
+  const resolver = createResolverWithTransforms(schema, queryName, [])
+  const entities = await resolver(
     parent,
     {
       where: {
@@ -111,10 +89,10 @@ const getSortedVideosBasedOnOrion = async (
     context,
     info
   )
-  const sortedChannels = [...channels].sort((a: Video, b: Video) => {
+  const sortedEntities = [...entities].sort((a: Entity, b: Entity) => {
     return ids.indexOf(a.id) - ids.indexOf(b.id)
   })
-  return sortedChannels
+  return sortedEntities
 }
 
 export const queryNodeStitchingResolvers = (
@@ -156,13 +134,13 @@ export const queryNodeStitchingResolvers = (
         context.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(args.timePeriodDays)],
         args.limit
       ).map((entity) => entity.id)
-      return getSortedVideosBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema)
+      return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
     mostViewedVideosAllTime: async (parent, args, context, info) => {
       const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit).map(
         (entity) => entity.id
       )
-      return getSortedVideosBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema)
+      return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
     videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection', [RemoveQueryNodeViewsField]),
     // channel queries
@@ -225,36 +203,35 @@ export const queryNodeStitchingResolvers = (
     },
     mostFollowedChannels: async (parent, args, context, info) => {
       context.followsAggregate.filterEventsByPeriod(args.timePeriodDays)
-      const mostFollowedChannels = limitFollows(
+      const mostFollowedChannelIds = limitFollows(
         context.followsAggregate.getTimePeriodChannelFollows()[mapPeriods(args.timePeriodDays)],
         args.limit
-      )
-      const mostFollowedIds = mostFollowedChannels.map((entity) => entity.id)
-      const channels = await getSortedChannelsBasedOnOrion(parent, mostFollowedIds, context, info, queryNodeSchema)
-      return channels
+      ).map((entity) => entity.id)
+
+      return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     mostFollowedChannelsAllTime: async (parent, args, context, info) => {
-      const mostFollowedChannels = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit)
-      const mostFollowedIds = mostFollowedChannels.map((entity) => entity.id)
-      console.log(args)
-      const channels = await getSortedChannelsBasedOnOrion(parent, mostFollowedIds, context, info, queryNodeSchema)
-      return channels
+      const mostFollowedChannelIds = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit).map(
+        (entity) => entity.id
+      )
+
+      return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     mostViewedChannels: async (parent, args, context, info) => {
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
-      const mostViewedChannels = limitViews(
+      const mostViewedChannelIds = limitViews(
         context.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(args.timePeriodDays)],
         args.limit
-      )
-      const mostViewedIds = mostViewedChannels.map((entity) => entity.id)
-      const channels = await getSortedChannelsBasedOnOrion(parent, mostViewedIds, context, info, queryNodeSchema)
-      return channels
+      ).map((entity) => entity.id)
+
+      return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     mostViewedChannelsAllTime: async (parent, args, context, info) => {
-      const mostViewedChannels = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit)
-      const mostViewedIds = mostViewedChannels.map((entity) => entity.id)
-      const channels = await getSortedChannelsBasedOnOrion(parent, mostViewedIds, context, info, queryNodeSchema)
-      return channels
+      const mostViewedChannelIds = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit).map(
+        (entity) => entity.id
+      )
+
+      return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     channelsConnection: createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [
       RemoveQueryNodeChannelFollowsField,
