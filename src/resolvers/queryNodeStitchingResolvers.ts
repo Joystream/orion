@@ -37,11 +37,7 @@ const createSelectionSetAppendingTransform = (parentFieldName: string, appendedF
         },
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore the selection set is technically read only
-      selectionSet.selections.push(newSelection)
-
-      return selectionSet
+      return { ...selectionSet, selections: [...selectionSet.selections, newSelection] }
     },
     (result) => result
   )
