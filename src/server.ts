@@ -1,36 +1,18 @@
-import { makeExecutableSchema } from '@graphql-tools/schema'
+import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
+import { loadSchema } from '@graphql-tools/load'
 import { stitchSchemas } from '@graphql-tools/stitch'
-import type { ExecutionRequest } from '@graphql-tools/utils'
-import { introspectSchema, wrapSchema } from '@graphql-tools/wrap'
+import { UrlLoader } from '@graphql-tools/url-loader'
 import { ApolloServerPluginLandingPageGraphQLPlayground, ContextFunction } from 'apollo-server-core'
 import { ApolloServer } from 'apollo-server-express'
 import { ExpressContext } from 'apollo-server-express/dist/ApolloServer'
-import fetch from 'cross-undici-fetch'
-import { readFileSync } from 'fs'
-import { print } from 'graphql'
 import { connect, Mongoose } from 'mongoose'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import { customAuthChecker } from './helpers'
-import { queryNodeStitchingResolvers, ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
-
+import { ChannelFollowsInfosResolver, queryNodeStitchingResolvers, VideoViewsInfosResolver } from './resolvers'
 import { FeaturedContentResolver } from './resolvers/featuredContent'
 import { Aggregates, OrionContext } from './types'
-
-const createExecutor = (nodeUrl: string) => {
-  return async ({ document, variables }: ExecutionRequest) => {
-    const query = print(document)
-    const fetchResult = await fetch(nodeUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query, variables }),
-    })
-    return fetchResult.json()
-  }
-}
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, queryNodeUrl: string) => {
   await mongoose.connection
@@ -42,15 +24,12 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
     validate: true,
   })
 
-  const executor = createExecutor(queryNodeUrl)
-
-  const remoteQueryNodeSchema = wrapSchema({
-    schema: await introspectSchema(executor),
-    executor,
+  const extendedQueryNodeSchema = await loadSchema('./extendedQueryNodeSchema.graphql', {
+    loaders: [new GraphQLFileLoader()],
   })
 
-  const extendedQueryNodeSchema = makeExecutableSchema({
-    typeDefs: readFileSync('./extendedQueryNodeSchema.graphql', { encoding: 'utf-8' }),
+  const remoteQueryNodeSchema = await loadSchema(queryNodeUrl, {
+    loaders: [new UrlLoader()],
   })
 
   const schema = stitchSchemas({
