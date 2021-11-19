@@ -37,7 +37,7 @@ describe('Channel follows resolver', () => {
   beforeEach(async () => {
     mongoose = await connectMongoose(process.env.MONGO_URL!)
     aggregates = await buildAggregates()
-    server = await createServer(mongoose, aggregates)
+    server = await createServer(mongoose, aggregates, 'https://sumer-dev-2.joystream.app/query/server/graphql')
     await server.start()
     query = createQueryFn(server)
     mutate = createMutationFn(server)
@@ -257,7 +257,7 @@ describe('Channel follows resolver', () => {
 
     await server.stop()
     aggregates = await buildAggregates()
-    server = await createServer(mongoose, aggregates)
+    server = await createServer(mongoose, aggregates, 'https://sumer-dev-2.joystream.app/query/server/graphql')
     query = createQueryFn(server)
     mutate = createMutationFn(server)
 

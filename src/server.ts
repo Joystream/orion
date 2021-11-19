@@ -12,26 +12,27 @@ import { connect, Mongoose } from 'mongoose'
 import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
-import config from './config'
 import { customAuthChecker } from './helpers'
 import { queryNodeStitchingResolvers, ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
 
 import { FeaturedContentResolver } from './resolvers/featuredContent'
 import { Aggregates, OrionContext } from './types'
 
-const executor = async ({ document, variables }: ExecutionRequest) => {
-  const query = print(document)
-  const fetchResult = await fetch(config.queryNodeUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query, variables }),
-  })
-  return fetchResult.json()
+const createExecutor = (nodeUrl: string) => {
+  return async ({ document, variables }: ExecutionRequest) => {
+    const query = print(document)
+    const fetchResult = await fetch(nodeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, variables }),
+    })
+    return fetchResult.json()
+  }
 }
 
-export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) => {
+export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, queryNodeUrl: string) => {
   await mongoose.connection
 
   const orionSchema = await buildSchema({
@@ -40,6 +41,8 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates) =
     emitSchemaFile: 'schema.graphql',
     validate: true,
   })
+
+  const executor = createExecutor(queryNodeUrl)
 
   const remoteQueryNodeSchema = wrapSchema({
     schema: await introspectSchema(executor),

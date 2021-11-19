@@ -66,7 +66,9 @@ export class Config {
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
-    this._queryNodeUrl = loadEnvVar('QUERY_NODE_URL')
+    this._queryNodeUrl = loadEnvVar('QUERY_NODE_URL', {
+      defaultValue: 'https://sumer-dev-2.joystream.app/query/server/graphql',
+    })
   }
 }
 
