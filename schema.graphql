@@ -74,9 +74,6 @@ type Query {
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
 
-  """Get current video hero"""
-  videoHero: VideoHero!
-
   """Get views count for a single video"""
   videoViews(videoId: ID!): EntityViewsInfo
 }

@@ -6,20 +6,19 @@ type Channel {
   follows: Int
   views: Int
 }
-directive @getVideo on FIELD_DEFINITION
 
 type VideoHero {
   heroPosterUrl: String!
   heroTitle: String!
   heroVideoCutUrl: String!
   videoId: ID!
-  video: Video @getVideo
+  video: Video
 }
 
 type FeaturedVideo {
   videoCutUrl: String
   videoId: ID!
-  video: Video @getVideo
+  video: Video
 }
 
 type Query {

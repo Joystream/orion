@@ -37,10 +37,10 @@ class SetCategoryFeaturedVideoArgs {
 
 @Resolver()
 export class FeaturedContentResolver {
-  @Query(() => VideoHero, { nullable: false, description: 'Get current video hero' })
-  async videoHero() {
-    return (await getFeaturedContentDoc()).videoHero
-  }
+  // @Query(() => VideoHero, { nullable: false, description: 'Get current video hero' })
+  // async videoHero() {
+  //   return (await getFeaturedContentDoc()).videoHero
+  // }
 
   @Query(() => [FeaturedVideo], { nullable: false, description: 'Get featured videos for a given video category' })
   async categoryFeaturedVideos(@Arg('categoryId', () => ID) categoryId: string) {
