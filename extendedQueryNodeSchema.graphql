@@ -6,6 +6,21 @@ type Channel {
   follows: Int
   views: Int
 }
+directive @getVideo on FIELD_DEFINITION
+
+type VideoHero {
+  heroPosterUrl: String!
+  heroTitle: String!
+  heroVideoCutUrl: String!
+  videoId: ID!
+  video: Video @getVideo
+}
+
+type FeaturedVideo {
+  videoCutUrl: String
+  videoId: ID!
+  video: Video @getVideo
+}
 
 type Query {
   mostFollowedChannels(
@@ -54,4 +69,9 @@ type Query {
   Get list of most viewed videos of all time
   """
   mostViewedVideosAllTime(limit: Int!): [Video!]
+
+  """
+  Get current video hero
+  """
+  videoHero: VideoHero!
 }

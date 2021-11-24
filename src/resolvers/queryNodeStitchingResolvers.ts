@@ -100,7 +100,6 @@ export const queryNodeStitchingResolvers = (
     videoByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
       RemoveQueryNodeViewsField,
     ]),
-
     videos: async (parent, args, context, info) => {
       const videosResolver = createResolverWithTransforms(queryNodeSchema, 'videos', [RemoveQueryNodeViewsField])
       const videos = await videosResolver(parent, args, context, info)
@@ -124,6 +123,7 @@ export const queryNodeStitchingResolvers = (
         return videos
       }
     },
+    videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection', [RemoveQueryNodeViewsField]),
     mostViewedVideos: async (parent, args, context, info) => {
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
       const mostViewedVideosIds = limitViews(
@@ -138,7 +138,6 @@ export const queryNodeStitchingResolvers = (
       )
       return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
-    videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection', [RemoveQueryNodeViewsField]),
     // channel queries
     channelByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'channelByUniqueInput', [
       RemoveQueryNodeChannelFollowsField,
