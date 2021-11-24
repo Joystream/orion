@@ -139,40 +139,8 @@ export const queryNodeStitchingResolvers = (
       )
       return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
-    videoHero: async (parent, args, context, info) => {
-      const videoHero = (await getFeaturedContentDoc()).toObject().videoHero
-
-      const videoHeroSelectionSet = info.operation.selectionSet.selections.find(
-        (selection) => selection.kind === 'Field' && selection.name.value === 'videoHero'
-      )
-      const videoSelection =
-        videoHeroSelectionSet?.kind === 'Field' &&
-        videoHeroSelectionSet.selectionSet?.selections.find(
-          (selection) => selection.kind === 'Field' && selection.name.value === 'video'
-        )
-      const videoSelectionSet = videoSelection && videoSelection.kind === 'Field' && videoSelection.selectionSet
-
-      if (videoSelectionSet) {
-        const video = await delegateToSchema({
-          selectionSet: videoSelectionSet,
-          schema: queryNodeSchema,
-          operation: 'query',
-          fieldName: 'videoByUniqueInput',
-          args: {
-            where: {
-              id: videoHero.videoId,
-            },
-          },
-          context,
-          info,
-        })
-
-        return {
-          video,
-          ...videoHero,
-        }
-      }
-      return videoHero
+    videoHero: async () => {
+      return (await getFeaturedContentDoc()).videoHero
     },
     // channel queries
     channelByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'channelByUniqueInput', [
@@ -361,6 +329,23 @@ export const queryNodeStitchingResolvers = (
         console.error('Failed to resolve channel views, channel follows or video views', 'search resolver', error)
         return search
       }
+    },
+  },
+  VideoHero: {
+    video: async (parent, args, context, info) => {
+      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
+        RemoveQueryNodeViewsField,
+      ])
+      return videoResolver(
+        parent,
+        {
+          where: {
+            id: parent.videoId,
+          },
+        },
+        context,
+        info
+      )
     },
   },
   Video: {
