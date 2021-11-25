@@ -92,5 +92,5 @@ type Query {
   """
   Get featured videos for a given video category
   """
-  categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
+  categoryFeaturedVideos(categoryId: ID!): CategoryFeaturedVideos!
 }

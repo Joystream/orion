@@ -346,7 +346,10 @@ export const queryNodeStitchingResolvers = (
     },
     categoryFeaturedVideos: async (parent, args) => {
       const featuredContent = await getFeaturedContentDoc()
-      return featuredContent.featuredVideosPerCategory.get(args.categoryId) || []
+      return {
+        categoryId: args.categoryId,
+        videos: featuredContent.featuredVideosPerCategory.get(args.categoryId) || [],
+      }
     },
   },
 
