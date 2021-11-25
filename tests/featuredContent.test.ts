@@ -79,7 +79,7 @@ describe('Featured content resolver', () => {
 
   it('should return empty array of featured videos for unknown category id', async () => {
     const featuredVideos = await getCategoryFeaturedVideos('1')
-    expect(featuredVideos).toHaveLength(0)
+    expect(featuredVideos?.videos).toHaveLength(0)
   })
 
   it('should return empty array for list of all categories with featured videos', async () => {
@@ -114,7 +114,7 @@ describe('Featured content resolver', () => {
     })
 
     const featuredVideos = await getCategoryFeaturedVideos('3')
-    expect(featuredVideos).toEqual(newFeaturedVideos)
+    expect(featuredVideos?.videos).toEqual(newFeaturedVideos)
   })
 
   it('should return all categories that have featured videos set', async () => {
