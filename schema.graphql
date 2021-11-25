@@ -3,11 +3,6 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
-type CategoryFeaturedVideos {
-  categoryId: ID!
-  videos: [FeaturedVideo!]!
-}
-
 type ChannelFollowsInfo {
   follows: Int!
   id: ID!
@@ -42,9 +37,6 @@ type Mutation {
 }
 
 type Query {
-  """Get featured videos for all categories"""
-  allCategoriesFeaturedVideos: [CategoryFeaturedVideos!]!
-
   """Get follows counts for a list of channels"""
   batchedChannelFollows(channelIdList: [ID!]!): [ChannelFollowsInfo]!
 
@@ -53,9 +45,6 @@ type Query {
 
   """Get views counts for a list of videos"""
   batchedVideoViews(videoIdList: [ID!]!): [EntityViewsInfo]!
-
-  """Get featured videos for a given video category"""
-  categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
 
   """Get follows count for a single channel"""
   channelFollows(channelId: ID!): ChannelFollowsInfo

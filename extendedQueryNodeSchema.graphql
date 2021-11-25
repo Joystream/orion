@@ -15,6 +15,11 @@ type VideoHero {
   video: Video
 }
 
+type CategoryFeaturedVideos {
+  categoryId: ID!
+  videos: [FeaturedVideo!]!
+}
+
 type FeaturedVideo {
   videoCutUrl: String
   videoId: ID!
@@ -73,4 +78,14 @@ type Query {
   Get current video hero
   """
   videoHero: VideoHero!
+
+  """
+  Get featured videos for all categories
+  """
+  allCategoriesFeaturedVideos: [CategoryFeaturedVideos!]!
+
+  """
+  Get featured videos for a given video category
+  """
+  categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
 }

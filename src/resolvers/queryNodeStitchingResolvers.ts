@@ -2,6 +2,7 @@ import { delegateToSchema, Transform } from '@graphql-tools/delegate'
 import type { IResolvers, ISchemaLevelResolver } from '@graphql-tools/utils'
 import { WrapQuery } from '@graphql-tools/wrap'
 import { GraphQLResolveInfo, GraphQLSchema, Kind, SelectionSetNode } from 'graphql'
+import { CategoryFeaturedVideos } from '../entities/CategoryFeaturedVideos'
 import { createLookup, mapPeriods } from '../helpers'
 import { getFeaturedContentDoc } from '../models/FeaturedContent'
 import { Channel, ChannelEdge, OrionContext, SearchFtsOutput, Video, VideoEdge } from '../types'
@@ -47,7 +48,7 @@ const createSelectionSetAppendingTransform = (parentFieldName: string, appendedF
 export const createResolverWithTransforms = (
   schema: GraphQLSchema,
   fieldName: string,
-  transforms: Array<Transform>
+  transforms: Array<Transform> = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ISchemaLevelResolver<any, any> => {
   return async (parent, args, context, info) =>
@@ -330,12 +331,44 @@ export const queryNodeStitchingResolvers = (
         return search
       }
     },
+    allCategoriesFeaturedVideos: async () => {
+      const featuredContent = await getFeaturedContentDoc()
+
+      const categoriesList: CategoryFeaturedVideos[] = []
+      featuredContent.featuredVideosPerCategory.forEach((videos, categoryId) => {
+        categoriesList.push({
+          categoryId,
+          videos,
+        })
+      })
+
+      return categoriesList
+    },
+    categoryFeaturedVideos: async (parent, args) => {
+      const featuredContent = await getFeaturedContentDoc()
+      return featuredContent.featuredVideosPerCategory.get(args.categoryId) || []
+    },
   },
   VideoHero: {
     video: async (parent, args, context, info) => {
       const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
         RemoveQueryNodeViewsField,
       ])
+      return videoResolver(
+        parent,
+        {
+          where: {
+            id: parent.videoId,
+          },
+        },
+        context,
+        info
+      )
+    },
+  },
+  FeaturedVideo: {
+    video: async (parent, args, context, info) => {
+      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
       return videoResolver(
         parent,
         {
