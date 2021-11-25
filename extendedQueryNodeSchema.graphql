@@ -2,6 +2,10 @@ type Video {
   views: Int
 }
 
+type VideoCategory {
+  id: ID!
+}
+
 type Channel {
   follows: Int
   views: Int
@@ -17,6 +21,7 @@ type VideoHero {
 
 type CategoryFeaturedVideos {
   categoryId: ID!
+  category: VideoCategory
   videos: [FeaturedVideo!]!
 }
 

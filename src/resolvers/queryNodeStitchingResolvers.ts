@@ -349,38 +349,7 @@ export const queryNodeStitchingResolvers = (
       return featuredContent.featuredVideosPerCategory.get(args.categoryId) || []
     },
   },
-  VideoHero: {
-    video: async (parent, args, context, info) => {
-      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
-        RemoveQueryNodeViewsField,
-      ])
-      return videoResolver(
-        parent,
-        {
-          where: {
-            id: parent.videoId,
-          },
-        },
-        context,
-        info
-      )
-    },
-  },
-  FeaturedVideo: {
-    video: async (parent, args, context, info) => {
-      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
-      return videoResolver(
-        parent,
-        {
-          where: {
-            id: parent.videoId,
-          },
-        },
-        context,
-        info
-      )
-    },
-  },
+
   Video: {
     views: async (parent, args, context, info) => {
       const orionViewsResolver = createResolverWithTransforms(orionSchema, ORION_VIEWS_QUERY_NAME, [
@@ -428,6 +397,38 @@ export const queryNodeStitchingResolvers = (
         console.error('Failed to resolve video views', 'VideoConnection.edges resolver', error)
         return parent.edges
       }
+    },
+  },
+  VideoHero: {
+    video: async (parent, args, context, info) => {
+      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
+        RemoveQueryNodeViewsField,
+      ])
+      return videoResolver(
+        parent,
+        {
+          where: {
+            id: parent.videoId,
+          },
+        },
+        context,
+        info
+      )
+    },
+  },
+  FeaturedVideo: {
+    video: async (parent, args, context, info) => {
+      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
+      return videoResolver(
+        parent,
+        {
+          where: {
+            id: parent.videoId,
+          },
+        },
+        context,
+        info
+      )
     },
   },
   Channel: {
@@ -517,6 +518,21 @@ export const queryNodeStitchingResolvers = (
       } catch (error) {
         console.error('Failed to resolve channel views or follows', 'ChannelConnection.edges resolver', error)
       }
+    },
+  },
+  CategoryFeaturedVideos: {
+    category: async (parent, args, context, info) => {
+      const channelResolver = createResolverWithTransforms(queryNodeSchema, 'videoCategoryByUniqueInput')
+      return channelResolver(
+        parent,
+        {
+          where: {
+            id: parent.categoryId,
+          },
+        },
+        context,
+        info
+      )
     },
   },
 })
