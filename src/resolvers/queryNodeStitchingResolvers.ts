@@ -14,8 +14,6 @@ import {
   ORION_CHANNEL_VIEWS_QUERY_NAME,
   ORION_FOLLOWS_QUERY_NAME,
   ORION_VIEWS_QUERY_NAME,
-  RemoveQueryNodeChannelFollowsField,
-  RemoveQueryNodeViewsField,
   TransformBatchedChannelOrionViewsField,
   TransformBatchedOrionFollowsField,
   TransformBatchedOrionVideoViewsField,
@@ -100,10 +98,10 @@ export const queryNodeStitchingResolvers = (
   Query: {
     // video queries
     videoByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
-      RemoveQueryNodeViewsField,
+      // RemoveQueryNodeViewsField,
     ]),
     videos: async (parent, args, context, info) => {
-      const videosResolver = createResolverWithTransforms(queryNodeSchema, 'videos', [RemoveQueryNodeViewsField])
+      const videosResolver = createResolverWithTransforms(queryNodeSchema, 'videos', [])
       const videos = await videosResolver(parent, args, context, info)
       try {
         const batchedVideoViewsResolver = createResolverWithTransforms(orionSchema, ORION_BATCHED_VIEWS_QUERY_NAME, [
@@ -125,7 +123,7 @@ export const queryNodeStitchingResolvers = (
         return videos
       }
     },
-    videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection', [RemoveQueryNodeViewsField]),
+    videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection'),
     mostViewedVideos: async (parent, args, context, info) => {
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
       const mostViewedVideosIds = limitViews(
@@ -144,15 +142,9 @@ export const queryNodeStitchingResolvers = (
       return (await getFeaturedContentDoc()).videoHero
     },
     // channel queries
-    channelByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'channelByUniqueInput', [
-      RemoveQueryNodeChannelFollowsField,
-      RemoveQueryNodeViewsField,
-    ]),
+    channelByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'channelByUniqueInput'),
     channels: async (parent, args, context, info) => {
-      const channelsResolver = createResolverWithTransforms(queryNodeSchema, 'channels', [
-        RemoveQueryNodeChannelFollowsField,
-        RemoveQueryNodeViewsField,
-      ])
+      const channelsResolver = createResolverWithTransforms(queryNodeSchema, 'channels')
       const channels = await channelsResolver(parent, args, context, info)
       try {
         const batchedChannelFollowsResolver = createResolverWithTransforms(
@@ -233,16 +225,10 @@ export const queryNodeStitchingResolvers = (
 
       return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
     },
-    channelsConnection: createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [
-      RemoveQueryNodeChannelFollowsField,
-      RemoveQueryNodeViewsField,
-    ]),
+    channelsConnection: createResolverWithTransforms(queryNodeSchema, 'channelsConnection'),
     // mixed queries
     search: async (parent, args, context, info) => {
-      const searchResolver = createResolverWithTransforms(queryNodeSchema, 'search', [
-        RemoveQueryNodeChannelFollowsField,
-        RemoveQueryNodeViewsField,
-      ])
+      const searchResolver = createResolverWithTransforms(queryNodeSchema, 'search')
       const search = await searchResolver(parent, args, context, info)
       try {
         const channelIdList = search
@@ -404,9 +390,7 @@ export const queryNodeStitchingResolvers = (
   },
   VideoHero: {
     video: async (parent, args, context, info) => {
-      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput', [
-        RemoveQueryNodeViewsField,
-      ])
+      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
       return videoResolver(
         parent,
         {
