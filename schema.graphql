@@ -37,21 +37,6 @@ type Mutation {
 }
 
 type Query {
-  """Get follows counts for a list of channels"""
-  batchedChannelFollows(channelIdList: [ID!]!): [ChannelFollowsInfo]!
-
-  """Get views counts for a list of channels"""
-  batchedChannelsViews(channelIdList: [ID!]!): [EntityViewsInfo]!
-
-  """Get views counts for a list of videos"""
-  batchedVideoViews(videoIdList: [ID!]!): [EntityViewsInfo]!
-
-  """Get follows count for a single channel"""
-  channelFollows(channelId: ID!): ChannelFollowsInfo
-
-  """Get views count for a single channel"""
-  channelViews(channelId: ID!): EntityViewsInfo
-
   """Get list of most viewed categories in a given time period"""
   mostViewedCategories(
     limit: Int
@@ -62,9 +47,6 @@ type Query {
 
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
-
-  """Get views count for a single video"""
-  videoViews(videoId: ID!): EntityViewsInfo
 }
 
 type VideoHero {

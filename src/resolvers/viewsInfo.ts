@@ -6,18 +6,6 @@ import { UnsequencedVideoEvent, VideoEventType, saveVideoEvent } from '../models
 import { OrionContext } from '../types'
 
 @ArgsType()
-class VideoViewsArgs {
-  @Field(() => ID)
-  videoId: string
-}
-
-@ArgsType()
-class BatchedVideoViewsArgs {
-  @Field(() => [ID])
-  videoIdList: string[]
-}
-
-@ArgsType()
 class MostViewedArgs {
   @Field(() => Int, {
     description: 'timePeriodDays must take one of the following values: 7, 30',
@@ -27,18 +15,6 @@ class MostViewedArgs {
 
   @Field(() => Int, { nullable: true })
   limit?: number
-}
-
-@ArgsType()
-class ChannelViewsArgs {
-  @Field(() => ID)
-  channelId: string
-}
-
-@ArgsType()
-class BatchedChannelViewsArgs {
-  @Field(() => [ID])
-  channelIdList: string[]
 }
 
 @ArgsType()
@@ -63,19 +39,6 @@ class MostViewedAllTimeArgs {
 
 @Resolver()
 export class VideoViewsInfosResolver {
-  @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single video' })
-  async videoViews(@Args() { videoId }: VideoViewsArgs, @Ctx() ctx: OrionContext): Promise<EntityViewsInfo | null> {
-    return getVideoViewsInfo(videoId, ctx)
-  }
-
-  @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of videos', nullable: 'items' })
-  async batchedVideoViews(
-    @Args() { videoIdList }: BatchedVideoViewsArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<(EntityViewsInfo | null)[]> {
-    return videoIdList.map((videoId) => getVideoViewsInfo(videoId, ctx))
-  }
-
   @Query(() => [EntityViewsInfo], {
     nullable: true,
     description: 'Get list of most viewed categories in a given time period',
@@ -94,22 +57,6 @@ export class VideoViewsInfosResolver {
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
     return limitViews(ctx.viewsAggregate.getAllCategoryViews(), limit)
-  }
-
-  @Query(() => EntityViewsInfo, { nullable: true, description: 'Get views count for a single channel' })
-  async channelViews(
-    @Args() { channelId }: ChannelViewsArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<EntityViewsInfo | null> {
-    return getChannelViewsInfo(channelId, ctx)
-  }
-
-  @Query(() => [EntityViewsInfo], { description: 'Get views counts for a list of channels', nullable: 'items' })
-  async batchedChannelsViews(
-    @Args() { channelIdList }: BatchedChannelViewsArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<(EntityViewsInfo | null)[]> {
-    return channelIdList.map((channelId) => getChannelViewsInfo(channelId, ctx))
   }
 
   @Mutation(() => EntityViewsInfo, { description: "Add a single view to the target video's count" })
