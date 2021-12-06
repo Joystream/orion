@@ -1,9 +1,9 @@
 import { Args, ArgsType, Ctx, Field, ID, Int, Mutation, Query, Resolver } from 'type-graphql'
 import { Min, Max, IsIn } from 'class-validator'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
-import { saveVideoEvent, VideoEventType, UnsequencedVideoEvent } from '../models/VideoEvent'
-import { OrionContext } from '../types'
 import { mapPeriods } from '../helpers'
+import { UnsequencedVideoEvent, VideoEventType, saveVideoEvent } from '../models/VideoEvent'
+import { OrionContext } from '../types'
 
 @ArgsType()
 class VideoViewsArgs {

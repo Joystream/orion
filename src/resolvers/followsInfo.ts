@@ -1,6 +1,6 @@
 import { Args, ArgsType, Ctx, Field, ID, Mutation, Query, Resolver } from 'type-graphql'
 import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
-import { ChannelEventType, saveChannelEvent, UnsequencedChannelEvent } from '../models/ChannelEvent'
+import { UnsequencedChannelEvent, ChannelEventType, saveChannelEvent } from '../models/ChannelEvent'
 import { OrionContext } from '../types'
 
 @ArgsType()

@@ -10,8 +10,9 @@ import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import { customAuthChecker } from './helpers'
-import { ChannelFollowsInfosResolver, queryNodeStitchingResolvers, VideoViewsInfosResolver } from './resolvers'
+import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
 import { FeaturedContentResolver } from './resolvers/featuredContent'
+import { queryNodeStitchingResolvers } from './resolvers/queryNodeStitchingResolvers'
 import { Aggregates, OrionContext } from './types'
 
 export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, queryNodeUrl: string) => {
@@ -31,7 +32,6 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   const remoteQueryNodeSchema = await loadSchema(queryNodeUrl, {
     loaders: [new UrlLoader()],
   })
-
   const schema = stitchSchemas({
     subschemas: [extendedQueryNodeSchema, orionSchema, remoteQueryNodeSchema],
     resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema, orionSchema),
