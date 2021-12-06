@@ -27,7 +27,4 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Video: {
     views: async (parent, args, context) => getVideoViewsInfo(parent.id, context)?.views,
   },
-  VideoEdge: {
-    views: async (parent, args, context) => getVideoViewsInfo(parent.id, context)?.views,
-  },
 })

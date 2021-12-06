@@ -47,8 +47,4 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
     views: async (parent, args, context) => getChannelViewsInfo(parent.id, context)?.views,
     follows: async (parent, args, context) => getFollowsInfo(parent.id, context)?.follows,
   },
-  ChannelEdge: {
-    views: async (parent, args, context) => getChannelViewsInfo(parent.id, context)?.views,
-    follows: async (parent, args, context) => getFollowsInfo(parent.id, context)?.follows,
-  },
 })
