@@ -1,14 +1,6 @@
 import { gql } from 'apollo-server-express'
 import { ChannelFollowsInfo } from '../../src/entities/ChannelFollowsInfo'
 
-export const GET_CHANNEL_FOLLOWS = gql`
-  query GetChannelFollows($channelId: ID!) {
-    channelFollows(channelId: $channelId) {
-      id
-      follows
-    }
-  }
-`
 export const GET_MOST_FOLLOWED_CHANNELS = gql`
   query GetMostFollowedChannels($timePeriodDays: Int!) {
     mostFollowedChannels(timePeriodDays: $timePeriodDays) {
@@ -26,12 +18,7 @@ export const GET_MOST_FOLLOWED_CHANNELS_ALL_TIME = gql`
     }
   }
 `
-export type GetChannelFollows = {
-  channelFollows: ChannelFollowsInfo | null
-}
-export type GetChannelFollowsArgs = {
-  channelId: string
-}
+
 export type GetMostFollowedChannelsArgs = {
   timePeriodDays: number
 }

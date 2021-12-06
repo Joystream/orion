@@ -1,15 +1,6 @@
 import { gql } from 'apollo-server-express'
 import { EntityViewsInfo } from '../../src/entities/EntityViewsInfo'
 
-export const GET_VIDEO_VIEWS = gql`
-  query GetVideoViews($videoId: ID!) {
-    videoViews(videoId: $videoId) {
-      id
-      views
-    }
-  }
-`
-
 export const GET_MOST_VIEWED_VIDEOS = gql`
   query GetMostViewedVideos($timePeriodDays: Int!) {
     mostViewedVideos(timePeriodDays: $timePeriodDays) {
@@ -27,14 +18,9 @@ export const GET_MOST_VIEWED_VIDEOS_ALL_TIME = gql`
     }
   }
 `
-export type GetVideoViews = {
-  videoViews: EntityViewsInfo | null
-}
+
 export type GetMostViewedVideos = {
   mostViewedVideos: EntityViewsInfo[]
-}
-export type GetVideoViewsArgs = {
-  videoId: string
 }
 export type GetMostViewedVideosArgs = {
   timePeriodDays: number
@@ -45,15 +31,6 @@ export type GetMostViewedVideosAllTimeArgs = {
 export type GetMostViewedVideosAllTime = {
   mostViewedVideosAllTime: EntityViewsInfo[]
 }
-
-export const GET_CHANNEL_VIEWS = gql`
-  query GetChannelViews($channelId: ID!) {
-    channelViews(channelId: $channelId) {
-      id
-      views
-    }
-  }
-`
 
 export const GET_MOST_VIEWED_CHANNELS = gql`
   query GetMostViewedChannels($timePeriodDays: Int!) {
@@ -72,15 +49,10 @@ export const GET_MOST_VIEWED_CHANNELS_ALL_TIME = gql`
     }
   }
 `
-export type GetChannelViews = {
-  channelViews: EntityViewsInfo | null
-}
 export type GetMostViewedChannels = {
   mostViewedChannels: EntityViewsInfo[]
 }
-export type GetChannelViewsArgs = {
-  channelId: string
-}
+
 export type GetMostViewedChannelsArgs = {
   timePeriodDays: number
 }

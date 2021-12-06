@@ -6,18 +6,12 @@ import {
   ADD_VIDEO_VIEW,
   AddVideoView,
   AddVideoViewArgs,
-  GET_CHANNEL_VIEWS,
   GET_MOST_VIEWED_CHANNELS,
   GET_MOST_VIEWED_CHANNELS_ALL_TIME,
-  GET_VIDEO_VIEWS,
   GET_MOST_VIEWED_VIDEOS,
   GET_MOST_VIEWED_VIDEOS_ALL_TIME,
   GET_MOST_VIEWED_CATEGORIES,
   GET_MOST_VIEWED_CATEGORIES_ALL_TIME,
-  GetChannelViews,
-  GetChannelViewsArgs,
-  GetVideoViews,
-  GetVideoViewsArgs,
   GetMostViewedVideosArgs,
   GetMostViewedVideosAllTimeArgs,
   GetMostViewedChannelsArgs,
@@ -73,15 +67,6 @@ describe('Video and channel views resolver', () => {
     return addVideoViewResponse.data?.addVideoView
   }
 
-  const getVideoViews = async (videoId: string) => {
-    const videoViewsResponse = await query<GetVideoViews, GetVideoViewsArgs>({
-      query: GET_VIDEO_VIEWS,
-      variables: { videoId },
-    })
-    expect(videoViewsResponse.errors).toBeUndefined()
-    return videoViewsResponse.data?.videoViews
-  }
-
   const getMostViewedVideos = async (timePeriodDays: number) => {
     const mostViewedVideosResponse = await query<GetMostViewedVideos, GetMostViewedVideosArgs>({
       query: GET_MOST_VIEWED_VIDEOS,
@@ -98,15 +83,6 @@ describe('Video and channel views resolver', () => {
     })
     expect(mostViewedVideosAllTimeResponse.errors).toBeUndefined()
     return mostViewedVideosAllTimeResponse.data?.mostViewedVideosAllTime
-  }
-
-  const getChannelViews = async (channelId: string) => {
-    const channelViewsResponse = await query<GetChannelViews, GetChannelViewsArgs>({
-      query: GET_CHANNEL_VIEWS,
-      variables: { channelId },
-    })
-    expect(channelViewsResponse.errors).toBeUndefined()
-    return channelViewsResponse.data?.channelViews
   }
 
   const getMostViewedChannels = async (timePeriodDays: number) => {
@@ -152,19 +128,15 @@ describe('Video and channel views resolver', () => {
   }
 
   it('should return null for unknown video, channel and category views', async () => {
-    const videoViews = await getVideoViews(FIRST_VIDEO_ID)
     const mostViewedVideos = await getMostViewedVideos(30)
     const mostViewedVideosAllTime = await getMostViewedVideosAllTime(10)
-    const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
     const mostViewedChannels = await getMostViewedChannels(30)
     const mostViewedChannelsAllTime = await getMostViewedChannelsAllTime(10)
     const mostViewedCategories = await getMostViewedCategories(30)
     const mostViewedCategoriesAllTime = await getMostViewedCategoriesAllTime(10)
 
-    expect(videoViews).toBeNull()
     expect(mostViewedVideos).toHaveLength(0)
     expect(mostViewedVideosAllTime).toHaveLength(0)
-    expect(channelViews).toBeNull()
     expect(mostViewedChannels).toHaveLength(0)
     expect(mostViewedChannelsAllTime).toHaveLength(0)
     expect(mostViewedCategories).toHaveLength(0)
@@ -185,19 +157,15 @@ describe('Video and channel views resolver', () => {
       views: 1,
     }
     const checkViews = async () => {
-      const videoViews = await getVideoViews(FIRST_VIDEO_ID)
       const mostViewedVideos = await getMostViewedVideos(30)
       const mostViewedVideosAllTime = await getMostViewedVideosAllTime(10)
-      const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
       const mostViewedChannels = await getMostViewedChannels(30)
       const mostViewedChannelsAllTime = await getMostViewedChannelsAllTime(10)
       const mostViewedCategories = await getMostViewedCategories(30)
       const mostViewedCategoriesAllTime = await getMostViewedCategoriesAllTime(10)
 
-      expect(videoViews).toEqual(expectedVideoViews)
       expect(mostViewedVideos).toEqual([expectedVideoViews])
       expect(mostViewedVideosAllTime).toEqual([expectedVideoViews])
-      expect(channelViews).toEqual(expectedChannelViews)
       expect(mostViewedChannels).toEqual([expectedChannelViews])
       expect(mostViewedChannelsAllTime).toEqual([expectedChannelViews])
       expect(mostViewedCategories).toEqual([expectedCategoryViews])
@@ -239,13 +207,9 @@ describe('Video and channel views resolver', () => {
 
     await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
 
-    const firstVideoViews = await getVideoViews(FIRST_VIDEO_ID)
-    const secondVideoViews = await getVideoViews(SECOND_VIDEO_ID)
     const mostViewedVideos = await getMostViewedVideos(30)
     const mostViewedVideosAllTime = await getMostViewedVideosAllTime(10)
 
-    expect(firstVideoViews).toEqual(expectedFirstVideoViews)
-    expect(secondVideoViews).toEqual(expectedSecondVideoViews)
     expect(mostViewedVideos).toEqual([expectedFirstVideoViews, expectedSecondVideoViews])
     expect(mostViewedVideosAllTime).toEqual([expectedFirstVideoViews, expectedSecondVideoViews])
   })
@@ -263,13 +227,9 @@ describe('Video and channel views resolver', () => {
     await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
     await addVideoView(SECOND_VIDEO_ID, SECOND_CHANNEL_ID)
 
-    const firstChannelViews = await getChannelViews(FIRST_CHANNEL_ID)
-    const secondChannelViews = await getChannelViews(SECOND_CHANNEL_ID)
     const mostViewedChannels = await getMostViewedChannels(30)
     const mostViewedChannelsAllTime = await getMostViewedChannelsAllTime(10)
 
-    expect(firstChannelViews).toEqual(expectedFirstChanelViews)
-    expect(secondChannelViews).toEqual(expectedSecondChannelViews)
     expect(mostViewedChannels).toEqual([expectedFirstChanelViews, expectedSecondChannelViews])
     expect(mostViewedChannelsAllTime).toEqual([expectedFirstChanelViews, expectedSecondChannelViews])
   })
@@ -283,11 +243,9 @@ describe('Video and channel views resolver', () => {
     await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
     await addVideoView(SECOND_VIDEO_ID, FIRST_CHANNEL_ID)
 
-    const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
     const mostViewedChannels = await getMostViewedChannels(30)
     const mostViewedChannelsAllTime = await getMostViewedChannelsAllTime(10)
 
-    expect(channelViews).toEqual(expectedChannelViews)
     expect(mostViewedChannels).toEqual([expectedChannelViews])
     expect(mostViewedChannelsAllTime).toEqual([expectedChannelViews])
   })
@@ -327,9 +285,6 @@ describe('Video and channel views resolver', () => {
     }
 
     const checkViews = async () => {
-      const firstVideoViews = await getVideoViews(FIRST_VIDEO_ID)
-      const secondVideoViews = await getVideoViews(SECOND_VIDEO_ID)
-      const channelViews = await getChannelViews(FIRST_CHANNEL_ID)
       const mostViewedVideos = await getMostViewedVideos(30)
       const mostViewedVideosAllTime = await getMostViewedVideosAllTime(10)
       const mostViewedChannels = await getMostViewedChannels(30)
@@ -337,11 +292,8 @@ describe('Video and channel views resolver', () => {
       const mostViewedCategories = await getMostViewedCategories(30)
       const mostViewedCategoriesAllTime = await getMostViewedCategoriesAllTime(10)
 
-      expect(firstVideoViews).toEqual(expectedFirstVideoViews)
-      expect(secondVideoViews).toEqual(expectedSecondVideoViews)
       expect(mostViewedVideos).toEqual([expectedSecondVideoViews, expectedFirstVideoViews])
       expect(mostViewedVideosAllTime).toEqual([expectedSecondVideoViews, expectedFirstVideoViews])
-      expect(channelViews).toEqual(expectedChannelViews)
       expect(mostViewedChannels).toEqual([expectedChannelViews])
       expect(mostViewedChannelsAllTime).toEqual([expectedChannelViews])
       expect(mostViewedCategories).toEqual([expectedCategoryViews])
@@ -379,10 +331,8 @@ describe('Video and channel views resolver', () => {
       await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
     }
 
-    const videoViews = await getVideoViews(FIRST_VIDEO_ID)
     const mostViewedVideos = await getMostViewedVideos(30)
     const mostViewedVideosAllTime = await getMostViewedVideosAllTime(10)
-    expect(videoViews).toEqual(expectedVideoViews)
     expect(mostViewedVideos).toEqual([expectedVideoViews])
     expect(mostViewedVideosAllTime).toEqual([expectedVideoViews])
   })
