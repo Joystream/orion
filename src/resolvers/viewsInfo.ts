@@ -147,12 +147,12 @@ const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | n
   return null
 }
 
-const getVideoViewsInfo = (videoId: string, ctx: OrionContext): EntityViewsInfo | null => {
+export const getVideoViewsInfo = (videoId: string, ctx: OrionContext): EntityViewsInfo | null => {
   const views = ctx.viewsAggregate.videoViews(videoId)
   return buildViewsObject(videoId, views)
 }
 
-const getChannelViewsInfo = (channelId: string, ctx: OrionContext): EntityViewsInfo | null => {
+export const getChannelViewsInfo = (channelId: string, ctx: OrionContext): EntityViewsInfo | null => {
   const views = ctx.viewsAggregate.channelViews(channelId)
   return buildViewsObject(channelId, views)
 }

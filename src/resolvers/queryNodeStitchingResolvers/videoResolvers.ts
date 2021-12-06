@@ -2,14 +2,9 @@ import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
 import { createLookup, mapPeriods } from '../../helpers'
 import { Video, VideoEdge } from '../../types'
-import {
-  ORION_BATCHED_VIEWS_QUERY_NAME,
-  ORION_VIEWS_QUERY_NAME,
-  TransformBatchedOrionVideoViewsField,
-  TransformOrionVideoViewsField,
-} from './transforms'
-import { limitViews } from '../viewsInfo'
+import { getVideoViewsInfo, limitViews } from '../viewsInfo'
 import { createResolverWithTransforms, getSortedEntitiesBasedOnOrion } from './helpers'
+import { ORION_BATCHED_VIEWS_QUERY_NAME, TransformBatchedOrionVideoViewsField } from './transforms'
 
 export const videoResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: GraphQLSchema): IResolvers => ({
   Query: {
@@ -54,24 +49,7 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: Grap
     },
   },
   Video: {
-    views: async (parent, args, context, info) => {
-      const orionViewsResolver = createResolverWithTransforms(orionSchema, ORION_VIEWS_QUERY_NAME, [
-        TransformOrionVideoViewsField,
-      ])
-      try {
-        return await orionViewsResolver(
-          parent,
-          {
-            videoId: parent.id,
-          },
-          context,
-          info
-        )
-      } catch (error) {
-        console.error('Failed to resolve video views', 'Video.views resolver', error)
-        return null
-      }
-    },
+    views: async (parent, args, context) => getVideoViewsInfo(parent.id, context)?.views,
   },
   VideoConnection: {
     edges: async (parent, args, context, info) => {

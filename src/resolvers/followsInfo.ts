@@ -77,7 +77,7 @@ export const limitFollows = (follows: ChannelFollowsInfo[], limit?: number) => {
   return follows.sort((a, b) => (a.follows > b.follows ? -1 : 1)).slice(0, limit)
 }
 
-const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
+export const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
   const follows = ctx.followsAggregate.channelFollows(channelId)
   if (follows != null) {
     return {

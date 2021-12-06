@@ -2,19 +2,15 @@ import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
 import { createLookup, mapPeriods } from '../../helpers'
 import { Channel, ChannelEdge } from '../../types'
-import { limitFollows } from '../followsInfo'
+import { getFollowsInfo, limitFollows } from '../followsInfo'
+import { getChannelViewsInfo, limitViews } from '../viewsInfo'
+import { createResolverWithTransforms, getSortedEntitiesBasedOnOrion } from './helpers'
 import {
   ORION_BATCHED_CHANNEL_VIEWS_QUERY_NAME,
   ORION_BATCHED_FOLLOWS_QUERY_NAME,
-  ORION_CHANNEL_VIEWS_QUERY_NAME,
-  ORION_FOLLOWS_QUERY_NAME,
   TransformBatchedChannelOrionViewsField,
   TransformBatchedOrionFollowsField,
-  TransformOrionChannelViewsField,
-  TransformOrionFollowsField,
 } from './transforms'
-import { limitViews } from '../viewsInfo'
-import { createResolverWithTransforms, getSortedEntitiesBasedOnOrion } from './helpers'
 
 export const channelResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: GraphQLSchema): IResolvers => ({
   Query: {
@@ -104,42 +100,8 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: Gr
     channelsConnection: createResolverWithTransforms(queryNodeSchema, 'channelsConnection'),
   },
   Channel: {
-    views: async (parent, args, context, info) => {
-      const orionViewsResolver = createResolverWithTransforms(orionSchema, ORION_CHANNEL_VIEWS_QUERY_NAME, [
-        TransformOrionChannelViewsField,
-      ])
-      try {
-        return await orionViewsResolver(
-          parent,
-          {
-            channelId: parent.id,
-          },
-          context,
-          info
-        )
-      } catch (error) {
-        console.error('Failed to resolve channel views', 'Channel.views resolver', error)
-        return null
-      }
-    },
-    follows: async (parent, args, context, info) => {
-      const orionFollowsResolver = createResolverWithTransforms(orionSchema, ORION_FOLLOWS_QUERY_NAME, [
-        TransformOrionFollowsField,
-      ])
-      try {
-        return await orionFollowsResolver(
-          parent,
-          {
-            channelId: parent.id,
-          },
-          context,
-          info
-        )
-      } catch (error) {
-        console.error('Failed to resolve channel follows', 'Channel.follows resolver', error)
-        return null
-      }
-    },
+    views: async (parent, args, context) => getChannelViewsInfo(parent.id, context)?.views,
+    follows: async (parent, args, context) => getFollowsInfo(parent.id, context),
   },
   ChannelConnection: {
     edges: async (parent, args, context, info) => {
