@@ -4,7 +4,7 @@ import { CategoryFeaturedVideos } from '../../entities/CategoryFeaturedVideos'
 import { getFeaturedContentDoc } from '../../models/FeaturedContent'
 import { createResolverWithTransforms } from './helpers'
 
-export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: GraphQLSchema): IResolvers => ({
+export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
     videoHero: async () => {
       return (await getFeaturedContentDoc()).videoHero

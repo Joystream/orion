@@ -2,6 +2,10 @@ type Video {
   views: Int
 }
 
+type VideoEdge {
+  views: Int
+}
+
 type VideoCategory {
   id: ID!
 }
@@ -9,6 +13,11 @@ type VideoCategory {
 type Channel {
   follows: Int
   views: Int
+}
+
+type ChannelEdge {
+  views: Int
+  follows: Int
 }
 
 type VideoHero {

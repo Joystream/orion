@@ -6,11 +6,11 @@ import { channelResolvers } from './channelResolvers'
 import { featuredContentResolvers } from './featuredContentResolvers'
 import { videoResolvers } from './videoResolvers'
 
-export const queryNodeStitchingResolvers = (queryNodeSchema: GraphQLSchema, orionSchema: GraphQLSchema): IResolvers => {
+export const queryNodeStitchingResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => {
   return mergeResolvers([
-    searchResolvers(queryNodeSchema, orionSchema),
-    channelResolvers(queryNodeSchema, orionSchema),
-    featuredContentResolvers(queryNodeSchema, orionSchema),
-    videoResolvers(queryNodeSchema, orionSchema),
+    searchResolvers(queryNodeSchema),
+    channelResolvers(queryNodeSchema),
+    featuredContentResolvers(queryNodeSchema),
+    videoResolvers(queryNodeSchema),
   ])
 }

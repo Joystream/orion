@@ -34,7 +34,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   })
   const schema = stitchSchemas({
     subschemas: [extendedQueryNodeSchema, orionSchema, remoteQueryNodeSchema],
-    resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema, orionSchema),
+    resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema),
   })
 
   const contextFn: ContextFunction<ExpressContext, OrionContext> = ({ req }) => ({
