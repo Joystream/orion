@@ -11,11 +11,17 @@ type Channel {
   views: Int
 }
 
-enum ChannelOrderByInput {
-  followsNumber_ASC
-  followsNumber_DESC
-  viewsNumber_ASC
-  viewsNumber_DESC
+"""
+TODO Find solution to not adding types below.
+Unforutnately we need to add some types which are already declared in query node.
+For some reason if we don't write these types server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
+"""
+type ChannelConnection {
+  edges: [ChannelEdge!]!
+}
+
+type ChannelEdge {
+  node: Channel!
 }
 
 type VideoHero {
@@ -100,4 +106,8 @@ type Query {
   Get featured videos for a given video category
   """
   categoryFeaturedVideos(categoryId: ID!): CategoryFeaturedVideos!
+
+  promisingNewChannels: ChannelConnection!
+
+  discoverNewChannels: ChannelConnection!
 }
