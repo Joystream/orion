@@ -3,6 +3,11 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type CategoryFeaturedVideos {
+  categoryId: ID!
+  videos: [FeaturedVideo!]!
+}
+
 type ChannelFollowsInfo {
   follows: Int!
   id: ID!
@@ -37,6 +42,12 @@ type Mutation {
 }
 
 type Query {
+  """Get featured videos for all categories"""
+  allCategoriesFeaturedVideos: [CategoryFeaturedVideos!]!
+
+  """Get featured videos for a given video category"""
+  categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
+
   """Get list of most viewed categories in a given time period"""
   mostViewedCategories(
     limit: Int

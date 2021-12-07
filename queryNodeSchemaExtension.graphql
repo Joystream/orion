@@ -28,16 +28,12 @@ type VideoHero {
   video: Video
 }
 
-type CategoryFeaturedVideos {
-  categoryId: ID!
-  category: VideoCategory
-  videos: [FeaturedVideo!]!
+type FeaturedVideo {
+  video: Video
 }
 
-type FeaturedVideo {
-  videoCutUrl: String
-  videoId: ID!
-  video: Video
+type CategoryFeaturedVideos {
+  category: VideoCategory
 }
 
 type Query {
@@ -87,16 +83,6 @@ type Query {
   Get list of most viewed videos of all time
   """
   mostViewedVideosAllTime(limit: Int!): [Video!]
-
-  """
-  Get featured videos for all categories
-  """
-  allCategoriesFeaturedVideos: [CategoryFeaturedVideos!]!
-
-  """
-  Get featured videos for a given video category
-  """
-  categoryFeaturedVideos(categoryId: ID!): CategoryFeaturedVideos!
 
   promisingNewChannels: ChannelConnection!
 
