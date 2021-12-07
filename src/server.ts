@@ -25,15 +25,16 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
     validate: true,
   })
 
-  const extendedQueryNodeSchema = await loadSchema('./extendedQueryNodeSchema.graphql', {
-    loaders: [new GraphQLFileLoader()],
-  })
-
   const remoteQueryNodeSchema = await loadSchema(queryNodeUrl, {
     loaders: [new UrlLoader()],
   })
+
+  const queryNodeSchemaExtension = await loadSchema('./queryNodeSchemaExtension.graphql', {
+    loaders: [new GraphQLFileLoader()],
+  })
+
   const schema = stitchSchemas({
-    subschemas: [extendedQueryNodeSchema, orionSchema, remoteQueryNodeSchema],
+    subschemas: [orionSchema, remoteQueryNodeSchema, queryNodeSchemaExtension],
     resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema),
   })
 

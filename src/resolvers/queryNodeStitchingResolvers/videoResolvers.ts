@@ -2,13 +2,10 @@ import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
 import { mapPeriods } from '../../helpers'
 import { getVideoViewsInfo, limitViews } from '../viewsInfo'
-import { createResolverWithTransforms, getSortedEntitiesBasedOnOrion } from './helpers'
+import { getSortedEntitiesBasedOnOrion } from './helpers'
 
 export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
-    videoByUniqueInput: createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput'),
-    videos: createResolverWithTransforms(queryNodeSchema, 'videos'),
-    videosConnection: createResolverWithTransforms(queryNodeSchema, 'videosConnection'),
     mostViewedVideos: async (parent, args, context, info) => {
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
       const mostViewedVideosIds = limitViews(
@@ -25,6 +22,9 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
     },
   },
   Video: {
-    views: async (parent, args, context) => getVideoViewsInfo(parent.id, context)?.views,
+    views: {
+      selectionSet: `{ id }`,
+      resolve: async (parent, args, context) => getVideoViewsInfo(parent.id, context)?.views,
+    },
   },
 })

@@ -1,28 +1,7 @@
 import { delegateToSchema, Transform } from '@graphql-tools/delegate'
 import type { ISchemaLevelResolver } from '@graphql-tools/utils'
-import { WrapQuery } from '@graphql-tools/wrap'
-import { GraphQLResolveInfo, GraphQLSchema, Kind, SelectionSetNode } from 'graphql'
+import { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import { OrionContext } from '../../types'
-
-// found here: https://gist.github.com/Jalle19/1ca5081f220e83e1015fd661ee4e877c
-const createSelectionSetAppendingTransform = (parentFieldName: string, appendedFieldName: string) => {
-  return new WrapQuery(
-    // Modify the specified field's selection set
-    [parentFieldName],
-    (selectionSet: SelectionSetNode) => {
-      const newSelection = {
-        kind: Kind.FIELD,
-        name: {
-          kind: Kind.NAME,
-          value: appendedFieldName,
-        },
-      }
-
-      return { ...selectionSet, selections: [...selectionSet.selections, newSelection] }
-    },
-    (result) => result
-  )
-}
 
 export const createResolverWithTransforms = (
   schema: GraphQLSchema,
@@ -38,8 +17,7 @@ export const createResolverWithTransforms = (
       args,
       context,
       info,
-      // createSelectionSetAppendingTransform will allow getting views and follows without passing id field
-      transforms: [...transforms, createSelectionSetAppendingTransform(fieldName, 'id')],
+      transforms,
     })
 }
 

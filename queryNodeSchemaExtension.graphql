@@ -11,6 +11,11 @@ type Channel {
   views: Int
 }
 
+enum ChannelOrderByInput {
+  followsNumber_ASC
+  followsNumber_DESC
+}
+
 type VideoHero {
   heroPosterUrl: String!
   heroTitle: String!
