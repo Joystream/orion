@@ -21,9 +21,6 @@ export const GET_CATEGORY_FEATURED_VIDEOS = gql`
     categoryFeaturedVideos(categoryId: $categoryId) {
       videoCutUrl
       videoId
-      video {
-        id
-      }
     }
   }
 `
@@ -31,7 +28,6 @@ export type GetCategoryFeaturedVideos = {
   categoryFeaturedVideos: {
     videoId: string
     videoCutUrl: string
-    video: { id: string }[]
   }
 }
 export type GetCategoryFeaturedVideosArgs = {

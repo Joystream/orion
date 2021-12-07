@@ -40,7 +40,6 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
     category: {
       selectionSet: '{ categoryId }',
       resolve: async (parent, args, context, info) => {
-        console.log(parent)
         const channelResolver = createResolverWithTransforms(queryNodeSchema, 'videoCategoryByUniqueInput')
         return channelResolver(
           parent,
