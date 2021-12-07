@@ -12,9 +12,9 @@ type Channel {
 }
 
 """
-TODO Find solution to not adding types below.
+TODO Find solution how to not adding types below.
 Unforutnately we need to add some types which are already declared in query node.
-For some reason if we don't write these types server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
+For some reason if we don't do it, server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
 """
 type ChannelConnection {
   edges: [ChannelEdge!]!
@@ -34,6 +34,20 @@ type FeaturedVideo {
 
 type CategoryFeaturedVideos {
   category: VideoCategory
+}
+
+enum ChannelOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input PromisingChannelsWhereInput {
+  id_in: [ID!]
+  ownerMemberId_eq: ID
+  isCurated_eq: Boolean
+  isPublic_eq: Boolean
+  isCensored_eq: Boolean
+  languageId_eq: ID
 }
 
 type Query {
@@ -84,7 +98,17 @@ type Query {
   """
   mostViewedVideosAllTime(limit: Int!): [Video!]
 
-  promisingNewChannels: ChannelConnection!
+  promisingNewChannels(
+    first: Int
+    after: String
+    where: PromisingChannelsWhereInput
+    orderBy: [ChannelOrderByInput!]
+  ): ChannelConnection!
 
-  discoverNewChannels: ChannelConnection!
+  discoverNewChannels(
+    first: Int
+    after: String
+    where: PromisingChannelsWhereInput
+    orderBy: [ChannelOrderByInput!]
+  ): ChannelConnection!
 }

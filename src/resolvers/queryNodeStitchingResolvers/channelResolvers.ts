@@ -42,15 +42,7 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
     },
     promisingNewChannels: async (parent, args, context, info) => {
       const channelsConnectionResolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection')
-      const channelsConnection = await channelsConnectionResolver(
-        parent,
-        {
-          orderBy: ['createdAt_DESC'],
-          first: 100,
-        },
-        context,
-        info
-      )
+      const channelsConnection = await channelsConnectionResolver(parent, args, context, info)
 
       const nodesWithViews = channelsConnection.edges.map((edge: ChannelEdge) => ({
         ...edge,
@@ -69,15 +61,7 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
     },
     discoverNewChannels: async (parent, args, context, info) => {
       const channelsConnectionResolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection')
-      const channelsConnection = await channelsConnectionResolver(
-        parent,
-        {
-          orderBy: ['createdAt_DESC'],
-          first: 100,
-        },
-        context,
-        info
-      )
+      const channelsConnection = await channelsConnectionResolver(parent, args, context, info)
 
       const nodesWithFollows = channelsConnection.edges.map((edge: ChannelEdge) => ({
         ...edge,
