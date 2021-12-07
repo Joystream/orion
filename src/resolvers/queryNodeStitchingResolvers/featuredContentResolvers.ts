@@ -6,9 +6,6 @@ import { createResolverWithTransforms } from './helpers'
 
 export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
-    videoHero: async () => {
-      return (await getFeaturedContentDoc()).videoHero
-    },
     allCategoriesFeaturedVideos: async () => {
       const featuredContent = await getFeaturedContentDoc()
 

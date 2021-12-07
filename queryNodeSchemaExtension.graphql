@@ -25,10 +25,6 @@ type ChannelEdge {
 }
 
 type VideoHero {
-  heroPosterUrl: String!
-  heroTitle: String!
-  heroVideoCutUrl: String!
-  videoId: ID!
   video: Video
 }
 
@@ -91,11 +87,6 @@ type Query {
   Get list of most viewed videos of all time
   """
   mostViewedVideosAllTime(limit: Int!): [Video!]
-
-  """
-  Get current video hero
-  """
-  videoHero: VideoHero!
 
   """
   Get featured videos for all categories
