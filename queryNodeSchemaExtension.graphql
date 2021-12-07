@@ -14,6 +14,8 @@ type Channel {
 enum ChannelOrderByInput {
   followsNumber_ASC
   followsNumber_DESC
+  viewsNumber_ASC
+  viewsNumber_DESC
 }
 
 type VideoHero {

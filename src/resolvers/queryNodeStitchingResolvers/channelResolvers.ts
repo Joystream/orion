@@ -18,19 +18,31 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
       }
       const channels = await chanelsResolver(parent, filterOrderByArgs, context, info)
 
-      const followsSort = args.orderBy?.find(
+      const isSortedByFollows = args.orderBy?.find(
         (orderByArg: string) => orderByArg === 'followsNumber_ASC' || orderByArg === 'followsNumber_DESC'
       )
 
-      if (followsSort) {
+      if (isSortedByFollows) {
         const channelWithFollows = channels.map((channel: Channel) => ({
           ...channel,
-          follows: getFollowsInfo(channel.id, context)?.follows,
+          follows: getFollowsInfo(channel.id, context)?.follows || null,
         }))
         return [...channelWithFollows].sort((a, b) => {
-          return followsSort === 'followsNumber_DESC'
-            ? (b.follows || 0) - (a.follows || 0)
-            : (a.follows || 0) - (b.follows || 0)
+          return isSortedByFollows === 'followsNumber_DESC' ? b.follows - a.follows : a.follows - b.follows
+        })
+      }
+
+      const isSortedByViews = args.orderBy?.find(
+        (orderByArg: string) => orderByArg === 'viewsNumber_ASC' || orderByArg === 'viewsNumber_DESC'
+      )
+
+      if (isSortedByViews) {
+        const channelWithViews = channels.map((channel: Channel) => ({
+          ...channel,
+          views: getChannelViewsInfo(channel.id, context)?.views || null,
+        }))
+        return [...channelWithViews].sort((a, b) => {
+          return isSortedByViews === 'viewsNumber_DESC' ? b.views - a.views : a.views - b.views
         })
       }
       return channels
@@ -72,29 +84,52 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
       const filterOrderByArgs = {
         ...args,
         orderBy: args.orderBy?.filter(
-          (orderBy: string) => orderBy !== 'followsNumber_ASC' && orderBy !== 'followsNumber_DESC'
+          (orderBy: string) =>
+            orderBy !== 'followsNumber_ASC' &&
+            orderBy !== 'followsNumber_DESC' &&
+            orderBy !== 'viewsNumber_ASC' &&
+            orderBy !== 'viewsNumber_DESC'
         ),
       }
       const channelsConnection = await channelsConnectionResolver(parent, filterOrderByArgs, context, info)
 
-      const followsSort = args.orderBy?.find(
+      const isSortedByFollows = args.orderBy?.find(
         (orderByArg: string) => orderByArg === 'followsNumber_ASC' || orderByArg === 'followsNumber_DESC'
       )
 
-      if (followsSort) {
+      if (isSortedByFollows) {
         const nodesWithFollows = channelsConnection.edges.map((edge: ChannelEdge) => ({
           ...edge,
           node: {
             ...edge.node,
-            follows: getFollowsInfo(edge.node.id, context)?.follows,
+            follows: getFollowsInfo(edge.node.id, context)?.follows || null,
           },
         }))
         return {
           ...channelsConnection,
           edges: [...nodesWithFollows].sort((a, b) => {
-            return followsSort === 'followsNumber_DESC'
-              ? (b.node.follows || 0) - (a.node.follows || 0)
-              : (a.node.follows || 0) - (b.node.follows || 0)
+            return isSortedByFollows === 'followsNumber_DESC'
+              ? b.node.follows - a.node.follows
+              : a.node.follows - b.node.follows
+          }),
+        }
+      }
+
+      const isSortedByViews = args.orderBy?.find(
+        (orderByArg: string) => orderByArg === 'viewsNumber_ASC' || orderByArg === 'viewsNumber_DESC'
+      )
+      if (isSortedByViews) {
+        const nodesWithViews = channelsConnection.edges.map((edge: ChannelEdge) => ({
+          ...edge,
+          node: {
+            ...edge.node,
+            views: getChannelViewsInfo(edge.node.id, context)?.views || null,
+          },
+        }))
+        return {
+          ...channelsConnection,
+          edges: [...nodesWithViews].sort((a, b) => {
+            return isSortedByViews === 'viewsNumber_DESC' ? b.node.views - a.node.views : a.node.views - b.node.views
           }),
         }
       }
