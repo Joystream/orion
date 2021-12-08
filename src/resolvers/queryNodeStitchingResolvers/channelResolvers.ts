@@ -13,14 +13,16 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
       const mostFollowedChannelIds = limitFollows(
         context.followsAggregate.getTimePeriodChannelFollows()[mapPeriods(args.timePeriodDays)],
         args.limit
-      ).map((entity) => entity.id)
+      )
+        .filter((entity) => entity.follows)
+        .map((entity) => entity.id)
 
       return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     mostFollowedChannelsAllTime: async (parent, args, context, info) => {
-      const mostFollowedChannelIds = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit).map(
-        (entity) => entity.id
-      )
+      const mostFollowedChannelIds = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit)
+        .filter((entity) => entity.follows)
+        .map((entity) => entity.id)
 
       return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
     },
@@ -29,14 +31,16 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
       const mostViewedChannelIds = limitViews(
         context.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(args.timePeriodDays)],
         args.limit
-      ).map((entity) => entity.id)
+      )
+        .filter((entity) => entity.views)
+        .map((entity) => entity.id)
 
       return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
     },
     mostViewedChannelsAllTime: async (parent, args, context, info) => {
-      const mostViewedChannelIds = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit).map(
-        (entity) => entity.id
-      )
+      const mostViewedChannelIds = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit)
+        .filter((entity) => entity.views)
+        .map((entity) => entity.id)
 
       return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
     },

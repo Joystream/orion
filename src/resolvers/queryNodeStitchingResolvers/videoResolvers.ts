@@ -11,13 +11,17 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
       const mostViewedVideosIds = limitViews(
         context.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(args.timePeriodDays)],
         args.limit
-      ).map((entity) => entity.id)
+      )
+        .filter((entity) => entity.views)
+        .map((entity) => entity.id)
+
       return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
     mostViewedVideosAllTime: async (parent, args, context, info) => {
-      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit).map(
-        (entity) => entity.id
-      )
+      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit)
+        .filter((entity) => entity.views)
+        .map((entity) => entity.id)
+
       return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
     },
   },
