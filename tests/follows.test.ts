@@ -146,25 +146,6 @@ describe('Channel follows resolver', () => {
     expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
   })
 
-  it('should keep the channel follows non-negative', async () => {
-    const expectedChannelFollows: ChannelFollowsInfo = {
-      id: FIRST_CHANNEL_ID,
-      follows: 0,
-    }
-
-    await followChannel(FIRST_CHANNEL_ID)
-    await followChannel(FIRST_CHANNEL_ID)
-
-    await unfollowChannel(FIRST_CHANNEL_ID)
-    await unfollowChannel(FIRST_CHANNEL_ID)
-    await unfollowChannel(FIRST_CHANNEL_ID)
-
-    const mostFollowedChannels = await getMostFollowedChannels(30)
-    const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
-  })
-
   it('should distinct follows of separate channels', async () => {
     const expectedFirstChannelFollows: ChannelFollowsInfo = {
       id: FIRST_CHANNEL_ID,
