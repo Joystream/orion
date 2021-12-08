@@ -11,11 +11,10 @@ type Channel {
   views: Int
 }
 
-"""
-TODO Find solution how to not adding types below.
-Unforutnately we need to add some types which are already declared in query node.
-For some reason if we don't do it, server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
-"""
+# TODO Find solution how to not adding types below.
+# Unforutnately we need to add some types which are already declared in query node.
+# For some reason if we don't do it, server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
+
 type ChannelConnection {
   edges: [ChannelEdge!]!
 }
