@@ -2,7 +2,7 @@ import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
 import { mapPeriods } from '../../helpers'
 import { getVideoViewsInfo, limitViews } from '../viewsInfo'
-import { getSortedEntitiesBasedOnOrion } from './helpers'
+import { getSortedEntitiesConnectionBasedOnOrion } from './helpers'
 
 export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
@@ -15,14 +15,28 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
+      return getSortedEntitiesConnectionBasedOnOrion(
+        parent,
+        mostViewedVideosIds,
+        context,
+        info,
+        queryNodeSchema,
+        'videosConnection'
+      )
     },
     mostViewedVideosAllTime: async (parent, args, context, info) => {
       const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit)
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostViewedVideosIds, context, info, queryNodeSchema, 'videos')
+      return getSortedEntitiesConnectionBasedOnOrion(
+        parent,
+        mostViewedVideosIds,
+        context,
+        info,
+        queryNodeSchema,
+        'videosConnection'
+      )
     },
   },
   Video: {

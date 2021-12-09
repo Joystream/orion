@@ -22,6 +22,13 @@ type ChannelConnection {
 type ChannelEdge {
   node: Channel!
 }
+type VideoConnection {
+  edges: [VideoEdge!]!
+}
+
+type VideoEdge {
+  node: Video!
+}
 
 type VideoHero {
   video: Video
@@ -90,12 +97,12 @@ type Query {
     timePeriodDays must take one of the following values: 7, 30
     """
     timePeriodDays: Int!
-  ): [Video!]
+  ): VideoConnection!
 
   """
   Get list of most viewed videos of all time
   """
-  mostViewedVideosAllTime(limit: Int!): [Video!]
+  mostViewedVideosAllTime(limit: Int!): VideoConnection!
 
   promisingNewChannels(
     first: Int
