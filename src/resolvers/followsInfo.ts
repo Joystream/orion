@@ -56,7 +56,7 @@ export const limitFollows = (follows: ChannelFollowsInfo[], limit?: number) => {
 }
 
 export const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
-  const follows = ctx.followsAggregate.channelFollows(channelId)
+  const follows = ctx.followsAggregate.channelFollows(channelId) || 0
   if (follows != null) {
     return {
       id: channelId,

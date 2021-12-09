@@ -95,11 +95,11 @@ const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | n
 }
 
 export const getVideoViewsInfo = (videoId: string, ctx: OrionContext): EntityViewsInfo | null => {
-  const views = ctx.viewsAggregate.videoViews(videoId)
+  const views = ctx.viewsAggregate.videoViews(videoId) || 0
   return buildViewsObject(videoId, views)
 }
 
 export const getChannelViewsInfo = (channelId: string, ctx: OrionContext): EntityViewsInfo | null => {
-  const views = ctx.viewsAggregate.channelViews(channelId)
+  const views = ctx.viewsAggregate.channelViews(channelId) || 0
   return buildViewsObject(channelId, views)
 }
