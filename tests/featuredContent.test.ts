@@ -35,7 +35,7 @@ describe('Featured content resolver', () => {
   beforeEach(async () => {
     mongoose = await connectMongoose(process.env.MONGO_URL!)
     aggregates = await buildAggregates()
-    server = await createServer(mongoose, aggregates, process.env.QUERY_NODE_URL!)
+    server = await createServer(mongoose, aggregates, process.env.ORION_QUERY_NODE_URL!)
     await server.start()
     query = createQueryFn(server)
     mutate = createMutationFn(server)
