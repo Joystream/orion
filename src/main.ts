@@ -18,7 +18,12 @@ const main = async () => {
 
   app.enable('trust proxy')
   app.listen({ port: config.port }, () =>
-    console.log(`🚀 Server listening at ==> http://localhost:${config.port}${server.graphqlPath}`)
+    console.log(`
+        🚀 Orion online
+        Mongo => ${config.mongoDBUri}
+        Query node => ${config.queryNodeUrl}
+        Playground => http://localhost:${config.port}${server.graphqlPath}
+      `)
   )
 }
 
