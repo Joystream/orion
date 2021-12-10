@@ -4,7 +4,7 @@ import { mapPeriods } from '../../helpers'
 import { ChannelEdge } from '../../types'
 import { getFollowsInfo, limitFollows } from '../followsInfo'
 import { getChannelViewsInfo, limitViews } from '../viewsInfo'
-import { createResolverWithTransforms, getSortedEntitiesBasedOnOrion } from './helpers'
+import { createResolverWithTransforms } from './helpers'
 
 export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
@@ -17,14 +17,40 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
         .filter((entity) => entity.follows)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
+      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
+
+      return resolver(
+        parent,
+        {
+          ...args,
+          where: {
+            ...args.where,
+            id_in: mostFollowedChannelIds,
+          },
+        },
+        context,
+        info
+      )
     },
     mostFollowedChannelsAllTime: async (parent, args, context, info) => {
       const mostFollowedChannelIds = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit)
         .filter((entity) => entity.follows)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostFollowedChannelIds, context, info, queryNodeSchema, 'channels')
+      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
+
+      return resolver(
+        parent,
+        {
+          ...args,
+          where: {
+            ...args.where,
+            id_in: mostFollowedChannelIds,
+          },
+        },
+        context,
+        info
+      )
     },
     mostViewedChannels: async (parent, args, context, info) => {
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
@@ -35,14 +61,40 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
+      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
+
+      return resolver(
+        parent,
+        {
+          ...args,
+          where: {
+            ...args.where,
+            id_in: mostViewedChannelIds,
+          },
+        },
+        context,
+        info
+      )
     },
     mostViewedChannelsAllTime: async (parent, args, context, info) => {
       const mostViewedChannelIds = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit)
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
 
-      return getSortedEntitiesBasedOnOrion(parent, mostViewedChannelIds, context, info, queryNodeSchema, 'channels')
+      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
+
+      return resolver(
+        parent,
+        {
+          ...args,
+          where: {
+            ...args.where,
+            id_in: mostViewedChannelIds,
+          },
+        },
+        context,
+        info
+      )
     },
     promisingNewChannels: async (parent, args, context, info) => {
       const channelsConnectionResolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection')

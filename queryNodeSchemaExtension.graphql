@@ -62,7 +62,7 @@ input PromisingChannelsWhereInput {
   languageId_eq: ID
 }
 
-input MostViewedVideosWhereInput {
+input MostViewedAndMostFollowedWhereInput {
   categoryId_eq: ID
   categoryId_in: [ID!]
   channelId_in: [ID!]
@@ -82,35 +82,49 @@ input MostViewedVideosWhereInput {
 
 type Query {
   mostFollowedChannels(
-    limit: Int
     """
     timePeriodDays must take one of the following values: 7, 30
     """
     timePeriodDays: Int!
-  ): [Channel]!
+    limit: Int
+    first: Int
+    after: String
+    where: MostViewedAndMostFollowedWhereInput
+  ): ChannelConnection!
 
   """
   Get list of most followed channels of all time
   """
-  mostFollowedChannelsAllTime(limit: Int!): [Channel!]
+  mostFollowedChannelsAllTime(
+    limit: Int!
+    first: Int
+    after: String
+    where: MostViewedAndMostFollowedWhereInput
+  ): ChannelConnection!
 
   """
   Get list of most viewed channels in a given time period
   """
   mostViewedChannels(
-    limit: Int
-
     """
     timePeriodDays must take one of the following values: 7, 30
     """
     timePeriodDays: Int!
-  ): [Channel!]
+    limit: Int
+    first: Int
+    after: String
+    where: MostViewedAndMostFollowedWhereInput
+  ): ChannelConnection!
 
   """
   Get list of most viewed channels of all time
   """
-  mostViewedChannelsAllTime(limit: Int!): [Channel!]
-
+  mostViewedChannelsAllTime(
+    limit: Int!
+    first: Int
+    after: String
+    where: MostViewedAndMostFollowedWhereInput
+  ): ChannelConnection!
   """
   Get list of most viewed videos in a given time period
   """
@@ -122,13 +136,18 @@ type Query {
     limit: Int
     first: Int
     after: String
-    where: MostViewedVideosWhereInput
+    where: MostViewedAndMostFollowedWhereInput
   ): VideoConnection!
 
   """
   Get list of most viewed videos of all time
   """
-  mostViewedVideosAllTime(limit: Int!, first: Int, after: String, where: MostViewedVideosWhereInput): VideoConnection!
+  mostViewedVideosAllTime(
+    limit: Int!
+    first: Int
+    after: String
+    where: MostViewedAndMostFollowedWhereInput
+  ): VideoConnection!
 
   promisingNewChannels(
     first: Int
