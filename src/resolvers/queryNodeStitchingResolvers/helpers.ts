@@ -49,37 +49,3 @@ export const getSortedEntitiesBasedOnOrion = async (
   })
   return sortedEntities
 }
-
-export const getSortedEntitiesConnectionBasedOnOrion = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parent: any,
-  ids: string[],
-  context: OrionContext,
-  info: GraphQLResolveInfo,
-  schema: GraphQLSchema,
-  queryName: 'videosConnection'
-) => {
-  const resolver = createResolverWithTransforms(schema, queryName, [])
-  const videosConnection = await resolver(
-    parent,
-    {
-      where: {
-        id_in: ids,
-      },
-    },
-    context,
-    info
-  )
-  const edges = videosConnection.edges
-    ? {
-        edges: [...videosConnection.edges]?.sort((a, b) => {
-          return ids.indexOf(a.node.id) - ids.indexOf(b.node.id)
-        }),
-      }
-    : undefined
-
-  return {
-    ...videosConnection,
-    ...edges,
-  }
-}

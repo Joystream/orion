@@ -47,6 +47,12 @@ enum ChannelOrderByInput {
   createdAt_DESC
 }
 
+enum AssetAvailability {
+  ACCEPTED
+  PENDING
+  INVALID
+}
+
 input PromisingChannelsWhereInput {
   id_in: [ID!]
   ownerMemberId_eq: ID
@@ -54,6 +60,24 @@ input PromisingChannelsWhereInput {
   isPublic_eq: Boolean
   isCensored_eq: Boolean
   languageId_eq: ID
+}
+
+input MostViewedVideosWhereInput {
+  categoryId_eq: ID
+  categoryId_in: [ID!]
+  channelId_in: [ID!]
+  channelId_eq: ID
+  duration_lte: Int
+  duration_gte: Int
+  thumbnailPhotoAvailability_eq: AssetAvailability
+  mediaAvailability_eq: AssetAvailability
+  licenseId_in: [ID!]
+  languageId_eq: ID
+  hasMarketing_eq: Boolean
+  isFeatured_eq: Boolean
+  isPublic_eq: Boolean
+  isCensored_eq: Boolean
+  isExplicit_eq: Boolean
 }
 
 type Query {
@@ -91,18 +115,19 @@ type Query {
   Get list of most viewed videos in a given time period
   """
   mostViewedVideos(
-    limit: Int
-
     """
     timePeriodDays must take one of the following values: 7, 30
     """
     timePeriodDays: Int!
+    first: Int
+    after: String
+    where: MostViewedVideosWhereInput
   ): VideoConnection!
 
   """
   Get list of most viewed videos of all time
   """
-  mostViewedVideosAllTime(limit: Int!): VideoConnection!
+  mostViewedVideosAllTime(first: Int, after: String, where: MostViewedVideosWhereInput): VideoConnection!
 
   promisingNewChannels(
     first: Int
