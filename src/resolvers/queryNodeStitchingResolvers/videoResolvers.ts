@@ -10,7 +10,7 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
       context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
       const mostViewedVideosIds = limitViews(
         context.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(args.timePeriodDays)],
-        50
+        args.limit
       )
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
@@ -31,7 +31,7 @@ export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
       )
     },
     mostViewedVideosAllTime: async (parent, args, context, info) => {
-      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), 50)
+      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit)
         .filter((entity) => entity.views)
         .map((entity) => entity.id)
 

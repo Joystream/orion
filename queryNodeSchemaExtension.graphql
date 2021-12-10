@@ -119,6 +119,7 @@ type Query {
     timePeriodDays must take one of the following values: 7, 30
     """
     timePeriodDays: Int!
+    limit: Int
     first: Int
     after: String
     where: MostViewedVideosWhereInput
@@ -127,7 +128,7 @@ type Query {
   """
   Get list of most viewed videos of all time
   """
-  mostViewedVideosAllTime(first: Int, after: String, where: MostViewedVideosWhereInput): VideoConnection!
+  mostViewedVideosAllTime(limit: Int!, first: Int, after: String, where: MostViewedVideosWhereInput): VideoConnection!
 
   promisingNewChannels(
     first: Int
