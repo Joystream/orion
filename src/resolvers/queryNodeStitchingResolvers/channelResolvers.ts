@@ -138,11 +138,11 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
   Channel: {
     views: {
       selectionSet: '{ id }',
-      resolve: async (parent, args, context) => getChannelViewsInfo(parent.id, context)?.views,
+      resolve: (parent, args, context) => getChannelViewsInfo(parent.id, context)?.views,
     },
     follows: {
       selectionSet: '{ id }',
-      resolve: async (parent, args, context) => getFollowsInfo(parent.id, context)?.follows,
+      resolve: (parent, args, context) => getFollowsInfo(parent.id, context)?.follows,
     },
   },
 })
