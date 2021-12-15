@@ -50,7 +50,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   return new ApolloServer({
     schema,
     context: contextFn,
-    plugins: [ApolloServerPluginLandingPageGraphQLPlayground, graphQLLoggingPlugin],
+    plugins: [ApolloServerPluginLandingPageGraphQLPlayground, config.isDebugging ? graphQLLoggingPlugin : {}],
   })
 }
 
@@ -67,27 +67,25 @@ export const buildAggregates = async (): Promise<Aggregates> => {
   return { viewsAggregate, followsAggregate }
 }
 
-const graphQLLoggingPlugin: PluginDefinition = config.isDebugging
-  ? {
-      async requestDidStart(requestContext: GraphQLRequestContext): Promise<GraphQLRequestListener | void> {
-        console.log('Request started: ' + requestContext.request.operationName)
+const graphQLLoggingPlugin: PluginDefinition = {
+  async requestDidStart(requestContext: GraphQLRequestContext): Promise<GraphQLRequestListener | void> {
+    console.log('Request started: ' + requestContext.request.operationName)
+    return {
+      async executionDidStart() {
         return {
-          async executionDidStart() {
-            return {
-              willResolveField({ info }) {
-                const start = process.hrtime.bigint()
-                return () => {
-                  const end = process.hrtime.bigint()
-                  const time = end - start
-                  // log only fields that took longer than 1ms to resolve
-                  if (time > 1000 * 1000) {
-                    console.log(`Field ${info.parentType.name}.${info.fieldName} took ${time / 1000n / 1000n}ms`)
-                  }
-                }
-              },
+          willResolveField({ info }) {
+            const start = process.hrtime.bigint()
+            return () => {
+              const end = process.hrtime.bigint()
+              const time = end - start
+              // log only fields that took longer than 1ms to resolve
+              if (time > 1000 * 1000) {
+                console.log(`Field ${info.parentType.name}.${info.fieldName} took ${time / 1000n / 1000n}ms`)
+              }
             }
           },
         }
       },
     }
-  : {}
+  },
+}
