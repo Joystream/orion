@@ -29,6 +29,7 @@ export class Config {
   private _mongoDBUri: string
   private _featuredContentSecret: string
   private _queryNodeUrl: string
+  private _isDebugging: boolean
 
   get port(): number {
     return this._port
@@ -50,6 +51,10 @@ export class Config {
     return this._queryNodeUrl
   }
 
+  get isDebugging(): boolean {
+    return this._isDebugging
+  }
+
   loadConfig() {
     dotenv.config()
 
@@ -67,6 +72,8 @@ export class Config {
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
     this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
+
+    this._isDebugging = loadEnvVar('ORION_DEBUGGING', { defaultValue: 'false' }) === 'true'
   }
 }
 
