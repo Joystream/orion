@@ -2226,6 +2226,17 @@ cross-undici-fetch@^0.0.20:
     node-fetch "^2.6.5"
     undici "^4.9.3"
 
+cross-undici-fetch@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/cross-undici-fetch/-/cross-undici-fetch-0.1.4.tgz#6058950dc6bf451f81a51582258f4e5a5a01b702"
+  integrity sha512-jIcyxjQ6mEvUS3y2yhIVktOR7wlGZuyjFAK8woo7pMb+BR1f2ylfTxsN01UPwhqT8gtYPmZ2rPdyoInr1Cdrrw==
+  dependencies:
+    abort-controller "^3.0.0"
+    form-data-encoder "^1.7.1"
+    formdata-node "^4.3.1"
+    node-fetch "^2.6.5"
+    undici "^4.9.3"
+
 cssfilter@0.0.10:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/cssfilter/-/cssfilter-0.0.10.tgz#c6d2672632a2e5c83e013e6864a42ce8defd20ae"
@@ -3015,6 +3026,11 @@ flatted@^3.1.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-3.2.2.tgz#64bfed5cb68fe3ca78b3eb214ad97b63bedce561"
   integrity sha512-JaTY/wtrcSyvXJl4IMFHPKyFur1sE9AUqc0QnhOaJ0CxHtAoIV8pYDzeEfAaNEtGkOfq4gr3LBFmdXW5mOQFnA==
 
+form-data-encoder@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/form-data-encoder/-/form-data-encoder-1.7.1.tgz#ac80660e4f87ee0d3d3c3638b7da8278ddb8ec96"
+  integrity sha512-EFRDrsMm/kyqbTQocNvRXMLjc7Es2Vk+IQFx/YW7hkUH1eBl4J1fqiP34l74Yt0pFLCNpc06fkbVk00008mzjg==
+
 form-data@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-3.0.0.tgz#31b7e39c85f1355b7139ee0c647cf0de7f83c682"
@@ -3032,6 +3048,14 @@ form-data@^4.0.0:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
+
+formdata-node@^4.3.1:
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/formdata-node/-/formdata-node-4.3.1.tgz#e7b78a2a51f524ccc483b4d223c89690fd22061d"
+  integrity sha512-8xKSa9et4zb+yziWsD/bI+EYjdg1z2p9EpKr+o+Yk12F/wP66bmDdvjj2ZXd2K/MJlR3HBzWnuV7f82jzHRqCA==
+  dependencies:
+    node-domexception "1.0.0"
+    web-streams-polyfill "4.0.0-beta.1"
 
 forwarded@~0.1.2:
   version "0.1.2"
@@ -4493,6 +4517,11 @@ new-find-package-json@^1.1.0:
   dependencies:
     debug "^4.3.2"
     tslib "^2.3.0"
+
+node-domexception@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/node-domexception/-/node-domexception-1.0.0.tgz#6888db46a1f71c0b76b3f7555016b63fe64766e5"
+  integrity sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==
 
 node-fetch@^2.6.1:
   version "2.6.5"
@@ -5961,6 +5990,11 @@ walker@^1.0.7:
   integrity sha1-L3+bj9ENZ3JisYqITijRlhjgKPs=
   dependencies:
     makeerror "1.0.x"
+
+web-streams-polyfill@4.0.0-beta.1:
+  version "4.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-4.0.0-beta.1.tgz#3b19b9817374b7cee06d374ba7eeb3aeb80e8c95"
+  integrity sha512-3ux37gEX670UUphBF9AMCq8XM6iQ8Ac6A+DSRRjDoRBm1ufCkaCDdNVbaqq60PsEkdNlLKrGtv/YBP4EJXqNtQ==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"

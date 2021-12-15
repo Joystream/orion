@@ -41,6 +41,7 @@
     "apollo-server-core": "^3.4.0",
     "apollo-server-express": "^3.4.0",
     "class-validator": "^0.13.1",
+    "cross-undici-fetch": "^0.1.4",
     "date-fns": "^2.25.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
