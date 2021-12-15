@@ -76,6 +76,6 @@
     "@types/serve-static": "1.13.10"
   },
   "engines": {
-    "node": ">=12"
+    "node": "^16.13.1"
   }
 }

@@ -11,14 +11,14 @@ export class ChannelEvent extends GenericEvent {
   channelId: string
 
   @prop({ required: true, index: true, enum: ChannelEventType })
-  type: ChannelEventType
+  declare type: ChannelEventType
 }
 
 export type UnsequencedChannelEvent = Omit<ChannelEvent, '_id'>
 
 class ChannelEventsBucket extends GenericBucket {
   @prop({ required: true, type: () => [ChannelEvent] })
-  events: ChannelEvent[]
+  declare events: ChannelEvent[]
 }
 
 export const ChannelEventsBucketModel = getModelForClass(ChannelEventsBucket, {
