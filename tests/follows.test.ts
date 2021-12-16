@@ -89,8 +89,8 @@ describe('Channel follows resolver', () => {
     const mostFollowedChannels = await getMostFollowedChannels(30)
     const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
 
-    expect(mostFollowedChannels).toHaveLength(0)
-    expect(mostFollowedChannelsAllTime).toHaveLength(0)
+    expect(mostFollowedChannels?.edges).toHaveLength(0)
+    expect(mostFollowedChannelsAllTime?.edges).toHaveLength(0)
   })
 
   it('should properly handle channel follow', async () => {
@@ -98,14 +98,17 @@ describe('Channel follows resolver', () => {
       id: FIRST_CHANNEL_ID,
       follows: 1,
     }
+    const expectedMostFollowedChannels = {
+      edges: [expectedChannelFollows].map((follow) => ({ node: follow })),
+    }
 
     let addChannelFollowData = await followChannel(FIRST_CHANNEL_ID)
     expect(addChannelFollowData).toEqual(expectedChannelFollows)
 
     let mostFollowedChannels = await getMostFollowedChannels(30)
     let mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
 
     expectedChannelFollows.follows++
 
@@ -114,14 +117,18 @@ describe('Channel follows resolver', () => {
 
     mostFollowedChannels = await getMostFollowedChannels(30)
     mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
 
   it('should properly handle channel unfollow', async () => {
     const expectedChannelFollows: ChannelFollowsInfo = {
       id: FIRST_CHANNEL_ID,
       follows: 5,
+    }
+
+    const expectedMostFollowedChannels = {
+      edges: [expectedChannelFollows].map((follow) => ({ node: follow })),
     }
 
     await followChannel(FIRST_CHANNEL_ID)
@@ -132,8 +139,8 @@ describe('Channel follows resolver', () => {
 
     let mostFollowedChannels = await getMostFollowedChannels(30)
     let mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
 
     expectedChannelFollows.follows--
 
@@ -142,8 +149,8 @@ describe('Channel follows resolver', () => {
 
     mostFollowedChannels = await getMostFollowedChannels(30)
     mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
 
   it('should distinct follows of separate channels', async () => {
@@ -154,6 +161,9 @@ describe('Channel follows resolver', () => {
     const expectedSecondChannelFollows: ChannelFollowsInfo = {
       id: SECOND_CHANNEL_ID,
       follows: 1,
+    }
+    const expectedMostFollowedChannels = {
+      edges: [expectedFirstChannelFollows, expectedSecondChannelFollows].map((follow) => ({ node: follow })),
     }
 
     const firstChannelFollowData = await followChannel(FIRST_CHANNEL_ID)
@@ -169,8 +179,8 @@ describe('Channel follows resolver', () => {
     const mostFollowedChannels = await getMostFollowedChannels(30)
     const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
 
-    expect(mostFollowedChannels).toEqual([expectedFirstChannelFollows, expectedSecondChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedFirstChannelFollows, expectedSecondChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
 
   it('should properly rebuild the aggregate', async () => {
@@ -182,13 +192,16 @@ describe('Channel follows resolver', () => {
       id: SECOND_CHANNEL_ID,
       follows: 4,
     }
+    const expectedMostFollowedChannels = {
+      edges: [expectedFirstChannelFollows, expectedSecondChannelFollows].map((follow) => ({ node: follow })),
+    }
 
     const checkFollows = async () => {
       const mostFollowedChannels = await getMostFollowedChannels(30)
       const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
 
-      expect(mostFollowedChannels).toEqual([expectedSecondChannelFollows, expectedFirstChannelFollows])
-      expect(mostFollowedChannelsAllTime).toEqual([expectedSecondChannelFollows, expectedFirstChannelFollows])
+      expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+      expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
     }
 
     await followChannel(FIRST_CHANNEL_ID)
@@ -224,10 +237,13 @@ describe('Channel follows resolver', () => {
     for (let i = 0; i < eventsCount; i++) {
       await followChannel(FIRST_CHANNEL_ID)
     }
+    const expectedMostFollowedChannels = {
+      edges: [expectedChannelFollows].map((follow) => ({ node: follow })),
+    }
 
     const mostFollowedChannels = await getMostFollowedChannels(30)
     const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
-    expect(mostFollowedChannels).toEqual([expectedChannelFollows])
-    expect(mostFollowedChannelsAllTime).toEqual([expectedChannelFollows])
+    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
+    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
 })

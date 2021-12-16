@@ -1,11 +1,16 @@
 import { gql } from 'apollo-server-express'
 import { ChannelFollowsInfo } from '../../src/entities/ChannelFollowsInfo'
+import { ChannelConnection } from '../../src/types'
 
 export const GET_MOST_FOLLOWED_CHANNELS = gql`
   query GetMostFollowedChannels($timePeriodDays: Int!) {
     mostFollowedChannels(timePeriodDays: $timePeriodDays) {
-      id
-      follows
+      edges {
+        node {
+          id
+          follows
+        }
+      }
     }
   }
 `
@@ -13,8 +18,12 @@ export const GET_MOST_FOLLOWED_CHANNELS = gql`
 export const GET_MOST_FOLLOWED_CHANNELS_ALL_TIME = gql`
   query GetMostFollowedChannelsAllTime($limit: Int!) {
     mostFollowedChannelsAllTime(limit: $limit) {
-      id
-      follows
+      edges {
+        node {
+          id
+          follows
+        }
+      }
     }
   }
 `
@@ -23,10 +32,10 @@ export type GetMostFollowedChannelsArgs = {
   timePeriodDays: number
 }
 export type GetMostFollowedChannels = {
-  mostFollowedChannels: ChannelFollowsInfo[]
+  mostFollowedChannels: ChannelConnection
 }
 export type GetMostFollowedChannelsAllTime = {
-  mostFollowedChannelsAllTime: ChannelFollowsInfo[]
+  mostFollowedChannelsAllTime: ChannelConnection
 }
 export type GetMostFollowedChannelsAllTimeArgs = {
   limit: number

@@ -27,6 +27,18 @@ export type Video = {
   views?: Maybe<Scalars['Int']>
 }
 
+export type VideoEdge = {
+  __typename?: 'VideoEdge'
+  node: Video
+  cursor: Scalars['String']
+}
+
+export type VideoConnection = {
+  __typename?: 'VideoConnection'
+  totalCount: number
+  edges: VideoEdge[]
+}
+
 export type Channel = {
   __typename?: 'Channel'
   id: Scalars['ID']
@@ -40,6 +52,13 @@ export type ChannelEdge = {
   node: Channel
   cursor: Scalars['String']
 }
+
+export type ChannelConnection = {
+  __typename?: 'ChannelConnection'
+  totalCount: number
+  edges: ChannelEdge[]
+}
+
 export type SearchResult = Video | Channel
 
 export type SearchFtsOutput = {
@@ -48,10 +67,4 @@ export type SearchFtsOutput = {
   rank: Scalars['Float']
   isTypeOf: Scalars['String']
   highlight: Scalars['String']
-}
-
-export type VideoEdge = {
-  __typename?: 'VideoEdge'
-  node: Video
-  cursor: Scalars['String']
 }
