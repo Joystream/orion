@@ -42,24 +42,10 @@ type CategoryFeaturedVideos {
   category: VideoCategory
 }
 
-enum ChannelOrderByInput {
-  createdAt_ASC
-  createdAt_DESC
-}
-
 enum AssetAvailability {
   ACCEPTED
   PENDING
   INVALID
-}
-
-input PromisingChannelsWhereInput {
-  id_in: [ID!]
-  ownerMemberId_eq: ID
-  isCurated_eq: Boolean
-  isPublic_eq: Boolean
-  isCensored_eq: Boolean
-  languageId_eq: ID
 }
 
 input MostViewedAndMostFollowedWhereInput {
@@ -148,18 +134,4 @@ type Query {
     after: String
     where: MostViewedAndMostFollowedWhereInput
   ): VideoConnection!
-
-  promisingNewChannels(
-    first: Int
-    after: String
-    where: PromisingChannelsWhereInput
-    orderBy: [ChannelOrderByInput!]
-  ): ChannelConnection!
-
-  discoverNewChannels(
-    first: Int
-    after: String
-    where: PromisingChannelsWhereInput
-    orderBy: [ChannelOrderByInput!]
-  ): ChannelConnection!
 }
