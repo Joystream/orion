@@ -1,43 +1,71 @@
 import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
-import { Channel } from '../../types'
+import { Channel, OrionContext } from '../../types'
 import { getFollowsInfo } from '../followsInfo'
 import { getMostFollowedChannelsIds, getMostViewedChannelsIds } from '../helpers'
 import { getChannelViewsInfo } from '../viewsInfo'
 import { createResolver, getDataWithIds, sortEntities } from './helpers'
+import { shuffle } from 'lodash'
 
-export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers<any, OrionContext> => ({
   Query: {
-    discoverChannels: async (parent, args, context, info) => {
-      // TODO: figure out the logic
-      const resolver = createResolver(queryNodeSchema, 'channels')
-      return resolver(parent, args, context, info)
-    },
-    promisingChannels: {
+    discoverChannels: {
       selectionSet: '{ id }',
       resolve: async (parent, args, context, info) => {
         const resolver = createResolver(queryNodeSchema, 'channels')
-        const channels: Channel[] = await resolver(
+        const newestChannels: Channel[] = await resolver(
           parent,
           {
-            args: {
-              limit: 50,
-              where: {
-                ...args.where,
-              },
+            limit: 100,
+            where: {
+              ...(args.where || {}),
             },
+            orderBy: ['createdAt_DESC'],
           },
           context,
           info
         )
 
-        return channels
+        const sortedChannels = newestChannels
           .map((channel) => ({
             ...channel,
-            views: getChannelViewsInfo(channel.id, context)?.views,
+            follows: context.followsAggregate.channelFollows(channel.id),
+          }))
+          .filter((channel) => channel.follows)
+          .sort((a, b) => (b.follows || 0) - (a.follows || 0))
+
+        const slicedChannels = sortedChannels.slice(0, 15)
+        return shuffle(slicedChannels)
+      },
+    },
+    promisingChannels: {
+      selectionSet: '{ id }',
+      resolve: async (parent, args, context, info) => {
+        const resolver = createResolver(queryNodeSchema, 'channels')
+        const newestChannels: Channel[] = await resolver(
+          parent,
+          {
+            limit: 100,
+            where: {
+              ...(args.where || {}),
+            },
+            orderBy: ['createdAt_DESC'],
+          },
+          context,
+          info
+        )
+
+        const sortedChannels = newestChannels
+          .map((channel) => ({
+            ...channel,
+            views: context.viewsAggregate.channelViews(channel.id),
           }))
           .filter((channel) => channel.views)
           .sort((a, b) => (b.views || 0) - (a.views || 0))
+
+        const slicedChannels = sortedChannels.slice(0, 15)
+        return shuffle(slicedChannels)
       },
     },
     top10Channels: async (parent, args, context, info) => {

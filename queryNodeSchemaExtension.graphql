@@ -58,12 +58,12 @@ type Query {
   # ===== Channels =====
 
   """
-  Get list of channels that something...
+  Get list of 15 most followed channels out of 100 newest channels in random order
   """
   discoverChannels(where: ChannelWhereInput): [Channel!]!
 
   """
-  Get list of channels that something...
+  Get list of 15 most watched channels out of 100 newest channels in random order
   """
   promisingChannels(where: ChannelWhereInput): [Channel!]!
 

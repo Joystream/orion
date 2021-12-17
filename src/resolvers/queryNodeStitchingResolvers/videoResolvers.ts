@@ -3,8 +3,10 @@ import { GraphQLSchema } from 'graphql'
 import { getVideoViewsInfo } from '../viewsInfo'
 import { createResolver, getDataWithIds, sortEntities } from './helpers'
 import { getMostViewedVideosIds } from '../helpers'
+import { OrionContext } from '../../types'
 
-export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers<any, OrionContext> => ({
   Query: {
     top10VideosThisWeek: async (parent, args, context, info) => {
       const mostViewedVideosIds = getMostViewedVideosIds(context, { limit: 10, period: 7 })
