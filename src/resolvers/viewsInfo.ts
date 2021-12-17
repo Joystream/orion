@@ -48,7 +48,8 @@ export class VideoViewsInfosResolver {
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
     ctx.viewsAggregate.filterEventsByPeriod(timePeriodDays)
-    return limitViews(ctx.viewsAggregate.getTimePeriodCategoryViews()[mapPeriods(timePeriodDays)], limit)
+    const views = ctx.viewsAggregate.getTimePeriodCategoryViews()[mapPeriods(timePeriodDays)]
+    return views.slice(0, limit)
   }
 
   @Query(() => [EntityViewsInfo], { nullable: true, description: 'Get list of most viewed categories of all time' })
@@ -56,7 +57,8 @@ export class VideoViewsInfosResolver {
     @Args() { limit }: MostViewedAllTimeArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo[]> {
-    return limitViews(ctx.viewsAggregate.getAllCategoryViews(), limit)
+    const views = ctx.viewsAggregate.getAllCategoryViews()
+    return views.slice(0, limit)
   }
 
   @Mutation(() => EntityViewsInfo, { description: "Add a single view to the target video's count" })
@@ -78,10 +80,6 @@ export class VideoViewsInfosResolver {
 
     return getVideoViewsInfo(videoId, ctx)!
   }
-}
-
-export const limitViews = (views: EntityViewsInfo[], limit?: number) => {
-  return views.slice(0, limit)
 }
 
 const buildViewsObject = (id: string, views: number | null): EntityViewsInfo | null => {

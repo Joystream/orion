@@ -1,99 +1,43 @@
 import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
-import { mapPeriods } from '../../helpers'
-import { getFollowsInfo, limitFollows } from '../followsInfo'
-import { getChannelViewsInfo, limitViews } from '../viewsInfo'
-import { createResolverWithTransforms } from './helpers'
+import { getFollowsInfo } from '../followsInfo'
+import { getChannelViewsInfo } from '../viewsInfo'
+import { createResolver, getDataWithIds, sortEntities } from './helpers'
+import { getMostFollowedChannelsIds, getMostViewedChannelsIds } from '../helpers'
 
 export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
-    mostFollowedChannels: async (parent, args, context, info) => {
-      context.followsAggregate.filterEventsByPeriod(args.timePeriodDays)
-      const mostFollowedChannelIds = limitFollows(
-        context.followsAggregate.getTimePeriodChannelFollows()[mapPeriods(args.timePeriodDays)],
-        args.limit
-      )
-        .filter((entity) => entity.follows)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostFollowedChannelIds,
-          },
-        },
-        context,
-        info
-      )
+    discoverChannels: async (parent, args, context, info) => {
+      // TODO: figure out the logic
+      const resolver = createResolver(queryNodeSchema, 'channels')
+      return resolver(parent, args, context, info)
     },
-    mostFollowedChannelsAllTime: async (parent, args, context, info) => {
-      const mostFollowedChannelIds = limitFollows(context.followsAggregate.getAllChannelFollows(), args.limit)
-        .filter((entity) => entity.follows)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostFollowedChannelIds,
-          },
-        },
-        context,
-        info
-      )
+    promisingChannels: async (parent, args, context, info) => {
+      // TODO: figure out the logic
+      const resolver = createResolver(queryNodeSchema, 'channels')
+      return resolver(parent, args, context, info)
     },
-    mostViewedChannels: async (parent, args, context, info) => {
-      context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
-      const mostViewedChannelIds = limitViews(
-        context.viewsAggregate.getTimePeriodChannelViews()[mapPeriods(args.timePeriodDays)],
-        args.limit
-      )
-        .filter((entity) => entity.views)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostViewedChannelIds,
-          },
-        },
-        context,
-        info
-      )
+    top10Channels: async (parent, args, context, info) => {
+      const mostFollowedChannelsIds = getMostFollowedChannelsIds(context, { limit: 10, period: null })
+      const resolver = createResolver(queryNodeSchema, 'channels')
+      const channels = await getDataWithIds(resolver, mostFollowedChannelsIds, parent, args, context, info)
+      return sortEntities(channels, mostFollowedChannelsIds)
     },
-    mostViewedChannelsAllTime: async (parent, args, context, info) => {
-      const mostViewedChannelIds = limitViews(context.viewsAggregate.getAllChannelViews(), args.limit)
-        .filter((entity) => entity.views)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'channelsConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostViewedChannelIds,
-          },
-        },
-        context,
-        info
-      )
+    mostViewedChannelsConnection: async (parent, args, context, info) => {
+      const mostViewedChannelsIds = getMostViewedChannelsIds(context, {
+        limit: args.limit,
+        period: args.periodDays || null,
+      })
+      const resolver = createResolver(queryNodeSchema, 'channelsConnection')
+      return getDataWithIds(resolver, mostViewedChannelsIds, parent, args, context, info)
+    },
+    mostFollowedChannelsConnection: async (parent, args, context, info) => {
+      const mostFollowedChannelsIds = getMostFollowedChannelsIds(context, {
+        limit: args.limit,
+        period: args.periodDays || null,
+      })
+      const resolver = createResolver(queryNodeSchema, 'channelsConnection')
+      return getDataWithIds(resolver, mostFollowedChannelsIds, parent, args, context, info)
     },
   },
   Channel: {

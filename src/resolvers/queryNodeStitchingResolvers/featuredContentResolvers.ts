@@ -1,11 +1,11 @@
 import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
-import { createResolverWithTransforms } from './helpers'
+import { createResolver } from './helpers'
 
 export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   VideoHero: {
     video: async (parent, args, context, info) => {
-      const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
+      const videoResolver = createResolver(queryNodeSchema, 'videoByUniqueInput')
       return videoResolver(
         parent,
         {
@@ -22,7 +22,7 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
     video: {
       selectionSet: '{ videoId }',
       resolve: async (parent, args, context, info) => {
-        const videoResolver = createResolverWithTransforms(queryNodeSchema, 'videoByUniqueInput')
+        const videoResolver = createResolver(queryNodeSchema, 'videoByUniqueInput')
         return videoResolver(
           parent,
           {
@@ -40,7 +40,7 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
     category: {
       selectionSet: '{ categoryId }',
       resolve: async (parent, args, context, info) => {
-        const channelResolver = createResolverWithTransforms(queryNodeSchema, 'videoCategoryByUniqueInput')
+        const channelResolver = createResolver(queryNodeSchema, 'videoCategoryByUniqueInput')
         return channelResolver(
           parent,
           {

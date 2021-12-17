@@ -8,4 +8,5 @@ globalConfig.json
 
 .idea
 db/
+db.zip
 .env

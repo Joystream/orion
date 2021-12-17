@@ -1,12 +1,11 @@
-import { delegateToSchema, Transform } from '@graphql-tools/delegate'
+import { delegateToSchema } from '@graphql-tools/delegate'
 import type { ISchemaLevelResolver } from '@graphql-tools/utils'
 import { GraphQLResolveInfo, GraphQLSchema } from 'graphql'
 import { OrionContext } from '../../types'
 
-export const createResolverWithTransforms = (
+export const createResolver = (
   schema: GraphQLSchema,
-  fieldName: string,
-  transforms: Array<Transform> = []
+  fieldName: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ISchemaLevelResolver<any, any> => {
   return async (parent, args, context, info) =>
@@ -17,35 +16,37 @@ export const createResolverWithTransforms = (
       args,
       context,
       info,
-      transforms,
     })
 }
 
-type Entity = {
-  id: string
-}
-export const getSortedEntitiesBasedOnOrion = async (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parent: any,
+export const getDataWithIds = (
+  resolver: ReturnType<typeof createResolver>,
   ids: string[],
+  parent: unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  args: any,
   context: OrionContext,
-  info: GraphQLResolveInfo,
-  schema: GraphQLSchema,
-  queryName: 'videos' | 'channels'
+  info: GraphQLResolveInfo
 ) => {
-  const resolver = createResolverWithTransforms(schema, queryName, [])
-  const entities = await resolver(
+  return resolver(
     parent,
     {
+      ...args,
       where: {
+        ...args.where,
         id_in: ids,
       },
     },
     context,
     info
   )
-  const sortedEntities = [...entities].sort((a: Entity, b: Entity) => {
+}
+
+type Entity = {
+  id: string
+}
+export const sortEntities = (entities: Entity[], ids: string[]) => {
+  return [...entities].sort((a: Entity, b: Entity) => {
     return ids.indexOf(a.id) - ids.indexOf(b.id)
   })
-  return sortedEntities
 }

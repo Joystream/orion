@@ -1,137 +1,120 @@
-type Video {
-  views: Int
-}
-
-type VideoCategory {
-  id: ID!
-}
-
-type Channel {
-  follows: Int
-  views: Int
-}
-
-# TODO Find solution how to not adding types below.
-# Unforutnately we need to add some types which are already declared in query node.
-# For some reason if we don't do it, server will throw errors about unknown type (ChannelConnection, ChannelEdge, VideoCategory)
-
-type ChannelConnection {
-  edges: [ChannelEdge!]!
-}
-
-type ChannelEdge {
-  node: Channel!
-}
-type VideoConnection {
-  edges: [VideoEdge!]!
-}
-
-type VideoEdge {
-  node: Video!
-}
-
-type VideoHero {
+extend type VideoHero {
   video: Video
 }
 
-type FeaturedVideo {
+extend type FeaturedVideo {
   video: Video
 }
 
-type CategoryFeaturedVideos {
+extend type CategoryFeaturedVideos {
   category: VideoCategory
 }
 
-enum AssetAvailability {
-  ACCEPTED
-  PENDING
-  INVALID
+extend type Video {
+  views: Int!
 }
 
-input MostViewedAndMostFollowedWhereInput {
-  categoryId_eq: ID
-  categoryId_in: [ID!]
-  channelId_in: [ID!]
-  channelId_eq: ID
-  duration_lte: Int
-  duration_gte: Int
-  thumbnailPhotoAvailability_eq: AssetAvailability
-  mediaAvailability_eq: AssetAvailability
-  licenseId_in: [ID!]
-  languageId_eq: ID
-  hasMarketing_eq: Boolean
-  isFeatured_eq: Boolean
-  isPublic_eq: Boolean
-  isCensored_eq: Boolean
-  isExplicit_eq: Boolean
+extend type Channel {
+  views: Int!
+  follows: Int!
 }
 
 type Query {
-  mostFollowedChannels(
-    """
-    timePeriodDays must take one of the following values: 7, 30
-    """
-    timePeriodDays: Int!
-    limit: Int
-    first: Int
-    after: String
-    where: MostViewedAndMostFollowedWhereInput
-  ): ChannelConnection!
+  # ===== Videos =====
 
   """
-  Get list of most followed channels of all time
+  Get list of 10 most watched videos in last week
   """
-  mostFollowedChannelsAllTime(
+  top10VideosThisWeek(where: VideoWhereInput): [Video!]!
+
+  """
+  Get list of 10 most watched videos in last month
+  """
+  top10VideosThisMonth(where: VideoWhereInput): [Video!]!
+
+  """
+  Get connection of most viewed videos in a given period or of all time
+  """
+  mostViewedVideosConnection(
+    """
+    `periodDays` indicates from which time period the views should be taken from. Can be 7 or 30.
+    If not provided, views from all time will be used.
+    """
+    periodDays: Int
+
+    """
+    `limit` indicates on how many videos the connection should be capped.
+    """
     limit: Int!
-    first: Int
-    after: String
-    where: MostViewedAndMostFollowedWhereInput
-  ): ChannelConnection!
 
-  """
-  Get list of most viewed channels in a given time period
-  """
-  mostViewedChannels(
-    """
-    timePeriodDays must take one of the following values: 7, 30
-    """
-    timePeriodDays: Int!
-    limit: Int
     first: Int
     after: String
-    where: MostViewedAndMostFollowedWhereInput
-  ): ChannelConnection!
-
-  """
-  Get list of most viewed channels of all time
-  """
-  mostViewedChannelsAllTime(
-    limit: Int!
-    first: Int
-    after: String
-    where: MostViewedAndMostFollowedWhereInput
-  ): ChannelConnection!
-  """
-  Get list of most viewed videos in a given time period
-  """
-  mostViewedVideos(
-    """
-    timePeriodDays must take one of the following values: 7, 30
-    """
-    timePeriodDays: Int!
-    limit: Int
-    first: Int
-    after: String
-    where: MostViewedAndMostFollowedWhereInput
+    last: Int
+    before: String
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
   ): VideoConnection!
 
+  # ===== Channels =====
+
   """
-  Get list of most viewed videos of all time
+  Get list of channels that something...
   """
-  mostViewedVideosAllTime(
+  discoverChannels(where: ChannelWhereInput): [Channel!]!
+
+  """
+  Get list of channels that something...
+  """
+  promisingChannels(where: ChannelWhereInput): [Channel!]!
+
+  """
+  Get list of 10 most followed channels of all time
+  """
+  top10Channels(where: ChannelWhereInput): [Channel!]!
+
+  """
+  Get connection of most followed channels in a given period or of all time
+  """
+  mostFollowedChannelsConnection(
+    """
+    `periodDays` indicates from which time period the follows should be taken from. Can be 7 or 30.
+    If not provided, follows from all time will be used.
+    """
+    periodDays: Int
+
+    """
+    `limit` indicates on how many channels the connection should be capped.
+    """
     limit: Int!
+
     first: Int
     after: String
-    where: MostViewedAndMostFollowedWhereInput
-  ): VideoConnection!
+    last: Int
+    before: String
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+  ): ChannelConnection!
+
+  """
+  Get connection of most viewed channels in a given period or of all time
+  """
+  mostViewedChannelsConnection(
+    """
+    `periodDays` indicates from which time period the views should be taken from. Can be 7 or 30.
+    If not provided, views from all time will be used.
+    """
+    periodDays: Int
+
+    """
+    `limit` indicates on how many channels the connection should be capped.
+    """
+    limit: Int!
+
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+  ): ChannelConnection!
 }

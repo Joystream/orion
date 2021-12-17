@@ -51,10 +51,6 @@ export class ChannelFollowsInfosResolver {
   }
 }
 
-export const limitFollows = (follows: ChannelFollowsInfo[], limit?: number) => {
-  return follows.sort((a, b) => (a.follows > b.follows ? -1 : 1)).slice(0, limit)
-}
-
 export const getFollowsInfo = (channelId: string, ctx: OrionContext): ChannelFollowsInfo | null => {
   const follows = ctx.followsAggregate.channelFollows(channelId) || 0
   if (follows != null) {

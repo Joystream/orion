@@ -1,54 +1,30 @@
 import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
-import { mapPeriods } from '../../helpers'
-import { getVideoViewsInfo, limitViews } from '../viewsInfo'
-import { createResolverWithTransforms } from './helpers'
+import { getVideoViewsInfo } from '../viewsInfo'
+import { createResolver, getDataWithIds, sortEntities } from './helpers'
+import { getMostViewedVideosIds } from '../helpers'
 
 export const videoResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
-    mostViewedVideos: async (parent, args, context, info) => {
-      context.viewsAggregate.filterEventsByPeriod(args.timePeriodDays)
-      const mostViewedVideosIds = limitViews(
-        context.viewsAggregate.getTimePeriodVideoViews()[mapPeriods(args.timePeriodDays)],
-        args.limit
-      )
-        .filter((entity) => entity.views)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'videosConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostViewedVideosIds,
-          },
-        },
-        context,
-        info
-      )
+    top10VideosThisWeek: async (parent, args, context, info) => {
+      const mostViewedVideosIds = getMostViewedVideosIds(context, { limit: 10, period: 7 })
+      const resolver = createResolver(queryNodeSchema, 'videos')
+      const videos = await getDataWithIds(resolver, mostViewedVideosIds, parent, args, context, info)
+      return sortEntities(videos, mostViewedVideosIds)
     },
-    mostViewedVideosAllTime: async (parent, args, context, info) => {
-      const mostViewedVideosIds = limitViews(context.viewsAggregate.getAllVideoViews(), args.limit)
-        .filter((entity) => entity.views)
-        .map((entity) => entity.id)
-
-      const resolver = createResolverWithTransforms(queryNodeSchema, 'videosConnection', [])
-
-      return resolver(
-        parent,
-        {
-          ...args,
-          where: {
-            ...args.where,
-            id_in: mostViewedVideosIds,
-          },
-        },
-        context,
-        info
-      )
+    top10VideosThisMonth: async (parent, args, context, info) => {
+      const mostViewedVideosIds = getMostViewedVideosIds(context, { limit: 10, period: 30 })
+      const resolver = createResolver(queryNodeSchema, 'videos')
+      const videos = await getDataWithIds(resolver, mostViewedVideosIds, parent, args, context, info)
+      return sortEntities(videos, mostViewedVideosIds)
+    },
+    mostViewedVideosConnection: async (parent, args, context, info) => {
+      const mostViewedVideosIds = getMostViewedVideosIds(context, {
+        limit: args.limit,
+        period: args.periodDays || null,
+      })
+      const resolver = createResolver(queryNodeSchema, 'videosConnection')
+      return getDataWithIds(resolver, mostViewedVideosIds, parent, args, context, info)
     },
   },
   Video: {
