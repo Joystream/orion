@@ -1,9 +1,10 @@
 import type { IResolvers } from '@graphql-tools/utils'
 import { GraphQLSchema } from 'graphql'
+import { Channel } from '../../types'
 import { getFollowsInfo } from '../followsInfo'
+import { getMostFollowedChannelsIds, getMostViewedChannelsIds } from '../helpers'
 import { getChannelViewsInfo } from '../viewsInfo'
 import { createResolver, getDataWithIds, sortEntities } from './helpers'
-import { getMostFollowedChannelsIds, getMostViewedChannelsIds } from '../helpers'
 
 export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   Query: {
@@ -12,10 +13,32 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => 
       const resolver = createResolver(queryNodeSchema, 'channels')
       return resolver(parent, args, context, info)
     },
-    promisingChannels: async (parent, args, context, info) => {
-      // TODO: figure out the logic
-      const resolver = createResolver(queryNodeSchema, 'channels')
-      return resolver(parent, args, context, info)
+    promisingChannels: {
+      selectionSet: '{ id }',
+      resolve: async (parent, args, context, info) => {
+        const resolver = createResolver(queryNodeSchema, 'channels')
+        const channels: Channel[] = await resolver(
+          parent,
+          {
+            args: {
+              limit: 50,
+              where: {
+                ...args.where,
+              },
+            },
+          },
+          context,
+          info
+        )
+
+        return channels
+          .map((channel) => ({
+            ...channel,
+            views: getChannelViewsInfo(channel.id, context)?.views,
+          }))
+          .filter((channel) => channel.views)
+          .sort((a, b) => (b.views || 0) - (a.views || 0))
+      },
     },
     top10Channels: async (parent, args, context, info) => {
       const mostFollowedChannelsIds = getMostFollowedChannelsIds(context, { limit: 10, period: null })
