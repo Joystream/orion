@@ -2,9 +2,9 @@ import { gql } from 'apollo-server-express'
 import { EntityViewsInfo } from '../../src/entities/EntityViewsInfo'
 import { ChannelConnection, VideoConnection } from '../../src/types'
 
-export const GET_MOST_VIEWED_VIDEOS = gql`
-  query GetMostViewedVideos($timePeriodDays: Int!) {
-    mostViewedVideos(timePeriodDays: $timePeriodDays) {
+export const GET_MOST_VIEWED_VIDEOS_CONNECTION = gql`
+  query GetMostViewedVideosConnection($periodDays: Int, $limit: Int!) {
+    mostViewedVideosConnection(periodDays: $periodDays, limit: $limit) {
       edges {
         node {
           id
@@ -15,35 +15,17 @@ export const GET_MOST_VIEWED_VIDEOS = gql`
   }
 `
 
-export const GET_MOST_VIEWED_VIDEOS_ALL_TIME = gql`
-  query GetMostViewedVideosAllTime($limit: Int!) {
-    mostViewedVideosAllTime(limit: $limit) {
-      edges {
-        node {
-          id
-          views
-        }
-      }
-    }
-  }
-`
-
-export type GetMostViewedVideos = {
-  mostViewedVideos: VideoConnection
+export type GetMostViewedVideosConnection = {
+  mostViewedVideosConnection: VideoConnection
 }
-export type GetMostViewedVideosArgs = {
-  timePeriodDays: number
-}
-export type GetMostViewedVideosAllTimeArgs = {
+export type GetMostViewedVideosConnectionArgs = {
+  periodDays: number | null
   limit: number
 }
-export type GetMostViewedVideosAllTime = {
-  mostViewedVideosAllTime: VideoConnection
-}
 
-export const GET_MOST_VIEWED_CHANNELS = gql`
-  query GetMostViewedChannels($timePeriodDays: Int!) {
-    mostViewedChannels(timePeriodDays: $timePeriodDays) {
+export const GET_MOST_VIEWED_CHANNELS_CONNECTION = gql`
+  query GetMostViewedChannelsConnection($periodDays: Int, $limit: Int!) {
+    mostViewedChannelsConnection(periodDays: $periodDays, limit: $limit) {
       edges {
         node {
           id
@@ -54,30 +36,13 @@ export const GET_MOST_VIEWED_CHANNELS = gql`
   }
 `
 
-export const GET_MOST_VIEWED_CHANNELS_ALL_TIME = gql`
-  query GetMostViewedVideosAllTime($limit: Int!) {
-    mostViewedChannelsAllTime(limit: $limit) {
-      edges {
-        node {
-          id
-          views
-        }
-      }
-    }
-  }
-`
-export type GetMostViewedChannels = {
-  mostViewedChannels: ChannelConnection
+export type GetMostViewedChannelsConnection = {
+  mostViewedChannelsConnection: ChannelConnection
 }
 
-export type GetMostViewedChannelsArgs = {
-  timePeriodDays: number
-}
-export type GetMostViewedChannelsAllTimeArgs = {
+export type GetMostViewedChannelsConnectionArgs = {
+  periodDays: number | null
   limit: number
-}
-export type GetMostViewedChannelsAllTime = {
-  mostViewedChannelsAllTime: ChannelConnection
 }
 
 export const GET_MOST_VIEWED_CATEGORIES = gql`

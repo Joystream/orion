@@ -9,12 +9,9 @@ import {
   UNFOLLOW_CHANNEL,
   UnfollowChannel,
   UnfollowChannelArgs,
-  GET_MOST_FOLLOWED_CHANNELS,
-  GetMostFollowedChannels,
-  GetMostFollowedChannelsArgs,
-  GET_MOST_FOLLOWED_CHANNELS_ALL_TIME,
-  GetMostFollowedChannelsAllTime,
-  GetMostFollowedChannelsAllTimeArgs,
+  GET_MOST_FOLLOWED_CHANNELS_CONNECTION,
+  GetMostFollowedChannelsConnection,
+  GetMostFollowedChannelsConnectionArgs,
 } from './queries/follows'
 import { ChannelFollowsInfo } from '../src/entities/ChannelFollowsInfo'
 import { ChannelEventsBucketModel } from '../src/models/ChannelEvent'
@@ -64,30 +61,21 @@ describe('Channel follows resolver', () => {
     return unfollowChannelResponse.data?.unfollowChannel
   }
 
-  const getMostFollowedChannels = async (timePeriodDays: number) => {
-    const mostFollowedChannelsResponse = await query<GetMostFollowedChannels, GetMostFollowedChannelsArgs>({
-      query: GET_MOST_FOLLOWED_CHANNELS,
-      variables: { timePeriodDays },
+  const getMostFollowedChannels = async (periodDays: 7 | 30 | null) => {
+    const mostFollowedChannelsResponse = await query<
+      GetMostFollowedChannelsConnection,
+      GetMostFollowedChannelsConnectionArgs
+    >({
+      query: GET_MOST_FOLLOWED_CHANNELS_CONNECTION,
+      variables: { periodDays, limit: 10 },
     })
     expect(mostFollowedChannelsResponse.errors).toBeUndefined()
-    return mostFollowedChannelsResponse.data?.mostFollowedChannels
-  }
-
-  const getMostFollowedChannelsAllTime = async (limit: number) => {
-    const mostFollowedChannelsAllTimeResponse = await query<
-      GetMostFollowedChannelsAllTime,
-      GetMostFollowedChannelsAllTimeArgs
-    >({
-      query: GET_MOST_FOLLOWED_CHANNELS_ALL_TIME,
-      variables: { limit },
-    })
-    expect(mostFollowedChannelsAllTimeResponse.errors).toBeUndefined()
-    return mostFollowedChannelsAllTimeResponse.data?.mostFollowedChannelsAllTime
+    return mostFollowedChannelsResponse.data?.mostFollowedChannelsConnection
   }
 
   it('should return null for unknown channel follows', async () => {
     const mostFollowedChannels = await getMostFollowedChannels(30)
-    const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    const mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
 
     expect(mostFollowedChannels?.edges).toHaveLength(0)
     expect(mostFollowedChannelsAllTime?.edges).toHaveLength(0)
@@ -106,7 +94,7 @@ describe('Channel follows resolver', () => {
     expect(addChannelFollowData).toEqual(expectedChannelFollows)
 
     let mostFollowedChannels = await getMostFollowedChannels(30)
-    let mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    let mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
 
@@ -116,7 +104,7 @@ describe('Channel follows resolver', () => {
     expect(addChannelFollowData).toEqual(expectedChannelFollows)
 
     mostFollowedChannels = await getMostFollowedChannels(30)
-    mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
@@ -138,7 +126,7 @@ describe('Channel follows resolver', () => {
     await followChannel(FIRST_CHANNEL_ID)
 
     let mostFollowedChannels = await getMostFollowedChannels(30)
-    let mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    let mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
 
@@ -148,7 +136,7 @@ describe('Channel follows resolver', () => {
     expect(unfollowChannelData).toEqual(expectedChannelFollows)
 
     mostFollowedChannels = await getMostFollowedChannels(30)
-    mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
@@ -177,7 +165,7 @@ describe('Channel follows resolver', () => {
     await followChannel(FIRST_CHANNEL_ID)
 
     const mostFollowedChannels = await getMostFollowedChannels(30)
-    const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    const mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
 
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
@@ -198,7 +186,7 @@ describe('Channel follows resolver', () => {
 
     const checkFollows = async () => {
       const mostFollowedChannels = await getMostFollowedChannels(30)
-      const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+      const mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
 
       expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
       expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
@@ -242,7 +230,7 @@ describe('Channel follows resolver', () => {
     }
 
     const mostFollowedChannels = await getMostFollowedChannels(30)
-    const mostFollowedChannelsAllTime = await getMostFollowedChannelsAllTime(10)
+    const mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
     expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
     expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
