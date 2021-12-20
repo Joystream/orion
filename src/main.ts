@@ -11,14 +11,19 @@ const main = async () => {
 
   const aggregates = await wrapTask('Rebuilding aggregates', buildAggregates)
 
-  const server = await createServer(mongoose, aggregates)
+  const server = await createServer(mongoose, aggregates, config.queryNodeUrl)
   await server.start()
   const app = Express()
   server.applyMiddleware({ app })
 
   app.enable('trust proxy')
   app.listen({ port: config.port }, () =>
-    console.log(`🚀 Server listening at ==> http://localhost:${config.port}${server.graphqlPath}`)
+    console.log(`
+        🚀 Orion online
+        Mongo => ${config.mongoDBUri}
+        Query node => ${config.queryNodeUrl}
+        Playground => http://localhost:${config.port}${server.graphqlPath}
+      `)
   )
 }
 

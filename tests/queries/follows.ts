@@ -1,47 +1,24 @@
 import { gql } from 'apollo-server-express'
 import { ChannelFollowsInfo } from '../../src/entities/ChannelFollowsInfo'
+import { ChannelConnection } from '../../src/types'
 
-export const GET_CHANNEL_FOLLOWS = gql`
-  query GetChannelFollows($channelId: ID!) {
-    channelFollows(channelId: $channelId) {
-      id
-      follows
+export const GET_MOST_FOLLOWED_CHANNELS_CONNECTION = gql`
+  query GetMostFollowedChannelsConnection($periodDays: Int, $limit: Int!) {
+    mostFollowedChannelsConnection(periodDays: $periodDays, limit: $limit) {
+      edges {
+        node {
+          id
+          follows
+        }
+      }
     }
   }
 `
-export const GET_MOST_FOLLOWED_CHANNELS = gql`
-  query GetMostFollowedChannels($timePeriodDays: Int!) {
-    mostFollowedChannels(timePeriodDays: $timePeriodDays) {
-      id
-      follows
-    }
-  }
-`
-
-export const GET_MOST_FOLLOWED_CHANNELS_ALL_TIME = gql`
-  query GetMostFollowedChannelsAllTime($limit: Int!) {
-    mostFollowedChannelsAllTime(limit: $limit) {
-      id
-      follows
-    }
-  }
-`
-export type GetChannelFollows = {
-  channelFollows: ChannelFollowsInfo | null
+export type GetMostFollowedChannelsConnection = {
+  mostFollowedChannelsConnection: ChannelConnection
 }
-export type GetChannelFollowsArgs = {
-  channelId: string
-}
-export type GetMostFollowedChannelsArgs = {
-  timePeriodDays: number
-}
-export type GetMostFollowedChannels = {
-  mostFollowedChannels: ChannelFollowsInfo[]
-}
-export type GetMostFollowedChannelsAllTime = {
-  mostFollowedChannelsAllTime: ChannelFollowsInfo[]
-}
-export type GetMostFollowedChannelsAllTimeArgs = {
+export type GetMostFollowedChannelsConnectionArgs = {
+  periodDays: number | null
   limit: number
 }
 

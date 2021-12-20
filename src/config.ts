@@ -28,6 +28,8 @@ export class Config {
   private _bucketSize: number
   private _mongoDBUri: string
   private _featuredContentSecret: string
+  private _queryNodeUrl: string
+  private _isDebugging: boolean
 
   get port(): number {
     return this._port
@@ -43,6 +45,14 @@ export class Config {
 
   get featuredContentSecret(): string {
     return this._featuredContentSecret
+  }
+
+  get queryNodeUrl(): string {
+    return this._queryNodeUrl
+  }
+
+  get isDebugging(): boolean {
+    return this._isDebugging
   }
 
   loadConfig() {
@@ -61,6 +71,9 @@ export class Config {
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
+    this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
+
+    this._isDebugging = loadEnvVar('ORION_DEBUGGING', { defaultValue: 'false' }) === 'true'
   }
 }
 

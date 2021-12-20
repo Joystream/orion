@@ -19,13 +19,16 @@ export type GetVideoHero = {
 export const GET_CATEGORY_FEATURED_VIDEOS = gql`
   query GetCategoryFeaturedVideos($categoryId: ID!) {
     categoryFeaturedVideos(categoryId: $categoryId) {
-      videoId
       videoCutUrl
+      videoId
     }
   }
 `
 export type GetCategoryFeaturedVideos = {
-  categoryFeaturedVideos: FeaturedVideo[] | null
+  categoryFeaturedVideos: {
+    videoId: string
+    videoCutUrl: string
+  }
 }
 export type GetCategoryFeaturedVideosArgs = {
   categoryId: string
