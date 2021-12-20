@@ -16,14 +16,14 @@ export class VideoEvent extends GenericEvent {
   categoryId?: string
 
   @prop({ required: true, index: true, enum: VideoEventType })
-  type: VideoEventType
+  declare type: VideoEventType
 }
 
 export type UnsequencedVideoEvent = Omit<VideoEvent, '_id'>
 
 class VideoEventsBucket extends GenericBucket {
   @prop({ required: true, type: () => [VideoEvent] })
-  events: VideoEvent[]
+  declare events: VideoEvent[]
 }
 
 export const VideoEventsBucketModel = getModelForClass(VideoEventsBucket, {

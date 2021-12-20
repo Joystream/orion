@@ -1,6 +1,6 @@
 import { Arg, Args, ArgsType, Authorized, Field, ID, InputType, Mutation, Query, Resolver } from 'type-graphql'
-import { FeaturedVideo, getFeaturedContentDoc, VideoHero } from '../models/FeaturedContent'
 import { CategoryFeaturedVideos } from '../entities/CategoryFeaturedVideos'
+import { FeaturedVideo, getFeaturedContentDoc, VideoHero } from '../models/FeaturedContent'
 
 @InputType()
 class FeaturedVideoInput implements FeaturedVideo {
@@ -37,11 +37,6 @@ class SetCategoryFeaturedVideoArgs {
 
 @Resolver()
 export class FeaturedContentResolver {
-  @Query(() => VideoHero, { nullable: false, description: 'Get current video hero' })
-  async videoHero() {
-    return (await getFeaturedContentDoc()).videoHero
-  }
-
   @Query(() => [FeaturedVideo], { nullable: false, description: 'Get featured videos for a given video category' })
   async categoryFeaturedVideos(@Arg('categoryId', () => ID) categoryId: string) {
     const featuredContent = await getFeaturedContentDoc()
@@ -61,6 +56,11 @@ export class FeaturedContentResolver {
     })
 
     return categoriesList
+  }
+
+  @Query(() => VideoHero, { nullable: false, description: 'Get current video hero' })
+  async videoHero() {
+    return (await getFeaturedContentDoc()).videoHero
   }
 
   @Mutation(() => VideoHero, { nullable: false })
