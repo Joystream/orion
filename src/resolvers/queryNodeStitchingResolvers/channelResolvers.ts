@@ -68,6 +68,14 @@ export const channelResolvers = (queryNodeSchema: GraphQLSchema): IResolvers<any
         return shuffle(slicedChannels)
       },
     },
+    popularChannels: {
+      resolve: async (parent, args, context, info) => {
+        const mostViewedChannelsIds = getMostViewedChannelsIds(context, { limit: 15, period: null })
+        const resolver = createResolver(queryNodeSchema, 'channels')
+        const channels = await getDataWithIds(resolver, mostViewedChannelsIds, parent, args, context, info)
+        return shuffle(channels)
+      },
+    },
     top10Channels: async (parent, args, context, info) => {
       const mostFollowedChannelsIds = getMostFollowedChannelsIds(context, { limit: 10, period: null })
       const resolver = createResolver(queryNodeSchema, 'channels')

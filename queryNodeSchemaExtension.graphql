@@ -1,13 +1,13 @@
 extend type VideoHero {
-  video: Video
+  video: Video!
 }
 
 extend type FeaturedVideo {
-  video: Video
+  video: Video!
 }
 
 extend type CategoryFeaturedVideos {
-  category: VideoCategory
+  category: VideoCategory!
 }
 
 extend type Video {
@@ -66,6 +66,11 @@ type Query {
   Get list of 15 most watched channels out of 100 newest channels in random order
   """
   promisingChannels(where: ChannelWhereInput): [Channel!]!
+
+  """
+  Get list of 15 most watched channels in random order
+  """
+  popularChannels(where: ChannelWhereInput): [Channel!]!
 
   """
   Get list of 10 most followed channels of all time
