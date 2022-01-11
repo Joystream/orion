@@ -34,7 +34,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
 
   const queryNodeSchemaExtension = await loadSchema('./queryNodeSchemaExtension.graphql', {
     loaders: [new GraphQLFileLoader()],
-    schemas: [remoteQueryNodeSchema, orionSchema],
+    schemas: [orionSchema, remoteQueryNodeSchema],
     resolvers: queryNodeStitchingResolvers(remoteQueryNodeSchema),
   })
 
