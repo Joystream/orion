@@ -1,4 +1,3 @@
-import { shuffle } from 'lodash'
 import { Arg, Args, ArgsType, Authorized, Field, ID, InputType, Int, Mutation, Query, Resolver } from 'type-graphql'
 import { CategoryFeaturedVideos } from '../entities/CategoryFeaturedVideos'
 import { FeaturedVideo, getFeaturedContentDoc, VideoHero } from '../models/FeaturedContent'
@@ -52,7 +51,7 @@ export class FeaturedContentResolver {
     featuredContent.featuredVideosPerCategory.forEach((videos, categoryId) => {
       categoriesList.push({
         categoryId,
-        categoryFeaturedVideos: shuffle(videos).slice(0, videosLimit),
+        categoryFeaturedVideos: videos.slice(0, videosLimit),
       })
     })
 
