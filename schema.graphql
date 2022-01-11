@@ -43,7 +43,7 @@ type Mutation {
 
 type Query {
   """Get featured videos for all categories"""
-  allCategoriesFeaturedVideos: [CategoryFeaturedVideos!]!
+  allCategoriesFeaturedVideos(videosLimit: Int!): [CategoryFeaturedVideos!]!
 
   """Get featured videos for a given video category"""
   categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
