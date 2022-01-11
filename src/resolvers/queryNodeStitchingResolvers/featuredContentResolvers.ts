@@ -44,9 +44,9 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
   },
   CategoryFeaturedVideos: {
     categoryFeaturedVideos: {
-      selectionSet: '{ videos { videoId } }',
+      selectionSet: '{ categoryFeaturedVideos { videoId } }',
       resolve: async (parent, args, context, info) => {
-        const videosIds = parent.videos.map((video: FeaturedVideo) => video.videoId)
+        const videosIds = parent.categoryFeaturedVideos?.map((video: FeaturedVideo) => video.videoId)
         const videoResolver = () =>
           delegateToSchema({
             schema: queryNodeSchema,
@@ -77,9 +77,9 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
           })
 
         const videos = await videoResolver()
-        return parent.videos.map((v: FeaturedVideo) => ({
+        return parent.categoryFeaturedVideos.map((v: FeaturedVideo) => ({
           ...v,
-          categoryFeaturedVideos: videos.find((video: Video) => video.id === v.videoId),
+          video: videos?.find((video: Video) => video.id === v.videoId),
         }))
       },
     },
