@@ -52,7 +52,7 @@ export class FeaturedContentResolver {
     featuredContent.featuredVideosPerCategory.forEach((videos, categoryId) => {
       categoriesList.push({
         categoryId,
-        videos: shuffle(videos).slice(0, videosLimit),
+        categoryFeaturedVideos: shuffle(videos).slice(0, videosLimit),
       })
     })
 

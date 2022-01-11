@@ -7,5 +7,5 @@ export class CategoryFeaturedVideos {
   categoryId!: string
 
   @Field(() => [FeaturedVideo])
-  videos!: FeaturedVideo[]
+  categoryFeaturedVideos!: FeaturedVideo[]
 }

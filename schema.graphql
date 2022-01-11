@@ -4,8 +4,8 @@
 # -----------------------------------------------
 
 type CategoryFeaturedVideos {
+  categoryFeaturedVideos: [FeaturedVideo!]!
   categoryId: ID!
-  videos: [FeaturedVideo!]!
 }
 
 type ChannelFollowsInfo {

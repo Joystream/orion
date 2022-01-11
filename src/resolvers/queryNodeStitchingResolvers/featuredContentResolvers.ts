@@ -3,6 +3,8 @@ import { GraphQLSchema, SelectionSetNode } from 'graphql'
 import { createResolver } from './helpers'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { WrapQuery } from '@graphql-tools/wrap'
+import { Video } from '../../types'
+import { FeaturedVideo } from '../../models/FeaturedContent'
 
 export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   VideoHero: {
@@ -41,10 +43,10 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
     },
   },
   CategoryFeaturedVideos: {
-    videos: {
+    categoryFeaturedVideos: {
       selectionSet: '{ videos { videoId } }',
       resolve: async (parent, args, context, info) => {
-        const videosIds = parent.videos.map((video: any) => video.videoId)
+        const videosIds = parent.videos.map((video: FeaturedVideo) => video.videoId)
         const videoResolver = () =>
           delegateToSchema({
             schema: queryNodeSchema,
@@ -75,9 +77,9 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
           })
 
         const videos = await videoResolver()
-        return parent.videos.map((v: any) => ({
+        return parent.videos.map((v: FeaturedVideo) => ({
           ...v,
-          video: videos.find((video: any) => video.id === v.videoId),
+          categoryFeaturedVideos: videos.find((video: Video) => video.id === v.videoId),
         }))
       },
     },
