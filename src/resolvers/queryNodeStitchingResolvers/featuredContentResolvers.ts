@@ -1,6 +1,10 @@
 import type { IResolvers } from '@graphql-tools/utils'
-import { GraphQLSchema } from 'graphql'
+import { GraphQLSchema, SelectionSetNode } from 'graphql'
 import { createResolver } from './helpers'
+import { delegateToSchema } from '@graphql-tools/delegate'
+import { WrapQuery } from '@graphql-tools/wrap'
+import { Video } from '../../types'
+import { FeaturedVideo } from '../../models/FeaturedContent'
 
 export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResolvers => ({
   VideoHero: {
@@ -20,8 +24,10 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
   },
   FeaturedVideo: {
     video: {
-      selectionSet: '{ videoId }',
       resolve: async (parent, args, context, info) => {
+        if (parent.video) {
+          return parent.video
+        }
         const videoResolver = createResolver(queryNodeSchema, 'videoByUniqueInput')
         return videoResolver(
           parent,
@@ -37,6 +43,46 @@ export const featuredContentResolvers = (queryNodeSchema: GraphQLSchema): IResol
     },
   },
   CategoryFeaturedVideos: {
+    categoryFeaturedVideos: {
+      selectionSet: '{ categoryFeaturedVideos { videoId } }',
+      resolve: async (parent, args, context, info) => {
+        const videosIds = parent.categoryFeaturedVideos?.map((video: FeaturedVideo) => video.videoId)
+        const videoResolver = () =>
+          delegateToSchema({
+            schema: queryNodeSchema,
+            operation: 'query',
+            fieldName: 'videos',
+            args: {
+              where: {
+                id_in: videosIds,
+              },
+            },
+            context,
+            info,
+            transforms: [
+              new WrapQuery(
+                ['videos'],
+                (subtree: SelectionSetNode) => {
+                  const videoSubTree = subtree.selections.find(
+                    (selection) => selection.kind === 'Field' && selection.name.value === 'video'
+                  )
+                  if (videoSubTree?.kind === 'Field' && videoSubTree.selectionSet) {
+                    return videoSubTree.selectionSet
+                  }
+                  return subtree
+                },
+                (result) => result && result
+              ),
+            ],
+          })
+
+        const videos = await videoResolver()
+        return parent.categoryFeaturedVideos.map((v: FeaturedVideo) => ({
+          ...v,
+          video: videos?.find((video: Video) => video.id === v.videoId),
+        }))
+      },
+    },
     category: {
       selectionSet: '{ categoryId }',
       resolve: async (parent, args, context, info) => {

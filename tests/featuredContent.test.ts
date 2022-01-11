@@ -17,6 +17,7 @@ import {
   SetCategoryFeaturedVideosArgs,
   SetVideoHero,
   SetVideoHeroArgs,
+  GetAllCategoriesFeaturedVideosArgs,
 } from './queries/featuredContent'
 import {
   DEFAULT_FEATURED_CONTENT_DOC,
@@ -64,9 +65,10 @@ describe('Featured content resolver', () => {
     return result.data?.categoryFeaturedVideos
   }
 
-  const getAllCategoriesFeaturedVideos = async () => {
-    const result = await query<GetAllCategoriesFeaturedVideos>({
+  const getAllCategoriesFeaturedVideos = async (videosLimit: number) => {
+    const result = await query<GetAllCategoriesFeaturedVideos, GetAllCategoriesFeaturedVideosArgs>({
       query: GET_ALL_CATEGORIES_FEATURED_VIDEOS,
+      variables: { videosLimit },
     })
     expect(result.errors).toBeUndefined()
     return result.data?.allCategoriesFeaturedVideos
@@ -83,7 +85,7 @@ describe('Featured content resolver', () => {
   })
 
   it('should return empty array for list of all categories with featured videos', async () => {
-    const allCategoriesFeaturedVideos = await getAllCategoriesFeaturedVideos()
+    const allCategoriesFeaturedVideos = await getAllCategoriesFeaturedVideos(3)
     expect(allCategoriesFeaturedVideos).toHaveLength(0)
   })
 
@@ -135,15 +137,15 @@ describe('Featured content resolver', () => {
       variables: { categoryId: '2', videos: category2FeaturedVideos },
     })
 
-    const allCategoriesFeaturedVideos = await getAllCategoriesFeaturedVideos()
+    const allCategoriesFeaturedVideos = await getAllCategoriesFeaturedVideos(3)
     expect(allCategoriesFeaturedVideos).toEqual([
       {
         categoryId: '1',
-        videos: category1FeaturedVideos,
+        categoryFeaturedVideos: category1FeaturedVideos,
       },
       {
         categoryId: '2',
-        videos: category2FeaturedVideos,
+        categoryFeaturedVideos: category2FeaturedVideos,
       },
     ])
   })

@@ -34,11 +34,15 @@ export type GetCategoryFeaturedVideosArgs = {
   categoryId: string
 }
 
+export type GetAllCategoriesFeaturedVideosArgs = {
+  videosLimit: number
+}
+
 export const GET_ALL_CATEGORIES_FEATURED_VIDEOS = gql`
-  query GetAllCategoriesFeaturedVideos {
-    allCategoriesFeaturedVideos {
+  query GetAllCategoriesFeaturedVideos($videosLimit: Int!) {
+    allCategoriesFeaturedVideos(videosLimit: $videosLimit) {
       categoryId
-      videos {
+      categoryFeaturedVideos {
         videoId
         videoCutUrl
       }
