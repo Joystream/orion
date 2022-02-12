@@ -6,7 +6,7 @@ services:
       - ORION_PORT=6116
       - ORION_MONGO_HOSTNAME=mongo
       - ORION_FEATURED_CONTENT_SECRET=change_me_please
-      - ORION_QUERY_NODE_URL=change_me_please
+      - ORION_QUERY_NODE_URL=https://hydra.joystream.org/graphql
     ports:
       - '127.0.0.1:6116:6116'
     restart: always

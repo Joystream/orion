@@ -1,22 +1,13 @@
 import { GenericAggregate } from './shared'
-import {
-  ChannelEvent,
-  ChannelEventsBucketModel,
-  ChannelEventType,
-  UnsequencedChannelEvent,
-} from '../models/ChannelEvent'
+import { ChannelEvent, ChannelEventModel, ChannelEventType } from '../models/ChannelEvent'
 
 import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
 import { mapPeriods } from '../helpers'
 import { differenceInCalendarDays } from 'date-fns'
 
-type ChannelEventsAggregationResult = {
-  events?: ChannelEvent[]
-}[]
-
 type TimePeriodEventsData = {
-  sevenDays: Partial<UnsequencedChannelEvent>[]
-  thirtyDays: Partial<UnsequencedChannelEvent>[]
+  sevenDays: Partial<ChannelEvent>[]
+  thirtyDays: Partial<ChannelEvent>[]
 }
 
 type TimePeriodFollows = {
@@ -57,9 +48,9 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   }
 
   private addOrRemoveFollowEvent(
-    array: Partial<UnsequencedChannelEvent>[],
+    array: Partial<ChannelEvent>[],
     eventType: ChannelEventType,
-    { channelId, timestamp }: UnsequencedChannelEvent
+    { channelId, timestamp }: ChannelEvent
   ): void {
     if (eventType === ChannelEventType.FollowChannel) {
       array.push({ channelId, timestamp })
@@ -110,13 +101,7 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
   }
 
   public static async Build(): Promise<FollowsAggregate> {
-    const aggregation: ChannelEventsAggregationResult = await ChannelEventsBucketModel.aggregate([
-      { $unwind: '$events' },
-      { $group: { _id: null, allEvents: { $push: '$events' } } },
-      { $project: { events: '$allEvents' } },
-    ])
-
-    const events = aggregation[0]?.events || []
+    const events = await ChannelEventModel.find({}).lean()
 
     const aggregate = new FollowsAggregate()
     events.forEach((event) => {
@@ -129,7 +114,7 @@ export class FollowsAggregate implements GenericAggregate<ChannelEvent> {
     return aggregate
   }
 
-  public applyEvent(event: UnsequencedChannelEvent) {
+  public applyEvent(event: ChannelEvent) {
     const { type, ...eventWithoutType } = event
     const { channelId } = eventWithoutType
     const currentChannelFollows = this.channelFollowsMap[channelId] || 0
