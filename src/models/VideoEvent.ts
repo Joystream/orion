@@ -1,11 +1,10 @@
 import { getModelForClass, prop } from '@typegoose/typegoose'
-import { GenericBucket, GenericEvent, insertEventIntoBucket } from './shared'
 
 export enum VideoEventType {
   AddView = 'ADD_VIEW',
 }
 
-export class VideoEvent extends GenericEvent {
+export class VideoEvent {
   @prop({ required: true, index: true })
   videoId: string
 
@@ -15,21 +14,18 @@ export class VideoEvent extends GenericEvent {
   @prop({ required: false, index: true })
   categoryId?: string
 
+  @prop({ required: true })
+  timestamp: Date
+
+  @prop({ required: false, index: true })
+  actorId?: string
+
   @prop({ required: true, index: true, enum: VideoEventType })
-  declare type: VideoEventType
+  type: VideoEventType
 }
 
-export type UnsequencedVideoEvent = Omit<VideoEvent, '_id'>
+export const VideoEventModel = getModelForClass(VideoEvent, { schemaOptions: { collection: 'videoEvents' } })
 
-class VideoEventsBucket extends GenericBucket {
-  @prop({ required: true, type: () => [VideoEvent] })
-  declare events: VideoEvent[]
-}
-
-export const VideoEventsBucketModel = getModelForClass(VideoEventsBucket, {
-  schemaOptions: { collection: 'videoEvents' },
-})
-
-export const saveVideoEvent = async (unsequencedVideoEvent: UnsequencedVideoEvent) => {
-  return await insertEventIntoBucket(unsequencedVideoEvent, VideoEventsBucketModel)
+export const saveVideoEvent = (event: VideoEvent) => {
+  return VideoEventModel.create(event)
 }

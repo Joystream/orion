@@ -1,6 +1,6 @@
 import { Args, ArgsType, Ctx, Field, ID, Mutation, Resolver } from 'type-graphql'
 import { ChannelFollowsInfo } from '../entities/ChannelFollowsInfo'
-import { UnsequencedChannelEvent, ChannelEventType, saveChannelEvent } from '../models/ChannelEvent'
+import { ChannelEvent, ChannelEventType, saveChannelEvent } from '../models/ChannelEvent'
 import { OrionContext } from '../types'
 
 @ArgsType()
@@ -19,7 +19,7 @@ class UnfollowChannelArgs extends ChannelFollowsArgs {}
 export class ChannelFollowsInfosResolver {
   @Mutation(() => ChannelFollowsInfo, { description: 'Add a single follow to the target channel' })
   async followChannel(@Args() { channelId }: FollowChannelArgs, @Ctx() ctx: OrionContext): Promise<ChannelFollowsInfo> {
-    const event: UnsequencedChannelEvent = {
+    const event: ChannelEvent = {
       channelId,
       type: ChannelEventType.FollowChannel,
       timestamp: new Date(),
@@ -37,7 +37,7 @@ export class ChannelFollowsInfosResolver {
     @Args() { channelId }: UnfollowChannelArgs,
     @Ctx() ctx: OrionContext
   ): Promise<ChannelFollowsInfo> {
-    const event: UnsequencedChannelEvent = {
+    const event: ChannelEvent = {
       channelId,
       type: ChannelEventType.UnfollowChannel,
       timestamp: new Date(),

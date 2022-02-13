@@ -1,5 +1,3 @@
-export const TEST_BUCKET_SIZE = 20
+process.env.ORION_QUERY_NODE_URL = 'https://atlas-dev.joystream.app/query-node/server/graphql'
 
-jest.mock('../src/config', () => ({ bucketSize: TEST_BUCKET_SIZE }))
-
-process.env.ORION_QUERY_NODE_URL = 'https://sumer-dev-2.joystream.app/query/server/graphql'
+export {}
