@@ -20,15 +20,14 @@ import {
   GetMostViewedCategoriesAllTime,
 } from './queries/views'
 import { EntityViewsInfo } from '../src/entities/EntityViewsInfo'
-import { VideoEventsBucketModel } from '../src/models/VideoEvent'
-import { TEST_BUCKET_SIZE } from './setup'
+import { VideoEventModel } from '../src/models/VideoEvent'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 
-const FIRST_VIDEO_ID = '12'
-const SECOND_VIDEO_ID = '13'
-const FIRST_CHANNEL_ID = '22'
-const SECOND_CHANNEL_ID = '23'
-const FIRST_CATEGORY_ID = '32'
+const FIRST_VIDEO_ID = '7'
+const SECOND_VIDEO_ID = '8'
+const FIRST_CHANNEL_ID = '6'
+const SECOND_CHANNEL_ID = '7'
+const FIRST_CATEGORY_ID = '1'
 
 describe('Video and channel views resolver', () => {
   let server: ApolloServer
@@ -48,7 +47,7 @@ describe('Video and channel views resolver', () => {
 
   afterEach(async () => {
     await server.stop()
-    await VideoEventsBucketModel.deleteMany({})
+    await VideoEventModel.deleteMany({})
     await mongoose.disconnect()
   })
 
@@ -323,26 +322,5 @@ describe('Video and channel views resolver', () => {
     mutate = createMutationFn(server)
 
     await checkViews()
-  })
-
-  it('should properly handle saving events across buckets', async () => {
-    const eventsCount = TEST_BUCKET_SIZE * 2 + 1
-    const expectedVideoViews: EntityViewsInfo = {
-      id: FIRST_VIDEO_ID,
-      views: eventsCount,
-    }
-
-    const expectedMostViewedVideos = {
-      edges: [expectedVideoViews].map((view) => ({ node: view })),
-    }
-
-    for (let i = 0; i < eventsCount; i++) {
-      await addVideoView(FIRST_VIDEO_ID, FIRST_CHANNEL_ID)
-    }
-
-    const mostViewedVideos = await getMostViewedVideos(30)
-    const mostViewedVideosAllTime = await getMostViewedVideos(null)
-    expect(mostViewedVideos).toEqual(expectedMostViewedVideos)
-    expect(mostViewedVideosAllTime).toEqual(expectedMostViewedVideos)
   })
 })

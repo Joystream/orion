@@ -1,30 +1,28 @@
 import { getModelForClass, prop } from '@typegoose/typegoose'
-import { GenericBucket, GenericEvent, insertEventIntoBucket } from './shared'
 
 export enum ChannelEventType {
   FollowChannel = 'FOLLOW_CHANNEL',
   UnfollowChannel = 'UNFOLLOW_CHANNEL',
 }
 
-export class ChannelEvent extends GenericEvent {
+export class ChannelEvent {
   @prop({ required: true, index: true })
   channelId: string
 
+  @prop({ required: true })
+  timestamp: Date
+
+  @prop({ required: false, index: true })
+  actorId?: string
+
   @prop({ required: true, index: true, enum: ChannelEventType })
-  declare type: ChannelEventType
+  type: ChannelEventType
 }
 
-export type UnsequencedChannelEvent = Omit<ChannelEvent, '_id'>
-
-class ChannelEventsBucket extends GenericBucket {
-  @prop({ required: true, type: () => [ChannelEvent] })
-  declare events: ChannelEvent[]
-}
-
-export const ChannelEventsBucketModel = getModelForClass(ChannelEventsBucket, {
+export const ChannelEventModel = getModelForClass(ChannelEvent, {
   schemaOptions: { collection: 'channelEvents' },
 })
 
-export const saveChannelEvent = async (unsequencedChannelEvent: UnsequencedChannelEvent) => {
-  return await insertEventIntoBucket(unsequencedChannelEvent, ChannelEventsBucketModel)
+export const saveChannelEvent = (event: ChannelEvent) => {
+  return ChannelEventModel.create(event)
 }

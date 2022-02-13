@@ -1,15 +1,11 @@
-import { UnsequencedVideoEvent, VideoEvent, VideoEventsBucketModel, VideoEventType } from '../models/VideoEvent'
+import { VideoEvent, VideoEventModel, VideoEventType } from '../models/VideoEvent'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { mapPeriods } from '../helpers'
 import { differenceInCalendarDays } from 'date-fns'
 
-type VideoEventsAggregationResult = {
-  events?: VideoEvent[]
-}[]
-
 type TimePeriodEventsData = {
-  sevenDays: Partial<UnsequencedVideoEvent>[]
-  thirtyDays: Partial<UnsequencedVideoEvent>[]
+  sevenDays: Partial<VideoEvent>[]
+  thirtyDays: Partial<VideoEvent>[]
 }
 
 type TimePeriodViews = {
@@ -133,13 +129,7 @@ export class ViewsAggregate {
   }
 
   public static async Build() {
-    const aggregation: VideoEventsAggregationResult = await VideoEventsBucketModel.aggregate([
-      { $unwind: '$events' },
-      { $group: { _id: null, allEvents: { $push: '$events' } } },
-      { $project: { events: '$allEvents' } },
-    ])
-
-    const events = aggregation[0]?.events || []
+    const events = await VideoEventModel.find({}).lean()
 
     const aggregate = new ViewsAggregate()
     events.forEach((event) => {
@@ -152,7 +142,7 @@ export class ViewsAggregate {
     return aggregate
   }
 
-  public applyEvent(event: UnsequencedVideoEvent) {
+  public applyEvent(event: VideoEvent) {
     const { type, ...eventWithoutType } = event
     const { videoId, channelId, categoryId } = eventWithoutType
     const currentVideoViews = videoId ? this.videoViewsMap[videoId] || 0 : 0

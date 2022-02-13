@@ -25,7 +25,6 @@ const loadEnvVar = (name: string, { defaultValue, devDefaultValue }: LoadEnvVarO
 
 export class Config {
   private _port: number
-  private _bucketSize: number
   private _mongoDBUri: string
   private _featuredContentSecret: string
   private _queryNodeUrl: string
@@ -33,10 +32,6 @@ export class Config {
 
   get port(): number {
     return this._port
-  }
-
-  get bucketSize(): number {
-    return this._bucketSize
   }
 
   get mongoDBUri(): string {
@@ -60,9 +55,6 @@ export class Config {
 
     const rawPort = loadEnvVar('ORION_PORT', { defaultValue: '6116' })
     this._port = parseInt(rawPort)
-
-    const rawBucketSize = loadEnvVar('ORION_BUCKET_SIZE', { defaultValue: '50000' })
-    this._bucketSize = parseInt(rawBucketSize)
 
     const mongoHostname = loadEnvVar('ORION_MONGO_HOSTNAME', { devDefaultValue: 'localhost' })
     const rawMongoPort = loadEnvVar('ORION_MONGO_PORT', { defaultValue: '27017' })

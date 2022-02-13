@@ -2,7 +2,7 @@ import { Args, ArgsType, Ctx, Field, ID, Int, Mutation, Query, Resolver } from '
 import { Min, Max, IsIn } from 'class-validator'
 import { EntityViewsInfo } from '../entities/EntityViewsInfo'
 import { mapPeriods } from '../helpers'
-import { UnsequencedVideoEvent, VideoEventType, saveVideoEvent } from '../models/VideoEvent'
+import { VideoEventType, saveVideoEvent, VideoEvent } from '../models/VideoEvent'
 import { OrionContext } from '../types'
 
 @ArgsType()
@@ -66,7 +66,7 @@ export class VideoViewsInfosResolver {
     @Args() { videoId, channelId, categoryId }: AddVideoViewArgs,
     @Ctx() ctx: OrionContext
   ): Promise<EntityViewsInfo> {
-    const event: UnsequencedVideoEvent = {
+    const event: VideoEvent = {
       videoId,
       channelId,
       categoryId,

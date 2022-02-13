@@ -14,12 +14,11 @@ import {
   GetMostFollowedChannelsConnectionArgs,
 } from './queries/follows'
 import { ChannelFollowsInfo } from '../src/entities/ChannelFollowsInfo'
-import { ChannelEventsBucketModel } from '../src/models/ChannelEvent'
-import { TEST_BUCKET_SIZE } from './setup'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
+import { ChannelEventModel } from '../src/models/ChannelEvent'
 
-const FIRST_CHANNEL_ID = '22'
-const SECOND_CHANNEL_ID = '23'
+const FIRST_CHANNEL_ID = '6'
+const SECOND_CHANNEL_ID = '7'
 
 describe('Channel follows resolver', () => {
   let server: ApolloServer
@@ -39,7 +38,7 @@ describe('Channel follows resolver', () => {
 
   afterEach(async () => {
     await server.stop()
-    await ChannelEventsBucketModel.deleteMany({})
+    await ChannelEventModel.deleteMany({})
     await mongoose.disconnect()
   })
 
@@ -212,26 +211,5 @@ describe('Channel follows resolver', () => {
     mutate = createMutationFn(server)
 
     await checkFollows()
-  })
-
-  it('should properly handle saving events across buckets', async () => {
-    const eventsCount = TEST_BUCKET_SIZE * 2 + 1
-
-    const expectedChannelFollows: ChannelFollowsInfo = {
-      id: FIRST_CHANNEL_ID,
-      follows: eventsCount,
-    }
-
-    for (let i = 0; i < eventsCount; i++) {
-      await followChannel(FIRST_CHANNEL_ID)
-    }
-    const expectedMostFollowedChannels = {
-      edges: [expectedChannelFollows].map((follow) => ({ node: follow })),
-    }
-
-    const mostFollowedChannels = await getMostFollowedChannels(30)
-    const mostFollowedChannelsAllTime = await getMostFollowedChannels(null)
-    expect(mostFollowedChannels).toEqual(expectedMostFollowedChannels)
-    expect(mostFollowedChannelsAllTime).toEqual(expectedMostFollowedChannels)
   })
 })
