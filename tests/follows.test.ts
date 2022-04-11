@@ -17,6 +17,8 @@ import { ChannelFollowsInfo } from '../src/entities/ChannelFollowsInfo'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 import { ChannelEventModel } from '../src/models/ChannelEvent'
 
+jest.setTimeout(20000)
+
 const FIRST_CHANNEL_ID = '1'
 const SECOND_CHANNEL_ID = '2'
 
