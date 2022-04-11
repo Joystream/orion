@@ -23,10 +23,10 @@ import { EntityViewsInfo } from '../src/entities/EntityViewsInfo'
 import { VideoEventModel } from '../src/models/VideoEvent'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 
-const FIRST_VIDEO_ID = '7'
-const SECOND_VIDEO_ID = '8'
-const FIRST_CHANNEL_ID = '6'
-const SECOND_CHANNEL_ID = '7'
+const FIRST_VIDEO_ID = '1'
+const SECOND_VIDEO_ID = '2'
+const FIRST_CHANNEL_ID = '3'
+const SECOND_CHANNEL_ID = '2'
 const FIRST_CATEGORY_ID = '1'
 
 describe('Video and channel views resolver', () => {
