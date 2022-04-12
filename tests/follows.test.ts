@@ -17,8 +17,10 @@ import { ChannelFollowsInfo } from '../src/entities/ChannelFollowsInfo'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 import { ChannelEventModel } from '../src/models/ChannelEvent'
 
-const FIRST_CHANNEL_ID = '6'
-const SECOND_CHANNEL_ID = '7'
+jest.setTimeout(20000)
+
+const FIRST_CHANNEL_ID = '1'
+const SECOND_CHANNEL_ID = '2'
 
 describe('Channel follows resolver', () => {
   let server: ApolloServer
