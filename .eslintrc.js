@@ -1,5 +1,13 @@
 module.exports = {
-  extends: ['@joystream/eslint-config', 'plugin:jest/recommended'],
+  extends: [ 'eslint:recommended',
+    'plugin:@typescript-eslint/recommended', 'plugin:jest/recommended', 'prettier'],
+  env: {
+    node: true,
+    es6: true,
+    jest: true,
+  },
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'jest'],
   rules: {
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
@@ -36,6 +44,5 @@ module.exports = {
         format: ['PascalCase'],
       },
     ],
-  },
-  plugins: ['jest'],
+  }
 }
