@@ -11,8 +11,12 @@ import 'reflect-metadata'
 import { buildSchema } from 'type-graphql'
 import { FollowsAggregate, ViewsAggregate } from './aggregates'
 import { customAuthChecker } from './helpers'
-import { ChannelFollowsInfosResolver, VideoViewsInfosResolver } from './resolvers'
-import { FeaturedContentResolver } from './resolvers/featuredContent'
+import {
+  ChannelFollowsInfosResolver,
+  VideoViewsInfosResolver,
+  FeaturedContentResolver,
+  ReportsInfosResolver,
+} from './resolvers'
 import { queryNodeStitchingResolvers } from './resolvers/queryNodeStitchingResolvers'
 import { Aggregates, OrionContext } from './types'
 import config from './config'
@@ -26,7 +30,7 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   })
 
   const orionSchema = await buildSchema({
-    resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver, FeaturedContentResolver],
+    resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver, ReportsInfosResolver, FeaturedContentResolver],
     authChecker: customAuthChecker,
     emitSchemaFile: 'schema.graphql',
     validate: true,

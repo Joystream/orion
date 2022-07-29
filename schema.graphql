@@ -34,6 +34,9 @@ type Mutation {
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
+
+  """Report a video"""
+  reportVideo(rationale: String!, videoId: ID!): ReportVideoInfo!
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
 
@@ -59,8 +62,16 @@ type Query {
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
 
+  """Report a video"""
+  reportedVideos: [ReportVideoInfo!]!
+
   """Get current video hero"""
   videoHero: VideoHero!
+}
+
+type ReportVideoInfo {
+  rationale: String!
+  videoId: ID!
 }
 
 type VideoHero {
