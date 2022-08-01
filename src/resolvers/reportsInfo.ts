@@ -7,14 +7,36 @@ import {
   ID,
   InputType,
   Int,
+  MiddlewareFn,
   Mutation,
   Query,
   registerEnumType,
   Resolver,
+  UseMiddleware,
 } from 'type-graphql'
 import { ReportVideoInfo } from '../entities/ReportVideoInfo'
 import { ReportedVideoModel, saveReportedVideo } from '../models/ReportedContent'
 import { OrionContext } from '../types'
+
+const ONE_HOUR = 60 * 60 * 1000
+const MAX_REPORTS_PER_VIDEO = 50
+
+export const rateLimit: (limit: number) => MiddlewareFn<OrionContext> =
+  (limit: number) =>
+  async ({ args, context: { remoteHost } }, next) => {
+    const reportsCountPerVideo = await ReportedVideoModel.count({
+      reporterIp: remoteHost,
+      videoId: args.videoId,
+      timestamp: {
+        $gte: new Date(Date.now() - ONE_HOUR),
+      },
+    })
+
+    if (reportsCountPerVideo > limit) {
+      throw new Error('You have exceeded the maximum number of requests per hour')
+    }
+    return next()
+  }
 
 @ArgsType()
 class ReportVideoArgs {
@@ -65,6 +87,7 @@ class VideoReportsArgs {
 @Resolver()
 export class ReportsInfosResolver {
   @Mutation(() => ReportVideoInfo, { description: 'Report a video' })
+  @UseMiddleware(rateLimit(MAX_REPORTS_PER_VIDEO))
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
     @Ctx() ctx: OrionContext
