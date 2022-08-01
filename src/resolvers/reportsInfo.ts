@@ -47,12 +47,12 @@ class ReportVideoArgs {
   rationale: string
 }
 
-enum Order {
+enum OrderDirection {
   ASC = 'asc',
   DESC = 'desc',
 }
 
-registerEnumType(Order, { name: 'Order' })
+registerEnumType(OrderDirection, { name: 'Order' })
 
 @InputType()
 class VideoReportWhereInput {
@@ -74,8 +74,8 @@ class VideoReportsArgs {
   @Field(() => VideoReportWhereInput, { nullable: true })
   where: VideoReportWhereInput
 
-  @Field(() => Order, { nullable: true, defaultValue: Order.DESC })
-  order: Order
+  @Field(() => OrderDirection, { nullable: true, defaultValue: OrderDirection.DESC })
+  order: OrderDirection
 
   @Field(() => Int, { nullable: true, defaultValue: 30 })
   limit: number
