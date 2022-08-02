@@ -3,12 +3,16 @@ import { KillSwitch } from '../../src/models/KillSwitch'
 
 export const GET_KILL_SWITCH = gql`
   query GetKillSwitch {
-    isKilled
+    killSwitch {
+      isKilled
+    }
   }
 `
 
 export type GetKillSwitch = {
-  isKilled: boolean
+  killSwitch: {
+    isKilled: boolean
+  }
 }
 
 export const SET_KILL_SWITCH = gql`
@@ -21,4 +25,7 @@ export const SET_KILL_SWITCH = gql`
 
 export type SetKillSwitch = {
   setKillSwitch: KillSwitch
+}
+export type SetKillSwitchArgs = {
+  isKilled: boolean
 }

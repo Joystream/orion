@@ -4,7 +4,7 @@ import { Aggregates } from '../src/types'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 import { buildAggregates, connectMongoose, createServer } from '../src/server'
 
-import { GetKillSwitch, GET_KILL_SWITCH, SetKillSwitch, SET_KILL_SWITCH } from './queries/killSwitch'
+import { GetKillSwitch, GET_KILL_SWITCH, SetKillSwitch, SET_KILL_SWITCH, SetKillSwitchArgs } from './queries/killSwitch'
 import { IsKilledModel } from '../src/models/KillSwitch'
 
 describe('Kill switch resolver', () => {
@@ -34,7 +34,7 @@ describe('Kill switch resolver', () => {
       query: GET_KILL_SWITCH,
     })
     expect(result.errors).toBeUndefined()
-    return result.data?.isKilled
+    return result.data?.killSwitch.isKilled
   }
 
   it('should return isKilled set to false', async () => {
@@ -43,7 +43,7 @@ describe('Kill switch resolver', () => {
   })
 
   it('should set isKilled to true', async () => {
-    await mutate<SetKillSwitch, undefined>({ mutation: SET_KILL_SWITCH, variables: undefined })
+    await mutate<SetKillSwitch, SetKillSwitchArgs>({ mutation: SET_KILL_SWITCH, variables: { isKilled: true } })
     const isKilled = await getKillSwitch()
     expect(isKilled).toEqual(true)
   })
