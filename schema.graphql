@@ -33,6 +33,10 @@ input FeaturedVideoInput {
   videoId: ID!
 }
 
+type KillSwitch {
+  isKilled: Boolean!
+}
+
 type Mutation {
   """Add a single view to the target video's count"""
   addVideoView(categoryId: ID, channelId: ID!, videoId: ID!): EntityViewsInfo!
@@ -43,6 +47,7 @@ type Mutation {
   """Report a video"""
   reportVideo(rationale: String!, videoId: ID!): ReportVideoInfo!
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
+  setKillSwitch(isKilled: Boolean!): KillSwitch!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
 
   """Remove a single follow from the target channel"""
@@ -55,6 +60,9 @@ type Query {
 
   """Get featured videos for a given video category"""
   categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
+
+  """Set killed instance"""
+  killSwitch: KillSwitch!
 
   """Get list of most viewed categories in a given time period"""
   mostViewedCategories(
