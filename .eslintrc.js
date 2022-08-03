@@ -30,7 +30,7 @@ module.exports = {
       },
       {
         selector: 'enumMember',
-        format: false,
+        format: null,
       },
       {
         selector: 'typeLike',
