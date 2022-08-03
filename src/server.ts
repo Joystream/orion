@@ -16,6 +16,7 @@ import {
   VideoViewsInfosResolver,
   FeaturedContentResolver,
   ReportsInfosResolver,
+  AdminResolver,
 } from './resolvers'
 import { queryNodeStitchingResolvers } from './resolvers/queryNodeStitchingResolvers'
 import { Aggregates, OrionContext } from './types'
@@ -30,7 +31,13 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   })
 
   const orionSchema = await buildSchema({
-    resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver, ReportsInfosResolver, FeaturedContentResolver],
+    resolvers: [
+      VideoViewsInfosResolver,
+      ChannelFollowsInfosResolver,
+      ReportsInfosResolver,
+      FeaturedContentResolver,
+      AdminResolver,
+    ],
     authChecker: customAuthChecker,
     emitSchemaFile: 'schema.graphql',
     validate: true,

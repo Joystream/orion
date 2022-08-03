@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 
 const isDev = process.env.NODE_ENV === 'development'
+export const ADMIN_ROLE = 'ADMIN'
 
 type LoadEnvVarOpts = {
   defaultValue?: string
@@ -27,6 +28,7 @@ export class Config {
   private _port: number
   private _mongoDBUri: string
   private _featuredContentSecret: string
+  private _adminSecret: string
   private _queryNodeUrl: string
   private _isDebugging: boolean
 
@@ -40,6 +42,10 @@ export class Config {
 
   get featuredContentSecret(): string {
     return this._featuredContentSecret
+  }
+
+  get adminSecret(): string {
+    return this._adminSecret
   }
 
   get queryNodeUrl(): string {
@@ -63,6 +69,7 @@ export class Config {
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
+    this._adminSecret = loadEnvVar('ORION_ADMIN_SECRET')
     this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
 
     this._isDebugging = loadEnvVar('ORION_DEBUGGING', { defaultValue: 'false' }) === 'true'
