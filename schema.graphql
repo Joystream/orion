@@ -49,11 +49,6 @@ type Mutation {
   unfollowChannel(channelId: ID!): ChannelFollowsInfo!
 }
 
-enum Order {
-  ASC
-  DESC
-}
-
 type Query {
   """Get featured videos for all categories"""
   allCategoriesFeaturedVideos(videosLimit: Int!): [CategoryFeaturedVideos!]!
@@ -71,7 +66,7 @@ type Query {
 
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
-  reportedVideos(limit: Int = 30, order: Order = DESC, skip: Int, where: VideoReportWhereInput): [ReportVideoInfo!]!
+  reportedVideos(limit: Int = 30, orderBy: VideoReportOrderByInput = createdAt_DESC, skip: Int, where: VideoReportWhereInput): [ReportVideoInfo!]!
 
   """Get current video hero"""
   videoHero: VideoHero!
@@ -97,6 +92,11 @@ input VideoHeroInput {
   heroTitle: String!
   heroVideoCutUrl: String!
   videoId: ID!
+}
+
+enum VideoReportOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
 }
 
 input VideoReportWhereInput {

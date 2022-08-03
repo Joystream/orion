@@ -19,14 +19,13 @@ import { ReportedVideoModel, saveReportedVideo } from '../models/ReportedContent
 import { OrionContext } from '../types'
 
 const ONE_HOUR = 60 * 60 * 1000
-const MAX_REPORTS_PER_VIDEO = 50
+const MAX_REPORTS_PER_HOUR = 50
 
 export const rateLimit: (limit: number) => MiddlewareFn<OrionContext> =
   (limit: number) =>
-  async ({ args, context: { remoteHost } }, next) => {
+  async ({ context: { remoteHost } }, next) => {
     const reportsCountPerVideo = await ReportedVideoModel.count({
       reporterIp: remoteHost,
-      videoId: args.videoId,
       timestamp: {
         $gte: new Date(Date.now() - ONE_HOUR),
       },
@@ -47,12 +46,12 @@ class ReportVideoArgs {
   rationale: string
 }
 
-enum OrderDirection {
-  ASC = 'asc',
-  DESC = 'desc',
+enum VideoReportOrderByInput {
+  createdAt_ASC = 'createdAt_ASC',
+  createdAt_DESC = 'createdAt_DESC',
 }
 
-registerEnumType(OrderDirection, { name: 'Order' })
+registerEnumType(VideoReportOrderByInput, { name: 'VideoReportOrderByInput' })
 
 @InputType()
 class VideoReportWhereInput {
@@ -74,8 +73,11 @@ class VideoReportsArgs {
   @Field(() => VideoReportWhereInput, { nullable: true })
   where: VideoReportWhereInput
 
-  @Field(() => OrderDirection, { nullable: true, defaultValue: OrderDirection.DESC })
-  order: OrderDirection
+  @Field(() => VideoReportOrderByInput, {
+    nullable: true,
+    defaultValue: VideoReportOrderByInput.createdAt_DESC,
+  })
+  orderBy: VideoReportOrderByInput
 
   @Field(() => Int, { nullable: true, defaultValue: 30 })
   limit: number
@@ -87,7 +89,7 @@ class VideoReportsArgs {
 @Resolver()
 export class ReportsInfosResolver {
   @Mutation(() => ReportVideoInfo, { description: 'Report a video' })
-  @UseMiddleware(rateLimit(MAX_REPORTS_PER_VIDEO))
+  @UseMiddleware(rateLimit(MAX_REPORTS_PER_HOUR))
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
     @Ctx() ctx: OrionContext
@@ -112,7 +114,7 @@ export class ReportsInfosResolver {
   @Query(() => [ReportVideoInfo])
   @Authorized()
   async reportedVideos(
-    @Args() { order, where, limit, skip }: VideoReportsArgs,
+    @Args() { orderBy, where, limit, skip }: VideoReportsArgs,
     @Ctx() ctx: OrionContext
   ): Promise<ReportVideoInfo[]> {
     const reportedVideosDocument = await ReportedVideoModel.find({
@@ -123,7 +125,7 @@ export class ReportsInfosResolver {
     })
       .skip(skip)
       .limit(limit)
-      .sort({ timestamp: order })
+      .sort({ timestamp: orderBy.split('_').at(-1) })
 
     return (
       reportedVideosDocument.map((reportedVideo) => ({

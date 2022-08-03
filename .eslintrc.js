@@ -1,6 +1,5 @@
 module.exports = {
-  extends: [ 'eslint:recommended',
-    'plugin:@typescript-eslint/recommended', 'plugin:jest/recommended', 'prettier'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:jest/recommended', 'prettier'],
   env: {
     node: true,
     es6: true,
@@ -31,7 +30,7 @@ module.exports = {
       },
       {
         selector: 'enumMember',
-        format: ['PascalCase'],
+        format: false,
       },
       {
         selector: 'typeLike',
@@ -44,5 +43,5 @@ module.exports = {
         format: ['PascalCase'],
       },
     ],
-  }
+  },
 }
