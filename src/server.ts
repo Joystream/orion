@@ -31,7 +31,13 @@ export const createServer = async (mongoose: Mongoose, aggregates: Aggregates, q
   })
 
   const orionSchema = await buildSchema({
-    resolvers: [VideoViewsInfosResolver, ChannelFollowsInfosResolver, ReportsInfosResolver, FeaturedContentResolver, AdminResolver],
+    resolvers: [
+      VideoViewsInfosResolver,
+      ChannelFollowsInfosResolver,
+      ReportsInfosResolver,
+      FeaturedContentResolver,
+      AdminResolver,
+    ],
     authChecker: customAuthChecker,
     emitSchemaFile: 'schema.graphql',
     validate: true,

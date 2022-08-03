@@ -1,5 +1,6 @@
 import { Authorized, Field, Mutation, Query, Resolver, Args, ArgsType } from 'type-graphql'
 import { getAdminDoc, Admin } from '../models/Admin'
+import { ADMIN_ROLE } from '../config'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -15,7 +16,7 @@ export class AdminResolver {
   }
 
   @Mutation(() => Admin, { nullable: false })
-  @Authorized('ADMIN')
+  @Authorized(ADMIN_ROLE)
   async setKillSwitch(@Args() { isKilled }: AdminInput) {
     const killSwitch = await getAdminDoc()
     killSwitch.isKilled = isKilled

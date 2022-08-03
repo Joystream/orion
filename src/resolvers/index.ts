@@ -4,4 +4,10 @@ import { ReportsInfosResolver } from './reportsInfo'
 import { VideoViewsInfosResolver } from './viewsInfo'
 import { AdminResolver } from './admin'
 
-export { ChannelFollowsInfosResolver, VideoViewsInfosResolver, FeaturedContentResolver, ReportsInfosResolver, AdminResolver }
+export {
+  ChannelFollowsInfosResolver,
+  VideoViewsInfosResolver,
+  FeaturedContentResolver,
+  ReportsInfosResolver,
+  AdminResolver,
+}

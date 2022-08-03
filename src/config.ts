@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 
 const isDev = process.env.NODE_ENV === 'development'
+export const ADMIN_ROLE = 'ADMIN'
 
 type LoadEnvVarOpts = {
   defaultValue?: string
