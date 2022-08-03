@@ -1,16 +1,16 @@
 import { gql } from 'apollo-server-express'
-import { KillSwitch } from '../../src/models/KillSwitch'
+import { Admin } from '../../src/models/Admin'
 
 export const GET_KILL_SWITCH = gql`
   query GetKillSwitch {
-    killSwitch {
+    admin {
       isKilled
     }
   }
 `
 
 export type GetKillSwitch = {
-  killSwitch: {
+  admin: {
     isKilled: boolean
   }
 }
@@ -24,7 +24,7 @@ export const SET_KILL_SWITCH = gql`
 `
 
 export type SetKillSwitch = {
-  setKillSwitch: KillSwitch
+  setKillSwitch: Admin
 }
 export type SetKillSwitchArgs = {
   isKilled: boolean

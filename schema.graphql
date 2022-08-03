@@ -3,6 +3,10 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Admin {
+  isKilled: Boolean!
+}
+
 type CategoryFeaturedVideos {
   categoryFeaturedVideos: [FeaturedVideo!]!
   categoryId: ID!
@@ -33,10 +37,6 @@ input FeaturedVideoInput {
   videoId: ID!
 }
 
-type KillSwitch {
-  isKilled: Boolean!
-}
-
 type Mutation {
   """Add a single view to the target video's count"""
   addVideoView(categoryId: ID, channelId: ID!, videoId: ID!): EntityViewsInfo!
@@ -47,7 +47,7 @@ type Mutation {
   """Report a video"""
   reportVideo(rationale: String!, videoId: ID!): ReportVideoInfo!
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
-  setKillSwitch(isKilled: Boolean!): KillSwitch!
+  setKillSwitch(isKilled: Boolean!): Admin!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
 
   """Remove a single follow from the target channel"""
@@ -55,14 +55,14 @@ type Mutation {
 }
 
 type Query {
+  """Set killed instance"""
+  admin: Admin!
+
   """Get featured videos for all categories"""
   allCategoriesFeaturedVideos(videosLimit: Int!): [CategoryFeaturedVideos!]!
 
   """Get featured videos for a given video category"""
   categoryFeaturedVideos(categoryId: ID!): [FeaturedVideo!]!
-
-  """Set killed instance"""
-  killSwitch: KillSwitch!
 
   """Get list of most viewed categories in a given time period"""
   mostViewedCategories(

@@ -4,8 +4,8 @@ import { Aggregates } from '../src/types'
 import { createMutationFn, createQueryFn, MutationFn, QueryFn } from './helpers'
 import { buildAggregates, connectMongoose, createServer } from '../src/server'
 
-import { GetKillSwitch, GET_KILL_SWITCH, SetKillSwitch, SET_KILL_SWITCH, SetKillSwitchArgs } from './queries/killSwitch'
-import { IsKilledModel } from '../src/models/KillSwitch'
+import { GetKillSwitch, GET_KILL_SWITCH, SetKillSwitch, SET_KILL_SWITCH, SetKillSwitchArgs } from './queries/admin'
+import { AdminModel } from '../src/models/Admin'
 
 describe('Kill switch resolver', () => {
   let server: ApolloServer
@@ -25,7 +25,7 @@ describe('Kill switch resolver', () => {
 
   afterEach(async () => {
     await server.stop()
-    await IsKilledModel.deleteMany({})
+    await AdminModel.deleteMany({})
     await mongoose.disconnect()
   })
 
@@ -34,7 +34,7 @@ describe('Kill switch resolver', () => {
       query: GET_KILL_SWITCH,
     })
     expect(result.errors).toBeUndefined()
-    return result.data?.killSwitch.isKilled
+    return result.data?.admin.isKilled
   }
 
   it('should return isKilled set to false', async () => {

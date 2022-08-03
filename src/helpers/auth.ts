@@ -3,8 +3,8 @@ import { OrionContext } from '../types'
 import config from '../config'
 
 export const customAuthChecker: AuthChecker<OrionContext> = ({ context }, roles) => {
-  if (roles.includes(config.killerRole)) {
-    return context.authorization === config.killSwitchSecret
+  if (roles.includes('ADMIN')) {
+    return context.authorization === config.adminSecret
   }
   return context.authorization === config.featuredContentSecret
 }

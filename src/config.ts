@@ -27,10 +27,9 @@ export class Config {
   private _port: number
   private _mongoDBUri: string
   private _featuredContentSecret: string
-  private _killSwitchSecret: string
+  private _adminSecret: string
   private _queryNodeUrl: string
   private _isDebugging: boolean
-  private _killerRole: string
 
   get port(): number {
     return this._port
@@ -44,8 +43,8 @@ export class Config {
     return this._featuredContentSecret
   }
 
-  get killSwitchSecret(): string {
-    return this._killSwitchSecret
+  get adminSecret(): string {
+    return this._adminSecret
   }
 
   get queryNodeUrl(): string {
@@ -54,10 +53,6 @@ export class Config {
 
   get isDebugging(): boolean {
     return this._isDebugging
-  }
-
-  get killerRole(): string {
-    return this._killerRole
   }
 
   loadConfig() {
@@ -73,12 +68,10 @@ export class Config {
     this._mongoDBUri = `mongodb://${mongoHostname}:${rawMongoPort}/${mongoDatabase}`
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
-    this._killSwitchSecret = loadEnvVar('ORION_KILL_SWITCH_PASSWORD')
+    this._adminSecret = loadEnvVar('ORION_ADMIN_SECRET')
     this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
 
     this._isDebugging = loadEnvVar('ORION_DEBUGGING', { defaultValue: 'false' }) === 'true'
-
-    this._killerRole = 'KILLER'
   }
 }
 
