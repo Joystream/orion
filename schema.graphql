@@ -13,6 +13,11 @@ type ChannelFollowsInfo {
   id: ID!
 }
 
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
 type EntityViewsInfo {
   id: ID!
   views: Int!
@@ -34,6 +39,9 @@ type Mutation {
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
+
+  """Report a video"""
+  reportVideo(rationale: String!, videoId: ID!): ReportVideoInfo!
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
 
@@ -58,9 +66,18 @@ type Query {
 
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
+  reportedVideos(limit: Int = 30, orderBy: VideoReportOrderByInput = createdAt_DESC, skip: Int, where: VideoReportWhereInput): [ReportVideoInfo!]!
 
   """Get current video hero"""
   videoHero: VideoHero!
+}
+
+type ReportVideoInfo {
+  createdAt: DateTime!
+  id: ID!
+  rationale: String!
+  reporterIp: String!
+  videoId: ID!
 }
 
 type VideoHero {
@@ -75,4 +92,16 @@ input VideoHeroInput {
   heroTitle: String!
   heroVideoCutUrl: String!
   videoId: ID!
+}
+
+enum VideoReportOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input VideoReportWhereInput {
+  createdAt_gt: DateTime
+  createdAt_lt: DateTime
+  reporterIp: String
+  videoId: ID
 }
