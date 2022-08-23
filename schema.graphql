@@ -17,6 +17,26 @@ type ChannelFollowsInfo {
   id: ID!
 }
 
+type ChannelReportInfo {
+  channelId: ID!
+  createdAt: DateTime!
+  id: ID!
+  rationale: String!
+  reporterIp: String!
+}
+
+enum ChannelReportOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+}
+
+input ChannelReportsWhereInput {
+  channelId: ID
+  createdAt_gt: DateTime
+  createdAt_lt: DateTime
+  reporterIp: String
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -44,8 +64,11 @@ type Mutation {
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
 
+  """Report a channel"""
+  reportChannel(channelId: ID!, rationale: String!): ChannelReportInfo!
+
   """Report a video"""
-  reportVideo(rationale: String!, videoId: ID!): ReportVideoInfo!
+  reportVideo(rationale: String!, videoId: ID!): VideoReportInfo!
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setKillSwitch(isKilled: Boolean!): Admin!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
@@ -74,18 +97,11 @@ type Query {
 
   """Get list of most viewed categories of all time"""
   mostViewedCategoriesAllTime(limit: Int!): [EntityViewsInfo!]
-  reportedVideos(limit: Int = 30, orderBy: VideoReportOrderByInput = createdAt_DESC, skip: Int, where: VideoReportWhereInput): [ReportVideoInfo!]!
+  reportedChannels(limit: Int = 30, orderBy: ChannelReportOrderByInput = createdAt_DESC, skip: Int, where: ChannelReportsWhereInput): [ChannelReportInfo!]!
+  reportedVideos(limit: Int = 30, orderBy: VideoReportOrderByInput = createdAt_DESC, skip: Int, where: VideoReportsWhereInput): [VideoReportInfo!]!
 
   """Get current video hero"""
   videoHero: VideoHero!
-}
-
-type ReportVideoInfo {
-  createdAt: DateTime!
-  id: ID!
-  rationale: String!
-  reporterIp: String!
-  videoId: ID!
 }
 
 type VideoHero {
@@ -102,12 +118,20 @@ input VideoHeroInput {
   videoId: ID!
 }
 
+type VideoReportInfo {
+  createdAt: DateTime!
+  id: ID!
+  rationale: String!
+  reporterIp: String!
+  videoId: ID!
+}
+
 enum VideoReportOrderByInput {
   createdAt_ASC
   createdAt_DESC
 }
 
-input VideoReportWhereInput {
+input VideoReportsWhereInput {
   createdAt_gt: DateTime
   createdAt_lt: DateTime
   reporterIp: String
