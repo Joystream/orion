@@ -181,10 +181,7 @@ export class ReportsInfosResolver {
 
   @Query(() => [VideoReportInfo])
   @Authorized()
-  async reportedVideos(
-    @Args() { orderBy, where, limit, skip }: VideoReportsArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<VideoReportInfo[]> {
+  async reportedVideos(@Args() { orderBy, where, limit, skip }: VideoReportsArgs): Promise<VideoReportInfo[]> {
     const reportedVideosDocument = await ReportedVideoModel.find({
       ...(where?.videoId ? { videoId: where?.videoId } : {}),
       ...(where?.createdAt_gt ? { timestamp: { $gte: where.createdAt_gt } } : {}),
@@ -201,16 +198,13 @@ export class ReportsInfosResolver {
         videoId: reportedVideo.videoId,
         createdAt: reportedVideo.timestamp,
         id: reportedVideo.id,
-        reporterIp: ctx.remoteHost || '',
+        reporterIp: reportedVideo.reporterIp,
       })) || []
     )
   }
   @Query(() => [ChannelReportInfo])
   @Authorized()
-  async reportedChannels(
-    @Args() { orderBy, where, limit, skip }: ChannelReportsArgs,
-    @Ctx() ctx: OrionContext
-  ): Promise<ChannelReportInfo[]> {
+  async reportedChannels(@Args() { orderBy, where, limit, skip }: ChannelReportsArgs): Promise<ChannelReportInfo[]> {
     const reportedChannelsDocument = await ReportedChannelModel.find({
       ...(where?.channelId ? { channelId: where?.channelId } : {}),
       ...(where?.createdAt_gt ? { timestamp: { $gte: where.createdAt_gt } } : {}),
@@ -227,7 +221,7 @@ export class ReportsInfosResolver {
         channelId: reportedChannel.channelId,
         createdAt: reportedChannel.timestamp,
         id: reportedChannel.id,
-        reporterIp: ctx.remoteHost || '',
+        reporterIp: reportedChannel.reporterIp,
       })) || []
     )
   }
