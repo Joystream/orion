@@ -1,11 +1,7 @@
 {
   "outDir": "src/types",
-  "specVersions": "https://kusama.archive.subsquid.io/graphql",
-  "events": [
-    "Balances.Transfer"
-  ],
-  "calls": [ 
-  ],
-  "storage": [
-  ]
+  "specVersions": "http://localhost:8888/graphql",
+  "events": ["Content.VideoCreated", "Content.ChannelCreated", "System.ExtrinsicSuccess"],
+  "calls": [],
+  "storage": []
 }

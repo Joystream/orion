@@ -1,0 +1,245 @@
+type Event @entity {
+  "{blockNumber}-{indexInBlock}"
+  id: ID!
+
+  "Blocknumber of the block in which the event was emitted."
+  inBlock: Int!
+
+  "Hash of the extrinsic the event was emitted in"
+  inExtrinsic: String!
+
+  "Index of event in block from which it was emitted."
+  indexInBlock: Int!
+
+  "Timestamp of the block the event was emitted in"
+  timestamp: DateTime!
+
+  "More specific event data, which depends on event type"
+  data: EventData!
+}
+
+union EventData =
+    CommentCreatedEventData
+  | CommentTextUpdatedEventData
+  | OpenAuctionStartedEventData
+  | EnglishAuctionStartedEventData
+  | NftIssuedEventData
+  | AuctionBidMadeEventData
+  | AuctionBidCanceledEventData
+  | AuctionCanceledEventData
+  | EnglishAuctionSettledEventData
+  | BidMadeCompletingAuctionEventData
+  | OpenAuctionBidAcceptedEventData
+  | NftSellOrderMadeEventData
+  | NftBoughtEventData
+  | BuyNowCanceledEventData
+  | BuyNowPriceUpdatedEventData
+  | MetaprotocolTransactionStatusEventData
+
+# Atlas use-case: `GetCommentEdits` query
+type CommentCreatedEventData {
+  "The comment that was added"
+  comment: Comment!
+
+  "Comment's original text"
+  text: String!
+}
+
+# Atlas use-case: `GetCommentEdits` query
+type CommentTextUpdatedEventData {
+  "The comment being updated"
+  comment: Comment!
+
+  "New comment text"
+  newText: String!
+
+  # Only author can edit the comment, so no actor context required
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type OpenAuctionStartedEventData {
+  "Actor that started this auction."
+  actor: ContentActor!
+
+  "Nft owner at the time it was put on an auction."
+  nftOwner: NftOwner!
+
+  "Auction started."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type EnglishAuctionStartedEventData {
+  "Actor that started this auction."
+  actor: ContentActor!
+
+  "Nft owner at the time it was put on an auction."
+  nftOwner: NftOwner!
+
+  "Auction started."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type NftIssuedEventData {
+  "Actor that issued the NFT."
+  actor: ContentActor!
+
+  "NFT that was issued."
+  nft: OwnedNft!
+
+  "NFT's initial owner."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type AuctionBidMadeEventData {
+  "The bid that was submitted "
+  bid: Bid!
+
+  "Nft owner at the time it was being auctioned."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type AuctionBidCanceledEventData {
+  "Member that canceled the bid."
+  member: Membership!
+
+  "Nft owner at the time it was being auctioned."
+  nftOwner: NftOwner!
+
+  "The bid that got canceled."
+  bid: Bid!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type AuctionCanceledEventData {
+  "Content actor canceling the auction."
+  actor: ContentActor!
+
+  "Nft owner at the time the auction was being auctioned."
+  nftOwner: NftOwner!
+
+  "Auction that was canceled."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type EnglishAuctionSettledEventData {
+  "English auction winning bid"
+  winningBid: Bid!
+
+  "NFT owner before the english auction was settled"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type BidMadeCompletingAuctionEventData {
+  "Bid that completed the auction"
+  winningBid: Bid!
+
+  "NFT owner before the auction was completed"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type OpenAuctionBidAcceptedEventData {
+  "Content actor that accepted the bid."
+  actor: ContentActor!
+
+  "Accepted/winning bid"
+  winningBid: Bid!
+
+  "NFT owner before the auction was completed"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type NftSellOrderMadeEventData {
+  "NFT being sold"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "NFT owner at the time it was put on sale"
+  nftOwner: NftOwner!
+
+  "Offer's price."
+  price: BigInt!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type NftBoughtEventData {
+  "The NFT that was bought"
+  nft: OwnedNft!
+
+  "Member that bought the NFT."
+  buyer: Membership!
+
+  "NFT owner before it was bought"
+  previousNftOwner: NftOwner!
+
+  "Price for which the NFT was bought"
+  price: BigInt!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory`
+type BuyNowCanceledEventData {
+  "The NFT for which the buy now offer was canceled"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "Owner of the NFT at the time the buy now offer was canceled."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory`
+type BuyNowPriceUpdatedEventData {
+  "NFT being sold"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "NFT owner at the time it was on sale"
+  nftOwner: NftOwner!
+
+  "New sell order price."
+  newPrice: BigInt!
+}
+
+type MetaprotocolTransactionResultCommentCreated {
+  commentCreated: Comment!
+}
+
+type MetaprotocolTransactionResultCommentEdited {
+  commentEdited: Comment!
+}
+
+type MetaprotocolTransactionResultCommentDeleted {
+  commentDeleted: Comment!
+}
+
+type MetaprotocolTransactionResultCommentModerated {
+  commentModerated: Comment!
+}
+
+type MetaprotocolTransactionResultFailed {
+  errorMessage: String!
+}
+
+union MetaprotocolTransactionResult =
+    MetaprotocolTransactionResultCommentCreated
+  | MetaprotocolTransactionResultCommentEdited
+  | MetaprotocolTransactionResultCommentDeleted
+  | MetaprotocolTransactionResultCommentModerated
+  | MetaprotocolTransactionResultFailed
+
+type MetaprotocolTransactionStatusEventData {
+  "The result of metaprotocol action"
+  result: MetaprotocolTransactionResult!
+}
