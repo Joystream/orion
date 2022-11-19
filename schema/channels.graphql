@@ -1,0 +1,66 @@
+type Channel @entity {
+  "Runtime entity identifier (EntityId)"
+  id: ID!
+
+  "Timestamp of the block the channel was created at"
+  createdAt: DateTime!
+
+  "Current member-owner of the channel (if owned by a member)"
+  ownerMember: Membership
+
+  "The title of the Channel"
+  title: String
+
+  "The description of a Channel"
+  description: String
+
+  "Channel's cover (background) photo asset. Recommended ratio: 16:9."
+  coverPhoto: StorageDataObject
+
+  "Channel's avatar photo asset."
+  avatarPhoto: StorageDataObject
+
+  "Flag signaling whether a channel is public."
+  isPublic: Boolean
+
+  "Flag signaling whether a channel is censored."
+  isCensored: Boolean!
+
+  "The primary langauge of the channel's content"
+  language: String @index
+
+  "List of videos that belong to the channel"
+  videos: [Video!]! @derivedFrom(field: "channel")
+
+  "Number of the block the channel was created in"
+  createdInBlock: Int!
+
+  "Channel's reward account, storing the income from the nft sales and channel payouts."
+  rewardAccount: String!
+
+  "Value of channel state bloat bond fee paid by channel creator"
+  channelStateBloatBond: BigInt!
+
+  "Channel follows"
+  follows: [ChannelFollow!] @derivedFrom(field: "channel")
+
+  "Channel's video views"
+  videoViews: [VideoViewEvent!] @derivedFrom(field: "channel")
+
+  "Number of active follows (to speed up orderBy queries by avoiding COUNT aggregation)"
+  followsNum: Int!
+
+  "Number of total video views (to speed up orderBy queries by avoiding COUNT aggregation)"
+  videoViewsNum: Int!
+}
+
+type ChannelFollow @entity {
+  "Channel being followed"
+  channel: Channel!
+
+  "User who followed"
+  user: User!
+
+  "Timestamp"
+  timestamp: DateTime!
+}

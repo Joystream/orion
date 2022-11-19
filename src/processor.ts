@@ -1,127 +1,116 @@
-import {lookupArchive} from "@subsquid/archive-registry"
-import * as ss58 from "@subsquid/ss58"
-import {BatchContext, BatchProcessorItem, SubstrateBatchProcessor} from "@subsquid/substrate-processor"
-import {Store, TypeormDatabase} from "@subsquid/typeorm-store"
-import {In} from "typeorm"
-import {Account, Transfer} from "./model"
-import {BalancesTransferEvent} from "./types/events"
+import {
+  BatchContext,
+  BatchProcessorItem,
+  SubstrateBatchProcessor,
+} from '@subsquid/substrate-processor'
+import { Store, TypeormDatabase } from '@subsquid/typeorm-store'
+import { Channel, Video, Event, OwnedNft, Auction, Bid, Membership, Comment } from './model'
+import {
+  ContentVideoCreatedEvent,
+  ContentChannelCreatedEvent,
+  SystemExtrinsicSuccessEvent,
+} from './types/events'
+import _ from 'lodash'
+import {
+  randomMember,
+  randomChannel,
+  randomVideo,
+  randomNFT,
+  randomAuction,
+  randomBid,
+  randomComment,
+  randomEvent,
+  randomEventData,
+} from './mock'
 
+const defaultEventOptions = {
+  data: {
+    event: {
+      args: true,
+    },
+  },
+} as const
+
+const eventsMap = {
+  'Content.VideoCreated': ContentVideoCreatedEvent,
+  'Content.ChannelCreated': ContentChannelCreatedEvent,
+  'System.ExtrinsicSuccess': SystemExtrinsicSuccessEvent,
+} as const
 
 const processor = new SubstrateBatchProcessor()
-    .setBatchSize(500)
-    .setDataSource({
-        // Lookup archive by the network name in the Subsquid registry
-        archive: lookupArchive("kusama", {release: "FireSquid"})
-
-        // Use archive created by archive/docker-compose.yml
-        // archive: 'http://localhost:8888/graphql'
-    })
-    .addEvent('Balances.Transfer', {
-        data: {
-            event: {
-                args: true,
-                extrinsic: {
-                    hash: true,
-                    fee: true
-                }
-            }
-        }
-    } as const)
-
+  .setDataSource({
+    archive: 'http://localhost:8888/graphql',
+  })
+  .addEvent('Content.VideoCreated', defaultEventOptions)
+  .addEvent('Content.ChannelCreated', defaultEventOptions)
+  .addEvent('System.ExtrinsicSuccess', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
 
+processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
+  const extrinscSuccessEvents = getEvents(ctx, 'System.ExtrinsicSuccess')
 
-processor.run(new TypeormDatabase(), async ctx => {
-    let transfersData = getTransfers(ctx)
+  const allMembers: Membership[] = []
+  const allChannels: Channel[] = []
+  const allVideos: Video[] = []
+  const allNfts: OwnedNft[] = []
+  const allAuctions: Auction[] = []
+  const allBids: Bid[] = []
+  const allComments: Comment[] = []
+  const allEvents: Event[] = []
+  for (const e of extrinscSuccessEvents) {
+    const members = Array.from({ length: 5 }, () => randomMember())
+    const channels = Array.from({ length: 10 }, () => randomChannel(_.sample(members)!))
+    const videos = Array.from({ length: 100 }, () => randomVideo(_.sample(channels)!))
+    const nfts = _.sampleSize(videos, 50).map((v) => randomNFT(v))
+    const auctions = _.sampleSize(nfts, 30).map((nft) => randomAuction(nft))
+    const bids = Array.from({ length: 100 }, () =>
+      randomBid(_.sample(auctions)!, _.sample(members)!)
+    )
+    const comments = Array.from({ length: 200 }, () =>
+      randomComment(_.sample(members)!, _.sample(videos)!)
+    )
+    const events = Array.from({ length: 1000 }, () =>
+      randomEvent(randomEventData(members, nfts, auctions, bids, comments))
+    )
+    allMembers.push(...members)
+    allChannels.push(...channels)
+    allVideos.push(...videos)
+    allNfts.push(...nfts)
+    allAuctions.push(...auctions)
+    allBids.push(...bids)
+    allComments.push(...comments)
+    allEvents.push(...events)
+  }
+  const allAssets = allVideos.map((v) => [v.thumbnailPhoto!, v.media!]).flat()
+  const allBags = allAssets.map((a) => a.storageBag)
 
-    let accountIds = new Set<string>()
-    for (let t of transfersData) {
-        accountIds.add(t.from)
-        accountIds.add(t.to)
-    }
-
-    let accounts = await ctx.store.findBy(Account, {id: In([...accountIds])}).then(accounts => {
-        return new Map(accounts.map(a => [a.id, a]))
-    })
-
-    let transfers: Transfer[] = []
-
-    for (let t of transfersData) {
-        let {id, blockNumber, timestamp, extrinsicHash, amount, fee} = t
-
-        let from = getAccount(accounts, t.from)
-        let to = getAccount(accounts, t.to)
-
-        transfers.push(new Transfer({
-            id,
-            blockNumber,
-            timestamp,
-            extrinsicHash,
-            from,
-            to,
-            amount,
-            fee
-        }))
-    }
-
-    await ctx.store.save(Array.from(accounts.values()))
-    await ctx.store.insert(transfers)
+  await ctx.store.insert(allMembers)
+  await ctx.store.insert(allChannels)
+  await ctx.store.insert(allBags)
+  await ctx.store.insert(allAssets)
+  await ctx.store.insert(allVideos)
+  await ctx.store.insert(allNfts)
+  await ctx.store.insert(allAuctions)
+  await ctx.store.insert(allBids)
+  await ctx.store.insert(allComments)
+  await ctx.store.insert(allEvents)
 })
 
-
-interface TransferEvent {
-    id: string
-    blockNumber: number
-    timestamp: Date
-    extrinsicHash?: string
-    from: string
-    to: string
-    amount: bigint
-    fee?: bigint
-}
-
-
-function getTransfers(ctx: Ctx): TransferEvent[] {
-    let transfers: TransferEvent[] = []
-    for (let block of ctx.blocks) {
-        for (let item of block.items) {
-            if (item.name == "Balances.Transfer") {
-                let e = new BalancesTransferEvent(ctx, item.event)
-                let rec: {from: Uint8Array, to: Uint8Array, amount: bigint}
-                if (e.isV1020) {
-                    let [from, to, amount,] = e.asV1020
-                    rec = {from, to, amount}
-                } else if (e.isV1050) {
-                    let [from, to, amount] = e.asV1050
-                    rec = {from, to, amount}
-                } else {
-                    rec = e.asV9130
-                }
-                transfers.push({
-                    id: item.event.id,
-                    blockNumber: block.header.height,
-                    timestamp: new Date(block.header.timestamp),
-                    extrinsicHash: item.event.extrinsic?.hash,
-                    from: ss58.codec('kusama').encode(rec.from),
-                    to: ss58.codec('kusama').encode(rec.to),
-                    amount: rec.amount,
-                    fee: item.event.extrinsic?.fee || 0n
-                })
-            }
-        }
+function getEvents<T extends keyof typeof eventsMap>(
+  ctx: Ctx,
+  type: T
+): InstanceType<typeof eventsMap[T]>[] {
+  const events: InstanceType<typeof eventsMap[T]>[] = []
+  for (const block of ctx.blocks) {
+    for (const item of block.items) {
+      if (item.name === type) {
+        const EventConstructor = eventsMap[type]
+        const e = new EventConstructor(ctx, item.event) as InstanceType<typeof eventsMap[T]>
+        events.push(e)
+      }
     }
-    return transfers
-}
-
-
-function getAccount(m: Map<string, Account>, id: string): Account {
-    let acc = m.get(id)
-    if (acc == null) {
-        acc = new Account()
-        acc.id = id
-        m.set(id, acc)
-    }
-    return acc
+  }
+  return events
 }

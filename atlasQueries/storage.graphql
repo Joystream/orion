@@ -1,0 +1,53 @@
+query GetDistributionBucketsWithBags {
+  distributionBuckets(limit: 500, where: { distributing_eq: true }) {
+    id
+    bags {
+      # CHANGE: Many-to-Many relations are not supported, changed to 2-way One-to-Many
+      bag {
+        id
+      }
+    }
+    operators {
+      ...DistributionBucketOperatorField
+    }
+  }
+}
+
+query GetStorageBucketsWithBags {
+  storageBuckets(
+    limit: 500
+    where: {
+      operatorStatus: { isTypeOf_eq: "StorageBucketOperatorStatusActive" } # CHANGE: Now using `operatorStatus` instead of `operatorStatus_json`
+      operatorMetadata: { nodeEndpoint_contains: "http" }
+    }
+  ) {
+    id
+    operatorMetadata {
+      nodeEndpoint
+    }
+    bags {
+      # CHANGE: Many-to-Many relations are not supported, changed to 2-way One-to-Many
+      bag {
+        id
+      }
+    }
+  }
+}
+
+# No changes
+query GetBasicDistributionBuckets {
+  distributionBuckets(limit: 500, where: { acceptingNewBags_eq: true }) {
+    id
+    bucketIndex
+    family {
+      id
+    }
+  }
+}
+
+# No changes
+query GetBasicStorageBuckets {
+  storageBuckets(limit: 500, where: { acceptingNewBags_eq: true }) {
+    id
+  }
+}

@@ -20,6 +20,8 @@ serve:
 migrate:
 	@npx squid-typeorm-migration apply
 
+dbgen:
+	@npx squid-typeorm-migration generate
 
 codegen:
 	@npx squid-typeorm-codegen

@@ -11,7 +11,7 @@ database:
   type: pg-14
 
 api:
-  cmd: [ "npx", "squid-graphql-server" ]
+  cmd: ['npx', 'squid-graphql-server']
   graphql-examples:
     - query: |-
         query MyQuery {
@@ -27,9 +27,9 @@ api:
 processor:
   init:
     - name: db-migrate
-      cmd: [ "npx" ,"sqd", "db", "migrate" ]
+      cmd: ['npx', 'sqd', 'db', 'migrate']
 
-#  secrets:
-#    - name: SECRET_ENV_NAME
+  #  secrets:
+  #    - name: SECRET_ENV_NAME
 
-  cmd: [ "node", "lib/processor" ]
+  cmd: ['node', 'lib/processor']
