@@ -41,9 +41,6 @@ type Channel @entity {
   "Value of channel state bloat bond fee paid by channel creator"
   channelStateBloatBond: BigInt!
 
-  "Channel follows"
-  follows: [ChannelFollow!] @derivedFrom(field: "channel")
-
   "Channel's video views"
   videoViews: [VideoViewEvent!] @derivedFrom(field: "channel")
 
@@ -52,15 +49,4 @@ type Channel @entity {
 
   "Number of total video views (to speed up orderBy queries by avoiding COUNT aggregation)"
   videoViewsNum: Int!
-}
-
-type ChannelFollow @entity {
-  "Channel being followed"
-  channel: Channel!
-
-  "User who followed"
-  user: User!
-
-  "Timestamp"
-  timestamp: DateTime!
 }
