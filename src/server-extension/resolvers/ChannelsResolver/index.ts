@@ -83,7 +83,7 @@ export class ChannelsResolver {
       // Define the shape of the extra query to be merged with the original query
       const extraQ = parseSql(`
                 SELECT
-                    "activeVideoCounter"."activeVideosCount"
+                    COALESCE("activeVideoCounter"."activeVideosCount", 0) AS "activeVideosCount"
                 FROM
                     "channel"
                     LEFT OUTER JOIN (${activeVideosCountQueryString}) AS "activeVideoCounter"
