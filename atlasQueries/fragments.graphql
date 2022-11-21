@@ -45,7 +45,7 @@ fragment ExtendedFullChannelFields on ExtendedChannel {
 # CHANGE: This is a replacement for `BasicChannelFields` + `activeVideosCount`
 fragment ExtendedBasicChannelFields on ExtendedChannel {
   channel {
-    ...FullChannelFields
+    ...BasicChannelFields
   }
   activeVideosCount
 }
