@@ -1,14 +1,3 @@
-# Generic Atlas user
-type User @entity {
-  "Some unique identifier of the user"
-  id: ID!
-
-  "Channels followed by the user"
-  channelsFollows: [ChannelFollow!] @derivedFrom(field: "user")
-
-  # TODO: Expand as needed
-}
-
 # Content Actor
 union ContentActor = ContentActorCurator | ContentActorMember | ContentActorLead
 
