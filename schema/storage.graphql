@@ -16,8 +16,9 @@ union StorageBucketOperatorStatus =
   | StorageBucketOperatorStatusInvited
   | StorageBucketOperatorStatusActive
 
-type GeoCoordinates @entity {
+type GeoCoordinates {
   latitude: Float!
+  
   longitude: Float!
 }
 
@@ -50,7 +51,7 @@ union GeographicalArea =
   | GeographicalAreaCountry
   | GeographicalAreaSubdivistion
 
-type NodeLocationMetadata @entity {
+type NodeLocationMetadata {
   "ISO 3166-1 alpha-2 country code (2 letters)"
   countryCode: String
 
@@ -62,6 +63,11 @@ type NodeLocationMetadata @entity {
 }
 
 type StorageBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Storage bucket to which the metadata is assigned"
+  storageBucket: StorageBucket! @unique
+
   "Root node endpoint"
   nodeEndpoint: String
 
@@ -80,7 +86,7 @@ type StorageBucket @entity {
   operatorStatus: StorageBucketOperatorStatus!
 
   "Storage bucket operator metadata"
-  operatorMetadata: StorageBucketOperatorMetadata
+  operatorMetadata: StorageBucketOperatorMetadata @derivedFrom(field: "storageBucket")
 
   "Whether the bucket is accepting any new storage bags"
   acceptingNewBags: Boolean!
@@ -110,11 +116,11 @@ type StorageBagOwnerWorkingGroup {
 }
 
 type StorageBagOwnerMember {
-  memberId: Int
+  memberId: String!
 }
 
 type StorageBagOwnerChannel {
-  channelId: Int
+  channelId: String!
 }
 
 # Note: Not supported by runtime yet
@@ -226,18 +232,12 @@ type StorageDataObject @entity {
   unsetAt: DateTime
 }
 
-type DistributionBucketFamilyGeographicArea @entity {
-  "{metadataId}-{(C|c|s)}-{code}"
+type DistributionBucketFamilyMetadata @entity {
   id: ID!
 
-  "Geographical area (continent / country / subdivision)"
-  area: GeographicalArea!
+  "Distribution bucket family"
+  family: DistributionBucketFamily! @unique
 
-  "Related distribution bucket family metadata"
-  distributionBucketFamilyMetadata: DistributionBucketFamilyMetadata!
-}
-
-type DistributionBucketFamilyMetadata @entity {
   "Name of the geographical region covered by the family (ie.: us-east-1)"
   region: String @index
 
@@ -245,14 +245,18 @@ type DistributionBucketFamilyMetadata @entity {
   description: String
 
   "Geographical areas covered by the family"
-  areas: [DistributionBucketFamilyGeographicArea!]
-    @derivedFrom(field: "distributionBucketFamilyMetadata")
+  areas: [GeographicalArea!]
 
   "List of targets (hosts/ips) best suited latency measurements for the family"
   latencyTestTargets: [String]
 }
 
 type DistributionBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Distribution bucket operator"
+  distirbutionBucketOperator: DistributionBucketOperator! @unique
+  
   "Root distributor node api endpoint"
   nodeEndpoint: String
 
@@ -282,7 +286,7 @@ type DistributionBucketOperator @entity {
   status: DistributionBucketOperatorStatus!
 
   "Operator metadata"
-  metadata: DistributionBucketOperatorMetadata
+  metadata: DistributionBucketOperatorMetadata @derivedFrom(field: "distirbutionBucketOperator")
 }
 
 type DistributionBucket @entity {
@@ -313,7 +317,7 @@ type DistributionBucketFamily @entity {
   id: ID!
 
   "Current bucket family metadata"
-  metadata: DistributionBucketFamilyMetadata
+  metadata: DistributionBucketFamilyMetadata @derivedFrom(field: "family")
 
   "Distribution buckets belonging to the family"
   buckets: [DistributionBucket!] @derivedFrom(field: "family")

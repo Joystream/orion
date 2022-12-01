@@ -1,4 +1,4 @@
-import type {Result} from './support'
+import type {Result, Option} from './support'
 
 export interface ChannelRecord {
   owner: ChannelOwner
@@ -50,6 +50,95 @@ export interface VideoCreationParametersRecord {
   expectedVideoStateBloatBond: bigint
   expectedDataObjectStateBloatBond: bigint
   storageBucketsNumWitness: number
+}
+
+export interface CreateMemberParameters {
+  rootAccount: Uint8Array
+  controllerAccount: Uint8Array
+  handle: Uint8Array
+  metadata: Uint8Array
+  isFoundingMember: boolean
+}
+
+export interface InviteMembershipParameters {
+  invitingMemberId: bigint
+  rootAccount: Uint8Array
+  controllerAccount: Uint8Array
+  handle: (Uint8Array | undefined)
+  metadata: Uint8Array
+}
+
+export interface BuyMembershipParameters {
+  rootAccount: Uint8Array
+  controllerAccount: Uint8Array
+  handle: (Uint8Array | undefined)
+  metadata: Uint8Array
+  referrerId: (bigint | undefined)
+}
+
+export interface GiftMembershipParameters {
+  rootAccount: Uint8Array
+  controllerAccount: Uint8Array
+  handle: (Uint8Array | undefined)
+  metadata: Uint8Array
+  creditControllerAccount: bigint
+  applyControllerAccountInvitationLock: (bigint | undefined)
+  creditRootAccount: bigint
+  applyRootAccountInvitationLock: (bigint | undefined)
+}
+
+export type BagIdType = BagIdType_Static | BagIdType_Dynamic
+
+export interface BagIdType_Static {
+  __kind: 'Static'
+  value: StaticBagId
+}
+
+export interface BagIdType_Dynamic {
+  __kind: 'Dynamic'
+  value: DynamicBagIdType
+}
+
+export interface UploadParametersRecord {
+  bagId: BagIdType
+  objectCreationList: DataObjectCreationParameters[]
+  stateBloatBondSourceAccountId: Uint8Array
+  expectedDataSizeFee: bigint
+  expectedDataObjectStateBloatBond: bigint
+}
+
+export interface DistributionBucketIdRecord {
+  distributionBucketFamilyId: bigint
+  distributionBucketIndex: bigint
+}
+
+export interface DynBagCreationParametersRecord {
+  bagId: DynamicBagIdType
+  objectCreationList: DataObjectCreationParameters[]
+  stateBloatBondSourceAccountId: Uint8Array
+  expectedDataSizeFee: bigint
+  expectedDataObjectStateBloatBond: bigint
+  storageBuckets: bigint[]
+  distributionBuckets: DistributionBucketIdRecord[]
+}
+
+export type DynamicBagIdType = DynamicBagIdType_Member | DynamicBagIdType_Channel
+
+export interface DynamicBagIdType_Member {
+  __kind: 'Member'
+  value: bigint
+}
+
+export interface DynamicBagIdType_Channel {
+  __kind: 'Channel'
+  value: bigint
+}
+
+export interface Voucher {
+  sizeLimit: bigint
+  objectsLimit: bigint
+  sizeUsed: bigint
+  objectsUsed: bigint
 }
 
 export interface DispatchInfo {
@@ -217,16 +306,27 @@ export interface StorageAssetsRecord {
   expectedDataSizeFee: bigint
 }
 
-export interface DistributionBucketIdRecord {
-  distributionBucketFamilyId: bigint
-  distributionBucketIndex: bigint
-}
-
 export interface NftIssuanceParametersRecord {
   royalty: (number | undefined)
   nftMetadata: Uint8Array
   nonChannelOwner: (bigint | undefined)
   initTransactionalStatus: InitTransactionalStatusRecord
+}
+
+export type StaticBagId = StaticBagId_Council | StaticBagId_WorkingGroup
+
+export interface StaticBagId_Council {
+  __kind: 'Council'
+}
+
+export interface StaticBagId_WorkingGroup {
+  __kind: 'WorkingGroup'
+  value: WorkingGroup
+}
+
+export interface DataObjectCreationParameters {
+  size: bigint
+  ipfsContentId: Uint8Array
 }
 
 export type DispatchClass = DispatchClass_Normal | DispatchClass_Operational | DispatchClass_Mandatory
@@ -258,11 +358,6 @@ export interface PendingTransfer {
   transferParams: TransferCommitmentParameters
 }
 
-export interface DataObjectCreationParameters {
-  size: bigint
-  ipfsContentId: Uint8Array
-}
-
 export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
 
 export interface InitTransactionalStatusRecord_Idle {
@@ -287,6 +382,44 @@ export interface InitTransactionalStatusRecord_EnglishAuction {
 export interface InitTransactionalStatusRecord_OpenAuction {
   __kind: 'OpenAuction'
   value: OpenAuctionParamsRecord
+}
+
+export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_App | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
+
+export interface WorkingGroup_Forum {
+  __kind: 'Forum'
+}
+
+export interface WorkingGroup_Storage {
+  __kind: 'Storage'
+}
+
+export interface WorkingGroup_Content {
+  __kind: 'Content'
+}
+
+export interface WorkingGroup_OperationsAlpha {
+  __kind: 'OperationsAlpha'
+}
+
+export interface WorkingGroup_App {
+  __kind: 'App'
+}
+
+export interface WorkingGroup_Distribution {
+  __kind: 'Distribution'
+}
+
+export interface WorkingGroup_OperationsBeta {
+  __kind: 'OperationsBeta'
+}
+
+export interface WorkingGroup_OperationsGamma {
+  __kind: 'OperationsGamma'
+}
+
+export interface WorkingGroup_Membership {
+  __kind: 'Membership'
 }
 
 export interface TransferCommitmentParameters {

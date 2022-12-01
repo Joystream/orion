@@ -2,26 +2,58 @@ import {
   BatchContext,
   BatchProcessorItem,
   SubstrateBatchProcessor,
+  SubstrateBlock,
 } from '@subsquid/substrate-processor'
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store'
-import { Channel, Video, Event, OwnedNft, Auction, Bid, Membership, Comment } from './model'
+import { Logger } from './logger'
 import {
-  ContentVideoCreatedEvent,
-  ContentChannelCreatedEvent,
-  SystemExtrinsicSuccessEvent,
-} from './types/events'
-import _ from 'lodash'
+  processStorageBucketCreatedEvent,
+  processStorageBucketInvitationAcceptedEvent,
+  processStorageBucketsUpdatedForBagEvent,
+  processStorageOperatorMetadataSetEvent,
+  processStorageBucketVoucherLimitsSetEvent,
+  processPendingDataObjectsAcceptedEvent,
+  processStorageBucketInvitationCancelledEvent,
+  processStorageBucketOperatorInvitedEvent,
+  processStorageBucketOperatorRemovedEvent,
+  processStorageBucketStatusUpdatedEvent,
+  processStorageBucketDeletedEvent,
+  processVoucherChangedEvent,
+  processDynamicBagCreatedEvent,
+  processDynamicBagDeletedEvent,
+  processDataObjectsUploadedEvent,
+  processDataObjectsUpdatedEvent,
+  processDataObjectsMovedEvent,
+  processDataObjectsDeletedEvent,
+  processDistributionBucketCreatedEvent,
+  processDistributionBucketStatusUpdatedEvent,
+  processDistributionBucketDeletedEvent,
+  processDistributionBucketsUpdatedForBagEvent,
+  processDistributionBucketModeUpdatedEvent,
+  processDistributionBucketOperatorInvitedEvent,
+  processDistributionBucketInvitationCancelledEvent,
+  processDistributionBucketInvitationAcceptedEvent,
+  processDistributionBucketMetadataSetEvent,
+  processDistributionBucketOperatorRemovedEvent,
+  processDistributionBucketFamilyCreatedEvent,
+  processDistributionBucketFamilyMetadataSetEvent,
+  processDistributionBucketFamilyDeletedEvent,
+} from './mappings/storage'
+import { processChannelCreatedEvent } from './mappings/content/channel'
 import {
-  randomMember,
-  randomChannel,
-  randomVideo,
-  randomNFT,
-  randomAuction,
-  randomBid,
-  randomComment,
-  randomEvent,
-  randomEventData,
-} from './mock'
+  processMemberAccountsUpdatedEvent,
+  processMemberProfileUpdatedEvent,
+  processNewMember,
+} from './mappings/membership'
+import { Event } from './types/support'
+import {
+  assertAssignable,
+  EventNames,
+  EventHandler,
+  eventConstructors,
+  EventInstance,
+  EntitiesCollector,
+} from './utils'
 
 const defaultEventOptions = {
   data: {
@@ -31,86 +63,123 @@ const defaultEventOptions = {
   },
 } as const
 
-const eventsMap = {
-  'Content.VideoCreated': ContentVideoCreatedEvent,
-  'Content.ChannelCreated': ContentChannelCreatedEvent,
-  'System.ExtrinsicSuccess': SystemExtrinsicSuccessEvent,
-} as const
-
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
     archive: 'http://localhost:8888/graphql',
   })
-  .addEvent('Content.VideoCreated', defaultEventOptions)
   .addEvent('Content.ChannelCreated', defaultEventOptions)
-  .addEvent('System.ExtrinsicSuccess', defaultEventOptions)
+  .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
+  .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
+  .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
+  .addEvent('Storage.StorageOperatorMetadataSet', defaultEventOptions)
+  .addEvent('Storage.StorageBucketVoucherLimitsSet', defaultEventOptions)
+  .addEvent('Storage.PendingDataObjectsAccepted', defaultEventOptions)
+  .addEvent('Storage.StorageBucketInvitationCancelled', defaultEventOptions)
+  .addEvent('Storage.StorageBucketOperatorInvited', defaultEventOptions)
+  .addEvent('Storage.StorageBucketOperatorRemoved', defaultEventOptions)
+  .addEvent('Storage.StorageBucketStatusUpdated', defaultEventOptions)
+  .addEvent('Storage.StorageBucketDeleted', defaultEventOptions)
+  .addEvent('Storage.VoucherChanged', defaultEventOptions)
+  .addEvent('Storage.DynamicBagCreated', defaultEventOptions)
+  .addEvent('Storage.DynamicBagDeleted', defaultEventOptions)
+  .addEvent('Storage.DataObjectsUploaded', defaultEventOptions)
+  .addEvent('Storage.DataObjectsUpdated', defaultEventOptions)
+  .addEvent('Storage.DataObjectsMoved', defaultEventOptions)
+  .addEvent('Storage.DataObjectsDeleted', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketCreated', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketStatusUpdated', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketDeleted', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketsUpdatedForBag', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketModeUpdated', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketOperatorInvited', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketInvitationCancelled', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketInvitationAccepted', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketMetadataSet', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketOperatorRemoved', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketFamilyCreated', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketFamilyMetadataSet', defaultEventOptions)
+  .addEvent('Storage.DistributionBucketFamilyDeleted', defaultEventOptions)
+  .addEvent('Members.MemberCreated', defaultEventOptions)
+  .addEvent('Members.MembershipBought', defaultEventOptions)
+  .addEvent('Members.MembershipGifted', defaultEventOptions)
+  .addEvent('Members.MemberInvited', defaultEventOptions)
+  .addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
+  .addEvent('Members.MemberProfileUpdated', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
 
-processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
-  const extrinscSuccessEvents = getEvents(ctx, 'System.ExtrinsicSuccess')
+assertAssignable<{ [K in Exclude<Item['name'], '*'>]: unknown }>(eventConstructors)
 
-  const allMembers: Membership[] = []
-  const allChannels: Channel[] = []
-  const allVideos: Video[] = []
-  const allNfts: OwnedNft[] = []
-  const allAuctions: Auction[] = []
-  const allBids: Bid[] = []
-  const allComments: Comment[] = []
-  const allEvents: Event[] = []
-  for (const e of extrinscSuccessEvents) {
-    const members = Array.from({ length: 5 }, () => randomMember())
-    const channels = Array.from({ length: 10 }, () => randomChannel(_.sample(members)!))
-    const videos = Array.from({ length: 100 }, () => randomVideo(_.sample(channels)!))
-    const nfts = _.sampleSize(videos, 50).map((v) => randomNFT(v))
-    const auctions = _.sampleSize(nfts, 30).map((nft) => randomAuction(nft))
-    const bids = Array.from({ length: 100 }, () =>
-      randomBid(_.sample(auctions)!, _.sample(members)!)
-    )
-    const comments = Array.from({ length: 200 }, () =>
-      randomComment(_.sample(members)!, _.sample(videos)!)
-    )
-    const events = Array.from({ length: 1000 }, () =>
-      randomEvent(randomEventData(members, nfts, auctions, bids, comments))
-    )
-    allMembers.push(...members)
-    allChannels.push(...channels)
-    allVideos.push(...videos)
-    allNfts.push(...nfts)
-    allAuctions.push(...auctions)
-    allBids.push(...bids)
-    allComments.push(...comments)
-    allEvents.push(...events)
-  }
-  const allAssets = allVideos.map((v) => [v.thumbnailPhoto!, v.media!]).flat()
-  const allBags = allAssets.map((a) => a.storageBag)
+const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
+  'Content.ChannelCreated': processChannelCreatedEvent,
+  'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
+  'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
+  'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
+  'Storage.StorageOperatorMetadataSet': processStorageOperatorMetadataSetEvent,
+  'Storage.StorageBucketVoucherLimitsSet': processStorageBucketVoucherLimitsSetEvent,
+  'Storage.PendingDataObjectsAccepted': processPendingDataObjectsAcceptedEvent,
+  'Storage.StorageBucketInvitationCancelled': processStorageBucketInvitationCancelledEvent,
+  'Storage.StorageBucketOperatorInvited': processStorageBucketOperatorInvitedEvent,
+  'Storage.StorageBucketOperatorRemoved': processStorageBucketOperatorRemovedEvent,
+  'Storage.StorageBucketStatusUpdated': processStorageBucketStatusUpdatedEvent,
+  'Storage.StorageBucketDeleted': processStorageBucketDeletedEvent,
+  'Storage.VoucherChanged': processVoucherChangedEvent,
+  'Storage.DynamicBagCreated': processDynamicBagCreatedEvent,
+  'Storage.DynamicBagDeleted': processDynamicBagDeletedEvent,
+  'Storage.DataObjectsUploaded': processDataObjectsUploadedEvent,
+  'Storage.DataObjectsUpdated': processDataObjectsUpdatedEvent,
+  'Storage.DataObjectsMoved': processDataObjectsMovedEvent,
+  'Storage.DataObjectsDeleted': processDataObjectsDeletedEvent,
+  'Storage.DistributionBucketCreated': processDistributionBucketCreatedEvent,
+  'Storage.DistributionBucketStatusUpdated': processDistributionBucketStatusUpdatedEvent,
+  'Storage.DistributionBucketDeleted': processDistributionBucketDeletedEvent,
+  'Storage.DistributionBucketsUpdatedForBag': processDistributionBucketsUpdatedForBagEvent,
+  'Storage.DistributionBucketModeUpdated': processDistributionBucketModeUpdatedEvent,
+  'Storage.DistributionBucketOperatorInvited': processDistributionBucketOperatorInvitedEvent,
+  'Storage.DistributionBucketInvitationCancelled':
+    processDistributionBucketInvitationCancelledEvent,
+  'Storage.DistributionBucketInvitationAccepted': processDistributionBucketInvitationAcceptedEvent,
+  'Storage.DistributionBucketMetadataSet': processDistributionBucketMetadataSetEvent,
+  'Storage.DistributionBucketOperatorRemoved': processDistributionBucketOperatorRemovedEvent,
+  'Storage.DistributionBucketFamilyCreated': processDistributionBucketFamilyCreatedEvent,
+  'Storage.DistributionBucketFamilyMetadataSet': processDistributionBucketFamilyMetadataSetEvent,
+  'Storage.DistributionBucketFamilyDeleted': processDistributionBucketFamilyDeletedEvent,
+  'Members.MemberCreated': processNewMember,
+  'Members.MembershipBought': processNewMember,
+  'Members.MembershipGifted': processNewMember,
+  'Members.MemberInvited': processNewMember,
+  'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
+  'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
+}
 
-  await ctx.store.insert(allMembers)
-  await ctx.store.insert(allChannels)
-  await ctx.store.insert(allBags)
-  await ctx.store.insert(allAssets)
-  await ctx.store.insert(allVideos)
-  await ctx.store.insert(allNfts)
-  await ctx.store.insert(allAuctions)
-  await ctx.store.insert(allBids)
-  await ctx.store.insert(allComments)
-  await ctx.store.insert(allEvents)
-})
-
-function getEvents<T extends keyof typeof eventsMap>(
+async function processEvent<EventName extends EventNames>(
   ctx: Ctx,
-  type: T
-): InstanceType<typeof eventsMap[T]>[] {
-  const events: InstanceType<typeof eventsMap[T]>[] = []
+  name: EventName,
+  block: SubstrateBlock,
+  rawEvent: Event,
+  ec: EntitiesCollector
+) {
+  const eventHandler: EventHandler<EventName> = eventHandlers[name]
+  const EventConstructor = eventConstructors[name]
+  const event = new EventConstructor(ctx, rawEvent) as EventInstance<EventName>
+  await eventHandler({ block, ec, event })
+}
+
+processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
+  Logger.set(ctx.log)
+
+  const ec = new EntitiesCollector(ctx.store)
+
   for (const block of ctx.blocks) {
     for (const item of block.items) {
-      if (item.name === type) {
-        const EventConstructor = eventsMap[type]
-        const e = new EventConstructor(ctx, item.event) as InstanceType<typeof eventsMap[T]>
-        events.push(e)
+      if (item.name !== '*') {
+        ctx.log.info(`Processing ${item.name} event in block ${block.header.height}...`)
+        await processEvent(ctx, item.name, block.header, item.event, ec)
       }
     }
   }
-  return events
-}
+
+  ctx.log.info(`Saving database updates...`)
+  await ec.updateDatabase()
+})
