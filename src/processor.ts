@@ -39,7 +39,15 @@ import {
   processDistributionBucketFamilyMetadataSetEvent,
   processDistributionBucketFamilyDeletedEvent,
 } from './mappings/storage'
-import { processChannelCreatedEvent } from './mappings/content/channel'
+import {
+  processChannelCreatedEvent,
+  processChannelUpdatedEvent,
+  processChannelDeletedEvent,
+  processChannelDeletedByModeratorEvent,
+  processChannelVisibilitySetByModeratorEvent,
+  processChannelOwnerRemarkedEvent,
+  processChannelAgentRemarkedEvent,
+} from './mappings/content/channel'
 import {
   processMemberAccountsUpdatedEvent,
   processMemberProfileUpdatedEvent,
@@ -59,6 +67,7 @@ const defaultEventOptions = {
   data: {
     event: {
       args: true,
+      indexInBlock: true,
     },
   },
 } as const
@@ -68,6 +77,12 @@ const processor = new SubstrateBatchProcessor()
     archive: 'http://localhost:8888/graphql',
   })
   .addEvent('Content.ChannelCreated', defaultEventOptions)
+  .addEvent('Content.ChannelUpdated', defaultEventOptions)
+  .addEvent('Content.ChannelDeleted', defaultEventOptions)
+  .addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
+  .addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
+  .addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
+  .addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
   .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
   .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
   .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -113,6 +128,12 @@ assertAssignable<{ [K in Exclude<Item['name'], '*'>]: unknown }>(eventConstructo
 
 const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelCreated': processChannelCreatedEvent,
+  'Content.ChannelUpdated': processChannelUpdatedEvent,
+  'Content.ChannelDeleted': processChannelDeletedEvent,
+  'Content.ChannelDeletedByModerator': processChannelDeletedByModeratorEvent,
+  'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
+  'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
+  'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -157,13 +178,14 @@ async function processEvent<EventName extends EventNames>(
   ctx: Ctx,
   name: EventName,
   block: SubstrateBlock,
+  indexInBlock: number,
   rawEvent: Event,
   ec: EntitiesCollector
 ) {
   const eventHandler: EventHandler<EventName> = eventHandlers[name]
   const EventConstructor = eventConstructors[name]
   const event = new EventConstructor(ctx, rawEvent) as EventInstance<EventName>
-  await eventHandler({ block, ec, event })
+  await eventHandler({ block, ec, event, indexInBlock })
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
@@ -175,7 +197,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
     for (const item of block.items) {
       if (item.name !== '*') {
         ctx.log.info(`Processing ${item.name} event in block ${block.header.height}...`)
-        await processEvent(ctx, item.name, block.header, item.event, ec)
+        await processEvent(ctx, item.name, block.header, item.event.indexInBlock, item.event, ec)
       }
     }
   }

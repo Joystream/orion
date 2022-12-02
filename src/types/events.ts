@@ -2,6 +2,29 @@ import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result, Option} from './support'
 import * as v1000 from './v1000'
 
+export class ContentChannelAgentRemarkedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelAgentRemarked')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelAgentRemarked') === 'fa4d8d29128018b630ceab7a5e5b148d417929825da537a24b441dd6b1a0be8c'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class ContentChannelCreatedEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -20,6 +43,127 @@ export class ContentChannelCreatedEvent {
   }
 
   get asV1000(): [bigint, v1000.ChannelRecord, v1000.ChannelCreationParametersRecord, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentChannelDeletedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelDeleted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelDeleted') === '48a22056559f8981366eaf63cf3efad925fd24c56f7d28d373458c2ebc4bb415'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentChannelDeletedByModeratorEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelDeletedByModerator')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelDeletedByModerator') === 'fa4d8d29128018b630ceab7a5e5b148d417929825da537a24b441dd6b1a0be8c'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentChannelOwnerRemarkedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelOwnerRemarked')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  /**
+   * Metaprotocols related event
+   */
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelOwnerRemarked') === '455000da2c8f650044c433ea0fc69e39c5cb2db11e7a81e15e0fcba6f0757e16'
+  }
+
+  /**
+   * Metaprotocols related event
+   */
+  get asV1000(): [bigint, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentChannelUpdatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelUpdated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelUpdated') === 'c789826ee1aec5f7fb0f59e67414b4a392cc79d9e5c714b33aba6e123643f455'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, v1000.ChannelUpdateParametersRecord, bigint[]] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentChannelVisibilitySetByModeratorEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.ChannelVisibilitySetByModerator')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.ChannelVisibilitySetByModerator') === 'cf849322ba1879fc99d8b7a515af0b8d4459283258ace34216380100eb86e498'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, boolean, Uint8Array] {
     assert(this.isV1000)
     return this._chain.decodeEvent(this.event)
   }

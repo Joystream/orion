@@ -196,3 +196,10 @@ export async function deleteDataObjects(ec: EntitiesCollector, objects: StorageD
   ec.collections.StorageDataObject.remove(...objects)
   await Promise.all(objects.map((o) => unsetAssetRelations(ec, o)))
 }
+
+export async function deleteDataObjectsByIds(ec: EntitiesCollector, ids: bigint[]) {
+  const objects = await Promise.all(
+    ids.map((id) => ec.collections.StorageDataObject.get(id.toString()))
+  )
+  await deleteDataObjects(ec, objects)
+}

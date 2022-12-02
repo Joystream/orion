@@ -4,6 +4,12 @@
   "events": [
     "Content.VideoCreated",
     "Content.ChannelCreated",
+    "Content.ChannelUpdated",
+    "Content.ChannelDeleted",
+    "Content.ChannelDeletedByModerator",
+    "Content.ChannelVisibilitySetByModerator",
+    "Content.ChannelOwnerRemarked",
+    "Content.ChannelAgentRemarked",
     "System.ExtrinsicSuccess",
     "Storage.StorageBucketCreated",
     "Storage.StorageBucketInvitationAccepted",
