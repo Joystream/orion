@@ -3,6 +3,12 @@ import { Store } from '@subsquid/typeorm-store'
 import * as models from './model'
 import {
   ContentChannelCreatedEvent,
+  ContentChannelUpdatedEvent,
+  ContentChannelDeletedEvent,
+  ContentChannelDeletedByModeratorEvent,
+  ContentChannelVisibilitySetByModeratorEvent,
+  ContentChannelOwnerRemarkedEvent,
+  ContentChannelAgentRemarkedEvent,
   StorageStorageBucketCreatedEvent,
   StorageDynamicBagCreatedEvent,
   StorageDataObjectsUploadedEvent,
@@ -50,6 +56,12 @@ export function assertAssignable<T>(type: T) {
 
 export const eventConstructors = {
   'Content.ChannelCreated': ContentChannelCreatedEvent,
+  'Content.ChannelUpdated': ContentChannelUpdatedEvent,
+  'Content.ChannelDeleted': ContentChannelDeletedEvent,
+  'Content.ChannelDeletedByModerator': ContentChannelDeletedByModeratorEvent,
+  'Content.ChannelVisibilitySetByModerator': ContentChannelVisibilitySetByModeratorEvent,
+  'Content.ChannelOwnerRemarked': ContentChannelOwnerRemarkedEvent,
+  'Content.ChannelAgentRemarked': ContentChannelAgentRemarkedEvent,
   'Storage.StorageBucketCreated': StorageStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': StorageStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': StorageStorageBucketsUpdatedForBagEvent,
@@ -264,6 +276,7 @@ export type EventInstance<EventName extends EventNames> = InstanceType<EventCons
 export type EventHandlerContext<EventName extends EventNames> = {
   ec: EntitiesCollector
   block: SubstrateBlock
+  indexInBlock: number
   event: EventInstance<EventName>
 }
 

@@ -1,7 +1,11 @@
-import { Channel, Membership } from '../../model'
+import { Channel, Event, Membership, MetaprotocolTransactionStatusEventData } from '../../model'
 import { deserializeMetadata } from '../utils'
-import { ChannelMetadata } from '@joystream/metadata-protobuf'
-import { processChannelMetadata } from './metadata'
+import {
+  ChannelMetadata,
+  ChannelModeratorRemarked,
+  ChannelOwnerRemarked,
+} from '@joystream/metadata-protobuf'
+import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EventHandlerContext } from '../../utils'
 
@@ -38,4 +42,103 @@ export async function processChannelCreatedEvent({
   }
 
   ec.collections.Channel.push(channel)
+}
+
+export async function processChannelUpdatedEvent({
+  ec,
+  block,
+  event: {
+    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
+  },
+}: EventHandlerContext<'Content.ChannelUpdated'>) {
+  const channel = await ec.collections.Channel.get(channelId.toString(), {
+    avatarPhoto: true,
+    coverPhoto: true,
+  })
+
+  //  update metadata if it was changed
+  if (channelUpdateParameters.newMeta) {
+    const newMetadata = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta) || {}
+    await processChannelMetadata(ec, block, channel, newMetadata, newDataObjects)
+  }
+}
+
+export async function processChannelDeletedEvent({
+  ec,
+  event: { asV1000: channelId },
+}: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
+  ec.collections.Channel.remove(new Channel({ id: channelId.toString() }))
+}
+
+export async function processChannelDeletedByModeratorEvent({
+  ec,
+  event: {
+    asV1000: [, channelId],
+  },
+}: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
+  ec.collections.Channel.remove(new Channel({ id: channelId.toString() }))
+}
+
+export async function processChannelVisibilitySetByModeratorEvent({
+  ec,
+  event: {
+    asV1000: [, channelId, isHidden],
+  },
+}: EventHandlerContext<'Content.ChannelVisibilitySetByModerator'>): Promise<void> {
+  const channel = await ec.collections.Channel.get(channelId.toString())
+  channel.isCensored = isHidden
+}
+
+export async function processChannelOwnerRemarkedEvent({
+  block,
+  indexInBlock,
+  ec,
+  event: {
+    asV1000: [channelId, messageBytes],
+  },
+}: EventHandlerContext<'Content.ChannelOwnerRemarked'>): Promise<void> {
+  const channel = await ec.collections.Channel.get(channelId.toString())
+  const decodedMessage = deserializeMetadata(ChannelOwnerRemarked, messageBytes)
+
+  if (decodedMessage) {
+    const result = await processOwnerRemark(ec, channel, decodedMessage)
+    ec.collections.Event.push(
+      new Event({
+        id: `${block.height}-${indexInBlock}`,
+        inBlock: block.height,
+        indexInBlock,
+        timestamp: new Date(block.timestamp),
+        data: new MetaprotocolTransactionStatusEventData({
+          result,
+        }),
+      })
+    )
+  }
+}
+
+export async function processChannelAgentRemarkedEvent({
+  ec,
+  block,
+  indexInBlock,
+  event: {
+    asV1000: [, channelId, messageBytes],
+  },
+}: EventHandlerContext<'Content.ChannelAgentRemarked'>): Promise<void> {
+  const channel = await ec.collections.Channel.get(channelId.toString())
+  const decodedMessage = deserializeMetadata(ChannelModeratorRemarked, messageBytes)
+
+  if (decodedMessage) {
+    const result = await processModeratorRemark(ec, channel, decodedMessage)
+    ec.collections.Event.push(
+      new Event({
+        id: `${block.height}-${indexInBlock}`,
+        inBlock: block.height,
+        indexInBlock,
+        timestamp: new Date(block.timestamp),
+        data: new MetaprotocolTransactionStatusEventData({
+          result,
+        }),
+      })
+    )
+  }
 }

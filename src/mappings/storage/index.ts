@@ -22,6 +22,7 @@ import {
   createDistributionBucketBag,
   createStorageBucketBag,
   deleteDataObjects,
+  deleteDataObjectsByIds,
   distributionBucketId,
   distributionOperatorId,
   getBagId,
@@ -303,10 +304,7 @@ export async function processDataObjectsUpdatedEvent({
       uploadedObjectIds
     )
   )
-  const objectsToRemove = await Promise.all(
-    objectsToRemoveIds.map((id) => ec.collections.StorageDataObject.get(id.toString()))
-  )
-  await deleteDataObjects(ec, objectsToRemove)
+  await deleteDataObjectsByIds(ec, objectsToRemoveIds)
 }
 
 export async function processPendingDataObjectsAcceptedEvent({
@@ -342,10 +340,7 @@ export async function processDataObjectsDeletedEvent({
     asV1000: [, , dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsDeleted'>): Promise<void> {
-  const objectsToRemove = await Promise.all(
-    dataObjectIds.map((id) => ec.collections.StorageDataObject.get(id.toString()))
-  )
-  await deleteDataObjects(ec, objectsToRemove)
+  await deleteDataObjectsByIds(ec, dataObjectIds)
 }
 
 // DISTRIBUTION FAMILY EVENTS

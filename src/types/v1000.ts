@@ -1,5 +1,21 @@
 import type {Result, Option} from './support'
 
+export type ContentActor = ContentActor_Curator | ContentActor_Member | ContentActor_Lead
+
+export interface ContentActor_Curator {
+  __kind: 'Curator'
+  value: [bigint, bigint]
+}
+
+export interface ContentActor_Member {
+  __kind: 'Member'
+  value: bigint
+}
+
+export interface ContentActor_Lead {
+  __kind: 'Lead'
+}
+
 export interface ChannelRecord {
   owner: ChannelOwner
   numVideos: bigint
@@ -27,20 +43,13 @@ export interface ChannelCreationParametersRecord {
   expectedDataObjectStateBloatBond: bigint
 }
 
-export type ContentActor = ContentActor_Curator | ContentActor_Member | ContentActor_Lead
-
-export interface ContentActor_Curator {
-  __kind: 'Curator'
-  value: [bigint, bigint]
-}
-
-export interface ContentActor_Member {
-  __kind: 'Member'
-  value: bigint
-}
-
-export interface ContentActor_Lead {
-  __kind: 'Lead'
+export interface ChannelUpdateParametersRecord {
+  assetsToUpload: (StorageAssetsRecord | undefined)
+  newMeta: (Uint8Array | undefined)
+  assetsToRemove: bigint[]
+  collaborators: ([bigint, ChannelActionPermission[]][] | undefined)
+  expectedDataObjectStateBloatBond: bigint
+  storageBucketsNumWitness: (number | undefined)
 }
 
 export interface VideoCreationParametersRecord {

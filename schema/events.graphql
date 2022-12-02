@@ -228,12 +228,17 @@ type MetaprotocolTransactionResultCommentModerated {
   commentModerated: Comment!
 }
 
+type MetaprotocolTransactionResultOK {
+  phantom: Int
+}
+
 type MetaprotocolTransactionResultFailed {
   errorMessage: String!
 }
 
 union MetaprotocolTransactionResult =
-    MetaprotocolTransactionResultCommentCreated
+    MetaprotocolTransactionResultOK
+  | MetaprotocolTransactionResultCommentCreated
   | MetaprotocolTransactionResultCommentEdited
   | MetaprotocolTransactionResultCommentDeleted
   | MetaprotocolTransactionResultCommentModerated
