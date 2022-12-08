@@ -23,23 +23,12 @@ enum CommentStatus {
   MODERATED
 }
 
-type CommentReactionsCountByReactionId @entity {
-  "{commentId}-{reactionId}"
-  id: ID!
-
+type CommentReactionsCountByReactionId {
   "The reaction id"
   reactionId: Int!
 
   "No of times the comment has been reacted with given reaction Id"
   count: Int!
-
-  "The comment which has been react with given reaction Id"
-  comment: Comment!
-
-  # Added to efficiently delete all reactions counts of all
-  # (deleted) comments once video has been deleted.
-  "The video the comment (that has been reacted) exists"
-  video: Video!
 }
 
 type Comment @entity {
@@ -65,7 +54,7 @@ type Comment @entity {
   reactions: [CommentReaction!] @derivedFrom(field: "comment")
 
   "Reactions count by reaction Id"
-  reactionsCountByReactionId: [CommentReactionsCountByReactionId!] @derivedFrom(field: "comment")
+  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
 
   "A (parent) comment that this comment replies to (if any)"
   parentComment: Comment

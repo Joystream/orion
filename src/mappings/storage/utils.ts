@@ -9,7 +9,6 @@ import {
   StorageBucketBag,
   DistributionBucket,
   DistributionBucketBag,
-  DataObjectTypeVideoSubtitle,
   DistributionBucketOperator,
   StorageBagOwnerCouncil,
   StorageBagOwnerWorkingGroup,
@@ -23,7 +22,7 @@ import {
 } from '../../types/v1000'
 import { bytesToString } from '../utils'
 import { EntitiesCollector } from '../../utils'
-import { ASSET_TYPES } from '../content/utils'
+import { ASSETS_MAP } from '../content/utils'
 
 export function getDynamicBagId(bagId: DynamicBagIdType): string {
   if (bagId.__kind === 'Channel') {
@@ -148,21 +147,24 @@ export async function unsetAssetRelations(
   ec: EntitiesCollector,
   dataObject: StorageDataObject
 ): Promise<void> {
-  for (const type of ASSET_TYPES.channel) {
-    if (dataObject.type instanceof type.DataObjectTypeConstructor) {
+  for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.channel)) {
+    if (dataObject.type instanceof DataObjectTypeConstructor) {
       const channel = await ec.collections.Channel.get(dataObject.type.channel)
-      channel[type.schemaFieldName] = null
+      channel[entityProperty] = null
     }
   }
 
-  for (const type of ASSET_TYPES.video) {
-    if (
-      dataObject.type instanceof type.DataObjectTypeConstructor &&
-      // Subtitles are derived, so no need to unset
-      !(dataObject.type instanceof DataObjectTypeVideoSubtitle)
-    ) {
+  for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.video)) {
+    if (dataObject.type instanceof DataObjectTypeConstructor) {
       const video = await ec.collections.Video.get(dataObject.type.video)
-      video[type.schemaFieldName] = null
+      video[entityProperty] = null
+    }
+  }
+
+  for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.subtitle)) {
+    if (dataObject.type instanceof DataObjectTypeConstructor) {
+      const subtitle = await ec.collections.VideoSubtitle.get(dataObject.type.subtitle)
+      subtitle[entityProperty] = null
     }
   }
 }

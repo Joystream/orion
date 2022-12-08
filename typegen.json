@@ -3,6 +3,10 @@
   "specVersions": "http://localhost:8888/graphql",
   "events": [
     "Content.VideoCreated",
+    "Content.VideoUpdated",
+    "Content.VideoDeleted",
+    "Content.VideoDeletedByModerator",
+    "Content.VideoVisibilitySetByModerator",
     "Content.ChannelCreated",
     "Content.ChannelUpdated",
     "Content.ChannelDeleted",

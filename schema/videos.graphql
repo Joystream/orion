@@ -79,9 +79,6 @@ type Video @entity {
   "Block the video was created in"
   createdInBlock: Int!
 
-  "Is video featured or not"
-  isFeatured: Boolean!
-
   "List of video subtitles"
   subtitles: [VideoSubtitle!] @derivedFrom(field: "video")
 
@@ -104,7 +101,7 @@ type Video @entity {
   reactions: [VideoReaction!] @derivedFrom(field: "video")
 
   "Reactions count by reaction Id"
-  reactionsCountByReactionId: [VideoReactionsCountByReactionType!] @derivedFrom(field: "video")
+  reactionsCountByReactionId: [VideoReactionsCountByReactionType!]
 
   "Reactions count"
   reactionsCount: Int!
@@ -226,18 +223,12 @@ type VideoSubtitle @entity {
   asset: StorageDataObject
 }
 
-type VideoReactionsCountByReactionType @entity {
-  "{videoId}-{reactionId}"
-  id: ID!
-
+type VideoReactionsCountByReactionType {
   "The reaction option"
   reaction: VideoReactionOptions!
 
   "No of times the video has been reacted with given reaction"
   count: Int!
-
-  "The video which has been react with given reaction"
-  video: Video!
 }
 
 enum VideoReactionOptions {

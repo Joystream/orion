@@ -49,6 +49,13 @@ import {
   processChannelAgentRemarkedEvent,
 } from './mappings/content/channel'
 import {
+  processVideoCreatedEvent,
+  processVideoUpdatedEvent,
+  processVideoDeletedEvent,
+  processVideoDeletedByModeratorEvent,
+  processVideoVisibilitySetByModeratorEvent,
+} from './mappings/content/video'
+import {
   processMemberAccountsUpdatedEvent,
   processMemberProfileUpdatedEvent,
   processNewMember,
@@ -68,6 +75,9 @@ const defaultEventOptions = {
     event: {
       args: true,
       indexInBlock: true,
+      extrinsic: {
+        hash: true,
+      },
     },
   },
 } as const
@@ -76,6 +86,11 @@ const processor = new SubstrateBatchProcessor()
   .setDataSource({
     archive: 'http://localhost:8888/graphql',
   })
+  .addEvent('Content.VideoCreated', defaultEventOptions)
+  .addEvent('Content.VideoUpdated', defaultEventOptions)
+  .addEvent('Content.VideoDeleted', defaultEventOptions)
+  .addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
+  .addEvent('Content.VideoVisibilitySetByModerator', defaultEventOptions)
   .addEvent('Content.ChannelCreated', defaultEventOptions)
   .addEvent('Content.ChannelUpdated', defaultEventOptions)
   .addEvent('Content.ChannelDeleted', defaultEventOptions)
@@ -127,6 +142,11 @@ type Ctx = BatchContext<Store, Item>
 assertAssignable<{ [K in Exclude<Item['name'], '*'>]: unknown }>(eventConstructors)
 
 const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
+  'Content.VideoCreated': processVideoCreatedEvent,
+  'Content.VideoUpdated': processVideoUpdatedEvent,
+  'Content.VideoDeleted': processVideoDeletedEvent,
+  'Content.VideoDeletedByModerator': processVideoDeletedByModeratorEvent,
+  'Content.VideoVisibilitySetByModerator': processVideoVisibilitySetByModeratorEvent,
   'Content.ChannelCreated': processChannelCreatedEvent,
   'Content.ChannelUpdated': processChannelUpdatedEvent,
   'Content.ChannelDeleted': processChannelDeletedEvent,
@@ -179,13 +199,14 @@ async function processEvent<EventName extends EventNames>(
   name: EventName,
   block: SubstrateBlock,
   indexInBlock: number,
+  extrinsicHash: string | undefined,
   rawEvent: Event,
   ec: EntitiesCollector
 ) {
   const eventHandler: EventHandler<EventName> = eventHandlers[name]
   const EventConstructor = eventConstructors[name]
   const event = new EventConstructor(ctx, rawEvent) as EventInstance<EventName>
-  await eventHandler({ block, ec, event, indexInBlock })
+  await eventHandler({ block, ec, event, indexInBlock, extrinsicHash })
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
@@ -197,7 +218,15 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
     for (const item of block.items) {
       if (item.name !== '*') {
         ctx.log.info(`Processing ${item.name} event in block ${block.header.height}...`)
-        await processEvent(ctx, item.name, block.header, item.event.indexInBlock, item.event, ec)
+        await processEvent(
+          ctx,
+          item.name,
+          block.header,
+          item.event.indexInBlock,
+          item.event.extrinsic?.hash,
+          item.event,
+          ec
+        )
       }
     }
   }

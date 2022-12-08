@@ -18,7 +18,7 @@ union StorageBucketOperatorStatus =
 
 type GeoCoordinates {
   latitude: Float!
-  
+
   longitude: Float!
 }
 
@@ -256,7 +256,7 @@ type DistributionBucketOperatorMetadata @entity {
 
   "Distribution bucket operator"
   distirbutionBucketOperator: DistributionBucketOperator! @unique
-  
+
   "Root distributor node api endpoint"
   nodeEndpoint: String
 

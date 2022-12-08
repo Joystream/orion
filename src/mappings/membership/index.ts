@@ -1,9 +1,8 @@
 import { Membership } from '../../model'
 import { EventHandlerContext } from '../../utils'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
-import { bytesToString, deserializeMetadata } from '../utils'
+import { bytesToString, deserializeMetadata, toAddress } from '../utils'
 import { processMembershipMetadata } from './metadata'
-import { encodeAddress } from '@polkadot/util-crypto'
 
 export function processNewMember({
   ec,
@@ -23,7 +22,7 @@ export function processNewMember({
   const member = new Membership({
     createdAt: new Date(block.timestamp),
     id: memberId.toString(),
-    controllerAccount: encodeAddress(controllerAccount),
+    controllerAccount: toAddress(controllerAccount),
     handle: handle && bytesToString(handle),
   })
 
@@ -42,7 +41,7 @@ export async function processMemberAccountsUpdatedEvent({
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
     const member = await ec.collections.Membership.get(memberId.toString())
-    member.controllerAccount = encodeAddress(newControllerAccount)
+    member.controllerAccount = toAddress(newControllerAccount)
   }
 }
 
