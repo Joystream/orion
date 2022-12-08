@@ -192,6 +192,98 @@ export class ContentVideoCreatedEvent {
   }
 }
 
+export class ContentVideoDeletedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.VideoDeleted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.VideoDeleted') === '48a22056559f8981366eaf63cf3efad925fd24c56f7d28d373458c2ebc4bb415'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentVideoDeletedByModeratorEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.VideoDeletedByModerator')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.VideoDeletedByModerator') === 'fa4d8d29128018b630ceab7a5e5b148d417929825da537a24b441dd6b1a0be8c'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentVideoUpdatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.VideoUpdated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.VideoUpdated') === '96ed5bbd21a4e24af6f21b01922119297ee1904daacc6e5aeed2be7e02ac7b60'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, v1000.VideoUpdateParametersRecord, bigint[]] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentVideoVisibilitySetByModeratorEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.VideoVisibilitySetByModerator')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.VideoVisibilitySetByModerator') === 'cf849322ba1879fc99d8b7a515af0b8d4459283258ace34216380100eb86e498'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, boolean, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class MembersMemberAccountsUpdatedEvent {
   private readonly _chain: Chain
   private readonly event: Event

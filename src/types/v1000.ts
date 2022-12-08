@@ -61,6 +61,15 @@ export interface VideoCreationParametersRecord {
   storageBucketsNumWitness: number
 }
 
+export interface VideoUpdateParametersRecord {
+  assetsToUpload: (StorageAssetsRecord | undefined)
+  newMeta: (Uint8Array | undefined)
+  assetsToRemove: bigint[]
+  autoIssueNft: (NftIssuanceParametersRecord | undefined)
+  expectedDataObjectStateBloatBond: bigint
+  storageBucketsNumWitness: (number | undefined)
+}
+
 export interface CreateMemberParameters {
   rootAccount: Uint8Array
   controllerAccount: Uint8Array

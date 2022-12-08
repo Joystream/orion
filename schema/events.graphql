@@ -6,7 +6,7 @@ type Event @entity {
   inBlock: Int!
 
   "Hash of the extrinsic the event was emitted in"
-  inExtrinsic: String!
+  inExtrinsic: String
 
   "Index of event in block from which it was emitted."
   indexInBlock: Int!
@@ -213,19 +213,19 @@ type BuyNowPriceUpdatedEventData {
 }
 
 type MetaprotocolTransactionResultCommentCreated {
-  commentCreated: Comment!
+  commentCreated: Comment
 }
 
 type MetaprotocolTransactionResultCommentEdited {
-  commentEdited: Comment!
+  commentEdited: Comment
 }
 
 type MetaprotocolTransactionResultCommentDeleted {
-  commentDeleted: Comment!
+  commentDeleted: Comment
 }
 
 type MetaprotocolTransactionResultCommentModerated {
-  commentModerated: Comment!
+  commentModerated: Comment
 }
 
 type MetaprotocolTransactionResultOK {

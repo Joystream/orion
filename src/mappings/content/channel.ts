@@ -1,12 +1,11 @@
 import { Channel, Event, Membership, MetaprotocolTransactionStatusEventData } from '../../model'
-import { deserializeMetadata } from '../utils'
+import { deserializeMetadata, genericEventFields, toAddress } from '../utils'
 import {
   ChannelMetadata,
   ChannelModeratorRemarked,
   ChannelOwnerRemarked,
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
-import { encodeAddress } from '@polkadot/util-crypto'
 import { EventHandlerContext } from '../../utils'
 
 export async function processChannelCreatedEvent({
@@ -29,7 +28,7 @@ export async function processChannelCreatedEvent({
     createdInBlock: block.height,
     ownerMember:
       owner.__kind === 'Member' ? new Membership({ id: owner.value.toString() }) : undefined,
-    rewardAccount: encodeAddress(rewardAccount),
+    rewardAccount: toAddress(rewardAccount),
     channelStateBloatBond: channelStateBloatBond.amount,
     followsNum: 0,
     videoViewsNum: 0,
@@ -92,6 +91,7 @@ export async function processChannelVisibilitySetByModeratorEvent({
 export async function processChannelOwnerRemarkedEvent({
   block,
   indexInBlock,
+  extrinsicHash,
   ec,
   event: {
     asV1000: [channelId, messageBytes],
@@ -104,10 +104,7 @@ export async function processChannelOwnerRemarkedEvent({
     const result = await processOwnerRemark(ec, channel, decodedMessage)
     ec.collections.Event.push(
       new Event({
-        id: `${block.height}-${indexInBlock}`,
-        inBlock: block.height,
-        indexInBlock,
-        timestamp: new Date(block.timestamp),
+        ...genericEventFields(block, indexInBlock, extrinsicHash),
         data: new MetaprotocolTransactionStatusEventData({
           result,
         }),
@@ -120,6 +117,7 @@ export async function processChannelAgentRemarkedEvent({
   ec,
   block,
   indexInBlock,
+  extrinsicHash,
   event: {
     asV1000: [, channelId, messageBytes],
   },
@@ -131,10 +129,7 @@ export async function processChannelAgentRemarkedEvent({
     const result = await processModeratorRemark(ec, channel, decodedMessage)
     ec.collections.Event.push(
       new Event({
-        id: `${block.height}-${indexInBlock}`,
-        inBlock: block.height,
-        indexInBlock,
-        timestamp: new Date(block.timestamp),
+        ...genericEventFields(block, indexInBlock, extrinsicHash),
         data: new MetaprotocolTransactionStatusEventData({
           result,
         }),

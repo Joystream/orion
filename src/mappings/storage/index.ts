@@ -15,7 +15,7 @@ import {
   StorageBucketOperatorStatusMissing,
 } from '../../model'
 import { EventHandlerContext } from '../../utils'
-import { deserializeMetadata } from '../utils'
+import { deserializeMetadata, toAddress } from '../utils'
 import {
   addStaticBagIfNotExists,
   createDataObjects,
@@ -30,7 +30,6 @@ import {
   getDynamicBagOwner,
   removeDistributionBucketOperator,
 } from './utils'
-import { encodeAddress } from '@polkadot/util-crypto'
 import {
   processDistributionBucketFamilyMetadata,
   processDistributionOperatorMetadata,
@@ -103,7 +102,7 @@ export async function processStorageBucketInvitationAcceptedEvent({
   const storageBucket = await ec.collections.StorageBucket.get(bucketId.toString())
   storageBucket.operatorStatus = new StorageBucketOperatorStatusActive({
     workerId: Number(workerId),
-    transactorAccountId: encodeAddress(transactorAccountId),
+    transactorAccountId: toAddress(transactorAccountId),
   })
 }
 
@@ -255,10 +254,15 @@ export async function processDynamicBagDeletedEvent({
     distributionBuckets: true,
     objects: true,
   })
-
-  ec.collections.StorageBucketBag.remove(...storageBag.storageBuckets)
-  ec.collections.DistributionBucketBag.remove(...storageBag.distributionBuckets)
-  await deleteDataObjects(ec, storageBag.objects)
+  if (storageBag.storageBuckets) {
+    ec.collections.StorageBucketBag.remove(...storageBag.storageBuckets)
+  }
+  if (storageBag.distributionBuckets) {
+    ec.collections.DistributionBucketBag.remove(...storageBag.distributionBuckets)
+  }
+  if (storageBag.objects) {
+    await deleteDataObjects(ec, storageBag.objects)
+  }
   ec.collections.StorageBag.remove(storageBag)
 }
 
@@ -426,8 +430,10 @@ export async function processDistributionBucketDeletedEvent({
     }
   )
   // Remove relations
-  distributionBucket.operators.forEach((o) => removeDistributionBucketOperator(ec, o))
-  ec.collections.DistributionBucketBag.remove(...distributionBucket.bags)
+  ;(distributionBucket.operators || []).forEach((o) => removeDistributionBucketOperator(ec, o))
+  if (distributionBucket.bags) {
+    ec.collections.DistributionBucketBag.remove(...distributionBucket.bags)
+  }
   ec.collections.DistributionBucket.remove(distributionBucket)
 }
 

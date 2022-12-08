@@ -95,7 +95,6 @@ export function randomVideo(channel: Channel): Video {
     media: randomAsset(),
     videoStateBloatBond: randomHAPIAmount(),
     createdInBlock: randomBlock(),
-    isFeatured: Boolean(_.random(0, 1)),
     isCommentSectionEnabled: Boolean(_.random(0, 1)),
     commentsCount: _.random(0, 1000),
     isReactionFeatureEnabled: Boolean(_.random(0, 1)),

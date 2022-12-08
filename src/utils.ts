@@ -2,6 +2,11 @@ import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Store } from '@subsquid/typeorm-store'
 import * as models from './model'
 import {
+  ContentVideoCreatedEvent,
+  ContentVideoUpdatedEvent,
+  ContentVideoDeletedEvent,
+  ContentVideoDeletedByModeratorEvent,
+  ContentVideoVisibilitySetByModeratorEvent,
   ContentChannelCreatedEvent,
   ContentChannelUpdatedEvent,
   ContentChannelDeletedEvent,
@@ -47,14 +52,20 @@ import {
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
 } from './types/events'
-import { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { EntityManager, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
 import _ from 'lodash'
+import { Logger } from './logger'
 
 export function assertAssignable<T>(type: T) {
   return type
 }
 
 export const eventConstructors = {
+  'Content.VideoCreated': ContentVideoCreatedEvent,
+  'Content.VideoUpdated': ContentVideoUpdatedEvent,
+  'Content.VideoDeleted': ContentVideoDeletedEvent,
+  'Content.VideoDeletedByModerator': ContentVideoDeletedByModeratorEvent,
+  'Content.VideoVisibilitySetByModerator': ContentVideoVisibilitySetByModeratorEvent,
   'Content.ChannelCreated': ContentChannelCreatedEvent,
   'Content.ChannelUpdated': ContentChannelUpdatedEvent,
   'Content.ChannelDeleted': ContentChannelDeletedEvent,
@@ -141,13 +152,34 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     this._toBeRemoved.push(...items)
   }
 
+  // Prevents inserting strings that contain null character into the postgresql table
+  // (as this would cause an error)
+  private normalizeString(s: string) {
+    // eslint-disable-next-line no-control-regex
+    return s.replace(/\u0000/g, '')
+  }
+
+  private normalizeInput(e: Record<string, unknown>) {
+    for (const [k, v] of Object.entries(e)) {
+      if (typeof v === 'object' && v && `isTypeOf` in v) {
+        this.normalizeInput(v as Record<string, unknown>)
+      }
+      if (typeof v === 'string') {
+        e[k] = this.normalizeString(v)
+      }
+    }
+  }
+
   push(...items: E[]): number {
     // skip already cached entities
     items = items.filter((i) => !this._toBeSaved.find((e) => e.id === i.id))
-    // pushing an entity overrides any scheduled removals of this entity
     items.forEach((i) => {
+      // pushing an entity overrides any scheduled removals of this entity
       _.remove(this._toBeRemoved, (e) => e.id === i.id)
+      // normalize the input (remove UTF-8 null characters)
+      this.normalizeInput(i)
     })
+    // normalize the input
     return this._toBeSaved.push(...items)
   }
 
@@ -200,14 +232,24 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
   // Execute scheduled save operations
   async save(): Promise<void> {
     if (this._toBeSaved.length) {
-      await this.store.save(this._toBeSaved)
+      const logger = Logger.get()
+      logger.info(`Saving ${this._toBeSaved.length} ${this._class.name} entities...`)
+      // FIXME: This is a little hacky, but we really need to access the EntityManager,
+      // because Store by default uses `upsert` for saving the entities, which is problematic
+      // when the entity has some required relations and we're just trying to update it
+      const em = await (this.store as unknown as { em: () => Promise<EntityManager> }).em()
+      await em.save(this._toBeSaved)
+      this._toBeSaved = []
     }
   }
 
   // Execute scheduled remove operations
   async cleanup(): Promise<void> {
     if (this._toBeRemoved.length) {
+      const logger = Logger.get()
+      logger.info(`Removing ${this._toBeRemoved.length} ${this._class.name} entities...`)
       await this.store.remove(this._toBeRemoved)
+      this._toBeRemoved = []
     }
   }
 }
@@ -252,7 +294,33 @@ export class EntitiesCollector {
     await this.collections.Membership.save()
     await this.collections.MemberMetadata.save()
     await this.collections.Channel.save()
+    await this.collections.License.save()
+    await this.collections.VideoCategory.save()
+    await this.collections.Video.save()
+    await this.collections.OwnedNft.save()
+    await this.collections.Auction.save()
+    await this.collections.AuctionWhitelistedMember.save()
+    await this.collections.VideoSubtitle.save()
+    await this.collections.VideoMediaEncoding.save()
+    await this.collections.VideoMediaMetadata.save()
+    await this.collections.VideoReaction.save()
+    await this.collections.Comment.save()
+    await this.collections.CommentReaction.save()
+    await this.collections.Event.save()
     // Execute remove operations (opposite order, related entities first)
+    await this.collections.Event.cleanup()
+    await this.collections.CommentReaction.cleanup()
+    await this.collections.Comment.cleanup()
+    await this.collections.VideoReaction.cleanup()
+    await this.collections.VideoMediaMetadata.cleanup()
+    await this.collections.VideoMediaEncoding.cleanup()
+    await this.collections.VideoSubtitle.cleanup()
+    await this.collections.AuctionWhitelistedMember.cleanup()
+    await this.collections.Auction.cleanup()
+    await this.collections.OwnedNft.cleanup()
+    await this.collections.Video.cleanup()
+    await this.collections.VideoCategory.cleanup()
+    await this.collections.License.cleanup()
     await this.collections.Channel.cleanup()
     await this.collections.MemberMetadata.cleanup()
     await this.collections.Membership.cleanup()
@@ -277,6 +345,7 @@ export type EventHandlerContext<EventName extends EventNames> = {
   ec: EntitiesCollector
   block: SubstrateBlock
   indexInBlock: number
+  extrinsicHash?: string
   event: EventInstance<EventName>
 }
 
