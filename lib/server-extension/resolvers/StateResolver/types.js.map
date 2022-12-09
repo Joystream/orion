@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"","sources":["../../../../src/server-extension/resolvers/StateResolver/types.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,+CAAqD;AAG9C,IAAM,cAAc,GAApB,MAAM,cAAc;CAG1B,CAAA;AAFC;IAAC,IAAA,oBAAK,EAAC,GAAG,EAAE,CAAC,kBAAG,EAAE,EAAE,QAAQ,EAAE,KAAK,EAAE,CAAC;;0DACX;AAFhB,cAAc;IAD1B,IAAA,yBAAU,GAAE;GACA,cAAc,CAG1B;AAHY,wCAAc"}

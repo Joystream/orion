@@ -1,5 +1,5 @@
-import { criticalError } from '../../utils/misc'
-import { Flat, EntityManagerOverlay } from '../../utils/overlay'
+import { criticalError } from "../../utils/misc";
+import { Flat, EntityManagerOverlay } from "../../utils/overlay";
 import {
   Benefit,
   CreatorToken,
@@ -11,48 +11,57 @@ import {
   VestingSchedule,
   VestingSource,
   Video,
-} from '../../model'
-import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
-import { isSet, uniqueId } from 'lodash'
+} from "../../model";
+import {
+  Validated,
+  ValidatedPayment,
+  VestingScheduleParams,
+} from "../../types/v1000";
+import { isSet, uniqueId } from "lodash";
 
-export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
+export async function removeVesting(
+  overlay: EntityManagerOverlay,
+  vestedAccountId: string
+) {
   // remove information that a particular vesting schedule is pending on an account
-  const vestedAccountRepository = overlay.getRepository(VestedAccount)
-  const vestedAccountToRemove = await vestedAccountRepository.getByIdOrFail(vestedAccountId)
-  vestedAccountRepository.remove(vestedAccountToRemove)
+  const vestedAccountRepository = overlay.getRepository(VestedAccount);
+  const vestedAccountToRemove = await vestedAccountRepository.getByIdOrFail(
+    vestedAccountId
+  );
+  vestedAccountRepository.remove(vestedAccountToRemove);
 }
 
 export class VestingScheduleData {
-  private _params: VestingScheduleParams
-  private _block: number
+  private _params: VestingScheduleParams;
+  private _block: number;
 
   public constructor(params: VestingScheduleParams, block: number) {
-    this._params = params
-    this._block = block
+    this._params = params;
+    this._block = block;
   }
 
   public get id(): string {
-    return this.cliffBlock + '-' + this.duration + '-' + this.cliffPercent
+    return this.cliffBlock + "-" + this.duration + "-" + this.cliffPercent;
   }
 
   public get cliffBlock(): number {
-    return this._params.blocksBeforeCliff + this._block
+    return this._params.blocksBeforeCliff + this._block;
   }
 
   public get cliffDuration(): number {
-    return this._params.blocksBeforeCliff
+    return this._params.blocksBeforeCliff;
   }
 
   public get duration(): number {
-    return this._params.linearVestingDuration
+    return this._params.linearVestingDuration;
   }
 
   public get endsAt(): number {
-    return this.cliffBlock + this.duration
+    return this.cliffBlock + this.duration;
   }
 
   public get cliffPercent(): number {
-    return this._params.cliffAmountPercentage
+    return this._params.cliffAmountPercentage;
   }
 }
 
@@ -62,20 +71,22 @@ export async function burnFromVesting(
   burnedAmount: bigint
 ) {
   const vestingSchedulesForAccount = (
-    await overlay.getRepository(VestedAccount).getManyByRelation('accountId', accountId)
+    await overlay
+      .getRepository(VestedAccount)
+      .getManyByRelation("accountId", accountId)
   ).sort((a, b) => {
-    return BigInt(a.id) - BigInt(b.id) > 0 ? 1 : -1
-  })
-  let tallyBurnedAmount = burnedAmount
+    return BigInt(a.id) - BigInt(b.id) > 0 ? 1 : -1;
+  });
+  let tallyBurnedAmount = burnedAmount;
   for (const vesting of vestingSchedulesForAccount) {
     if (tallyBurnedAmount === BigInt(0)) {
-      return // no-op
+      return; // no-op
     }
     if (vesting.totalVestingAmount <= tallyBurnedAmount) {
-      await removeVesting(overlay, vesting.id)
-      tallyBurnedAmount -= vesting.totalVestingAmount
+      await removeVesting(overlay, vesting.id);
+      tallyBurnedAmount -= vesting.totalVestingAmount;
     } else {
-      vesting.totalVestingAmount -= tallyBurnedAmount
+      vesting.totalVestingAmount -= tallyBurnedAmount;
     }
   }
 }
@@ -89,30 +100,34 @@ export async function addVestingScheduleToAccount(
 ) {
   const existingVestingSchedulesForAccount = await overlay
     .getRepository(VestedAccount)
-    .getManyByRelation('accountId', account.id)
+    .getManyByRelation("accountId", account.id);
 
-  const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter((vestedAccount) => {
-    return (
-      vestedAccount.vestingSource.isTypeOf === 'SaleVestingSource' &&
-      vestingSource.isTypeOf === 'SaleVestingSource' &&
-      vestedAccount.vestingSource.sale === vestingSource.sale
-    )
-  })
+  const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter(
+    (vestedAccount) => {
+      return (
+        vestedAccount.vestingSource.isTypeOf === "SaleVestingSource" &&
+        vestingSource.isTypeOf === "SaleVestingSource" &&
+        vestedAccount.vestingSource.sale === vestingSource.sale
+      );
+    }
+  );
 
   if (vestedAccountToBeUpdated.length > 0) {
     vestedAccountToBeUpdated.forEach((vestedAccount) => {
-      vestedAccount.totalVestingAmount += amount
-      account.totalAmount += amount
-    })
+      vestedAccount.totalVestingAmount += amount;
+      account.totalAmount += amount;
+    });
   } else {
-    const vestedAccountId = overlay.getRepository(VestedAccount).getNewEntityId()
+    const vestedAccountId = overlay
+      .getRepository(VestedAccount)
+      .getNewEntityId();
     overlay.getRepository(VestedAccount).new({
       id: vestedAccountId,
       accountId: account.id,
       vestingId,
       totalVestingAmount: amount,
       vestingSource: vestingSource,
-    })
+    });
   }
 }
 
@@ -122,7 +137,7 @@ export function createAccount(
   memberId: bigint,
   allocationAmount: bigint
 ): Flat<TokenAccount> {
-  const accountId = overlay.getRepository(TokenAccount).getNewEntityId()
+  const accountId = overlay.getRepository(TokenAccount).getNewEntityId();
   const newAccount = overlay.getRepository(TokenAccount).new({
     tokenId: token.id,
     memberId: memberId.toString(),
@@ -130,9 +145,9 @@ export function createAccount(
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
     deleted: false,
-  })
-  token.accountsNum += 1
-  return newAccount
+  });
+  token.accountsNum += 1;
+  return newAccount;
 }
 
 export async function getTokenAccountByMemberByToken(
@@ -141,12 +156,16 @@ export async function getTokenAccountByMemberByToken(
   tokenId: bigint
 ): Promise<Flat<TokenAccount> | undefined> {
   const results = (
-    await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
-  ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+    await overlay
+      .getRepository(TokenAccount)
+      .getManyByRelation("memberId", memberId.toString())
+  ).filter(
+    (account) => account.tokenId === tokenId.toString() && !account.deleted
+  );
   if (results.length === 0) {
-    return undefined
+    return undefined;
   }
-  return results[0]
+  return results[0];
 }
 
 export async function getTokenAccountByMemberByTokenOrFail(
@@ -154,11 +173,17 @@ export async function getTokenAccountByMemberByTokenOrFail(
   memberId: bigint,
   tokenId: bigint
 ): Promise<Flat<TokenAccount>> {
-  const result = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
+  const result = await getTokenAccountByMemberByToken(
+    overlay,
+    memberId,
+    tokenId
+  );
   if (result === undefined) {
-    criticalError(`Token account for member ${memberId} and token ${tokenId} does not exist.`)
+    criticalError(
+      `Token account for member ${memberId} and token ${tokenId} does not exist.`
+    );
   } else {
-    return result
+    return result;
   }
 }
 
@@ -172,42 +197,50 @@ export async function processValidatedTransfers(
   sourceAccount.totalAmount -= validatedTransfers.reduce(
     (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
     BigInt(0)
-  )
-  const tokenId = BigInt(token.id)
-  for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
-    let destinationAccount: Flat<TokenAccount>
-    if (validatedMemberId.__kind === 'Existing') {
+  );
+  const tokenId = BigInt(token.id);
+  for (const [
+    validatedMemberId,
+    validatedPaymentWithVesting,
+  ] of validatedTransfers) {
+    let destinationAccount: Flat<TokenAccount>;
+    if (validatedMemberId.__kind === "Existing") {
       destinationAccount = await getTokenAccountByMemberByTokenOrFail(
         overlay,
         validatedMemberId.value,
         tokenId
-      )
-      destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
+      );
+      destinationAccount.totalAmount +=
+        validatedPaymentWithVesting.payment.amount;
     } else {
-      const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+      const token = await overlay
+        .getRepository(CreatorToken)
+        .getByIdOrFail(tokenId.toString());
       destinationAccount = createAccount(
         overlay,
         token,
         validatedMemberId.value,
         validatedPaymentWithVesting.payment.amount
-      )
+      );
     }
 
     if (validatedPaymentWithVesting.payment.vestingSchedule) {
       const vestingData = new VestingScheduleData(
         validatedPaymentWithVesting.payment.vestingSchedule,
         blockHeight
-      )
-      const { id: vestingScheduleId } = overlay.getRepository(VestingSchedule).new({
-        ...vestingData,
-      })
+      );
+      const { id: vestingScheduleId } = overlay
+        .getRepository(VestingSchedule)
+        .new({
+          ...vestingData,
+        });
       await addVestingScheduleToAccount(
         overlay,
         destinationAccount,
         vestingScheduleId,
         validatedPaymentWithVesting.payment.amount,
         new IssuerTransferVestingSource()
-      )
+      );
     }
   }
 }
@@ -219,7 +252,7 @@ export async function processTokenMetadata(
   isUpdate: boolean
 ) {
   if (isSet(metadata.description)) {
-    token.description = metadata.description
+    token.description = metadata.description;
   }
 
   if (isSet(metadata.benefits)) {
@@ -227,11 +260,13 @@ export async function processTokenMetadata(
       if (benefit.displayOrder !== null) {
         // remove existing benefit with the same display order (if exists)
         const existingBenefit = (
-          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
-        ).find((b) => b.displayOrder === benefit.displayOrder)
+          await overlay
+            .getRepository(Benefit)
+            .getManyByRelation("tokenId", token.id)
+        ).find((b) => b.displayOrder === benefit.displayOrder);
 
         if (existingBenefit !== undefined) {
-          overlay.getRepository(Benefit).remove(existingBenefit)
+          overlay.getRepository(Benefit).remove(existingBenefit);
         }
 
         // if the benefit title is null, it means we want to remove the benefit
@@ -243,46 +278,103 @@ export async function processTokenMetadata(
             emojiCode: benefit.emoji,
             displayOrder: benefit.displayOrder,
             tokenId: token.id,
-          })
+          });
         }
       }
     }
   }
 
   if (isSet(metadata.whitelistApplicationNote)) {
-    token.whitelistApplicantNote = metadata.whitelistApplicationNote || null
+    token.whitelistApplicantNote = metadata.whitelistApplicationNote || null;
   }
 
   if (isSet(metadata.whitelistApplicationApplyLink)) {
-    token.whitelistApplicantLink = metadata.whitelistApplicationApplyLink || null
+    token.whitelistApplicantLink =
+      metadata.whitelistApplicationApplyLink || null;
   }
 
   if (isSet(metadata.avatarUri)) {
-    token.avatar = metadata.avatarUri ? new TokenAvatarUri({ avatarUri: metadata.avatarUri }) : null
+    token.avatar = metadata.avatarUri
+      ? new TokenAvatarUri({ avatarUri: metadata.avatarUri })
+      : null;
   }
 
   if (isUpdate) {
     if (isSet(metadata.symbol)) {
-      token.symbol = metadata.symbol
+      token.symbol = metadata.symbol;
     } else {
-      token.symbol = uniqueId() // create artificial unique symbol in case it's not provided
+      token.symbol = uniqueId(); // create artificial unique symbol in case it's not provided
     }
   }
 
   if (isSet(metadata.trailerVideoId)) {
-    const video = await overlay.getRepository(Video).getById(metadata.trailerVideoId)
+    const video = await overlay
+      .getRepository(Video)
+      .getById(metadata.trailerVideoId);
     if (video) {
-      const trailerVideoRepository = overlay.getRepository(TrailerVideo)
-      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
-      trailerVideoRepository.remove(oldTrailer)
+      const trailerVideoRepository = overlay.getRepository(TrailerVideo);
+      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail(
+        "tokenId",
+        token.id
+      );
+      trailerVideoRepository.remove(oldTrailer);
 
-      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
+      const id = overlay.getRepository(TrailerVideo).getNewEntityId();
       overlay.getRepository(TrailerVideo).new({
         id,
         tokenId: token.id,
         videoId: video.id,
-      })
-      token.trailerVideoId = id
+      });
+      token.trailerVideoId = id;
     }
   }
+}
+
+export function addVestingSchedule(
+  overlay: EntityManagerOverlay,
+  vestingParams: VestingScheduleParams,
+  blockHeight: number,
+  tokenId: bigint,
+  memberId: bigint
+) {
+  const vestingData = new VestingScheduleData(vestingParams, blockHeight);
+
+  overlay.getRepository(VestingSchedule).new({
+    id: vestingData.id(),
+    endsAt: vestingData.endsAt(),
+    cliffBlock: vestingData.cliffBlock(),
+    vestingDurationBlocks: vestingData.duration(),
+    cliffPercent: vestingData.cliffPercent(),
+  });
+
+  overlay.getRepository(VestedAccount).new({
+    id: tokenAccountId(tokenId, memberId) + vestingData.id(),
+    accountId: tokenAccountId(tokenId, memberId),
+    vestingId: vestingData.id(),
+  });
+}
+
+export function createAccount(
+  overlay: EntityManagerOverlay,
+  token: Flat<Token>,
+  memberId: bigint,
+  allocationAmount: bigint,
+  whitelisted?: boolean
+) {
+  overlay.getRepository(TokenAccount).new({
+    tokenId: token.id,
+    memberId: memberId.toString(),
+    id: token.id + memberId.toString(),
+    stakedAmount: BigInt(0),
+    totalAmount: allocationAmount,
+    whitelisted,
+  });
+  const token = await overlay
+    .getRepository(Token)
+    .getByIdOrFail(tokenId.toString());
+  token.accountsNum += 1;
+}
+
+export function ammId(token: Flat<Token>): string {
+  return token.id + token.ammNonce.toString();
 }

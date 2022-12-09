@@ -1,0 +1,13 @@
+query salesTest($id_eq: String = "") {
+  salesConnection(orderBy: createdIn_ASC, where: { token: { id_eq: $id_eq } }) {
+    edges {
+      node {
+        pricePerUnit
+        startBlock
+        createdIn
+        endsAt
+        finalized
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+fragment MembershipFields on Membership {
+  id
+  handle
+  createdAt
+  metadata {
+    id
+  }
+  totalChannelsCreated
+}
+
+query getMembersByIds($ids: [String!]) {
+  memberships(where: { id_in: $ids }) {
+    ...MembershipFields
+  }
+}

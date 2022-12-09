@@ -1,0 +1,1 @@
+{"version":3,"file":"codec.d.ts","sourceRoot":"","sources":["../src/codec.ts"],"names":[],"mappings":"AAIA,qBAAa,KAAK;aACc,MAAM,EAAE,MAAM;gBAAd,MAAM,EAAE,MAAM;IAI1C,MAAM,CAAC,KAAK,EAAE,UAAU,GAAG,MAAM;IAIjC,MAAM,CAAC,CAAC,EAAE,MAAM,GAAG,UAAU;CAOhC"}

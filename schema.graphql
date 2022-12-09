@@ -1,0 +1,1623 @@
+type User @entity {
+  "Unique identifier (32-byte string, securely random)"
+  id: ID!
+
+  "Whether the user has root (gateway operator) privileges"
+  isRoot: Boolean!
+
+  "The account associated with the user (if any)"
+  account: Account @derivedFrom(field: "user")
+
+  "User's channel follows"
+  channelFollows: [ChannelFollow!]! @derivedFrom(field: "user")
+
+  "Video views associated with the user"
+  videoViewEvents: [VideoViewEvent!]! @derivedFrom(field: "user")
+
+  "Reports associated with the user"
+  reports: [Report!]! @derivedFrom(field: "user")
+
+  "NFT featuring requests associated with the user"
+  nftFeaturingRequests: [NftFeaturingRequest!]! @derivedFrom(field: "user")
+}
+
+type EncryptionArtifacts @entity {
+  "ID / lookupKey"
+  id: ID!
+
+  "The account the encryption artifacts are associated with"
+  account: Account! @unique
+
+  "The IV used to encrypt the wallet seed with user credentials"
+  cipherIv: String!
+
+  "Wallet seed encrypted with user credentials"
+  encryptedSeed: String!
+}
+
+type SessionEncryptionArtifacts @entity {
+  "Unique identifier"
+  id: ID!
+
+  "The session the encryption artifacts are associated with"
+  session: Session! @unique
+
+  "The IV used to encrypt the seed with cipherKey"
+  cipherIv: String!
+
+  "cipherKey used to encrypt the seed stored client-side for the duration of the session"
+  cipherKey: String!
+}
+
+type Session @entity {
+  "Unique identifier (32-byte string, securely random)"
+  id: ID!
+
+  "Browser (as deterimned based on user-agent header)"
+  browser: String!
+
+  "Operating system (as deterimned based on user-agent header)"
+  os: String!
+
+  "Device (as deterimned based on user-agent header)"
+  device: String!
+
+  "Device type (as deterimned based on user-agent header)"
+  deviceType: String
+
+  "User associated with the session"
+  user: User!
+
+  "Account associated with the session (if any)"
+  account: Account
+
+  "IP address associated with the session"
+  ip: String! @index
+
+  "Time when the session started"
+  startedAt: DateTime!
+
+  "Time when the session expires or did expire"
+  expiry: DateTime!
+}
+
+"A Gateway Account"
+type Account @entity {
+  "Unique identifier (can be sequential)"
+  id: ID!
+
+  "The user associated with the gateway account (the Gateway Account Owner)"
+  user: User! @unique
+
+  "Gateway account's e-mail address"
+  email: String! @unique
+
+  """
+  Indicates whether the gateway account's e-mail has been confirmed or not.
+  """
+  isEmailConfirmed: Boolean!
+
+  "Indicates whether the access to the gateway account is blocked"
+  isBlocked: Boolean!
+
+  "Time when the gateway account was registered"
+  registeredAt: DateTime!
+
+  "On-chain membership associated with the gateway account"
+  membership: Membership! @unique
+
+  "Blockchain (joystream) account associated with the gateway account"
+  joystreamAccount: String! @unique
+}
+
+enum TokenType {
+  EMAIL_CONFIRMATION
+}
+
+type Token @entity {
+  "The token itself (32-byte string, securely random)"
+  id: ID!
+
+  "Type of the token (its intended purpose)"
+  type: TokenType!
+
+  "When was the token issued"
+  issuedAt: DateTime!
+
+  "When does the token expire or when has it expired"
+  expiry: DateTime!
+
+  "The account the token was issued for"
+  issuedFor: Account!
+}
+type Event @entity {
+  "{blockNumber}-{indexInBlock}"
+  id: ID!
+
+  "Blocknumber of the block in which the event was emitted."
+  inBlock: Int!
+
+  "Hash of the extrinsic the event was emitted in"
+  inExtrinsic: String @index
+
+  "Index of event in block from which it was emitted."
+  indexInBlock: Int!
+
+  "Timestamp of the block the event was emitted in"
+  timestamp: DateTime!
+
+  "More specific event data, which depends on event type"
+  data: EventData!
+}
+
+type Notification @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Member that should recieve the notification"
+  member: Membership!
+
+  "The notification event"
+  event: Event!
+}
+
+type NftHistoryEntry @entity {
+  "Autoincremented"
+  id: ID!
+
+  "The NFT the event relates to"
+  nft: OwnedNft!
+
+  "Nft-related event"
+  event: Event!
+}
+
+type NftActivity @entity {
+  "Autoincremented"
+  id: ID!
+
+  "The member the activity relates to"
+  member: Membership!
+
+  "Nft-related activity"
+  event: Event!
+}
+
+union EventData =
+    CommentCreatedEventData
+  | CommentTextUpdatedEventData
+  | OpenAuctionStartedEventData
+  | EnglishAuctionStartedEventData
+  | NftIssuedEventData
+  | AuctionBidMadeEventData
+  | AuctionBidCanceledEventData
+  | AuctionCanceledEventData
+  | EnglishAuctionSettledEventData
+  | BidMadeCompletingAuctionEventData
+  | OpenAuctionBidAcceptedEventData
+  | NftSellOrderMadeEventData
+  | NftBoughtEventData
+  | BuyNowCanceledEventData
+  | BuyNowPriceUpdatedEventData
+  | MetaprotocolTransactionStatusEventData
+  | ChannelRewardClaimedEventData
+  | ChannelRewardClaimedAndWithdrawnEventData
+  | ChannelFundsWithdrawnEventData
+  | ChannelPayoutsUpdatedEventData
+  | ChannelPaymentMadeEventData
+  | MemberBannedFromChannelEventData
+
+# Atlas use-case: `GetCommentEdits` query
+type CommentCreatedEventData {
+  "The comment that was added"
+  comment: Comment!
+
+  "Comment's original text"
+  text: String!
+}
+
+# Atlas use-case: `GetCommentEdits` query
+type CommentTextUpdatedEventData {
+  "The comment being updated"
+  comment: Comment!
+
+  "New comment text"
+  newText: String!
+
+  # Only author can edit the comment, so no actor context required
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type OpenAuctionStartedEventData {
+  "Actor that started this auction."
+  actor: ContentActor!
+
+  "Nft owner at the time it was put on an auction."
+  nftOwner: NftOwner!
+
+  "Auction started."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type EnglishAuctionStartedEventData {
+  "Actor that started this auction."
+  actor: ContentActor!
+
+  "Nft owner at the time it was put on an auction."
+  nftOwner: NftOwner!
+
+  "Auction started."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type NftIssuedEventData {
+  "Actor that issued the NFT."
+  actor: ContentActor!
+
+  "NFT that was issued."
+  nft: OwnedNft!
+
+  "NFT's initial owner."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type AuctionBidMadeEventData {
+  "The bid that was submitted "
+  bid: Bid!
+
+  "Nft owner at the time it was being auctioned."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type AuctionBidCanceledEventData {
+  "Member that canceled the bid."
+  member: Membership!
+
+  "Nft owner at the time it was being auctioned."
+  nftOwner: NftOwner!
+
+  "The bid that got canceled."
+  bid: Bid!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type AuctionCanceledEventData {
+  "Content actor canceling the auction."
+  actor: ContentActor!
+
+  "Nft owner at the time the auction was being auctioned."
+  nftOwner: NftOwner!
+
+  "Auction that was canceled."
+  auction: Auction!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type EnglishAuctionSettledEventData {
+  "English auction winning bid"
+  winningBid: Bid!
+
+  "NFT owner before the english auction was settled"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type BidMadeCompletingAuctionEventData {
+  "Bid that completed the auction"
+  winningBid: Bid!
+
+  "NFT owner before the auction was completed"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type OpenAuctionBidAcceptedEventData {
+  "Content actor that accepted the bid."
+  actor: ContentActor!
+
+  "Accepted/winning bid"
+  winningBid: Bid!
+
+  "NFT owner before the auction was completed"
+  previousNftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory` query
+type NftSellOrderMadeEventData {
+  "NFT being sold"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "NFT owner at the time it was put on sale"
+  nftOwner: NftOwner!
+
+  "Offer's price."
+  price: BigInt!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+type NftBoughtEventData {
+  "The NFT that was bought"
+  nft: OwnedNft!
+
+  "Member that bought the NFT."
+  buyer: Membership!
+
+  "NFT owner before it was bought"
+  previousNftOwner: NftOwner!
+
+  "Price for which the NFT was bought"
+  price: BigInt!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory`
+type BuyNowCanceledEventData {
+  "The NFT for which the buy now offer was canceled"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "Owner of the NFT at the time the buy now offer was canceled."
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities` and `GetNftHistory`
+type BuyNowPriceUpdatedEventData {
+  "NFT being sold"
+  nft: OwnedNft!
+
+  "Content actor acting as NFT owner."
+  actor: ContentActor!
+
+  "NFT owner at the time it was on sale"
+  nftOwner: NftOwner!
+
+  "New sell order price."
+  newPrice: BigInt!
+}
+
+type MetaprotocolTransactionResultCommentCreated {
+  commentCreated: Comment
+}
+
+type MetaprotocolTransactionResultCommentEdited {
+  commentEdited: Comment
+}
+
+type MetaprotocolTransactionResultCommentDeleted {
+  commentDeleted: Comment
+}
+
+type MetaprotocolTransactionResultCommentModerated {
+  commentModerated: Comment
+}
+
+type MetaprotocolTransactionResultChannelPaid {
+  channelPaid: Channel
+}
+
+type MetaprotocolTransactionResultOK {
+  phantom: Int
+}
+
+type MetaprotocolTransactionResultFailed {
+  errorMessage: String!
+}
+
+union MetaprotocolTransactionResult =
+    MetaprotocolTransactionResultOK
+  | MetaprotocolTransactionResultCommentCreated
+  | MetaprotocolTransactionResultCommentEdited
+  | MetaprotocolTransactionResultCommentDeleted
+  | MetaprotocolTransactionResultCommentModerated
+  | MetaprotocolTransactionResultFailed
+  | MetaprotocolTransactionResultChannelPaid
+
+type MetaprotocolTransactionStatusEventData {
+  "The result of metaprotocol action"
+  result: MetaprotocolTransactionResult!
+}
+
+type ChannelRewardClaimedEventData {
+  "The channel that claimed the reward"
+  channel: Channel!
+
+  "Reward amount claimed"
+  amount: BigInt!
+}
+
+type ChannelRewardClaimedAndWithdrawnEventData {
+  "The channel that claimed the reward"
+  channel: Channel!
+
+  "Reward amount claimed"
+  amount: BigInt!
+
+  "Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)"
+  account: String
+
+  "Content actor"
+  actor: ContentActor!
+}
+
+type ChannelFundsWithdrawnEventData {
+  "The channel that claimed the reward"
+  channel: Channel!
+
+  "Reward amount claimed"
+  amount: BigInt!
+
+  "Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)"
+  account: String
+
+  "Content actor"
+  actor: ContentActor!
+}
+
+type ChannelPayoutsUpdatedEventData {
+  "Merkle root of the channel payouts"
+  commitment: String
+
+  "Storage data object corresponding to the channel payouts payload"
+  payloadDataObject: StorageDataObject
+
+  "Minimum amount of channel reward cashout allowed at a time"
+  minCashoutAllowed: BigInt
+
+  "Maximum amount of channel reward cashout allowed at a time"
+  maxCashoutAllowed: BigInt
+
+  "Can channel cashout the rewards"
+  channelCashoutsEnabled: Boolean
+}
+
+type PaymentContextVideo {
+  "Video for which the payment was made"
+  video: Video!
+}
+
+type PaymentContextChannel {
+  "Channel for which the payment was made"
+  channel: Channel!
+}
+
+"Various Channel Payment Contexts"
+union PaymentContext = PaymentContextVideo | PaymentContextChannel
+
+"Direct channel payment by any member by-passing the council payouts"
+type ChannelPaymentMadeEventData {
+  "Actor that made the payment"
+  payer: Membership!
+
+  "Amount of the payment"
+  amount: BigInt!
+
+  "Payment and payee context"
+  paymentContext: PaymentContext
+
+  "Channel that received the payment (if any)"
+  payeeChannel: Channel
+
+  "Reason of the payment"
+  rationale: String
+}
+
+# This event is emitted both when a member is banned and when they are unbanned
+type MemberBannedFromChannelEventData {
+  "The chanel the member is being banned / unbanned from"
+  channel: Channel!
+
+  "The member being banned / unbanned"
+  member: Membership!
+
+  "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
+  action: Boolean!
+}
+type VideoCategory @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "The name of the category"
+  name: String @index
+
+  "The description of the category"
+  description: String
+
+  "Parent category if defined"
+  parentCategory: VideoCategory
+
+  videos: [Video!]! @derivedFrom(field: "category")
+
+  featuredVideos: [VideoFeaturedInCategory!] @derivedFrom(field: "category")
+
+  "Indicates whether the category is supported by the Gateway"
+  isSupported: Boolean!
+
+  createdInBlock: Int!
+}
+
+type Video @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "Timestamp of the block the video was created at"
+  createdAt: DateTime!
+
+  "Reference to videos's channel"
+  channel: Channel!
+
+  "Reference to a video category"
+  category: VideoCategory
+
+  "The title of the video"
+  title: String
+
+  "The description of the Video"
+  description: String
+
+  "Video duration in seconds"
+  duration: Int
+
+  "Video thumbnail asset (recommended ratio: 16:9)"
+  thumbnailPhoto: StorageDataObject
+
+  "Video's main langauge"
+  language: String @index
+
+  "Whether or not Video contains marketing"
+  hasMarketing: Boolean
+
+  "If the Video was published on other platform before beeing published on Joystream - the original publication date"
+  publishedBeforeJoystream: DateTime
+
+  "Whether the Video is supposed to be publically displayed"
+  isPublic: Boolean
+
+  "Flag signaling whether a video is censored."
+  isCensored: Boolean!
+
+  "Whether a video has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+
+  "Video NFT details"
+  nft: OwnedNft @derivedFrom(field: "video")
+
+  "Whether the Video contains explicit material."
+  isExplicit: Boolean
+
+  "License under the video is published"
+  license: License
+
+  "Video media asset"
+  media: StorageDataObject
+
+  "Value of video state bloat bond fee paid by channel owner"
+  videoStateBloatBond: BigInt!
+
+  "Video file metadata"
+  mediaMetadata: VideoMediaMetadata @derivedFrom(field: "video")
+
+  "Block the video was created in"
+  createdInBlock: Int!
+
+  "List of video subtitles"
+  subtitles: [VideoSubtitle!] @derivedFrom(field: "video")
+
+  "Is comment section enabled (true if enabled)"
+  isCommentSectionEnabled: Boolean!
+
+  "channel owner pinned comment"
+  pinnedComment: Comment
+
+  "List of all video comments"
+  comments: [Comment!] @derivedFrom(field: "video")
+
+  "Comments count"
+  commentsCount: Int!
+
+  "Is reactions feature enabled on video (true if enabled i.e. video can be reacted)"
+  isReactionFeatureEnabled: Boolean!
+
+  "List of all video reactions"
+  reactions: [VideoReaction!] @derivedFrom(field: "video")
+
+  "Reactions count by reaction Id"
+  reactionsCountByReactionId: [VideoReactionsCountByReactionType!]
+
+  "Reactions count"
+  reactionsCount: Int!
+
+  "Number of video views (to speed up orderBy queries by avoiding COUNT aggregation)"
+  viewsNum: Int!
+
+  "Application used for video creation"
+  entryApp: App
+
+  "Video ID coming from YPP"
+  ytVideoId: String
+
+  "Video relevance score based on the views, reactions, comments and update date"
+  videoRelevance: Float! @index
+}
+
+type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
+  "{categoryId-videoId}"
+  id: ID!
+
+  "Video being featured"
+  video: Video!
+
+  "Category the video is featured in"
+  category: VideoCategory!
+
+  "Url to video fragment to be displayed in the UI"
+  videoCutUrl: String
+}
+
+type VideoHero @entity {
+  "Unique ID"
+  id: ID!
+
+  "Video being featured in the Hero section"
+  video: Video!
+
+  "Title of the Hero section"
+  heroTitle: String!
+
+  "Url to video fragment to be displayed in the Hero section"
+  heroVideoCutUrl: String!
+
+  "Url to the poster to be displayed in the Hero section"
+  heroPosterUrl: String!
+
+  "Time at which this VideoHero was created/activated"
+  activatedAt: DateTime
+}
+
+type VideoMediaMetadata @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Encoding of the video media object"
+  encoding: VideoMediaEncoding
+
+  "Video media width in pixels"
+  pixelWidth: Int
+
+  "Video media height in pixels"
+  pixelHeight: Int
+
+  "Video media size in bytes"
+  size: BigInt
+
+  video: Video! @unique
+
+  createdInBlock: Int!
+}
+
+type VideoMediaEncoding @entity {
+  "Encoding of the video media object"
+  codecName: String
+
+  "Media container format"
+  container: String
+
+  "Content MIME type"
+  mimeMediaType: String
+}
+
+type License @entity {
+  "Unique identifier"
+  id: ID!
+
+  "License code defined by Joystream"
+  code: Int
+
+  "Attribution (if required by the license)"
+  attribution: String
+
+  "Custom license content"
+  customText: String
+}
+
+type VideoSubtitle @entity {
+  "{type}-{language}"
+  id: ID!
+
+  "Subtitle's video"
+  video: Video!
+
+  # Atlas will use 'subtitles' | 'closed-captions' for now and possible other types in the future.
+  "Subtitle's type"
+  type: String!
+
+  "Subtitle's language"
+  language: String @index
+
+  "MIME type description of format used for this subtitle"
+  mimeType: String!
+
+  "Storage object representing the subtitle file"
+  asset: StorageDataObject
+}
+
+type VideoReactionsCountByReactionType {
+  "The reaction option"
+  reaction: VideoReactionOptions!
+
+  "No of times the video has been reacted with given reaction"
+  count: Int!
+}
+
+enum VideoReactionOptions {
+  "Reacting again with the same option will cancel the previous reaction"
+  LIKE
+  UNLIKE
+}
+
+type VideoReaction @entity {
+  "{memberId}-{videoId}"
+  id: ID!
+
+  "Timestamp of the block the reaction was created at"
+  createdAt: DateTime!
+
+  "The Reaction"
+  reaction: VideoReactionOptions!
+
+  "The member that reacted"
+  member: Membership!
+
+  "The video that has been reacted to"
+  video: Video!
+}
+type VideoViewEvent @entity {
+  "Unique identifier of the video view event"
+  id: ID!
+
+  "ID of the video that was viewed (the video may no longer exist)"
+  videoId: String! @index
+
+  "User that viewed the video"
+  user: User!
+
+  "Video view event timestamp"
+  timestamp: DateTime!
+}
+
+type Report @entity {
+  "Unique identifier of the report"
+  id: ID!
+
+  "User that reported the channel / video"
+  user: User!
+
+  "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
+  channelId: String @index
+
+  "If it's a video report: ID of the video being reported (the video may no longer exist)"
+  videoId: String @index
+
+  "Time of the report"
+  timestamp: DateTime!
+
+  "Rationale behind the report"
+  rationale: String!
+}
+
+type NftFeaturingRequest @entity {
+  "Unique identifier of the request"
+  id: ID!
+
+  "User that requested the nft to be featured"
+  user: User!
+
+  "ID of the nft that is being requested to be featured by operator"
+  nftId: String! @index
+
+  "Time of the request"
+  timestamp: DateTime!
+
+  "Rationale behind the request"
+  rationale: String!
+}
+
+type ChannelFollow @entity {
+  "Unique identifier of the follow"
+  id: ID!
+
+  "User that followed the channel"
+  user: User!
+
+  "ID of the channel being followed (the channel may no longer exist)"
+  channelId: String! @index
+
+  "Time when user started following the channel"
+  timestamp: DateTime!
+}
+
+type GatewayConfig @entity {
+  "Unique name of the configuration variable"
+  id: ID!
+
+  "Value of the configuration variable serialized to a string"
+  value: String!
+
+  "Last time the configuration variable was updated"
+  updatedAt: DateTime!
+}
+type StorageBucketOperatorStatusMissing {
+  phantom: Int
+}
+
+type StorageBucketOperatorStatusInvited {
+  workerId: Int!
+}
+
+type StorageBucketOperatorStatusActive {
+  workerId: Int!
+  transactorAccountId: String!
+}
+
+union StorageBucketOperatorStatus =
+    StorageBucketOperatorStatusMissing
+  | StorageBucketOperatorStatusInvited
+  | StorageBucketOperatorStatusActive
+
+type GeoCoordinates {
+  latitude: Float!
+
+  longitude: Float!
+}
+
+enum Continent {
+  AF
+  NA
+  OC
+  AN
+  AS
+  EU
+  SA
+}
+
+type GeographicalAreaContinent {
+  continentCode: Continent
+}
+
+type GeographicalAreaCountry {
+  "ISO 3166-1 alpha-2 country code"
+  countryCode: String
+}
+
+type GeographicalAreaSubdivistion {
+  "ISO 3166-2 subdivision code"
+  subdivisionCode: String
+}
+
+union GeographicalArea =
+    GeographicalAreaContinent
+  | GeographicalAreaCountry
+  | GeographicalAreaSubdivistion
+
+type NodeLocationMetadata {
+  "ISO 3166-1 alpha-2 country code (2 letters)"
+  countryCode: String
+
+  "City name"
+  city: String
+
+  "Geographic coordinates"
+  coordinates: GeoCoordinates
+}
+
+type StorageBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Storage bucket to which the metadata is assigned"
+  storageBucket: StorageBucket! @unique
+
+  "Root node endpoint"
+  nodeEndpoint: String
+
+  "Optional node location metadata"
+  nodeLocation: NodeLocationMetadata
+
+  "Additional information about the node/operator"
+  extra: String
+}
+
+type StorageBucket @entity {
+  "Runtime bucket id"
+  id: ID!
+
+  "Current bucket operator status"
+  operatorStatus: StorageBucketOperatorStatus!
+
+  "Storage bucket operator metadata"
+  operatorMetadata: StorageBucketOperatorMetadata @derivedFrom(field: "storageBucket")
+
+  "Whether the bucket is accepting any new storage bags"
+  acceptingNewBags: Boolean!
+
+  "Storage bags assigned to the bucket"
+  bags: [StorageBucketBag!] @derivedFrom(field: "storageBucket")
+
+  "Bucket's data object size limit in bytes"
+  dataObjectsSizeLimit: BigInt!
+
+  "Bucket's data object count limit"
+  dataObjectCountLimit: BigInt!
+
+  "Number of assigned data objects"
+  dataObjectsCount: BigInt!
+
+  "Total size of assigned data objects"
+  dataObjectsSize: BigInt!
+}
+
+type StorageBagOwnerCouncil {
+  phantom: Int
+}
+
+type StorageBagOwnerWorkingGroup {
+  workingGroupId: String
+}
+
+type StorageBagOwnerMember {
+  memberId: String!
+}
+
+type StorageBagOwnerChannel {
+  channelId: String!
+}
+
+# Note: Not supported by runtime yet
+type StorageBagOwnerDAO {
+  daoId: Int
+}
+
+union StorageBagOwner =
+    StorageBagOwnerCouncil
+  | StorageBagOwnerWorkingGroup
+  | StorageBagOwnerMember
+  | StorageBagOwnerChannel
+  | StorageBagOwnerDAO
+
+type StorageBag @entity {
+  "Storage bag id"
+  id: ID!
+
+  "Data objects in the bag"
+  objects: [StorageDataObject!] @derivedFrom(field: "storageBag")
+
+  "Storage buckets assigned to the bag"
+  storageBuckets: [StorageBucketBag!] @derivedFrom(field: "bag")
+
+  "Distribution buckets assigned to the bag"
+  distributionBuckets: [DistributionBucketBag!] @derivedFrom(field: "bag")
+
+  "Owner of the storage bag"
+  owner: StorageBagOwner!
+}
+
+type StorageBucketBag @entity @index(fields: ["storageBucket", "bag"], unique: true) {
+  "{storageBucketId}-{storageBagId}"
+  id: ID!
+  storageBucket: StorageBucket!
+  bag: StorageBag!
+}
+
+type DistributionBucketBag @entity @index(fields: ["distributionBucket", "bag"], unique: true) {
+  "{distributionBucketId}-{storageBagId}"
+  id: ID!
+  distributionBucket: DistributionBucket!
+  bag: StorageBag!
+}
+
+type DataObjectTypeChannelAvatar {
+  "Related channel entity"
+  channel: Channel!
+}
+
+type DataObjectTypeChannelCoverPhoto {
+  "Related channel entity"
+  channel: Channel!
+}
+
+type DataObjectTypeVideoMedia {
+  "Related video entity"
+  video: Video!
+}
+
+type DataObjectTypeVideoThumbnail {
+  "Related video entity"
+  video: Video!
+}
+
+type DataObjectTypeVideoSubtitle {
+  "Related subtitle entity"
+  subtitle: VideoSubtitle!
+
+  # Useful for filtering subtitles against video, since
+  # relationship filtering through variant is not supported
+  "Related video entity"
+  video: Video!
+}
+
+type DataObjectTypeChannelPayoutsPayload {
+  phantom: Int
+}
+
+union DataObjectType =
+    DataObjectTypeChannelAvatar
+  | DataObjectTypeChannelCoverPhoto
+  | DataObjectTypeVideoMedia
+  | DataObjectTypeVideoThumbnail
+  | DataObjectTypeVideoSubtitle
+  | DataObjectTypeChannelPayoutsPayload
+
+type StorageDataObject @entity {
+  "Data object runtime id"
+  id: ID!
+
+  "Timestamp of the block the data object was created at"
+  createdAt: DateTime!
+
+  "Whether the data object was uploaded and accepted by the storage provider"
+  isAccepted: Boolean!
+
+  "Data object size in bytes"
+  size: BigInt!
+
+  "Storage bag the data object is part of"
+  storageBag: StorageBag!
+
+  "IPFS content hash"
+  ipfsHash: String!
+
+  "The type of the asset that the data object represents (if known)"
+  type: DataObjectType
+
+  "State Bloat Bond for removing the data object"
+  stateBloatBond: BigInt!
+
+  "If the object is no longer used as an asset - the time at which it was unset (if known)"
+  unsetAt: DateTime
+
+  "Resolved asset urls"
+  # This field should be populated with [dataObjectId] and will be then resolved by Orion's GraphQL
+  # server during query resolution
+  resolvedUrls: [String!]!
+}
+
+type DistributionBucketFamilyMetadata @entity {
+  id: ID!
+
+  "Distribution bucket family"
+  family: DistributionBucketFamily! @unique
+
+  "Name of the geographical region covered by the family (ie.: us-east-1)"
+  region: String @index
+
+  "Optional, more specific description of the region covered by the family"
+  description: String
+
+  "Geographical areas covered by the family"
+  areas: [GeographicalArea!]
+
+  "List of targets (hosts/ips) best suited latency measurements for the family"
+  latencyTestTargets: [String]
+}
+
+type DistributionBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Distribution bucket operator"
+  distirbutionBucketOperator: DistributionBucketOperator! @unique
+
+  "Root distributor node api endpoint"
+  nodeEndpoint: String
+
+  "Optional node location metadata"
+  nodeLocation: NodeLocationMetadata
+
+  "Additional information about the node/operator"
+  extra: String
+}
+
+enum DistributionBucketOperatorStatus {
+  INVITED
+  ACTIVE
+}
+
+type DistributionBucketOperator @entity {
+  "{bucketId}-{workerId}"
+  id: ID!
+
+  "Related distirbution bucket"
+  distributionBucket: DistributionBucket!
+
+  "ID of the distribution group worker"
+  workerId: Int!
+
+  "Current operator status"
+  status: DistributionBucketOperatorStatus!
+
+  "Operator metadata"
+  metadata: DistributionBucketOperatorMetadata @derivedFrom(field: "distirbutionBucketOperator")
+}
+
+type DistributionBucket @entity {
+  "Runtime bucket id in {familyId}:{bucketIndex} format"
+  id: ID!
+
+  "Distribution family the bucket is part of"
+  family: DistributionBucketFamily!
+
+  "Bucket index within the family"
+  bucketIndex: Int!
+
+  "Distribution bucket operators (either active or invited)"
+  operators: [DistributionBucketOperator!] @derivedFrom(field: "distributionBucket")
+
+  "Whether the bucket is accepting any new bags"
+  acceptingNewBags: Boolean!
+
+  "Whether the bucket is currently distributing content"
+  distributing: Boolean!
+
+  "Storage bags assigned to the bucket"
+  bags: [DistributionBucketBag!] @derivedFrom(field: "distributionBucket")
+}
+
+type DistributionBucketFamily @entity {
+  "Runtime bucket family id"
+  id: ID!
+
+  "Current bucket family metadata"
+  metadata: DistributionBucketFamilyMetadata @derivedFrom(field: "family")
+
+  "Distribution buckets belonging to the family"
+  buckets: [DistributionBucket!] @derivedFrom(field: "family")
+}
+type Channel @entity {
+  "Runtime entity identifier (EntityId)"
+  id: ID!
+
+  "Timestamp of the block the channel was created at"
+  createdAt: DateTime!
+
+  "Current member-owner of the channel (if owned by a member)"
+  ownerMember: Membership
+
+  "The title of the Channel"
+  title: String
+
+  "The description of a Channel"
+  description: String
+
+  "Channel's cover (background) photo asset. Recommended ratio: 16:9."
+  coverPhoto: StorageDataObject
+
+  "Channel's avatar photo asset."
+  avatarPhoto: StorageDataObject
+
+  "Flag signaling whether a channel is public."
+  isPublic: Boolean
+
+  "Flag signaling whether a channel is censored."
+  isCensored: Boolean!
+
+  "Whether a channel has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+
+  "The primary langauge of the channel's content"
+  language: String @index
+
+  "List of videos that belong to the channel"
+  videos: [Video!]! @derivedFrom(field: "channel")
+
+  "Number of the block the channel was created in"
+  createdInBlock: Int!
+
+  "Channel's reward account, storing the income from the nft sales and channel payouts."
+  rewardAccount: String!
+
+  "Value of channel state bloat bond fee paid by channel creator"
+  channelStateBloatBond: BigInt!
+
+  "Number of active follows (to speed up orderBy queries by avoiding COUNT aggregation)"
+  followsNum: Int!
+
+  "Number of total video views (to speed up orderBy queries by avoiding COUNT aggregation)"
+  videoViewsNum: Int!
+
+  "List of members blocked from commenting/reacting on any video of the channel."
+  bannedMembers: [BannedMember!] @derivedFrom(field: "channel")
+
+  "Application used for channel creation"
+  entryApp: App
+
+  "Number of videos ever created in this channel"
+  totalVideosCreated: Int!
+
+  "Cumulative rewards claimed by this channel"
+  cumulativeRewardClaimed: BigInt
+}
+
+type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
+  "{memberId}-{channelId}"
+  id: ID!
+  member: Membership!
+  channel: Channel!
+}
+type App @entity {
+  "Runtime entity identifier (EntityId)"
+  id: ID!
+  "The name of the App"
+  name: String! @unique
+  "Member owning the App"
+  ownerMember: Membership!
+  "Url where user can read more about the project or company for this app"
+  websiteUrl: String
+  "Url to the app"
+  useUri: String
+  smallIcon: String
+  mediumIcon: String
+  bigIcon: String
+  "Tagline of the app"
+  oneLiner: String
+  description: String
+  termsOfService: String
+  "List of platforms on which the app will be available, e.g. [mobile, web, native]"
+  platforms: [String]
+  category: String
+  authKey: String
+  appVideos: [Video!] @derivedFrom(field: "entryApp")
+  appChannels: [Channel!] @derivedFrom(field: "entryApp")
+}
+# Content Actor
+union ContentActor = ContentActorCurator | ContentActorMember | ContentActorLead
+
+type ContentActorCurator {
+  curator: Curator!
+}
+
+type ContentActorMember {
+  member: Membership!
+}
+
+type ContentActorLead {
+  phantom: Int
+}
+
+type CuratorGroup @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "Is group active or not"
+  isActive: Boolean!
+}
+
+type Curator @entity {
+  "Runtime identifier"
+  id: ID!
+}
+
+# NFT owner
+union NftOwner = NftOwnerChannel | NftOwnerMember
+
+type NftOwnerChannel {
+  channel: Channel!
+}
+
+type NftOwnerMember {
+  member: Membership!
+}
+type AvatarObject @variant {
+  "The avatar data object"
+  avatarObject: StorageDataObject!
+}
+
+type AvatarUri @variant {
+  "The avatar URL"
+  avatarUri: String!
+}
+
+union Avatar = AvatarObject | AvatarUri
+
+type MemberMetadata @entity {
+  "Member's name"
+  name: String
+
+  "Avatar data object"
+  avatar: Avatar
+
+  "Short text chosen by member to share information about themselves"
+  about: String
+
+  member: Membership! @unique
+}
+
+"Stored information about a registered user"
+type Membership @entity {
+  "MemberId: runtime identifier for a user"
+  id: ID!
+
+  "Timestamp of the block the membership was created at"
+  createdAt: DateTime!
+
+  "The unique handle chosen by member"
+  handle: String! @unique
+
+  "Member's metadata"
+  metadata: MemberMetadata @derivedFrom(field: "member")
+
+  "Member's controller account id"
+  controllerAccount: String!
+
+  "Auctions in which is this user whitelisted to participate"
+  whitelistedInAuctions: [AuctionWhitelistedMember!] @derivedFrom(field: "member")
+
+  "Channels owned by this member"
+  channels: [Channel!] @derivedFrom(field: "ownerMember")
+
+  "Channels the member is banned from (in terms of commenting/reacting)"
+  bannedFromChannels: [BannedMember!] @derivedFrom(field: "member")
+
+  "Number of channels ever created by this member"
+  totalChannelsCreated: Int!
+}
+"NFT transactional state"
+union TransactionalStatus =
+    TransactionalStatusIdle
+  | TransactionalStatusInitiatedOfferToMember
+  | TransactionalStatusBuyNow
+  | TransactionalStatusAuction
+
+"Represents TransactionalStatus Idle"
+type TransactionalStatusIdle {
+  phantom: Int
+}
+
+"Represents TransactionalStatus InitiatedOfferToMember"
+type TransactionalStatusInitiatedOfferToMember {
+  "Member that recieved the offer"
+  member: Membership!
+
+  "The price that the member should pay to accept offer (optional)"
+  price: BigInt
+}
+
+"Represents TransactionalStatus BuyNow"
+type TransactionalStatusBuyNow {
+  price: BigInt!
+}
+
+"Represents TransactionalStatus Auction"
+type TransactionalStatusAuction {
+  auction: Auction!
+}
+
+"Represents NFT details"
+type OwnedNft @entity {
+  "Timestamp of the block the NFT was created at"
+  createdAt: DateTime!
+
+  "NFT's video"
+  video: Video! @unique
+
+  "Auctions done for this NFT"
+  auctions: [Auction!]! @derivedFrom(field: "nft")
+
+  "Current owner of the NFT."
+  owner: NftOwner!
+
+  "NFT's transactional status"
+  transactionalStatus: TransactionalStatus
+
+  "Creator royalty (if any)"
+  creatorRoyalty: Float
+
+  "NFT's last sale price (if any)"
+  lastSalePrice: BigInt
+
+  "NFT's last sale date (if any)"
+  lastSaleDate: DateTime
+
+  "All NFT auction bids"
+  bids: [Bid!]! @derivedFrom(field: "nft")
+
+  "Flag to indicate whether the NFT is featured or not"
+  isFeatured: Boolean!
+}
+
+"Represents various action types"
+union AuctionType = AuctionTypeEnglish | AuctionTypeOpen
+
+"Represents English auction details"
+type AuctionTypeEnglish {
+  "English auction duration in blocks"
+  duration: Int!
+
+  "Auction extension period in blocks"
+  extensionPeriod: Int!
+
+  "Block when auction is supposed to end"
+  plannedEndAtBlock: Int!
+
+  "Minimal step between auction bids"
+  minimalBidStep: BigInt!
+}
+
+"Represents Open auction details"
+type AuctionTypeOpen @variant {
+  "Auction bid lock duration"
+  bidLockDuration: Int!
+}
+
+"Represents NFT auction"
+type Auction @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Auctioned NFT"
+  nft: OwnedNft!
+
+  "Member that won this auction"
+  winningMember: Membership
+
+  "Auction starting price"
+  startingPrice: BigInt!
+
+  "Price at which the auction gets completed instantly (if any)"
+  buyNowPrice: BigInt
+
+  "The type of auction"
+  auctionType: AuctionType!
+
+  "Auction last bid (if exists)"
+  # TODO: Is it really needed? (bids(orderBy: amount_DESC, limit: 1).?[0])
+  topBid: Bid
+
+  "All bids made during this auction"
+  bids: [Bid!]! @derivedFrom(field: "auction")
+
+  "Block when auction starts"
+  startsAtBlock: Int!
+
+  "Block when auction ended"
+  endedAtBlock: Int
+
+  "Is auction canceled"
+  isCanceled: Boolean!
+
+  "Is auction completed"
+  isCompleted: Boolean!
+
+  "Auction participants whitelist"
+  whitelistedMembers: [AuctionWhitelistedMember!] @derivedFrom(field: "auction")
+}
+
+type AuctionWhitelistedMember @entity @index(fields: ["auction", "member"], unique: true) {
+  "{auctionId}-{memberId}"
+  id: ID!
+  auction: Auction!
+  member: Membership!
+}
+
+"Represents bid in NFT auction"
+type Bid @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Timestamp of the block the bid was created at"
+  createdAt: DateTime!
+
+  "NFT's auction"
+  auction: Auction!
+
+  "Bid's NFT"
+  nft: OwnedNft!
+
+  "Bidder membership"
+  bidder: Membership!
+
+  "Amount bidded"
+  amount: BigInt!
+
+  "Sign for canceled bid"
+  isCanceled: Boolean!
+
+  "Block in which the bid was placed"
+  createdInBlock: Int!
+
+  "Index in block of the related AuctionBidMade event"
+  indexInBlock: Int!
+
+  "Bid that was displaced by this bid in the English auction (if any)"
+  previousTopBid: Bid
+}
+type CommentReaction @entity {
+  "{memberId}-{commentId}-{reactionId}"
+  id: ID!
+
+  "The Reaction id"
+  reactionId: Int!
+
+  "The member that reacted"
+  member: Membership!
+
+  "The comment that has been reacted to"
+  comment: Comment!
+
+  # Added to efficiently delete all reactions of all
+  # (deleted) comments once video has been deleted.
+  "The video the comment (that has been reacted) exists"
+  video: Video!
+}
+
+enum CommentStatus {
+  VISIBLE
+  DELETED
+  MODERATED
+}
+
+type CommentReactionsCountByReactionId {
+  "The reaction id"
+  reactionId: Int!
+
+  "No of times the comment has been reacted with given reaction Id"
+  count: Int!
+}
+
+type Comment @entity {
+  "METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}"
+  id: ID!
+
+  "Timestamp of the block the comment was created at"
+  createdAt: DateTime!
+
+  "Author of the video comment"
+  author: Membership!
+
+  "Comment text"
+  text: String!
+
+  "Video the comment was added to"
+  video: Video!
+
+  "Status of the comment; either it is visible, deleted, or moderated (deleted by moderator)"
+  status: CommentStatus! @index
+
+  "List of all reactions to the comment"
+  reactions: [CommentReaction!] @derivedFrom(field: "comment")
+
+  "Reactions count by reaction Id"
+  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
+
+  "A (parent) comment that this comment replies to (if any)"
+  parentComment: Comment
+
+  "How many comments has replied to this comment"
+  repliesCount: Int!
+
+  "Total number of reactions to this comment"
+  reactionsCount: Int!
+
+  "Sum of replies and reactions"
+  reactionsAndRepliesCount: Int!
+
+  "Whether comment has been edited or not"
+  isEdited: Boolean!
+
+  "Whether a comment has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+}

@@ -1,0 +1,557 @@
+openapi: 3.0.2
+info:
+  title: Orion authentication API
+  description: Orion API for handling authentication, account creation and related activites
+  contact:
+    email: info@joystream.org
+  license:
+    name: GPL-3.0-only
+    url: 'https://opensource.org/licenses/GPL-3.0'
+  version: 1.0.0
+servers:
+  - url: '/api/v1/'
+paths:
+  /anonymous-auth:
+    post:
+      operationId: anonymousAuth
+      x-eov-operation-handler: anonymousAuth
+      description: Authenticate as an anonymous user, either using an existing user identifier or creating a new one.
+      requestBody:
+        $ref: '#/components/requestBodies/AnonymousUserAuthRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AnonymousUserAuthOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAnonymousUserResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /login:
+    post:
+      operationId: login
+      x-eov-operation-handler: login
+      description: Login to user's account by providing a message signed by the associated blockchain account.
+      requestBody:
+        $ref: '#/components/requestBodies/LoginRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/LoginUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /artifacts:
+    get:
+      operationId: getArtifacts
+      x-eov-operation-handler: getArtifacts
+      description: Get wallet seed encryption artifacts.
+      parameters:
+        - name: id
+          in: query
+          description: The lookup key derived from user's credentials.
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: The user's email address.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/GetArtifactsResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '404':
+          $ref: '#/components/responses/GetArtifactsNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /session-artifacts:
+    get:
+      security:
+        - cookieAuth: []
+      operationId: getSessionArtifacts
+      x-eov-operation-handler: getSessionArtifacts
+      description: Get wallet seed encryption artifacts for the current session.
+      responses:
+        '200':
+          $ref: '#/components/responses/GetArtifactsResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GetSessionArtifactsNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+    post:
+      security:
+        - cookieAuth: []
+      operationId: postSessionArtifacts
+      x-eov-operation-handler: postSessionArtifacts
+      description: Save wallet seed encryption artifacts for the current session on the server.
+      requestBody:
+        $ref: '#/components/requestBodies/PostSessionArtifactsRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '409':
+          $ref: '#/components/responses/PostSessionArtifactsConflictResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /account:
+    post:
+      operationId: createAccount
+      x-eov-operation-handler: createAccount
+      description: Create a new Gateway account.
+        Requires anonymousAuth to be performed first.
+      security:
+        - cookieAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/CreateAccountRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '400':
+          $ref: '#/components/responses/CreateAccountBadRequestResponse'
+        '404':
+          $ref: '#/components/responses/CreateAccountNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/CreateAccountConflictResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /confirm-email:
+    post:
+      operationId: confirmEmail
+      x-eov-operation-handler: confirmEmail
+      description: Confirm account's e-mail address provided during registration.
+      requestBody:
+        $ref: '#/components/requestBodies/ConfirmEmailRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/ConfirmEmailBadRequestResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /request-email-confirmation-token:
+    post:
+      operationId: requestEmailConfirmationToken
+      x-eov-operation-handler: requestEmailConfirmationToken
+      description: Request a token to be sent to account's e-mail address,
+        which will allow confirming the ownership of the e-mail by the user.
+      requestBody:
+        $ref: '#/components/requestBodies/RequestTokenRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/RequestTokenBadRequestResponse'
+        '404':
+          $ref: '#/components/responses/RequestEmailConfirmationAccountNotFoundResponse'
+        '429':
+          $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /change-account:
+    post:
+      operationId: changeAccount
+      x-eov-operation-handler: changeAccount
+      description: Change the blockchain (Joystream) account associated with the Gateway account.
+        Delete the old account's encryption artifacts and optionally set new ones.
+      security:
+        - cookieAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ChangeAccountRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '409':
+          $ref: '#/components/responses/ChangeAccountConflictResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /logout:
+    post:
+      operationId: logout
+      x-eov-operation-handler: logout
+      description: Terminate the current session.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Session ID
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+  requestBodies:
+    AnonymousUserAuthRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnonymousUserAuthRequestData'
+    LoginRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequestData'
+    CreateAccountRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateAccountRequestData'
+    ConfirmEmailRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmEmailRequestData'
+    RequestTokenRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestTokenRequestData'
+    PostSessionArtifactsRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SessionEncryptionArtifacts'
+    ChangeAccountRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChangeAccountRequestData'
+  responses:
+    AnonymousUserAuthOkResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnonymousUserAuthResponseData'
+    GenericBadRequestResponse:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericInternalServerErrorResponse:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    UnauthorizedAnonymousUserResponse:
+      description: Anonymous user id not recognized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    LoginOkResponse:
+      description: Logged in
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponseData'
+    LoginUnauthorizedResponse:
+      description: Account not found by provided address or the address cannot be used to login.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    CreateAccountBadRequestResponse:
+      description: Cannot create user account with the provided credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericOkResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericOkResponseData'
+    ConfirmEmailBadRequestResponse:
+      description: Missing token or provided token is invalid / already used.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericUnauthorizedResponse:
+      description: Access token (session id) is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestTokenBadRequestResponse:
+      description: Request is malformatted or provided e-mail address is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestTokenTooManyRequestsResponse:
+      description: Too many requests for a new token sent within a given timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericTooManyRequestsResponse:
+      description: Too many requests sent within a given timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestEmailConfirmationAccountNotFoundResponse:
+      description: Provided e-mail address is not associated with any account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GetArtifactsResponse:
+      description: Encryption artifacts found and provided in the response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EncryptionArtifacts'
+    GetArtifactsNotFoundResponse:
+      description: Encryption artifacts not found by the provided lookup key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GetSessionArtifactsNotFoundResponse:
+      description: No artifacts associated with the current session found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    CreateAccountConflictResponse:
+      description: Account with the provided e-mail address already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    PostSessionArtifactsConflictResponse:
+      description: Session encryption artifacts for the current session already saved.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    ChangeAccountConflictResponse:
+      description: Provided blockchain (Joystream) account is already assigned to another user account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    CreateAccountNotFoundResponse:
+      description: On-chain membership not found by the provided memberId.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+  schemas:
+    ActionExecutionPayload:
+      type: object
+      required:
+        - joystreamAccountId
+        - gatewayName
+        - timestamp
+        - action
+      properties:
+        joystreamAccountId:
+          type: string
+          maxLength: 50
+        gatewayName:
+          type: string
+        timestamp:
+          type: number
+        action:
+          type: string
+    ActionExecutionRequestData:
+      type: object
+      required:
+        - payload
+        - signature
+      properties:
+        signature:
+          type: string
+        payload:
+          $ref: '#/components/schemas/ActionExecutionPayload'
+    AnonymousUserAuthRequestData:
+      type: object
+      properties:
+        userId:
+          type: string
+    AnonymousUserAuthResponseData:
+      allOf:
+        - $ref: '#/components/schemas/GenericOkResponseData'
+        - type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+    LoginRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - login
+    LoginResponseData:
+      type: object
+      required:
+        - accountId
+      properties:
+        accountId:
+          type: string
+    CreateAccountRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - email
+                    - memberId
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - createAccount
+                    memberId:
+                      type: string
+                    email:
+                      type: string
+                      pattern: ^\S+@\S+\.\S+$
+                      maxLength: 255
+                    encryptionArtifacts:
+                      $ref: '#/components/schemas/EncryptionArtifacts'
+    ChangeAccountRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - gatewayAccountId
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - changeAccount
+                    gatewayAccountId:
+                      type: string
+                    newArtifacts:
+                      $ref: '#/components/schemas/EncryptionArtifacts'
+    ConfirmEmailRequestData:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Confirmation token recieved by the user via an e-mail.
+    RequestTokenRequestData:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          description: User's e-mail address.
+    GenericErrorResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    GenericOkResponseData:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+    EncryptionArtifacts:
+      type: object
+      required:
+        - id
+        - encryptedSeed
+        - cipherIv
+      properties:
+        id:
+          type: string
+          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
+        encryptedSeed:
+          type: string
+          maxLength: 98 # 48 bytes (32-byte input + 16-byte padding), hex-encoded + 2 bytes for optional 0x prefix
+        cipherIv:
+          type: string
+          maxLength: 34 # 16 bytes, hex-encoded + 2 bytes for optional 0x prefix
+    SessionEncryptionArtifacts:
+      type: object
+      required:
+        - cipherKey
+        - cipherIv
+      properties:
+        cipherKey:
+          type: string
+          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
+        cipherIv:
+          type: string
+          maxLength: 34 # 16 bytes, hex-encoded + 2 bytes for optional 0x prefix
