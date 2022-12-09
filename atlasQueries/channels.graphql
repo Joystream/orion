@@ -1,0 +1,146 @@
+# CHANGE: Dropped because unused:
+# query GetBasicChannel(...) { ... }
+
+query GetFullChannel($id: String!) {
+  # CHANGE: `channelByUniqueInput` is no longer supported in subsquid, replaced with `channelById`
+  channelById(id: $id) {
+    ...FullChannelFields
+  }
+}
+
+query GetVideoCount($where: VideoWhereInput) {
+  # CHANGE: `orderBy` added, Subsquid complains if it's not provided
+  videosConnection(first: 0, where: $where, orderBy: id_ASC) {
+    totalCount
+  }
+}
+
+# CHANGE: `channels` replaced with `extendedChannels` (which include `activeVideosCount`)
+query GetExtendedBasicChannels(
+  $where: ExtendedChannelWhereInput
+  $limit: Int = 50
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  extendedChannels(where: $where, orderBy: $orderBy, limit: $limit) {
+    ...ExtendedBasicChannelFields
+  }
+}
+
+# CHANGE: `channels` replaced with `extendedChannels` (which include `activeVideosCount`)
+query GetExtendedFullChannels(
+  $where: ExtendedChannelWhereInput
+  $limit: Int = 50
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  extendedChannels(where: $where, orderBy: $orderBy, limit: $limit) {
+    ...ExtendedFullChannelFields
+  }
+}
+
+# No changes (UNLESS `activeVideosCount` is needed in "where")
+query GetBasicChannelsConnection(
+  $first: Int
+  $after: String
+  $where: ChannelWhereInput
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  channelsConnection(first: $first, after: $after, where: $where, orderBy: $orderBy) {
+    edges {
+      cursor
+      node {
+        ...BasicChannelFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+# CHANGE: `ID` is now `String`
+mutation FollowChannel($channelId: String!) {
+  followChannel(channelId: $channelId) {
+    id
+    follows
+  }
+}
+
+# CHANGE: `ID` is now `String`
+mutation UnfollowChannel($channelId: String!) {
+  unfollowChannel(channelId: $channelId) {
+    id
+    follows
+  }
+}
+
+# CHANGE: Removed because unused:
+# query GetMostViewedChannelsConnection(...) { ... }
+
+query GetTop10Channels($where: ExtendedChannelWhereInput) {
+  # CHANGE: Replacement for overly-specific `top10Channels` query
+  extendedChannels(where: $where, orderBy: followsNum_DESC, limit: 10) {
+    channel {
+      ...BasicChannelFields
+    }
+  }
+}
+
+query GetPromisingChannels($where: ExtendedChannelWhereInput) {
+  # CHANGE: Replacement for overly-specific `promisingChannels` query
+  mostRecentChannels(
+    where: $where
+    orderBy: videoViewsNum_DESC
+    mostRecentLimit: 100
+    resultsLimit: 15
+  ) {
+    channel {
+      ...BasicChannelFields
+    }
+  }
+}
+
+query GetDiscoverChannels($where: ExtendedChannelWhereInput) {
+  # CHANGE: Replacement for overly-specific `discoverChannels` query
+  mostRecentChannels(
+    where: $where
+    orderBy: followsNum_DESC
+    mostRecentLimit: 100
+    resultsLimit: 15
+  ) {
+    channel {
+      ...BasicChannelFields
+    }
+  }
+}
+
+query GetPopularChannels($where: ExtendedChannelWhereInput) {
+  # CHANGE: Replacement for overly-specific `popularChannels` query
+  extendedChannels(where: $where, orderBy: videoViewsNum_DESC, limit: 15) {
+    channel {
+      ...BasicChannelFields
+    }
+  }
+}
+
+# CHANGE: Replaced with a custom `channelNftCollectors` query taking `channelId` argument (instead of `ChannelNftCollectorsWhereInput`)
+query GetChannelNftCollectors(
+  $channelId: String!
+  $orderBy: [ChannelNftCollectorsOrderByInput!] = [amount_DESC]
+) {
+  channelNftCollectors(channelId: $channelId, orderBy: $orderBy) {
+    member {
+      ...BasicMembershipFields
+    }
+    amount
+  }
+}
+
+# CHANGE: `ID` is now `String`
+mutation ReportChannel($channelId: String!, $rationale: String!) {
+  reportChannel(channelId: $channelId, rationale: $rationale) {
+    id
+    channelId
+  }
+}
