@@ -1,0 +1,324 @@
+type StorageBucketOperatorStatusMissing {
+  phantom: Int
+}
+
+type StorageBucketOperatorStatusInvited {
+  workerId: Int!
+}
+
+type StorageBucketOperatorStatusActive {
+  workerId: Int!
+  transactorAccountId: String!
+}
+
+union StorageBucketOperatorStatus =
+    StorageBucketOperatorStatusMissing
+  | StorageBucketOperatorStatusInvited
+  | StorageBucketOperatorStatusActive
+
+type GeoCoordinates {
+  latitude: Float!
+
+  longitude: Float!
+}
+
+enum Continent {
+  AF
+  NA
+  OC
+  AN
+  AS
+  EU
+  SA
+}
+
+type GeographicalAreaContinent {
+  continentCode: Continent
+}
+
+type GeographicalAreaCountry {
+  "ISO 3166-1 alpha-2 country code"
+  countryCode: String
+}
+
+type GeographicalAreaSubdivistion {
+  "ISO 3166-2 subdivision code"
+  subdivisionCode: String
+}
+
+union GeographicalArea =
+    GeographicalAreaContinent
+  | GeographicalAreaCountry
+  | GeographicalAreaSubdivistion
+
+type NodeLocationMetadata {
+  "ISO 3166-1 alpha-2 country code (2 letters)"
+  countryCode: String
+
+  "City name"
+  city: String
+
+  "Geographic coordinates"
+  coordinates: GeoCoordinates
+}
+
+type StorageBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Storage bucket to which the metadata is assigned"
+  storageBucket: StorageBucket! @unique
+
+  "Root node endpoint"
+  nodeEndpoint: String
+
+  "Optional node location metadata"
+  nodeLocation: NodeLocationMetadata
+
+  "Additional information about the node/operator"
+  extra: String
+}
+
+type StorageBucket @entity {
+  "Runtime bucket id"
+  id: ID!
+
+  "Current bucket operator status"
+  operatorStatus: StorageBucketOperatorStatus!
+
+  "Storage bucket operator metadata"
+  operatorMetadata: StorageBucketOperatorMetadata @derivedFrom(field: "storageBucket")
+
+  "Whether the bucket is accepting any new storage bags"
+  acceptingNewBags: Boolean!
+
+  "Storage bags assigned to the bucket"
+  bags: [StorageBucketBag!] @derivedFrom(field: "storageBucket")
+
+  "Bucket's data object size limit in bytes"
+  dataObjectsSizeLimit: BigInt!
+
+  "Bucket's data object count limit"
+  dataObjectCountLimit: BigInt!
+
+  "Number of assigned data objects"
+  dataObjectsCount: BigInt!
+
+  "Total size of assigned data objects"
+  dataObjectsSize: BigInt!
+}
+
+type StorageBagOwnerCouncil {
+  phantom: Int
+}
+
+type StorageBagOwnerWorkingGroup {
+  workingGroupId: String
+}
+
+type StorageBagOwnerMember {
+  memberId: String!
+}
+
+type StorageBagOwnerChannel {
+  channelId: String!
+}
+
+# Note: Not supported by runtime yet
+type StorageBagOwnerDAO {
+  daoId: Int
+}
+
+union StorageBagOwner =
+    StorageBagOwnerCouncil
+  | StorageBagOwnerWorkingGroup
+  | StorageBagOwnerMember
+  | StorageBagOwnerChannel
+  | StorageBagOwnerDAO
+
+type StorageBag @entity {
+  "Storage bag id"
+  id: ID!
+
+  "Data objects in the bag"
+  objects: [StorageDataObject!] @derivedFrom(field: "storageBag")
+
+  "Storage buckets assigned to the bag"
+  storageBuckets: [StorageBucketBag!] @derivedFrom(field: "bag")
+
+  "Distribution buckets assigned to the bag"
+  distributionBuckets: [DistributionBucketBag!] @derivedFrom(field: "bag")
+
+  "Owner of the storage bag"
+  owner: StorageBagOwner!
+}
+
+type StorageBucketBag @entity @index(fields: ["storageBucket", "bag"], unique: true) {
+  "{storageBucketId}-{storageBagId}"
+  id: ID!
+  storageBucket: StorageBucket!
+  bag: StorageBag!
+}
+
+type DistributionBucketBag @entity @index(fields: ["distributionBucket", "bag"], unique: true) {
+  "{distributionBucketId}-{storageBagId}"
+  id: ID!
+  distributionBucket: DistributionBucket!
+  bag: StorageBag!
+}
+
+type DataObjectTypeChannelAvatar {
+  "Related channel entity"
+  channel: Channel!
+}
+
+type DataObjectTypeChannelCoverPhoto {
+  "Related channel entity"
+  channel: Channel!
+}
+
+type DataObjectTypeVideoMedia {
+  "Related video entity"
+  video: Video!
+}
+
+type DataObjectTypeVideoThumbnail {
+  "Related video entity"
+  video: Video!
+}
+
+type DataObjectTypeVideoSubtitle {
+  "Related subtitle entity"
+  subtitle: VideoSubtitle!
+
+  # Useful for filtering subtitles against video, since
+  # relationship filtering through variant is not supported
+  "Related video entity"
+  video: Video!
+}
+
+union DataObjectType =
+    DataObjectTypeChannelAvatar
+  | DataObjectTypeChannelCoverPhoto
+  | DataObjectTypeVideoMedia
+  | DataObjectTypeVideoThumbnail
+  | DataObjectTypeVideoSubtitle
+
+type StorageDataObject @entity {
+  "Data object runtime id"
+  id: ID!
+
+  "Timestamp of the block the data object was created at"
+  createdAt: DateTime!
+
+  "Whether the data object was uploaded and accepted by the storage provider"
+  isAccepted: Boolean!
+
+  "Data object size in bytes"
+  size: BigInt!
+
+  "Storage bag the data object is part of"
+  storageBag: StorageBag!
+
+  "IPFS content hash"
+  ipfsHash: String!
+
+  "The type of the asset that the data object represents (if known)"
+  type: DataObjectType
+
+  "State Bloat Bond for removing the data object"
+  stateBloatBond: BigInt!
+
+  "If the object is no longer used as an asset - the time at which it was unset (if known)"
+  unsetAt: DateTime
+}
+
+type DistributionBucketFamilyMetadata @entity {
+  id: ID!
+
+  "Distribution bucket family"
+  family: DistributionBucketFamily! @unique
+
+  "Name of the geographical region covered by the family (ie.: us-east-1)"
+  region: String @index
+
+  "Optional, more specific description of the region covered by the family"
+  description: String
+
+  "Geographical areas covered by the family"
+  areas: [GeographicalArea!]
+
+  "List of targets (hosts/ips) best suited latency measurements for the family"
+  latencyTestTargets: [String]
+}
+
+type DistributionBucketOperatorMetadata @entity {
+  id: ID!
+
+  "Distribution bucket operator"
+  distirbutionBucketOperator: DistributionBucketOperator! @unique
+
+  "Root distributor node api endpoint"
+  nodeEndpoint: String
+
+  "Optional node location metadata"
+  nodeLocation: NodeLocationMetadata
+
+  "Additional information about the node/operator"
+  extra: String
+}
+
+enum DistributionBucketOperatorStatus {
+  INVITED
+  ACTIVE
+}
+
+type DistributionBucketOperator @entity {
+  "{bucketId}-{workerId}"
+  id: ID!
+
+  "Related distirbution bucket"
+  distributionBucket: DistributionBucket!
+
+  "ID of the distribution group worker"
+  workerId: Int!
+
+  "Current operator status"
+  status: DistributionBucketOperatorStatus!
+
+  "Operator metadata"
+  metadata: DistributionBucketOperatorMetadata @derivedFrom(field: "distirbutionBucketOperator")
+}
+
+type DistributionBucket @entity {
+  "Runtime bucket id in {familyId}:{bucketIndex} format"
+  id: ID!
+
+  "Distribution family the bucket is part of"
+  family: DistributionBucketFamily!
+
+  "Bucket index within the family"
+  bucketIndex: Int!
+
+  "Distribution bucket operators (either active or invited)"
+  operators: [DistributionBucketOperator!] @derivedFrom(field: "distributionBucket")
+
+  "Whether the bucket is accepting any new bags"
+  acceptingNewBags: Boolean!
+
+  "Whether the bucket is currently distributing content"
+  distributing: Boolean!
+
+  "Storage bags assigned to the bucket"
+  bags: [DistributionBucketBag!] @derivedFrom(field: "distributionBucket")
+}
+
+type DistributionBucketFamily @entity {
+  "Runtime bucket family id"
+  id: ID!
+
+  "Current bucket family metadata"
+  metadata: DistributionBucketFamilyMetadata @derivedFrom(field: "family")
+
+  "Distribution buckets belonging to the family"
+  buckets: [DistributionBucket!] @derivedFrom(field: "family")
+}

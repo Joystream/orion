@@ -1,0 +1,38 @@
+# Content Actor
+union ContentActor = ContentActorCurator | ContentActorMember | ContentActorLead
+
+type ContentActorCurator {
+  curator: Curator!
+}
+
+type ContentActorMember {
+  member: Membership!
+}
+
+type ContentActorLead {
+  phantom: Int
+}
+
+type CuratorGroup @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "Is group active or not"
+  isActive: Boolean!
+}
+
+type Curator @entity {
+  "Runtime identifier"
+  id: ID!
+}
+
+# NFT owner
+union NftOwner = NftOwnerChannel | NftOwnerMember
+
+type NftOwnerChannel {
+  channel: Channel!
+}
+
+type NftOwnerMember {
+  member: Membership!
+}
