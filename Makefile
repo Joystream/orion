@@ -1,5 +1,5 @@
 process: migrate
-	@node -r dotenv/config lib/processor.js
+	@SQD_DEBUG=sqd:processor:mapping node -r dotenv/config lib/processor.js
 
 
 build:

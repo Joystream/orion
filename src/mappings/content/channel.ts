@@ -1,4 +1,10 @@
-import { Channel, Event, Membership, MetaprotocolTransactionStatusEventData } from '../../model'
+import {
+  Channel,
+  Event,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  MetaprotocolTransactionStatusEventData,
+} from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress } from '../utils'
 import {
   ChannelMetadata,
@@ -50,7 +56,7 @@ export async function processChannelUpdatedEvent({
     asV1000: [, channelId, channelUpdateParameters, newDataObjects],
   },
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
-  const channel = await ec.collections.Channel.get(channelId.toString(), {
+  const channel = await ec.collections.Channel.getOrFail(channelId.toString(), {
     avatarPhoto: true,
     coverPhoto: true,
   })
@@ -84,7 +90,7 @@ export async function processChannelVisibilitySetByModeratorEvent({
     asV1000: [, channelId, isHidden],
   },
 }: EventHandlerContext<'Content.ChannelVisibilitySetByModerator'>): Promise<void> {
-  const channel = await ec.collections.Channel.get(channelId.toString())
+  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
   channel.isCensored = isHidden
 }
 
@@ -97,20 +103,22 @@ export async function processChannelOwnerRemarkedEvent({
     asV1000: [channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelOwnerRemarked'>): Promise<void> {
-  const channel = await ec.collections.Channel.get(channelId.toString())
+  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
   const decodedMessage = deserializeMetadata(ChannelOwnerRemarked, messageBytes)
 
-  if (decodedMessage) {
-    const result = await processOwnerRemark(ec, channel, decodedMessage)
-    ec.collections.Event.push(
-      new Event({
-        ...genericEventFields(block, indexInBlock, extrinsicHash),
-        data: new MetaprotocolTransactionStatusEventData({
-          result,
-        }),
+  const result = decodedMessage
+    ? await processOwnerRemark(ec, channel, decodedMessage)
+    : new MetaprotocolTransactionResultFailed({
+        errorMessage: 'Could not decode the metadata',
       })
-    )
-  }
+  ec.collections.Event.push(
+    new Event({
+      ...genericEventFields(block, indexInBlock, extrinsicHash),
+      data: new MetaprotocolTransactionStatusEventData({
+        result,
+      }),
+    })
+  )
 }
 
 export async function processChannelAgentRemarkedEvent({
@@ -122,18 +130,20 @@ export async function processChannelAgentRemarkedEvent({
     asV1000: [, channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelAgentRemarked'>): Promise<void> {
-  const channel = await ec.collections.Channel.get(channelId.toString())
+  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
   const decodedMessage = deserializeMetadata(ChannelModeratorRemarked, messageBytes)
 
-  if (decodedMessage) {
-    const result = await processModeratorRemark(ec, channel, decodedMessage)
-    ec.collections.Event.push(
-      new Event({
-        ...genericEventFields(block, indexInBlock, extrinsicHash),
-        data: new MetaprotocolTransactionStatusEventData({
-          result,
-        }),
+  const result = decodedMessage
+    ? await processModeratorRemark(ec, channel, decodedMessage)
+    : new MetaprotocolTransactionResultFailed({
+        errorMessage: 'Could not decode the metadata',
       })
-    )
-  }
+  ec.collections.Event.push(
+    new Event({
+      ...genericEventFields(block, indexInBlock, extrinsicHash),
+      data: new MetaprotocolTransactionStatusEventData({
+        result,
+      }),
+    })
+  )
 }

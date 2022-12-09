@@ -121,7 +121,7 @@ export const ASSETS_MAP: AssetsMap = {
 }
 
 export async function deleteVideo(ec: EntitiesCollector, videoId: bigint) {
-  const video = await ec.collections.Video.get(videoId.toString(), {
+  const video = await ec.collections.Video.getOrFail(videoId.toString(), {
     comments: {
       reactions: true,
     },

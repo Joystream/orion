@@ -23,6 +23,7 @@ import {
   MembersMemberInvitedEvent,
   MembersMemberAccountsUpdatedEvent,
   MembersMemberProfileUpdatedEvent,
+  MembersMemberRemarkedEvent,
   StorageStorageBucketInvitationAcceptedEvent,
   StorageStorageBucketsUpdatedForBagEvent,
   StorageStorageOperatorMetadataSetEvent,
@@ -55,6 +56,7 @@ import {
 import { EntityManager, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
 import _ from 'lodash'
 import { Logger } from './logger'
+import { NextEntityId } from './model/NextEntityId'
 
 export function assertAssignable<T>(type: T) {
   return type
@@ -111,6 +113,7 @@ export const eventConstructors = {
   'Members.MemberInvited': MembersMemberInvitedEvent,
   'Members.MemberAccountsUpdated': MembersMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': MembersMemberProfileUpdatedEvent,
+  'Members.MemberRemarked': MembersMemberRemarkedEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors
@@ -134,22 +137,31 @@ export type ModelNames = {
 export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = Constructor<E>> {
   private store: Store
   private _class: EC
-  private _toBeSaved: E[] = []
-  private _toBeRemoved: E[] = []
+  private _toBeSaved: Map<string, E> = new Map()
+  private _toBeRemoved: Map<string, E> = new Map()
+  private _nextId = 1
 
   constructor(store: Store, _class: EC) {
     this.store = store
     this._class = _class
   }
 
+  private asIdString(idNum: number) {
+    const idStr = idNum.toString(36)
+    // Add leading zeros to simplify sorting
+    return _.repeat('0', 8 - idStr.length) + idStr
+  }
+
+  getNextId(): string {
+    return this.asIdString(this._nextId++)
+  }
+
   remove(...items: E[]): void {
-    // skip already cached entities
-    items = items.filter((i) => !this._toBeRemoved.find((e) => e.id === i.id))
-    // removing an entity overrides any scheduled updates of this entity
     items.forEach((i) => {
-      _.remove(this._toBeSaved, (e) => e.id === i.id)
+      // removing an entity overrides any scheduled updates of this entity
+      this._toBeSaved.delete(i.id)
+      this._toBeRemoved.set(i.id, i)
     })
-    this._toBeRemoved.push(...items)
   }
 
   // Prevents inserting strings that contain null character into the postgresql table
@@ -170,24 +182,30 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     }
   }
 
-  push(...items: E[]): number {
-    // skip already cached entities
-    items = items.filter((i) => !this._toBeSaved.find((e) => e.id === i.id))
+  push(...items: E[]): void {
     items.forEach((i) => {
       // pushing an entity overrides any scheduled removals of this entity
-      _.remove(this._toBeRemoved, (e) => e.id === i.id)
+      this._toBeRemoved.delete(i.id)
       // normalize the input (remove UTF-8 null characters)
       this.normalizeInput(i)
+      // Entities with the same id will override existing ones
+      this._toBeSaved.set(i.id, i)
     })
-    // normalize the input
-    return this._toBeSaved.push(...items)
   }
 
-  async get(id: string, relations?: FindOptionsRelations<E>): Promise<E> {
-    if (this._toBeRemoved.find((e) => e.id === id)) {
+  async getOrFail(id: string, relations?: FindOptionsRelations<E>): Promise<E> {
+    if (this._toBeRemoved.has(id)) {
       throw new Error(`Trying to access entity scheduled for removal ${this._class}:${id}`)
     }
-    const cached = this._toBeSaved.find((e) => e.id === id)
+    const result = await this.get(id, relations)
+    if (!result) {
+      throw new Error(`Could not find ${this._class.name} by id ${id}`)
+    }
+    return result
+  }
+
+  async get(id: string, relations?: FindOptionsRelations<E>): Promise<E | undefined> {
+    const cached = this._toBeSaved.get(id)
     if (cached && !relations) {
       return cached
     }
@@ -197,8 +215,8 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     })
 
     if (!stored && !cached) {
-      // We have neither stored nor cached version - throw an error
-      throw new Error(`Could not find ${this._class.name} by id ${id}`)
+      // We have neither stored nor cached version
+      return undefined
     }
 
     if (stored && !cached) {
@@ -213,8 +231,8 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     }
 
     if (stored && cached) {
-      // We have both stored and cached version - return a merge of cached->stored
-      return _.mergeWith(stored, cached, (destVal, srcVal) => {
+      // We have both stored and cached version - merge cached->stored
+      const merged = _.mergeWith(stored, cached, (destVal, srcVal) => {
         // Do not recursively merge arrays
         if (_.isArray(srcVal)) {
           return srcVal
@@ -224,6 +242,10 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
           return srcVal
         }
       })
+      // Update cached ref
+      this.push(merged)
+      // Return the result of the merge
+      return merged
     }
 
     throw new Error('Never going to happen, just making TypeScript happy')
@@ -231,25 +253,29 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
 
   // Execute scheduled save operations
   async save(): Promise<void> {
-    if (this._toBeSaved.length) {
+    if (this._toBeSaved.size) {
       const logger = Logger.get()
-      logger.info(`Saving ${this._toBeSaved.length} ${this._class.name} entities...`)
+      logger.info(`Saving ${this._toBeSaved.size} ${this._class.name} entities...`)
+      logger.debug(`Entity ids: ${[...this._toBeSaved.keys()].join(', ')}`)
       // FIXME: This is a little hacky, but we really need to access the EntityManager,
       // because Store by default uses `upsert` for saving the entities, which is problematic
       // when the entity has some required relations and we're just trying to update it
       const em = await (this.store as unknown as { em: () => Promise<EntityManager> }).em()
-      await em.save(this._toBeSaved)
-      this._toBeSaved = []
+      // Save the entities and update the next entity id
+      const nextEntityId = new NextEntityId({ entityName: this._class.name, nextId: this._nextId })
+      await Promise.all([em.save([...this._toBeSaved.values()]), em.save(nextEntityId)])
+      this._toBeSaved = new Map()
     }
   }
 
   // Execute scheduled remove operations
   async cleanup(): Promise<void> {
-    if (this._toBeRemoved.length) {
+    if (this._toBeRemoved.size) {
       const logger = Logger.get()
-      logger.info(`Removing ${this._toBeRemoved.length} ${this._class.name} entities...`)
-      await this.store.remove(this._toBeRemoved)
-      this._toBeRemoved = []
+      logger.info(`Removing ${this._toBeRemoved.size} ${this._class.name} entities...`)
+      logger.debug(`Entity ids: ${[...this._toBeRemoved.keys()].join(', ')}`)
+      await this.store.remove([...this._toBeRemoved.values()])
+      this._toBeRemoved = new Map()
     }
   }
 }

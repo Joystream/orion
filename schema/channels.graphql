@@ -49,4 +49,14 @@ type Channel @entity {
 
   "Number of total video views (to speed up orderBy queries by avoiding COUNT aggregation)"
   videoViewsNum: Int!
+
+  "List of members blocked from commenting/reacting on any video of the channel."
+  bannedMembers: [BannedMember!] @derivedFrom(field: "channel")
+}
+
+type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
+  "{memberId}-{channelId}"
+  id: ID!
+  member: Membership!
+  channel: Channel!
 }

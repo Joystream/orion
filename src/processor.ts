@@ -59,6 +59,7 @@ import {
   processMemberAccountsUpdatedEvent,
   processMemberProfileUpdatedEvent,
   processNewMember,
+  processMemberRemarkedEvent,
 } from './mappings/membership'
 import { Event } from './types/support'
 import {
@@ -135,6 +136,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberInvited', defaultEventOptions)
   .addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
   .addEvent('Members.MemberProfileUpdated', defaultEventOptions)
+  .addEvent('Members.MemberRemarked', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -192,6 +194,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberInvited': processNewMember,
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
+  'Members.MemberRemarked': processMemberRemarkedEvent,
 }
 
 async function processEvent<EventName extends EventNames>(
