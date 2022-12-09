@@ -51,7 +51,8 @@
     "Members.MembershipGifted",
     "Members.MemberInvited",
     "Members.MemberProfileUpdated",
-    "Members.MemberAccountsUpdated"
+    "Members.MemberAccountsUpdated",
+    "Members.MemberRemarked"
   ],
   "calls": [],
   "storage": []

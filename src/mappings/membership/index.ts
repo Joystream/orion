@@ -1,8 +1,13 @@
-import { Membership } from '../../model'
+import {
+  Event,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  MetaprotocolTransactionStatusEventData,
+} from '../../model'
 import { EventHandlerContext } from '../../utils'
-import { MembershipMetadata } from '@joystream/metadata-protobuf'
-import { bytesToString, deserializeMetadata, toAddress } from '../utils'
-import { processMembershipMetadata } from './metadata'
+import { MemberRemarked, MembershipMetadata } from '@joystream/metadata-protobuf'
+import { bytesToString, deserializeMetadata, genericEventFields, toAddress } from '../utils'
+import { processMemberRemark, processMembershipMetadata } from './metadata'
 
 export function processNewMember({
   ec,
@@ -40,7 +45,7 @@ export async function processMemberAccountsUpdatedEvent({
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
-    const member = await ec.collections.Membership.get(memberId.toString())
+    const member = await ec.collections.Membership.getOrFail(memberId.toString())
     member.controllerAccount = toAddress(newControllerAccount)
   }
 }
@@ -51,7 +56,7 @@ export async function processMemberProfileUpdatedEvent({
     asV1000: [memberId, newHandle, newMetadata],
   },
 }: EventHandlerContext<'Members.MemberProfileUpdated'>) {
-  const member = await ec.collections.Membership.get(memberId.toString(), { metadata: true })
+  const member = await ec.collections.Membership.getOrFail(memberId.toString(), { metadata: true })
 
   if (newHandle) {
     member.handle = newHandle.toString()
@@ -63,4 +68,36 @@ export async function processMemberProfileUpdatedEvent({
       processMembershipMetadata(ec, member, metadata)
     }
   }
+}
+
+export async function processMemberRemarkedEvent({
+  ec,
+  block,
+  indexInBlock,
+  extrinsicHash,
+  event: {
+    asV1000: [memberId, message],
+  },
+}: EventHandlerContext<'Members.MemberRemarked'>) {
+  const metadata = deserializeMetadata(MemberRemarked, message)
+  const result = metadata
+    ? await processMemberRemark(
+        ec,
+        block,
+        indexInBlock,
+        extrinsicHash,
+        memberId.toString(),
+        metadata
+      )
+    : new MetaprotocolTransactionResultFailed({
+        errorMessage: 'Could not decode the metadata',
+      })
+  ec.collections.Event.push(
+    new Event({
+      ...genericEventFields(block, indexInBlock, extrinsicHash),
+      data: new MetaprotocolTransactionStatusEventData({
+        result,
+      }),
+    })
+  )
 }

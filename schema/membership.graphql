@@ -45,4 +45,7 @@ type Membership @entity {
 
   "Channels owned by this member"
   channels: [Channel!] @derivedFrom(field: "ownerMember")
+
+  "Channels the member is banned from (in terms of commenting/reacting)"
+  bannedFromChannels: [BannedMember!] @derivedFrom(field: "member")
 }

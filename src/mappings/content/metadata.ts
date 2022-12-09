@@ -39,13 +39,12 @@ import {
   MetaprotocolTransactionResultOK,
   StorageDataObject,
   Video,
-  VideoCategory,
   VideoMediaEncoding,
   VideoMediaMetadata,
   VideoSubtitle,
 } from '../../model'
 import { EntitiesCollector } from '../../utils'
-import { invalidMetadata } from '../utils'
+import { invalidMetadata, metaprotocolTransactionFailure } from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
@@ -56,7 +55,7 @@ export async function processChannelMetadata(
   newAssetIds: bigint[]
 ) {
   const assets = await Promise.all(
-    newAssetIds.map((id) => ec.collections.StorageDataObject.get(id.toString()))
+    newAssetIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
   )
 
   integrateMeta(channel, meta, ['title', 'description', 'isPublic'])
@@ -72,12 +71,13 @@ export async function processChannelMetadata(
 export async function processVideoMetadata(
   ec: EntitiesCollector,
   block: SubstrateBlock,
+  indexInBlock: number,
   video: Video,
   meta: DecodedMetadataObject<IVideoMetadata>,
   newAssetIds: bigint[]
 ): Promise<void> {
   const assets = await Promise.all(
-    newAssetIds.map((id) => ec.collections.StorageDataObject.get(id.toString()))
+    newAssetIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
   )
 
   integrateMeta(video, meta, [
@@ -93,7 +93,13 @@ export async function processVideoMetadata(
 
   // prepare video category if needed
   if (meta.category) {
-    await processVideoCategory(ec, block, video, meta.category)
+    const category = await ec.collections.VideoCategory.get(meta.category)
+    if (!category) {
+      invalidMetadata(VideoMetadata, `Category by id ${meta.category} not found!`, {
+        decodedMessage: meta,
+      })
+    }
+    video.category = category || null
   }
 
   // prepare media meta information if needed
@@ -105,12 +111,12 @@ export async function processVideoMetadata(
   ) {
     // prepare video file size if poosible
     const videoSize = extractVideoSize(assets)
-    processVideoMediaMetadata(ec, block, video, meta, videoSize)
+    processVideoMediaMetadata(ec, block, indexInBlock, video, meta, videoSize)
   }
 
   // prepare license if needed
   if (isSet(meta.license)) {
-    processVideoLicense(ec, video, meta.license)
+    processVideoLicense(ec, block, indexInBlock, video, meta.license)
   }
 
   // prepare language if needed
@@ -158,12 +164,14 @@ function processVideoMediaEncoding(
 function processVideoMediaMetadata(
   ec: EntitiesCollector,
   block: SubstrateBlock,
+  indexInBlock: number,
   video: Video,
   metadata: DecodedMetadataObject<IVideoMetadata>,
   videoSize: bigint | undefined
 ): void {
   if (!video.mediaMetadata) {
     video.mediaMetadata = new VideoMediaMetadata({
+      // TODO: Backward-compatibility: `${block.height}-${indexInBlock}`
       id: video.id,
       createdInBlock: block.height,
       video,
@@ -185,6 +193,8 @@ function processVideoMediaMetadata(
 
 function processVideoLicense(
   ec: EntitiesCollector,
+  block: SubstrateBlock,
+  indexInBlock: number,
   video: Video,
   licenseMetadata: DecodedMetadataObject<ILicense>
 ): void {
@@ -194,6 +204,7 @@ function processVideoLicense(
     video.license =
       video.license ||
       new License({
+        // TODO: Backward-compatibility: `${block.height}-${indexInBlock}`
         id: video.id,
       })
     integrateMeta(video.license, licenseMetadata, ['attribution', 'code', 'customText'])
@@ -250,7 +261,7 @@ function processPublishedBeforeJoystream(
   // ensure date is valid
   if (isNaN(timestamp)) {
     invalidMetadata(PublishedBeforeJoystream, `Invalid date provided`, {
-      decodedValue: metadata,
+      decodedMessage: metadata,
     })
     return
   }
@@ -282,24 +293,6 @@ function processAssets<E, M extends AnyMetadataClass<unknown>>(
         newAsset.type = createDataObjectType(entity as E)
       }
     }
-  }
-}
-
-async function processVideoCategory(
-  ec: EntitiesCollector,
-  block: SubstrateBlock,
-  video: Video,
-  categoryId: string
-): Promise<void> {
-  try {
-    video.category = await ec.collections.VideoCategory.get(categoryId)
-  } catch (e) {
-    // if category is not found, create new one
-    video.category = new VideoCategory({
-      id: categoryId,
-      createdInBlock: block.height,
-    })
-    ec.collections.VideoCategory.push(video.category)
   }
 }
 
@@ -364,36 +357,25 @@ export async function processOwnerRemark(
   )
 }
 
-function metaprotocolTransactionFailure<T>(
-  metaClass: AnyMetadataClass<T>,
-  message: string,
-  data?: Record<string, unknown>
-): MetaprotocolTransactionResultFailed {
-  invalidMetadata(metaClass, message, data)
-  return new MetaprotocolTransactionResultFailed({
-    errorMessage: message,
-  })
-}
-
 async function getCommentForMetaprotocolAction<T>(
   ec: EntitiesCollector,
   metaClass: AnyMetadataClass<T>,
   channel: Channel,
+  message: DecodedMetadataObject<T>,
   commentId: string,
   requiredStatus: CommentStatus
 ): Promise<Comment | MetaprotocolTransactionResultFailed> {
-  let comment: Comment
-  try {
-    comment = await ec.collections.Comment.get(commentId, {
-      video: { channel: true },
-      parentComment: true,
-    })
-  } catch (e) {
+  const comment = await ec.collections.Comment.get(commentId, {
+    video: { channel: true },
+    parentComment: true,
+  })
+
+  if (!comment) {
     return metaprotocolTransactionFailure(metaClass, `Comment by id ${commentId} not found`, {
-      commentId,
-      remarkChannelId: channel.id,
+      decodedMessage: message,
     })
   }
+
   const { video } = comment
 
   // ensure channel owns the video
@@ -402,10 +384,7 @@ async function getCommentForMetaprotocolAction<T>(
       metaClass,
       `Cannot modify comment on video ${video.id} which does not belong to channel ${channel.id}`,
       {
-        videoId: video.id,
-        videoChannelId: video.channel.id,
-        remarkChannelId: channel.id,
-        commentId: comment.id,
+        decodedMessage: message,
       }
     )
   }
@@ -413,9 +392,7 @@ async function getCommentForMetaprotocolAction<T>(
   // ensure comment has the expected status
   if (comment.status !== requiredStatus) {
     return metaprotocolTransactionFailure(metaClass, `Invalid comment status: ${comment.status}`, {
-      commentId: comment.id,
-      videoId: comment.video.id,
-      channelId: channel.id,
+      decodedMessage: message,
     })
   }
 
@@ -427,13 +404,14 @@ export async function processPinOrUnpinCommentMessage(
   channel: Channel,
   message: DecodedMetadataObject<IPinOrUnpinComment>
 ): Promise<MetaprotocolTransactionResult> {
-  const { commentId, option } = message
+  const { option } = message
 
   const commentOrFailure = await getCommentForMetaprotocolAction(
     ec,
     PinOrUnpinComment,
     channel,
-    commentId,
+    message,
+    message.commentId,
     CommentStatus.VISIBLE
   )
 
@@ -457,14 +435,13 @@ export async function processVideoReactionsPreferenceMessage(
   const { videoId, option } = message
 
   // load video
-  let video: Video
-  try {
-    video = await ec.collections.Video.get(videoId, { channel: true })
-  } catch (e) {
+  const video = await ec.collections.Video.get(videoId, { channel: true })
+
+  if (!video) {
     return metaprotocolTransactionFailure(
       VideoReactionsPreference,
       `Video by id ${videoId} not found`,
-      { videoId, remarkChannelId: channel.id }
+      { decodedMessage: message }
     )
   }
 
@@ -474,9 +451,7 @@ export async function processVideoReactionsPreferenceMessage(
       VideoReactionsPreference,
       `Cannot change preferences on video ${video.id} which does not belong to channel ${channel.id}`,
       {
-        videoId: video.id,
-        videoChannelId: video.channel.id,
-        remarkChannelId: channel.id,
+        decodedMessage: message,
       }
     )
   }
@@ -490,13 +465,12 @@ export async function processModerateCommentMessage(
   channel: Channel,
   message: DecodedMetadataObject<IModerateComment>
 ): Promise<MetaprotocolTransactionResult> {
-  const { commentId } = message
-
   const commentOrFailure = await getCommentForMetaprotocolAction(
     ec,
     ModerateComment,
     channel,
-    commentId,
+    message,
+    message.commentId,
     CommentStatus.VISIBLE
   )
 

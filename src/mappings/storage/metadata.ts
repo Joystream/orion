@@ -160,7 +160,8 @@ export function processDistributionBucketFamilyMetadata(
           if (!continentCode) {
             invalidMetadata(
               GeographicalAreaProto,
-              `Unrecognized continent enum variant: ${a.continent}`
+              `Unrecognized continent enum variant: ${a.continent}`,
+              { decodedMessage: a }
             )
             return []
           }
@@ -173,7 +174,9 @@ export function processDistributionBucketFamilyMetadata(
 
         if (a.countryCode) {
           if (!isValidCountryCode(a.countryCode)) {
-            invalidMetadata(GeographicalAreaProto, `Invalid country code: ${a.countryCode}`)
+            invalidMetadata(GeographicalAreaProto, `Invalid country code: ${a.countryCode}`, {
+              decodedMessage: a,
+            })
             return []
           }
           return [
@@ -185,7 +188,13 @@ export function processDistributionBucketFamilyMetadata(
 
         if (a.subdivisionCode) {
           if (!isValidSubdivisionCode(a.subdivisionCode)) {
-            invalidMetadata(GeographicalAreaProto, `Invalid subdivision code: ${a.subdivisionCode}`)
+            invalidMetadata(
+              GeographicalAreaProto,
+              `Invalid subdivision code: ${a.subdivisionCode}`,
+              {
+                decodedMessage: a,
+              }
+            )
             return []
           }
           return [new GeographicalAreaSubdivistion({ subdivisionCode: a.subdivisionCode })]

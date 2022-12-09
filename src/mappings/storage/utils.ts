@@ -149,21 +149,21 @@ export async function unsetAssetRelations(
 ): Promise<void> {
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.channel)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const channel = await ec.collections.Channel.get(dataObject.type.channel)
+      const channel = await ec.collections.Channel.getOrFail(dataObject.type.channel)
       channel[entityProperty] = null
     }
   }
 
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.video)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const video = await ec.collections.Video.get(dataObject.type.video)
+      const video = await ec.collections.Video.getOrFail(dataObject.type.video)
       video[entityProperty] = null
     }
   }
 
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.subtitle)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const subtitle = await ec.collections.VideoSubtitle.get(dataObject.type.subtitle)
+      const subtitle = await ec.collections.VideoSubtitle.getOrFail(dataObject.type.subtitle)
       subtitle[entityProperty] = null
     }
   }
@@ -201,7 +201,7 @@ export async function deleteDataObjects(ec: EntitiesCollector, objects: StorageD
 
 export async function deleteDataObjectsByIds(ec: EntitiesCollector, ids: bigint[]) {
   const objects = await Promise.all(
-    ids.map((id) => ec.collections.StorageDataObject.get(id.toString()))
+    ids.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
   )
   await deleteDataObjects(ec, objects)
 }

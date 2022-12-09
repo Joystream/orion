@@ -376,6 +376,29 @@ export class MembersMemberProfileUpdatedEvent {
   }
 }
 
+export class MembersMemberRemarkedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Members.MemberRemarked')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Members.MemberRemarked') === '455000da2c8f650044c433ea0fc69e39c5cb2db11e7a81e15e0fcba6f0757e16'
+  }
+
+  get asV1000(): [bigint, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class MembersMembershipBoughtEvent {
   private readonly _chain: Chain
   private readonly event: Event

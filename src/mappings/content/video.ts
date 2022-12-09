@@ -35,7 +35,14 @@ export async function processVideoCreatedEvent({
   ec.collections.Video.push(video)
 
   if (contentMetadata?.videoMetadata) {
-    await processVideoMetadata(ec, block, video, contentMetadata.videoMetadata, newDataObjectIds)
+    await processVideoMetadata(
+      ec,
+      block,
+      indexInBlock,
+      video,
+      contentMetadata.videoMetadata,
+      newDataObjectIds
+    )
   }
 
   if (autoIssueNft) {
@@ -53,7 +60,7 @@ export async function processVideoUpdatedEvent({
   },
 }: EventHandlerContext<'Content.VideoUpdated'>): Promise<void> {
   const { newMeta, autoIssueNft } = contentUpdateParameters
-  const video = await ec.collections.Video.get(contentId.toString(), {
+  const video = await ec.collections.Video.getOrFail(contentId.toString(), {
     license: true,
     channel: true,
     nft: true,
@@ -70,7 +77,14 @@ export async function processVideoUpdatedEvent({
   const contentMetadata = newMeta && deserializeMetadata(ContentMetadata, newMeta)
 
   if (contentMetadata?.videoMetadata) {
-    await processVideoMetadata(ec, block, video, contentMetadata.videoMetadata, newDataObjectIds)
+    await processVideoMetadata(
+      ec,
+      block,
+      indexInBlock,
+      video,
+      contentMetadata.videoMetadata,
+      newDataObjectIds
+    )
   }
 
   if (autoIssueNft) {
@@ -102,6 +116,6 @@ export async function processVideoVisibilitySetByModeratorEvent({
     asV1000: [, videoId, isCensored],
   },
 }: EventHandlerContext<'Content.VideoVisibilitySetByModerator'>): Promise<void> {
-  const video = await ec.collections.Video.get(videoId.toString())
+  const video = await ec.collections.Video.getOrFail(videoId.toString())
   video.isCensored = isCensored
 }
