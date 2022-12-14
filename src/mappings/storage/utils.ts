@@ -21,8 +21,9 @@ import {
   StaticBagId,
 } from '../../types/v1000'
 import { bytesToString } from '../utils'
-import { EntitiesCollector } from '../../utils'
+import { criticalError, EntitiesCollector } from '../../utils'
 import { ASSETS_MAP } from '../content/utils'
+import { FindOptionsRelations } from 'typeorm'
 
 export function getDynamicBagId(bagId: DynamicBagIdType): string {
   if (bagId.__kind === 'Channel') {
@@ -33,7 +34,7 @@ export function getDynamicBagId(bagId: DynamicBagIdType): string {
     return `dynamic:member:${bagId.value.toString()}`
   }
 
-  throw new Error(`Unexpected dynamic bag type: ${JSON.stringify(bagId)}`)
+  criticalError(`Unexpected dynamic bag type`, { bagId })
 }
 
 export function getStaticBagId(bagId: StaticBagId): string {
@@ -45,7 +46,7 @@ export function getStaticBagId(bagId: StaticBagId): string {
     return `static:wg:${bagId.value.__kind.toLowerCase()}`
   }
 
-  throw new Error(`Unexpected static bag type: ${JSON.stringify(bagId)}`)
+  criticalError(`Unexpected static bag type`, { bagId })
 }
 
 export function getBagId(bagId: BagIdType): string {
@@ -60,7 +61,7 @@ export function getDynamicBagOwner(bagId: DynamicBagIdType): StorageBagOwner {
     return new StorageBagOwnerMember({ memberId: bagId.value.toString() })
   }
 
-  throw new Error(`Unexpected dynamic bag type: ${JSON.stringify(bagId)}`)
+  criticalError(`Unexpected dynamic bag type`, { bagId })
 }
 
 export function getStaticBagOwner(bagId: StaticBagId): StorageBagOwner {
@@ -70,7 +71,7 @@ export function getStaticBagOwner(bagId: StaticBagId): StorageBagOwner {
     return new StorageBagOwnerWorkingGroup({ workingGroupId: bagId.value.__kind.toLowerCase() })
   }
 
-  throw new Error(`Unexpected static bag type: ${JSON.stringify(bagId)}`)
+  criticalError(`Unexpected static bag type`, { bagId })
 }
 
 export function distributionBucketId({
@@ -179,19 +180,24 @@ export function removeDistributionBucketOperator(
   }
 }
 
-export async function addStaticBagIfNotExists(ec: EntitiesCollector, bagId: BagIdType) {
-  if (bagId.__kind === 'Static') {
-    try {
-      await ec.collections.StorageBag.get(getBagId(bagId))
-    } catch (e) {
-      ec.collections.StorageBag.push(
-        new StorageBag({
-          id: getBagId(bagId),
-          owner: getStaticBagOwner(bagId.value),
-        })
-      )
-    }
+export async function getOrCreateBag(
+  ec: EntitiesCollector,
+  bagId: BagIdType,
+  relations?: FindOptionsRelations<StorageBag>
+): Promise<StorageBag> {
+  const bag = await ec.collections.StorageBag.get(getBagId(bagId), relations)
+  if (bag) {
+    return bag
   }
+  if (bagId.__kind === 'Dynamic') {
+    criticalError(`Missing dynamic bag`, { id: bagId.value })
+  }
+  const newBag = new StorageBag({
+    id: getBagId(bagId),
+    owner: getStaticBagOwner(bagId.value),
+  })
+  ec.collections.StorageBag.push(newBag)
+  return newBag
 }
 
 export async function deleteDataObjects(ec: EntitiesCollector, objects: StorageDataObject[]) {

@@ -3,7 +3,7 @@ type VideoCategory @entity {
   id: ID!
 
   "The name of the category"
-  name: String @unique
+  name: String @index
 
   "The description of the category"
   description: String

@@ -171,8 +171,8 @@ function processVideoMediaMetadata(
 ): void {
   if (!video.mediaMetadata) {
     video.mediaMetadata = new VideoMediaMetadata({
-      // TODO: Backward-compatibility: `${block.height}-${indexInBlock}`
-      id: video.id,
+      // TODO: Re-think backward-compatibility
+      id: `${block.height}-${indexInBlock}`, // video.id,
       createdInBlock: block.height,
       video,
     })
@@ -204,8 +204,8 @@ function processVideoLicense(
     video.license =
       video.license ||
       new License({
-        // TODO: Backward-compatibility: `${block.height}-${indexInBlock}`
-        id: video.id,
+        // TODO: Re-think backward-compatibility
+        id: `${block.height}-${indexInBlock}`, // video.id,
       })
     integrateMeta(video.license, licenseMetadata, ['attribution', 'code', 'customText'])
     ec.collections.License.push(video.license)
@@ -226,6 +226,9 @@ function processVideoSubtitles(
   subtitlesMeta: DecodedMetadataObject<ISubtitleMetadata>[]
 ): void {
   if (video.subtitles) {
+    ec.collections.StorageDataObject.remove(
+      ...video.subtitles.flatMap((s) => (s.asset ? [s.asset] : []))
+    )
     ec.collections.VideoSubtitle.remove(...video.subtitles)
   }
   video.subtitles = []
@@ -239,8 +242,6 @@ function processVideoSubtitles(
     })
     processLanguage(SubtitleMetadata, subtitle, subtitleMeta.language)
     ec.collections.VideoSubtitle.push(subtitle)
-    video.subtitles.push(subtitle)
-
     processAssets(ec, block, assets, subtitle, SubtitleMetadata, subtitleMeta, ASSETS_MAP.subtitle)
   }
 }
@@ -287,7 +288,6 @@ function processAssets<E, M extends AnyMetadataClass<unknown>>(
       if (newAsset) {
         if (currentAsset) {
           currentAsset.unsetAt = new Date(block.timestamp)
-          ec.collections.StorageDataObject.push(currentAsset)
         }
         entity[entityProperty] = newAsset
         newAsset.type = createDataObjectType(entity as E)
@@ -422,7 +422,6 @@ export async function processPinOrUnpinCommentMessage(
   const comment = commentOrFailure
   const { video } = comment
   video.pinnedComment = option === PinOrUnpinComment.Option.PIN ? comment : null
-  await ec.collections.Video.push(video)
 
   return new MetaprotocolTransactionResultOK()
 }

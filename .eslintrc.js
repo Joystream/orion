@@ -21,7 +21,7 @@ module.exports = {
   ],
   rules: {
     'no-console': 'off',
-    'no-useless-constructor': 'warn',
+    'no-useless-constructor': 'off',
     '@typescript-eslint/no-floating-promises': [
       'error',
       {

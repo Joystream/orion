@@ -52,6 +52,31 @@ export interface ChannelUpdateParametersRecord {
   storageBucketsNumWitness: (number | undefined)
 }
 
+export interface EnglishAuctionParamsRecord {
+  startingPrice: bigint
+  buyNowPrice: (bigint | undefined)
+  whitelist: bigint[]
+  startsAt: (number | undefined)
+  duration: number
+  extensionPeriod: number
+  minBidStep: bigint
+}
+
+export interface NftIssuanceParametersRecord {
+  royalty: (number | undefined)
+  nftMetadata: Uint8Array
+  nonChannelOwner: (bigint | undefined)
+  initTransactionalStatus: InitTransactionalStatusRecord
+}
+
+export interface OpenAuctionParamsRecord {
+  startingPrice: bigint
+  buyNowPrice: (bigint | undefined)
+  startsAt: (number | undefined)
+  whitelist: bigint[]
+  bidLockDuration: number
+}
+
 export interface VideoCreationParametersRecord {
   assets: (StorageAssetsRecord | undefined)
   meta: (Uint8Array | undefined)
@@ -324,11 +349,30 @@ export interface StorageAssetsRecord {
   expectedDataSizeFee: bigint
 }
 
-export interface NftIssuanceParametersRecord {
-  royalty: (number | undefined)
-  nftMetadata: Uint8Array
-  nonChannelOwner: (bigint | undefined)
-  initTransactionalStatus: InitTransactionalStatusRecord
+export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
+
+export interface InitTransactionalStatusRecord_Idle {
+  __kind: 'Idle'
+}
+
+export interface InitTransactionalStatusRecord_BuyNow {
+  __kind: 'BuyNow'
+  value: bigint
+}
+
+export interface InitTransactionalStatusRecord_InitiatedOfferToMember {
+  __kind: 'InitiatedOfferToMember'
+  value: [bigint, (bigint | undefined)]
+}
+
+export interface InitTransactionalStatusRecord_EnglishAuction {
+  __kind: 'EnglishAuction'
+  value: EnglishAuctionParamsRecord
+}
+
+export interface InitTransactionalStatusRecord_OpenAuction {
+  __kind: 'OpenAuction'
+  value: OpenAuctionParamsRecord
 }
 
 export type StaticBagId = StaticBagId_Council | StaticBagId_WorkingGroup
@@ -376,32 +420,6 @@ export interface PendingTransfer {
   transferParams: TransferCommitmentParameters
 }
 
-export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
-
-export interface InitTransactionalStatusRecord_Idle {
-  __kind: 'Idle'
-}
-
-export interface InitTransactionalStatusRecord_BuyNow {
-  __kind: 'BuyNow'
-  value: bigint
-}
-
-export interface InitTransactionalStatusRecord_InitiatedOfferToMember {
-  __kind: 'InitiatedOfferToMember'
-  value: [bigint, (bigint | undefined)]
-}
-
-export interface InitTransactionalStatusRecord_EnglishAuction {
-  __kind: 'EnglishAuction'
-  value: EnglishAuctionParamsRecord
-}
-
-export interface InitTransactionalStatusRecord_OpenAuction {
-  __kind: 'OpenAuction'
-  value: OpenAuctionParamsRecord
-}
-
 export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_App | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
 
 export interface WorkingGroup_Forum {
@@ -444,22 +462,4 @@ export interface TransferCommitmentParameters {
   newCollaborators: [bigint, ChannelActionPermission[]][]
   price: bigint
   transferId: bigint
-}
-
-export interface EnglishAuctionParamsRecord {
-  startingPrice: bigint
-  buyNowPrice: (bigint | undefined)
-  whitelist: bigint[]
-  startsAt: (number | undefined)
-  duration: number
-  extensionPeriod: number
-  minBidStep: bigint
-}
-
-export interface OpenAuctionParamsRecord {
-  startingPrice: bigint
-  buyNowPrice: (bigint | undefined)
-  startsAt: (number | undefined)
-  whitelist: bigint[]
-  bidLockDuration: number
 }

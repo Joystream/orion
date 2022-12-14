@@ -17,7 +17,6 @@ import {
 import { EventHandlerContext } from '../../utils'
 import { deserializeMetadata, toAddress } from '../utils'
 import {
-  addStaticBagIfNotExists,
   createDataObjects,
   createDistributionBucketBag,
   createStorageBucketBag,
@@ -25,9 +24,9 @@ import {
   deleteDataObjectsByIds,
   distributionBucketId,
   distributionOperatorId,
-  getBagId,
   getDynamicBagId,
   getDynamicBagOwner,
+  getOrCreateBag,
   removeDistributionBucketOperator,
 } from './utils'
 import {
@@ -146,7 +145,7 @@ export async function processStorageBucketsUpdatedForBagEvent({
     asV1000: [bagId, addedBuckets, removedBuckets],
   },
 }: EventHandlerContext<'Storage.StorageBucketsUpdatedForBag'>): Promise<void> {
-  await addStaticBagIfNotExists(ec, bagId)
+  await getOrCreateBag(ec, bagId)
   removedBuckets.forEach((bucket) => {
     const toBeRemoved = createStorageBucketBag(bucket, bagId)
     ec.collections.StorageBucketBag.remove(toBeRemoved)
@@ -222,19 +221,9 @@ export function processDynamicBagCreatedEvent({
     owner: getDynamicBagOwner(bagId),
   })
 
-  ec.collections.StorageBag.push(bag)
-
-  const storageBucketBags = storageBuckets.map((id) => createStorageBucketBag(id, bag))
-
-  ec.collections.StorageBucketBag.push(...storageBucketBags)
-
-  const distributionBucketBags = distributionBuckets.map((id) =>
-    createDistributionBucketBag(id, bag)
-  )
-
-  ec.collections.DistributionBucketBag.push(...distributionBucketBags)
-
-  const dataObjects = createDataObjects(
+  bag.storageBuckets = storageBuckets.map((id) => createStorageBucketBag(id, bag))
+  bag.distributionBuckets = distributionBuckets.map((id) => createDistributionBucketBag(id, bag))
+  bag.objects = createDataObjects(
     block,
     bag,
     objectCreationList,
@@ -242,7 +231,10 @@ export function processDynamicBagCreatedEvent({
     objectIds
   )
 
-  ec.collections.StorageDataObject.push(...dataObjects)
+  ec.collections.StorageBag.push(bag)
+  ec.collections.StorageBucketBag.push(...bag.storageBuckets)
+  ec.collections.DistributionBucketBag.push(...bag.distributionBuckets)
+  ec.collections.StorageDataObject.push(...bag.objects)
 }
 
 export async function processDynamicBagDeletedEvent({
@@ -275,16 +267,9 @@ export async function processDataObjectsUploadedEvent({
     asV1000: [objectIds, { bagId, objectCreationList }, stateBloatBond],
   },
 }: EventHandlerContext<'Storage.DataObjectsUploaded'>) {
-  await addStaticBagIfNotExists(ec, bagId)
-  ec.collections.StorageDataObject.push(
-    ...createDataObjects(
-      block,
-      new StorageBag({ id: getBagId(bagId) }),
-      objectCreationList,
-      stateBloatBond,
-      objectIds
-    )
-  )
+  const bag = await getOrCreateBag(ec, bagId)
+  const newObjects = createDataObjects(block, bag, objectCreationList, stateBloatBond, objectIds)
+  ec.collections.StorageDataObject.push(...newObjects)
 }
 
 export async function processDataObjectsUpdatedEvent({
@@ -298,16 +283,15 @@ export async function processDataObjectsUpdatedEvent({
     ],
   },
 }: EventHandlerContext<'Storage.DataObjectsUpdated'>): Promise<void> {
-  await addStaticBagIfNotExists(ec, bagId)
-  ec.collections.StorageDataObject.push(
-    ...createDataObjects(
-      block,
-      new StorageBag({ id: getBagId(bagId) }),
-      objectCreationList,
-      stateBloatBond,
-      uploadedObjectIds
-    )
+  const bag = await getOrCreateBag(ec, bagId)
+  const newObjects = createDataObjects(
+    block,
+    bag,
+    objectCreationList,
+    stateBloatBond,
+    uploadedObjectIds
   )
+  ec.collections.StorageDataObject.push(...newObjects)
   await deleteDataObjectsByIds(ec, objectsToRemoveIds)
 }
 
@@ -320,9 +304,7 @@ export async function processPendingDataObjectsAcceptedEvent({
   const objects = await Promise.all(
     dataObjectIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
   )
-  objects.forEach((o) => {
-    o.isAccepted = true
-  })
+  objects.forEach((o) => (o.isAccepted = true))
 }
 
 export async function processDataObjectsMovedEvent({
@@ -331,11 +313,13 @@ export async function processDataObjectsMovedEvent({
     asV1000: [, destBagId, dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsMoved'>): Promise<void> {
-  await addStaticBagIfNotExists(ec, destBagId)
+  const destBag = await getOrCreateBag(ec, destBagId)
   const dataObjects = await Promise.all(
     dataObjectIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
   )
-  dataObjects.forEach((o) => (o.storageBag = new StorageBag({ id: getBagId(destBagId) })))
+  dataObjects.forEach((o) => {
+    o.storageBag = destBag
+  })
 }
 
 export async function processDataObjectsDeletedEvent({
@@ -443,7 +427,7 @@ export async function processDistributionBucketsUpdatedForBagEvent({
     asV1000: [bagId, familyId, addedBucketsIndices, removedBucketsIndices],
   },
 }: EventHandlerContext<'Storage.DistributionBucketsUpdatedForBag'>): Promise<void> {
-  await addStaticBagIfNotExists(ec, bagId)
+  await getOrCreateBag(ec, bagId)
   removedBucketsIndices.forEach((index) => {
     const toBeRemoved = createDistributionBucketBag(
       {

@@ -1,10 +1,10 @@
-module.exports = class Data1670586434084 {
-  name = 'Data1670586434084'
+module.exports = class Data1671014020988 {
+  name = 'Data1671014020988'
 
   async up(db) {
     await db.query(`CREATE TABLE "member_metadata" ("id" character varying NOT NULL, "name" text, "avatar" jsonb, "about" text, "member_id" character varying NOT NULL, CONSTRAINT "REL_e7e4d350f82ae2383894f465ed" UNIQUE ("member_id"), CONSTRAINT "PK_d3fcc374696465f3c0ac3ba8708" PRIMARY KEY ("id"))`)
     await db.query(`CREATE UNIQUE INDEX "IDX_e7e4d350f82ae2383894f465ed" ON "member_metadata" ("member_id") `)
-    await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_9e594e5a61c0f3cb25679f6ba8" ON "bid" ("auction_id") `)
     await db.query(`CREATE INDEX "IDX_3caf2d6b31d2fe45a2b85b8191" ON "bid" ("nft_id") `)
     await db.query(`CREATE INDEX "IDX_e7618559409a903a897164156b" ON "bid" ("bidder_id") `)
@@ -55,7 +55,7 @@ module.exports = class Data1670586434084 {
     await db.query(`CREATE INDEX "IDX_7b16ddad43901921a8d3c8eab7" ON "video_featured_in_category" ("video_id") `)
     await db.query(`CREATE UNIQUE INDEX "IDX_6d0917e1ac0cc06c8075bcf256" ON "video_featured_in_category" ("category_id", "video_id") `)
     await db.query(`CREATE TABLE "video_category" ("id" character varying NOT NULL, "name" text, "description" text, "created_in_block" integer NOT NULL, "parent_category_id" character varying, CONSTRAINT "PK_2a5c61f32e9636ee10821e9a58d" PRIMARY KEY ("id"))`)
-    await db.query(`CREATE UNIQUE INDEX "IDX_cbe7e5d162a819e4ee2e2f6105" ON "video_category" ("name") `)
+    await db.query(`CREATE INDEX "IDX_cbe7e5d162a819e4ee2e2f6105" ON "video_category" ("name") `)
     await db.query(`CREATE INDEX "IDX_da26b34f037c0d59d3c0d0646e" ON "video_category" ("parent_category_id") `)
     await db.query(`CREATE TABLE "license" ("id" character varying NOT NULL, "code" integer, "attribution" text, "custom_text" text, CONSTRAINT "PK_f168ac1ca5ba87286d03b2ef905" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "video_media_encoding" ("id" character varying NOT NULL, "codec_name" text, "container" text, "mime_media_type" text, CONSTRAINT "PK_52e25874f8d8a381e154d1125e0" PRIMARY KEY ("id"))`)
