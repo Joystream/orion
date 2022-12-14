@@ -159,6 +159,9 @@ type Bid @entity {
   "Block in which the bid was placed"
   createdInBlock: Int!
 
+  "Index in block of the related AuctionBidMade event"
+  indexInBlock: Int!
+
   "Bid that was displaced by this bid in the English auction (if any)"
   previousTopBid: Bid
 }

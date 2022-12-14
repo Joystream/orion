@@ -68,3 +68,7 @@ export function metaprotocolTransactionFailure<T>(
     errorMessage: message,
   })
 }
+
+export function backwardCompatibleMetaID(block: SubstrateBlock, indexInBlock: number) {
+  return `METAPROTOCOL-OLYMPIA-${block.height}-${indexInBlock}`
+}

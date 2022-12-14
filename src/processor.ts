@@ -56,6 +56,25 @@ import {
   processVideoVisibilitySetByModeratorEvent,
 } from './mappings/content/video'
 import {
+  processOpenAuctionStartedEvent,
+  processEnglishAuctionStartedEvent,
+  processNftIssuedEvent,
+  processAuctionBidMadeEvent,
+  processAuctionBidCanceledEvent,
+  processAuctionCanceledEvent,
+  processEnglishAuctionSettledEvent,
+  processBidMadeCompletingAuctionEvent,
+  processOpenAuctionBidAcceptedEvent,
+  processOfferStartedEvent,
+  processOfferAcceptedEvent,
+  processOfferCanceledEvent,
+  processNftSellOrderMadeEvent,
+  processNftBoughtEvent,
+  processBuyNowCanceledEvent,
+  processBuyNowPriceUpdatedEvent,
+  processNftSlingedBackToTheOriginalArtistEvent,
+} from './mappings/content/nft'
+import {
   processMemberAccountsUpdatedEvent,
   processMemberProfileUpdatedEvent,
   processNewMember,
@@ -99,6 +118,23 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
   .addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
   .addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+  .addEvent('Content.OpenAuctionStarted', defaultEventOptions)
+  .addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
+  .addEvent('Content.NftIssued', defaultEventOptions)
+  .addEvent('Content.AuctionBidMade', defaultEventOptions)
+  .addEvent('Content.AuctionBidCanceled', defaultEventOptions)
+  .addEvent('Content.AuctionCanceled', defaultEventOptions)
+  .addEvent('Content.EnglishAuctionSettled', defaultEventOptions)
+  .addEvent('Content.BidMadeCompletingAuction', defaultEventOptions)
+  .addEvent('Content.OpenAuctionBidAccepted', defaultEventOptions)
+  .addEvent('Content.OfferStarted', defaultEventOptions)
+  .addEvent('Content.OfferAccepted', defaultEventOptions)
+  .addEvent('Content.OfferCanceled', defaultEventOptions)
+  .addEvent('Content.NftSellOrderMade', defaultEventOptions)
+  .addEvent('Content.NftBought', defaultEventOptions)
+  .addEvent('Content.BuyNowCanceled', defaultEventOptions)
+  .addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
+  .addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
   .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
   .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
   .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -156,6 +192,23 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
+  'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
+  'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
+  'Content.NftIssued': processNftIssuedEvent,
+  'Content.AuctionBidMade': processAuctionBidMadeEvent,
+  'Content.AuctionBidCanceled': processAuctionBidCanceledEvent,
+  'Content.AuctionCanceled': processAuctionCanceledEvent,
+  'Content.EnglishAuctionSettled': processEnglishAuctionSettledEvent,
+  'Content.BidMadeCompletingAuction': processBidMadeCompletingAuctionEvent,
+  'Content.OpenAuctionBidAccepted': processOpenAuctionBidAcceptedEvent,
+  'Content.OfferStarted': processOfferStartedEvent,
+  'Content.OfferAccepted': processOfferAcceptedEvent,
+  'Content.OfferCanceled': processOfferCanceledEvent,
+  'Content.NftSellOrderMade': processNftSellOrderMadeEvent,
+  'Content.NftBought': processNftBoughtEvent,
+  'Content.BuyNowCanceled': processBuyNowCanceledEvent,
+  'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
+  'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -215,7 +268,7 @@ async function processEvent<EventName extends EventNames>(
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
 
-  const ec = new EntitiesCollector(ctx.store)
+  const ec = await EntitiesCollector.create(ctx.store)
 
   for (const block of ctx.blocks) {
     for (const item of block.items) {

@@ -14,6 +14,23 @@ import {
   ContentChannelVisibilitySetByModeratorEvent,
   ContentChannelOwnerRemarkedEvent,
   ContentChannelAgentRemarkedEvent,
+  ContentOpenAuctionStartedEvent,
+  ContentEnglishAuctionStartedEvent,
+  ContentNftIssuedEvent,
+  ContentAuctionBidMadeEvent,
+  ContentAuctionBidCanceledEvent,
+  ContentAuctionCanceledEvent,
+  ContentEnglishAuctionSettledEvent,
+  ContentBidMadeCompletingAuctionEvent,
+  ContentOpenAuctionBidAcceptedEvent,
+  ContentOfferStartedEvent,
+  ContentOfferAcceptedEvent,
+  ContentOfferCanceledEvent,
+  ContentNftSellOrderMadeEvent,
+  ContentNftBoughtEvent,
+  ContentBuyNowCanceledEvent,
+  ContentBuyNowPriceUpdatedEvent,
+  ContentNftSlingedBackToTheOriginalArtistEvent,
   StorageStorageBucketCreatedEvent,
   StorageDynamicBagCreatedEvent,
   StorageDataObjectsUploadedEvent,
@@ -53,10 +70,12 @@ import {
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
 } from './types/events'
-import { EntityManager, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { EntityManager, FindOptionsRelations, FindOptionsWhere, In, Not } from 'typeorm'
 import _ from 'lodash'
 import { Logger } from './logger'
 import { NextEntityId } from './model/NextEntityId'
+import { Auction, Bid } from './model'
+import { RelationMetadata } from 'typeorm/metadata/RelationMetadata'
 
 export function assertAssignable<T>(type: T) {
   return type
@@ -75,6 +94,23 @@ export const eventConstructors = {
   'Content.ChannelVisibilitySetByModerator': ContentChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': ContentChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': ContentChannelAgentRemarkedEvent,
+  'Content.OpenAuctionStarted': ContentOpenAuctionStartedEvent,
+  'Content.EnglishAuctionStarted': ContentEnglishAuctionStartedEvent,
+  'Content.NftIssued': ContentNftIssuedEvent,
+  'Content.AuctionBidMade': ContentAuctionBidMadeEvent,
+  'Content.AuctionBidCanceled': ContentAuctionBidCanceledEvent,
+  'Content.AuctionCanceled': ContentAuctionCanceledEvent,
+  'Content.EnglishAuctionSettled': ContentEnglishAuctionSettledEvent,
+  'Content.BidMadeCompletingAuction': ContentBidMadeCompletingAuctionEvent,
+  'Content.OpenAuctionBidAccepted': ContentOpenAuctionBidAcceptedEvent,
+  'Content.OfferStarted': ContentOfferStartedEvent,
+  'Content.OfferAccepted': ContentOfferAcceptedEvent,
+  'Content.OfferCanceled': ContentOfferCanceledEvent,
+  'Content.NftSellOrderMade': ContentNftSellOrderMadeEvent,
+  'Content.NftBought': ContentNftBoughtEvent,
+  'Content.BuyNowCanceled': ContentBuyNowCanceledEvent,
+  'Content.BuyNowPriceUpdated': ContentBuyNowPriceUpdatedEvent,
+  'Content.NftSlingedBackToTheOriginalArtist': ContentNftSlingedBackToTheOriginalArtistEvent,
   'Storage.StorageBucketCreated': StorageStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': StorageStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': StorageStorageBucketsUpdatedForBagEvent,
@@ -134,17 +170,47 @@ export type ModelNames = {
   [K in keyof typeof models]: IsEntityType<typeof models[K]> extends true ? K : never
 }[keyof typeof models]
 
+export type SimpleWhereCondition<E> = {
+  [K in keyof E]?: E[K] extends string | boolean | bigint | number | Date | null | undefined
+    ? E[K]
+    : E[K] extends { isTypeOf?: string } | null | undefined
+    ? never
+    : SimpleWhereCondition<E[K]>
+}
+
+const entityClasses = _.pickBy(models, (o) => {
+  return (
+    typeof o === 'function' &&
+    o.name &&
+    o.name[0] === o.name[0].toUpperCase() &&
+    !o.toString().includes('toJSON')
+  )
+}) as { [K in ModelNames]: Constructor<AnyEntity> }
+
+enum CachedEntityState {
+  UpToDate,
+  ToBeSaved,
+  ToBeRemoved,
+}
+
+type Cached<E> = {
+  entity?: E
+  state: CachedEntityState
+}
+
 export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = Constructor<E>> {
-  private store: Store
-  private _class: EC
-  private _toBeSaved: Map<string, E> = new Map()
-  private _toBeRemoved: Map<string, E> = new Map()
+  private _cached: Map<string, Cached<E>> = new Map()
   private _nextId = 1
 
-  constructor(store: Store, _class: EC) {
-    this.store = store
-    this._class = _class
-  }
+  public constructor(
+    private store: Store,
+    private em: EntityManager,
+    private getAllCollections: () => {
+      [K in ModelNames]: EntityCollection<InstanceType<typeof models[K]>>
+    },
+    private updateDb: () => Promise<void>,
+    private _class: EC
+  ) {}
 
   private asIdString(idNum: number) {
     const idStr = idNum.toString(36)
@@ -156,12 +222,11 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     return this.asIdString(this._nextId++)
   }
 
-  remove(...items: E[]): void {
-    items.forEach((i) => {
-      // removing an entity overrides any scheduled updates of this entity
-      this._toBeSaved.delete(i.id)
-      this._toBeRemoved.set(i.id, i)
+  remove(...items: E[]): this {
+    items.forEach((entity) => {
+      this._cached.set(entity.id, { state: CachedEntityState.ToBeRemoved })
     })
+    return this
   }
 
   // Prevents inserting strings that contain null character into the postgresql table
@@ -171,9 +236,13 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     return s.replace(/\u0000/g, '')
   }
 
+  private isObject(o: unknown): o is object {
+    return typeof o === 'object' && !Array.isArray(o) && !!o
+  }
+
   private normalizeInput(e: Record<string, unknown>) {
     for (const [k, v] of Object.entries(e)) {
-      if (typeof v === 'object' && v && `isTypeOf` in v) {
+      if (this.isObject(v) && `isTypeOf` in v) {
         this.normalizeInput(v as Record<string, unknown>)
       }
       if (typeof v === 'string') {
@@ -182,101 +251,322 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     }
   }
 
-  push(...items: E[]): void {
-    items.forEach((i) => {
-      // pushing an entity overrides any scheduled removals of this entity
-      this._toBeRemoved.delete(i.id)
-      // normalize the input (remove UTF-8 null characters)
-      this.normalizeInput(i)
-      // Entities with the same id will override existing ones
-      this._toBeSaved.set(i.id, i)
+  private asCachedProxy(e: E): E {
+    return new Proxy(e, {
+      set: (obj, prop, value, receiver) => {
+        // Only schedule for update if the value was not initially "undefined"
+        // (ie. it's not just relation being loaded)
+        if (obj[prop as keyof E] !== undefined) {
+          const cached = this._cached.get(e.id)
+          if (cached?.state === CachedEntityState.UpToDate) {
+            cached.state = CachedEntityState.ToBeSaved
+          }
+        }
+        return Reflect.set(obj, prop, value, receiver)
+      },
     })
   }
 
-  async getOrFail(id: string, relations?: FindOptionsRelations<E>): Promise<E> {
-    if (this._toBeRemoved.has(id)) {
-      throw new Error(`Trying to access entity scheduled for removal ${this._class}:${id}`)
-    }
-    const result = await this.get(id, relations)
-    if (!result) {
-      throw new Error(`Could not find ${this._class.name} by id ${id}`)
-    }
+  push(...items: E[]): this {
+    items.forEach((entity) => {
+      // normalize the input (remove UTF-8 null characters)
+      this.normalizeInput(entity)
+      // Entities with the same id will override existing ones
+      this._cached.set(entity.id, { entity, state: CachedEntityState.ToBeSaved })
+    })
+
+    return this
+  }
+
+  private matchesWhere<T extends { id: string }>(o: T, where: SimpleWhereCondition<T>): boolean {
+    const result = Object.entries(where).every(([key, value]) => {
+      if (this.isObject(value)) {
+        return this.matchesWhere(o, value)
+      }
+      return o[key as keyof T] === value
+    })
     return result
   }
 
-  async get(id: string, relations?: FindOptionsRelations<E>): Promise<E | undefined> {
-    const cached = this._toBeSaved.get(id)
-    if (cached && !relations) {
+  private findOneCachedWhere(where: SimpleWhereCondition<E>): E | undefined {
+    return [...this._cached.values()].find(
+      ({ entity, state }) =>
+        entity && state !== CachedEntityState.ToBeRemoved && this.matchesWhere(entity, where)
+    )?.entity
+  }
+
+  private isRelationField(fieldName: string) {
+    this.em.connection.getMetadata(this._class).relations.find((r) => r.propertyName === fieldName)
+  }
+
+  private hasId(ref: unknown): ref is { id: string } {
+    return this.isObject(ref) && Object.keys(ref).includes('id')
+  }
+
+  private getRelationByProperty<T extends AnyEntity>(
+    entityClass: Constructor<T>,
+    property: keyof T & string
+  ): RelationMetadata {
+    const relation = this.em.connection
+      .getMetadata(entityClass)
+      .relations.find((r) => r.propertyName === property)
+    if (!relation) {
+      criticalError(`Relation ${property} not found in ${entityClass.name}`)
+    }
+    return relation
+  }
+
+  private async loadRelated<T extends AnyEntity>(
+    entity: T,
+    property: keyof T & string
+  ): Promise<AnyEntity[] | AnyEntity | null> {
+    let resolved: AnyEntity[] | AnyEntity | null
+    const entityClass = entity.constructor as Constructor<T>
+    const relation = this.getRelationByProperty(entityClass, property)
+    const inverseClass = entityClasses[relation.inverseEntityMetadata.targetName as ModelNames]
+    const inverseCollection = this.getAllCollections()[
+      inverseClass.name as ModelNames
+    ] as EntityCollection<AnyEntity>
+    const inverseProp = relation.inverseRelation?.propertyName
+    const refValue = entity[property] as unknown
+    if (relation.isOneToOneOwner || relation.isManyToOne) {
+      if (refValue === undefined) {
+        const stored = await this.em.findOne(entityClass, {
+          where: { id: entity.id } as FindOptionsWhere<T>,
+          relations: { [property]: true } as FindOptionsRelations<T>,
+        })
+        const storedRelated = stored && (stored[property as keyof T] as AnyEntity | null)
+        if (storedRelated) {
+          const inverseCached = inverseCollection.addCached(storedRelated)
+          resolved = inverseCached || null
+        } else {
+          resolved = null
+        }
+      } else if (refValue === null) {
+        resolved = null
+      } else if (this.hasId(refValue)) {
+        resolved = (await inverseCollection.get(refValue.id)) || null
+      } else {
+        criticalError(`Unexpected value of ${entityClass.name}.${property}`, { entity })
+      }
+    } else if (relation.isOneToOneNotOwner) {
+      // "Consult" the owning side
+      if (!inverseProp) {
+        criticalError(
+          `Cannot find inverseRelation property of OneToOne relation ${entityClass.name}.${property}`,
+          {
+            relation,
+          }
+        )
+      }
+      const inverseToBeSaved = inverseCollection.getAllToBeSaved()
+      const inverseCachedRelated = inverseToBeSaved.find(
+        (e: any) => e[inverseProp]?.id === entity.id
+      )
+      if (inverseCachedRelated) {
+        return inverseCachedRelated
+      }
+      const inverseStoredRelated = await this.em.findOne(inverseClass, {
+        where: {
+          [inverseProp]: { id: entity.id },
+        } as FindOptionsWhere<T>,
+      })
+      if (inverseStoredRelated) {
+        const inverseStoredCached: any = inverseCollection.addCached(inverseStoredRelated)
+        if (
+          inverseStoredCached &&
+          (inverseStoredCached[inverseProp] === undefined ||
+            inverseStoredCached[inverseProp]?.id === entity.id)
+        ) {
+          resolved = inverseStoredCached
+        } else {
+          resolved = null
+        }
+      } else {
+        resolved = null
+      }
+    } else if (relation.isOneToMany) {
+      if (!inverseProp) {
+        criticalError(
+          `Cannot find inverseRelation property of OneToMany relation ${entityClass.name}.${property}`,
+          {
+            relation,
+          }
+        )
+      }
+      const inverseToBeSaved = inverseCollection.getAllToBeSaved()
+      const inverseToBeRemovedIds = (await inverseCollection.getAllToBeRemoved()).map((e) => e.id)
+      const cachedAndRelatedIds = inverseToBeSaved
+        .filter((e: any) => e[inverseProp] && e[inverseProp].id === entity.id)
+        .map((e) => e.id)
+      const cachedAndNotRelatedIds = inverseToBeSaved
+        .filter((e: any) => e[inverseProp] !== undefined && e[inverseProp]?.id !== entity.id)
+        .map((e) => e.id)
+        .concat(inverseToBeRemovedIds)
+
+      const loaded = await this.em.find(inverseClass, {
+        where: {
+          [inverseProp]: { id: entity.id },
+          id: Not(In(cachedAndRelatedIds.concat(cachedAndNotRelatedIds))),
+        },
+      })
+      loaded.forEach((e) => inverseCollection.addCached(e))
+      resolved = (
+        await Promise.all(
+          cachedAndRelatedIds.concat(loaded.map((e) => e.id)).map((id) => inverseCollection.get(id))
+        )
+      ).flatMap((e) => (e ? [e] : []))
+    } else {
+      criticalError(`Unsupported relation type`, { relation })
+    }
+
+    entity[property] = resolved as T[keyof T & string]
+
+    return resolved
+  }
+
+  async loadRelatedEntities<T extends AnyEntity>(entity: T, relations: FindOptionsRelations<T>) {
+    for (const [k, v] of Object.entries(relations)) {
+      const relationKey = k as keyof T & string
+      const related = await this.loadRelated(entity, relationKey)
+      if (this.isObject(v) && related) {
+        if (Array.isArray(related)) {
+          await Promise.all(related.map((rel) => this.loadRelatedEntities(rel, v)))
+        } else {
+          await this.loadRelatedEntities(related, v)
+        }
+      }
+    }
+  }
+
+  async getWhere(
+    where: SimpleWhereCondition<E>,
+    relations?: FindOptionsRelations<E>
+  ): Promise<E | undefined> {
+    const cached = this.findOneCachedWhere(where)
+
+    if (cached) {
+      // We found a cached entity that matches the conditions
+      // - load any potentially missing relations and return it
+      if (relations) {
+        await this.loadRelatedEntities(cached, relations)
+      }
+
       return cached
     }
-    const stored = await this.store.findOne(this._class, {
-      where: { id } as FindOptionsWhere<E>,
+
+    if (relations || Object.keys(where).some((k) => this.isRelationField(k))) {
+      // If no cached entity was found and the condition is complex and/or relations are included:
+      // update the database state before retrying
+      Logger.get().info(`Updating the database before retrying complex query...`)
+      await this.updateDb()
+    }
+
+    const stored = await this.em.findOne(this._class, {
+      where: where as FindOptionsWhere<E>,
       relations,
     })
 
-    if (!stored && !cached) {
-      // We have neither stored nor cached version
-      return undefined
-    }
-
-    if (stored && !cached) {
-      // We have only a stored version - cache and return it
-      this.push(stored)
-      return stored
-    }
-
-    if (!stored && cached) {
-      // We have only a cached version - return it
+    if (stored) {
+      // Update cache if entity found
+      const cached = this.addCached(stored)
+      if (cached && relations) {
+        await this.loadRelatedEntities(cached, relations)
+      }
       return cached
     }
 
-    if (stored && cached) {
-      // We have both stored and cached version - merge cached->stored
-      const merged = _.mergeWith(stored, cached, (destVal, srcVal) => {
-        // Do not recursively merge arrays
-        if (_.isArray(srcVal)) {
-          return srcVal
-        }
-        // Do not recursively merge JSON variants
-        if (typeof srcVal === 'object' && srcVal !== null && 'toJSON' in Object.keys(srcVal)) {
-          return srcVal
-        }
-      })
-      // Update cached ref
-      this.push(merged)
-      // Return the result of the merge
-      return merged
-    }
+    return undefined
+  }
 
-    throw new Error('Never going to happen, just making TypeScript happy')
+  async getOrFailWhere(
+    where: SimpleWhereCondition<E>,
+    relations?: FindOptionsRelations<E>
+  ): Promise<E> {
+    const entity = await this.getWhere(where, relations)
+    if (!entity) {
+      criticalError(`Could not find required ${this._class.name} entity!`, { where })
+    }
+    return entity
+  }
+
+  async get(id: string, relations?: FindOptionsRelations<E>): Promise<E | undefined> {
+    return this.getWhere({ id } as SimpleWhereCondition<E>, relations)
+  }
+
+  async getOrFail(id: string, relations?: FindOptionsRelations<E>) {
+    return this.getOrFailWhere({ id } as SimpleWhereCondition<E>, relations)
+  }
+
+  private stripRelations(entity: E) {
+    const metadata = this.em.connection.getMetadata(this._class)
+    const relationFields = metadata.relations.map((r) => r.propertyName)
+    relationFields.forEach((f) => delete entity[f as keyof E])
+  }
+
+  addCached(entity: E): E | undefined {
+    const cached = this._cached.get(entity.id)
+    if (cached && cached.state === CachedEntityState.ToBeRemoved) {
+      return undefined
+    } else if (cached) {
+      return cached.entity
+    }
+    this.stripRelations(entity)
+    const proxy = this.asCachedProxy(entity)
+    this._cached.set(entity.id, {
+      entity: proxy,
+      state: CachedEntityState.UpToDate,
+    })
+    return proxy
   }
 
   // Execute scheduled save operations
   async save(): Promise<void> {
-    if (this._toBeSaved.size) {
+    const toBeSaved = this.getAllToBeSaved()
+
+    if (toBeSaved.length) {
       const logger = Logger.get()
-      logger.info(`Saving ${this._toBeSaved.size} ${this._class.name} entities...`)
-      logger.debug(`Entity ids: ${[...this._toBeSaved.keys()].join(', ')}`)
-      // FIXME: This is a little hacky, but we really need to access the EntityManager,
-      // because Store by default uses `upsert` for saving the entities, which is problematic
-      // when the entity has some required relations and we're just trying to update it
-      const em = await (this.store as unknown as { em: () => Promise<EntityManager> }).em()
+      logger.info(`Saving ${toBeSaved.length} ${this._class.name} entities...`)
+      logger.debug(`Entity ids: ${toBeSaved.map((e) => e.id).join(', ')}`)
       // Save the entities and update the next entity id
       const nextEntityId = new NextEntityId({ entityName: this._class.name, nextId: this._nextId })
-      await Promise.all([em.save([...this._toBeSaved.values()]), em.save(nextEntityId)])
-      this._toBeSaved = new Map()
+      await Promise.all([this.em.save(toBeSaved), this.em.save(nextEntityId)])
     }
   }
 
-  // Execute scheduled remove operations
+  // Execute scheduled remove operations and clean the cache
   async cleanup(): Promise<void> {
-    if (this._toBeRemoved.size) {
+    const toBeRemoved = await this.getAllToBeRemoved()
+
+    if (toBeRemoved.length) {
       const logger = Logger.get()
-      logger.info(`Removing ${this._toBeRemoved.size} ${this._class.name} entities...`)
-      logger.debug(`Entity ids: ${[...this._toBeRemoved.keys()].join(', ')}`)
-      await this.store.remove([...this._toBeRemoved.values()])
-      this._toBeRemoved = new Map()
+      logger.info(`Removing ${toBeRemoved.length} ${this._class.name} entities...`)
+      logger.debug(`Entity ids: ${toBeRemoved.map((e) => e.id).join(', ')}`)
+      await this.store.remove(toBeRemoved)
     }
+    this._cached = new Map()
+  }
+
+  getAllToBeSaved(): E[] {
+    return [...this._cached.values()]
+      .filter(({ state }) => state === CachedEntityState.ToBeSaved)
+      .flatMap(({ entity }) => (entity ? [entity] : []))
+  }
+
+  async getAllToBeRemoved(load = false): Promise<E[]> {
+    return (
+      await Promise.all(
+        [...this._cached.entries()]
+          .filter(([, { state }]) => state === CachedEntityState.ToBeRemoved)
+          .map(async ([id]) => {
+            if (load) {
+              const loaded = await this.get(id)
+              return loaded ? [loaded] : []
+            }
+            return [new this._class({ id })]
+          })
+      )
+    ).flat()
   }
 }
 
@@ -288,20 +578,27 @@ export class EntitiesCollector {
   store: Store
   collections: EntityCollections
 
-  constructor(store: Store) {
+  constructor(store: Store, em: EntityManager) {
     this.store = store
-    const entityClasses = _.pickBy(models, (o) => {
-      return (
-        typeof o === 'function' &&
-        o.name &&
-        o.name[0] === o.name[0].toUpperCase() &&
-        !o.toString().includes('toJSON')
-      )
-    }) as { [K in ModelNames]: Constructor<AnyEntity> }
     this.collections = _.mapValues(
       entityClasses,
-      (entityClass) => new EntityCollection(store, entityClass)
+      (entityClass) =>
+        new EntityCollection<AnyEntity>(
+          store,
+          em,
+          () => this.collections,
+          () => this.updateDatabase(),
+          entityClass
+        )
     ) as EntityCollections
+  }
+
+  public static async create(store: Store) {
+    // FIXME: This is a little hacky, but we really need to access the underlying EntityManager,
+    // for example, because Store by default uses `upsert` for saving the entities, which is problematic
+    // when the entity has some required relations and we're just trying to update it
+    const em = await (store as unknown as { em: () => Promise<EntityManager> }).em()
+    return new EntitiesCollector(store, em)
   }
 
   async updateDatabase() {
@@ -324,7 +621,18 @@ export class EntitiesCollector {
     await this.collections.VideoCategory.save()
     await this.collections.Video.save()
     await this.collections.OwnedNft.save()
+    // Because of Auction<->Bid cross-relationship we need to temporarly unset auction.topBid first
+    const auctionsToSave = this.collections.Auction.getAllToBeSaved()
+    const auctionsWithTopBid: Auction[] = []
+    auctionsToSave.forEach((a) => {
+      if (a.topBid) {
+        auctionsWithTopBid.push(new Auction({ ...a }))
+        a.topBid = null
+      }
+    })
     await this.collections.Auction.save()
+    await this.collections.Bid.save()
+    await this.collections.Auction.push(...auctionsWithTopBid).save()
     await this.collections.AuctionWhitelistedMember.save()
     await this.collections.VideoSubtitle.save()
     await this.collections.VideoMediaEncoding.save()
@@ -342,7 +650,12 @@ export class EntitiesCollector {
     await this.collections.VideoMediaEncoding.cleanup()
     await this.collections.VideoSubtitle.cleanup()
     await this.collections.AuctionWhitelistedMember.cleanup()
-    await this.collections.Auction.cleanup()
+    // Because of Auction<->Bid cross-relationship we need to unset auction.topBid first
+    const auctionsToRemove = await this.collections.Auction.getAllToBeRemoved(true)
+    auctionsToRemove.forEach((a) => (a.topBid = null))
+    await this.collections.Auction.push(...auctionsToRemove).save()
+    await this.collections.Bid.cleanup()
+    await this.collections.Auction.remove(...auctionsToRemove).cleanup()
     await this.collections.OwnedNft.cleanup()
     await this.collections.Video.cleanup()
     await this.collections.VideoCategory.cleanup()
@@ -378,3 +691,8 @@ export type EventHandlerContext<EventName extends EventNames> = {
 export type EventHandler<EventName extends EventNames> =
   | ((ctx: EventHandlerContext<EventName>) => void)
   | ((ctx: EventHandlerContext<EventName>) => Promise<void>)
+
+export function criticalError(message: string, metadata?: Record<string, unknown>): never {
+  metadata ? console.error(message, metadata) : console.error(message)
+  throw new Error(message)
+}

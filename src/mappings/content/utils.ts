@@ -29,8 +29,10 @@ import {
   Event,
   NftIssuedEventData,
   DataObjectType,
+  Bid,
+  NftOwner,
 } from '../../model'
-import { EntitiesCollector } from '../../utils'
+import { criticalError, EntitiesCollector } from '../../utils'
 import {
   ContentActor,
   EnglishAuctionParamsRecord,
@@ -40,6 +42,7 @@ import {
 } from '../../types/v1000'
 import { genericEventFields } from '../utils'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { FindOptionsRelations } from 'typeorm'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -189,7 +192,12 @@ export function processNft(
   ec.collections.OwnedNft.push(nft)
 
   // update NFT transactional status
-  processNftTransactionalStatus(ec, block, nft, nftIssuanceParameters.initTransactionalStatus)
+  processNftInitialTransactionalStatus(
+    ec,
+    block,
+    nft,
+    nftIssuanceParameters.initTransactionalStatus
+  )
 
   // Push a new NftIssued event
   ec.collections.Event.push(
@@ -204,7 +212,7 @@ export function processNft(
   )
 }
 
-export function processNftTransactionalStatus(
+export function processNftInitialTransactionalStatus(
   ec: EntitiesCollector,
   block: SubstrateBlock,
   nft: OwnedNft,
@@ -239,12 +247,12 @@ export function processNftTransactionalStatus(
       return
     }
     default: {
-      throw new Error(`Unknown TransactionalStatus type: ${JSON.stringify(transactionalStatus)}`)
+      criticalError(`Unknown TransactionalStatus type`, { transactionalStatus })
     }
   }
 }
 
-function createAuction(
+export function createAuction(
   ec: EntitiesCollector,
   block: SubstrateBlock,
   nft: OwnedNft,
@@ -253,6 +261,7 @@ function createAuction(
   const startsAtBlock = auctionParams.startsAt ?? block.height
   // prepare auction record
   const auction = new Auction({
+    id: ec.collections.Auction.getNextId(),
     nft,
     startingPrice: auctionParams.startingPrice,
     buyNowPrice: auctionParams.buyNowPrice,
@@ -317,5 +326,164 @@ export function parseContentActor(contentActor: ContentActor): ContentActorEntit
     return new ContentActorLead()
   }
 
-  throw new Error('Unknown ContentActor type')
+  criticalError('Unknown ContentActor type', { contentActor })
+}
+
+export async function getCurrentAuctionFromVideo(
+  ec: EntitiesCollector,
+  videoId: string,
+  relations?: FindOptionsRelations<Auction>
+): Promise<Auction> {
+  const nft = await ec.collections.OwnedNft.getOrFail(videoId)
+  if (nft.transactionalStatus?.isTypeOf !== 'TransactionalStatusAuction') {
+    criticalError(`Nft of video ${videoId} was expected to be in TransactionalStatusAuction.`, {
+      actualStatus: nft.transactionalStatus?.isTypeOf,
+    })
+  }
+  return ec.collections.Auction.getOrFail(nft.transactionalStatus.auction, relations)
+}
+
+export function findTopBid(bids: Bid[]): Bid | undefined {
+  return bids.reduce((topBid, bid) => {
+    if (bid.isCanceled) {
+      return topBid
+    }
+
+    if (!topBid) {
+      return bid
+    }
+
+    if (topBid.amount > bid.amount) {
+      return topBid
+    }
+
+    if (topBid.amount < bid.amount) {
+      return bid
+    }
+    // bids are equal, use the oldest one
+    return topBid.createdInBlock < bid.createdInBlock ||
+      (topBid.createdInBlock === bid.createdInBlock && topBid.indexInBlock < bid.indexInBlock)
+      ? topBid
+      : bid
+  }, undefined as Bid | undefined)
+}
+
+export async function createBid(
+  ec: EntitiesCollector,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  memberId: string,
+  videoId: string,
+  bidAmount?: bigint
+): Promise<Bid> {
+  const auction = await getCurrentAuctionFromVideo(ec, videoId, {
+    bids: {
+      bidder: true,
+    },
+    topBid: { bidder: true },
+    nft: true,
+  })
+
+  if (!auction.bids) {
+    auction.bids = []
+  }
+
+  // cancel any previous bids done by same member
+  auction.bids
+    .filter((b) => b.bidder.id === memberId && !b.isCanceled)
+    .forEach((b) => {
+      b.isCanceled = true
+    })
+
+  const amount = bidAmount ?? (auction.buyNowPrice as bigint)
+  const previousTopBid =
+    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' ? auction.topBid : null
+
+  // prepare bid record
+  const newBid = new Bid({
+    id: ec.collections.Bid.getNextId(),
+    createdAt: new Date(block.timestamp),
+    auction,
+    nft: new OwnedNft({ id: videoId.toString() }),
+    bidder: new Membership({ id: memberId }),
+    amount,
+    createdInBlock: block.height,
+    isCanceled: false,
+    indexInBlock,
+    previousTopBid,
+  })
+  auction.bids.push(newBid)
+  ec.collections.Bid.push(newBid)
+
+  // check if the auction's top bid needs to be updated, this can happen in those cases:
+  // 1. auction doesn't have the top bid at the moment, new bid should be new top bid
+  // 2. new bid is higher than the current top bid
+  // 3. new bid canceled previous top bid (user changed their bid to a lower one), so we need to find a new one
+
+  if (!auction.topBid || newBid.amount > auction.topBid.amount) {
+    // handle cases 1 and 2
+    auction.topBid = newBid
+  } else {
+    // handle case 3
+    auction.topBid = findTopBid(auction.bids)
+  }
+
+  return newBid
+}
+
+export async function finishAuction(
+  ec: EntitiesCollector,
+  videoId: string,
+  block: SubstrateBlock,
+  openAuctionWinner?: { winnerId: bigint; bidAmount: bigint }
+): Promise<{ winningBid: Bid; auction: Auction; previousNftOwner: NftOwner }> {
+  function findOpenAuctionWinningBid(
+    bids: Bid[],
+    bidAmount: bigint,
+    winnerId: string,
+    videoId: string
+  ): Bid {
+    const winningBid = bids.find(
+      (bid) => !bid.isCanceled && bid.bidder.id === winnerId && bid.amount === bidAmount
+    )
+
+    if (!winningBid) {
+      criticalError(`Open auction won by non-existing bid!`, {
+        videoId,
+        bidAmount,
+        winnerId,
+      })
+    }
+
+    return winningBid
+  }
+
+  // load video and auction
+  const auction = await getCurrentAuctionFromVideo(ec, videoId.toString(), {
+    topBid: { bidder: true },
+    bids: { bidder: true },
+    nft: true,
+  })
+
+  const winningBid = openAuctionWinner
+    ? findOpenAuctionWinningBid(
+        auction.bids || [],
+        openAuctionWinner.bidAmount,
+        openAuctionWinner.winnerId.toString(),
+        videoId
+      )
+    : (auction.topBid as Bid)
+
+  // update NFT's transactional status
+  auction.nft.transactionalStatus = new TransactionalStatusIdle()
+  // update NFT owner
+  const previousNftOwner = auction.nft.owner
+  auction.nft.owner = new NftOwnerMember({ member: winningBid.bidder.id })
+
+  // update auction
+  auction.isCompleted = true
+  auction.winningMember = winningBid.bidder
+  auction.endedAtBlock = block.height
+
+  return { winningBid, auction, previousNftOwner }
 }

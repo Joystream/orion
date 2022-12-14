@@ -36,7 +36,11 @@ import {
   VideoReactionsCountByReactionType,
 } from '../../model'
 import { EntitiesCollector, ModelNames } from '../../utils'
-import { genericEventFields, metaprotocolTransactionFailure } from '../utils'
+import {
+  backwardCompatibleMetaID,
+  genericEventFields,
+  metaprotocolTransactionFailure,
+} from '../utils'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -205,7 +209,6 @@ function processVideoReaction(
   } else {
     ++video.reactionsCount
     ++newReactionTypeCounter.count
-    video.reactions = (video.reactions || []).concat(videoReaction)
   }
 
   ec.collections.VideoReaction.push(videoReaction)
@@ -306,7 +309,6 @@ export async function processReactCommentMessage(
     ++comment.reactionsAndRepliesCount
     ++comment.reactionsCount
     // add reaction
-    comment.reactions = (comment.reactions || []).concat(newReaction)
     ec.collections.CommentReaction.push(newReaction)
   }
 
@@ -374,8 +376,8 @@ export async function processCreateCommentMessage(
 
   // add new comment
   const comment = new Comment({
-    // TODO: Backward compatibility: METAPROTOCOL-${network}-${block.height}-${indexInBlock}
-    id: ec.collections.Comment.getNextId(),
+    // TODO: Re-think backward compatibility
+    id: backwardCompatibleMetaID(block, indexInBlock), // ec.collections.Comment.getNextId(),
     createdAt: new Date(block.timestamp),
     text: body,
     video,
@@ -387,7 +389,6 @@ export async function processCreateCommentMessage(
     reactionsAndRepliesCount: 0,
     isEdited: false,
   })
-  video.comments = (video.comments || []).concat(comment)
   ec.collections.Comment.push(comment)
 
   // add CommentCreated event
@@ -557,8 +558,8 @@ export async function processCreateVideoCategoryMessage(
 
   // create new video category
   const videoCategory = new VideoCategory({
-    // TODO: Backward-compatibility: `${block.height}-${indexInBlock}`
-    id: ec.collections.VideoCategory.getNextId(),
+    // TODO: Re-think backward-compatibility
+    id: `${block.height}-${indexInBlock}`, // ec.collections.VideoCategory.getNextId(),
     name: name || null,
     description: description || null,
     parentCategory,

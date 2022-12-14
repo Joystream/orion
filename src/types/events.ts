@@ -2,6 +2,144 @@ import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result, Option} from './support'
 import * as v1000 from './v1000'
 
+export class ContentAuctionBidCanceledEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.AuctionBidCanceled')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.AuctionBidCanceled') === 'a07d31c2644106aa567962b0935daed493556b5253e00c77997c3b0e46966110'
+  }
+
+  get asV1000(): [bigint, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentAuctionBidMadeEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.AuctionBidMade')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.AuctionBidMade') === 'bcafd0d37bce2fe783b98aaa33d1909e0c6e142b99bc7825473a4936f1475025'
+  }
+
+  get asV1000(): [bigint, bigint, bigint, (bigint | undefined)] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentAuctionCanceledEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.AuctionCanceled')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.AuctionCanceled') === '48a22056559f8981366eaf63cf3efad925fd24c56f7d28d373458c2ebc4bb415'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentBidMadeCompletingAuctionEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.BidMadeCompletingAuction')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.BidMadeCompletingAuction') === '91264357064d8d3d661b6fc1d1a98e7c18dae959a65f1e867909106e18a4a871'
+  }
+
+  get asV1000(): [bigint, bigint, (bigint | undefined)] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentBuyNowCanceledEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.BuyNowCanceled')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.BuyNowCanceled') === '3b47d764c1ffe81d817bcba7109d633ce8a964e97cceeac157b2c951f61b001d'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentBuyNowPriceUpdatedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.BuyNowPriceUpdated')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.BuyNowPriceUpdated') === 'cebfba3ae629656a1b23fba2233f6c98894c68c68b5cb558a92842730402fd44'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
 export class ContentChannelAgentRemarkedEvent {
   private readonly _chain: Chain
   private readonly event: Event
@@ -164,6 +302,259 @@ export class ContentChannelVisibilitySetByModeratorEvent {
   }
 
   get asV1000(): [v1000.ContentActor, bigint, boolean, Uint8Array] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentEnglishAuctionSettledEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.EnglishAuctionSettled')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.EnglishAuctionSettled') === '5e0eb9075960a18f82f813e13501ef4a17c375bbb914d5cd7d61bfccc134745a'
+  }
+
+  get asV1000(): [bigint, Uint8Array, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentEnglishAuctionStartedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.EnglishAuctionStarted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.EnglishAuctionStarted') === 'c9dbfde7fcc71c651d1bd1112b88993bba1c36783f97a23dbbe31a2cf82e3222'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, v1000.EnglishAuctionParamsRecord] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentNftBoughtEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.NftBought')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.NftBought') === 'a07d31c2644106aa567962b0935daed493556b5253e00c77997c3b0e46966110'
+  }
+
+  get asV1000(): [bigint, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentNftIssuedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.NftIssued')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.NftIssued') === '8a65dbd390f4bddd39c85cb6880eddd0c9195d763f1973d927795f1351874f8b'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, v1000.NftIssuanceParametersRecord] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentNftSellOrderMadeEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.NftSellOrderMade')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.NftSellOrderMade') === 'cebfba3ae629656a1b23fba2233f6c98894c68c68b5cb558a92842730402fd44'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentNftSlingedBackToTheOriginalArtistEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.NftSlingedBackToTheOriginalArtist')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.NftSlingedBackToTheOriginalArtist') === '3b47d764c1ffe81d817bcba7109d633ce8a964e97cceeac157b2c951f61b001d'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentOfferAcceptedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.OfferAccepted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.OfferAccepted') === '0e1caef0df80727d2768bc480792261a4e7615b57b3e8182c7f664f06c96a08e'
+  }
+
+  get asV1000(): bigint {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentOfferCanceledEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.OfferCanceled')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.OfferCanceled') === '3b47d764c1ffe81d817bcba7109d633ce8a964e97cceeac157b2c951f61b001d'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentOfferStartedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.OfferStarted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.OfferStarted') === '78d6881bd7c7cc4612a401ffdb4c972bbc18693242ce246034d51b021d789614'
+  }
+
+  get asV1000(): [bigint, v1000.ContentActor, bigint, (bigint | undefined)] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentOpenAuctionBidAcceptedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.OpenAuctionBidAccepted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.OpenAuctionBidAccepted') === '815d65d68b303087f052b8eda6eea7379a258cfe398a9691efddb30c9d647a3a'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, bigint, bigint] {
+    assert(this.isV1000)
+    return this._chain.decodeEvent(this.event)
+  }
+}
+
+export class ContentOpenAuctionStartedEvent {
+  private readonly _chain: Chain
+  private readonly event: Event
+
+  constructor(ctx: EventContext)
+  constructor(ctx: ChainContext, event: Event)
+  constructor(ctx: EventContext, event?: Event) {
+    event = event || ctx.event
+    assert(event.name === 'Content.OpenAuctionStarted')
+    this._chain = ctx._chain
+    this.event = event
+  }
+
+  get isV1000(): boolean {
+    return this._chain.getEventHash('Content.OpenAuctionStarted') === 'fc7cf3f82d767a3293aaa31ad06b82bfc54ad134429f01c1b0b088369e34b7ee'
+  }
+
+  get asV1000(): [v1000.ContentActor, bigint, v1000.OpenAuctionParamsRecord, bigint] {
     assert(this.isV1000)
     return this._chain.decodeEvent(this.event)
   }
