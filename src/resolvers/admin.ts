@@ -27,7 +27,9 @@ export class AdminResolver {
 
   @Mutation(() => GeneratedSignature)
   async generateSignature(@Arg('bytes', () => String) bytes: string) {
-    if (!config.appPrivateKey) throw new Error('No PRIVATE_KEY provided to generate signature')
+    if (!config.appPrivateKey) {
+      throw new Error('No PRIVATE_KEY provided to generate signature')
+    }
 
     if (!cryptoIsReady()) {
       throw new Error('@polkadot/util-crypto is not ready')
