@@ -57,12 +57,17 @@ input FeaturedVideoInput {
   videoId: ID!
 }
 
+type GeneratedSignature {
+  signature: String!
+}
+
 type Mutation {
   """Add a single view to the target video's count"""
   addVideoView(categoryId: ID, channelId: ID!, videoId: ID!): EntityViewsInfo!
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
+  generateSignature(bytes: String!): GeneratedSignature!
 
   """Report a channel"""
   reportChannel(channelId: ID!, rationale: String!): ChannelReportInfo!
