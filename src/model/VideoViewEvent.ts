@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, Index } from 'typeorm'
+import { Entity, Column, ManyToOne, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { Video } from './generated'
 
 @Entity()
@@ -7,9 +7,8 @@ export class VideoViewEvent {
     Object.assign(this, props)
   }
 
-  // {videoId}-{viewNumber}
-  @PrimaryColumn()
-  id!: string
+  @PrimaryGeneratedColumn('increment')
+  id!: number
 
   // Video that was viewed
   @Index()
@@ -17,6 +16,7 @@ export class VideoViewEvent {
   video!: Video
 
   // IP of the viewer
+  @Index()
   @Column({ nullable: false })
   ip!: string
 

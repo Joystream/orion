@@ -2,7 +2,6 @@ import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, Info, Ctx } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import {
-  ChannelFollowsInfo,
   ChannelNftCollector,
   ChannelNftCollectorsArgs,
   ExtendedChannel,
@@ -14,6 +13,8 @@ import {
   ReportChannelArgs,
   ChannelsSearchArgs,
   ChannelsSearchResult,
+  ChannelFollowResult,
+  ChannelUnfollowResult,
 } from './types'
 import { parseSqlArguments, parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
@@ -22,11 +23,13 @@ import { Expr, parse as parseSql, SelectFromStatement, toSql } from 'pgsql-ast-p
 import { model } from '../model'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
+import { Channel, ChannelFollow } from '../../../model'
+import { randomAsHex } from '@polkadot/util-crypto'
 
 @Resolver()
 export class ChannelsResolver {
   // Set by depenency injection
-  constructor(private tx: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Query(() => [ExtendedChannel])
   async extendedChannels(
@@ -149,22 +152,93 @@ export class ChannelsResolver {
     return []
   }
 
-  @Mutation(() => ChannelFollowsInfo)
-  async followChannel(@Args() args: FollowChannelArgs): Promise<ChannelFollowsInfo> {
-    // TODO: Implement
-    return { id: '0', follows: 0 }
-  }
-
   @Query(() => [ChannelsSearchResult!])
   async searchChannels(@Args() args: ChannelsSearchArgs): Promise<ChannelsSearchResult[]> {
     // TODO: Implement
     return []
   }
 
-  @Mutation(() => ChannelFollowsInfo)
-  async unfollowChannel(@Args() args: UnfollowChannelArgs): Promise<ChannelFollowsInfo> {
-    // TODO: Implement
-    return { id: '0', follows: 0 }
+  @Mutation(() => ChannelFollowResult)
+  async followChannel(
+    @Args() { channelId }: FollowChannelArgs,
+    @Ctx() ctx: Context
+  ): Promise<ChannelFollowResult> {
+    const em = await this.em()
+    const { ip } = ctx.req
+    return em.transaction(async (em) => {
+      // Try to retrieve the channel and lock it for update
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+        lock: { mode: 'pessimistic_write' },
+      })
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      // Check if there's already an existing follow by this IP
+      const existingFollow = await em.findOne(ChannelFollow, {
+        where: { channel: { id: channelId }, ip },
+      })
+      // If so - just return the result
+      if (existingFollow) {
+        return {
+          channelId,
+          followId: existingFollow.id,
+          follows: channel.followsNum,
+          cancelToken: existingFollow.cancelToken,
+          added: false,
+        }
+      }
+      // Otherwise add a new follow
+      const cancelToken = randomAsHex(32).replace('0x', '')
+      channel.followsNum += 1
+      const newFollow = new ChannelFollow({
+        cancelToken,
+        channel,
+        ip,
+        timestamp: new Date(),
+      })
+
+      await em.save([channel, newFollow])
+
+      return {
+        channelId,
+        followId: newFollow.id,
+        follows: channel.followsNum,
+        cancelToken,
+        added: true,
+      }
+    })
+  }
+
+  @Mutation(() => ChannelUnfollowResult)
+  async unfollowChannel(
+    @Args() { channelId, token }: UnfollowChannelArgs
+  ): Promise<ChannelUnfollowResult> {
+    const em = await this.em()
+    return em.transaction(async (em) => {
+      // Try to retrieve the channel and lock it for update
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+        lock: { mode: 'pessimistic_write' },
+      })
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      // Check if there's a follow matching the request data
+      const follow = await em.findOne(ChannelFollow, {
+        where: { channel: { id: channelId }, cancelToken: token },
+      })
+      // If not - just return the current number of follows
+      if (!follow) {
+        return { channelId, follows: channel.followsNum, removed: false }
+      }
+      // Otherwise remove the follow
+      channel.followsNum -= 1
+
+      await Promise.all([em.remove(follow), em.save(channel)])
+
+      return { channelId, follows: channel.followsNum, removed: true }
+    })
   }
 
   @Mutation(() => ChannelReportInfo)

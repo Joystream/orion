@@ -2,15 +2,16 @@ import 'reflect-metadata'
 import { Arg, Args, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { EntityManager, MoreThan } from 'typeorm'
 import {
+  AddVideoViewResult,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
   VideoReportInfo,
   VideosSearchArgs,
   VideosSearchResult,
 } from './types'
-import { Video, VideosConnection } from '../baseTypes'
+import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
-import { VideoViewEvent, Video as VideoModel } from '../../../model'
+import { VideoViewEvent, Video } from '../../../model'
 
 // How much time has to pass before a video view from the same ip
 // will be considered a new view
@@ -37,16 +38,16 @@ export class VideosResolver {
     }
   }
 
-  @Mutation(() => Video)
+  @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
     @Ctx() ctx: Context
-  ): Promise<Video> {
+  ): Promise<AddVideoViewResult> {
     const em = await this.em()
     const ip = ctx.req.ip
     return em.transaction(async (em) => {
       // Check if the video actually exists & lock it for update
-      const video = await em.findOne(VideoModel, {
+      const video = await em.findOne(Video, {
         where: { id: videoId },
         lock: { mode: 'pessimistic_write' },
       })
@@ -61,21 +62,29 @@ export class VideosResolver {
           timestamp: MoreThan(new Date(Date.now() - SAME_IP_VIDEO_VIEW_IGNORE_TIME)),
         },
       })
-      // If so - just return the video
+      // If so - just return the result
       if (recentView) {
-        return video
+        return {
+          videoId,
+          viewsNum: video.viewsNum,
+          viewId: recentView.id,
+          added: false,
+        }
       }
       // Otherwise create a new VideoViewEvent and increase the videoViews counter
       video.viewsNum += 1
       const newView = new VideoViewEvent({
-        id: `${video.id}-${video.viewsNum}`,
         ip,
         timestamp: new Date(),
         video,
       })
-      await em.save(newView)
-      await em.save(video)
-      return video
+      await em.save([video, newView])
+      return {
+        videoId,
+        viewsNum: video.viewsNum,
+        viewId: newView.id,
+        added: true,
+      }
     })
   }
 

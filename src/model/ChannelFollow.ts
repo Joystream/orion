@@ -1,6 +1,5 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, Index } from 'typeorm'
+import { Entity, Column, ManyToOne, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { Channel } from './generated/channel.model'
-import { User } from './User'
 
 @Entity()
 export class ChannelFollow {
@@ -8,26 +7,25 @@ export class ChannelFollow {
     Object.assign(this, props)
   }
 
-  @PrimaryColumn()
-  id!: string
+  @PrimaryGeneratedColumn('increment')
+  id!: number
 
-  /**
-   * Channel being followed
-   */
+  // IP address of the user
+  @Index()
+  @Column({ nullable: false })
+  ip!: string
+
+  // Channel being followed
   @Index()
   @ManyToOne(() => Channel, { nullable: true })
   channel!: Channel
 
-  /**
-   * User who followed
-   */
-  @Index()
-  @ManyToOne(() => User, { nullable: true })
-  user!: User
-
-  /**
-   * Timestamp
-   */
+  // Time when user started following the channel
   @Column('timestamp with time zone', { nullable: false })
   timestamp!: Date
+
+  // Token that has to be provided in order to unfollow the channel
+  // (to prevent abuse / inconsistent state)
+  @Column({ nullable: false })
+  cancelToken!: string
 }
