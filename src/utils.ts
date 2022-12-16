@@ -74,7 +74,7 @@ import { EntityManager, FindOptionsRelations, FindOptionsWhere, In, Not } from '
 import _ from 'lodash'
 import { Logger } from './logger'
 import { NextEntityId } from './model/NextEntityId'
-import { Auction, Bid } from './model'
+import { Auction } from './model'
 import { RelationMetadata } from 'typeorm/metadata/RelationMetadata'
 
 export function assertAssignable<T>(type: T) {

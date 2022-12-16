@@ -130,7 +130,6 @@ export async function deleteVideo(ec: EntitiesCollector, videoId: bigint) {
     },
     license: true,
     reactions: true,
-    views: true,
     mediaMetadata: {
       encoding: true,
     },
@@ -146,9 +145,6 @@ export async function deleteVideo(ec: EntitiesCollector, videoId: bigint) {
   }
   if (video.reactions) {
     ec.collections.VideoReaction.remove(...video.reactions)
-  }
-  if (video.views) {
-    ec.collections.VideoViewEvent.remove(...video.views)
   }
   if (video.mediaMetadata) {
     if (video.mediaMetadata.encoding) {

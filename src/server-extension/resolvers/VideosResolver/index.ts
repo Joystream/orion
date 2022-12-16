@@ -1,6 +1,6 @@
 import 'reflect-metadata'
-import { Arg, Args, Mutation, Query, Resolver } from 'type-graphql'
-import type { EntityManager } from 'typeorm'
+import { Arg, Args, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { EntityManager, MoreThan } from 'typeorm'
 import {
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
@@ -9,11 +9,17 @@ import {
   VideosSearchResult,
 } from './types'
 import { Video, VideosConnection } from '../baseTypes'
+import { Context } from '@subsquid/openreader/lib/context'
+import { VideoViewEvent, Video as VideoModel } from '../../../model'
+
+// How much time has to pass before a video view from the same ip
+// will be considered a new view
+const SAME_IP_VIDEO_VIEW_IGNORE_TIME = 24 * 60 * 60 * 1000 // one day
 
 @Resolver()
 export class VideosResolver {
   // Set by depenency injection
-  constructor(private tx: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Query(() => [VideosSearchResult!])
   async searchVideos(@Args() args: VideosSearchArgs): Promise<VideosSearchResult[]> {
@@ -33,10 +39,44 @@ export class VideosResolver {
 
   @Mutation(() => Video)
   async addVideoView(
-    @Arg('videoId', () => String, { nullable: false }) videoId: string
+    @Arg('videoId', () => String, { nullable: false }) videoId: string,
+    @Ctx() ctx: Context
   ): Promise<Video> {
-    // TODO: Implement
-    return { id: '0' }
+    const em = await this.em()
+    const ip = ctx.req.ip
+    return em.transaction(async (em) => {
+      // Check if the video actually exists & lock it for update
+      const video = await em.findOne(VideoModel, {
+        where: { id: videoId },
+        lock: { mode: 'pessimistic_write' },
+      })
+      if (!video) {
+        throw new Error(`Video by id ${videoId} does not exist`)
+      }
+      // See if there is already a recent view of this video by this ip
+      const recentView = await em.findOne(VideoViewEvent, {
+        where: {
+          ip,
+          video: { id: videoId },
+          timestamp: MoreThan(new Date(Date.now() - SAME_IP_VIDEO_VIEW_IGNORE_TIME)),
+        },
+      })
+      // If so - just return the video
+      if (recentView) {
+        return video
+      }
+      // Otherwise create a new VideoViewEvent and increase the videoViews counter
+      video.viewsNum += 1
+      const newView = new VideoViewEvent({
+        id: `${video.id}-${video.viewsNum}`,
+        ip,
+        timestamp: new Date(),
+        video,
+      })
+      await em.save(newView)
+      await em.save(video)
+      return video
+    })
   }
 
   @Mutation(() => VideoReportInfo)
