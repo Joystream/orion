@@ -54,6 +54,21 @@ export class VideoReportInfo extends EntityReportInfo {
   videoId!: string
 }
 
+@ObjectType()
+export class AddVideoViewResult {
+  @Field(() => String, { nullable: false })
+  videoId!: string
+
+  @Field(() => Int, { nullable: false })
+  viewId!: number
+
+  @Field(() => Int, { nullable: false })
+  viewsNum!: number
+
+  @Field(() => Boolean, { nullable: false })
+  added!: boolean
+}
+
 @ArgsType()
 export class ReportVideoArgs {
   @Field(() => String, { nullable: false })

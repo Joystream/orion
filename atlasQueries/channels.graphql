@@ -62,15 +62,17 @@ query GetBasicChannelsConnection(
 # CHANGE: `ID` is now `String`
 mutation FollowChannel($channelId: String!) {
   followChannel(channelId: $channelId) {
-    id
+    channelId # CHANGE: Previously just `id`
     follows
+    cancelToken # CHANGE: Need to retrieve it now in order to cancel the follow later
   }
 }
 
 # CHANGE: `ID` is now `String`
-mutation UnfollowChannel($channelId: String!) {
-  unfollowChannel(channelId: $channelId) {
-    id
+# CHANGE: `$token` argument is now required!
+mutation UnfollowChannel($channelId: String!, $token: String!) {
+  unfollowChannel(channelId: $channelId, token: $token) {
+    channelId # CHANGE: Previously just `id`
     follows
   }
 }

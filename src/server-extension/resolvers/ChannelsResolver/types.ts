@@ -100,15 +100,39 @@ export class FollowChannelArgs {
 export class UnfollowChannelArgs {
   @Field(() => String, { nullable: false })
   channelId!: string
+
+  @Field(() => String, { nullable: false })
+  token!: string
 }
 
 @ObjectType()
-export class ChannelFollowsInfo {
+export class ChannelFollowResult {
   @Field(() => String, { nullable: false })
-  id!: string
+  channelId!: string
+
+  @Field(() => Int, { nullable: false })
+  followId!: number
 
   @Field(() => Int, { nullable: false })
   follows!: number
+
+  @Field(() => String, { nullable: false })
+  cancelToken!: string
+
+  @Field(() => Boolean, { nullable: false })
+  added!: boolean
+}
+
+@ObjectType()
+export class ChannelUnfollowResult {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => Int, { nullable: false })
+  follows!: number
+
+  @Field(() => Boolean, { nullable: false })
+  removed!: boolean
 }
 
 @ObjectType()
