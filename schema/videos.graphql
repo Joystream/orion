@@ -106,9 +106,6 @@ type Video @entity {
   "Reactions count"
   reactionsCount: Int!
 
-  "Video views"
-  views: [VideoViewEvent!] @derivedFrom(field: "video")
-
   "Number of video views (to speed up orderBy queries by avoiding COUNT aggregation)"
   viewsNum: Int!
 }
@@ -252,15 +249,4 @@ type VideoReaction @entity {
 
   "The video that has been reacted to"
   video: Video!
-}
-
-type VideoViewEvent @entity {
-  "Video viewed"
-  video: Video!
-
-  "Channel the video belongs to"
-  channel: Channel!
-
-  "Timestamp"
-  timestamp: DateTime!
 }

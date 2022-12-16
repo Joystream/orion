@@ -1,0 +1,64 @@
+diff --git a/node_modules/@subsquid/openreader/lib/context.d.ts b/node_modules/@subsquid/openreader/lib/context.d.ts
+index ccb64b5..faa6199 100644
+--- a/node_modules/@subsquid/openreader/lib/context.d.ts
++++ b/node_modules/@subsquid/openreader/lib/context.d.ts
+@@ -1,7 +1,9 @@
+ import { Dialect } from './dialect';
+ import { Query } from './sql/query';
+ import { Limit } from './util/limit';
++import { Request } from 'express'
+ export interface Context {
++    req: Request;
+     openreader: OpenreaderContext;
+ }
+ export interface OpenreaderContext {
+@@ -10,5 +12,6 @@ export interface OpenreaderContext {
+     subscription<T>(query: Query<T>): AsyncIterable<T>;
+     responseSizeLimit?: Limit;
+     subscriptionResponseSizeLimit?: Limit;
++    req: Request
+ }
+ //# sourceMappingURL=context.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/@subsquid/openreader/lib/server.d.ts b/node_modules/@subsquid/openreader/lib/server.d.ts
+index 7f5df76..066e4b2 100644
+--- a/node_modules/@subsquid/openreader/lib/server.d.ts
++++ b/node_modules/@subsquid/openreader/lib/server.d.ts
+@@ -7,6 +7,7 @@ import type { Pool } from 'pg';
+ import { Context } from './context';
+ import type { Dialect } from './dialect';
+ import type { Model } from './model';
++import { ExpressContext } from 'apollo-server-express'
+ export interface ServerOptions {
+     port: number | string;
+     model: Model;
+@@ -28,7 +29,7 @@ export declare type Dispose = () => Promise<void>;
+ export interface ApolloOptions {
+     port: number | string;
+     disposals: Dispose[];
+-    context: () => Context;
++    context: (ctx: ExpressContext) => Context;
+     schema: GraphQLSchema;
+     plugins?: PluginDefinition[];
+     subscriptions?: boolean;
+diff --git a/node_modules/@subsquid/openreader/lib/server.js b/node_modules/@subsquid/openreader/lib/server.js
+index 6fb0711..854393f 100644
+--- a/node_modules/@subsquid/openreader/lib/server.js
++++ b/node_modules/@subsquid/openreader/lib/server.js
+@@ -21,7 +21,7 @@ async function serve(options) {
+     let { connection, subscriptionConnection, subscriptionPollInterval, maxResponseNodes, subscriptionMaxResponseNodes } = options;
+     let dialect = options.dialect ?? 'postgres';
+     let schema = new schema_1.SchemaBuilder(options).build();
+-    let context = () => {
++    let context = ({ req }) => {
+         let openreader = new db_1.PoolOpenreaderContext(dialect, connection, subscriptionConnection, subscriptionPollInterval);
+         if (maxResponseNodes) {
+             openreader.responseSizeLimit = new limit_1.ResponseSizeLimit(maxResponseNodes);
+@@ -31,6 +31,7 @@ async function serve(options) {
+             openreader.subscriptionResponseSizeLimit = new limit_1.ResponseSizeLimit(subscriptionMaxResponseNodes);
+         }
+         return {
++            req,
+             openreader
+         };
+     };

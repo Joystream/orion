@@ -1,0 +1,22 @@
+diff --git a/node_modules/@subsquid/graphql-server/lib/server.js b/node_modules/@subsquid/graphql-server/lib/server.js
+index 04e74c3..8ad0e52 100644
+--- a/node_modules/@subsquid/graphql-server/lib/server.js
++++ b/node_modules/@subsquid/graphql-server/lib/server.js
+@@ -177,7 +177,7 @@ class Server {
+                 return new db_1.PoolOpenreaderContext(dialect, pool, pool, this.options.subscriptionPollInterval);
+             };
+         }
+-        return () => {
++        return ({ req }) => {
+             let openreader = createOpenreader();
+             if (this.options.maxResponseNodes) {
+                 openreader.responseSizeLimit = new limit_1.ResponseSizeLimit(this.options.maxResponseNodes);
+@@ -186,7 +186,7 @@ class Server {
+             if (this.options.subscriptionMaxResponseNodes) {
+                 openreader.subscriptionResponseSizeLimit = new limit_1.ResponseSizeLimit(this.options.subscriptionMaxResponseNodes);
+             }
+-            return { openreader };
++            return { req, openreader };
+         };
+     }
+     async createTypeormConnection(options) {
