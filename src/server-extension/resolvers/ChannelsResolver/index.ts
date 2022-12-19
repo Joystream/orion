@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, Info, Ctx } from 'type-graphql'
-import type { EntityManager } from 'typeorm'
+import { EntityManager, IsNull } from 'typeorm'
 import {
   ChannelNftCollector,
   ChannelNftCollectorsArgs,
@@ -25,6 +25,7 @@ import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
+import { Report } from '../../../model/Report'
 
 @Resolver()
 export class ChannelsResolver {
@@ -242,14 +243,52 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => ChannelReportInfo)
-  async reportChannel(@Args() args: ReportChannelArgs): Promise<ChannelReportInfo> {
-    // TODO: Implement
-    return {
-      id: '0',
-      channelId: args.channelId,
-      createdAt: new Date(),
-      rationale: args.rationale,
-      reporterIp: '127.0.0.1',
-    }
+  async reportChannel(
+    @Args() { channelId, rationale }: ReportChannelArgs,
+    @Ctx() ctx: Context
+  ): Promise<ChannelReportInfo> {
+    const em = await this.em()
+    const { ip } = ctx.req
+    return em.transaction(async (em) => {
+      // Try to retrieve the channel first
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+      })
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      // We allow only one report per specific entity per ip
+      const existingReport = await em.findOne(Report, {
+        where: { ip, channel: { id: channelId }, video: IsNull() },
+      })
+      // If report already exists - return its data with { created: false }
+      if (existingReport) {
+        return {
+          id: existingReport.id,
+          channelId,
+          created: false,
+          reporterIp: existingReport.ip,
+          createdAt: existingReport.timestamp,
+          rationale: existingReport.rationale,
+        }
+      }
+      // If report doesn't exist, create a new one
+      const newReport = new Report({
+        channel,
+        ip,
+        rationale,
+        timestamp: new Date(),
+      })
+      await em.save(newReport)
+
+      return {
+        id: newReport.id,
+        channelId,
+        created: true,
+        createdAt: newReport.timestamp,
+        rationale,
+        reporterIp: ip,
+      }
+    })
   }
 }
