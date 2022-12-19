@@ -12,6 +12,7 @@ import {
 import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
 import { VideoViewEvent, Video } from '../../../model'
+import { Report } from '../../../model/Report'
 
 // How much time has to pass before a video view from the same ip
 // will be considered a new view
@@ -89,14 +90,54 @@ export class VideosResolver {
   }
 
   @Mutation(() => VideoReportInfo)
-  async reportVideo(@Args() args: ReportVideoArgs): Promise<VideoReportInfo> {
-    // TODO: Implement
-    return {
-      id: '0',
-      videoId: args.videoId,
-      createdAt: new Date(),
-      rationale: args.rationale,
-      reporterIp: '127.0.0.1',
-    }
+  async reportVideo(
+    @Args() { videoId, rationale }: ReportVideoArgs,
+    @Ctx() ctx: Context
+  ): Promise<VideoReportInfo> {
+    const em = await this.em()
+    const { ip } = ctx.req
+    return em.transaction(async (em) => {
+      // Try to retrieve the video+channel first
+      const video = await em.findOne(Video, {
+        where: { id: videoId },
+        relations: { channel: true },
+      })
+      if (!video) {
+        throw new Error(`Video by id ${videoId} not found!`)
+      }
+      // We allow only one report per specific entity per ip
+      const existingReport = await em.findOne(Report, {
+        where: { ip, video: { id: videoId } },
+      })
+      // If report already exists - return its data with { created: false }
+      if (existingReport) {
+        return {
+          id: existingReport.id,
+          videoId,
+          created: false,
+          reporterIp: existingReport.ip,
+          createdAt: existingReport.timestamp,
+          rationale: existingReport.rationale,
+        }
+      }
+      // If report doesn't exist, create a new one
+      const newReport = new Report({
+        video,
+        channel: video.channel,
+        ip,
+        rationale,
+        timestamp: new Date(),
+      })
+      await em.save(newReport)
+
+      return {
+        id: newReport.id,
+        videoId,
+        created: true,
+        createdAt: newReport.timestamp,
+        rationale,
+        reporterIp: ip,
+      }
+    })
   }
 }
