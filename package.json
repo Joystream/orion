@@ -29,7 +29,8 @@
     "pg": "8.8.0",
     "pgsql-ast-parser": "^11.0.0",
     "type-graphql": "^1.2.0-rc.1",
-    "typeorm": "^0.3.11"
+    "typeorm": "^0.3.11",
+    "axios": "^1.2.1"
   },
   "devDependencies": {
     "@subsquid/substrate-metadata-explorer": "1.0.8",
