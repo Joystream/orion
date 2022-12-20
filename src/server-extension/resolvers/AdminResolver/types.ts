@@ -1,4 +1,4 @@
-import { ArgsType, Field, ObjectType } from 'type-graphql'
+import { ArgsType, Field, Int, ObjectType } from 'type-graphql'
 
 @ArgsType()
 export class SetKillSwitchInput {
@@ -25,4 +25,16 @@ export class SetVideoHeroInput {
 
   @Field(() => String, { nullable: false })
   heroPosterUrl!: string
+}
+
+@ArgsType()
+export class SetSupportedCategoriesInput {
+  @Field(() => [String], { nullable: false })
+  newSupportedCategories!: string[]
+}
+
+@ObjectType()
+export class SetSupportedCategoriesResult {
+  @Field(() => Int, { nullable: false })
+  newNumberOfCategoriesSupported!: number
 }

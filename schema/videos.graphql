@@ -15,6 +15,9 @@ type VideoCategory @entity {
 
   featuredVideos: [VideoFeaturedInCategory!] @derivedFrom(field: "category")
 
+  "Indicates whether the category is supported by the Gateway"
+  isSupported: Boolean!
+
   createdInBlock: Int!
 }
 

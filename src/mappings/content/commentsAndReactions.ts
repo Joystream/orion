@@ -564,6 +564,7 @@ export async function processCreateVideoCategoryMessage(
     description: description || null,
     parentCategory,
     createdInBlock: block.height,
+    isSupported: false,
   })
   ec.collections.VideoCategory.push(videoCategory)
 

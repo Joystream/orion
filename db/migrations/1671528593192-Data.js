@@ -1,5 +1,5 @@
-module.exports = class Data1671444912341 {
-  name = 'Data1671444912341'
+module.exports = class Data1671528593192 {
+  name = 'Data1671528593192'
 
   async up(db) {
     await db.query(`CREATE TABLE "member_metadata" ("id" character varying NOT NULL, "name" text, "avatar" jsonb, "about" text, "member_id" character varying NOT NULL, CONSTRAINT "REL_e7e4d350f82ae2383894f465ed" UNIQUE ("member_id"), CONSTRAINT "PK_d3fcc374696465f3c0ac3ba8708" PRIMARY KEY ("id"))`)
@@ -51,7 +51,7 @@ module.exports = class Data1671444912341 {
     await db.query(`CREATE TABLE "video_featured_in_category" ("id" character varying NOT NULL, "video_cut_url" text, "video_id" character varying, "category_id" character varying, CONSTRAINT "PK_f84d38b5cdb7567ac04d6e9d209" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_7b16ddad43901921a8d3c8eab7" ON "video_featured_in_category" ("video_id") `)
     await db.query(`CREATE UNIQUE INDEX "IDX_6d0917e1ac0cc06c8075bcf256" ON "video_featured_in_category" ("category_id", "video_id") `)
-    await db.query(`CREATE TABLE "video_category" ("id" character varying NOT NULL, "name" text, "description" text, "created_in_block" integer NOT NULL, "parent_category_id" character varying, CONSTRAINT "PK_2a5c61f32e9636ee10821e9a58d" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "video_category" ("id" character varying NOT NULL, "name" text, "description" text, "is_supported" boolean NOT NULL, "created_in_block" integer NOT NULL, "parent_category_id" character varying, CONSTRAINT "PK_2a5c61f32e9636ee10821e9a58d" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_cbe7e5d162a819e4ee2e2f6105" ON "video_category" ("name") `)
     await db.query(`CREATE INDEX "IDX_da26b34f037c0d59d3c0d0646e" ON "video_category" ("parent_category_id") `)
     await db.query(`CREATE TABLE "license" ("id" character varying NOT NULL, "code" integer, "attribution" text, "custom_text" text, CONSTRAINT "PK_f168ac1ca5ba87286d03b2ef905" PRIMARY KEY ("id"))`)

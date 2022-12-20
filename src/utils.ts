@@ -157,7 +157,7 @@ export type EventNames = keyof typeof eventConstructors
 export type AnyEntity = { id: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Constructor<E> = new (...args: any[]) => E & { name: string }
+export type Constructor<E> = { new (...args: any[]): E; name: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type IsEntityType<T> = T extends Constructor<any>
@@ -325,7 +325,7 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
     const relation = this.getRelationByProperty(entityClass, property)
     const inverseClass = entityClasses[relation.inverseEntityMetadata.targetName as ModelNames]
     const inverseCollection = this.getAllCollections()[
-      inverseClass.name as ModelNames
+      relation.inverseEntityMetadata.targetName as ModelNames
     ] as EntityCollection<AnyEntity>
     const inverseProp = relation.inverseRelation?.propertyName
     const refValue = entity[property] as unknown
@@ -529,6 +529,7 @@ export class EntityCollection<E extends AnyEntity, EC extends Constructor<E> = C
       logger.info(`Saving ${toBeSaved.length} ${this._class.name} entities...`)
       logger.debug(`Entity ids: ${toBeSaved.map((e) => e.id).join(', ')}`)
       // Save the entities and update the next entity id
+      // TODO: Load on startup
       const nextEntityId = new NextEntityId({ entityName: this._class.name, nextId: this._nextId })
       await Promise.all([this.em.save(toBeSaved), this.em.save(nextEntityId)])
     }
@@ -594,10 +595,10 @@ export class EntitiesCollector {
   }
 
   public static async create(store: Store) {
-    // FIXME: This is a little hacky, but we really need to access the underlying EntityManager,
-    // for example, because Store by default uses `upsert` for saving the entities, which is problematic
-    // when the entity has some required relations and we're just trying to update it
+    // FIXME: This is a little hacky, but we really need to access the underlying EntityManager
     const em = await (store as unknown as { em: () => Promise<EntityManager> }).em()
+    // Add "processor" schema to search path in order to be able to access "hidden" entities
+    await em.query('SET search_path TO processor,public')
     return new EntitiesCollector(store, em)
   }
 
