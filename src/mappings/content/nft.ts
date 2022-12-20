@@ -169,6 +169,7 @@ export async function processAuctionBidCanceledEvent({
       isCanceled: false,
     },
     {
+      bidder: true,
       auction: {
         topBid: true,
         bids: {

@@ -1,13 +1,19 @@
 import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
-import { KillSwitch, SetKillSwitchInput, SetVideoHeroInput } from './types'
+import {
+  KillSwitch,
+  SetKillSwitchInput,
+  SetSupportedCategoriesInput,
+  SetSupportedCategoriesResult,
+  SetVideoHeroInput,
+} from './types'
 import { VideoHero } from '../baseTypes'
 
 @Resolver()
 export class AdminResolver {
   // Set by depenency injection
-  constructor(private tx: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Mutation(() => KillSwitch)
   async setKillSwitch(@Args() args: SetKillSwitchInput): Promise<KillSwitch> {
@@ -31,5 +37,22 @@ export class AdminResolver {
   async setVideoHero(@Args() args: SetVideoHeroInput): Promise<VideoHero> {
     // TODO: Implement
     return { id: '0' }
+  }
+
+  @Mutation(() => SetSupportedCategoriesResult)
+  async setSupportedCategories(
+    @Args() { newSupportedCategories }: SetSupportedCategoriesInput
+  ): Promise<SetSupportedCategoriesResult> {
+    const em = await this.em()
+    return em.transaction(async (em) => {
+      await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
+      const result = await em.query(
+        `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE "id" IN (${newSupportedCategories
+          .map((id) => `'${id}'`)
+          .join(', ')})`
+      )
+      const newNumberOfCategoriesSupported = result[1]
+      return { newNumberOfCategoriesSupported }
+    })
   }
 }
