@@ -29,7 +29,7 @@ import {
   GeographicalArea,
 } from '../../model'
 import { invalidMetadata } from '../utils'
-import { EntitiesCollector } from '../../utils'
+import { EntitiesCollector } from '../../utils/EntitiesCollector'
 import { Logger } from '../../logger'
 import _ from 'lodash'
 

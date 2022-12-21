@@ -1,4 +1,5 @@
-import { criticalError, EventHandlerContext } from '../../utils'
+import { EventHandlerContext } from '../../utils/events'
+import { criticalError } from '../../utils/misc'
 import {
   createAuction,
   createBid,

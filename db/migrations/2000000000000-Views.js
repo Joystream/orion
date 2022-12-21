@@ -23,7 +23,23 @@ module.exports = class Views2000000000000 {
         FROM "processor"."video"
         WHERE
           EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")
-          AND EXISTS(SELECT 1 FROM "video_category" WHERE "id"="category_id" AND "is_supported"='1')
+          AND (
+            EXISTS(SELECT 1 FROM "video_category" WHERE "id"="category_id" AND "is_supported"='1')
+            OR (
+              "category_id" IS NULL
+              AND COALESCE(
+                (SELECT "value" FROM "gateway_config" WHERE "id"='SUPPORT_NO_CATEGORY_VIDEOS'),
+                ${
+                  (
+                    process.env.SUPPORT_NO_CATEGORY_VIDEOS === 'true' ||
+                    process.env.SUPPORT_NO_CATEGORY_VIDEOS === '1'
+                  )
+                    ? 'true'
+                    : 'false'
+                }
+              )
+            )
+          )
           AND "is_censored"='0'
     `)
     // Categories view: All categories except those not supported by the Gateway

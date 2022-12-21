@@ -35,7 +35,8 @@ import {
   VideoReactionOptions,
   VideoReactionsCountByReactionType,
 } from '../../model'
-import { EntitiesCollector, ModelNames } from '../../utils'
+import { config, ConfigVariable } from '../../utils/config'
+import { EntitiesCollector, ModelNames } from '../../utils/EntitiesCollector'
 import {
   backwardCompatibleMetaID,
   genericEventFields,
@@ -564,7 +565,7 @@ export async function processCreateVideoCategoryMessage(
     description: description || null,
     parentCategory,
     createdInBlock: block.height,
-    isSupported: false,
+    isSupported: await config.get(ConfigVariable.SupportNewCategories, ec.em),
   })
   ec.collections.VideoCategory.push(videoCategory)
 

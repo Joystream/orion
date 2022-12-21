@@ -4,7 +4,7 @@ import {
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionStatusEventData,
 } from '../../model'
-import { EventHandlerContext } from '../../utils'
+import { EventHandlerContext } from '../../utils/events'
 import { MemberRemarked, MembershipMetadata } from '@joystream/metadata-protobuf'
 import { bytesToString, deserializeMetadata, genericEventFields, toAddress } from '../utils'
 import { processMemberRemark, processMembershipMetadata } from './metadata'

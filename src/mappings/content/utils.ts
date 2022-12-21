@@ -32,7 +32,8 @@ import {
   Bid,
   NftOwner,
 } from '../../model'
-import { criticalError, EntitiesCollector } from '../../utils'
+import { criticalError } from '../../utils/misc'
+import { EntitiesCollector } from '../../utils/EntitiesCollector'
 import {
   ContentActor,
   EnglishAuctionParamsRecord,

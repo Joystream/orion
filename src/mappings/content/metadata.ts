@@ -43,7 +43,7 @@ import {
   VideoMediaMetadata,
   VideoSubtitle,
 } from '../../model'
-import { EntitiesCollector } from '../../utils'
+import { EntitiesCollector } from '../../utils/EntitiesCollector'
 import { invalidMetadata, metaprotocolTransactionFailure } from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 

@@ -1,6 +1,6 @@
 import { ContentMetadata } from '@joystream/metadata-protobuf'
 import { Channel, Video } from '../../model'
-import { EventHandlerContext } from '../../utils'
+import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, processNft } from './utils'
