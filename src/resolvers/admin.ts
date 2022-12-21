@@ -1,7 +1,7 @@
 import { Arg, Args, ArgsType, Authorized, Field, Mutation, Query, Resolver } from 'type-graphql'
 import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
-import { cryptoIsReady, base64Encode, sr25519Sign, sr25519PairFromSeed } from '@polkadot/util-crypto'
+import { sr25519Sign } from '@polkadot/util-crypto'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -26,18 +26,8 @@ export class AdminResolver {
   }
 
   @Mutation(() => GeneratedSignature)
-  async generateSignature(@Arg('bytes', () => String) bytes: string) {
-    if (!config.appPrivateKey) {
-      throw new Error('No PRIVATE_KEY provided to generate signature')
-    }
-
-    if (!cryptoIsReady()) {
-      throw new Error('@polkadot/util-crypto is not ready')
-    }
-
-    const keypair = sr25519PairFromSeed(config.appPrivateKey)
-    const key = sr25519Sign(bytes, keypair)
-
-    return { signature: base64Encode(key) }
+  async signAppActionCommitment(@Arg('message', () => String) message: string) {
+    const signature = sr25519Sign(message, config.appKeypair)
+    return { signature: Buffer.from(signature).toString('hex') }
   }
 }

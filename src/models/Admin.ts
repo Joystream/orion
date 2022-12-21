@@ -12,7 +12,7 @@ export class Admin {
 @ObjectType()
 @ArgsType()
 export class GeneratedSignature {
-  @Field()
+  @Field({ description: 'App signature converted to hexadecimal string.' })
   signature: string
 }
 
