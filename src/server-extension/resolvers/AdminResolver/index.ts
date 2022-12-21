@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver } from 'type-graphql'
+import { Args, Query, Mutation, Resolver, UseMiddleware } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import {
   KillSwitch,
@@ -10,12 +10,14 @@ import {
 } from './types'
 import { VideoHero } from '../baseTypes'
 import { config, ConfigVariable } from '../../../utils/config'
+import { OperatorOnly } from '../middleware'
 
 @Resolver()
 export class AdminResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
 
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => KillSwitch)
   async setKillSwitch(@Args() args: SetKillSwitchInput): Promise<KillSwitch> {
     // TODO: Implement
@@ -34,12 +36,14 @@ export class AdminResolver {
     return undefined
   }
 
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => VideoHero)
   async setVideoHero(@Args() args: SetVideoHeroInput): Promise<VideoHero> {
     // TODO: Implement
     return { id: '0' }
   }
 
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => SetSupportedCategoriesResult)
   async setSupportedCategories(
     @Args()
@@ -54,12 +58,16 @@ export class AdminResolver {
     return em.transaction(async (em) => {
       if (supportedCategoriesIds) {
         await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
-        const result = await em.query(
-          `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE "id" IN (${supportedCategoriesIds
-            .map((id) => `'${id}'`)
-            .join(', ')})`
-        )
-        newNumberOfCategoriesSupported = result[1]
+        if (supportedCategoriesIds.length) {
+          const result = await em.query(
+            `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE ID IN (${supportedCategoriesIds
+              .map((id) => `'${id}'`)
+              .join(', ')})`
+          )
+          newNumberOfCategoriesSupported = result[1]
+        } else {
+          newNumberOfCategoriesSupported = 0
+        }
       }
       if (supportNewCategories !== undefined) {
         await config.set(ConfigVariable.SupportNewCategories, supportNewCategories, em)
