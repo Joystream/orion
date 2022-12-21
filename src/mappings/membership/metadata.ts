@@ -2,7 +2,7 @@ import { IMemberRemarked, IMembershipMetadata, MemberRemarked } from '@joystream
 import { AvatarUri, MemberMetadata, Membership, MetaprotocolTransactionResult } from '../../model'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { isSet } from '@joystream/metadata-protobuf/utils'
-import { EntitiesCollector } from '../../utils'
+import { EntitiesCollector } from '../../utils/EntitiesCollector'
 import { metaprotocolTransactionFailure } from '../utils'
 import {
   processCreateCommentMessage,

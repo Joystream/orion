@@ -12,7 +12,7 @@ import {
   ChannelOwnerRemarked,
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
-import { EventHandlerContext } from '../../utils'
+import { EventHandlerContext } from '../../utils/events'
 
 export async function processChannelCreatedEvent({
   ec,

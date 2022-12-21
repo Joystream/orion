@@ -9,6 +9,7 @@ import {
   SetVideoHeroInput,
 } from './types'
 import { VideoHero } from '../baseTypes'
+import { config, ConfigVariable } from '../../../utils/config'
 
 @Resolver()
 export class AdminResolver {
@@ -41,18 +42,36 @@ export class AdminResolver {
 
   @Mutation(() => SetSupportedCategoriesResult)
   async setSupportedCategories(
-    @Args() { newSupportedCategories }: SetSupportedCategoriesInput
+    @Args()
+    {
+      supportNewCategories,
+      supportNoCategoryVideos,
+      supportedCategoriesIds,
+    }: SetSupportedCategoriesInput
   ): Promise<SetSupportedCategoriesResult> {
     const em = await this.em()
+    let newNumberOfCategoriesSupported: number
     return em.transaction(async (em) => {
-      await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
-      const result = await em.query(
-        `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE "id" IN (${newSupportedCategories
-          .map((id) => `'${id}'`)
-          .join(', ')})`
-      )
-      const newNumberOfCategoriesSupported = result[1]
-      return { newNumberOfCategoriesSupported }
+      if (supportedCategoriesIds) {
+        await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
+        const result = await em.query(
+          `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE "id" IN (${supportedCategoriesIds
+            .map((id) => `'${id}'`)
+            .join(', ')})`
+        )
+        newNumberOfCategoriesSupported = result[1]
+      }
+      if (supportNewCategories !== undefined) {
+        await config.set(ConfigVariable.SupportNewCategories, supportNewCategories, em)
+      }
+      if (supportNoCategoryVideos !== undefined) {
+        await config.set(ConfigVariable.SupportNoCategoryVideo, supportNoCategoryVideos, em)
+      }
+      return {
+        newNumberOfCategoriesSupported,
+        newlyCreatedCategoriesSupported: await config.get(ConfigVariable.SupportNewCategories, em),
+        noCategoryVideosSupported: await config.get(ConfigVariable.SupportNoCategoryVideo, em),
+      }
     })
   }
 }

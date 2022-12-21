@@ -1,5 +1,5 @@
-module.exports = class Data1671528593192 {
-  name = 'Data1671528593192'
+module.exports = class Data1671633764569 {
+  name = 'Data1671633764569'
 
   async up(db) {
     await db.query(`CREATE TABLE "member_metadata" ("id" character varying NOT NULL, "name" text, "avatar" jsonb, "about" text, "member_id" character varying NOT NULL, CONSTRAINT "REL_e7e4d350f82ae2383894f465ed" UNIQUE ("member_id"), CONSTRAINT "PK_d3fcc374696465f3c0ac3ba8708" PRIMARY KEY ("id"))`)
@@ -101,6 +101,7 @@ module.exports = class Data1671528593192 {
     await db.query(`CREATE INDEX "IDX_8afe872a1f3227ba331f9e63eb" ON "report" ("ip") `)
     await db.query(`CREATE INDEX "IDX_893057921f4b5cc37a0ef36684" ON "report" ("channel_id") `)
     await db.query(`CREATE INDEX "IDX_f732b6f82095a935db68c9491f" ON "report" ("video_id") `)
+    await db.query(`CREATE TABLE "gateway_config" ("id" character varying NOT NULL, "value" boolean NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_db1fa5a857fb6292eee4c493e6f" PRIMARY KEY ("id"))`)
     await db.query(`ALTER TABLE "member_metadata" ADD CONSTRAINT "FK_e7e4d350f82ae2383894f465ede" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
     await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`)
@@ -255,6 +256,7 @@ module.exports = class Data1671528593192 {
     await db.query(`DROP INDEX "public"."IDX_8afe872a1f3227ba331f9e63eb"`)
     await db.query(`DROP INDEX "public"."IDX_893057921f4b5cc37a0ef36684"`)
     await db.query(`DROP INDEX "public"."IDX_f732b6f82095a935db68c9491f"`)
+    await db.query(`DROP TABLE "gateway_config"`)
     await db.query(`ALTER TABLE "member_metadata" DROP CONSTRAINT "FK_e7e4d350f82ae2383894f465ede"`)
     await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d"`)
     await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912"`)

@@ -14,7 +14,7 @@ import {
   StorageBucketOperatorStatusInvited,
   StorageBucketOperatorStatusMissing,
 } from '../../model'
-import { EventHandlerContext } from '../../utils'
+import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, toAddress } from '../utils'
 import {
   createDataObjects,

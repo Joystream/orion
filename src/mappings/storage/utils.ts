@@ -21,7 +21,8 @@ import {
   StaticBagId,
 } from '../../types/v1000'
 import { bytesToString } from '../utils'
-import { criticalError, EntitiesCollector } from '../../utils'
+import { criticalError } from '../../utils/misc'
+import { EntitiesCollector } from '../../utils/EntitiesCollector'
 import { ASSETS_MAP } from '../content/utils'
 import { FindOptionsRelations } from 'typeorm'
 

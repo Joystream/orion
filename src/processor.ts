@@ -81,14 +81,9 @@ import {
   processMemberRemarkedEvent,
 } from './mappings/membership'
 import { Event } from './types/support'
-import {
-  assertAssignable,
-  EventNames,
-  EventHandler,
-  eventConstructors,
-  EventInstance,
-  EntitiesCollector,
-} from './utils'
+import { assertAssignable } from './utils/misc'
+import { EntitiesCollector } from './utils/EntitiesCollector'
+import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 
 const defaultEventOptions = {
   data: {
