@@ -2,6 +2,7 @@ import { Arg, Args, ArgsType, Authorized, Field, Mutation, Query, Resolver } fro
 import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
 import { sr25519Sign } from '@polkadot/util-crypto'
+import { u8aToHex } from '@polkadot/util'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -28,6 +29,6 @@ export class AdminResolver {
   @Mutation(() => GeneratedSignature)
   async signAppActionCommitment(@Arg('message', () => String) message: string) {
     const signature = sr25519Sign(message, config.appKeypair)
-    return { signature: Buffer.from(signature).toString('hex') }
+    return { signature: u8aToHex(signature) }
   }
 }
