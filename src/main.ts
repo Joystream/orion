@@ -6,8 +6,6 @@ import { cryptoWaitReady } from '@polkadot/util-crypto'
 const main = async () => {
   config.loadConfig()
 
-  await wrapTask('Initializing WASM bridge for @polkadot/util-crypto', cryptoWaitReady)
-
   const mongoose = await wrapTask(`Connecting to MongoDB at "${config.mongoDBUri}"`, () =>
     connectMongoose(config.mongoDBUri)
   )
@@ -43,4 +41,6 @@ const wrapTask = async <T>(message: string, task: () => Promise<T>): Promise<T> 
   }
 }
 
-main()
+wrapTask('Initializing WASM bridge for @polkadot/util-crypto', cryptoWaitReady).then(() => {
+  main()
+})

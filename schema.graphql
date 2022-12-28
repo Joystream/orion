@@ -58,6 +58,7 @@ input FeaturedVideoInput {
 }
 
 type GeneratedSignature {
+  """App signature converted to hexadecimal string."""
   signature: String!
 }
 
@@ -67,7 +68,6 @@ type Mutation {
 
   """Add a single follow to the target channel"""
   followChannel(channelId: ID!): ChannelFollowsInfo!
-  generateSignature(bytes: String!): GeneratedSignature!
 
   """Report a channel"""
   reportChannel(channelId: ID!, rationale: String!): ChannelReportInfo!
@@ -77,6 +77,7 @@ type Mutation {
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setKillSwitch(isKilled: Boolean!): Admin!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
+  signAppActionCommitment(message: String!): GeneratedSignature!
 
   """Remove a single follow from the target channel"""
   unfollowChannel(channelId: ID!): ChannelFollowsInfo!
