@@ -1,6 +1,8 @@
-import { Authorized, Field, Mutation, Query, Resolver, Args, ArgsType } from 'type-graphql'
-import { getAdminDoc, Admin } from '../models/Admin'
-import { ADMIN_ROLE } from '../config'
+import { Arg, Args, ArgsType, Authorized, Field, Mutation, Query, Resolver } from 'type-graphql'
+import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
+import config, { ADMIN_ROLE } from '../config'
+import { sr25519Sign } from '@polkadot/util-crypto'
+import { u8aToHex } from '@polkadot/util'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -22,5 +24,11 @@ export class AdminResolver {
     killSwitch.isKilled = isKilled
     await killSwitch.save()
     return { isKilled }
+  }
+
+  @Mutation(() => GeneratedSignature)
+  async signAppActionCommitment(@Arg('message', () => String) message: string) {
+    const signature = sr25519Sign(message, config.appKeypair)
+    return { signature: u8aToHex(signature) }
   }
 }

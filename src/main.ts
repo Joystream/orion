@@ -1,6 +1,7 @@
 import config from './config'
 import Express from 'express'
 import { buildAggregates, connectMongoose, createServer } from './server'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 
 const main = async () => {
   config.loadConfig()
@@ -40,4 +41,6 @@ const wrapTask = async <T>(message: string, task: () => Promise<T>): Promise<T> 
   }
 }
 
-main()
+wrapTask('Initializing WASM bridge for @polkadot/util-crypto', cryptoWaitReady).then(() => {
+  main()
+})
