@@ -18,7 +18,7 @@ export class VideosSearchArgs {
   query!: string
 
   @Field(() => VideoWhereInput, { nullable: true })
-  where?: VideoWhereInput
+  where?: Record<string, unknown>
 
   @Field(() => Int, { nullable: true })
   limit?: number
@@ -35,8 +35,8 @@ export class VideosConnectionArgs {
   @Field(() => [VideoOrderByInput!]!, { nullable: false })
   orderBy!: VideoOrderByInput[]
 
-  @Field(() => VideoWhereInput, { nullable: true })
-  where?: VideoWhereInput
+  @Field(() => VideoWhereInput, { nullable: true, simple: true })
+  where?: Record<string, unknown>
 }
 
 @ArgsType()

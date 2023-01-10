@@ -27,7 +27,7 @@ export class ChannelNftCollector {
 @InputType()
 export class ExtendedChannelWhereInput {
   @Field(() => ChannelWhereInput, { nullable: true })
-  channel?: ChannelWhereInput
+  channel?: Record<string, unknown>
 
   @Field(() => Int, { nullable: true })
   activeVideosCount_gt?: number
@@ -156,7 +156,7 @@ export class ChannelsSearchArgs {
   query!: string
 
   @Field(() => ChannelWhereInput, { nullable: true })
-  where?: ChannelWhereInput
+  where?: Record<string, unknown>
 
   @Field(() => Int, { nullable: true })
   limit?: number
