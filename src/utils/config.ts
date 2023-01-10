@@ -4,6 +4,7 @@ import { GatewayConfig } from '../model'
 export enum ConfigVariable {
   SupportNoCategoryVideo = 'SUPPORT_NO_CATEGORY_VIDEOS',
   SupportNewCategories = 'SUPPORT_NEW_CATEGORIES',
+  KillSwitch = 'KILL_SWITCH_ON',
 }
 
 class Config {

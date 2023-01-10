@@ -20,14 +20,15 @@ export class AdminResolver {
   @UseMiddleware(OperatorOnly)
   @Mutation(() => KillSwitch)
   async setKillSwitch(@Args() args: SetKillSwitchInput): Promise<KillSwitch> {
-    // TODO: Implement
-    return { isKilled: false }
+    const em = await this.em()
+    await config.set(ConfigVariable.KillSwitch, args.isKilled, em)
+    return { isKilled: await config.get(ConfigVariable.KillSwitch, em) }
   }
 
   @Query(() => KillSwitch)
   async getKillSwitch(): Promise<KillSwitch> {
-    // TODO: Implement
-    return { isKilled: false }
+    const em = await this.em()
+    return { isKilled: await config.get(ConfigVariable.KillSwitch, em) }
   }
 
   @Query(() => VideoHero, { nullable: true })
