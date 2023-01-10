@@ -19,13 +19,13 @@ import {
 import { parseSqlArguments, parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
-import { Expr, parse as parseSql, SelectFromStatement, toSql } from 'pgsql-ast-parser'
 import { model } from '../model'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { Report } from '../../../model/Report'
+import { extendClause } from '../../../utils/sql'
 
 @Resolver()
 export class ChannelsResolver {
@@ -58,7 +58,7 @@ export class ChannelsResolver {
       channelFields,
       sqlArgs
     )
-    const q = parseSql(listQuery.sql)[0] as SelectFromStatement
+    let listQuerySql = listQuery.sql
 
     // Check whether the query includes non-standard fields / filters
     const isExtraQuery =
@@ -68,74 +68,75 @@ export class ChannelsResolver {
     // If it does...
     if (isExtraQuery) {
       // Define a subquery to fetch channel's active videos count
-      const activeVideosCountQueryString = `
-                SELECT
-                    "channel_id",
-                    COUNT("video"."id") AS "activeVideosCount"
-                FROM
-                    "video"
-                    INNER JOIN "storage_data_object" AS "media" ON "media"."id" = "video"."media_id"
-                    INNER JOIN "storage_data_object" AS "thumbnail" ON "thumbnail"."id" = "video"."thumbnail_photo_id"
-                WHERE
-                    "video"."is_censored" = '0'
-                    AND "video"."is_public" = '1'
-                    AND "media"."is_accepted" = '1'
-                    AND "thumbnail"."is_accepted" = '1'
-                GROUP BY "channel_id"
-            `
+      const activeVideosCountQuerySql = `
+          SELECT
+              "channel_id",
+              COUNT("video"."id") AS "activeVideosCount"
+          FROM
+              "video"
+              INNER JOIN "storage_data_object" AS "media" ON "media"."id" = "video"."media_id"
+              INNER JOIN "storage_data_object" AS "thumbnail" ON "thumbnail"."id" = "video"."thumbnail_photo_id"
+          WHERE
+              "video"."is_censored" = '0'
+              AND "video"."is_public" = '1'
+              AND "media"."is_accepted" = '1'
+              AND "thumbnail"."is_accepted" = '1'
+          GROUP BY "channel_id"
+      `
 
-      // Define the shape of the extra query to be merged with the original query
-      const extraQ = parseSql(`
-                SELECT
-                    COALESCE("activeVideoCounter"."activeVideosCount", 0) AS "activeVideosCount"
-                FROM
-                    "channel"
-                    LEFT OUTER JOIN (${activeVideosCountQueryString}) AS "activeVideoCounter"
-                        ON "activeVideoCounter"."channel_id" = "channel"."id"
-                    WHERE "activeVideoCounter"."activeVideosCount" > ${
-                      args.where?.activeVideosCount_gt || -1
-                    }
-            `)[0] as SelectFromStatement
+      // Extend SELECT clause of the original query
+      listQuerySql = extendClause(
+        listQuerySql,
+        'SELECT',
+        'COALESCE("activeVideoCounter"."activeVideosCount", 0) AS "activeVideosCount"'
+      )
 
-      // Push SELECT "activeVideoCounter"."activeVideosCount" part of `extraQ` to the original query
-      q.columns?.push(extraQ.columns![0])
-
-      // Push LEFT OUTER JOIN part of `extraQ` to the original query
-      q.from?.push(extraQ.from![1])
+      // Extend FROM clause of the original query
+      listQuerySql = extendClause(
+        listQuerySql,
+        'FROM',
+        `LEFT OUTER JOIN (${activeVideosCountQuerySql}) AS "activeVideoCounter"
+          ON "activeVideoCounter"."channel_id" = "channel"."id"`,
+        ''
+      )
 
       // If `where: { activeVideosCount_gt: x }` was provided...
       if (args.where?.activeVideosCount_gt) {
-        // Push additional `extraQ` WHERE condition to the original query
-        q.where = q.where
-          ? {
-              type: 'binary',
-              left: q.where,
-              right: extraQ.where as Expr,
-              op: 'AND',
-            }
-          : (extraQ.where as Expr)
+        // Extend WHERE condition of the original query
+        listQuerySql = extendClause(
+          listQuerySql,
+          'WHERE',
+          `"activeVideoCounter"."activeVideosCount" > ${args.where.activeVideosCount_gt}`,
+          'AND'
+        )
       }
 
       // Override the raw `sql` string in `listQuery` with the modified query
-      ;(listQuery as { sql: string }).sql = toSql.statement(q)
-      console.log(toSql.statement(q))
+      ;(listQuery as { sql: string }).sql = listQuerySql
+      console.log('SQL', listQuery.sql)
+    }
 
-      // Override the `listQuery.map` function to take `activeVideosCount` into account
-      const oldListQMap = listQuery.map.bind(listQuery)
-      listQuery.map = (rows: any[][]) => {
-        const activeVideoCounts: string[] = []
+    // Override the `listQuery.map` function
+    const oldListQMap = listQuery.map.bind(listQuery)
+    listQuery.map = (rows: any[][]) => {
+      const activeVideoCounts: string[] = []
+      if (isExtraQuery) {
         for (const row of rows) {
           activeVideoCounts.push(row.pop())
         }
-        const channelsMapped = oldListQMap(rows)
-        return channelsMapped.map((channel, i) => ({
-          channel,
-          activeVideosCount: activeVideoCounts[i],
-        }))
       }
+      const channelsMapped = oldListQMap(rows)
+      return channelsMapped.map((channel, i) => {
+        const resultRow: { channel: unknown; activeVideosCount?: unknown } = { channel }
+        if (isExtraQuery) {
+          resultRow.activeVideosCount = activeVideoCounts[i]
+        }
+        return resultRow
+      })
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
+    console.log('Result', result)
     return result
   }
 

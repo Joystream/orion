@@ -32,7 +32,7 @@ export type SimpleWhereCondition<E> = {
     : SimpleWhereCondition<E[K]>
 }
 
-const entityClasses = _.pickBy(models, (o) => {
+export const entityClasses = _.pickBy(models, (o) => {
   return (
     typeof o === 'function' &&
     o.name &&
