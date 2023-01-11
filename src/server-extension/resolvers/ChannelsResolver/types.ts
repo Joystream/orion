@@ -14,9 +14,6 @@ export class ExtendedChannel {
 
 @ObjectType()
 export class ChannelNftCollector {
-  @Field(() => Channel, { nullable: false })
-  channel!: Channel
-
   @Field(() => Membership, { nullable: false })
   member!: Membership
 
@@ -60,7 +57,7 @@ export class MostRecentChannelsArgs {
   resultsLimit?: number
 }
 
-enum ChannelNftCollectorsOrderByInput {
+export enum ChannelNftCollectorsOrderByInput {
   amount_ASC,
   amount_DESC,
 }
@@ -73,8 +70,8 @@ export class ChannelNftCollectorsArgs {
   @Field(() => String, { nullable: false })
   channelId!: string
 
-  @Field(() => [ChannelNftCollectorsOrderByInput!], { nullable: true })
-  orderBy?: ChannelNftCollectorsOrderByInput[]
+  @Field(() => ChannelNftCollectorsOrderByInput, { nullable: true })
+  orderBy?: ChannelNftCollectorsOrderByInput
 
   @Field(() => Int, { nullable: true })
   limit?: number
