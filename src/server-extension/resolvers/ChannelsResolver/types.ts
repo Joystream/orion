@@ -53,8 +53,8 @@ export class MostRecentChannelsArgs {
   @Field(() => [ChannelOrderByInput!], { nullable: true })
   orderBy?: ChannelOrderByInput[]
 
-  @Field(() => Int, { nullable: true })
-  mostRecentLimit?: number
+  @Field(() => Int, { nullable: false })
+  mostRecentLimit!: number
 
   @Field(() => Int, { nullable: true })
   resultsLimit?: number
