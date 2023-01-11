@@ -64,17 +64,23 @@ query GetNotifications($channelId: String!, $memberId: String!, $limit: Int!) {
           }
         }
         {
-          data: {
-            isTypeOf_eq: "CommentCreatedEventData"
-            comment: { author: { id_not_eq: $memberId } }
-          }
-          OR: [
+          AND: [
             {
               data: {
-                comment: { video: { channel: { id_eq: $channelId } }, parentComment_isNull: true }
+                isTypeOf_eq: "CommentCreatedEventData"
+                comment: { author: { id_not_eq: $memberId } }
               }
+            },
+            {
+              OR: [
+                {
+                  data: {
+                    comment: { video: { channel: { id_eq: $channelId } }, parentComment_isNull: true }
+                  }
+                }
+                { data: { comment: { parentComment: { author: { id_eq: $memberId } } } } }
+              ]
             }
-            { data: { comment: { parentComment: { author: { id_eq: $memberId } } } } }
           ]
         }
       ]
@@ -378,17 +384,23 @@ query GetNftActivities($memberId: String!, $limit: Int!) {
 
   nftsSold: eventsConnection(
     where: {
-      data: {
-        isTypeOf_in: [
-          "EnglishAuctionSettledEventData"
-          "BidMadeCompletingAuctionEventData"
-          "OpenAuctionBidAcceptedEventData"
-          "NftBoughtEventData"
-        ]
-      }
-      OR: [
-        { data: { previousNftOwner: { member: { id_eq: $memberId } } } }
-        { data: { previousNftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+      AND: [
+        {
+          data: {
+            isTypeOf_in: [
+              "EnglishAuctionSettledEventData"
+              "BidMadeCompletingAuctionEventData"
+              "OpenAuctionBidAcceptedEventData"
+              "NftBoughtEventData"
+            ]
+          }
+        },
+        {
+          OR: [
+            { data: { previousNftOwner: { member: { id_eq: $memberId } } } }
+            { data: { previousNftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+          ]
+        }
       ]
     }
     orderBy: timestamp_DESC
@@ -398,10 +410,14 @@ query GetNftActivities($memberId: String!, $limit: Int!) {
 
   nftsIssued: eventsConnection(
     where: {
-      data: { isTypeOf_eq: "NftIssuedEventData" }
-      OR: [
-        { data: { nftOwner: { member: { id_eq: $memberId } } } }
-        { data: { nftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+      AND: [
+        { data: { isTypeOf_eq: "NftIssuedEventData" } },
+        {
+          OR: [
+            { data: { nftOwner: { member: { id_eq: $memberId } } } }
+            { data: { nftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+          ]
+        }
       ]
     }
     orderBy: timestamp_DESC
