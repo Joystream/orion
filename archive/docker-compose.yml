@@ -1,21 +1,25 @@
 services:
   archive_db:
+    container_name: orion_archive_db
+    hostname: orion_archive_db
     image: postgres:14 # CockroachDB cluster might be a better fit for production deployment
-    restart: always
+    restart: unless-stopped
     volumes:
-      - /var/lib/postgresql/data
+      - orion_archive_db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: squid-archive
     ports:
-      - '${DB_PORT}:5432'
+      - '127.0.0.1:${DB_PORT}:5432'
+      - '[::1]:${DB_PORT}:5432'
     command: ['postgres', '-c', 'log_statement=all']
 
   ingest:
+    container_name: orion_archive_ingest
     depends_on:
       - archive_db
-    restart: on-failure
+    restart: unless-stopped
     image: subsquid/substrate-ingest:firesquid
     command: [
         '-e',
@@ -28,8 +32,11 @@ services:
       ]
 
   gateway:
+    container_name: orion_archive_gateway
+    hostname: orion_archive_gateway
     depends_on:
       - archive_db
+    restart: unless-stopped
     image: subsquid/substrate-gateway:firesquid
     environment:
       DATABASE_MAX_CONNECTIONS: 5
@@ -41,12 +48,16 @@ services:
         # (e.g. Moonbeam/Moonriver or Astar/Shiden)
       ]
     ports:
-      - '8888:8000'
+      - '127.0.0.1:8888:8000'
+      - '[::1]:8888:8000'
 
   # Explorer service is optional.
   # It provides rich GraphQL API for querying archived data.
   # Many developers find it very useful for exploration and debugging.
   explorer:
+    container_name: orion_archive_explorer
+    hostname: orion_archive_explorer
+    restart: unless-stopped
     image: subsquid/substrate-explorer:firesquid
     environment:
       DB_TYPE: postgres # set to `cockroach` for Cockroach DB
@@ -61,3 +72,6 @@ networks:
   default:
     external:
       name: joystream_default
+
+volumes:
+  orion_archive_db_data:

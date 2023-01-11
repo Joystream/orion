@@ -12,12 +12,19 @@ class ProcessorStateRetriever {
       .then(() => {
         /* Do nothing */
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err)
+        process.exit(-1)
+      })
   }
 
   private async updateLoop(intervalMs: number) {
     while (true) {
-      this.state = await this.getUpdatedState()
+      try {
+        this.state = await this.getUpdatedState()
+      } catch (e) {
+        console.error('Cannot get updated state', e)
+      }
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
@@ -31,7 +38,7 @@ class ProcessorStateRetriever {
 
   private async getMetric(metricName: string) {
     const resp = await axios.get(
-      `http://localhost:${process.env.PROCESSOR_PROMETHEUS_PORT}/metrics/${metricName}`,
+      `http://${process.env.PROCESSOR_HOST}:${process.env.PROCESSOR_PROMETHEUS_PORT}/metrics/${metricName}`,
       { headers: { 'Connection': 'keep-alive' } }
     )
     return parseInt(resp.data.match(new RegExp(`${metricName} ([0-9]+)`))[1])

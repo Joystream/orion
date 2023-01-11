@@ -99,7 +99,7 @@ const defaultEventOptions = {
 
 const processor = new SubstrateBatchProcessor()
   .setDataSource({
-    archive: 'http://localhost:8888/graphql',
+    archive: `http://${process.env.ARCHIVE_GATEWAY_HOST}:${process.env.ARCHIVE_GATEWAY_PORT}/graphql`,
   })
   .addEvent('Content.VideoCreated', defaultEventOptions)
   .addEvent('Content.VideoUpdated', defaultEventOptions)
