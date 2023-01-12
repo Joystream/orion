@@ -1,4 +1,4 @@
-import { ArgsType, Field, Int, ObjectType } from 'type-graphql'
+import { ArgsType, Field, InputType, Int, ObjectType } from 'type-graphql'
 
 @ArgsType()
 export class SetKillSwitchInput {
@@ -74,4 +74,34 @@ export class SetSupportedCategoriesResult {
     description: 'Whether or not vidoes w/o any category assigned will be supported',
   })
   noCategoryVideosSupported!: boolean
+}
+
+@InputType()
+class FeaturedVideoInput {
+  @Field(() => String)
+  videoId!: string
+
+  @Field({ nullable: true })
+  videoCutUrl?: string
+}
+
+@ArgsType()
+export class SetCategoryFeaturedVideosArgs {
+  @Field(() => String)
+  categoryId!: string
+
+  @Field(() => [FeaturedVideoInput])
+  videos!: FeaturedVideoInput[]
+}
+
+@ObjectType()
+export class SetCategoryFeaturedVideosResult {
+  @Field(() => String)
+  categoryId!: string
+
+  @Field(() => Int)
+  numberOfFeaturedVideosUnset!: number
+
+  @Field(() => Int)
+  numberOfFeaturedVideosSet!: number
 }

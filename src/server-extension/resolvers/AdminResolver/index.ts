@@ -1,8 +1,10 @@
 import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
-import type { EntityManager } from 'typeorm'
+import { EntityManager, In, Not } from 'typeorm'
 import {
   KillSwitch,
+  SetCategoryFeaturedVideosArgs,
+  SetCategoryFeaturedVideosResult,
   SetKillSwitchInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -11,7 +13,12 @@ import {
 } from './types'
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
-import { Video, VideoHero as VideoHeroEntity } from '../../../model'
+import {
+  Video,
+  VideoCategory,
+  VideoFeaturedInCategory,
+  VideoHero as VideoHeroEntity,
+} from '../../../model'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { parseObjectTree } from '@subsquid/openreader/lib/opencrud/tree'
@@ -99,6 +106,42 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetCategoryFeaturedVideosResult)
+  async setCategoryFeaturedVideos(
+    @Args() args: SetCategoryFeaturedVideosArgs
+  ): Promise<SetCategoryFeaturedVideosResult> {
+    const em = await this.em()
+    const { categoryId } = args
+
+    const deleteResult = await em.getRepository(VideoFeaturedInCategory).delete({
+      category: {
+        id: categoryId,
+      },
+      video: {
+        id: Not(In(args.videos.map((v) => v.videoId))),
+      },
+    })
+    const numberOfFeaturedVideosUnset = deleteResult.affected || 0
+
+    const newRows = args.videos.map(
+      ({ videoId, videoCutUrl }) =>
+        new VideoFeaturedInCategory({
+          id: `${videoId}-${categoryId}`,
+          category: new VideoCategory({ id: categoryId }),
+          video: new Video({ id: videoId }),
+          videoCutUrl,
+        })
+    )
+    await em.save(newRows)
+
+    return {
+      categoryId,
+      numberOfFeaturedVideosSet: newRows.length,
+      numberOfFeaturedVideosUnset,
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => SetSupportedCategoriesResult)
   async setSupportedCategories(
     @Args()
@@ -109,32 +152,28 @@ export class AdminResolver {
     }: SetSupportedCategoriesInput
   ): Promise<SetSupportedCategoriesResult> {
     const em = await this.em()
-    let newNumberOfCategoriesSupported: number
-    return em.transaction(async (em) => {
-      if (supportedCategoriesIds) {
-        await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
-        if (supportedCategoriesIds.length) {
-          const result = await em.query(
-            `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE ID IN (${supportedCategoriesIds
-              .map((id) => `'${id}'`)
-              .join(', ')})`
-          )
-          newNumberOfCategoriesSupported = result[1]
-        } else {
-          newNumberOfCategoriesSupported = 0
-        }
+    let newNumberOfCategoriesSupported = 0
+    if (supportedCategoriesIds) {
+      await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
+      if (supportedCategoriesIds.length) {
+        const result = await em.query(
+          `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE ID IN (${supportedCategoriesIds
+            .map((id) => `'${id}'`)
+            .join(', ')})`
+        )
+        newNumberOfCategoriesSupported = result[1]
       }
-      if (supportNewCategories !== undefined) {
-        await config.set(ConfigVariable.SupportNewCategories, supportNewCategories, em)
-      }
-      if (supportNoCategoryVideos !== undefined) {
-        await config.set(ConfigVariable.SupportNoCategoryVideo, supportNoCategoryVideos, em)
-      }
-      return {
-        newNumberOfCategoriesSupported,
-        newlyCreatedCategoriesSupported: await config.get(ConfigVariable.SupportNewCategories, em),
-        noCategoryVideosSupported: await config.get(ConfigVariable.SupportNoCategoryVideo, em),
-      }
-    })
+    }
+    if (supportNewCategories !== undefined) {
+      await config.set(ConfigVariable.SupportNewCategories, supportNewCategories, em)
+    }
+    if (supportNoCategoryVideos !== undefined) {
+      await config.set(ConfigVariable.SupportNoCategoryVideo, supportNoCategoryVideos, em)
+    }
+    return {
+      newNumberOfCategoriesSupported,
+      newlyCreatedCategoriesSupported: await config.get(ConfigVariable.SupportNewCategories, em),
+      noCategoryVideosSupported: await config.get(ConfigVariable.SupportNoCategoryVideo, em),
+    }
   }
 }
