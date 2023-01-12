@@ -143,17 +143,8 @@ type VideoHero @entity {
   "Url to the poster to be displayed in the Hero section"
   heroPosterUrl: String!
 
-  "Whether this video hero is currently active"
-  active: Boolean!
-
-  "Time at which this VideoHero was created"
-  createdAt: DateTime
-
-  "Time at which this VideoHero was activated"
+  "Time at which this VideoHero was created/activated"
   activatedAt: DateTime
-
-  "Time at which this VideoHero was deactivated"
-  deactivatedAt: DateTime
 }
 
 type VideoMediaMetadata @entity {

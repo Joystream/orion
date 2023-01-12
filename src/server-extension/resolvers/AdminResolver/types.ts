@@ -27,6 +27,12 @@ export class SetVideoHeroInput {
   heroPosterUrl!: string
 }
 
+@ObjectType()
+export class SetVideoHeroResult {
+  @Field(() => String, { nullable: false })
+  id!: string
+}
+
 @ArgsType()
 export class SetSupportedCategoriesInput {
   @Field(() => [String], {

@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver, UseMiddleware } from 'type-graphql'
+import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import {
   KillSwitch,
@@ -7,10 +7,19 @@ import {
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
+  SetVideoHeroResult,
 } from './types'
-import { VideoHero } from '../baseTypes'
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
+import { Video, VideoHero as VideoHeroEntity } from '../../../model'
+import { GraphQLResolveInfo } from 'graphql'
+import { Context } from '@subsquid/openreader/lib/context'
+import { parseObjectTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
+import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
+import { getObjectSize } from '@subsquid/openreader/lib/limit.size'
+import { VideoHero } from '../baseTypes'
+import { model } from '../model'
 
 @Resolver()
 export class AdminResolver {
@@ -32,16 +41,61 @@ export class AdminResolver {
   }
 
   @Query(() => VideoHero, { nullable: true })
-  async videoHero(): Promise<VideoHero | undefined> {
-    // TODO: Implement
-    return undefined
+  async videoHero(
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<VideoHero | undefined> {
+    const tree = getResolveTree(info)
+    const fields = parseObjectTree(model, 'VideoHero', info.schema, tree)
+
+    ctx.openreader.responseSizeLimit?.check(() => getObjectSize(model, fields) + 1)
+
+    const em = await this.em()
+    const { id: currentHeroId } =
+      (
+        await em.getRepository(VideoHeroEntity).find({
+          select: { id: true },
+          order: { activatedAt: 'DESC' },
+          take: 1,
+        })
+      )[0] || {}
+
+    if (currentHeroId === undefined) {
+      return undefined
+    }
+
+    const entityByIdQuery = new EntityByIdQuery(
+      model,
+      ctx.openreader.dialect,
+      'VideoHero',
+      fields,
+      currentHeroId
+    )
+
+    return ctx.openreader.executeQuery(entityByIdQuery)
   }
 
   @UseMiddleware(OperatorOnly)
-  @Mutation(() => VideoHero)
-  async setVideoHero(@Args() args: SetVideoHeroInput): Promise<VideoHero> {
-    // TODO: Implement
-    return { id: '0' }
+  @Mutation(() => SetVideoHeroResult)
+  async setVideoHero(@Args() args: SetVideoHeroInput): Promise<SetVideoHeroResult> {
+    const em = await this.em()
+    const [currentHero] = await em.getRepository(VideoHeroEntity).find({
+      order: { activatedAt: 'DESC' },
+      take: 1,
+    })
+    // Create sequential id
+    const id = (parseInt(currentHero?.id || '0', 36) + 1).toString(36)
+    const videoHero = new VideoHeroEntity({
+      id,
+      activatedAt: new Date(),
+      heroPosterUrl: args.heroPosterUrl,
+      heroTitle: args.heroTitle,
+      heroVideoCutUrl: args.videoCutUrl,
+      video: new Video({ id: args.videoId }),
+    })
+    await em.save(videoHero)
+
+    return { id }
   }
 
   @UseMiddleware(OperatorOnly)
