@@ -1,5 +1,5 @@
-module.exports = class Data1671633764569 {
-  name = 'Data1671633764569'
+module.exports = class Data1673525629614 {
+  name = 'Data1673525629614'
 
   async up(db) {
     await db.query(`CREATE TABLE "member_metadata" ("id" character varying NOT NULL, "name" text, "avatar" jsonb, "about" text, "member_id" character varying NOT NULL, CONSTRAINT "REL_e7e4d350f82ae2383894f465ed" UNIQUE ("member_id"), CONSTRAINT "PK_d3fcc374696465f3c0ac3ba8708" PRIMARY KEY ("id"))`)
@@ -88,7 +88,7 @@ module.exports = class Data1671633764569 {
     await db.query(`CREATE TABLE "curator_group" ("id" character varying NOT NULL, "is_active" boolean NOT NULL, CONSTRAINT "PK_0b4c0ab279d72bcbf4e16b65ff1" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "curator" ("id" character varying NOT NULL, CONSTRAINT "PK_5791051a62d2c2dfc593d38ab57" PRIMARY KEY ("id"))`)
     await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
-    await db.query(`CREATE TABLE "video_hero" ("id" character varying NOT NULL, "hero_title" text NOT NULL, "hero_video_cut_url" text NOT NULL, "hero_poster_url" text NOT NULL, "active" boolean NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE, "activated_at" TIMESTAMP WITH TIME ZONE, "deactivated_at" TIMESTAMP WITH TIME ZONE, "video_id" character varying, CONSTRAINT "PK_f3b63979879773378afac0b9495" PRIMARY KEY ("id"))`)
+    await db.query(`CREATE TABLE "video_hero" ("id" character varying NOT NULL, "hero_title" text NOT NULL, "hero_video_cut_url" text NOT NULL, "hero_poster_url" text NOT NULL, "activated_at" TIMESTAMP WITH TIME ZONE, "video_id" character varying, CONSTRAINT "PK_f3b63979879773378afac0b9495" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_9feac5d9713a9f07e32eb8ba7a" ON "video_hero" ("video_id") `)
     await db.query(`CREATE TABLE "channel_follow" ("id" SERIAL NOT NULL, "ip" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "cancel_token" character varying NOT NULL, "channel_id" character varying NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
     await db.query(`CREATE INDEX "IDX_9bba17db99b72836523ab6c16f" ON "channel_follow" ("ip") `)
