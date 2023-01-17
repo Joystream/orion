@@ -7,10 +7,10 @@ import {
 import { EventHandlerContext } from '../../utils/events'
 import { MemberRemarked, MembershipMetadata } from '@joystream/metadata-protobuf'
 import { bytesToString, deserializeMetadata, genericEventFields, toAddress } from '../utils'
-import { processMemberRemark, processMembershipMetadata } from './metadata'
+import { processMembershipMetadata, processMemberRemark } from './metadata'
 
-export function processNewMember({
-  ec,
+export async function processNewMember({
+  overlay,
   block,
   event: {
     asV1000: [memberId, params],
@@ -24,7 +24,7 @@ export function processNewMember({
   const { controllerAccount, handle, metadata: metadataBytes } = params
   const metadata = deserializeMetadata(MembershipMetadata, metadataBytes)
 
-  const member = new Membership({
+  const member = overlay.getRepository(Membership).new({
     createdAt: new Date(block.timestamp),
     id: memberId.toString(),
     controllerAccount: toAddress(controllerAccount),
@@ -32,46 +32,44 @@ export function processNewMember({
   })
 
   if (metadata) {
-    processMembershipMetadata(ec, member, metadata)
+    await processMembershipMetadata(overlay, member.id, metadata)
   }
-
-  ec.collections.Membership.push(member)
 }
 
 export async function processMemberAccountsUpdatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [memberId, , newControllerAccount],
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
-    const member = await ec.collections.Membership.getOrFail(memberId.toString())
+    const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
     member.controllerAccount = toAddress(newControllerAccount)
   }
 }
 
 export async function processMemberProfileUpdatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [memberId, newHandle, newMetadata],
   },
 }: EventHandlerContext<'Members.MemberProfileUpdated'>) {
-  const member = await ec.collections.Membership.getOrFail(memberId.toString(), { metadata: true })
+  const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
 
   if (newHandle) {
     member.handle = newHandle.toString()
   }
 
   if (newMetadata) {
-    const metadata = deserializeMetadata(MembershipMetadata, newMetadata)
-    if (metadata) {
-      processMembershipMetadata(ec, member, metadata)
+    const metadataUpdate = deserializeMetadata(MembershipMetadata, newMetadata)
+    if (metadataUpdate) {
+      await processMembershipMetadata(overlay, member.id, metadataUpdate)
     }
   }
 }
 
 export async function processMemberRemarkedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -82,7 +80,7 @@ export async function processMemberRemarkedEvent({
   const metadata = deserializeMetadata(MemberRemarked, message)
   const result = metadata
     ? await processMemberRemark(
-        ec,
+        overlay,
         block,
         indexInBlock,
         extrinsicHash,
@@ -92,12 +90,11 @@ export async function processMemberRemarkedEvent({
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',
       })
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new MetaprotocolTransactionStatusEventData({
-        result,
-      }),
-    })
-  )
+  const eventRepository = overlay.getRepository(Event)
+  eventRepository.new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new MetaprotocolTransactionStatusEventData({
+      result,
+    }),
+  })
 }

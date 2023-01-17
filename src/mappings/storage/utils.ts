@@ -4,14 +4,14 @@ import {
   StorageBagOwner,
   StorageBagOwnerChannel,
   StorageBagOwnerMember,
-  StorageBucket,
   StorageDataObject,
-  StorageBucketBag,
-  DistributionBucket,
-  DistributionBucketBag,
   DistributionBucketOperator,
   StorageBagOwnerCouncil,
   StorageBagOwnerWorkingGroup,
+  Channel,
+  Video,
+  VideoSubtitle,
+  DistributionBucketOperatorMetadata,
 } from '../../model'
 import {
   BagIdType,
@@ -22,9 +22,8 @@ import {
 } from '../../types/v1000'
 import { bytesToString } from '../utils'
 import { criticalError } from '../../utils/misc'
-import { EntitiesCollector } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay, Flat, RepositoryOverlay } from '../../utils/overlay'
 import { ASSETS_MAP } from '../content/utils'
-import { FindOptionsRelations } from 'typeorm'
 
 export function getDynamicBagId(bagId: DynamicBagIdType): string {
   if (bagId.__kind === 'Channel') {
@@ -89,55 +88,49 @@ export function distributionOperatorId(
   return `${distributionBucketId(bucketId)}-${workerId.toString()}`
 }
 
-export function createStorageBucketBag(
-  bucketOrId: StorageBucket | bigint,
-  bagOrId: StorageBag | BagIdType
-): StorageBucketBag {
-  const storageBucket =
-    bucketOrId instanceof StorageBucket
-      ? bucketOrId
-      : new StorageBucket({ id: bucketOrId.toString() })
-  const bag = bagOrId instanceof StorageBag ? bagOrId : new StorageBag({ id: getBagId(bagOrId) })
-  return new StorageBucketBag({
-    id: `${storageBucket.id}-${bag.id}`,
-    storageBucket,
-    bag,
-  })
+export function storageBucketBagData(
+  bucketId: bigint | string,
+  bagId: BagIdType | string
+): { id: string; storageBucketId: string; bagId: string } {
+  bagId = typeof bagId === 'string' ? bagId : getBagId(bagId)
+  return {
+    id: `${bucketId.toString()}-${bagId}`,
+    storageBucketId: bucketId.toString(),
+    bagId,
+  }
 }
 
-export function createDistributionBucketBag(
-  bucketOrId: DistributionBucket | DistributionBucketIdRecord,
-  bagOrId: StorageBag | BagIdType
-): DistributionBucketBag {
-  const distributionBucket =
-    bucketOrId instanceof DistributionBucket
-      ? bucketOrId
-      : new DistributionBucket({ id: distributionBucketId(bucketOrId) })
-  const bag = bagOrId instanceof StorageBag ? bagOrId : new StorageBag({ id: getBagId(bagOrId) })
-  return new DistributionBucketBag({
-    id: `${distributionBucket.id}-${bag.id}`,
-    distributionBucket,
-    bag,
-  })
+export function distributionBucketBagData(
+  bucketId: DistributionBucketIdRecord | string,
+  bagId: BagIdType | string
+): { id: string; distributionBucketId: string; bagId: string } {
+  bucketId = typeof bucketId === 'string' ? bucketId : distributionBucketId(bucketId)
+  bagId = typeof bagId === 'string' ? bagId : getBagId(bagId)
+  return {
+    id: `${bucketId}-${bagId}`,
+    distributionBucketId: bucketId,
+    bagId,
+  }
 }
 
 export function createDataObjects(
+  dataObjectRepository: RepositoryOverlay<StorageDataObject>,
   block: SubstrateBlock,
-  storageBag: StorageBag,
+  storageBagId: string,
   objectCreationList: DataObjectCreationParameters[],
   stateBloatBond: bigint,
   objectIds: bigint[]
-): StorageDataObject[] {
+): Flat<StorageDataObject>[] {
   const dataObjects = objectCreationList.map((objectParams, i) => {
     const objectId = objectIds[i]
-    const object = new StorageDataObject({
+    const object = dataObjectRepository.new({
       id: objectId.toString(),
       createdAt: new Date(block.timestamp),
       isAccepted: false,
       ipfsHash: bytesToString(objectParams.ipfsContentId),
       size: objectParams.size,
       stateBloatBond,
-      storageBag,
+      storageBagId,
     })
     return object
   })
@@ -146,69 +139,70 @@ export function createDataObjects(
 }
 
 export async function unsetAssetRelations(
-  ec: EntitiesCollector,
-  dataObject: StorageDataObject
+  overlay: EntityManagerOverlay,
+  dataObject: Flat<StorageDataObject>
 ): Promise<void> {
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.channel)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const channel = await ec.collections.Channel.getOrFail(dataObject.type.channel)
+      const channel = await overlay.getRepository(Channel).getByIdOrFail(dataObject.type.channel)
       channel[entityProperty] = null
     }
   }
-
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.video)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const video = await ec.collections.Video.getOrFail(dataObject.type.video)
+      const video = await overlay.getRepository(Video).getByIdOrFail(dataObject.type.video)
       video[entityProperty] = null
     }
   }
-
   for (const { DataObjectTypeConstructor, entityProperty } of Object.values(ASSETS_MAP.subtitle)) {
     if (dataObject.type instanceof DataObjectTypeConstructor) {
-      const subtitle = await ec.collections.VideoSubtitle.getOrFail(dataObject.type.subtitle)
+      const subtitle = await overlay
+        .getRepository(VideoSubtitle)
+        .getByIdOrFail(dataObject.type.subtitle)
       subtitle[entityProperty] = null
     }
   }
 }
 
-export function removeDistributionBucketOperator(
-  ec: EntitiesCollector,
-  operator: DistributionBucketOperator
+export async function removeDistributionBucketOperator(
+  overlay: EntityManagerOverlay,
+  operatorId: string
 ) {
-  ec.collections.DistributionBucketOperator.remove(operator)
-  if (operator.metadata) {
-    ec.collections.DistributionBucketOperatorMetadata.remove(operator.metadata)
-  }
+  overlay.getRepository(DistributionBucketOperator).remove(operatorId)
+  overlay.getRepository(DistributionBucketOperatorMetadata).remove(operatorId)
 }
 
 export async function getOrCreateBag(
-  ec: EntitiesCollector,
-  bagId: BagIdType,
-  relations?: FindOptionsRelations<StorageBag>
-): Promise<StorageBag> {
-  const bag = await ec.collections.StorageBag.get(getBagId(bagId), relations)
+  overlay: EntityManagerOverlay,
+  bagId: BagIdType
+): Promise<Flat<StorageBag>> {
+  const bagRepository = overlay.getRepository(StorageBag)
+  const bag = await bagRepository.getById(getBagId(bagId))
   if (bag) {
     return bag
   }
   if (bagId.__kind === 'Dynamic') {
     criticalError(`Missing dynamic bag`, { id: bagId.value })
   }
-  const newBag = new StorageBag({
+  const newBag = bagRepository.new({
     id: getBagId(bagId),
     owner: getStaticBagOwner(bagId.value),
   })
-  ec.collections.StorageBag.push(newBag)
   return newBag
 }
 
-export async function deleteDataObjects(ec: EntitiesCollector, objects: StorageDataObject[]) {
-  ec.collections.StorageDataObject.remove(...objects)
-  await Promise.all(objects.map((o) => unsetAssetRelations(ec, o)))
+export async function deleteDataObjects(
+  overlay: EntityManagerOverlay,
+  objects: Flat<StorageDataObject>[]
+) {
+  overlay.getRepository(StorageDataObject).remove(...objects)
+  await Promise.all(objects.map((o) => unsetAssetRelations(overlay, o)))
 }
 
-export async function deleteDataObjectsByIds(ec: EntitiesCollector, ids: bigint[]) {
+export async function deleteDataObjectsByIds(overlay: EntityManagerOverlay, ids: bigint[]) {
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
   const objects = await Promise.all(
-    ids.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
+    ids.map((id) => dataObjectRepository.getByIdOrFail(id.toString()))
   )
-  await deleteDataObjects(ec, objects)
+  await deleteDataObjects(overlay, objects)
 }

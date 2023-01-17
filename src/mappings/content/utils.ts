@@ -11,11 +11,9 @@ import {
   AuctionTypeOpen,
   AuctionWhitelistedMember,
   Channel,
-  Membership,
   NftOwnerChannel,
   NftOwnerMember,
   OwnedNft,
-  StorageDataObject,
   TransactionalStatusAuction,
   TransactionalStatusBuyNow,
   TransactionalStatusIdle,
@@ -31,9 +29,15 @@ import {
   DataObjectType,
   Bid,
   NftOwner,
+  Comment,
+  CommentReaction,
+  License as LicenseEntity,
+  VideoMediaMetadata,
+  VideoReaction,
+  VideoMediaEncoding,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
-import { EntitiesCollector } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   ContentActor,
   EnglishAuctionParamsRecord,
@@ -42,8 +46,7 @@ import {
   OpenAuctionParamsRecord,
 } from '../../types/v1000'
 import { genericEventFields } from '../utils'
-import { SubstrateBlock } from '@subsquid/substrate-processor'
-import { FindOptionsRelations } from 'typeorm'
+import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -51,12 +54,12 @@ export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I)
   : never
 
 export type PropertyOfWithType<E, T> = {
-  [K in keyof E]?: E[K] extends T | null | undefined ? K : never
+  [K in keyof E]: [E[K]] extends [T | null | undefined] ? ([T] extends [E[K]] ? K : never) : never
 }[keyof E] &
   string &
   keyof E
 
-export type EntityAssetProps<E> = PropertyOfWithType<E, StorageDataObject>
+export type EntityAssetProps<E> = PropertyOfWithType<E, string | null>
 export type MetaNumberProps<M> = PropertyOfWithType<M, number>
 
 export type EntityAssetsMap<
@@ -67,7 +70,7 @@ export type EntityAssetsMap<
   DataObjectTypeConstructor: OTC
   entityProperty: EntityAssetProps<E>
   metaProperty: MetaNumberProps<M>
-  createDataObjectType: (e: E) => InstanceType<OTC>
+  createDataObjectType: (e: Flat<E>) => InstanceType<OTC>
 }[]
 
 export type AssetsMap = {
@@ -88,13 +91,13 @@ export const ASSETS_MAP: AssetsMap = {
   channel: [
     {
       DataObjectTypeConstructor: DataObjectTypeChannelAvatar,
-      entityProperty: 'avatarPhoto',
+      entityProperty: 'avatarPhotoId',
       metaProperty: 'avatarPhoto',
       createDataObjectType: (e) => new DataObjectTypeChannelAvatar({ channel: e.id }),
     },
     {
       DataObjectTypeConstructor: DataObjectTypeChannelCoverPhoto,
-      entityProperty: 'coverPhoto',
+      entityProperty: 'coverPhotoId',
       metaProperty: 'coverPhoto',
       createDataObjectType: (e) => new DataObjectTypeChannelCoverPhoto({ channel: e.id }),
     },
@@ -102,13 +105,13 @@ export const ASSETS_MAP: AssetsMap = {
   video: [
     {
       DataObjectTypeConstructor: DataObjectTypeVideoMedia,
-      entityProperty: 'media',
+      entityProperty: 'mediaId',
       metaProperty: 'video',
       createDataObjectType: (e) => new DataObjectTypeVideoMedia({ video: e.id }),
     },
     {
       DataObjectTypeConstructor: DataObjectTypeVideoThumbnail,
-      entityProperty: 'thumbnailPhoto',
+      entityProperty: 'thumbnailPhotoId',
       metaProperty: 'thumbnailPhoto',
       createDataObjectType: (e) => new DataObjectTypeVideoThumbnail({ video: e.id }),
     },
@@ -116,62 +119,61 @@ export const ASSETS_MAP: AssetsMap = {
   subtitle: [
     {
       DataObjectTypeConstructor: DataObjectTypeVideoSubtitle,
-      entityProperty: 'asset',
+      entityProperty: 'assetId',
       metaProperty: 'newAsset',
       createDataObjectType: (e) =>
-        new DataObjectTypeVideoSubtitle({ video: e.video.id, subtitle: e.id }),
+        new DataObjectTypeVideoSubtitle({ video: assertNotNull(e.videoId), subtitle: e.id }),
     },
   ],
 }
 
-export async function deleteVideo(ec: EntitiesCollector, videoId: bigint) {
-  const video = await ec.collections.Video.getOrFail(videoId.toString(), {
-    comments: {
-      reactions: true,
-    },
-    license: true,
-    reactions: true,
-    mediaMetadata: {
-      encoding: true,
-    },
-    subtitles: true,
-  })
+export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint) {
+  const videoRepository = overlay.getRepository(Video)
+  const commentRepository = overlay.getRepository(Comment)
+  const commentReactionRepository = overlay.getRepository(CommentReaction)
+  const licenseRepository = overlay.getRepository(LicenseEntity)
+  const videoReactionRepository = overlay.getRepository(VideoReaction)
+  const mediaMetadataRepository = overlay.getRepository(VideoMediaMetadata)
+  const mediaEncodingRepository = overlay.getRepository(VideoMediaEncoding)
+  const subtitlesRepository = overlay.getRepository(VideoSubtitle)
 
-  if (video.comments) {
-    ec.collections.CommentReaction.remove(...video.comments.flatMap((c) => c.reactions || []))
-    ec.collections.Comment.remove(...video.comments)
+  const video = await videoRepository.getByIdOrFail(videoId.toString())
+  const comments = await commentRepository.getManyByRelation('videoId', video.id)
+  const commentReactions = await commentReactionRepository.getManyByRelation('videoId', video.id)
+  const videoReactions = await videoReactionRepository.getManyByRelation('videoId', video.id)
+  const mediaMetadata = await mediaMetadataRepository.getOneByRelation('videoId', video.id)
+  const mediaEncoding = await mediaEncodingRepository.getById(mediaMetadata?.encodingId || '')
+  const subtitles = await subtitlesRepository.getManyByRelation('videoId', video.id)
+
+  commentReactionRepository.remove(...commentReactions)
+  commentRepository.remove(...comments)
+  if (video.licenseId) {
+    licenseRepository.remove(video.licenseId)
   }
-  if (video.license) {
-    ec.collections.License.remove(video.license)
+  videoReactionRepository.remove(...videoReactions)
+  if (mediaMetadata?.id) {
+    mediaMetadataRepository.remove(mediaMetadata.id)
   }
-  if (video.reactions) {
-    ec.collections.VideoReaction.remove(...video.reactions)
+  if (mediaEncoding?.id) {
+    mediaEncodingRepository.remove(mediaEncoding.id)
   }
-  if (video.mediaMetadata) {
-    if (video.mediaMetadata.encoding) {
-      ec.collections.VideoMediaEncoding.remove(video.mediaMetadata.encoding)
-    }
-    ec.collections.VideoMediaMetadata.remove(video.mediaMetadata)
-  }
-  if (video.subtitles) {
-    ec.collections.VideoSubtitle.remove(...video.subtitles)
-  }
-  ec.collections.Video.remove(video)
+  subtitlesRepository.remove(...subtitles)
+  videoRepository.remove(video)
 }
 
 export function processNft(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   extrinsicHash: string | undefined,
-  video: Video,
+  video: Flat<Video>,
   issuer: ContentActor,
   nftIssuanceParameters: NftIssuanceParametersRecord
 ): void {
   const owner =
     nftIssuanceParameters.nonChannelOwner !== undefined
       ? new NftOwnerMember({ member: nftIssuanceParameters.nonChannelOwner.toString() })
-      : new NftOwnerChannel({ channel: video.channel.id })
+      : new NftOwnerChannel({ channel: assertNotNull(video.channelId) })
 
   const creatorRoyalty =
     nftIssuanceParameters.royalty !== undefined
@@ -179,40 +181,38 @@ export function processNft(
         nftIssuanceParameters.royalty / Math.pow(10, 7)
       : undefined
 
-  const nft = new OwnedNft({
+  const nftRepository = overlay.getRepository(OwnedNft)
+  const nft = nftRepository.new({
     id: video.id,
-    video,
+    videoId: video.id,
     creatorRoyalty,
     owner,
     createdAt: new Date(block.timestamp),
   })
-  ec.collections.OwnedNft.push(nft)
 
   // update NFT transactional status
   processNftInitialTransactionalStatus(
-    ec,
+    overlay,
     block,
     nft,
     nftIssuanceParameters.initTransactionalStatus
   )
 
   // Push a new NftIssued event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new NftIssuedEventData({
-        actor: parseContentActor(issuer),
-        nft: nft.id,
-        nftOwner: nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new NftIssuedEventData({
+      actor: parseContentActor(issuer),
+      nft: nft.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export function processNftInitialTransactionalStatus(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
-  nft: OwnedNft,
+  nft: Flat<OwnedNft>,
   transactionalStatus: InitTransactionalStatusRecord
 ): void {
   switch (transactionalStatus.__kind) {
@@ -231,7 +231,7 @@ export function processNftInitialTransactionalStatus(
     case 'OpenAuction':
     case 'EnglishAuction': {
       const auctionParams = transactionalStatus.value
-      const auction = createAuction(ec, block, nft, auctionParams)
+      const auction = createAuction(overlay, block, nft, auctionParams)
 
       // create new auction
       nft.transactionalStatus = new TransactionalStatusAuction({
@@ -250,16 +250,17 @@ export function processNftInitialTransactionalStatus(
 }
 
 export function createAuction(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
-  nft: OwnedNft,
+  nft: Flat<OwnedNft>,
   auctionParams: OpenAuctionParamsRecord | EnglishAuctionParamsRecord
-): Auction {
+): Flat<Auction> {
   const startsAtBlock = auctionParams.startsAt ?? block.height
+  const auctionRepository = overlay.getRepository(Auction)
   // prepare auction record
-  const auction = new Auction({
-    id: ec.collections.Auction.getNextId(),
-    nft,
+  const auction = auctionRepository.new({
+    id: auctionRepository.getNextId(),
+    nftId: nft.id,
     startingPrice: auctionParams.startingPrice,
     buyNowPrice: auctionParams.buyNowPrice,
     auctionType: createAuctionType(block, auctionParams),
@@ -267,18 +268,14 @@ export function createAuction(
     isCanceled: false,
     isCompleted: false,
   })
-  ec.collections.Auction.push(auction)
 
-  const whitelistedMembers = auctionParams.whitelist.map(
-    (m) =>
-      new AuctionWhitelistedMember({
-        id: `${m.toString()}-${auction.id}`,
-        member: new Membership({ id: m.toString() }),
-        auction,
-      })
+  auctionParams.whitelist.forEach((m) =>
+    overlay.getRepository(AuctionWhitelistedMember).new({
+      id: `${m.toString()}-${auction.id}`,
+      memberId: m.toString(),
+      auctionId: auction.id,
+    })
   )
-
-  ec.collections.AuctionWhitelistedMember.push(...whitelistedMembers)
 
   return auction
 }
@@ -327,20 +324,19 @@ export function parseContentActor(contentActor: ContentActor): ContentActorEntit
 }
 
 export async function getCurrentAuctionFromVideo(
-  ec: EntitiesCollector,
-  videoId: string,
-  relations?: FindOptionsRelations<Auction>
-): Promise<Auction> {
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId)
+  overlay: EntityManagerOverlay,
+  videoId: string
+): Promise<Flat<Auction>> {
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId)
   if (nft.transactionalStatus?.isTypeOf !== 'TransactionalStatusAuction') {
     criticalError(`Nft of video ${videoId} was expected to be in TransactionalStatusAuction.`, {
       actualStatus: nft.transactionalStatus?.isTypeOf,
     })
   }
-  return ec.collections.Auction.getOrFail(nft.transactionalStatus.auction, relations)
+  return overlay.getRepository(Auction).getByIdOrFail(nft.transactionalStatus.auction)
 }
 
-export function findTopBid(bids: Bid[]): Bid | undefined {
+export function findTopBid(bids: Flat<Bid>[]): Flat<Bid> | undefined {
   return bids.reduce((topBid, bid) => {
     if (bid.isCanceled) {
       return topBid
@@ -362,86 +358,82 @@ export function findTopBid(bids: Bid[]): Bid | undefined {
       (topBid.createdInBlock === bid.createdInBlock && topBid.indexInBlock < bid.indexInBlock)
       ? topBid
       : bid
-  }, undefined as Bid | undefined)
+  }, undefined as Flat<Bid> | undefined)
 }
 
 export async function createBid(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   memberId: string,
   videoId: string,
   bidAmount?: bigint
-): Promise<Bid> {
-  const auction = await getCurrentAuctionFromVideo(ec, videoId, {
-    bids: {
-      bidder: true,
-    },
-    topBid: { bidder: true },
-    nft: true,
-  })
-
-  if (!auction.bids) {
-    auction.bids = []
-  }
+): Promise<{ bid: Flat<Bid>; auction: Flat<Auction> }> {
+  const auction = await getCurrentAuctionFromVideo(overlay, videoId)
+  const bidRepository = overlay.getRepository(Bid)
+  const auctionBids = await bidRepository.getManyByRelation('auctionId', auction.id)
 
   // cancel any previous bids done by same member
-  auction.bids
-    .filter((b) => b.bidder.id === memberId && !b.isCanceled)
+  auctionBids
+    .filter((b) => b.bidderId === memberId && !b.isCanceled)
     .forEach((b) => {
       b.isCanceled = true
     })
 
   const amount = bidAmount ?? (auction.buyNowPrice as bigint)
-  const previousTopBid =
-    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' ? auction.topBid : null
+  const previousTopBidId =
+    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' ? auction.topBidId : null
 
   // prepare bid record
-  const newBid = new Bid({
-    id: ec.collections.Bid.getNextId(),
+  const newBid = bidRepository.new({
+    id: bidRepository.getNextId(),
     createdAt: new Date(block.timestamp),
-    auction,
-    nft: new OwnedNft({ id: videoId.toString() }),
-    bidder: new Membership({ id: memberId }),
+    auctionId: auction.id,
+    nftId: videoId,
+    bidderId: memberId,
     amount,
     createdInBlock: block.height,
     isCanceled: false,
     indexInBlock,
-    previousTopBid,
+    previousTopBidId,
   })
-  auction.bids.push(newBid)
-  ec.collections.Bid.push(newBid)
+  auctionBids.push(newBid)
 
   // check if the auction's top bid needs to be updated, this can happen in those cases:
   // 1. auction doesn't have the top bid at the moment, new bid should be new top bid
   // 2. new bid is higher than the current top bid
   // 3. new bid canceled previous top bid (user changed their bid to a lower one), so we need to find a new one
-
-  if (!auction.topBid || newBid.amount > auction.topBid.amount) {
+  const previousTopBid = auctionBids.find((b) => b.id === previousTopBidId)
+  if (!previousTopBid || newBid.amount > previousTopBid.amount) {
     // handle cases 1 and 2
-    auction.topBid = newBid
+    auction.topBidId = newBid.id
   } else {
     // handle case 3
-    auction.topBid = findTopBid(auction.bids)
+    auction.topBidId = findTopBid(auctionBids)?.id
   }
 
-  return newBid
+  return { bid: newBid, auction }
 }
 
 export async function finishAuction(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   videoId: string,
   block: SubstrateBlock,
   openAuctionWinner?: { winnerId: bigint; bidAmount: bigint }
-): Promise<{ winningBid: Bid; auction: Auction; previousNftOwner: NftOwner }> {
+): Promise<{
+  winningBid: Flat<Bid>
+  auction: Flat<Auction>
+  nft: Flat<OwnedNft>
+  previousNftOwner: NftOwner
+}> {
   function findOpenAuctionWinningBid(
-    bids: Bid[],
+    bids: Flat<Bid>[],
     bidAmount: bigint,
     winnerId: string,
     videoId: string
-  ): Bid {
+  ): Flat<Bid> {
     const winningBid = bids.find(
-      (bid) => !bid.isCanceled && bid.bidder.id === winnerId && bid.amount === bidAmount
+      (bid) => !bid.isCanceled && bid.bidderId === winnerId && bid.amount === bidAmount
     )
 
     if (!winningBid) {
@@ -456,31 +448,30 @@ export async function finishAuction(
   }
 
   // load video and auction
-  const auction = await getCurrentAuctionFromVideo(ec, videoId.toString(), {
-    topBid: { bidder: true },
-    bids: { bidder: true },
-    nft: true,
-  })
+  const auction = await getCurrentAuctionFromVideo(overlay, videoId)
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId)
+  const bidRepository = overlay.getRepository(Bid)
+  const auctionBids = await bidRepository.getManyByRelation('auctionId', auction.id)
 
   const winningBid = openAuctionWinner
     ? findOpenAuctionWinningBid(
-        auction.bids || [],
+        auctionBids,
         openAuctionWinner.bidAmount,
         openAuctionWinner.winnerId.toString(),
         videoId
       )
-    : (auction.topBid as Bid)
+    : assertNotNull(auctionBids.find((b) => b.id === auction.topBidId))
 
   // update NFT's transactional status
-  auction.nft.transactionalStatus = new TransactionalStatusIdle()
+  nft.transactionalStatus = new TransactionalStatusIdle()
   // update NFT owner
-  const previousNftOwner = auction.nft.owner
-  auction.nft.owner = new NftOwnerMember({ member: winningBid.bidder.id })
+  const previousNftOwner = nft.owner
+  nft.owner = new NftOwnerMember({ member: assertNotNull(winningBid.bidderId) })
 
   // update auction
   auction.isCompleted = true
-  auction.winningMember = winningBid.bidder
+  auction.winningMemberId = winningBid.bidderId
   auction.endedAtBlock = block.height
 
-  return { winningBid, auction, previousNftOwner }
+  return { winningBid, nft, auction, previousNftOwner }
 }

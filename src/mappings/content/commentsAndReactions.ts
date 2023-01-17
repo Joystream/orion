@@ -14,8 +14,9 @@ import {
 } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { isSet } from '@joystream/metadata-protobuf/utils'
-import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
+  BannedMember,
   Comment,
   CommentCreatedEventData,
   CommentReaction,
@@ -23,7 +24,6 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
-  Membership,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -36,7 +36,7 @@ import {
   VideoReactionsCountByReactionType,
 } from '../../model'
 import { config, ConfigVariable } from '../../utils/config'
-import { EntitiesCollector, ModelNames } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   backwardCompatibleMetaID,
   genericEventFields,
@@ -52,7 +52,7 @@ function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions
 }
 
 function getOrCreateVideoReactionsCountByType(
-  video: Video,
+  video: Flat<Video>,
   reactionType: VideoReactionOptions
 ): VideoReactionsCountByReactionType {
   video.reactionsCountByReactionId = video.reactionsCountByReactionId || []
@@ -65,7 +65,7 @@ function getOrCreateVideoReactionsCountByType(
 }
 
 function getOrCreateCommentReactionsCountByReactionId(
-  comment: Comment,
+  comment: Flat<Comment>,
   reactionId: number
 ): CommentReactionsCountByReactionId {
   comment.reactionsCountByReactionId = comment.reactionsCountByReactionId || []
@@ -100,7 +100,7 @@ function commentReactionEntityId(idSegments: {
 function notFoundError<T>(
   metaClass: AnyMetadataClass<T>,
   decodedMessage: DecodedMetadataObject<T>,
-  entityName: ModelNames,
+  entityName: string,
   entityId: string
 ) {
   return metaprotocolTransactionFailure(metaClass, `${entityName} by id ${entityId} not found`, {
@@ -167,22 +167,23 @@ function unexpectedCommentStatusError<T>(
 }
 
 function processVideoReaction(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   memberId: string,
-  video: Video,
+  video: Flat<Video>,
   reactionType: VideoReactionOptions,
-  existingReaction?: VideoReaction
+  existingReaction?: Flat<VideoReaction>
 ) {
+  const videoReactionRepository = overlay.getRepository(VideoReaction)
   const newReactionTypeCounter = getOrCreateVideoReactionsCountByType(video, reactionType)
 
   const videoReaction =
     existingReaction ||
-    new VideoReaction({
+    videoReactionRepository.new({
       id: videoReactionEntityId({ memberId, videoId: video.id }),
-      video,
+      videoId: video.id,
       reaction: reactionType,
-      member: new Membership({ id: memberId }),
+      memberId,
       createdAt: new Date(block.timestamp),
     })
 
@@ -197,7 +198,7 @@ function processVideoReaction(
       --video.reactionsCount
       --previousReactionTypeCounter.count
       // remove reaction
-      ec.collections.VideoReaction.remove(existingReaction)
+      videoReactionRepository.remove(existingReaction)
       return
     }
     // otherwise...
@@ -211,12 +212,10 @@ function processVideoReaction(
     ++video.reactionsCount
     ++newReactionTypeCounter.count
   }
-
-  ec.collections.VideoReaction.push(videoReaction)
 }
 
 export async function processReactVideoMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   memberId: string,
   message: DecodedMetadataObject<IReactVideo>
@@ -225,7 +224,7 @@ export async function processReactVideoMessage(
   const reactionType = parseVideoReaction(reaction)
 
   // load video
-  const video = await ec.collections.Video.get(videoId, { channel: { bannedMembers: true } })
+  const video = await overlay.getRepository(Video).getById(videoId)
 
   // ensure video exists
   if (!video) {
@@ -233,8 +232,13 @@ export async function processReactVideoMessage(
   }
 
   // ensure member is not banned from channel
-  if ((video.channel.bannedMembers || []).some((m) => m.id === memberId)) {
-    return bannedFromChannelError(ReactVideo, message, memberId, video.channel.id)
+  const channelId = assertNotNull(video.channelId)
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId)
+
+  if (bannedMembers.some((m) => m.memberId === memberId)) {
+    return bannedFromChannelError(ReactVideo, message, memberId, channelId)
   }
 
   // ensure reactions are enabled
@@ -243,43 +247,45 @@ export async function processReactVideoMessage(
   }
 
   // load existing reaction by member to the video (if any)
-  const existingReaction = await ec.collections.VideoReaction.get(
-    videoReactionEntityId({ memberId, videoId })
-  )
+  const existingReaction = await overlay
+    .getRepository(VideoReaction)
+    .getById(videoReactionEntityId({ memberId, videoId }))
 
-  processVideoReaction(ec, block, memberId, video, reactionType, existingReaction)
+  await processVideoReaction(overlay, block, memberId, video, reactionType, existingReaction)
 
   return new MetaprotocolTransactionResultOK()
 }
 
 export async function processReactCommentMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   memberId: string,
   message: DecodedMetadataObject<IReactComment>
 ): Promise<MetaprotocolTransactionResult> {
   const { commentId, reactionId } = message
 
   // load comment
-  const comment = await ec.collections.Comment.get(commentId, {
-    video: { channel: { bannedMembers: true } },
-  })
+  const comment = await overlay.getRepository(Comment).getById(commentId)
 
   // ensure comment exists
   if (!comment) {
     return notFoundError(ReactComment, message, 'Comment', commentId)
   }
 
-  const { video } = comment
+  const video = await overlay.getRepository(Video).getByIdOrFail(assertNotNull(comment.videoId))
+  const channelId = assertNotNull(video.channelId)
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId)
 
   // ensure member is not banned from channel
-  if ((video.channel.bannedMembers || []).some((m) => m.id === memberId)) {
-    return bannedFromChannelError(ReactComment, message, memberId, video.channel.id)
+  if (bannedMembers.some((m) => m.memberId === memberId)) {
+    return bannedFromChannelError(ReactComment, message, memberId, channelId)
   }
 
   // load same reaction by member to the comment (if any)
-  const existingReaction = await ec.collections.CommentReaction.get(
-    commentReactionEntityId({ memberId, commentId, reactionId })
-  )
+  const existingReaction = await overlay
+    .getRepository(CommentReaction)
+    .getById(commentReactionEntityId({ memberId, commentId, reactionId }))
 
   // load comment reaction count by reaction id
   const reactionsCountByReactionId = getOrCreateCommentReactionsCountByReactionId(
@@ -288,36 +294,35 @@ export async function processReactCommentMessage(
   )
 
   // remove the reaction if same reaction already exists by the member on the comment
+  const commentReactionRepository = overlay.getRepository(CommentReaction)
   if (existingReaction) {
     // decrement counters
     --reactionsCountByReactionId.count
     --comment.reactionsAndRepliesCount
     --comment.reactionsCount
     // remove reaction
-    ec.collections.CommentReaction.remove(existingReaction)
+    commentReactionRepository.remove(existingReaction)
   } else {
     // new reaction
-    const newReaction = new CommentReaction({
+    commentReactionRepository.new({
       id: commentReactionEntityId({ memberId, commentId, reactionId }),
-      comment,
+      commentId: comment.id,
       reactionId,
-      video,
-      member: new Membership({ id: memberId }),
+      videoId: video.id,
+      memberId,
     })
 
     // increment counters
     ++reactionsCountByReactionId.count
     ++comment.reactionsAndRepliesCount
     ++comment.reactionsCount
-    // add reaction
-    ec.collections.CommentReaction.push(newReaction)
   }
 
   return new MetaprotocolTransactionResultOK()
 }
 
 export async function processCreateCommentMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   txHash: string | undefined,
@@ -327,16 +332,21 @@ export async function processCreateCommentMessage(
   const { videoId, parentCommentId, body } = message
 
   // load video
-  const video = await ec.collections.Video.get(videoId, { channel: { bannedMembers: true } })
+  const video = await overlay.getRepository(Video).getById(videoId)
 
   // ensure video exists
   if (!video) {
     return notFoundError(CreateComment, message, 'Video', videoId)
   }
 
+  const channelId = assertNotNull(video.channelId)
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId)
+
   // ensure member is not banned from channel
-  if ((video.channel.bannedMembers || []).some((m) => m.id === memberId)) {
-    return bannedFromChannelError(CreateComment, message, memberId, video.channel.id)
+  if (bannedMembers.some((m) => m.memberId === memberId)) {
+    return bannedFromChannelError(CreateComment, message, memberId, channelId)
   }
 
   // ensure comment section is enabled
@@ -345,7 +355,7 @@ export async function processCreateCommentMessage(
   }
 
   const parentComment = isSet(parentCommentId)
-    ? await ec.collections.Comment.get(parentCommentId, { video: true })
+    ? await overlay.getRepository(Comment).getById(parentCommentId)
     : undefined
 
   // ensure parent comment exists if the id was specified
@@ -358,7 +368,7 @@ export async function processCreateCommentMessage(
   }
 
   // ensure parent comment's video id matches with the new comment's video id
-  if (parentComment && parentComment.video.id !== videoId) {
+  if (parentComment && parentComment.videoId !== videoId) {
     return metaprotocolTransactionFailure(
       CreateComment,
       `Parent comment ${parentComment.id} does not exist on video ${videoId}`,
@@ -376,38 +386,35 @@ export async function processCreateCommentMessage(
   }
 
   // add new comment
-  const comment = new Comment({
+  const comment = overlay.getRepository(Comment).new({
     // TODO: Re-think backward compatibility
-    id: backwardCompatibleMetaID(block, indexInBlock), // ec.collections.Comment.getNextId(),
+    id: backwardCompatibleMetaID(block, indexInBlock), // overlay.getRepository(Comment).getNextId(),
     createdAt: new Date(block.timestamp),
     text: body,
-    video,
+    videoId: video.id,
     status: CommentStatus.VISIBLE,
-    author: new Membership({ id: memberId }),
-    parentComment,
+    authorId: memberId,
+    parentCommentId: parentComment?.id,
     repliesCount: 0,
     reactionsCount: 0,
     reactionsAndRepliesCount: 0,
     isEdited: false,
   })
-  ec.collections.Comment.push(comment)
 
   // add CommentCreated event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, txHash),
-      data: new CommentCreatedEventData({
-        comment: comment.id,
-        text: body,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, txHash),
+    data: new CommentCreatedEventData({
+      comment: comment.id,
+      text: body,
+    }),
+  })
 
   return new MetaprotocolTransactionResultCommentCreated({ commentCreated: comment.id })
 }
 
 export async function processEditCommentMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   txHash: string | undefined,
@@ -417,25 +424,22 @@ export async function processEditCommentMessage(
   const { commentId, newBody } = message
 
   // load comment
-  const comment = await ec.collections.Comment.get(commentId, {
-    author: true,
-    video: {
-      channel: {
-        bannedMembers: true,
-      },
-    },
-  })
+  const comment = await overlay.getRepository(Comment).getById(commentId)
 
   // ensure comment exists
   if (!comment) {
     return notFoundError(EditComment, message, 'Comment', commentId)
   }
 
-  const { video } = comment
+  const video = await overlay.getRepository(Video).getByIdOrFail(assertNotNull(comment.videoId))
+  const channelId = assertNotNull(video.channelId)
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId)
 
   // ensure member is not banned from channel
-  if ((video.channel.bannedMembers || []).some((m) => m.id === memberId)) {
-    return bannedFromChannelError(EditComment, message, memberId, video.channel.id)
+  if (bannedMembers.some((m) => m.memberId === memberId)) {
+    return bannedFromChannelError(EditComment, message, memberId, channelId)
   }
 
   // ensure video's comment section is enabled
@@ -444,7 +448,7 @@ export async function processEditCommentMessage(
   }
 
   // ensure comment is being edited by the author
-  if (comment.author.id !== memberId) {
+  if (comment.authorId !== memberId) {
     return notCommentAuthorError(EditComment, message, memberId, commentId)
   }
 
@@ -454,15 +458,13 @@ export async function processEditCommentMessage(
   }
 
   // add an event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, txHash),
-      data: new CommentTextUpdatedEventData({
-        comment: commentId,
-        newText: newBody,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, txHash),
+    data: new CommentTextUpdatedEventData({
+      comment: commentId,
+      newText: newBody,
+    }),
+  })
 
   // update the comment
   comment.text = newBody
@@ -474,32 +476,30 @@ export async function processEditCommentMessage(
 }
 
 export async function processDeleteCommentMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   memberId: string,
   message: DecodedMetadataObject<IDeleteComment>
 ): Promise<MetaprotocolTransactionResult> {
   const { commentId } = message
 
   // load comment
-  const comment = await ec.collections.Comment.get(commentId, {
-    author: true,
-    parentComment: true,
-    video: {
-      channel: {
-        bannedMembers: true,
-      },
-    },
-  })
+  const commentRepository = overlay.getRepository(Comment)
+  const comment = await commentRepository.getById(commentId)
 
   // ensure comment exists
   if (!comment) {
     return notFoundError(DeleteComment, message, 'Comment', commentId)
   }
-  const { video, parentComment } = comment
+
+  const video = await overlay.getRepository(Video).getByIdOrFail(assertNotNull(comment.videoId))
+  const channelId = assertNotNull(video.channelId)
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId)
 
   // ensure member is not banned from channel
-  if ((video.channel.bannedMembers || []).some((m) => m.id === memberId)) {
-    return bannedFromChannelError(DeleteComment, message, memberId, video.channel.id)
+  if (bannedMembers.some((m) => m.memberId === memberId)) {
+    return bannedFromChannelError(DeleteComment, message, memberId, channelId)
   }
 
   // ensure video's comment section is enabled
@@ -508,7 +508,7 @@ export async function processDeleteCommentMessage(
   }
 
   // ensure comment is being removed by the author
-  if (comment.author.id !== memberId) {
+  if (comment.authorId !== memberId) {
     notCommentAuthorError(DeleteComment, message, memberId, comment.id)
   }
 
@@ -521,10 +521,10 @@ export async function processDeleteCommentMessage(
   --video.commentsCount
 
   // decrement parent comment's replies count
-  if (parentComment) {
+  if (comment.parentCommentId) {
+    const parentComment = await commentRepository.getByIdOrFail(comment.parentCommentId)
     --parentComment.repliesCount
     --parentComment.reactionsAndRepliesCount
-    ec.collections.Comment.push(parentComment)
   }
 
   // update the comment
@@ -537,7 +537,7 @@ export async function processDeleteCommentMessage(
 }
 
 export async function processCreateVideoCategoryMessage(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   message: DecodedMetadataObject<ICreateVideoCategory>
@@ -545,7 +545,7 @@ export async function processCreateVideoCategoryMessage(
   const { parentCategoryId, name, description } = message
 
   const parentCategory = isSet(parentCategoryId)
-    ? await ec.collections.VideoCategory.get(parentCategoryId)
+    ? await overlay.getRepository(VideoCategory).getById(parentCategoryId)
     : undefined
 
   // ensure parent category exists if specified
@@ -558,16 +558,15 @@ export async function processCreateVideoCategoryMessage(
   }
 
   // create new video category
-  const videoCategory = new VideoCategory({
+  overlay.getRepository(VideoCategory).new({
     // TODO: Re-think backward-compatibility
-    id: `${block.height}-${indexInBlock}`, // ec.collections.VideoCategory.getNextId(),
+    id: `${block.height}-${indexInBlock}`, // overlay.getRepository(VideoCategory).getNextId(),
     name: name || null,
     description: description || null,
-    parentCategory,
+    parentCategoryId,
     createdInBlock: block.height,
-    isSupported: await config.get(ConfigVariable.SupportNewCategories, ec.em),
+    isSupported: await config.get(ConfigVariable.SupportNewCategories, overlay.getEm()),
   })
-  ec.collections.VideoCategory.push(videoCategory)
 
   return new MetaprotocolTransactionResultOK()
 }
