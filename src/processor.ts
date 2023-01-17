@@ -82,7 +82,7 @@ import {
 } from './mappings/membership'
 import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
-import { EntitiesCollector } from './utils/EntitiesCollector'
+import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 
 const defaultEventOptions = {
@@ -252,18 +252,18 @@ async function processEvent<EventName extends EventNames>(
   indexInBlock: number,
   extrinsicHash: string | undefined,
   rawEvent: Event,
-  ec: EntitiesCollector
+  overlay: EntityManagerOverlay
 ) {
   const eventHandler: EventHandler<EventName> = eventHandlers[name]
   const EventConstructor = eventConstructors[name]
   const event = new EventConstructor(ctx, rawEvent) as EventInstance<EventName>
-  await eventHandler({ block, ec, event, indexInBlock, extrinsicHash })
+  await eventHandler({ block, overlay, event, indexInBlock, extrinsicHash })
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
 
-  const ec = await EntitiesCollector.create(ctx.store)
+  const overlay = await EntityManagerOverlay.create(ctx.store)
 
   for (const block of ctx.blocks) {
     for (const item of block.items) {
@@ -276,12 +276,12 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
           item.event.indexInBlock,
           item.event.extrinsic?.hash,
           item.event,
-          ec
+          overlay
         )
       }
     }
   }
 
   ctx.log.info(`Saving database updates...`)
-  await ec.updateDatabase()
+  await overlay.updateDatabase()
 })

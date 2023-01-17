@@ -27,7 +27,7 @@ import {
   isSet,
   isValidLanguageCode,
 } from '@joystream/metadata-protobuf/utils'
-import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   Channel,
   Comment,
@@ -39,28 +39,30 @@ import {
   MetaprotocolTransactionResultOK,
   StorageDataObject,
   Video,
+  VideoCategory,
   VideoMediaEncoding,
   VideoMediaMetadata,
   VideoSubtitle,
 } from '../../model'
-import { EntitiesCollector } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { invalidMetadata, metaprotocolTransactionFailure } from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
-  channel: Channel,
+  channel: Flat<Channel>,
   meta: DecodedMetadataObject<IChannelMetadata>,
   newAssetIds: bigint[]
 ) {
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
   const assets = await Promise.all(
-    newAssetIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
+    newAssetIds.map((id) => dataObjectRepository.getByIdOrFail(id.toString()))
   )
 
   integrateMeta(channel, meta, ['title', 'description', 'isPublic'])
 
-  processAssets(ec, block, assets, channel, ChannelMetadata, meta, ASSETS_MAP.channel)
+  await processAssets(overlay, block, assets, channel, ChannelMetadata, meta, ASSETS_MAP.channel)
 
   // prepare language if needed
   if (isSet(meta.language)) {
@@ -69,15 +71,16 @@ export async function processChannelMetadata(
 }
 
 export async function processVideoMetadata(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
-  video: Video,
+  video: Flat<Video>,
   meta: DecodedMetadataObject<IVideoMetadata>,
   newAssetIds: bigint[]
 ): Promise<void> {
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
   const assets = await Promise.all(
-    newAssetIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
+    newAssetIds.map((id) => dataObjectRepository.getByIdOrFail(id.toString()))
   )
 
   integrateMeta(video, meta, [
@@ -89,17 +92,17 @@ export async function processVideoMetadata(
     'isPublic',
   ])
 
-  processAssets(ec, block, assets, video, VideoMetadata, meta, ASSETS_MAP.video)
+  await processAssets(overlay, block, assets, video, VideoMetadata, meta, ASSETS_MAP.video)
 
   // prepare video category if needed
-  if (meta.category) {
-    const category = await ec.collections.VideoCategory.get(meta.category)
+  if (isSet(meta.category)) {
+    const category = await overlay.getRepository(VideoCategory).getById(meta.category)
     if (!category) {
       invalidMetadata(VideoMetadata, `Category by id ${meta.category} not found!`, {
         decodedMessage: meta,
       })
     }
-    video.category = category || null
+    video.categoryId = category?.id || null
   }
 
   // prepare media meta information if needed
@@ -111,12 +114,12 @@ export async function processVideoMetadata(
   ) {
     // prepare video file size if poosible
     const videoSize = extractVideoSize(assets)
-    processVideoMediaMetadata(ec, block, indexInBlock, video, meta, videoSize)
+    await processVideoMediaMetadata(overlay, block, indexInBlock, video.id, meta, videoSize)
   }
 
   // prepare license if needed
   if (isSet(meta.license)) {
-    processVideoLicense(ec, block, indexInBlock, video, meta.license)
+    await processVideoLicense(overlay, block, indexInBlock, video, meta.license)
   }
 
   // prepare language if needed
@@ -127,7 +130,7 @@ export async function processVideoMetadata(
   // prepare subtitles if needed
   const subtitles = meta.clearSubtitles ? [] : meta.subtitles
   if (isSet(subtitles)) {
-    processVideoSubtitles(ec, block, video, assets, subtitles)
+    await processVideoSubtitles(overlay, block, video, assets, subtitles)
   }
 
   if (isSet(meta.publishedBeforeJoystream)) {
@@ -139,45 +142,47 @@ export async function processVideoMetadata(
   }
 }
 
-function extractVideoSize(assets: StorageDataObject[]): bigint | undefined {
+function extractVideoSize(assets: Flat<StorageDataObject>[]): bigint | undefined {
   const mediaAsset = assets.find((a) => a.type?.isTypeOf === 'DataObjectTypeVideoMedia')
   return mediaAsset ? mediaAsset.size : undefined
 }
 
-function processVideoMediaEncoding(
-  ec: EntitiesCollector,
-  mediaMetadata: VideoMediaMetadata,
+async function processVideoMediaEncoding(
+  overlay: EntityManagerOverlay,
+  mediaMetadata: Flat<VideoMediaMetadata>,
   metadata: DecodedMetadataObject<IMediaType>
-): void {
-  if (!mediaMetadata.encoding) {
-    // TODO: Make it one-to-many w/ video media?
-    // Or perhaps just jsonb?
-    mediaMetadata.encoding = new VideoMediaEncoding({
+): Promise<void> {
+  const metadataRepository = overlay.getRepository(VideoMediaEncoding)
+  // TODO: Make it one-to-many w/ video media?
+  // Or perhaps just jsonb?
+  const encoding =
+    (await metadataRepository.getById(mediaMetadata.id)) ||
+    metadataRepository.new({
       id: mediaMetadata.id,
     })
-  }
+
   // integrate media encoding-related data
-  integrateMeta(mediaMetadata.encoding, metadata, ['codecName', 'container', 'mimeMediaType'])
-  ec.collections.VideoMediaEncoding.push(mediaMetadata.encoding)
+  integrateMeta(encoding, metadata, ['codecName', 'container', 'mimeMediaType'])
+  mediaMetadata.encodingId = encoding.id
 }
 
-function processVideoMediaMetadata(
-  ec: EntitiesCollector,
+async function processVideoMediaMetadata(
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
-  video: Video,
+  videoId: string,
   metadata: DecodedMetadataObject<IVideoMetadata>,
   videoSize: bigint | undefined
-): void {
-  if (!video.mediaMetadata) {
-    video.mediaMetadata = new VideoMediaMetadata({
+): Promise<void> {
+  const metadataRepository = overlay.getRepository(VideoMediaMetadata)
+  const videoMediaMetadata =
+    (await metadataRepository.getOneByRelation('videoId', videoId)) ||
+    metadataRepository.new({
       // TODO: Re-think backward-compatibility
-      id: `${block.height}-${indexInBlock}`, // video.id,
+      id: `${block.height}-${indexInBlock}`, // videoId,
       createdInBlock: block.height,
-      video,
+      videoId,
     })
-  }
-  ec.collections.VideoMediaMetadata.push(video.mediaMetadata)
 
   // integrate media-related data
   const mediaMetadataUpdate = {
@@ -185,69 +190,75 @@ function processVideoMediaMetadata(
     pixelWidth: metadata.mediaPixelWidth,
     pixelHeight: metadata.mediaPixelHeight,
   }
-  integrateMeta(video.mediaMetadata, mediaMetadataUpdate, ['pixelWidth', 'pixelHeight', 'size'])
+  integrateMeta(videoMediaMetadata, mediaMetadataUpdate, ['pixelWidth', 'pixelHeight', 'size'])
   if (metadata.mediaType) {
-    processVideoMediaEncoding(ec, video.mediaMetadata, metadata.mediaType)
+    await processVideoMediaEncoding(overlay, videoMediaMetadata, metadata.mediaType)
   }
 }
 
-function processVideoLicense(
-  ec: EntitiesCollector,
+async function processVideoLicense(
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
-  video: Video,
+  video: Flat<Video>,
   licenseMetadata: DecodedMetadataObject<ILicense>
-): void {
+): Promise<void> {
+  const licenseRepository = overlay.getRepository(License)
   if (!isEmptyObject(licenseMetadata)) {
     // license is meant to be created/updated
     // TODO: Make it one-to-many w/ video?
-    video.license =
-      video.license ||
-      new License({
+    const videoLicense =
+      (await licenseRepository.getById(video.licenseId || '')) ||
+      licenseRepository.new({
         // TODO: Re-think backward-compatibility
-        id: `${block.height}-${indexInBlock}`, // video.id,
+        id: `${block.height}-${indexInBlock}`, // videoId,
       })
-    integrateMeta(video.license, licenseMetadata, ['attribution', 'code', 'customText'])
-    ec.collections.License.push(video.license)
+    integrateMeta(videoLicense, licenseMetadata, ['attribution', 'code', 'customText'])
+    video.licenseId = videoLicense.id
   } else {
     // license is meant to be unset/removed
-    if (video.license) {
-      ec.collections.License.remove(video.license)
+    if (video.licenseId) {
+      licenseRepository.remove(video.licenseId)
     }
-    video.license = null
+    video.licenseId = null
   }
 }
 
-function processVideoSubtitles(
-  ec: EntitiesCollector,
+async function processVideoSubtitles(
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
-  video: Video,
-  assets: StorageDataObject[],
+  video: Flat<Video>,
+  assets: Flat<StorageDataObject>[],
   subtitlesMeta: DecodedMetadataObject<ISubtitleMetadata>[]
-): void {
-  if (video.subtitles) {
-    ec.collections.StorageDataObject.remove(
-      ...video.subtitles.flatMap((s) => (s.asset ? [s.asset] : []))
-    )
-    ec.collections.VideoSubtitle.remove(...video.subtitles)
-  }
-  video.subtitles = []
+): Promise<void> {
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
+  const subtitlesRepository = overlay.getRepository(VideoSubtitle)
+  const currentSubtitles = await subtitlesRepository.getManyByRelation('videoId', video.id)
+  dataObjectRepository.remove(...currentSubtitles.flatMap((s) => (s.assetId ? [s.assetId] : [])))
+  subtitlesRepository.remove(...currentSubtitles)
   for (const subtitleMeta of subtitlesMeta) {
     const subtitleId = `${video.id}-${subtitleMeta.type}-${subtitleMeta.language}`
-    const subtitle = new VideoSubtitle({
+    const subtitle = subtitlesRepository.new({
       id: subtitleId,
       type: subtitleMeta.type,
-      video,
+      videoId: video.id,
       mimeType: subtitleMeta.mimeType,
     })
     processLanguage(SubtitleMetadata, subtitle, subtitleMeta.language)
-    ec.collections.VideoSubtitle.push(subtitle)
-    processAssets(ec, block, assets, subtitle, SubtitleMetadata, subtitleMeta, ASSETS_MAP.subtitle)
+    await processAssets(
+      overlay,
+      block,
+      assets,
+      subtitle,
+      SubtitleMetadata,
+      subtitleMeta,
+      ASSETS_MAP.subtitle
+    )
   }
 }
 
 function processPublishedBeforeJoystream(
-  video: Video,
+  video: Flat<Video>,
   metadata: DecodedMetadataObject<IPublishedBeforeJoystream>
 ): void {
   if (!metadata.isPublished) {
@@ -271,25 +282,28 @@ function processPublishedBeforeJoystream(
   video.publishedBeforeJoystream = new Date(timestamp)
 }
 
-function processAssets<E, M extends AnyMetadataClass<unknown>>(
-  ec: EntitiesCollector,
+async function processAssets<E, M extends AnyMetadataClass<unknown>>(
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
-  assets: StorageDataObject[],
-  entity: { [K in EntityAssetProps<E>]?: StorageDataObject | null | undefined },
+  assets: Flat<StorageDataObject>[],
+  entity: { [K in EntityAssetProps<E>]?: string | null | undefined },
   metadataClass: M,
   meta: { [K in MetaNumberProps<AsDecoded<M>>]?: number | null | undefined },
   entityAssetsMap: EntityAssetsMap<E, AsDecoded<M>>
-): void {
+): Promise<void> {
   for (const { metaProperty, entityProperty, createDataObjectType } of entityAssetsMap) {
     const newAssetIndex: number | undefined = meta[metaProperty] ?? undefined
-    const currentAsset = entity[entityProperty]
+    const currentAssetId = entity[entityProperty]
+    const currentAsset = currentAssetId
+      ? await overlay.getRepository(StorageDataObject).getByIdOrFail(currentAssetId)
+      : null
     if (isSet(newAssetIndex)) {
       const newAsset = findAssetByIndex(metadataClass, assets, newAssetIndex)
       if (newAsset) {
         if (currentAsset) {
           currentAsset.unsetAt = new Date(block.timestamp)
         }
-        entity[entityProperty] = newAsset
+        entity[entityProperty] = newAsset.id
         newAsset.type = createDataObjectType(entity as E)
       }
     }
@@ -298,9 +312,9 @@ function processAssets<E, M extends AnyMetadataClass<unknown>>(
 
 function findAssetByIndex(
   metaClass: AnyMetadataClass<unknown>,
-  assets: StorageDataObject[],
+  assets: Flat<StorageDataObject>[],
   index: number
-): StorageDataObject | null {
+): Flat<StorageDataObject> | null {
   if (assets[index]) {
     return assets[index]
   }
@@ -315,7 +329,7 @@ function findAssetByIndex(
 
 function processLanguage(
   metaClass: AnyMetadataClass<unknown>,
-  entity: Video | Channel | VideoSubtitle,
+  entity: Flat<Video> | Flat<Channel> | Flat<VideoSubtitle>,
   iso: string
 ) {
   // ensure language string is valid
@@ -328,24 +342,24 @@ function processLanguage(
 }
 
 export async function processOwnerRemark(
-  ec: EntitiesCollector,
-  channel: Channel,
+  overlay: EntityManagerOverlay,
+  channel: Flat<Channel>,
   decodedMessage: DecodedMetadataObject<IChannelOwnerRemarked>
 ): Promise<MetaprotocolTransactionResult> {
   if (decodedMessage.pinOrUnpinComment) {
-    return processPinOrUnpinCommentMessage(ec, channel, decodedMessage.pinOrUnpinComment)
+    return processPinOrUnpinCommentMessage(overlay, channel, decodedMessage.pinOrUnpinComment)
   }
 
   if (decodedMessage.videoReactionsPreference) {
     return processVideoReactionsPreferenceMessage(
-      ec,
+      overlay,
       channel,
       decodedMessage.videoReactionsPreference
     )
   }
 
   if (decodedMessage.moderateComment) {
-    return processModerateCommentMessage(ec, channel, decodedMessage.moderateComment)
+    return processModerateCommentMessage(overlay, channel, decodedMessage.moderateComment)
   }
 
   return metaprotocolTransactionFailure(
@@ -358,17 +372,14 @@ export async function processOwnerRemark(
 }
 
 async function getCommentForMetaprotocolAction<T>(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   metaClass: AnyMetadataClass<T>,
-  channel: Channel,
+  channel: Flat<Channel>,
   message: DecodedMetadataObject<T>,
   commentId: string,
   requiredStatus: CommentStatus
-): Promise<Comment | MetaprotocolTransactionResultFailed> {
-  const comment = await ec.collections.Comment.get(commentId, {
-    video: { channel: true },
-    parentComment: true,
-  })
+): Promise<{ comment: Flat<Comment>; video: Flat<Video> } | MetaprotocolTransactionResultFailed> {
+  const comment = await overlay.getRepository(Comment).getById(commentId)
 
   if (!comment) {
     return metaprotocolTransactionFailure(metaClass, `Comment by id ${commentId} not found`, {
@@ -376,10 +387,10 @@ async function getCommentForMetaprotocolAction<T>(
     })
   }
 
-  const { video } = comment
+  const video = await overlay.getRepository(Video).getByIdOrFail(assertNotNull(comment.videoId))
 
   // ensure channel owns the video
-  if (video.channel.id !== channel.id) {
+  if (video.channelId !== channel.id) {
     return metaprotocolTransactionFailure(
       metaClass,
       `Cannot modify comment on video ${video.id} which does not belong to channel ${channel.id}`,
@@ -396,18 +407,18 @@ async function getCommentForMetaprotocolAction<T>(
     })
   }
 
-  return comment
+  return { comment, video }
 }
 
 export async function processPinOrUnpinCommentMessage(
-  ec: EntitiesCollector,
-  channel: Channel,
+  overlay: EntityManagerOverlay,
+  channel: Flat<Channel>,
   message: DecodedMetadataObject<IPinOrUnpinComment>
 ): Promise<MetaprotocolTransactionResult> {
   const { option } = message
 
   const commentOrFailure = await getCommentForMetaprotocolAction(
-    ec,
+    overlay,
     PinOrUnpinComment,
     channel,
     message,
@@ -419,22 +430,21 @@ export async function processPinOrUnpinCommentMessage(
     return commentOrFailure
   }
 
-  const comment = commentOrFailure
-  const { video } = comment
-  video.pinnedComment = option === PinOrUnpinComment.Option.PIN ? comment : null
+  const { comment, video } = commentOrFailure
+  video.pinnedCommentId = option === PinOrUnpinComment.Option.PIN ? comment.id : null
 
   return new MetaprotocolTransactionResultOK()
 }
 
 export async function processVideoReactionsPreferenceMessage(
-  ec: EntitiesCollector,
-  channel: Channel,
+  overlay: EntityManagerOverlay,
+  channel: Flat<Channel>,
   message: DecodedMetadataObject<IVideoReactionsPreference>
 ): Promise<MetaprotocolTransactionResult> {
   const { videoId, option } = message
 
   // load video
-  const video = await ec.collections.Video.get(videoId, { channel: true })
+  const video = await overlay.getRepository(Video).getById(videoId)
 
   if (!video) {
     return metaprotocolTransactionFailure(
@@ -445,7 +455,7 @@ export async function processVideoReactionsPreferenceMessage(
   }
 
   // ensure channel owns the video
-  if (video.channel.id !== channel.id) {
+  if (video.channelId !== channel.id) {
     return metaprotocolTransactionFailure(
       VideoReactionsPreference,
       `Cannot change preferences on video ${video.id} which does not belong to channel ${channel.id}`,
@@ -460,12 +470,12 @@ export async function processVideoReactionsPreferenceMessage(
 }
 
 export async function processModerateCommentMessage(
-  ec: EntitiesCollector,
-  channel: Channel,
+  overlay: EntityManagerOverlay,
+  channel: Flat<Channel>,
   message: DecodedMetadataObject<IModerateComment>
 ): Promise<MetaprotocolTransactionResult> {
   const commentOrFailure = await getCommentForMetaprotocolAction(
-    ec,
+    overlay,
     ModerateComment,
     channel,
     message,
@@ -477,19 +487,17 @@ export async function processModerateCommentMessage(
     return commentOrFailure
   }
 
-  const comment = commentOrFailure
-  const { video } = comment
+  const { comment, video } = commentOrFailure
 
   // decrement video's comment count
   --video.commentsCount
-  ec.collections.Video.push(video)
 
   // decrement parent comment's replies count
-  if (comment.parentComment) {
-    --comment.parentComment.repliesCount
-    --comment.parentComment.reactionsAndRepliesCount
-
-    ec.collections.Comment.push(comment.parentComment)
+  if (comment.parentCommentId) {
+    const commentRepository = overlay.getRepository(Comment)
+    const parentComment = await commentRepository.getByIdOrFail(comment.parentCommentId)
+    --parentComment.repliesCount
+    --parentComment.reactionsAndRepliesCount
   }
 
   comment.text = ''
@@ -499,12 +507,12 @@ export async function processModerateCommentMessage(
 }
 
 export async function processModeratorRemark(
-  ec: EntitiesCollector,
-  channel: Channel,
+  overlay: EntityManagerOverlay,
+  channel: Flat<Channel>,
   decodedMessage: DecodedMetadataObject<IChannelModeratorRemarked>
 ): Promise<MetaprotocolTransactionResult> {
   if (decodedMessage.moderateComment) {
-    return processModerateCommentMessage(ec, channel, decodedMessage.moderateComment)
+    return processModerateCommentMessage(overlay, channel, decodedMessage.moderateComment)
   }
 
   return metaprotocolTransactionFailure(

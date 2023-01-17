@@ -1,7 +1,6 @@
 import {
   Channel,
   Event,
-  Membership,
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionStatusEventData,
 } from '../../model'
@@ -15,7 +14,7 @@ import { processChannelMetadata, processModeratorRemark, processOwnerRemark } fr
 import { EventHandlerContext } from '../../utils/events'
 
 export async function processChannelCreatedEvent({
-  ec,
+  overlay,
   block,
   event: {
     asV1000: [
@@ -27,13 +26,12 @@ export async function processChannelCreatedEvent({
   },
 }: EventHandlerContext<'Content.ChannelCreated'>) {
   // create entity
-  const channel = new Channel({
+  const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
     createdAt: new Date(block.timestamp),
     createdInBlock: block.height,
-    ownerMember:
-      owner.__kind === 'Member' ? new Membership({ id: owner.value.toString() }) : undefined,
+    ownerMemberId: owner.__kind === 'Member' ? owner.value.toString() : undefined,
     rewardAccount: toAddress(rewardAccount),
     channelStateBloatBond: channelStateBloatBond.amount,
     followsNum: 0,
@@ -43,54 +41,49 @@ export async function processChannelCreatedEvent({
   // deserialize & process metadata
   if (channelCreationParameters.meta !== undefined) {
     const metadata = deserializeMetadata(ChannelMetadata, channelCreationParameters.meta) || {}
-    await processChannelMetadata(ec, block, channel, metadata, dataObjects)
+    await processChannelMetadata(overlay, block, channel, metadata, dataObjects)
   }
-
-  ec.collections.Channel.push(channel)
 }
 
 export async function processChannelUpdatedEvent({
-  ec,
+  overlay,
   block,
   event: {
     asV1000: [, channelId, channelUpdateParameters, newDataObjects],
   },
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
-  const channel = await ec.collections.Channel.getOrFail(channelId.toString(), {
-    avatarPhoto: true,
-    coverPhoto: true,
-  })
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
   //  update metadata if it was changed
   if (channelUpdateParameters.newMeta) {
     const newMetadata = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta) || {}
-    await processChannelMetadata(ec, block, channel, newMetadata, newDataObjects)
+    await processChannelMetadata(overlay, block, channel, newMetadata, newDataObjects)
   }
 }
 
 export async function processChannelDeletedEvent({
-  ec,
+  overlay,
   event: { asV1000: channelId },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
-  ec.collections.Channel.remove(new Channel({ id: channelId.toString() }))
+  overlay.getRepository(Channel).remove(channelId.toString())
 }
 
 export async function processChannelDeletedByModeratorEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
-  ec.collections.Channel.remove(new Channel({ id: channelId.toString() }))
+  overlay.getRepository(Channel).remove(channelId.toString())
 }
 
 export async function processChannelVisibilitySetByModeratorEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, channelId, isHidden],
   },
 }: EventHandlerContext<'Content.ChannelVisibilitySetByModerator'>): Promise<void> {
-  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
   channel.isCensored = isHidden
 }
 
@@ -98,31 +91,29 @@ export async function processChannelOwnerRemarkedEvent({
   block,
   indexInBlock,
   extrinsicHash,
-  ec,
+  overlay,
   event: {
     asV1000: [channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelOwnerRemarked'>): Promise<void> {
-  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
   const decodedMessage = deserializeMetadata(ChannelOwnerRemarked, messageBytes)
 
   const result = decodedMessage
-    ? await processOwnerRemark(ec, channel, decodedMessage)
+    ? await processOwnerRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',
       })
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new MetaprotocolTransactionStatusEventData({
-        result,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new MetaprotocolTransactionStatusEventData({
+      result,
+    }),
+  })
 }
 
 export async function processChannelAgentRemarkedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -130,20 +121,18 @@ export async function processChannelAgentRemarkedEvent({
     asV1000: [, channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelAgentRemarked'>): Promise<void> {
-  const channel = await ec.collections.Channel.getOrFail(channelId.toString())
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
   const decodedMessage = deserializeMetadata(ChannelModeratorRemarked, messageBytes)
 
   const result = decodedMessage
-    ? await processModeratorRemark(ec, channel, decodedMessage)
+    ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',
       })
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new MetaprotocolTransactionStatusEventData({
-        result,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new MetaprotocolTransactionStatusEventData({
+      result,
+    }),
+  })
 }

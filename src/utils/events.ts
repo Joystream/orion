@@ -68,7 +68,7 @@ import {
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
 } from '../types/events'
-import { EntitiesCollector } from './EntitiesCollector'
+import { EntityManagerOverlay } from './overlay'
 
 export const eventConstructors = {
   'Content.VideoCreated': ContentVideoCreatedEvent,
@@ -146,7 +146,7 @@ export type EventConstructor<EventName extends EventNames> = typeof eventConstru
 export type EventInstance<EventName extends EventNames> = InstanceType<EventConstructor<EventName>>
 
 export type EventHandlerContext<EventName extends EventNames> = {
-  ec: EntitiesCollector
+  overlay: EntityManagerOverlay
   block: SubstrateBlock
   indexInBlock: number
   extrinsicHash?: string

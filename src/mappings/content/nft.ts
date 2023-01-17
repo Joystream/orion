@@ -10,9 +10,11 @@ import {
   processNft,
 } from './utils'
 import {
+  Auction,
   AuctionBidCanceledEventData,
   AuctionBidMadeEventData,
   AuctionCanceledEventData,
+  Bid,
   BidMadeCompletingAuctionEventData,
   BuyNowCanceledEventData,
   BuyNowPriceUpdatedEventData,
@@ -25,15 +27,18 @@ import {
   NftSellOrderMadeEventData,
   OpenAuctionBidAcceptedEventData,
   OpenAuctionStartedEventData,
+  OwnedNft,
   TransactionalStatusAuction,
   TransactionalStatusBuyNow,
   TransactionalStatusIdle,
   TransactionalStatusInitiatedOfferToMember,
+  Video,
 } from '../../model'
 import { genericEventFields } from '../utils'
+import { assertNotNull } from '@subsquid/substrate-processor'
 
 export async function processOpenAuctionStartedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -42,30 +47,28 @@ export async function processOpenAuctionStartedEvent({
   },
 }: EventHandlerContext<'Content.OpenAuctionStarted'>): Promise<void> {
   // load the nft
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // create auction
-  const auction = createAuction(ec, block, nft, auctionParams)
+  const auction = await createAuction(overlay, block, nft, auctionParams)
 
   nft.transactionalStatus = new TransactionalStatusAuction({
     auction: auction.id,
   })
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new OpenAuctionStartedEventData({
-        actor: parseContentActor(contentActor),
-        auction: auction.id,
-        nftOwner: nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new OpenAuctionStartedEventData({
+      actor: parseContentActor(contentActor),
+      auction: auction.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processEnglishAuctionStartedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -74,30 +77,28 @@ export async function processEnglishAuctionStartedEvent({
   },
 }: EventHandlerContext<'Content.EnglishAuctionStarted'>): Promise<void> {
   // load nft
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // create new auction
-  const auction = createAuction(ec, block, nft, auctionParams)
+  const auction = await createAuction(overlay, block, nft, auctionParams)
 
   nft.transactionalStatus = new TransactionalStatusAuction({
     auction: auction.id,
   })
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new EnglishAuctionStartedEventData({
-        actor: parseContentActor(contentActor),
-        auction: auction.id,
-        nftOwner: nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new EnglishAuctionStartedEventData({
+      actor: parseContentActor(contentActor),
+      auction: auction.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processNftIssuedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -106,16 +107,14 @@ export async function processNftIssuedEvent({
   },
 }: EventHandlerContext<'Content.NftIssued'>): Promise<void> {
   // load video
-  const video = await ec.collections.Video.getOrFail(videoId.toString(), {
-    channel: { ownerMember: true },
-  })
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
 
   // prepare the new nft
-  processNft(ec, block, indexInBlock, extrinsicHash, video, actor, nftIssuanceParameters)
+  processNft(overlay, block, indexInBlock, extrinsicHash, video, actor, nftIssuanceParameters)
 }
 
 export async function processAuctionBidMadeEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -124,15 +123,15 @@ export async function processAuctionBidMadeEvent({
   },
 }: EventHandlerContext<'Content.AuctionBidMade'>): Promise<void> {
   // create a new bid
-  const bid = await createBid(
-    ec,
+  const { bid, auction } = await createBid(
+    overlay,
     block,
     indexInBlock,
     memberId.toString(),
     videoId.toString(),
     bidAmount
   )
-  const { auction } = bid
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // extend auction duration when needed
   if (
@@ -143,19 +142,17 @@ export async function processAuctionBidMadeEvent({
   }
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new AuctionBidMadeEventData({
-        bid: bid.id,
-        nftOwner: auction.nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new AuctionBidMadeEventData({
+      bid: bid.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processAuctionBidCanceledEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -163,52 +160,40 @@ export async function processAuctionBidCanceledEvent({
     asV1000: [memberId, videoId],
   },
 }: EventHandlerContext<'Content.AuctionBidCanceled'>): Promise<void> {
-  const bid = await ec.collections.Bid.getOrFailWhere(
-    {
-      bidder: { id: memberId.toString() },
-      nft: { id: videoId.toString() },
-      isCanceled: false,
-    },
-    {
-      bidder: true,
-      auction: {
-        topBid: true,
-        bids: {
-          bidder: true,
-        },
-      },
-      nft: true,
-    }
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
+  // FIXME: Allow specifying multiple relations in a single "query" (in this case both `bidderId` and `nftId`)
+  const memberBids = await overlay
+    .getRepository(Bid)
+    .getManyByRelation('bidderId', memberId.toString())
+  const memberBid = assertNotNull(
+    memberBids.find((b) => b.nftId === videoId.toString() && b.isCanceled === false),
+    `Cannot cancel auction bid: Bid by member ${memberId.toString()} for nft ${videoId} not found`
   )
+  const auction = await overlay
+    .getRepository(Auction)
+    .getByIdOrFail(assertNotNull(memberBid.auctionId))
+  const auctionBids = await overlay.getRepository(Bid).getManyByRelation('auctionId', auction.id)
 
-  const {
-    auction,
-    nft: { owner },
-  } = bid
+  memberBid.isCanceled = true
 
-  bid.isCanceled = true
-
-  if (auction.topBid && bid.id === auction.topBid.id) {
-    // find new top bid (bid reference in auction.bids should already be up to date)
-    auction.topBid = findTopBid(auction.bids)
-    ec.collections.Auction.push(auction)
+  if (auction.topBidId && memberBid.id === auction.topBidId) {
+    // find new top bid
+    auction.topBidId = findTopBid(auctionBids)?.id
   }
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new AuctionBidCanceledEventData({
-        bid: bid.id,
-        member: memberId.toString(),
-        nftOwner: owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new AuctionBidCanceledEventData({
+      bid: memberBid.id,
+      member: memberId.toString(),
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processAuctionCanceledEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -216,28 +201,27 @@ export async function processAuctionCanceledEvent({
     asV1000: [contentActor, videoId],
   },
 }: EventHandlerContext<'Content.AuctionCanceled'>): Promise<void> {
-  // load video and auction
-  const auction = await getCurrentAuctionFromVideo(ec, videoId.toString(), { nft: true })
+  // load nft and auction
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
+  const auction = await getCurrentAuctionFromVideo(overlay, videoId.toString())
 
-  auction.nft.transactionalStatus = new TransactionalStatusIdle()
+  nft.transactionalStatus = new TransactionalStatusIdle()
   // mark auction as canceled
   auction.isCanceled = true
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new AuctionCanceledEventData({
-        actor: parseContentActor(contentActor),
-        auction: auction.id,
-        nftOwner: auction.nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new AuctionCanceledEventData({
+      actor: parseContentActor(contentActor),
+      auction: auction.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processEnglishAuctionSettledEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -246,13 +230,13 @@ export async function processEnglishAuctionSettledEvent({
   },
 }: EventHandlerContext<'Content.EnglishAuctionSettled'>): Promise<void> {
   // finish auction
-  const { winningBid, auction, previousNftOwner } = await finishAuction(
-    ec,
+  const { winningBid, auction, previousNftOwner, nft } = await finishAuction(
+    overlay,
     videoId.toString(),
     block
   )
 
-  if (winnerId.toString() !== winningBid.bidder.id) {
+  if (winnerId.toString() !== winningBid.bidderId) {
     criticalError(`Unexpected english auction winner of auction ${auction.id}.`, {
       eventWinnerId: winnerId.toString(),
       queryNodeTopBidder: winnerId,
@@ -260,24 +244,22 @@ export async function processEnglishAuctionSettledEvent({
   }
 
   // set last sale
-  auction.nft.lastSalePrice = winningBid.amount
-  auction.nft.lastSaleDate = new Date(block.timestamp)
+  nft.lastSalePrice = winningBid.amount
+  nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new EnglishAuctionSettledEventData({
-        previousNftOwner,
-        winningBid: winningBid.id,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new EnglishAuctionSettledEventData({
+      previousNftOwner,
+      winningBid: winningBid.id,
+    }),
+  })
 }
 
 // called when auction bid's value is higher than buy-now value
 export async function processBidMadeCompletingAuctionEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -286,33 +268,37 @@ export async function processBidMadeCompletingAuctionEvent({
   },
 }: EventHandlerContext<'Content.BidMadeCompletingAuction'>): Promise<void> {
   // create record for winning bid
-  const bid = await createBid(ec, block, indexInBlock, memberId.toString(), videoId.toString())
+  const { bid } = await createBid(
+    overlay,
+    block,
+    indexInBlock,
+    memberId.toString(),
+    videoId.toString()
+  )
 
   // finish auction and transfer ownership
-  const { auction, winningBid, previousNftOwner } = await finishAuction(
-    ec,
+  const { nft, winningBid, previousNftOwner } = await finishAuction(
+    overlay,
     videoId.toString(),
     block
   )
 
   // set last sale
-  auction.nft.lastSalePrice = winningBid.amount
-  auction.nft.lastSaleDate = new Date(block.timestamp)
+  nft.lastSalePrice = winningBid.amount
+  nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new BidMadeCompletingAuctionEventData({
-        previousNftOwner,
-        winningBid: bid.id,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new BidMadeCompletingAuctionEventData({
+      previousNftOwner,
+      winningBid: bid.id,
+    }),
+  })
 }
 
 export async function processOpenAuctionBidAcceptedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -321,8 +307,8 @@ export async function processOpenAuctionBidAcceptedEvent({
   },
 }: EventHandlerContext<'Content.OpenAuctionBidAccepted'>): Promise<void> {
   // finish auction
-  const { auction, previousNftOwner, winningBid } = await finishAuction(
-    ec,
+  const { previousNftOwner, winningBid, nft } = await finishAuction(
+    overlay,
     videoId.toString(),
     block,
     {
@@ -332,30 +318,28 @@ export async function processOpenAuctionBidAcceptedEvent({
   )
 
   // set last sale
-  auction.nft.lastSalePrice = winningBid.amount
-  auction.nft.lastSaleDate = new Date(block.timestamp)
+  nft.lastSalePrice = winningBid.amount
+  nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new OpenAuctionBidAcceptedEventData({
-        actor: parseContentActor(contentActor),
-        previousNftOwner,
-        winningBid: winningBid.id,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new OpenAuctionBidAcceptedEventData({
+      actor: parseContentActor(contentActor),
+      previousNftOwner,
+      winningBid: winningBid.id,
+    }),
+  })
 }
 
 export async function processOfferStartedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [videoId, , memberId, price],
   },
 }: EventHandlerContext<'Content.OfferStarted'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // update NFT transactional status
   const transactionalStatus = new TransactionalStatusInitiatedOfferToMember({
@@ -368,12 +352,12 @@ export async function processOfferStartedEvent({
 }
 
 export async function processOfferAcceptedEvent({
-  ec,
+  overlay,
   block,
   event: { asV1000: videoId },
 }: EventHandlerContext<'Content.OfferAccepted'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // read member from offer
   const memberId = (nft.transactionalStatus as TransactionalStatusInitiatedOfferToMember).member
@@ -394,13 +378,13 @@ export async function processOfferAcceptedEvent({
 }
 
 export async function processOfferCanceledEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [videoId],
   },
 }: EventHandlerContext<'Content.OfferCanceled'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // update NFT's transactional status
   nft.transactionalStatus = new TransactionalStatusIdle()
@@ -409,7 +393,7 @@ export async function processOfferCanceledEvent({
 }
 
 export async function processNftSellOrderMadeEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -418,7 +402,7 @@ export async function processNftSellOrderMadeEvent({
   },
 }: EventHandlerContext<'Content.NftSellOrderMade'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // update NFT transactional status
   const transactionalStatus = new TransactionalStatusBuyNow({
@@ -427,21 +411,19 @@ export async function processNftSellOrderMadeEvent({
   nft.transactionalStatus = transactionalStatus
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new NftSellOrderMadeEventData({
-        actor: parseContentActor(contentActor),
-        nft: nft.id,
-        nftOwner: nft.owner,
-        price,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new NftSellOrderMadeEventData({
+      actor: parseContentActor(contentActor),
+      nft: nft.id,
+      nftOwner: nft.owner,
+      price,
+    }),
+  })
 }
 
 export async function processNftBoughtEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [videoId, memberId],
   },
@@ -450,7 +432,7 @@ export async function processNftBoughtEvent({
   extrinsicHash,
 }: EventHandlerContext<'Content.NftBought'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // NFT bought price
   const price = (nft.transactionalStatus as TransactionalStatusBuyNow).price
@@ -466,21 +448,19 @@ export async function processNftBoughtEvent({
   nft.owner = new NftOwnerMember({ member: memberId.toString() })
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new NftBoughtEventData({
-        buyer: memberId.toString(),
-        nft: nft.id,
-        previousNftOwner,
-        price,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new NftBoughtEventData({
+      buyer: memberId.toString(),
+      nft: nft.id,
+      previousNftOwner,
+      price,
+    }),
+  })
 }
 
 export async function processBuyNowCanceledEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -489,26 +469,24 @@ export async function processBuyNowCanceledEvent({
   },
 }: EventHandlerContext<'Content.BuyNowCanceled'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // Update stauts
   nft.transactionalStatus = new TransactionalStatusIdle()
 
   // add new event
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new BuyNowCanceledEventData({
-        actor: parseContentActor(contentActor),
-        nft: nft.id,
-        nftOwner: nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new BuyNowCanceledEventData({
+      actor: parseContentActor(contentActor),
+      nft: nft.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processBuyNowPriceUpdatedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -517,7 +495,7 @@ export async function processBuyNowPriceUpdatedEvent({
   },
 }: EventHandlerContext<'Content.BuyNowPriceUpdated'>): Promise<void> {
   // load NFT
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString())
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   if (nft.transactionalStatus?.isTypeOf !== 'TransactionalStatusBuyNow') {
     criticalError(`Unexpected transactional status of NFT ${videoId.toString()}.`, {
@@ -527,31 +505,27 @@ export async function processBuyNowPriceUpdatedEvent({
   }
 
   nft.transactionalStatus = new TransactionalStatusBuyNow({ price: newPrice })
-
-  ec.collections.Event.push(
-    new Event({
-      ...genericEventFields(block, indexInBlock, extrinsicHash),
-      data: new BuyNowPriceUpdatedEventData({
-        actor: parseContentActor(contentActor),
-        newPrice,
-        nft: nft.id,
-        nftOwner: nft.owner,
-      }),
-    })
-  )
+  overlay.getRepository(Event).new({
+    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    data: new BuyNowPriceUpdatedEventData({
+      actor: parseContentActor(contentActor),
+      newPrice,
+      nft: nft.id,
+      nftOwner: nft.owner,
+    }),
+  })
 }
 
 export async function processNftSlingedBackToTheOriginalArtistEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [videoId],
   },
 }: EventHandlerContext<'Content.NftSlingedBackToTheOriginalArtist'>): Promise<void> {
-  const nft = await ec.collections.OwnedNft.getOrFail(videoId.toString(), {
-    video: { channel: true },
-  })
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
 
-  nft.owner = new NftOwnerChannel({ channel: nft.video.channel.id })
+  nft.owner = new NftOwnerChannel({ channel: assertNotNull(video.channelId) })
 
   // FIXME: No event?
 }

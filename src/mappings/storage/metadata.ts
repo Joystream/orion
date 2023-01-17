@@ -14,22 +14,19 @@ import {
   isValidSubdivisionCode,
 } from '@joystream/metadata-protobuf/utils'
 import {
-  StorageBucket,
   StorageBucketOperatorMetadata,
   NodeLocationMetadata,
   GeoCoordinates,
-  DistributionBucketFamily,
   DistributionBucketFamilyMetadata,
   GeographicalAreaContinent,
   Continent,
   GeographicalAreaCountry,
   GeographicalAreaSubdivistion,
-  DistributionBucketOperator,
   DistributionBucketOperatorMetadata,
   GeographicalArea,
 } from '../../model'
 import { invalidMetadata } from '../utils'
-import { EntitiesCollector } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { Logger } from '../../logger'
 import _ from 'lodash'
 
@@ -45,113 +42,111 @@ export const protobufContinentToGraphlContinent: {
   [GeographicalAreaProto.Continent.SA]: Continent.SA,
 }
 
-export function processStorageOperatorMetadata(
-  ec: EntitiesCollector,
-  storageBucket: StorageBucket,
-  meta: DecodedMetadataObject<IStorageBucketOperatorMetadata>
+export async function processStorageOperatorMetadata(
+  overlay: EntityManagerOverlay,
+  bucketId: string,
+  metadataUpdate: DecodedMetadataObject<IStorageBucketOperatorMetadata>
 ) {
+  const metadataRepository = overlay.getRepository(StorageBucketOperatorMetadata)
   const operatorMetadata =
-    storageBucket.operatorMetadata ||
-    new StorageBucketOperatorMetadata({
-      id: storageBucket.id,
-      storageBucket,
+    (await metadataRepository.getById(bucketId)) ||
+    metadataRepository.new({
+      id: bucketId,
+      storageBucketId: bucketId,
     })
-  if (isSet(meta.endpoint)) {
-    operatorMetadata.nodeEndpoint = meta.endpoint || null
+  if (isSet(metadataUpdate.endpoint)) {
+    operatorMetadata.nodeEndpoint = metadataUpdate.endpoint || null
   }
-  if (isSet(meta.location)) {
-    processNodeLocationMetadata(operatorMetadata, meta.location)
+  if (isSet(metadataUpdate.location)) {
+    processNodeLocationMetadata(operatorMetadata, metadataUpdate.location)
   }
-  if (isSet(meta.extra)) {
-    operatorMetadata.extra = meta.extra || null
+  if (isSet(metadataUpdate.extra)) {
+    operatorMetadata.extra = metadataUpdate.extra || null
   }
-  storageBucket.operatorMetadata = operatorMetadata
-  ec.collections.StorageBucketOperatorMetadata.push(operatorMetadata)
 }
 
 function processNodeLocationMetadata(
-  parent: StorageBucketOperatorMetadata | DistributionBucketOperatorMetadata,
-  meta: DecodedMetadataObject<INodeLocationMetadata>
+  parent: Flat<StorageBucketOperatorMetadata> | Flat<DistributionBucketOperatorMetadata>,
+  metadataUpdate: DecodedMetadataObject<INodeLocationMetadata>
 ) {
-  if (isEmptyObject(meta)) {
+  if (isEmptyObject(metadataUpdate)) {
     parent.nodeLocation = null
     return
   }
   const nodeLocationMetadata = parent.nodeLocation || new NodeLocationMetadata()
   parent.nodeLocation = nodeLocationMetadata
-  if (isSet(meta.city)) {
-    nodeLocationMetadata.city = meta.city
+  if (isSet(metadataUpdate.city)) {
+    nodeLocationMetadata.city = metadataUpdate.city
   }
-  if (isSet(meta.coordinates)) {
-    if (isEmptyObject(meta.coordinates)) {
+  if (isSet(metadataUpdate.coordinates)) {
+    if (isEmptyObject(metadataUpdate.coordinates)) {
       nodeLocationMetadata.coordinates = null
     } else {
       if (!nodeLocationMetadata.coordinates) {
         nodeLocationMetadata.coordinates = new GeoCoordinates()
       }
-      if (isSet(meta.coordinates.latitude)) {
-        nodeLocationMetadata.coordinates.latitude = meta.coordinates.latitude
+      if (isSet(metadataUpdate.coordinates.latitude)) {
+        nodeLocationMetadata.coordinates.latitude = metadataUpdate.coordinates.latitude
       }
-      if (isSet(meta.coordinates.longitude)) {
-        nodeLocationMetadata.coordinates.longitude = meta.coordinates.longitude
+      if (isSet(metadataUpdate.coordinates.longitude)) {
+        nodeLocationMetadata.coordinates.longitude = metadataUpdate.coordinates.longitude
       }
     }
   }
-  if (isSet(meta.countryCode)) {
-    if (isValidCountryCode(meta.countryCode)) {
-      nodeLocationMetadata.countryCode = meta.countryCode
+  if (isSet(metadataUpdate.countryCode)) {
+    if (isValidCountryCode(metadataUpdate.countryCode)) {
+      nodeLocationMetadata.countryCode = metadataUpdate.countryCode
     } else {
-      Logger.get().warn(`Invalid country code: ${meta.countryCode}`)
+      Logger.get().warn(`Invalid country code: ${metadataUpdate.countryCode}`)
       nodeLocationMetadata.countryCode = null
     }
   }
 }
 
-export function processDistributionOperatorMetadata(
-  ec: EntitiesCollector,
-  operator: DistributionBucketOperator,
-  meta: DecodedMetadataObject<IDistributionBucketOperatorMetadata>
-): void {
+export async function processDistributionOperatorMetadata(
+  overlay: EntityManagerOverlay,
+  operatorId: string,
+  metadataUpdate: DecodedMetadataObject<IDistributionBucketOperatorMetadata>
+): Promise<void> {
+  const metadataRepository = overlay.getRepository(DistributionBucketOperatorMetadata)
   const operatorMetadata =
-    operator.metadata ||
-    new DistributionBucketOperatorMetadata({
-      id: operator.id,
-      distirbutionBucketOperator: operator,
+    (await metadataRepository.getById(operatorId)) ||
+    metadataRepository.new({
+      id: operatorId,
+      distirbutionBucketOperatorId: operatorId,
     })
-  if (isSet(meta.endpoint)) {
-    operatorMetadata.nodeEndpoint = meta.endpoint || null
+  if (isSet(metadataUpdate.endpoint)) {
+    operatorMetadata.nodeEndpoint = metadataUpdate.endpoint || null
   }
-  if (isSet(meta.location)) {
-    processNodeLocationMetadata(operatorMetadata, meta.location)
+  if (isSet(metadataUpdate.location)) {
+    processNodeLocationMetadata(operatorMetadata, metadataUpdate.location)
   }
-  if (isSet(meta.extra)) {
-    operatorMetadata.extra = meta.extra || null
+  if (isSet(metadataUpdate.extra)) {
+    operatorMetadata.extra = metadataUpdate.extra || null
   }
-  operator.metadata = operatorMetadata
-  ec.collections.DistributionBucketOperatorMetadata.push(operatorMetadata)
 }
 
-export function processDistributionBucketFamilyMetadata(
-  ec: EntitiesCollector,
-  family: DistributionBucketFamily,
-  meta: DecodedMetadataObject<IDistributionBucketFamilyMetadata>
-): void {
+export async function processDistributionBucketFamilyMetadata(
+  overlay: EntityManagerOverlay,
+  familyId: string,
+  metadataUpdate: DecodedMetadataObject<IDistributionBucketFamilyMetadata>
+): Promise<void> {
+  const metadataRepository = overlay.getRepository(DistributionBucketFamilyMetadata)
   const familyMetadata =
-    family.metadata || new DistributionBucketFamilyMetadata({ id: family.id, family })
-  family.metadata = familyMetadata
-  ec.collections.DistributionBucketFamilyMetadata.push(familyMetadata)
-  if (isSet(meta.region)) {
-    familyMetadata.region = meta.region || null
+    (await metadataRepository.getById(familyId)) ||
+    metadataRepository.new({ id: familyId, familyId })
+  if (isSet(metadataUpdate.region)) {
+    familyMetadata.region = metadataUpdate.region || null
   }
-  if (isSet(meta.description)) {
-    familyMetadata.description = meta.description || null
+  if (isSet(metadataUpdate.description)) {
+    familyMetadata.description = metadataUpdate.description || null
   }
-  if (isSet(meta.latencyTestTargets)) {
-    familyMetadata.latencyTestTargets = meta.latencyTestTargets.filter((t) => t)
+  if (isSet(metadataUpdate.latencyTestTargets)) {
+    familyMetadata.latencyTestTargets = metadataUpdate.latencyTestTargets.filter((t) => t)
   }
-  if (isSet(meta.areas)) {
+  if (isSet(metadataUpdate.areas)) {
     // Set new areas
-    familyMetadata.areas = _.chain(meta.areas)
+    familyMetadata.areas = _.chain(metadataUpdate.areas)
       .filter((a) => !isEmptyObject(a))
       .uniqWith(_.isEqual)
       .flatMap((a: DecodedMetadataObject<IGeographicalArea>): Array<GeographicalArea> => {

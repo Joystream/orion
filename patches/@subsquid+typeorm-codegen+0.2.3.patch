@@ -1,8 +1,23 @@
 diff --git a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
-index 54b1dd0..59c5437 100644
+index 54b1dd0..3798098 100644
 --- a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
 +++ b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
-@@ -124,7 +124,7 @@ function generateOrmModels(model, dir) {
+@@ -110,7 +110,7 @@ function generateOrmModels(model, dir) {
+                         if (getFieldIndex(entity, key)?.unique) {
+                             imports.useTypeorm('OneToOne', 'Index', 'JoinColumn');
+                             out.line(`@Index_({unique: true})`);
+-                            out.line(`@OneToOne_(() => ${prop.type.entity}, {nullable: false})`);
++                            out.line(`@OneToOne_(() => ${prop.type.entity}, {nullable: false, deferrable: 'INITIALLY DEFERRED'})`);
+                             out.line(`@JoinColumn_()`);
+                         }
+                         else {
+@@ -119,12 +119,12 @@ function generateOrmModels(model, dir) {
+                                 out.line(`@Index_()`);
+                             }
+                             // Make foreign entity references always nullable
+-                            out.line(`@ManyToOne_(() => ${prop.type.entity}, {nullable: true})`);
++                            out.line(`@ManyToOne_(() => ${prop.type.entity}, {nullable: true, deferrable: 'INITIALLY DEFERRED'})`);
+                         }
                          break;
                      case 'lookup':
                          imports.useTypeorm('OneToOne');
@@ -11,3 +26,15 @@ index 54b1dd0..59c5437 100644
                          break;
                      case 'list-lookup':
                          imports.useTypeorm('OneToMany');
+@@ -157,6 +157,11 @@ function generateOrmModels(model, dir) {
+                         throw (0, util_internal_1.unexpectedCase)(prop.type.kind);
+                 }
+                 out.line(`${key}!: ${getPropJsType(imports, 'entity', prop)}`);
++                if (prop.type.kind === 'fk') {
++                    out.line()
++                    out.line(`@Column_(${!getFieldIndex(entity, key)?.unique ? '{ nullable: true }' : ''})`)
++                    out.line(`${key}Id!: string` + (!getFieldIndex(entity, key)?.unique ? ' | null | undefined' : ''))
++                }
+             }
+         });
+         out.write();

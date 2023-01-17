@@ -1,12 +1,12 @@
 import { ContentMetadata } from '@joystream/metadata-protobuf'
-import { Channel, Video } from '../../model'
+import { Video } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, processNft } from './utils'
 
 export async function processVideoCreatedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -19,10 +19,10 @@ export async function processVideoCreatedEvent({
   // deserialize & process metadata
   const contentMetadata = meta && deserializeMetadata(ContentMetadata, meta)
 
-  const video = new Video({
+  const video = overlay.getRepository(Video).new({
     id: contentId.toString(),
     createdAt: new Date(block.timestamp),
-    channel: new Channel({ id: channelId.toString() }),
+    channelId: channelId.toString(),
     isCensored: false,
     createdInBlock: block.height,
     isCommentSectionEnabled: true,
@@ -32,11 +32,10 @@ export async function processVideoCreatedEvent({
     reactionsCount: 0,
     viewsNum: 0,
   })
-  ec.collections.Video.push(video)
 
   if (contentMetadata?.videoMetadata) {
     await processVideoMetadata(
-      ec,
+      overlay,
       block,
       indexInBlock,
       video,
@@ -46,12 +45,12 @@ export async function processVideoCreatedEvent({
   }
 
   if (autoIssueNft) {
-    await processNft(ec, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
+    await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
 }
 
 export async function processVideoUpdatedEvent({
-  ec,
+  overlay,
   block,
   indexInBlock,
   extrinsicHash,
@@ -60,25 +59,13 @@ export async function processVideoUpdatedEvent({
   },
 }: EventHandlerContext<'Content.VideoUpdated'>): Promise<void> {
   const { newMeta, autoIssueNft } = contentUpdateParameters
-  const video = await ec.collections.Video.getOrFail(contentId.toString(), {
-    license: true,
-    channel: true,
-    nft: true,
-    mediaMetadata: {
-      encoding: true,
-    },
-    media: true,
-    thumbnailPhoto: true,
-    subtitles: {
-      asset: true,
-    },
-  })
+  const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
 
   const contentMetadata = newMeta && deserializeMetadata(ContentMetadata, newMeta)
 
   if (contentMetadata?.videoMetadata) {
     await processVideoMetadata(
-      ec,
+      overlay,
       block,
       indexInBlock,
       video,
@@ -88,34 +75,34 @@ export async function processVideoUpdatedEvent({
   }
 
   if (autoIssueNft) {
-    await processNft(ec, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
+    await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
 }
 
 export async function processVideoDeletedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, contentId],
   },
 }: EventHandlerContext<'Content.VideoDeleted'>): Promise<void> {
-  await deleteVideo(ec, contentId)
+  await deleteVideo(overlay, contentId)
 }
 
 export async function processVideoDeletedByModeratorEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, contentId],
   },
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
-  await deleteVideo(ec, contentId)
+  await deleteVideo(overlay, contentId)
 }
 
 export async function processVideoVisibilitySetByModeratorEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, videoId, isCensored],
   },
 }: EventHandlerContext<'Content.VideoVisibilitySetByModerator'>): Promise<void> {
-  const video = await ec.collections.Video.getOrFail(videoId.toString())
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   video.isCensored = isCensored
 }

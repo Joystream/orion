@@ -1,8 +1,8 @@
 import { IMemberRemarked, IMembershipMetadata, MemberRemarked } from '@joystream/metadata-protobuf'
-import { AvatarUri, MemberMetadata, Membership, MetaprotocolTransactionResult } from '../../model'
+import { AvatarUri, MemberMetadata, MetaprotocolTransactionResult } from '../../model'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { isSet } from '@joystream/metadata-protobuf/utils'
-import { EntitiesCollector } from '../../utils/EntitiesCollector'
+import { EntityManagerOverlay } from '../../utils/overlay'
 import { metaprotocolTransactionFailure } from '../utils'
 import {
   processCreateCommentMessage,
@@ -14,36 +14,35 @@ import {
 } from '../content/commentsAndReactions'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
 
-export function processMembershipMetadata(
-  ec: EntitiesCollector,
-  member: Membership,
-  metadata: DecodedMetadataObject<IMembershipMetadata>
+export async function processMembershipMetadata(
+  overlay: EntityManagerOverlay,
+  memberId: string,
+  metadataUpdate: DecodedMetadataObject<IMembershipMetadata>
 ) {
-  if (!member.metadata) {
-    member.metadata = new MemberMetadata({ id: member.id, member })
-  }
+  const metadataRepository = overlay.getRepository(MemberMetadata)
+  const memberMetadata =
+    (await metadataRepository.getById(memberId)) ||
+    metadataRepository.new({ id: memberId, memberId })
 
-  if (isSet(metadata.avatarUri)) {
-    member.metadata.avatar = metadata.avatarUri
-      ? new AvatarUri({ avatarUri: metadata.avatarUri })
+  if (isSet(metadataUpdate.avatarUri)) {
+    memberMetadata.avatar = metadataUpdate.avatarUri
+      ? new AvatarUri({ avatarUri: metadataUpdate.avatarUri })
       : null
   }
 
-  if (isSet(metadata.name)) {
+  if (isSet(metadataUpdate.name)) {
     // On empty string, set to `null`
-    member.metadata.name = metadata.name || null
+    memberMetadata.name = metadataUpdate.name || null
   }
 
-  if (isSet(metadata.about)) {
+  if (isSet(metadataUpdate.about)) {
     // On empty string, set to `null`
-    member.metadata.about = metadata.about || null
+    memberMetadata.about = metadataUpdate.about || null
   }
-
-  ec.collections.MemberMetadata.push(member.metadata)
 }
 
 export async function processMemberRemark(
-  ec: EntitiesCollector,
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   txHash: string | undefined,
@@ -51,16 +50,16 @@ export async function processMemberRemark(
   decodedMessage: DecodedMetadataObject<IMemberRemarked>
 ): Promise<MetaprotocolTransactionResult> {
   if (decodedMessage.reactVideo) {
-    return processReactVideoMessage(ec, block, memberId, decodedMessage.reactVideo)
+    return processReactVideoMessage(overlay, block, memberId, decodedMessage.reactVideo)
   }
 
   if (decodedMessage.reactComment) {
-    return processReactCommentMessage(ec, memberId, decodedMessage.reactComment)
+    return processReactCommentMessage(overlay, memberId, decodedMessage.reactComment)
   }
 
   if (decodedMessage.createComment) {
     return processCreateCommentMessage(
-      ec,
+      overlay,
       block,
       indexInBlock,
       txHash,
@@ -71,7 +70,7 @@ export async function processMemberRemark(
 
   if (decodedMessage.editComment) {
     return processEditCommentMessage(
-      ec,
+      overlay,
       block,
       indexInBlock,
       txHash,
@@ -81,12 +80,12 @@ export async function processMemberRemark(
   }
 
   if (decodedMessage.deleteComment) {
-    return processDeleteCommentMessage(ec, memberId, decodedMessage.deleteComment)
+    return processDeleteCommentMessage(overlay, memberId, decodedMessage.deleteComment)
   }
 
   if (decodedMessage.createVideoCategory) {
     return processCreateVideoCategoryMessage(
-      ec,
+      overlay,
       block,
       indexInBlock,
       decodedMessage.createVideoCategory

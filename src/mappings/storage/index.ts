@@ -13,21 +13,26 @@ import {
   StorageBucketOperatorStatusActive,
   StorageBucketOperatorStatusInvited,
   StorageBucketOperatorStatusMissing,
+  StorageBucketOperatorMetadata as StorageBucketOperatorMetadataEntity,
+  DistributionBucketFamilyMetadata as DistributionBucketFamilyMetadataEntity,
+  StorageBucketBag,
+  DistributionBucketBag,
+  StorageDataObject,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, toAddress } from '../utils'
 import {
   createDataObjects,
-  createDistributionBucketBag,
-  createStorageBucketBag,
   deleteDataObjects,
   deleteDataObjectsByIds,
+  distributionBucketBagData,
   distributionBucketId,
   distributionOperatorId,
   getDynamicBagId,
   getDynamicBagOwner,
   getOrCreateBag,
   removeDistributionBucketOperator,
+  storageBucketBagData,
 } from './utils'
 import {
   processDistributionBucketFamilyMetadata,
@@ -37,8 +42,8 @@ import {
 
 // STORAGE BUCKET EVENTS
 
-export function processStorageBucketCreatedEvent({
-  ec,
+export async function processStorageBucketCreatedEvent({
+  overlay,
   event: {
     asV1000: [
       bucketId,
@@ -49,7 +54,7 @@ export function processStorageBucketCreatedEvent({
     ],
   },
 }: EventHandlerContext<'Storage.StorageBucketCreated'>) {
-  const storageBucket = new StorageBucket({
+  const storageBucket = overlay.getRepository(StorageBucket).new({
     id: bucketId.toString(),
     acceptingNewBags,
     dataObjectCountLimit,
@@ -64,41 +69,41 @@ export function processStorageBucketCreatedEvent({
   } else {
     storageBucket.operatorStatus = new StorageBucketOperatorStatusMissing()
   }
-  ec.collections.StorageBucket.push(storageBucket)
 }
 
 export async function processStorageOperatorMetadataSetEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, , metadataBytes],
   },
 }: EventHandlerContext<'Storage.StorageOperatorMetadataSet'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString(), {
-    operatorMetadata: true,
-  })
-  const meta = deserializeMetadata(StorageBucketOperatorMetadata, metadataBytes)
-  if (meta) {
-    processStorageOperatorMetadata(ec, storageBucket, meta)
+  const metadataUpdate = deserializeMetadata(StorageBucketOperatorMetadata, metadataBytes)
+  if (metadataUpdate) {
+    await processStorageOperatorMetadata(overlay, bucketId.toString(), metadataUpdate)
   }
 }
 
 export async function processStorageBucketStatusUpdatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, acceptingNewBags],
   },
 }: EventHandlerContext<'Storage.StorageBucketStatusUpdated'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const storageBucket = await overlay
+    .getRepository(StorageBucket)
+    .getByIdOrFail(bucketId.toString())
   storageBucket.acceptingNewBags = acceptingNewBags
 }
 
 export async function processStorageBucketInvitationAcceptedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, workerId, transactorAccountId],
   },
 }: EventHandlerContext<'Storage.StorageBucketInvitationAccepted'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const storageBucket = await overlay
+    .getRepository(StorageBucket)
+    .getByIdOrFail(bucketId.toString())
   storageBucket.operatorStatus = new StorageBucketOperatorStatusActive({
     workerId: Number(workerId),
     transactorAccountId: toAddress(transactorAccountId),
@@ -106,63 +111,63 @@ export async function processStorageBucketInvitationAcceptedEvent({
 }
 
 export async function processStorageBucketInvitationCancelledEvent({
-  ec,
+  overlay,
   event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketInvitationCancelled'>): Promise<void> {
   // Metadata should not exist, because the operator wasn't active
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const storageBucket = await overlay
+    .getRepository(StorageBucket)
+    .getByIdOrFail(bucketId.toString())
   storageBucket.operatorStatus = new StorageBucketOperatorStatusMissing()
 }
 
 export async function processStorageBucketOperatorInvitedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.StorageBucketOperatorInvited'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const storageBucket = await overlay
+    .getRepository(StorageBucket)
+    .getByIdOrFail(bucketId.toString())
   storageBucket.operatorStatus = new StorageBucketOperatorStatusInvited({
     workerId: Number(workerId),
   })
 }
 
 export async function processStorageBucketOperatorRemovedEvent({
-  ec,
+  overlay,
   event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketOperatorRemoved'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString(), {
-    operatorMetadata: true,
-  })
+  const storageBucket = await overlay
+    .getRepository(StorageBucket)
+    .getByIdOrFail(bucketId.toString())
   storageBucket.operatorStatus = new StorageBucketOperatorStatusMissing()
-  if (storageBucket.operatorMetadata) {
-    ec.collections.StorageBucketOperatorMetadata.remove(storageBucket.operatorMetadata)
-  }
+  overlay.getRepository(StorageBucketOperatorMetadataEntity).remove(storageBucket.id)
 }
 
 export async function processStorageBucketsUpdatedForBagEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bagId, addedBuckets, removedBuckets],
   },
 }: EventHandlerContext<'Storage.StorageBucketsUpdatedForBag'>): Promise<void> {
-  await getOrCreateBag(ec, bagId)
-  removedBuckets.forEach((bucket) => {
-    const toBeRemoved = createStorageBucketBag(bucket, bagId)
-    ec.collections.StorageBucketBag.remove(toBeRemoved)
-  })
-  addedBuckets.forEach((bucket) => {
-    const toBeAdded = createStorageBucketBag(bucket, bagId)
-    ec.collections.StorageBucketBag.push(toBeAdded)
-  })
+  await getOrCreateBag(overlay, bagId)
+  overlay
+    .getRepository(StorageBucketBag)
+    .remove(...removedBuckets.map((bucketId) => storageBucketBagData(bucketId, bagId)))
+  addedBuckets.forEach((bucketId) =>
+    overlay.getRepository(StorageBucketBag).new(storageBucketBagData(bucketId, bagId))
+  )
 }
 
 export async function processVoucherChangedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, voucher],
   },
 }: EventHandlerContext<'Storage.VoucherChanged'>): Promise<void> {
-  const bucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const bucket = await overlay.getRepository(StorageBucket).getByIdOrFail(bucketId.toString())
 
   bucket.dataObjectCountLimit = voucher.objectsLimit
   bucket.dataObjectsSizeLimit = voucher.sizeLimit
@@ -171,37 +176,29 @@ export async function processVoucherChangedEvent({
 }
 
 export async function processStorageBucketVoucherLimitsSetEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, sizeLimit, countLimit],
   },
 }: EventHandlerContext<'Storage.StorageBucketVoucherLimitsSet'>): Promise<void> {
-  const bucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString())
+  const bucket = await overlay.getRepository(StorageBucket).getByIdOrFail(bucketId.toString())
   bucket.dataObjectsSizeLimit = sizeLimit
   bucket.dataObjectCountLimit = countLimit
 }
 
 export async function processStorageBucketDeletedEvent({
-  ec,
+  overlay,
   event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketDeleted'>): Promise<void> {
-  const storageBucket = await ec.collections.StorageBucket.getOrFail(bucketId.toString(), {
-    bags: true,
-    operatorMetadata: true,
-  })
-  storageBucket.bags.forEach((b) => {
-    ec.collections.StorageBucketBag.remove(b)
-  })
-  if (storageBucket.operatorMetadata) {
-    ec.collections.StorageBucketOperatorMetadata.remove(storageBucket.operatorMetadata)
-  }
-  ec.collections.StorageBucket.remove(storageBucket)
+  // There should be already no bags assigned - enforced by the runtime
+  overlay.getRepository(StorageBucketOperatorMetadataEntity).remove(bucketId.toString())
+  overlay.getRepository(StorageBucket).remove(bucketId.toString())
 }
 
 // DYNAMIC BAG EVENTS
 
-export function processDynamicBagCreatedEvent({
-  ec,
+export async function processDynamicBagCreatedEvent({
+  overlay,
   block,
   event: {
     asV1000: [
@@ -216,64 +213,71 @@ export function processDynamicBagCreatedEvent({
     ],
   },
 }: EventHandlerContext<'Storage.DynamicBagCreated'>) {
-  const bag = new StorageBag({
+  const bag = overlay.getRepository(StorageBag).new({
     id: getDynamicBagId(bagId),
     owner: getDynamicBagOwner(bagId),
   })
 
-  bag.storageBuckets = storageBuckets.map((id) => createStorageBucketBag(id, bag))
-  bag.distributionBuckets = distributionBuckets.map((id) => createDistributionBucketBag(id, bag))
-  bag.objects = createDataObjects(
+  storageBuckets.map((id) =>
+    overlay.getRepository(StorageBucketBag).new(storageBucketBagData(id, bag.id))
+  )
+  distributionBuckets.map((id) =>
+    overlay.getRepository(DistributionBucketBag).new(distributionBucketBagData(id, bag.id))
+  )
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
+  createDataObjects(
+    dataObjectRepository,
     block,
-    bag,
+    bag.id,
     objectCreationList,
     expectedDataObjectStateBloatBond,
     objectIds
   )
-
-  ec.collections.StorageBag.push(bag)
-  ec.collections.StorageBucketBag.push(...bag.storageBuckets)
-  ec.collections.DistributionBucketBag.push(...bag.distributionBuckets)
-  ec.collections.StorageDataObject.push(...bag.objects)
 }
 
 export async function processDynamicBagDeletedEvent({
-  ec,
+  overlay,
   event: { asV1000: bagId },
 }: EventHandlerContext<'Storage.DynamicBagDeleted'>): Promise<void> {
-  const storageBag = await ec.collections.StorageBag.getOrFail(getDynamicBagId(bagId), {
-    storageBuckets: true,
-    distributionBuckets: true,
-    objects: true,
-  })
-  if (storageBag.storageBuckets) {
-    ec.collections.StorageBucketBag.remove(...storageBag.storageBuckets)
-  }
-  if (storageBag.distributionBuckets) {
-    ec.collections.DistributionBucketBag.remove(...storageBag.distributionBuckets)
-  }
-  if (storageBag.objects) {
-    await deleteDataObjects(ec, storageBag.objects)
-  }
-  ec.collections.StorageBag.remove(storageBag)
+  const dynBagId = getDynamicBagId(bagId)
+  const bagStorageBucketRelations = await overlay
+    .getRepository(StorageBucketBag)
+    .getManyByRelation('bagId', dynBagId)
+  const bagDistributionBucketRelations = await overlay
+    .getRepository(DistributionBucketBag)
+    .getManyByRelation('bagId', dynBagId)
+  const objects = await overlay
+    .getRepository(StorageDataObject)
+    .getManyByRelation('storageBagId', dynBagId)
+  overlay.getRepository(StorageBucketBag).remove(...bagStorageBucketRelations)
+  overlay.getRepository(DistributionBucketBag).remove(...bagDistributionBucketRelations)
+  await deleteDataObjects(overlay, objects)
+  overlay.getRepository(StorageBag).remove(dynBagId)
 }
 
 // // DATA OBJECT EVENTS
 
 export async function processDataObjectsUploadedEvent({
-  ec,
+  overlay,
   block,
   event: {
     asV1000: [objectIds, { bagId, objectCreationList }, stateBloatBond],
   },
 }: EventHandlerContext<'Storage.DataObjectsUploaded'>) {
-  const bag = await getOrCreateBag(ec, bagId)
-  const newObjects = createDataObjects(block, bag, objectCreationList, stateBloatBond, objectIds)
-  ec.collections.StorageDataObject.push(...newObjects)
+  const bag = await getOrCreateBag(overlay, bagId)
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
+  createDataObjects(
+    dataObjectRepository,
+    block,
+    bag.id,
+    objectCreationList,
+    stateBloatBond,
+    objectIds
+  )
 }
 
 export async function processDataObjectsUpdatedEvent({
-  ec,
+  overlay,
   block,
   event: {
     asV1000: [
@@ -283,248 +287,227 @@ export async function processDataObjectsUpdatedEvent({
     ],
   },
 }: EventHandlerContext<'Storage.DataObjectsUpdated'>): Promise<void> {
-  const bag = await getOrCreateBag(ec, bagId)
-  const newObjects = createDataObjects(
+  const bag = await getOrCreateBag(overlay, bagId)
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
+  createDataObjects(
+    dataObjectRepository,
     block,
-    bag,
+    bag.id,
     objectCreationList,
     stateBloatBond,
     uploadedObjectIds
   )
-  ec.collections.StorageDataObject.push(...newObjects)
-  await deleteDataObjectsByIds(ec, objectsToRemoveIds)
+  await deleteDataObjectsByIds(overlay, objectsToRemoveIds)
 }
 
 export async function processPendingDataObjectsAcceptedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, , , dataObjectIds],
   },
 }: EventHandlerContext<'Storage.PendingDataObjectsAccepted'>): Promise<void> {
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
   const objects = await Promise.all(
-    dataObjectIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
+    dataObjectIds.map((id) => dataObjectRepository.getByIdOrFail(id.toString()))
   )
   objects.forEach((o) => (o.isAccepted = true))
 }
 
 export async function processDataObjectsMovedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, destBagId, dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsMoved'>): Promise<void> {
-  const destBag = await getOrCreateBag(ec, destBagId)
+  const destBag = await getOrCreateBag(overlay, destBagId)
+  const dataObjectRepository = overlay.getRepository(StorageDataObject)
   const dataObjects = await Promise.all(
-    dataObjectIds.map((id) => ec.collections.StorageDataObject.getOrFail(id.toString()))
+    dataObjectIds.map((id) => dataObjectRepository.getByIdOrFail(id.toString()))
   )
   dataObjects.forEach((o) => {
-    o.storageBag = destBag
+    o.storageBagId = destBag.id
   })
 }
 
 export async function processDataObjectsDeletedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [, , dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsDeleted'>): Promise<void> {
-  await deleteDataObjectsByIds(ec, dataObjectIds)
+  await deleteDataObjectsByIds(overlay, dataObjectIds)
 }
 
 // DISTRIBUTION FAMILY EVENTS
 
 export async function processDistributionBucketFamilyCreatedEvent({
-  ec,
+  overlay,
   event: { asV1000: familyId },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyCreated'>): Promise<void> {
-  const family = new DistributionBucketFamily({
-    id: familyId.toString(),
-  })
-  ec.collections.DistributionBucketFamily.push(family)
+  const familyRepository = overlay.getRepository(DistributionBucketFamily)
+  familyRepository.new({ id: familyId.toString() })
 }
 
 export async function processDistributionBucketFamilyMetadataSetEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [familyId, metadataBytes],
   },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyMetadataSet'>): Promise<void> {
-  const family = await ec.collections.DistributionBucketFamily.getOrFail(familyId.toString(), {
-    metadata: true,
-  })
-  const meta = deserializeMetadata(DistributionBucketFamilyMetadata, metadataBytes)
-  if (meta) {
-    processDistributionBucketFamilyMetadata(ec, family, meta)
+  const metadataUpdate = deserializeMetadata(DistributionBucketFamilyMetadata, metadataBytes)
+  if (metadataUpdate) {
+    await processDistributionBucketFamilyMetadata(overlay, familyId.toString(), metadataUpdate)
   }
 }
 
 export async function processDistributionBucketFamilyDeletedEvent({
-  ec,
+  overlay,
   event: { asV1000: familyId },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyDeleted'>): Promise<void> {
-  const family = await ec.collections.DistributionBucketFamily.getOrFail(familyId.toString(), {
-    metadata: true,
-  })
-  if (family.metadata) {
-    ec.collections.DistributionBucketFamilyMetadata.remove(family.metadata)
-  }
-  ec.collections.DistributionBucketFamily.remove(family)
+  overlay.getRepository(DistributionBucketFamilyMetadataEntity).remove(familyId.toString())
+  overlay.getRepository(DistributionBucketFamily).remove(familyId.toString())
 }
 
 // DISTRIBUTION BUCKET EVENTS
 
 export async function processDistributionBucketCreatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [familyId, acceptingNewBags, bucketId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketCreated'>): Promise<void> {
-  ec.collections.DistributionBucket.push(
-    new DistributionBucket({
-      id: distributionBucketId(bucketId),
-      bucketIndex: Number(bucketId.distributionBucketIndex),
-      acceptingNewBags,
-      distributing: true, // Runtime default
-      family: new DistributionBucketFamily({ id: familyId.toString() }),
-    })
-  )
+  overlay.getRepository(DistributionBucket).new({
+    id: distributionBucketId(bucketId),
+    bucketIndex: Number(bucketId.distributionBucketIndex),
+    acceptingNewBags,
+    distributing: true, // Runtime default
+    familyId: familyId.toString(),
+  })
 }
 
 export async function processDistributionBucketStatusUpdatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, acceptingNewBags],
   },
 }: EventHandlerContext<'Storage.DistributionBucketStatusUpdated'>): Promise<void> {
-  const bucket = await ec.collections.DistributionBucket.getOrFail(distributionBucketId(bucketId))
+  const bucket = await overlay
+    .getRepository(DistributionBucket)
+    .getByIdOrFail(distributionBucketId(bucketId))
   bucket.acceptingNewBags = acceptingNewBags
 }
 
 export async function processDistributionBucketDeletedEvent({
-  ec,
+  overlay,
   event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.DistributionBucketDeleted'>): Promise<void> {
-  const distributionBucket = await ec.collections.DistributionBucket.getOrFail(
-    distributionBucketId(bucketId),
-    {
-      bags: true,
-      operators: {
-        metadata: true,
-      },
-    }
-  )
-  // Remove relations
-  ;(distributionBucket.operators || []).forEach((o) => removeDistributionBucketOperator(ec, o))
-  if (distributionBucket.bags) {
-    ec.collections.DistributionBucketBag.remove(...distributionBucket.bags)
-  }
-  ec.collections.DistributionBucket.remove(distributionBucket)
+  // Operators and bags need to be empty (enforced by runtime)
+  overlay.getRepository(DistributionBucket).remove(distributionBucketId(bucketId))
 }
 
 export async function processDistributionBucketsUpdatedForBagEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bagId, familyId, addedBucketsIndices, removedBucketsIndices],
   },
 }: EventHandlerContext<'Storage.DistributionBucketsUpdatedForBag'>): Promise<void> {
-  await getOrCreateBag(ec, bagId)
-  removedBucketsIndices.forEach((index) => {
-    const toBeRemoved = createDistributionBucketBag(
-      {
-        distributionBucketFamilyId: familyId,
-        distributionBucketIndex: index,
-      },
-      bagId
+  await getOrCreateBag(overlay, bagId)
+  overlay.getRepository(DistributionBucketBag).remove(
+    ...removedBucketsIndices.map((index) =>
+      distributionBucketBagData(
+        {
+          distributionBucketFamilyId: familyId,
+          distributionBucketIndex: index,
+        },
+        bagId
+      )
     )
-    ec.collections.DistributionBucketBag.remove(toBeRemoved)
-  })
-  addedBucketsIndices.forEach((index) => {
-    const toBeAdded = createDistributionBucketBag(
-      {
-        distributionBucketFamilyId: familyId,
-        distributionBucketIndex: index,
-      },
-      bagId
+  )
+  addedBucketsIndices.forEach((index) =>
+    overlay.getRepository(DistributionBucketBag).new(
+      distributionBucketBagData(
+        {
+          distributionBucketFamilyId: familyId,
+          distributionBucketIndex: index,
+        },
+        bagId
+      )
     )
-    ec.collections.DistributionBucketBag.push(toBeAdded)
-  })
+  )
 }
 
 export async function processDistributionBucketModeUpdatedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, distributing],
   },
 }: EventHandlerContext<'Storage.DistributionBucketModeUpdated'>): Promise<void> {
-  const bucket = await ec.collections.DistributionBucket.getOrFail(distributionBucketId(bucketId))
+  const bucket = await overlay
+    .getRepository(DistributionBucket)
+    .getByIdOrFail(distributionBucketId(bucketId))
   bucket.distributing = distributing
 }
 
 export function processDistributionBucketOperatorInvitedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketOperatorInvited'>): void {
-  const invitedOperator = new DistributionBucketOperator({
+  const operatorRepository = overlay.getRepository(DistributionBucketOperator)
+  operatorRepository.new({
     id: distributionOperatorId(bucketId, workerId),
-    distributionBucket: new DistributionBucket({ id: distributionBucketId(bucketId) }),
+    distributionBucketId: distributionBucketId(bucketId),
     status: DistributionBucketOperatorStatus.INVITED,
     workerId: Number(workerId),
   })
-
-  ec.collections.DistributionBucketOperator.push(invitedOperator)
 }
 
 export async function processDistributionBucketInvitationCancelledEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketInvitationCancelled'>): Promise<void> {
   // Metadata should not exist, because the operator wasn't active
-  ec.collections.DistributionBucketOperator.remove(
-    new DistributionBucketOperator({ id: distributionOperatorId(bucketId, workerId) })
-  )
+  overlay
+    .getRepository(DistributionBucketOperator)
+    .remove(distributionOperatorId(bucketId, workerId))
 }
 
 export async function processDistributionBucketInvitationAcceptedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [workerId, bucketId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketInvitationAccepted'>): Promise<void> {
-  const operator = await ec.collections.DistributionBucketOperator.getOrFail(
-    distributionOperatorId(bucketId, workerId)
-  )
+  const operator = await overlay
+    .getRepository(DistributionBucketOperator)
+    .getByIdOrFail(distributionOperatorId(bucketId, workerId))
   operator.status = DistributionBucketOperatorStatus.ACTIVE
 }
 
 export async function processDistributionBucketMetadataSetEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [workerId, bucketId, metadataBytes],
   },
 }: EventHandlerContext<'Storage.DistributionBucketMetadataSet'>): Promise<void> {
-  const operator = await ec.collections.DistributionBucketOperator.getOrFail(
-    distributionOperatorId(bucketId, workerId),
-    { metadata: true }
-  )
-  const meta = deserializeMetadata(DistributionBucketOperatorMetadata, metadataBytes)
-  if (meta) {
-    processDistributionOperatorMetadata(ec, operator, meta)
+  const metadataUpdate = deserializeMetadata(DistributionBucketOperatorMetadata, metadataBytes)
+  if (metadataUpdate) {
+    await processDistributionOperatorMetadata(
+      overlay,
+      distributionOperatorId(bucketId, workerId),
+      metadataUpdate
+    )
   }
 }
 
 export async function processDistributionBucketOperatorRemovedEvent({
-  ec,
+  overlay,
   event: {
     asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketOperatorRemoved'>): Promise<void> {
-  const operator = await ec.collections.DistributionBucketOperator.getOrFail(
-    distributionOperatorId(bucketId, workerId),
-    { metadata: true }
-  )
-  await removeDistributionBucketOperator(ec, operator)
+  await removeDistributionBucketOperator(overlay, distributionOperatorId(bucketId, workerId))
 }
