@@ -10,9 +10,9 @@ services:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: squid
     ports:
-      - '127.0.0.1:${DB_PORT}:5432'
-      - '[::1]:${DB_PORT}:5432'
-    command: ['postgres', '-c', 'log_statement=all']
+      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+      - '[::1]:${DB_PORT}:${DB_PORT}'
+    command: ['postgres', '-c', 'log_statement=all', '-p', '${DB_PORT}']
     shm_size: 1g
     volumes:
       - orion_db_data:/var/lib/postgresql/data
@@ -24,11 +24,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      - DB_HOST=orion_db
-      - DB_PORT=5432
-      - ARCHIVE_GATEWAY_HOST=orion_archive_gateway
-      - ARCHIVE_GATEWAY_PORT=8000
+      - docker.env
     ports:
       - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
       - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
@@ -48,10 +44,7 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      - PROCESSOR_HOST=orion_processor
-      - DB_HOST=orion_db
-      - DB_PORT=5432
+      - docker.env
     depends_on:
       - db
     volumes:
