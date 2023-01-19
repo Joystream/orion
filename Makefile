@@ -1,21 +1,22 @@
 process: migrate
-	@SQD_DEBUG=sqd:processor:mapping node -r dotenv/config lib/processor.js
+	@SQD_DEBUG=sqd:processor:mapping node -r dotenv-expand/config lib/processor.js
 
+install:
+	@npm install
 
 build:
 	@npm run build
 
 build-processor-image:
-	@docker build . --target processor -t squid-processor
+	@docker build . --target processor -t orion-processor
 
 build-query-node-image:
-	@docker build . --target query-node -t query-node
+	@docker build . --target query-node -t orion-api
 
 build-images: build-processor-image build-query-node-image
 
 serve:
 	@npx squid-graphql-server --subscriptions
-
 
 migrate:
 	@npx squid-typeorm-migration apply
@@ -30,13 +31,24 @@ codegen:
 typegen:
 	@npx squid-substrate-typegen typegen.json
 
+prepare: install codegen build
 
-up:
+up-squid:
+	@docker network create joystream_default || true
 	@docker-compose up -d
 
+up-archive:
+	@docker network create joystream_default || true
+	@docker-compose -f archive/docker-compose.yml up -d
 
-down:
-	@docker-compose down
+up: up-archive up-squid
 
+down-squid:
+	@docker-compose down -v
+	
+down-archive:
+	@docker-compose -f archive/docker-compose.yml down -v
 
-.PHONY: build serve process migrate codegen typegen up down
+down: down-squid down-archive
+
+.PHONY: build serve process migrate codegen typegen prepare up-squid up-archive up down-squid down-archive down

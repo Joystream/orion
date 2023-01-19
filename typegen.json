@@ -31,7 +31,6 @@
     "Content.BuyNowCanceled",
     "Content.BuyNowPriceUpdated",
     "Content.NftSlingedBackToTheOriginalArtist",
-    "System.ExtrinsicSuccess",
     "Storage.StorageBucketCreated",
     "Storage.StorageBucketInvitationAccepted",
     "Storage.StorageBucketsUpdatedForBag",

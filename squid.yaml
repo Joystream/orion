@@ -1,35 +1,27 @@
 manifestVersion: subsquid.io/v0.1
-namespace: squid
-
-name: balances-batch-dzlzv
+name: joystream-orion
+version: 1
 description: |-
-  The very first squid from manifest
-tags:
-  - balances
+  Joystream Orion v2 backend
 
-database:
-  type: pg-14
+build: 
 
-api:
-  cmd: ['npx', 'squid-graphql-server']
-  graphql-examples:
-    - query: |-
-        query MyQuery {
-          accountsConnection(orderBy: id_ASC) {
-            edges {
-              node {
-                  id
-              }
-            }
-          }
-        }
-      variables: {} # optional
-processor:
-  init:
-    - name: db-migrate
-      cmd: ['npx', 'sqd', 'db', 'migrate']
-
-  #  secrets:
-  #    - name: SECRET_ENV_NAME
-
-  cmd: ['node', 'lib/processor']
+deploy:
+  addons:
+    postgres: 
+  secrets:
+    - OPERATOR_SECRET
+  processor:
+    env:
+      ARCHIVE_GATEWAY_HOST: 194.233.167.225
+      ARCHIVE_GATEWAY_PORT: 8888
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
+      PROCESSOR_PROMETHEUS_PORT: 3000
+    cmd: [ "npm", "run", "processor-start" ]
+  api:
+    env:
+      PROCESSOR_HOST: localhost
+      PROCESSOR_PROMETHEUS_PORT: 3000
+    cmd: [ "npm", "run", "query-node-start" ]
