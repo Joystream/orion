@@ -259,7 +259,7 @@ export function createAuction(
   const auctionRepository = overlay.getRepository(Auction)
   // prepare auction record
   const auction = auctionRepository.new({
-    id: auctionRepository.getNextId(),
+    id: auctionRepository.getNewEntityId(),
     nftId: nft.id,
     startingPrice: auctionParams.startingPrice,
     buyNowPrice: auctionParams.buyNowPrice,
@@ -386,7 +386,7 @@ export async function createBid(
 
   // prepare bid record
   const newBid = bidRepository.new({
-    id: bidRepository.getNextId(),
+    id: bidRepository.getNewEntityId(),
     createdAt: new Date(block.timestamp),
     auctionId: auction.id,
     nftId: videoId,

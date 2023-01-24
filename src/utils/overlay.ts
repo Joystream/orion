@@ -72,9 +72,14 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return _.repeat('0', 8 - idStr.length) + idStr
   }
 
-  // Get id of the next (new) entity of given type
-  getNextId(): string {
+  // Get id of the new entity of given type and increment `this.nextId`
+  getNewEntityId(): string {
     return this.asIdString(this.nextId++)
+  }
+
+  // Get current value of `this.nextId` number
+  getNextIdNumber(): number {
+    return this.nextId
   }
 
   // Prevents inserting strings that contain null character into the postgresql table
@@ -309,5 +314,10 @@ export class EntityManagerOverlay {
     await Promise.all(
       Array.from(this.repositories.values()).map((r) => r.executeScheduledRemovals())
     )
+    const nextIds = Array.from(this.repositories.values()).map((r) => new NextEntityId({
+      entityName: r.entityName,
+      nextId: r.getNextIdNumber()
+    }))
+    await this.em.save(nextIds)
   }
 }

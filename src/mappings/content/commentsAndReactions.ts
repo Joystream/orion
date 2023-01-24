@@ -388,7 +388,7 @@ export async function processCreateCommentMessage(
   // add new comment
   const comment = overlay.getRepository(Comment).new({
     // TODO: Re-think backward compatibility
-    id: backwardCompatibleMetaID(block, indexInBlock), // overlay.getRepository(Comment).getNextId(),
+    id: backwardCompatibleMetaID(block, indexInBlock), // overlay.getRepository(Comment).getNewEntityId(),
     createdAt: new Date(block.timestamp),
     text: body,
     videoId: video.id,
@@ -560,7 +560,7 @@ export async function processCreateVideoCategoryMessage(
   // create new video category
   overlay.getRepository(VideoCategory).new({
     // TODO: Re-think backward-compatibility
-    id: `${block.height}-${indexInBlock}`, // overlay.getRepository(VideoCategory).getNextId(),
+    id: `${block.height}-${indexInBlock}`, // overlay.getRepository(VideoCategory).getNewEntityId(),
     name: name || null,
     description: description || null,
     parentCategoryId,
