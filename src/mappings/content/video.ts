@@ -24,6 +24,7 @@ export async function processVideoCreatedEvent({
     createdAt: new Date(block.timestamp),
     channelId: channelId.toString(),
     isCensored: false,
+    isExcluded: false,
     createdInBlock: block.height,
     isCommentSectionEnabled: true,
     isReactionFeatureEnabled: true,

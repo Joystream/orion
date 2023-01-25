@@ -61,6 +61,9 @@ type Video @entity {
   "Flag signaling whether a video is censored."
   isCensored: Boolean!
 
+  "Whether a video has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+
   "Video NFT details"
   nft: OwnedNft @derivedFrom(field: "video")
 

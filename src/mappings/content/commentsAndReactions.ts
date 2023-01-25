@@ -399,6 +399,7 @@ export async function processCreateCommentMessage(
     reactionsCount: 0,
     reactionsAndRepliesCount: 0,
     isEdited: false,
+    isExcluded: false
   })
 
   // add CommentCreated event

@@ -11,7 +11,7 @@ module.exports = class Views2000000000000 {
       CREATE VIEW "channel" AS
         SELECT *
         FROM "processor"."channel"
-        WHERE "is_censored" = '0'
+        WHERE "is_censored" = '0' AND "is_excluded" = '0'
     `)
     // Videos view:
     // All videos except:
@@ -43,6 +43,7 @@ module.exports = class Views2000000000000 {
             )
           )
           AND "is_censored"='0'
+          AND "is_excluded"='0'
     `)
     // Categories view:
     // All categories except those not supported by the Gateway
@@ -92,6 +93,7 @@ module.exports = class Views2000000000000 {
         FROM "processor"."comment"
         WHERE
           EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")
+          AND "is_excluded"='0'
     `)
     // Comments reactions view:
     // All comment reactions expect those related to comments that are not part of the comment view

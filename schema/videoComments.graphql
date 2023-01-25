@@ -70,4 +70,7 @@ type Comment @entity {
 
   "Whether comment has been edited or not"
   isEdited: Boolean!
+
+  "Whether a comment has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
 }

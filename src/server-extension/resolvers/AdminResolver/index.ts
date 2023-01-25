@@ -2,7 +2,11 @@ import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
 import { EntityManager, In, Not } from 'typeorm'
 import {
+  ExcludeContentArgs,
+  ExcludeContentResult,
   KillSwitch,
+  RestoreContentArgs,
+  RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
   SetKillSwitchInput,
@@ -154,14 +158,17 @@ export class AdminResolver {
     const em = await this.em()
     let newNumberOfCategoriesSupported = 0
     if (supportedCategoriesIds) {
-      await em.query(`UPDATE "processor"."video_category" SET "is_supported"='0'`)
+      await em.createQueryBuilder()
+        .update(`processor.video_category`)
+        .set({ is_supported: false })
+        .execute()
       if (supportedCategoriesIds.length) {
-        const result = await em.query(
-          `UPDATE "processor"."video_category" SET "is_supported"='1' WHERE ID IN (${supportedCategoriesIds
-            .map((id) => `'${id}'`)
-            .join(', ')})`
-        )
-        newNumberOfCategoriesSupported = result[1]
+        const result = await em.createQueryBuilder()
+          .update(`processor.video_category`)
+          .set({ is_supported: true })
+          .where({ id: In(supportedCategoriesIds) })
+          .execute()
+        newNumberOfCategoriesSupported = result.affected || 0
       }
     }
     if (supportNewCategories !== undefined) {
@@ -174,6 +181,42 @@ export class AdminResolver {
       newNumberOfCategoriesSupported,
       newlyCreatedCategoriesSupported: await config.get(ConfigVariable.SupportNewCategories, em),
       noCategoryVideosSupported: await config.get(ConfigVariable.SupportNoCategoryVideo, em),
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => ExcludeContentResult)
+  async excludeContent(
+    @Args()
+    { ids, type }: ExcludeContentArgs
+  ): Promise<ExcludeContentResult> {
+    const em = await this.em()
+    const result = await em.createQueryBuilder()
+      .update(`processor.${type}`)
+      .set({ is_excluded: true })
+      .where({ id: In(ids) })
+      .execute()
+
+    return {
+      numberOfEntitiesAffected: result.affected || 0
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => RestoreContentResult)
+  async restoreContent(
+    @Args()
+    { ids, type }: RestoreContentArgs
+  ): Promise<ExcludeContentResult> {
+    const em = await this.em()
+    const result = await em.createQueryBuilder()
+      .update(`processor.${type}`)
+      .set({ is_excluded: false })
+      .where({ id: In(ids) })
+      .execute()
+
+    return {
+      numberOfEntitiesAffected: result.affected || 0
     }
   }
 }
