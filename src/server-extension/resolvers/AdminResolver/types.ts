@@ -1,4 +1,4 @@
-import { ArgsType, Field, InputType, Int, ObjectType } from 'type-graphql'
+import { ArgsType, Field, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
 
 @ArgsType()
 export class SetKillSwitchInput {
@@ -104,4 +104,53 @@ export class SetCategoryFeaturedVideosResult {
 
   @Field(() => Int)
   numberOfFeaturedVideosSet!: number
+}
+
+export enum ExcludableContentType {
+  Channel = 'channel',
+  Video = 'video',
+  Comment = 'comment'
+}
+registerEnumType(ExcludableContentType, { name: 'ExcludableContentType' })
+
+@ArgsType()
+export class ExcludeContentArgs {
+  @Field(() => ExcludableContentType, {
+    nullable: false,
+    description: 'Type of the content to exclude/hide'
+  })
+  type: ExcludableContentType
+
+  @Field(() => [String], {
+    nullable: false,
+    description: 'IDs of the entities to be excluded (hidden)',
+  })
+  ids!: string[]
+}
+
+@ObjectType()
+export class ExcludeContentResult {
+  @Field(() => Int)
+  numberOfEntitiesAffected!: number
+}
+
+@ArgsType()
+export class RestoreContentArgs {
+  @Field(() => ExcludableContentType, {
+    nullable: false,
+    description: 'Type of the content to restore'
+  })
+  type: ExcludableContentType
+
+  @Field(() => [String], {
+    nullable: false,
+    description: 'IDs of the entities to be restored',
+  })
+  ids!: string[]
+}
+
+@ObjectType()
+export class RestoreContentResult {
+  @Field(() => Int)
+  numberOfEntitiesAffected!: number
 }

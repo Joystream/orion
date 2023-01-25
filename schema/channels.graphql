@@ -26,6 +26,9 @@ type Channel @entity {
   "Flag signaling whether a channel is censored."
   isCensored: Boolean!
 
+  "Whether a channel has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+
   "The primary langauge of the channel's content"
   language: String @index
 
