@@ -97,10 +97,11 @@ const defaultEventOptions = {
   },
 } as const
 
+const archiveUrl = process.env.ARCHIVE_GATEWAY_URL || 'http://localhost:8888/graphql'
+const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
+
 const processor = new SubstrateBatchProcessor()
-  .setDataSource({
-    archive: `http://${process.env.ARCHIVE_GATEWAY_HOST}:${process.env.ARCHIVE_GATEWAY_PORT}/graphql`,
-  })
+  .setDataSource({ archive: archiveUrl })
   .addEvent('Content.VideoCreated', defaultEventOptions)
   .addEvent('Content.VideoUpdated', defaultEventOptions)
   .addEvent('Content.VideoDeleted', defaultEventOptions)
@@ -278,6 +279,11 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
           item.event,
           overlay
         )
+        // Update database if the number of cached entities exceeded MAX_CACHED_ENTITIES
+        if (overlay.totalCacheSize() > maxCachedEntities) {
+          ctx.log.info(`Max memory cache size of ${maxCachedEntities} exceeded, updating database...`)
+          await overlay.updateDatabase()
+        }
       }
     }
   }
