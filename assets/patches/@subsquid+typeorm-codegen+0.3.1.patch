@@ -1,5 +1,5 @@
 diff --git a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
-index 54b1dd0..3798098 100644
+index e40f9bc..a8b1225 100644
 --- a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
 +++ b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
 @@ -110,7 +110,7 @@ function generateOrmModels(model, dir) {
@@ -11,7 +11,7 @@ index 54b1dd0..3798098 100644
                              out.line(`@JoinColumn_()`);
                          }
                          else {
-@@ -119,12 +119,12 @@ function generateOrmModels(model, dir) {
+@@ -119,7 +119,7 @@ function generateOrmModels(model, dir) {
                                  out.line(`@Index_()`);
                              }
                              // Make foreign entity references always nullable
@@ -20,21 +20,15 @@ index 54b1dd0..3798098 100644
                          }
                          break;
                      case 'lookup':
-                         imports.useTypeorm('OneToOne');
--                        out.line(`@OneToOne_(() => ${prop.type.entity})`);
-+                        out.line(`@OneToOne_(() => ${prop.type.entity}, e => e.${prop.type.field})`);
-                         break;
-                     case 'list-lookup':
-                         imports.useTypeorm('OneToMany');
-@@ -157,6 +157,11 @@ function generateOrmModels(model, dir) {
-                         throw (0, util_internal_1.unexpectedCase)(prop.type.kind);
+@@ -161,6 +161,11 @@ function generateOrmModels(model, dir) {
                  }
-                 out.line(`${key}!: ${getPropJsType(imports, 'entity', prop)}`);
-+                if (prop.type.kind === 'fk') {
-+                    out.line()
-+                    out.line(`@Column_(${!getFieldIndex(entity, key)?.unique ? '{ nullable: true }' : ''})`)
-+                    out.line(`${key}Id!: string` + (!getFieldIndex(entity, key)?.unique ? ' | null | undefined' : ''))
-+                }
+                 if (prop.type.kind != 'lookup') {
+                     out.line(`${key}!: ${getPropJsType(imports, 'entity', prop)}`);
++                    if (prop.type.kind === 'fk') {
++                        out.line()
++                        out.line(`@Column_(${!getFieldIndex(entity, key)?.unique ? '{ nullable: true }' : ''})`)
++                        out.line(`${key}Id!: string` + (!getFieldIndex(entity, key)?.unique ? ' | null | undefined' : ''))
++                    }
+                 }
              }
          });
-         out.write();

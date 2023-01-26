@@ -295,7 +295,7 @@ async function processAssets<E, M extends AnyMetadataClass<unknown>>(
     const newAssetIndex: number | undefined = meta[metaProperty] ?? undefined
     const currentAssetId = entity[entityProperty]
     const currentAsset = currentAssetId
-      ? await overlay.getRepository(StorageDataObject).getByIdOrFail(currentAssetId)
+      ? await overlay.getRepository(StorageDataObject).getById(currentAssetId)
       : null
     if (isSet(newAssetIndex)) {
       const newAsset = findAssetByIndex(metadataClass, assets, newAssetIndex)

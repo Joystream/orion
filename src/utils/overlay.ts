@@ -65,6 +65,10 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     this.entityName = this.repository.metadata.name
   }
 
+  public cacheSize() {
+    return this.cached.size
+  }
+
   // Converts id as number to id as string (radix 36, with leading zeros)
   private asIdString(idNum: number) {
     const idStr = idNum.toString(36)
@@ -120,9 +124,9 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
   // Schedules provided entities for later removal.
   remove(...items: (E | Flat<E> | string)[]): this {
     items.forEach((entityOrId) => {
-      this.cached.set(typeof entityOrId === 'string' ? entityOrId : (entityOrId as E).id, {
-        state: CachedEntityState.ToBeRemoved,
-      })
+      const entityId = typeof entityOrId === 'string' ? entityOrId : (entityOrId as E).id
+      Logger.get().debug(`Scheduling ${this.entityName}:${entityId} for removal`)
+      this.cached.set(entityId, { state: CachedEntityState.ToBeRemoved })
     })
     return this
   }
@@ -211,6 +215,7 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     const entity = new this.EntityClass(entityFields)
     // normalize the input (remove UTF-8 null characters)
     this.normalizeInput(entity)
+    Logger.get().debug(`Creating new ${this.entityName}: ${entity.id}`)
     // Entities with the same id will override existing ones (!)
     this.cached.set(entity.id, { entity, state: CachedEntityState.ToBeSaved })
     return entity
@@ -246,25 +251,29 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
   async executeScheduledUpdates(): Promise<void> {
     const logger = Logger.get()
     const toBeSaved = this.getAllToBeSaved()
-    logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
-    logger.debug(
-      `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
-    )
-    await this.repository.save(toBeSaved)
-    // Remove saved entities from cache
-    toBeSaved.forEach((e) => this.cached.delete(e.id))
+    if (toBeSaved.length) {
+      logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
+      logger.debug(
+        `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
+      )
+      await this.repository.save(toBeSaved)
+      // Remove saved entities from cache
+      toBeSaved.forEach((e) => this.cached.delete(e.id))
+    }
   }
 
   // Execute all scheduled entity removals
   async executeScheduledRemovals(): Promise<void> {
     const logger = Logger.get()
     const toBeRemoved = this.getAllIdsToBeRemoved().map((id) => new this.EntityClass({ id }))
-    logger.info(`Removing ${toBeRemoved.length} ${this.entityName} entities...`)
-    logger.debug(
-      `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
-    )
-    // Remove deleted entities from cache
-    toBeRemoved.forEach((e) => this.cached.delete(e.id))
+    if (toBeRemoved.length) {
+      logger.info(`Removing ${toBeRemoved.length} ${this.entityName} entities...`)
+      logger.debug(
+        `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
+      )
+      // Remove deleted entities from cache
+      toBeRemoved.forEach((e) => this.cached.delete(e.id))
+    }
   }
 }
 
@@ -282,6 +291,10 @@ export class EntityManagerOverlay {
     await em.query('SET search_path TO processor,public')
     const nextEntityIds = await em.find(NextEntityId, {})
     return new EntityManagerOverlay(em, nextEntityIds)
+  }
+
+  public totalCacheSize() {
+    return Array.from(this.repositories.values()).reduce((a, b) => a + b.cacheSize(), 0)
   }
 
   public getEm() {

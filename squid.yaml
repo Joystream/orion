@@ -11,17 +11,26 @@ deploy:
     postgres: 
   secrets:
     - OPERATOR_SECRET
-  processor:
+  migrate:
     env:
-      ARCHIVE_GATEWAY_HOST: 194.233.167.225
-      ARCHIVE_GATEWAY_PORT: 8888
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
+    cmd: [ "npx", "squid-typeorm-migration", "apply" ]
+  processor:
+    env:
+      ARCHIVE_GATEWAY_URL: https://joystream.archive.subsquid.io/graphql
       PROCESSOR_PROMETHEUS_PORT: 3000
+      SQD_DEBUG: sqd:processor:mapping
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
     cmd: [ "npm", "run", "processor-start" ]
   api:
     env:
-      PROCESSOR_HOST: localhost
+      PROCESSOR_HOST: processor
       PROCESSOR_PROMETHEUS_PORT: 3000
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
     cmd: [ "npm", "run", "query-node-start" ]

@@ -1938,32 +1938,3 @@ export class StorageVoucherChangedEvent {
     return this._chain.decodeEvent(this.event)
   }
 }
-
-export class SystemExtrinsicSuccessEvent {
-  private readonly _chain: Chain
-  private readonly event: Event
-
-  constructor(ctx: EventContext)
-  constructor(ctx: ChainContext, event: Event)
-  constructor(ctx: EventContext, event?: Event) {
-    event = event || ctx.event
-    assert(event.name === 'System.ExtrinsicSuccess')
-    this._chain = ctx._chain
-    this.event = event
-  }
-
-  /**
-   * An extrinsic completed successfully.
-   */
-  get isV1000(): boolean {
-    return this._chain.getEventHash('System.ExtrinsicSuccess') === '407ed94c14f243acbe2cdb53df52c37d97bbb5ae550a10a6036bf59677cdd165'
-  }
-
-  /**
-   * An extrinsic completed successfully.
-   */
-  get asV1000(): {dispatchInfo: v1000.DispatchInfo} {
-    assert(this.isV1000)
-    return this._chain.decodeEvent(this.event)
-  }
-}

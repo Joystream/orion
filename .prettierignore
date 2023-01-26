@@ -6,3 +6,4 @@ lib
 src/types
 src/model/generated
 db/migrations/*.js
+schema.graphql

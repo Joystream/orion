@@ -63,9 +63,8 @@ make down
 # Clone the Orion v2 repository
 # ...(just like in 1.)
 
-# Use custom Squid archive host & port
-export CUSTOM_ARCHIVE_GATEWAY_HOST=194.233.167.225
-export CUSTOM_ARCHIVE_GATEWAY_PORT=8888
+# Use custom Squid archive url
+export CUSTOM_ARCHIVE_GATEWAY_URL=https://joystream.archive.subsquid.io/graphql
 # Start orion-v2 services (no local archive instance will be launched)
 make up-squid
 
