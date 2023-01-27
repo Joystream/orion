@@ -49,7 +49,7 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 
 - `addVideoView`:
     - no longer requires `channelId` and `categoryId` as input
-    - now only increases number of video views if the request is an unique request per ip-videoId pair in the last 24 hours (to prevent abuse). 
+    - now only increases number of video views if the request is a unique request per ip-videoId pair in the last `Config.VideoViewPerIpTimeLimit` seconds (to prevent abuse). This limit can be set via environment variable or through `setVideoViewPerIpTimeLimit` operator mutation.
     - `added` boolean was added to mutation result to indicate whether a new view was added or not
 - `followChannel`:
     - channel id is now returned in `channelId` field of the mutation result, instead of `id`, in order to distinguish between `channelId` and `followId`
@@ -72,3 +72,4 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - `setCategoryFeaturedVideos`
     - the mutation result now only includes `categoryId` and number of featured videos set / unset 
 - **New mutation:** `setSupportedCategories` - allows specifying which video categories are supported by the gateway. Content that doesn't belong to supported categories will not be displayed in query results. This includes the categories themselves, videos, nfts, auctions, comments, reactions etc.
+- **New mutation:** `setVideoViewPerIpTimeLimit` - allows specifying the time after which a video view triggered from the same ip address will be counted again (see: `addVideoView`)

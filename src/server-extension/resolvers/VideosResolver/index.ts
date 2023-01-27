@@ -34,10 +34,8 @@ import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import { extendClause } from '../../../utils/sql'
-
-// How much time has to pass before a video view from the same ip
-// will be considered a new view
-const SAME_IP_VIDEO_VIEW_IGNORE_TIME = 24 * 60 * 60 * 1000 // one day
+import { config, ConfigVariable } from '../../../utils/config'
+import { channel } from 'diagnostics_channel'
 
 @Resolver()
 export class VideosResolver {
@@ -165,16 +163,23 @@ export class VideosResolver {
       const video = await em.findOne(Video, {
         where: { id: videoId },
         lock: { mode: 'pessimistic_write' },
+        join: {
+          alias: 'v',
+          innerJoinAndSelect: {
+            c: 'v.channel',
+          },
+        },
       })
       if (!video) {
         throw new Error(`Video by id ${videoId} does not exist`)
       }
       // See if there is already a recent view of this video by this ip
+      const timeLimitInSeconds = await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em)
       const recentView = await em.findOne(VideoViewEvent, {
         where: {
           ip,
           video: { id: videoId },
-          timestamp: MoreThan(new Date(Date.now() - SAME_IP_VIDEO_VIEW_IGNORE_TIME)),
+          timestamp: MoreThan(new Date(Date.now() - timeLimitInSeconds * 1000)),
         },
       })
       // If so - just return the result
@@ -187,13 +192,15 @@ export class VideosResolver {
         }
       }
       // Otherwise create a new VideoViewEvent and increase the videoViews counter
+      // in both the video and its channel
       video.viewsNum += 1
+      video.channel.videoViewsNum += 1
       const newView = new VideoViewEvent({
         ip,
         timestamp: new Date(),
         video,
       })
-      await em.save([video, newView])
+      await em.save([video, video.channel, newView])
       return {
         videoId,
         viewsNum: video.viewsNum,
