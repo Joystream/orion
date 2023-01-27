@@ -44,7 +44,7 @@ import {
   InitTransactionalStatusRecord,
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
-} from '../../types/v1000'
+} from '../../types/v2000'
 import { genericEventFields } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 
