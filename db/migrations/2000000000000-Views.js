@@ -36,10 +36,10 @@ module.exports = class Views2000000000000 {
                     process.env.SUPPORT_NO_CATEGORY_VIDEOS === 'true' ||
                     process.env.SUPPORT_NO_CATEGORY_VIDEOS === '1'
                   )
-                    ? 'true'
-                    : 'false'
+                    ? "'1'"
+                    : "'0'"
                 }
-              )
+              )='1'
             )
           )
           AND "is_censored"='0'

@@ -13,6 +13,18 @@ export class KillSwitch {
 }
 
 @ArgsType()
+export class SetVideoViewPerIpTimeLimitInput {
+  @Field(() => Int, { nullable: false })
+  limitInSeconds!: number
+}
+
+@ObjectType()
+export class VideoViewPerIpTimeLimit {
+  @Field(() => Int, { nullable: false })
+  limitInSeconds!: number
+}
+
+@ArgsType()
 export class SetVideoHeroInput {
   @Field(() => String, { nullable: false })
   videoId!: string
@@ -109,7 +121,7 @@ export class SetCategoryFeaturedVideosResult {
 export enum ExcludableContentType {
   Channel = 'channel',
   Video = 'video',
-  Comment = 'comment'
+  Comment = 'comment',
 }
 registerEnumType(ExcludableContentType, { name: 'ExcludableContentType' })
 
@@ -117,7 +129,7 @@ registerEnumType(ExcludableContentType, { name: 'ExcludableContentType' })
 export class ExcludeContentArgs {
   @Field(() => ExcludableContentType, {
     nullable: false,
-    description: 'Type of the content to exclude/hide'
+    description: 'Type of the content to exclude/hide',
   })
   type: ExcludableContentType
 
@@ -138,7 +150,7 @@ export class ExcludeContentResult {
 export class RestoreContentArgs {
   @Field(() => ExcludableContentType, {
     nullable: false,
-    description: 'Type of the content to restore'
+    description: 'Type of the content to restore',
   })
   type: ExcludableContentType
 

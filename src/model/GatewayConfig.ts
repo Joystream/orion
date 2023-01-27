@@ -15,8 +15,8 @@ export class GatewayConfig {
   /**
    * Value of the configuration flag
    */
-  @Column('bool', { nullable: false })
-  value!: boolean
+  @Column('text', { nullable: false })
+  value!: string
 
   /**
    * Last time the value was updated

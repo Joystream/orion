@@ -14,6 +14,8 @@ import {
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
   SetVideoHeroResult,
+  SetVideoViewPerIpTimeLimitInput,
+  VideoViewPerIpTimeLimit,
 } from './types'
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
@@ -49,6 +51,26 @@ export class AdminResolver {
   async getKillSwitch(): Promise<KillSwitch> {
     const em = await this.em()
     return { isKilled: await config.get(ConfigVariable.KillSwitch, em) }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => VideoViewPerIpTimeLimit)
+  async setVideoViewPerIpTimeLimit(
+    @Args() args: SetVideoViewPerIpTimeLimitInput
+  ): Promise<VideoViewPerIpTimeLimit> {
+    const em = await this.em()
+    await config.set(ConfigVariable.VideoViewPerIpTimeLimit, args.limitInSeconds, em)
+    return {
+      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
+    }
+  }
+
+  @Query(() => VideoViewPerIpTimeLimit)
+  async getVideoViewPerIpTimeLimit(): Promise<VideoViewPerIpTimeLimit> {
+    const em = await this.em()
+    return {
+      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
+    }
   }
 
   @Query(() => VideoHero, { nullable: true })
@@ -158,12 +180,14 @@ export class AdminResolver {
     const em = await this.em()
     let newNumberOfCategoriesSupported = 0
     if (supportedCategoriesIds) {
-      await em.createQueryBuilder()
+      await em
+        .createQueryBuilder()
         .update(`processor.video_category`)
         .set({ is_supported: false })
         .execute()
       if (supportedCategoriesIds.length) {
-        const result = await em.createQueryBuilder()
+        const result = await em
+          .createQueryBuilder()
           .update(`processor.video_category`)
           .set({ is_supported: true })
           .where({ id: In(supportedCategoriesIds) })
@@ -191,14 +215,15 @@ export class AdminResolver {
     { ids, type }: ExcludeContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em.createQueryBuilder()
+    const result = await em
+      .createQueryBuilder()
       .update(`processor.${type}`)
       .set({ is_excluded: true })
       .where({ id: In(ids) })
       .execute()
 
     return {
-      numberOfEntitiesAffected: result.affected || 0
+      numberOfEntitiesAffected: result.affected || 0,
     }
   }
 
@@ -209,14 +234,15 @@ export class AdminResolver {
     { ids, type }: RestoreContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em.createQueryBuilder()
+    const result = await em
+      .createQueryBuilder()
       .update(`processor.${type}`)
       .set({ is_excluded: false })
       .where({ id: In(ids) })
       .execute()
 
     return {
-      numberOfEntitiesAffected: result.affected || 0
+      numberOfEntitiesAffected: result.affected || 0,
     }
   }
 }
