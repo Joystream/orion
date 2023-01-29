@@ -1,0 +1,478 @@
+diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
+index cfbfe12..307ef59 100644
+--- a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
++++ b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
+@@ -2484,6 +2484,105 @@ export class CreateVideoCategory implements ICreateVideoCategory {
+     public toJSON(): { [k: string]: any };
+ }
+ 
++/** Properties of a MakeChannelPayment. */
++export interface IMakeChannelPayment {
++
++    /** MakeChannelPayment rationale */
++    rationale?: (string|null);
++
++    /** MakeChannelPayment videoId */
++    videoId?: (Long|null);
++}
++
++/** Represents a MakeChannelPayment. */
++export class MakeChannelPayment implements IMakeChannelPayment {
++
++    /**
++     * Constructs a new MakeChannelPayment.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: IMakeChannelPayment);
++
++    /** MakeChannelPayment rationale. */
++    public rationale: string;
++
++    /** MakeChannelPayment videoId. */
++    public videoId?: (Long|null);
++
++    /** MakeChannelPayment paymentContext. */
++    public paymentContext?: "videoId";
++
++    /**
++     * Creates a new MakeChannelPayment instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns MakeChannelPayment instance
++     */
++    public static create(properties?: IMakeChannelPayment): MakeChannelPayment;
++
++    /**
++     * Encodes the specified MakeChannelPayment message. Does not implicitly {@link MakeChannelPayment.verify|verify} messages.
++     * @param message MakeChannelPayment message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: IMakeChannelPayment, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified MakeChannelPayment message, length delimited. Does not implicitly {@link MakeChannelPayment.verify|verify} messages.
++     * @param message MakeChannelPayment message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: IMakeChannelPayment, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes a MakeChannelPayment message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns MakeChannelPayment
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): MakeChannelPayment;
++
++    /**
++     * Decodes a MakeChannelPayment message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns MakeChannelPayment
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): MakeChannelPayment;
++
++    /**
++     * Verifies a MakeChannelPayment message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates a MakeChannelPayment message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns MakeChannelPayment
++     */
++    public static fromObject(object: { [k: string]: any }): MakeChannelPayment;
++
++    /**
++     * Creates a plain object from a MakeChannelPayment message. Also converts values to other types if specified.
++     * @param message MakeChannelPayment
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: MakeChannelPayment, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this MakeChannelPayment to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
+ /** Properties of a MemberRemarked. */
+ export interface IMemberRemarked {
+ 
+@@ -2504,6 +2603,9 @@ export interface IMemberRemarked {
+ 
+     /** MemberRemarked createVideoCategory */
+     createVideoCategory?: (ICreateVideoCategory|null);
++
++    /** MemberRemarked makeChannelPayment */
++    makeChannelPayment?: (IMakeChannelPayment|null);
+ }
+ 
+ /** Represents a MemberRemarked. */
+@@ -2533,8 +2635,11 @@ export class MemberRemarked implements IMemberRemarked {
+     /** MemberRemarked createVideoCategory. */
+     public createVideoCategory?: (ICreateVideoCategory|null);
+ 
++    /** MemberRemarked makeChannelPayment. */
++    public makeChannelPayment?: (IMakeChannelPayment|null);
++
+     /** MemberRemarked memberRemarked. */
+-    public memberRemarked?: ("reactVideo"|"reactComment"|"createComment"|"editComment"|"deleteComment"|"createVideoCategory");
++    public memberRemarked?: ("reactVideo"|"reactComment"|"createComment"|"editComment"|"deleteComment"|"createVideoCategory"|"makeChannelPayment");
+ 
+     /**
+      * Creates a new MemberRemarked instance using the specified properties.
+diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
+index a2f7852..7f0c71b 100644
+--- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
++++ b/node_modules/@joystream/metadata-protobuf/compiled/index.js
+@@ -5911,6 +5911,244 @@ $root.CreateVideoCategory = (function() {
+     return CreateVideoCategory;
+ })();
+ 
++$root.MakeChannelPayment = (function() {
++
++    /**
++     * Properties of a MakeChannelPayment.
++     * @exports IMakeChannelPayment
++     * @interface IMakeChannelPayment
++     * @property {string|null} [rationale] MakeChannelPayment rationale
++     * @property {Long|null} [videoId] MakeChannelPayment videoId
++     */
++
++    /**
++     * Constructs a new MakeChannelPayment.
++     * @exports MakeChannelPayment
++     * @classdesc Represents a MakeChannelPayment.
++     * @implements IMakeChannelPayment
++     * @constructor
++     * @param {IMakeChannelPayment=} [properties] Properties to set
++     */
++    function MakeChannelPayment(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * MakeChannelPayment rationale.
++     * @member {string} rationale
++     * @memberof MakeChannelPayment
++     * @instance
++     */
++    MakeChannelPayment.prototype.rationale = "";
++
++    /**
++     * MakeChannelPayment videoId.
++     * @member {Long|null|undefined} videoId
++     * @memberof MakeChannelPayment
++     * @instance
++     */
++    MakeChannelPayment.prototype.videoId = null;
++
++    // OneOf field names bound to virtual getters and setters
++    var $oneOfFields;
++
++    /**
++     * MakeChannelPayment paymentContext.
++     * @member {"videoId"|undefined} paymentContext
++     * @memberof MakeChannelPayment
++     * @instance
++     */
++    Object.defineProperty(MakeChannelPayment.prototype, "paymentContext", {
++        get: $util.oneOfGetter($oneOfFields = ["videoId"]),
++        set: $util.oneOfSetter($oneOfFields)
++    });
++
++    /**
++     * Creates a new MakeChannelPayment instance using the specified properties.
++     * @function create
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {IMakeChannelPayment=} [properties] Properties to set
++     * @returns {MakeChannelPayment} MakeChannelPayment instance
++     */
++    MakeChannelPayment.create = function create(properties) {
++        return new MakeChannelPayment(properties);
++    };
++
++    /**
++     * Encodes the specified MakeChannelPayment message. Does not implicitly {@link MakeChannelPayment.verify|verify} messages.
++     * @function encode
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {IMakeChannelPayment} message MakeChannelPayment message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    MakeChannelPayment.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        if (message.rationale != null && Object.hasOwnProperty.call(message, "rationale"))
++            writer.uint32(/* id 1, wireType 2 =*/10).string(message.rationale);
++        if (message.videoId != null && Object.hasOwnProperty.call(message, "videoId"))
++            writer.uint32(/* id 2, wireType 0 =*/16).uint64(message.videoId);
++        return writer;
++    };
++
++    /**
++     * Encodes the specified MakeChannelPayment message, length delimited. Does not implicitly {@link MakeChannelPayment.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {IMakeChannelPayment} message MakeChannelPayment message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    MakeChannelPayment.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes a MakeChannelPayment message from the specified reader or buffer.
++     * @function decode
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {MakeChannelPayment} MakeChannelPayment
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    MakeChannelPayment.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.MakeChannelPayment();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.rationale = reader.string();
++                break;
++            case 2:
++                message.videoId = reader.uint64();
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        return message;
++    };
++
++    /**
++     * Decodes a MakeChannelPayment message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {MakeChannelPayment} MakeChannelPayment
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    MakeChannelPayment.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies a MakeChannelPayment message.
++     * @function verify
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    MakeChannelPayment.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        var properties = {};
++        if (message.rationale != null && message.hasOwnProperty("rationale"))
++            if (!$util.isString(message.rationale))
++                return "rationale: string expected";
++        if (message.videoId != null && message.hasOwnProperty("videoId")) {
++            properties.paymentContext = 1;
++            if (!$util.isInteger(message.videoId) && !(message.videoId && $util.isInteger(message.videoId.low) && $util.isInteger(message.videoId.high)))
++                return "videoId: integer|Long expected";
++        }
++        return null;
++    };
++
++    /**
++     * Creates a MakeChannelPayment message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {MakeChannelPayment} MakeChannelPayment
++     */
++    MakeChannelPayment.fromObject = function fromObject(object) {
++        if (object instanceof $root.MakeChannelPayment)
++            return object;
++        var message = new $root.MakeChannelPayment();
++        if (object.rationale != null)
++            message.rationale = String(object.rationale);
++        if (object.videoId != null)
++            if ($util.Long)
++                (message.videoId = $util.Long.fromValue(object.videoId)).unsigned = true;
++            else if (typeof object.videoId === "string")
++                message.videoId = parseInt(object.videoId, 10);
++            else if (typeof object.videoId === "number")
++                message.videoId = object.videoId;
++            else if (typeof object.videoId === "object")
++                message.videoId = new $util.LongBits(object.videoId.low >>> 0, object.videoId.high >>> 0).toNumber(true);
++        return message;
++    };
++
++    /**
++     * Creates a plain object from a MakeChannelPayment message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof MakeChannelPayment
++     * @static
++     * @param {MakeChannelPayment} message MakeChannelPayment
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    MakeChannelPayment.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.defaults)
++            object.rationale = "";
++        if (message.rationale != null && message.hasOwnProperty("rationale"))
++            object.rationale = message.rationale;
++        if (message.videoId != null && message.hasOwnProperty("videoId")) {
++            if (typeof message.videoId === "number")
++                object.videoId = options.longs === String ? String(message.videoId) : message.videoId;
++            else
++                object.videoId = options.longs === String ? $util.Long.prototype.toString.call(message.videoId) : options.longs === Number ? new $util.LongBits(message.videoId.low >>> 0, message.videoId.high >>> 0).toNumber(true) : message.videoId;
++            if (options.oneofs)
++                object.paymentContext = "videoId";
++        }
++        return object;
++    };
++
++    /**
++     * Converts this MakeChannelPayment to JSON.
++     * @function toJSON
++     * @memberof MakeChannelPayment
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    MakeChannelPayment.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return MakeChannelPayment;
++})();
++
+ $root.MemberRemarked = (function() {
+ 
+     /**
+@@ -5923,6 +6161,7 @@ $root.MemberRemarked = (function() {
+      * @property {IEditComment|null} [editComment] MemberRemarked editComment
+      * @property {IDeleteComment|null} [deleteComment] MemberRemarked deleteComment
+      * @property {ICreateVideoCategory|null} [createVideoCategory] MemberRemarked createVideoCategory
++     * @property {IMakeChannelPayment|null} [makeChannelPayment] MemberRemarked makeChannelPayment
+      */
+ 
+     /**
+@@ -5988,17 +6227,25 @@ $root.MemberRemarked = (function() {
+      */
+     MemberRemarked.prototype.createVideoCategory = null;
+ 
++    /**
++     * MemberRemarked makeChannelPayment.
++     * @member {IMakeChannelPayment|null|undefined} makeChannelPayment
++     * @memberof MemberRemarked
++     * @instance
++     */
++    MemberRemarked.prototype.makeChannelPayment = null;
++
+     // OneOf field names bound to virtual getters and setters
+     var $oneOfFields;
+ 
+     /**
+      * MemberRemarked memberRemarked.
+-     * @member {"reactVideo"|"reactComment"|"createComment"|"editComment"|"deleteComment"|"createVideoCategory"|undefined} memberRemarked
++     * @member {"reactVideo"|"reactComment"|"createComment"|"editComment"|"deleteComment"|"createVideoCategory"|"makeChannelPayment"|undefined} memberRemarked
+      * @memberof MemberRemarked
+      * @instance
+      */
+     Object.defineProperty(MemberRemarked.prototype, "memberRemarked", {
+-        get: $util.oneOfGetter($oneOfFields = ["reactVideo", "reactComment", "createComment", "editComment", "deleteComment", "createVideoCategory"]),
++        get: $util.oneOfGetter($oneOfFields = ["reactVideo", "reactComment", "createComment", "editComment", "deleteComment", "createVideoCategory", "makeChannelPayment"]),
+         set: $util.oneOfSetter($oneOfFields)
+     });
+ 
+@@ -6038,6 +6285,8 @@ $root.MemberRemarked = (function() {
+             $root.DeleteComment.encode(message.deleteComment, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+         if (message.createVideoCategory != null && Object.hasOwnProperty.call(message, "createVideoCategory"))
+             $root.CreateVideoCategory.encode(message.createVideoCategory, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
++        if (message.makeChannelPayment != null && Object.hasOwnProperty.call(message, "makeChannelPayment"))
++            $root.MakeChannelPayment.encode(message.makeChannelPayment, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+         return writer;
+     };
+ 
+@@ -6090,6 +6339,9 @@ $root.MemberRemarked = (function() {
+             case 6:
+                 message.createVideoCategory = $root.CreateVideoCategory.decode(reader, reader.uint32());
+                 break;
++            case 7:
++                message.makeChannelPayment = $root.MakeChannelPayment.decode(reader, reader.uint32());
++                break;
+             default:
+                 reader.skipType(tag & 7);
+                 break;
+@@ -6184,6 +6436,16 @@ $root.MemberRemarked = (function() {
+                     return "createVideoCategory." + error;
+             }
+         }
++        if (message.makeChannelPayment != null && message.hasOwnProperty("makeChannelPayment")) {
++            if (properties.memberRemarked === 1)
++                return "memberRemarked: multiple values";
++            properties.memberRemarked = 1;
++            {
++                var error = $root.MakeChannelPayment.verify(message.makeChannelPayment);
++                if (error)
++                    return "makeChannelPayment." + error;
++            }
++        }
+         return null;
+     };
+ 
+@@ -6229,6 +6491,11 @@ $root.MemberRemarked = (function() {
+                 throw TypeError(".MemberRemarked.createVideoCategory: object expected");
+             message.createVideoCategory = $root.CreateVideoCategory.fromObject(object.createVideoCategory);
+         }
++        if (object.makeChannelPayment != null) {
++            if (typeof object.makeChannelPayment !== "object")
++                throw TypeError(".MemberRemarked.makeChannelPayment: object expected");
++            message.makeChannelPayment = $root.MakeChannelPayment.fromObject(object.makeChannelPayment);
++        }
+         return message;
+     };
+ 
+@@ -6275,6 +6542,11 @@ $root.MemberRemarked = (function() {
+             if (options.oneofs)
+                 object.memberRemarked = "createVideoCategory";
+         }
++        if (message.makeChannelPayment != null && message.hasOwnProperty("makeChannelPayment")) {
++            object.makeChannelPayment = $root.MakeChannelPayment.toObject(message.makeChannelPayment, options);
++            if (options.oneofs)
++                object.memberRemarked = "makeChannelPayment";
++        }
+         return object;
+     };
+ 

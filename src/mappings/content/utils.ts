@@ -44,7 +44,7 @@ import {
   InitTransactionalStatusRecord,
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
-} from '../../types/v1000'
+} from '../../types/v2000'
 import { genericEventFields } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 
@@ -200,7 +200,7 @@ export function processNft(
 
   // Push a new NftIssued event
   overlay.getRepository(Event).new({
-    ...genericEventFields(block, indexInBlock, extrinsicHash),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new NftIssuedEventData({
       actor: parseContentActor(issuer),
       nft: nft.id,

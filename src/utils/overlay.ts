@@ -50,6 +50,8 @@ type OwnedRelations<E> = {
   [K in keyof E & string]: `${K}Id` extends keyof E ? `${K}Id` : never
 }[keyof E & string]
 
+export type FlatRelationless<E> = Omit<Flat<E>, OwnedRelations<E>>
+
 // The entity repository overlay
 export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
   // All currently cached entities of given type
@@ -129,6 +131,45 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
       this.cached.set(entityId, { state: CachedEntityState.ToBeRemoved })
     })
     return this
+  }
+
+  // Checks if an entity matches a simple where condition
+  // (ie. the speficied non-relational fields have exactly matching values)
+  matches(
+    entity: FlatRelationless<E>,
+    where: { [K in keyof FlatRelationless<E>]?: E[K] }
+  ): boolean {
+    return Object.entries(where).every(
+      ([key, value]) => entity[key as keyof FlatRelationless<E>] === value
+    )
+  }
+
+  // Retrieves a (flat) entity by any non-relational field(s)
+  async getOneBy(where: { [K in keyof FlatRelationless<E>]?: E[K] }): Promise<Flat<E> | undefined> {
+    const allCached = Array.from(this.cached.values())
+    const cachedFound = allCached.find(
+      (e) => e.state !== CachedEntityState.ToBeRemoved && e.entity && this.matches(e.entity, where)
+    )
+    if (cachedFound) {
+      return cachedFound.entity
+    }
+
+    const stored = await this.repository.findBy(where as FindOptionsWhere<E>)
+    for (const storedEntity of stored) {
+      // See if we have a cached version of this entity. If yes - prioritize the cached one!
+      const cached = this.cached.get(storedEntity.id)
+      if (cached?.state === CachedEntityState.ToBeRemoved) {
+        continue
+      }
+      if (cached?.entity && this.matches(cached.entity, where)) {
+        return cached.entity
+      }
+      if (!cached && this.matches(storedEntity, where)) {
+        return this.cache(storedEntity)
+      }
+    }
+
+    return undefined
   }
 
   // Retrieves a (flat) entity by id.
@@ -327,10 +368,13 @@ export class EntityManagerOverlay {
     await Promise.all(
       Array.from(this.repositories.values()).map((r) => r.executeScheduledRemovals())
     )
-    const nextIds = Array.from(this.repositories.values()).map((r) => new NextEntityId({
-      entityName: r.entityName,
-      nextId: r.getNextIdNumber()
-    }))
+    const nextIds = Array.from(this.repositories.values()).map(
+      (r) =>
+        new NextEntityId({
+          entityName: r.entityName,
+          nextId: r.getNextIdNumber(),
+        })
+    )
     await this.em.save(nextIds)
   }
 }

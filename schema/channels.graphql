@@ -52,6 +52,9 @@ type Channel @entity {
 
   "List of members blocked from commenting/reacting on any video of the channel."
   bannedMembers: [BannedMember!] @derivedFrom(field: "channel")
+
+  "Cumulative rewards claimed by this channel"
+  cumulativeRewardClaimed: BigInt
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
