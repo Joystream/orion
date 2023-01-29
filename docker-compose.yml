@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  db:
+  orion_db:
     container_name: orion_db
     hostname: orion_db
     image: postgres:14
@@ -17,7 +17,7 @@ services:
     volumes:
       - orion_db_data:/var/lib/postgresql/data
 
-  processor:
+  orion_processor:
     container_name: orion_processor
     hostname: orion_processor
     image: node:14
@@ -29,7 +29,7 @@ services:
       - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
       - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
     depends_on:
-      - db
+      - orion_db
     volumes:
       - type: bind
         source: .
@@ -37,7 +37,7 @@ services:
     working_dir: /orion
     command: ['make', 'process']
 
-  graphql-server:
+  orion_graphql-server:
     container_name: orion_graphql-server
     hostname: orion_graphql-server
     image: node:14
@@ -46,7 +46,7 @@ services:
       - .env
       - docker.env
     depends_on:
-      - db
+      - orion_db
     volumes:
       - type: bind
         source: .
