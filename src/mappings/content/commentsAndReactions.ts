@@ -399,12 +399,12 @@ export async function processCreateCommentMessage(
     reactionsCount: 0,
     reactionsAndRepliesCount: 0,
     isEdited: false,
-    isExcluded: false
+    isExcluded: false,
   })
 
   // add CommentCreated event
   overlay.getRepository(Event).new({
-    ...genericEventFields(block, indexInBlock, txHash),
+    ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new CommentCreatedEventData({
       comment: comment.id,
       text: body,
@@ -460,7 +460,7 @@ export async function processEditCommentMessage(
 
   // add an event
   overlay.getRepository(Event).new({
-    ...genericEventFields(block, indexInBlock, txHash),
+    ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new CommentTextUpdatedEventData({
       comment: commentId,
       newText: newBody,

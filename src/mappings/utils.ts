@@ -4,6 +4,7 @@ import { Logger } from '../logger'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Event, MetaprotocolTransactionResultFailed } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
+import { EntityManagerOverlay } from '../utils/overlay'
 
 export const JOYSTREAM_SS58_PREFIX = 126
 
@@ -41,12 +42,13 @@ export function invalidMetadata<T>(
 }
 
 export function genericEventFields(
+  overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   txHash?: string
 ): Partial<Event> {
   return {
-    id: `${block.height}-${indexInBlock}`,
+    id: overlay.getRepository(Event).getNewEntityId(),
     inBlock: block.height,
     indexInBlock,
     timestamp: new Date(block.timestamp),

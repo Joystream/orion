@@ -13,6 +13,7 @@ import {
   processReactVideoMessage,
 } from '../content/commentsAndReactions'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { processChannelPaymentFromMember } from '../content/metadata'
 
 export async function processMembershipMetadata(
   overlay: EntityManagerOverlay,
@@ -47,7 +48,8 @@ export async function processMemberRemark(
   indexInBlock: number,
   txHash: string | undefined,
   memberId: string,
-  decodedMessage: DecodedMetadataObject<IMemberRemarked>
+  decodedMessage: DecodedMetadataObject<IMemberRemarked>,
+  payment?: [string, bigint]
 ): Promise<MetaprotocolTransactionResult> {
   if (decodedMessage.reactVideo) {
     return processReactVideoMessage(overlay, block, memberId, decodedMessage.reactVideo)
@@ -81,6 +83,28 @@ export async function processMemberRemark(
 
   if (decodedMessage.deleteComment) {
     return processDeleteCommentMessage(overlay, memberId, decodedMessage.deleteComment)
+  }
+
+  // Though the payments can be sent along with any arbitrary metadata message type,
+  // however they will only be processed if the message type is 'makeChannelPayment'
+  if (decodedMessage.makeChannelPayment) {
+    if (!payment) {
+      return metaprotocolTransactionFailure(
+        MemberRemarked,
+        `payment info should be set when sending remark with 'makeChannelPayment' message type`,
+        { decodedMessage }
+      )
+    }
+
+    return processChannelPaymentFromMember(
+      overlay,
+      block,
+      indexInBlock,
+      txHash,
+      decodedMessage.makeChannelPayment,
+      memberId,
+      payment
+    )
   }
 
   if (decodedMessage.createVideoCategory) {
