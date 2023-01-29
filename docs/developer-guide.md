@@ -164,7 +164,7 @@ A migration which sets up an intial PostgreSQL database schema (tables, indexes,
 # Oftentimes you'll first want to remove the old migration(s)
 rm db/migrations/*-Data.js
 # Start PostgreSQL database service
-docker-compose up -d db
+docker-compose up -d orion_db
 # Generate the new migration
 make dbegen
 ```

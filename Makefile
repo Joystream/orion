@@ -25,6 +25,7 @@ dbgen:
 	@npx squid-typeorm-migration generate
 
 codegen:
+	@npm run generate:schema || true
 	@npx squid-typeorm-codegen
 
 
