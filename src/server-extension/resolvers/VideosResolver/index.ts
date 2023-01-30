@@ -6,8 +6,6 @@ import {
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
   VideoReportInfo,
-  VideosSearchArgs,
-  VideosSearchResult,
 } from './types'
 import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
@@ -35,18 +33,11 @@ import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import { extendClause } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
-import { channel } from 'diagnostics_channel'
 
 @Resolver()
 export class VideosResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
-
-  @Query(() => [VideosSearchResult!])
-  async searchVideos(@Args() args: VideosSearchArgs): Promise<VideosSearchResult[]> {
-    // TODO: Implement
-    return []
-  }
 
   @Query(() => VideosConnection)
   async mostViewedVideosConnection(
@@ -66,7 +57,7 @@ export class VideosResolver {
     }
 
     const req: RelayConnectionRequest<AnyFields> = {
-      orderBy: parseOrderBy(model, typeName, orderByArg as any[]),
+      orderBy: parseOrderBy(model, typeName, orderByArg as unknown[] as string[]),
       where: parseWhere(args.where),
     }
 

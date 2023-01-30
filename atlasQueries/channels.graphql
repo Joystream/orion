@@ -141,14 +141,12 @@ query GetChannelNftCollectors(
 
 query GetPayloadDataObjectIdByCommitment($commitment: String!) {
   # CHANGE: `channelPayoutsUpdatedEvents` replaced with the new `events` query
-  events(where: {
-    data: {
-      isTypeOf_eq: "ChannelPayoutsUpdatedEventData",
-      commitment_eq: $commitment
-    }
-  }, limit: 1) {
+  events(
+    where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData", commitment_eq: $commitment } }
+    limit: 1
+  ) {
     data {
-      ...on ChannelPayoutsUpdatedEventData {
+      ... on ChannelPayoutsUpdatedEventData {
         payloadDataObject {
           id
           storageBagId
@@ -177,30 +175,31 @@ query GetChannelPaymentEvents($ownerMemberId: String!, $channelId: String!) {
             {
               data: {
                 isTypeOf_in: [
-                  "NftBoughtEventData",
-                  "BidMadeCompletingAuctionEventData",
-                  "EnglishAuctionSettledEventData",
-                  "OpenAuctionBidAcceptedEventData",
+                  "NftBoughtEventData"
+                  "BidMadeCompletingAuctionEventData"
+                  "EnglishAuctionSettledEventData"
+                  "OpenAuctionBidAcceptedEventData"
                 ]
               }
-            },
+            }
             {
               OR: [
-                { data: { previousNftOwner: { member: { id_eq: $ownerMemberId } } } },
-                { data: { previousNftOwner: { channel: { ownerMember: { id_eq: $ownerMemberId } } } } },
+                { data: { previousNftOwner: { member: { id_eq: $ownerMemberId } } } }
+                {
+                  data: {
+                    previousNftOwner: { channel: { ownerMember: { id_eq: $ownerMemberId } } }
+                  }
+                }
               ]
             }
           ]
-        },
+        }
         {
           data: {
-            isTypeOf_in: [
-              "ChannelRewardClaimedEventData",
-              "ChannelFundsWithdrawnEventData",
-            ],
+            isTypeOf_in: ["ChannelRewardClaimedEventData", "ChannelFundsWithdrawnEventData"]
             channel: { id_eq: $channelId }
           }
-        },
+        }
       ]
     }
   ) {
@@ -208,20 +207,20 @@ query GetChannelPaymentEvents($ownerMemberId: String!, $channelId: String!) {
     timestamp
     data {
       __typename
-      ...on NftBoughtEventData {
+      ... on NftBoughtEventData {
         price
       }
-      ...on BidMadeCompletingAuctionEventData {
+      ... on BidMadeCompletingAuctionEventData {
         winningBid {
           amount
         }
       }
-      ...on EnglishAuctionSettledEventData {
+      ... on EnglishAuctionSettledEventData {
         winningBid {
           amount
         }
       }
-      ...on OpenAuctionBidAcceptedEventData {
+      ... on OpenAuctionBidAcceptedEventData {
         winningBid {
           amount
         }

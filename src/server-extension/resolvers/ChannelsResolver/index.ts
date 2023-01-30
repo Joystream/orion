@@ -11,8 +11,6 @@ import {
   MostRecentChannelsArgs,
   ChannelReportInfo,
   ReportChannelArgs,
-  ChannelsSearchArgs,
-  ChannelsSearchResult,
   ChannelFollowResult,
   ChannelUnfollowResult,
   ChannelNftCollectorsOrderByInput,
@@ -131,8 +129,8 @@ export class ChannelsResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
-    listQuery.map = (rows: any[][]) => {
-      const nftCounts: string[] = []
+    listQuery.map = (rows: unknown[][]) => {
+      const nftCounts: unknown[] = []
       for (const row of rows) {
         nftCounts.push(row.pop())
       }
@@ -144,12 +142,6 @@ export class ChannelsResolver {
     console.log('Result', result)
 
     return result
-  }
-
-  @Query(() => [ChannelsSearchResult!])
-  async searchChannels(@Args() args: ChannelsSearchArgs): Promise<ChannelsSearchResult[]> {
-    // TODO: Implement
-    return []
   }
 
   @Mutation(() => ChannelFollowResult)
