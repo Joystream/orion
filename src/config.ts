@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { sr25519PairFromSeed } from '@polkadot/util-crypto'
+import { ed25519PairFromString } from '@polkadot/util-crypto'
 import { Keypair } from '@polkadot/util-crypto/types'
 
 const isDev = process.env.NODE_ENV === 'development'
@@ -79,7 +79,7 @@ export class Config {
     this._adminSecret = loadEnvVar('ORION_ADMIN_SECRET')
     // SR25519 32 bytes private key to create signature on App actions
     const appPrivateKey = loadEnvVar('APP_PRIVATE_KEY')
-    this._appKeypair = sr25519PairFromSeed(appPrivateKey)
+    this._appKeypair = ed25519PairFromString(appPrivateKey)
     this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
 
     this._isDebugging = loadEnvVar('ORION_DEBUGGING', { defaultValue: 'false' }) === 'true'
