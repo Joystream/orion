@@ -32,7 +32,7 @@ export class VideosConnectionArgs {
   @Field(() => Int, { nullable: true })
   first?: number
 
-  @Field(() => [VideoOrderByInput!]!, { nullable: false })
+  @Field(() => [VideoOrderByInput], { nullable: false })
   orderBy!: VideoOrderByInput[]
 
   @Field(() => VideoWhereInput, { nullable: true, simple: true })

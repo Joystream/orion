@@ -259,7 +259,6 @@ type MetaprotocolTransactionStatusEventData {
   result: MetaprotocolTransactionResult!
 }
 
-
 type ChannelRewardClaimedEventData {
   "The channel that claimed the reward"
   channel: Channel!
@@ -343,4 +342,3 @@ type ChannelPaymentMadeEventData {
   "Reason of the payment"
   rationale: String
 }
-

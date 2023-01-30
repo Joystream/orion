@@ -35,7 +35,7 @@ export class ExtendedChannelsArgs {
   @Field(() => ExtendedChannelWhereInput, { nullable: true })
   where?: ExtendedChannelWhereInput
 
-  @Field(() => [ChannelOrderByInput!], { nullable: true })
+  @Field(() => [ChannelOrderByInput], { nullable: true })
   orderBy?: ChannelOrderByInput[]
 
   @Field(() => Int, { nullable: true })
@@ -47,7 +47,7 @@ export class MostRecentChannelsArgs {
   @Field(() => ExtendedChannelWhereInput, { nullable: true })
   where?: ExtendedChannelWhereInput
 
-  @Field(() => [ChannelOrderByInput!], { nullable: true })
+  @Field(() => [ChannelOrderByInput], { nullable: true })
   orderBy?: ChannelOrderByInput[]
 
   @Field(() => Int, { nullable: false })

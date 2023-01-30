@@ -4,11 +4,11 @@ version: 1
 description: |-
   Joystream Orion v2 backend
 
-build: 
+build:
 
 deploy:
   addons:
-    postgres: 
+    postgres:
   secrets:
     - OPERATOR_SECRET
   migrate:
@@ -16,7 +16,7 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-    cmd: [ "npx", "squid-typeorm-migration", "apply" ]
+    cmd: ['npx', 'squid-typeorm-migration', 'apply']
   processor:
     env:
       ARCHIVE_GATEWAY_URL: https://joystream.archive.subsquid.io/graphql
@@ -25,7 +25,7 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-    cmd: [ "npm", "run", "processor-start" ]
+    cmd: ['npm', 'run', 'processor-start']
   api:
     env:
       PROCESSOR_HOST: processor
@@ -33,4 +33,4 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-    cmd: [ "npm", "run", "query-node-start" ]
+    cmd: ['npm', 'run', 'query-node-start']

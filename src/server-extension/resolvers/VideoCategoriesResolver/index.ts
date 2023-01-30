@@ -80,8 +80,8 @@ export class VideoCategoriesResolver {
 
     // Override the `listQuery.map` function
     const oldListQMap = listQuery.map.bind(listQuery)
-    listQuery.map = (rows: any[][]) => {
-      const activeVideoCounts: string[] = []
+    listQuery.map = (rows: unknown[][]) => {
+      const activeVideoCounts: unknown[] = []
       for (const row of rows) {
         activeVideoCounts.push(row.pop())
       }
