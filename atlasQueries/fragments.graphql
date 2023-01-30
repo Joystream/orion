@@ -10,6 +10,7 @@ fragment ExtendedVideoCategoryFields on ExtendedVideoCategory {
 fragment BasicChannelFields on Channel {
   id
   title
+  description
   createdAt
   followsNum # CHANGE: Instead of `follows` (which is now a One-to-Many field)
   rewardAccount
@@ -25,6 +26,7 @@ fragment FullChannelFields on Channel {
   description
   isPublic
   isCensored
+  cumulativeRewardClaimed
   language # CHANGE: Language is no longer a separate entity
   ownerMember {
     ...BasicMembershipFields
@@ -76,6 +78,10 @@ fragment FullMembershipFields on Membership {
   createdAt
   channels {
     ...BasicChannelFields
+    description
+    coverPhoto {
+      ...StorageDataObjectFields
+    }
   }
 }
 
