@@ -55,6 +55,9 @@ type Channel @entity {
 
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
+
+  "The app that the channel represents"
+  app: App @derivedFrom(field: "channel")
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

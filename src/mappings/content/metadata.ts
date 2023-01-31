@@ -55,6 +55,7 @@ import {
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { genericEventFields, invalidMetadata, metaprotocolTransactionFailure } from '../utils'
+import { processCreateAppMessage, processUpdateApp } from './app'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
@@ -352,6 +353,8 @@ function processLanguage(
 
 export async function processOwnerRemark(
   overlay: EntityManagerOverlay,
+  blockNumber: number,
+  indexInBlock: number,
   channel: Flat<Channel>,
   decodedMessage: DecodedMetadataObject<IChannelOwnerRemarked>
 ): Promise<MetaprotocolTransactionResult> {
@@ -369,6 +372,20 @@ export async function processOwnerRemark(
 
   if (decodedMessage.moderateComment) {
     return processModerateCommentMessage(overlay, channel, decodedMessage.moderateComment)
+  }
+
+  if (decodedMessage.createApp) {
+    return processCreateAppMessage(
+      overlay,
+      blockNumber,
+      indexInBlock,
+      channel,
+      decodedMessage.createApp
+    )
+  }
+
+  if (decodedMessage.updateApp) {
+    return processUpdateApp(overlay, channel, decodedMessage.updateApp)
   }
 
   return metaprotocolTransactionFailure(

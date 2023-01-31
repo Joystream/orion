@@ -132,7 +132,7 @@ index cfbfe12..307ef59 100644
      /**
       * Creates a new MemberRemarked instance using the specified properties.
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
-index a2f7852..7f0c71b 100644
+index a2f7852..0ca3e9a 100644
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.js
 @@ -5911,6 +5911,244 @@ $root.CreateVideoCategory = (function() {
@@ -472,6 +472,1123 @@ index a2f7852..7f0c71b 100644
 +            object.makeChannelPayment = $root.MakeChannelPayment.toObject(message.makeChannelPayment, options);
 +            if (options.oneofs)
 +                object.memberRemarked = "makeChannelPayment";
++        }
+         return object;
+     };
+ 
+@@ -6503,27 +6775,35 @@ $root.ChannelModeratorRemarked = (function() {
+     return ChannelModeratorRemarked;
+ })();
+ 
+-$root.ChannelOwnerRemarked = (function() {
++$root.AppMetadata = (function() {
+ 
+     /**
+-     * Properties of a ChannelOwnerRemarked.
+-     * @exports IChannelOwnerRemarked
+-     * @interface IChannelOwnerRemarked
+-     * @property {IPinOrUnpinComment|null} [pinOrUnpinComment] ChannelOwnerRemarked pinOrUnpinComment
+-     * @property {IBanOrUnbanMemberFromChannel|null} [banOrUnbanMemberFromChannel] ChannelOwnerRemarked banOrUnbanMemberFromChannel
+-     * @property {IVideoReactionsPreference|null} [videoReactionsPreference] ChannelOwnerRemarked videoReactionsPreference
+-     * @property {IModerateComment|null} [moderateComment] ChannelOwnerRemarked moderateComment
++     * Properties of an AppMetadata.
++     * @exports IAppMetadata
++     * @interface IAppMetadata
++     * @property {string|null} [websiteUrl] AppMetadata websiteUrl
++     * @property {string|null} [useUri] AppMetadata useUri
++     * @property {string|null} [smallIcon] AppMetadata smallIcon
++     * @property {string|null} [mediumIcon] AppMetadata mediumIcon
++     * @property {string|null} [bigIcon] AppMetadata bigIcon
++     * @property {string|null} [oneLiner] AppMetadata oneLiner
++     * @property {string|null} [description] AppMetadata description
++     * @property {string|null} [termsOfService] AppMetadata termsOfService
++     * @property {string|null} [authKey] AppMetadata authKey
++     * @property {Array.<string>|null} [platforms] AppMetadata platforms
++     * @property {string|null} [category] AppMetadata category
+      */
+ 
+     /**
+-     * Constructs a new ChannelOwnerRemarked.
+-     * @exports ChannelOwnerRemarked
+-     * @classdesc Represents a ChannelOwnerRemarked.
+-     * @implements IChannelOwnerRemarked
++     * Constructs a new AppMetadata.
++     * @exports AppMetadata
++     * @classdesc Represents an AppMetadata.
++     * @implements IAppMetadata
+      * @constructor
+-     * @param {IChannelOwnerRemarked=} [properties] Properties to set
++     * @param {IAppMetadata=} [properties] Properties to set
+      */
+-    function ChannelOwnerRemarked(properties) {
++    function AppMetadata(properties) {
++        this.platforms = [];
+         if (properties)
+             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                 if (properties[keys[i]] != null)
+@@ -6531,83 +6811,952 @@ $root.ChannelOwnerRemarked = (function() {
+     }
+ 
+     /**
+-     * ChannelOwnerRemarked pinOrUnpinComment.
+-     * @member {IPinOrUnpinComment|null|undefined} pinOrUnpinComment
+-     * @memberof ChannelOwnerRemarked
++     * AppMetadata websiteUrl.
++     * @member {string} websiteUrl
++     * @memberof AppMetadata
+      * @instance
+      */
+-    ChannelOwnerRemarked.prototype.pinOrUnpinComment = null;
++    AppMetadata.prototype.websiteUrl = "";
+ 
+     /**
+-     * ChannelOwnerRemarked banOrUnbanMemberFromChannel.
+-     * @member {IBanOrUnbanMemberFromChannel|null|undefined} banOrUnbanMemberFromChannel
+-     * @memberof ChannelOwnerRemarked
++     * AppMetadata useUri.
++     * @member {string} useUri
++     * @memberof AppMetadata
+      * @instance
+      */
+-    ChannelOwnerRemarked.prototype.banOrUnbanMemberFromChannel = null;
++    AppMetadata.prototype.useUri = "";
+ 
+     /**
+-     * ChannelOwnerRemarked videoReactionsPreference.
+-     * @member {IVideoReactionsPreference|null|undefined} videoReactionsPreference
+-     * @memberof ChannelOwnerRemarked
++     * AppMetadata smallIcon.
++     * @member {string} smallIcon
++     * @memberof AppMetadata
+      * @instance
+      */
+-    ChannelOwnerRemarked.prototype.videoReactionsPreference = null;
++    AppMetadata.prototype.smallIcon = "";
+ 
+     /**
+-     * ChannelOwnerRemarked moderateComment.
+-     * @member {IModerateComment|null|undefined} moderateComment
+-     * @memberof ChannelOwnerRemarked
++     * AppMetadata mediumIcon.
++     * @member {string} mediumIcon
++     * @memberof AppMetadata
+      * @instance
+      */
+-    ChannelOwnerRemarked.prototype.moderateComment = null;
++    AppMetadata.prototype.mediumIcon = "";
+ 
+-    // OneOf field names bound to virtual getters and setters
+-    var $oneOfFields;
++    /**
++     * AppMetadata bigIcon.
++     * @member {string} bigIcon
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.bigIcon = "";
+ 
+     /**
+-     * ChannelOwnerRemarked channelOwnerRemarked.
+-     * @member {"pinOrUnpinComment"|"banOrUnbanMemberFromChannel"|"videoReactionsPreference"|"moderateComment"|undefined} channelOwnerRemarked
+-     * @memberof ChannelOwnerRemarked
++     * AppMetadata oneLiner.
++     * @member {string} oneLiner
++     * @memberof AppMetadata
+      * @instance
+      */
+-    Object.defineProperty(ChannelOwnerRemarked.prototype, "channelOwnerRemarked", {
+-        get: $util.oneOfGetter($oneOfFields = ["pinOrUnpinComment", "banOrUnbanMemberFromChannel", "videoReactionsPreference", "moderateComment"]),
+-        set: $util.oneOfSetter($oneOfFields)
+-    });
++    AppMetadata.prototype.oneLiner = "";
+ 
+     /**
+-     * Creates a new ChannelOwnerRemarked instance using the specified properties.
++     * AppMetadata description.
++     * @member {string} description
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.description = "";
++
++    /**
++     * AppMetadata termsOfService.
++     * @member {string} termsOfService
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.termsOfService = "";
++
++    /**
++     * AppMetadata authKey.
++     * @member {string} authKey
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.authKey = "";
++
++    /**
++     * AppMetadata platforms.
++     * @member {Array.<string>} platforms
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.platforms = $util.emptyArray;
++
++    /**
++     * AppMetadata category.
++     * @member {string} category
++     * @memberof AppMetadata
++     * @instance
++     */
++    AppMetadata.prototype.category = "";
++
++    /**
++     * Creates a new AppMetadata instance using the specified properties.
+      * @function create
+-     * @memberof ChannelOwnerRemarked
++     * @memberof AppMetadata
+      * @static
+-     * @param {IChannelOwnerRemarked=} [properties] Properties to set
+-     * @returns {ChannelOwnerRemarked} ChannelOwnerRemarked instance
++     * @param {IAppMetadata=} [properties] Properties to set
++     * @returns {AppMetadata} AppMetadata instance
+      */
+-    ChannelOwnerRemarked.create = function create(properties) {
+-        return new ChannelOwnerRemarked(properties);
++    AppMetadata.create = function create(properties) {
++        return new AppMetadata(properties);
+     };
+ 
+     /**
+-     * Encodes the specified ChannelOwnerRemarked message. Does not implicitly {@link ChannelOwnerRemarked.verify|verify} messages.
++     * Encodes the specified AppMetadata message. Does not implicitly {@link AppMetadata.verify|verify} messages.
+      * @function encode
+-     * @memberof ChannelOwnerRemarked
++     * @memberof AppMetadata
+      * @static
+-     * @param {IChannelOwnerRemarked} message ChannelOwnerRemarked message or plain object to encode
++     * @param {IAppMetadata} message AppMetadata message or plain object to encode
+      * @param {$protobuf.Writer} [writer] Writer to encode to
+      * @returns {$protobuf.Writer} Writer
+      */
+-    ChannelOwnerRemarked.encode = function encode(message, writer) {
++    AppMetadata.encode = function encode(message, writer) {
+         if (!writer)
+             writer = $Writer.create();
+-        if (message.pinOrUnpinComment != null && Object.hasOwnProperty.call(message, "pinOrUnpinComment"))
+-            $root.PinOrUnpinComment.encode(message.pinOrUnpinComment, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+-        if (message.banOrUnbanMemberFromChannel != null && Object.hasOwnProperty.call(message, "banOrUnbanMemberFromChannel"))
+-            $root.BanOrUnbanMemberFromChannel.encode(message.banOrUnbanMemberFromChannel, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+-        if (message.videoReactionsPreference != null && Object.hasOwnProperty.call(message, "videoReactionsPreference"))
++        if (message.websiteUrl != null && Object.hasOwnProperty.call(message, "websiteUrl"))
++            writer.uint32(/* id 2, wireType 2 =*/18).string(message.websiteUrl);
++        if (message.useUri != null && Object.hasOwnProperty.call(message, "useUri"))
++            writer.uint32(/* id 3, wireType 2 =*/26).string(message.useUri);
++        if (message.smallIcon != null && Object.hasOwnProperty.call(message, "smallIcon"))
++            writer.uint32(/* id 4, wireType 2 =*/34).string(message.smallIcon);
++        if (message.mediumIcon != null && Object.hasOwnProperty.call(message, "mediumIcon"))
++            writer.uint32(/* id 5, wireType 2 =*/42).string(message.mediumIcon);
++        if (message.bigIcon != null && Object.hasOwnProperty.call(message, "bigIcon"))
++            writer.uint32(/* id 6, wireType 2 =*/50).string(message.bigIcon);
++        if (message.oneLiner != null && Object.hasOwnProperty.call(message, "oneLiner"))
++            writer.uint32(/* id 7, wireType 2 =*/58).string(message.oneLiner);
++        if (message.description != null && Object.hasOwnProperty.call(message, "description"))
++            writer.uint32(/* id 8, wireType 2 =*/66).string(message.description);
++        if (message.termsOfService != null && Object.hasOwnProperty.call(message, "termsOfService"))
++            writer.uint32(/* id 9, wireType 2 =*/74).string(message.termsOfService);
++        if (message.authKey != null && Object.hasOwnProperty.call(message, "authKey"))
++            writer.uint32(/* id 10, wireType 2 =*/82).string(message.authKey);
++        if (message.platforms != null && message.platforms.length)
++            for (var i = 0; i < message.platforms.length; ++i)
++                writer.uint32(/* id 11, wireType 2 =*/90).string(message.platforms[i]);
++        if (message.category != null && Object.hasOwnProperty.call(message, "category"))
++            writer.uint32(/* id 12, wireType 2 =*/98).string(message.category);
++        return writer;
++    };
++
++    /**
++     * Encodes the specified AppMetadata message, length delimited. Does not implicitly {@link AppMetadata.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof AppMetadata
++     * @static
++     * @param {IAppMetadata} message AppMetadata message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    AppMetadata.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes an AppMetadata message from the specified reader or buffer.
++     * @function decode
++     * @memberof AppMetadata
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {AppMetadata} AppMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    AppMetadata.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.AppMetadata();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 2:
++                message.websiteUrl = reader.string();
++                break;
++            case 3:
++                message.useUri = reader.string();
++                break;
++            case 4:
++                message.smallIcon = reader.string();
++                break;
++            case 5:
++                message.mediumIcon = reader.string();
++                break;
++            case 6:
++                message.bigIcon = reader.string();
++                break;
++            case 7:
++                message.oneLiner = reader.string();
++                break;
++            case 8:
++                message.description = reader.string();
++                break;
++            case 9:
++                message.termsOfService = reader.string();
++                break;
++            case 10:
++                message.authKey = reader.string();
++                break;
++            case 11:
++                if (!(message.platforms && message.platforms.length))
++                    message.platforms = [];
++                message.platforms.push(reader.string());
++                break;
++            case 12:
++                message.category = reader.string();
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        return message;
++    };
++
++    /**
++     * Decodes an AppMetadata message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof AppMetadata
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {AppMetadata} AppMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    AppMetadata.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies an AppMetadata message.
++     * @function verify
++     * @memberof AppMetadata
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    AppMetadata.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        if (message.websiteUrl != null && message.hasOwnProperty("websiteUrl"))
++            if (!$util.isString(message.websiteUrl))
++                return "websiteUrl: string expected";
++        if (message.useUri != null && message.hasOwnProperty("useUri"))
++            if (!$util.isString(message.useUri))
++                return "useUri: string expected";
++        if (message.smallIcon != null && message.hasOwnProperty("smallIcon"))
++            if (!$util.isString(message.smallIcon))
++                return "smallIcon: string expected";
++        if (message.mediumIcon != null && message.hasOwnProperty("mediumIcon"))
++            if (!$util.isString(message.mediumIcon))
++                return "mediumIcon: string expected";
++        if (message.bigIcon != null && message.hasOwnProperty("bigIcon"))
++            if (!$util.isString(message.bigIcon))
++                return "bigIcon: string expected";
++        if (message.oneLiner != null && message.hasOwnProperty("oneLiner"))
++            if (!$util.isString(message.oneLiner))
++                return "oneLiner: string expected";
++        if (message.description != null && message.hasOwnProperty("description"))
++            if (!$util.isString(message.description))
++                return "description: string expected";
++        if (message.termsOfService != null && message.hasOwnProperty("termsOfService"))
++            if (!$util.isString(message.termsOfService))
++                return "termsOfService: string expected";
++        if (message.authKey != null && message.hasOwnProperty("authKey"))
++            if (!$util.isString(message.authKey))
++                return "authKey: string expected";
++        if (message.platforms != null && message.hasOwnProperty("platforms")) {
++            if (!Array.isArray(message.platforms))
++                return "platforms: array expected";
++            for (var i = 0; i < message.platforms.length; ++i)
++                if (!$util.isString(message.platforms[i]))
++                    return "platforms: string[] expected";
++        }
++        if (message.category != null && message.hasOwnProperty("category"))
++            if (!$util.isString(message.category))
++                return "category: string expected";
++        return null;
++    };
++
++    /**
++     * Creates an AppMetadata message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof AppMetadata
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {AppMetadata} AppMetadata
++     */
++    AppMetadata.fromObject = function fromObject(object) {
++        if (object instanceof $root.AppMetadata)
++            return object;
++        var message = new $root.AppMetadata();
++        if (object.websiteUrl != null)
++            message.websiteUrl = String(object.websiteUrl);
++        if (object.useUri != null)
++            message.useUri = String(object.useUri);
++        if (object.smallIcon != null)
++            message.smallIcon = String(object.smallIcon);
++        if (object.mediumIcon != null)
++            message.mediumIcon = String(object.mediumIcon);
++        if (object.bigIcon != null)
++            message.bigIcon = String(object.bigIcon);
++        if (object.oneLiner != null)
++            message.oneLiner = String(object.oneLiner);
++        if (object.description != null)
++            message.description = String(object.description);
++        if (object.termsOfService != null)
++            message.termsOfService = String(object.termsOfService);
++        if (object.authKey != null)
++            message.authKey = String(object.authKey);
++        if (object.platforms) {
++            if (!Array.isArray(object.platforms))
++                throw TypeError(".AppMetadata.platforms: array expected");
++            message.platforms = [];
++            for (var i = 0; i < object.platforms.length; ++i)
++                message.platforms[i] = String(object.platforms[i]);
++        }
++        if (object.category != null)
++            message.category = String(object.category);
++        return message;
++    };
++
++    /**
++     * Creates a plain object from an AppMetadata message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof AppMetadata
++     * @static
++     * @param {AppMetadata} message AppMetadata
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    AppMetadata.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.arrays || options.defaults)
++            object.platforms = [];
++        if (options.defaults) {
++            object.websiteUrl = "";
++            object.useUri = "";
++            object.smallIcon = "";
++            object.mediumIcon = "";
++            object.bigIcon = "";
++            object.oneLiner = "";
++            object.description = "";
++            object.termsOfService = "";
++            object.authKey = "";
++            object.category = "";
++        }
++        if (message.websiteUrl != null && message.hasOwnProperty("websiteUrl"))
++            object.websiteUrl = message.websiteUrl;
++        if (message.useUri != null && message.hasOwnProperty("useUri"))
++            object.useUri = message.useUri;
++        if (message.smallIcon != null && message.hasOwnProperty("smallIcon"))
++            object.smallIcon = message.smallIcon;
++        if (message.mediumIcon != null && message.hasOwnProperty("mediumIcon"))
++            object.mediumIcon = message.mediumIcon;
++        if (message.bigIcon != null && message.hasOwnProperty("bigIcon"))
++            object.bigIcon = message.bigIcon;
++        if (message.oneLiner != null && message.hasOwnProperty("oneLiner"))
++            object.oneLiner = message.oneLiner;
++        if (message.description != null && message.hasOwnProperty("description"))
++            object.description = message.description;
++        if (message.termsOfService != null && message.hasOwnProperty("termsOfService"))
++            object.termsOfService = message.termsOfService;
++        if (message.authKey != null && message.hasOwnProperty("authKey"))
++            object.authKey = message.authKey;
++        if (message.platforms && message.platforms.length) {
++            object.platforms = [];
++            for (var j = 0; j < message.platforms.length; ++j)
++                object.platforms[j] = message.platforms[j];
++        }
++        if (message.category != null && message.hasOwnProperty("category"))
++            object.category = message.category;
++        return object;
++    };
++
++    /**
++     * Converts this AppMetadata to JSON.
++     * @function toJSON
++     * @memberof AppMetadata
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    AppMetadata.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return AppMetadata;
++})();
++
++$root.CreateApp = (function() {
++
++    /**
++     * Properties of a CreateApp.
++     * @exports ICreateApp
++     * @interface ICreateApp
++     * @property {string} name CreateApp name
++     * @property {IAppMetadata|null} [appMetadata] CreateApp appMetadata
++     */
++
++    /**
++     * Constructs a new CreateApp.
++     * @exports CreateApp
++     * @classdesc Represents a CreateApp.
++     * @implements ICreateApp
++     * @constructor
++     * @param {ICreateApp=} [properties] Properties to set
++     */
++    function CreateApp(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * CreateApp name.
++     * @member {string} name
++     * @memberof CreateApp
++     * @instance
++     */
++    CreateApp.prototype.name = "";
++
++    /**
++     * CreateApp appMetadata.
++     * @member {IAppMetadata|null|undefined} appMetadata
++     * @memberof CreateApp
++     * @instance
++     */
++    CreateApp.prototype.appMetadata = null;
++
++    /**
++     * Creates a new CreateApp instance using the specified properties.
++     * @function create
++     * @memberof CreateApp
++     * @static
++     * @param {ICreateApp=} [properties] Properties to set
++     * @returns {CreateApp} CreateApp instance
++     */
++    CreateApp.create = function create(properties) {
++        return new CreateApp(properties);
++    };
++
++    /**
++     * Encodes the specified CreateApp message. Does not implicitly {@link CreateApp.verify|verify} messages.
++     * @function encode
++     * @memberof CreateApp
++     * @static
++     * @param {ICreateApp} message CreateApp message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    CreateApp.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
++        if (message.appMetadata != null && Object.hasOwnProperty.call(message, "appMetadata"))
++            $root.AppMetadata.encode(message.appMetadata, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
++        return writer;
++    };
++
++    /**
++     * Encodes the specified CreateApp message, length delimited. Does not implicitly {@link CreateApp.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof CreateApp
++     * @static
++     * @param {ICreateApp} message CreateApp message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    CreateApp.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes a CreateApp message from the specified reader or buffer.
++     * @function decode
++     * @memberof CreateApp
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {CreateApp} CreateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    CreateApp.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.CreateApp();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.name = reader.string();
++                break;
++            case 3:
++                message.appMetadata = $root.AppMetadata.decode(reader, reader.uint32());
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        if (!message.hasOwnProperty("name"))
++            throw $util.ProtocolError("missing required 'name'", { instance: message });
++        return message;
++    };
++
++    /**
++     * Decodes a CreateApp message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof CreateApp
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {CreateApp} CreateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    CreateApp.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies a CreateApp message.
++     * @function verify
++     * @memberof CreateApp
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    CreateApp.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        if (!$util.isString(message.name))
++            return "name: string expected";
++        if (message.appMetadata != null && message.hasOwnProperty("appMetadata")) {
++            var error = $root.AppMetadata.verify(message.appMetadata);
++            if (error)
++                return "appMetadata." + error;
++        }
++        return null;
++    };
++
++    /**
++     * Creates a CreateApp message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof CreateApp
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {CreateApp} CreateApp
++     */
++    CreateApp.fromObject = function fromObject(object) {
++        if (object instanceof $root.CreateApp)
++            return object;
++        var message = new $root.CreateApp();
++        if (object.name != null)
++            message.name = String(object.name);
++        if (object.appMetadata != null) {
++            if (typeof object.appMetadata !== "object")
++                throw TypeError(".CreateApp.appMetadata: object expected");
++            message.appMetadata = $root.AppMetadata.fromObject(object.appMetadata);
++        }
++        return message;
++    };
++
++    /**
++     * Creates a plain object from a CreateApp message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof CreateApp
++     * @static
++     * @param {CreateApp} message CreateApp
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    CreateApp.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.defaults) {
++            object.name = "";
++            object.appMetadata = null;
++        }
++        if (message.name != null && message.hasOwnProperty("name"))
++            object.name = message.name;
++        if (message.appMetadata != null && message.hasOwnProperty("appMetadata"))
++            object.appMetadata = $root.AppMetadata.toObject(message.appMetadata, options);
++        return object;
++    };
++
++    /**
++     * Converts this CreateApp to JSON.
++     * @function toJSON
++     * @memberof CreateApp
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    CreateApp.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return CreateApp;
++})();
++
++$root.UpdateApp = (function() {
++
++    /**
++     * Properties of an UpdateApp.
++     * @exports IUpdateApp
++     * @interface IUpdateApp
++     * @property {string} appId UpdateApp appId
++     * @property {IAppMetadata|null} [appMetadata] UpdateApp appMetadata
++     */
++
++    /**
++     * Constructs a new UpdateApp.
++     * @exports UpdateApp
++     * @classdesc Represents an UpdateApp.
++     * @implements IUpdateApp
++     * @constructor
++     * @param {IUpdateApp=} [properties] Properties to set
++     */
++    function UpdateApp(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * UpdateApp appId.
++     * @member {string} appId
++     * @memberof UpdateApp
++     * @instance
++     */
++    UpdateApp.prototype.appId = "";
++
++    /**
++     * UpdateApp appMetadata.
++     * @member {IAppMetadata|null|undefined} appMetadata
++     * @memberof UpdateApp
++     * @instance
++     */
++    UpdateApp.prototype.appMetadata = null;
++
++    /**
++     * Creates a new UpdateApp instance using the specified properties.
++     * @function create
++     * @memberof UpdateApp
++     * @static
++     * @param {IUpdateApp=} [properties] Properties to set
++     * @returns {UpdateApp} UpdateApp instance
++     */
++    UpdateApp.create = function create(properties) {
++        return new UpdateApp(properties);
++    };
++
++    /**
++     * Encodes the specified UpdateApp message. Does not implicitly {@link UpdateApp.verify|verify} messages.
++     * @function encode
++     * @memberof UpdateApp
++     * @static
++     * @param {IUpdateApp} message UpdateApp message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    UpdateApp.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        writer.uint32(/* id 1, wireType 2 =*/10).string(message.appId);
++        if (message.appMetadata != null && Object.hasOwnProperty.call(message, "appMetadata"))
++            $root.AppMetadata.encode(message.appMetadata, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
++        return writer;
++    };
++
++    /**
++     * Encodes the specified UpdateApp message, length delimited. Does not implicitly {@link UpdateApp.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof UpdateApp
++     * @static
++     * @param {IUpdateApp} message UpdateApp message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    UpdateApp.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes an UpdateApp message from the specified reader or buffer.
++     * @function decode
++     * @memberof UpdateApp
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {UpdateApp} UpdateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    UpdateApp.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.UpdateApp();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.appId = reader.string();
++                break;
++            case 3:
++                message.appMetadata = $root.AppMetadata.decode(reader, reader.uint32());
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        if (!message.hasOwnProperty("appId"))
++            throw $util.ProtocolError("missing required 'appId'", { instance: message });
++        return message;
++    };
++
++    /**
++     * Decodes an UpdateApp message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof UpdateApp
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {UpdateApp} UpdateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    UpdateApp.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies an UpdateApp message.
++     * @function verify
++     * @memberof UpdateApp
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    UpdateApp.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        if (!$util.isString(message.appId))
++            return "appId: string expected";
++        if (message.appMetadata != null && message.hasOwnProperty("appMetadata")) {
++            var error = $root.AppMetadata.verify(message.appMetadata);
++            if (error)
++                return "appMetadata." + error;
++        }
++        return null;
++    };
++
++    /**
++     * Creates an UpdateApp message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof UpdateApp
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {UpdateApp} UpdateApp
++     */
++    UpdateApp.fromObject = function fromObject(object) {
++        if (object instanceof $root.UpdateApp)
++            return object;
++        var message = new $root.UpdateApp();
++        if (object.appId != null)
++            message.appId = String(object.appId);
++        if (object.appMetadata != null) {
++            if (typeof object.appMetadata !== "object")
++                throw TypeError(".UpdateApp.appMetadata: object expected");
++            message.appMetadata = $root.AppMetadata.fromObject(object.appMetadata);
++        }
++        return message;
++    };
++
++    /**
++     * Creates a plain object from an UpdateApp message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof UpdateApp
++     * @static
++     * @param {UpdateApp} message UpdateApp
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    UpdateApp.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.defaults) {
++            object.appId = "";
++            object.appMetadata = null;
++        }
++        if (message.appId != null && message.hasOwnProperty("appId"))
++            object.appId = message.appId;
++        if (message.appMetadata != null && message.hasOwnProperty("appMetadata"))
++            object.appMetadata = $root.AppMetadata.toObject(message.appMetadata, options);
++        return object;
++    };
++
++    /**
++     * Converts this UpdateApp to JSON.
++     * @function toJSON
++     * @memberof UpdateApp
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    UpdateApp.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return UpdateApp;
++})();
++
++$root.ChannelOwnerRemarked = (function() {
++
++    /**
++     * Properties of a ChannelOwnerRemarked.
++     * @exports IChannelOwnerRemarked
++     * @interface IChannelOwnerRemarked
++     * @property {IPinOrUnpinComment|null} [pinOrUnpinComment] ChannelOwnerRemarked pinOrUnpinComment
++     * @property {IBanOrUnbanMemberFromChannel|null} [banOrUnbanMemberFromChannel] ChannelOwnerRemarked banOrUnbanMemberFromChannel
++     * @property {IVideoReactionsPreference|null} [videoReactionsPreference] ChannelOwnerRemarked videoReactionsPreference
++     * @property {IModerateComment|null} [moderateComment] ChannelOwnerRemarked moderateComment
++     * @property {ICreateApp|null} [createApp] ChannelOwnerRemarked createApp
++     * @property {IUpdateApp|null} [updateApp] ChannelOwnerRemarked updateApp
++     */
++
++    /**
++     * Constructs a new ChannelOwnerRemarked.
++     * @exports ChannelOwnerRemarked
++     * @classdesc Represents a ChannelOwnerRemarked.
++     * @implements IChannelOwnerRemarked
++     * @constructor
++     * @param {IChannelOwnerRemarked=} [properties] Properties to set
++     */
++    function ChannelOwnerRemarked(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * ChannelOwnerRemarked pinOrUnpinComment.
++     * @member {IPinOrUnpinComment|null|undefined} pinOrUnpinComment
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.pinOrUnpinComment = null;
++
++    /**
++     * ChannelOwnerRemarked banOrUnbanMemberFromChannel.
++     * @member {IBanOrUnbanMemberFromChannel|null|undefined} banOrUnbanMemberFromChannel
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.banOrUnbanMemberFromChannel = null;
++
++    /**
++     * ChannelOwnerRemarked videoReactionsPreference.
++     * @member {IVideoReactionsPreference|null|undefined} videoReactionsPreference
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.videoReactionsPreference = null;
++
++    /**
++     * ChannelOwnerRemarked moderateComment.
++     * @member {IModerateComment|null|undefined} moderateComment
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.moderateComment = null;
++
++    /**
++     * ChannelOwnerRemarked createApp.
++     * @member {ICreateApp|null|undefined} createApp
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.createApp = null;
++
++    /**
++     * ChannelOwnerRemarked updateApp.
++     * @member {IUpdateApp|null|undefined} updateApp
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    ChannelOwnerRemarked.prototype.updateApp = null;
++
++    // OneOf field names bound to virtual getters and setters
++    var $oneOfFields;
++
++    /**
++     * ChannelOwnerRemarked channelOwnerRemarked.
++     * @member {"pinOrUnpinComment"|"banOrUnbanMemberFromChannel"|"videoReactionsPreference"|"moderateComment"|"createApp"|"updateApp"|undefined} channelOwnerRemarked
++     * @memberof ChannelOwnerRemarked
++     * @instance
++     */
++    Object.defineProperty(ChannelOwnerRemarked.prototype, "channelOwnerRemarked", {
++        get: $util.oneOfGetter($oneOfFields = ["pinOrUnpinComment", "banOrUnbanMemberFromChannel", "videoReactionsPreference", "moderateComment", "createApp", "updateApp"]),
++        set: $util.oneOfSetter($oneOfFields)
++    });
++
++    /**
++     * Creates a new ChannelOwnerRemarked instance using the specified properties.
++     * @function create
++     * @memberof ChannelOwnerRemarked
++     * @static
++     * @param {IChannelOwnerRemarked=} [properties] Properties to set
++     * @returns {ChannelOwnerRemarked} ChannelOwnerRemarked instance
++     */
++    ChannelOwnerRemarked.create = function create(properties) {
++        return new ChannelOwnerRemarked(properties);
++    };
++
++    /**
++     * Encodes the specified ChannelOwnerRemarked message. Does not implicitly {@link ChannelOwnerRemarked.verify|verify} messages.
++     * @function encode
++     * @memberof ChannelOwnerRemarked
++     * @static
++     * @param {IChannelOwnerRemarked} message ChannelOwnerRemarked message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    ChannelOwnerRemarked.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        if (message.pinOrUnpinComment != null && Object.hasOwnProperty.call(message, "pinOrUnpinComment"))
++            $root.PinOrUnpinComment.encode(message.pinOrUnpinComment, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
++        if (message.banOrUnbanMemberFromChannel != null && Object.hasOwnProperty.call(message, "banOrUnbanMemberFromChannel"))
++            $root.BanOrUnbanMemberFromChannel.encode(message.banOrUnbanMemberFromChannel, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
++        if (message.videoReactionsPreference != null && Object.hasOwnProperty.call(message, "videoReactionsPreference"))
+             $root.VideoReactionsPreference.encode(message.videoReactionsPreference, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+         if (message.moderateComment != null && Object.hasOwnProperty.call(message, "moderateComment"))
+             $root.ModerateComment.encode(message.moderateComment, writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
++        if (message.createApp != null && Object.hasOwnProperty.call(message, "createApp"))
++            $root.CreateApp.encode(message.createApp, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
++        if (message.updateApp != null && Object.hasOwnProperty.call(message, "updateApp"))
++            $root.UpdateApp.encode(message.updateApp, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+         return writer;
+     };
+ 
+@@ -6654,6 +7803,12 @@ $root.ChannelOwnerRemarked = (function() {
+             case 5:
+                 message.moderateComment = $root.ModerateComment.decode(reader, reader.uint32());
+                 break;
++            case 6:
++                message.createApp = $root.CreateApp.decode(reader, reader.uint32());
++                break;
++            case 7:
++                message.updateApp = $root.UpdateApp.decode(reader, reader.uint32());
++                break;
+             default:
+                 reader.skipType(tag & 7);
+                 break;
+@@ -6728,6 +7883,26 @@ $root.ChannelOwnerRemarked = (function() {
+                     return "moderateComment." + error;
+             }
+         }
++        if (message.createApp != null && message.hasOwnProperty("createApp")) {
++            if (properties.channelOwnerRemarked === 1)
++                return "channelOwnerRemarked: multiple values";
++            properties.channelOwnerRemarked = 1;
++            {
++                var error = $root.CreateApp.verify(message.createApp);
++                if (error)
++                    return "createApp." + error;
++            }
++        }
++        if (message.updateApp != null && message.hasOwnProperty("updateApp")) {
++            if (properties.channelOwnerRemarked === 1)
++                return "channelOwnerRemarked: multiple values";
++            properties.channelOwnerRemarked = 1;
++            {
++                var error = $root.UpdateApp.verify(message.updateApp);
++                if (error)
++                    return "updateApp." + error;
++            }
++        }
+         return null;
+     };
+ 
+@@ -6763,6 +7938,16 @@ $root.ChannelOwnerRemarked = (function() {
+                 throw TypeError(".ChannelOwnerRemarked.moderateComment: object expected");
+             message.moderateComment = $root.ModerateComment.fromObject(object.moderateComment);
+         }
++        if (object.createApp != null) {
++            if (typeof object.createApp !== "object")
++                throw TypeError(".ChannelOwnerRemarked.createApp: object expected");
++            message.createApp = $root.CreateApp.fromObject(object.createApp);
++        }
++        if (object.updateApp != null) {
++            if (typeof object.updateApp !== "object")
++                throw TypeError(".ChannelOwnerRemarked.updateApp: object expected");
++            message.updateApp = $root.UpdateApp.fromObject(object.updateApp);
++        }
+         return message;
+     };
+ 
+@@ -6799,6 +7984,16 @@ $root.ChannelOwnerRemarked = (function() {
+             if (options.oneofs)
+                 object.channelOwnerRemarked = "moderateComment";
+         }
++        if (message.createApp != null && message.hasOwnProperty("createApp")) {
++            object.createApp = $root.CreateApp.toObject(message.createApp, options);
++            if (options.oneofs)
++                object.channelOwnerRemarked = "createApp";
++        }
++        if (message.updateApp != null && message.hasOwnProperty("updateApp")) {
++            object.updateApp = $root.UpdateApp.toObject(message.updateApp, options);
++            if (options.oneofs)
++                object.channelOwnerRemarked = "updateApp";
 +        }
          return object;
      };
