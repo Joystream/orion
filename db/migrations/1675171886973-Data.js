@@ -1,5 +1,5 @@
-module.exports = class Data1675005105277 {
-    name = 'Data1675005105277'
+module.exports = class Data1675171886973 {
+    name = 'Data1675171886973'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -90,6 +90,9 @@ module.exports = class Data1675005105277 {
         await db.query(`CREATE TABLE "video_media_metadata" ("id" character varying NOT NULL, "encoding_id" character varying, "pixel_width" integer, "pixel_height" integer, "size" numeric, "video_id" character varying NOT NULL, "created_in_block" integer NOT NULL, CONSTRAINT "REL_4dc101240e8e1536b770aee202" UNIQUE ("video_id"), CONSTRAINT "PK_86a13815734e589cd86d0465e2d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5944dc5896cb16bd395414a0ce" ON "video_media_metadata" ("encoding_id") `)
         await db.query(`CREATE UNIQUE INDEX "IDX_4dc101240e8e1536b770aee202" ON "video_media_metadata" ("video_id") `)
+        await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, "channel_id" character varying NOT NULL, CONSTRAINT "REL_592715f3612179ab978cb7a835" UNIQUE ("channel_id"), CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE UNIQUE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
+        await db.query(`CREATE UNIQUE INDEX "IDX_592715f3612179ab978cb7a835" ON "app" ("channel_id") `)
         await db.query(`CREATE TABLE "channel_follow" ("id" SERIAL NOT NULL, "ip" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "cancel_token" character varying NOT NULL, "channel_id" character varying NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9bba17db99b72836523ab6c16f" ON "channel_follow" ("ip") `)
         await db.query(`CREATE INDEX "IDX_9bc0651dda94437ec18764a260" ON "channel_follow" ("channel_id") `)
@@ -150,6 +153,7 @@ module.exports = class Data1675005105277 {
         await db.query(`ALTER TABLE "video_hero" ADD CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0" FOREIGN KEY ("encoding_id") REFERENCES "video_media_encoding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_4dc101240e8e1536b770aee202a" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "app" ADD CONSTRAINT "FK_592715f3612179ab978cb7a835a" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "channel_follow" ADD CONSTRAINT "FK_9bc0651dda94437ec18764a2601" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE CASCADE ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "video_view_event" ADD CONSTRAINT "FK_2e29fba63e12a2b1818e0782d78" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE CASCADE ON UPDATE NO ACTION`)
         await db.query(`ALTER TABLE "report" ADD CONSTRAINT "FK_893057921f4b5cc37a0ef366845" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE CASCADE ON UPDATE NO ACTION`)
@@ -245,6 +249,9 @@ module.exports = class Data1675005105277 {
         await db.query(`DROP TABLE "video_media_metadata"`)
         await db.query(`DROP INDEX "public"."IDX_5944dc5896cb16bd395414a0ce"`)
         await db.query(`DROP INDEX "public"."IDX_4dc101240e8e1536b770aee202"`)
+        await db.query(`DROP TABLE "app"`)
+        await db.query(`DROP INDEX "public"."IDX_f36adbb7b096ceeb6f3e80ad14"`)
+        await db.query(`DROP INDEX "public"."IDX_592715f3612179ab978cb7a835"`)
         await db.query(`DROP TABLE "channel_follow"`)
         await db.query(`DROP INDEX "public"."IDX_9bba17db99b72836523ab6c16f"`)
         await db.query(`DROP INDEX "public"."IDX_9bc0651dda94437ec18764a260"`)
@@ -305,6 +312,7 @@ module.exports = class Data1675005105277 {
         await db.query(`ALTER TABLE "video_hero" DROP CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_4dc101240e8e1536b770aee202a"`)
+        await db.query(`ALTER TABLE "app" DROP CONSTRAINT "FK_592715f3612179ab978cb7a835a"`)
         await db.query(`ALTER TABLE "channel_follow" DROP CONSTRAINT "FK_9bc0651dda94437ec18764a2601"`)
         await db.query(`ALTER TABLE "video_view_event" DROP CONSTRAINT "FK_2e29fba63e12a2b1818e0782d78"`)
         await db.query(`ALTER TABLE "report" DROP CONSTRAINT "FK_893057921f4b5cc37a0ef366845"`)
