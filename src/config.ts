@@ -77,7 +77,7 @@ export class Config {
 
     this._featuredContentSecret = loadEnvVar('ORION_FEATURED_CONTENT_SECRET')
     this._adminSecret = loadEnvVar('ORION_ADMIN_SECRET')
-    // SR25519 32 bytes private key to create signature on App actions
+    // Secret string that will be use to generate ED25519 key pair
     const appPrivateKey = loadEnvVar('APP_PRIVATE_KEY')
     this._appKeypair = ed25519PairFromString(appPrivateKey)
     this._queryNodeUrl = loadEnvVar('ORION_QUERY_NODE_URL')
