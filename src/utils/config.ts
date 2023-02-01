@@ -6,6 +6,7 @@ export enum ConfigVariable {
   SupportNewCategories = 'SUPPORT_NEW_CATEGORIES',
   KillSwitch = 'KILL_SWITCH_ON',
   VideoViewPerIpTimeLimit = 'VIDEO_VIEW_PER_IP_TIME_LIMIT',
+  AppPrivateKey = 'APP_PRIVATE_KEY',
 }
 
 const boolType = {
@@ -18,11 +19,17 @@ const numberType = {
   deserialize: (v: string) => parseInt(v),
 } as const
 
+const stringType = {
+  serialize: (v: string) => v,
+  deserialize: (v: string) => v,
+}
+
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerIpTimeLimit]: numberType,
+  [ConfigVariable.AppPrivateKey]: stringType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
