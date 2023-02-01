@@ -166,3 +166,24 @@ export class RestoreContentResult {
   @Field(() => Int)
   numberOfEntitiesAffected!: number
 }
+
+@ArgsType()
+export class AppActionSignatureInput {
+  @Field()
+  creatorId: string
+
+  @Field({ description: 'Hex string from UInt8Array' })
+  assets: string
+
+  @Field({ description: 'Hex string from UInt8Array' })
+  rawAction: string
+
+  @Field({ description: 'Hex string from UInt8Array' })
+  rawAppActionMetadata: string
+}
+
+@ObjectType()
+export class GeneratedSignature {
+  @Field({ description: 'App signature converted to hexadecimal string.' })
+  signature: string
+}

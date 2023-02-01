@@ -2,8 +2,10 @@ import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
 import { EntityManager, In, Not } from 'typeorm'
 import {
+  AppActionSignatureInput,
   ExcludeContentArgs,
   ExcludeContentResult,
+  GeneratedSignature,
   KillSwitch,
   RestoreContentArgs,
   RestoreContentResult,
@@ -33,6 +35,9 @@ import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
 import { getObjectSize } from '@subsquid/openreader/lib/limit.size'
 import { VideoHero } from '../baseTypes'
 import { model } from '../model'
+import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
+import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
+import { generateAppActionCommitment } from './utils'
 
 @Resolver()
 export class AdminResolver {
@@ -244,5 +249,25 @@ export class AdminResolver {
     return {
       numberOfEntitiesAffected: result.affected || 0,
     }
+  }
+
+  @Mutation(() => GeneratedSignature)
+  async signAppActionCommitment(
+    @Args() { rawAppActionMetadata, rawAction, assets, creatorId }: AppActionSignatureInput
+  ) {
+    const em = await this.em()
+    if (!isHex(assets) || !isHex(rawAction) || !isHex(rawAppActionMetadata)) {
+      throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
+    }
+
+    const message = generateAppActionCommitment(
+      creatorId,
+      hexToU8a(assets),
+      hexToU8a(rawAction),
+      hexToU8a(rawAppActionMetadata)
+    )
+    const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
+    const signature = ed25519Sign(message, appKeypair)
+    return { signature: u8aToHex(signature) }
   }
 }
