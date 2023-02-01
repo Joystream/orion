@@ -381,8 +381,7 @@ export async function createBid(
     })
 
   const amount = bidAmount ?? (auction.buyNowPrice as bigint)
-  const previousTopBidId =
-    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' ? auction.topBidId : null
+  const previousTopBidId = auction.topBidId
 
   // prepare bid record
   const newBid = bidRepository.new({
