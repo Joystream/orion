@@ -1,5 +1,5 @@
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
-index cfbfe12..307ef59 100644
+index cfbfe12..7714173 100644
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 @@ -2484,6 +2484,105 @@ export class CreateVideoCategory implements ICreateVideoCategory {
@@ -131,6 +131,384 @@ index cfbfe12..307ef59 100644
  
      /**
       * Creates a new MemberRemarked instance using the specified properties.
+@@ -2700,6 +2805,348 @@ export class ChannelModeratorRemarked implements IChannelModeratorRemarked {
+     public toJSON(): { [k: string]: any };
+ }
+ 
++/** Properties of an AppMetadata. */
++export interface IAppMetadata {
++
++    /** AppMetadata websiteUrl */
++    websiteUrl?: (string|null);
++
++    /** AppMetadata useUri */
++    useUri?: (string|null);
++
++    /** AppMetadata smallIcon */
++    smallIcon?: (string|null);
++
++    /** AppMetadata mediumIcon */
++    mediumIcon?: (string|null);
++
++    /** AppMetadata bigIcon */
++    bigIcon?: (string|null);
++
++    /** AppMetadata oneLiner */
++    oneLiner?: (string|null);
++
++    /** AppMetadata description */
++    description?: (string|null);
++
++    /** AppMetadata termsOfService */
++    termsOfService?: (string|null);
++
++    /** AppMetadata authKey */
++    authKey?: (string|null);
++
++    /** AppMetadata platforms */
++    platforms?: (string[]|null);
++
++    /** AppMetadata category */
++    category?: (string|null);
++}
++
++/** Represents an AppMetadata. */
++export class AppMetadata implements IAppMetadata {
++
++    /**
++     * Constructs a new AppMetadata.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: IAppMetadata);
++
++    /** AppMetadata websiteUrl. */
++    public websiteUrl: string;
++
++    /** AppMetadata useUri. */
++    public useUri: string;
++
++    /** AppMetadata smallIcon. */
++    public smallIcon: string;
++
++    /** AppMetadata mediumIcon. */
++    public mediumIcon: string;
++
++    /** AppMetadata bigIcon. */
++    public bigIcon: string;
++
++    /** AppMetadata oneLiner. */
++    public oneLiner: string;
++
++    /** AppMetadata description. */
++    public description: string;
++
++    /** AppMetadata termsOfService. */
++    public termsOfService: string;
++
++    /** AppMetadata authKey. */
++    public authKey: string;
++
++    /** AppMetadata platforms. */
++    public platforms: string[];
++
++    /** AppMetadata category. */
++    public category: string;
++
++    /**
++     * Creates a new AppMetadata instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns AppMetadata instance
++     */
++    public static create(properties?: IAppMetadata): AppMetadata;
++
++    /**
++     * Encodes the specified AppMetadata message. Does not implicitly {@link AppMetadata.verify|verify} messages.
++     * @param message AppMetadata message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: IAppMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified AppMetadata message, length delimited. Does not implicitly {@link AppMetadata.verify|verify} messages.
++     * @param message AppMetadata message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: IAppMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes an AppMetadata message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns AppMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): AppMetadata;
++
++    /**
++     * Decodes an AppMetadata message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns AppMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): AppMetadata;
++
++    /**
++     * Verifies an AppMetadata message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates an AppMetadata message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns AppMetadata
++     */
++    public static fromObject(object: { [k: string]: any }): AppMetadata;
++
++    /**
++     * Creates a plain object from an AppMetadata message. Also converts values to other types if specified.
++     * @param message AppMetadata
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: AppMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this AppMetadata to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
++/** Properties of a CreateApp. */
++export interface ICreateApp {
++
++    /** CreateApp name */
++    name: string;
++
++    /** CreateApp appMetadata */
++    appMetadata?: (IAppMetadata|null);
++}
++
++/** Represents a CreateApp. */
++export class CreateApp implements ICreateApp {
++
++    /**
++     * Constructs a new CreateApp.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: ICreateApp);
++
++    /** CreateApp name. */
++    public name: string;
++
++    /** CreateApp appMetadata. */
++    public appMetadata?: (IAppMetadata|null);
++
++    /**
++     * Creates a new CreateApp instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns CreateApp instance
++     */
++    public static create(properties?: ICreateApp): CreateApp;
++
++    /**
++     * Encodes the specified CreateApp message. Does not implicitly {@link CreateApp.verify|verify} messages.
++     * @param message CreateApp message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: ICreateApp, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified CreateApp message, length delimited. Does not implicitly {@link CreateApp.verify|verify} messages.
++     * @param message CreateApp message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: ICreateApp, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes a CreateApp message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns CreateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): CreateApp;
++
++    /**
++     * Decodes a CreateApp message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns CreateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): CreateApp;
++
++    /**
++     * Verifies a CreateApp message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates a CreateApp message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns CreateApp
++     */
++    public static fromObject(object: { [k: string]: any }): CreateApp;
++
++    /**
++     * Creates a plain object from a CreateApp message. Also converts values to other types if specified.
++     * @param message CreateApp
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: CreateApp, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this CreateApp to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
++/** Properties of an UpdateApp. */
++export interface IUpdateApp {
++
++    /** UpdateApp appId */
++    appId: string;
++
++    /** UpdateApp appMetadata */
++    appMetadata?: (IAppMetadata|null);
++}
++
++/** Represents an UpdateApp. */
++export class UpdateApp implements IUpdateApp {
++
++    /**
++     * Constructs a new UpdateApp.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: IUpdateApp);
++
++    /** UpdateApp appId. */
++    public appId: string;
++
++    /** UpdateApp appMetadata. */
++    public appMetadata?: (IAppMetadata|null);
++
++    /**
++     * Creates a new UpdateApp instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns UpdateApp instance
++     */
++    public static create(properties?: IUpdateApp): UpdateApp;
++
++    /**
++     * Encodes the specified UpdateApp message. Does not implicitly {@link UpdateApp.verify|verify} messages.
++     * @param message UpdateApp message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: IUpdateApp, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified UpdateApp message, length delimited. Does not implicitly {@link UpdateApp.verify|verify} messages.
++     * @param message UpdateApp message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: IUpdateApp, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes an UpdateApp message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns UpdateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): UpdateApp;
++
++    /**
++     * Decodes an UpdateApp message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns UpdateApp
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): UpdateApp;
++
++    /**
++     * Verifies an UpdateApp message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates an UpdateApp message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns UpdateApp
++     */
++    public static fromObject(object: { [k: string]: any }): UpdateApp;
++
++    /**
++     * Creates a plain object from an UpdateApp message. Also converts values to other types if specified.
++     * @param message UpdateApp
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: UpdateApp, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this UpdateApp to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
+ /** Properties of a ChannelOwnerRemarked. */
+ export interface IChannelOwnerRemarked {
+ 
+@@ -2714,6 +3161,12 @@ export interface IChannelOwnerRemarked {
+ 
+     /** ChannelOwnerRemarked moderateComment */
+     moderateComment?: (IModerateComment|null);
++
++    /** ChannelOwnerRemarked createApp */
++    createApp?: (ICreateApp|null);
++
++    /** ChannelOwnerRemarked updateApp */
++    updateApp?: (IUpdateApp|null);
+ }
+ 
+ /** Represents a ChannelOwnerRemarked. */
+@@ -2737,8 +3190,14 @@ export class ChannelOwnerRemarked implements IChannelOwnerRemarked {
+     /** ChannelOwnerRemarked moderateComment. */
+     public moderateComment?: (IModerateComment|null);
+ 
++    /** ChannelOwnerRemarked createApp. */
++    public createApp?: (ICreateApp|null);
++
++    /** ChannelOwnerRemarked updateApp. */
++    public updateApp?: (IUpdateApp|null);
++
+     /** ChannelOwnerRemarked channelOwnerRemarked. */
+-    public channelOwnerRemarked?: ("pinOrUnpinComment"|"banOrUnbanMemberFromChannel"|"videoReactionsPreference"|"moderateComment");
++    public channelOwnerRemarked?: ("pinOrUnpinComment"|"banOrUnbanMemberFromChannel"|"videoReactionsPreference"|"moderateComment"|"createApp"|"updateApp");
+ 
+     /**
+      * Creates a new ChannelOwnerRemarked instance using the specified properties.
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
 index a2f7852..0ca3e9a 100644
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
