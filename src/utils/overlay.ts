@@ -312,6 +312,7 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
       logger.debug(
         `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
       )
+      await this.repository.remove(toBeRemoved)
       // Remove deleted entities from cache
       toBeRemoved.forEach((e) => this.cached.delete(e.id))
     }
