@@ -13,7 +13,9 @@
     "db:migrate": "npx squid-typeorm-migration apply",
     "processor-start": "node lib/processor.js",
     "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
-    "postinstall": "patch-package --patch-dir assets/patches"
+    "postinstall": "patch-package --patch-dir assets/patches",
+    "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
+    "tests": "npx ts-node ./src/tests/index.ts"
   },
   "dependencies": {
     "@joystream/metadata-protobuf": "^2.6.0",
@@ -37,6 +39,11 @@
     "typeorm": "^0.3.11"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^3.0.0",
+    "@graphql-codegen/import-types-preset": "^1.18.1",
+    "@graphql-codegen/typescript": "^1.22.0",
+    "@graphql-codegen/typescript-document-nodes": "^2.2.11",
+    "@graphql-codegen/typescript-operations": "^1.17.16",
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
     "@subsquid/typeorm-codegen": "^0.3.1",

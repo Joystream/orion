@@ -71,7 +71,9 @@ export async function processChannelUpdatedEvent({
 
 export async function processChannelDeletedEvent({
   overlay,
-  event: { asV2000: channelId },
+  event: {
+    asV2000: [, channelId],
+  },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
   overlay.getRepository(Channel).remove(channelId.toString())
 }

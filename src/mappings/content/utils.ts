@@ -394,7 +394,6 @@ export async function createBid(
     createdInBlock: block.height,
     isCanceled: false,
     indexInBlock,
-    previousTopBidId,
   })
   auctionBids.push(newBid)
 
@@ -409,6 +408,15 @@ export async function createBid(
   } else {
     // handle case 3
     auction.topBidId = findTopBid(auctionBids)?.id
+  }
+
+  // Only set previous top bid if auction.topBid has been updated
+  // and the action type is AuctionTypeEnglish
+  if (
+    auction.topBidId !== previousTopBidId &&
+    auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
+  ) {
+    newBid.previousTopBidId = previousTopBidId
   }
 
   return { bid: newBid, auction }
