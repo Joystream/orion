@@ -43,25 +43,6 @@ export interface ChannelCreationParametersRecord {
     expectedDataObjectStateBloatBond: bigint
 }
 
-export type ChannelFundsDestination = ChannelFundsDestination_AccountId | ChannelFundsDestination_CouncilBudget
-
-export interface ChannelFundsDestination_AccountId {
-    __kind: 'AccountId'
-    value: Uint8Array
-}
-
-export interface ChannelFundsDestination_CouncilBudget {
-    __kind: 'CouncilBudget'
-}
-
-export interface UpdateChannelPayoutsParametersRecord {
-    commitment: (Uint8Array | undefined)
-    payload: (ChannelPayoutsPayloadParametersRecord | undefined)
-    minCashoutAllowed: (bigint | undefined)
-    maxCashoutAllowed: (bigint | undefined)
-    channelCashoutsEnabled: (boolean | undefined)
-}
-
 export interface ChannelUpdateParametersRecord {
     assetsToUpload: (StorageAssetsRecord | undefined)
     newMeta: (Uint8Array | undefined)
@@ -362,13 +343,6 @@ export interface StorageAssetsRecord {
     expectedDataSizeFee: bigint
 }
 
-export interface ChannelPayoutsPayloadParametersRecord {
-    uploaderAccount: Uint8Array
-    objectCreationParams: DataObjectCreationParameters
-    expectedDataSizeFee: bigint
-    expectedDataObjectStateBloatBond: bigint
-}
-
 export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
 
 export interface InitTransactionalStatusRecord_Idle {
@@ -416,7 +390,7 @@ export interface PendingTransfer {
     transferParams: TransferCommitmentParameters
 }
 
-export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_Gateway | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
+export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_App | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
 
 export interface WorkingGroup_Forum {
     __kind: 'Forum'
@@ -434,8 +408,8 @@ export interface WorkingGroup_OperationsAlpha {
     __kind: 'OperationsAlpha'
 }
 
-export interface WorkingGroup_Gateway {
-    __kind: 'Gateway'
+export interface WorkingGroup_App {
+    __kind: 'App'
 }
 
 export interface WorkingGroup_Distribution {

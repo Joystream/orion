@@ -13,7 +13,7 @@ export async function processNewMember({
   overlay,
   block,
   event: {
-    asV2000: [memberId, params],
+    asV1000: [memberId, params],
   },
 }: EventHandlerContext<
   | 'Members.MemberCreated'
@@ -39,7 +39,7 @@ export async function processNewMember({
 export async function processMemberAccountsUpdatedEvent({
   overlay,
   event: {
-    asV2000: [memberId, , newControllerAccount],
+    asV1000: [memberId, , newControllerAccount],
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
@@ -51,7 +51,7 @@ export async function processMemberAccountsUpdatedEvent({
 export async function processMemberProfileUpdatedEvent({
   overlay,
   event: {
-    asV2000: [memberId, newHandle, newMetadata],
+    asV1000: [memberId, newHandle, newMetadata],
   },
 }: EventHandlerContext<'Members.MemberProfileUpdated'>) {
   const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
@@ -74,7 +74,7 @@ export async function processMemberRemarkedEvent({
   indexInBlock,
   extrinsicHash,
   event: {
-    asV2000: [memberId, message, payment],
+    asV1000: [memberId, message],
   },
 }: EventHandlerContext<'Members.MemberRemarked'>) {
   const metadata = deserializeMetadata(MemberRemarked, message)
@@ -85,8 +85,7 @@ export async function processMemberRemarkedEvent({
         indexInBlock,
         extrinsicHash,
         memberId.toString(),
-        metadata,
-        payment && [toAddress(payment[0]), payment[1]]
+        metadata
       )
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',
