@@ -19,7 +19,7 @@ import {
   DistributionBucketIdRecord,
   DynamicBagIdType,
   StaticBagId,
-} from '../../types/v2000'
+} from '../../types/v1000'
 import { bytesToString } from '../utils'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat, RepositoryOverlay } from '../../utils/overlay'

@@ -47,10 +47,6 @@ import {
   processChannelVisibilitySetByModeratorEvent,
   processChannelOwnerRemarkedEvent,
   processChannelAgentRemarkedEvent,
-  processChannelPayoutsUpdatedEvent,
-  processChannelRewardUpdatedEvent,
-  processChannelFundsWithdrawnEvent,
-  processChannelRewardClaimedAndWithdrawnEvent,
 } from './mappings/content/channel'
 import {
   processVideoCreatedEvent,
@@ -135,10 +131,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Content.BuyNowCanceled', defaultEventOptions)
   .addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
   .addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
-  .addEvent('Content.ChannelPayoutsUpdated', defaultEventOptions)
-  .addEvent('Content.ChannelRewardUpdated', defaultEventOptions)
-  .addEvent('Content.ChannelFundsWithdrawn', defaultEventOptions)
-  .addEvent('Content.ChannelRewardClaimedAndWithdrawn', defaultEventOptions)
   .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
   .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
   .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -213,10 +205,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
-  'Content.ChannelPayoutsUpdated': processChannelPayoutsUpdatedEvent,
-  'Content.ChannelRewardUpdated': processChannelRewardUpdatedEvent,
-  'Content.ChannelFundsWithdrawn': processChannelFundsWithdrawnEvent,
-  'Content.ChannelRewardClaimedAndWithdrawn': processChannelRewardClaimedAndWithdrawnEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,

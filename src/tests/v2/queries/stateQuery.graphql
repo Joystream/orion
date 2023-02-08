@@ -83,9 +83,10 @@ fragment MetaprotocolTransactionResultFields on MetaprotocolTransactionResult {
   ...on MetaprotocolTransactionResultCommentEdited {
     commentEdited { id }
   }
-  ...on MetaprotocolTransactionResultChannelPaid {
-    channelPaid { id }
-  }
+  # TODO: Ephesus
+  # ...on MetaprotocolTransactionResultChannelPaid {
+  #   channelPaid { id }
+  # }
   ...on MetaprotocolTransactionResultCommentModerated {
     commentModerated { id }
   }
