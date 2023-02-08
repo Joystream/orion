@@ -67,6 +67,7 @@ import {
   StorageDistributionBucketFamilyMetadataSetEvent,
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
+  ContentWorkingGroupLeadRemarkedEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
 
@@ -139,6 +140,7 @@ export const eventConstructors = {
   'Members.MemberAccountsUpdated': MembersMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': MembersMemberProfileUpdatedEvent,
   'Members.MemberRemarked': MembersMemberRemarkedEvent,
+  'ContentWorkingGroup.LeadRemarked': ContentWorkingGroupLeadRemarkedEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors
