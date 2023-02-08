@@ -13,6 +13,11 @@ import {
   processReactVideoMessage,
 } from '../content/commentsAndReactions'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
+import {
+  processCreateAppMessage,
+  processDeleteAppMessage,
+  processUpdateAppMessage,
+} from '../content/app'
 
 export async function processMembershipMetadata(
   overlay: EntityManagerOverlay,
@@ -49,6 +54,24 @@ export async function processMemberRemark(
   memberId: string,
   decodedMessage: DecodedMetadataObject<IMemberRemarked>
 ): Promise<MetaprotocolTransactionResult> {
+  if (decodedMessage.createApp) {
+    return processCreateAppMessage(
+      overlay,
+      block.height,
+      indexInBlock,
+      decodedMessage.createApp,
+      memberId
+    )
+  }
+
+  if (decodedMessage.updateApp) {
+    return processUpdateAppMessage(overlay, decodedMessage.updateApp, memberId)
+  }
+
+  if (decodedMessage.deleteApp) {
+    return processDeleteAppMessage(overlay, decodedMessage.deleteApp, memberId)
+  }
+
   if (decodedMessage.reactVideo) {
     return processReactVideoMessage(overlay, block, memberId, decodedMessage.reactVideo)
   }
