@@ -178,7 +178,7 @@ export async function processAuctionBidCanceledEvent({
 
   if (auction.topBidId && memberBid.id === auction.topBidId) {
     // find new top bid
-    auction.topBidId = findTopBid(auctionBids)?.id
+    auction.topBidId = findTopBid(auctionBids)?.id || null
   }
 
   // add new event

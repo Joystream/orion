@@ -28,7 +28,7 @@ fragment TransactionalStatusFields on TransactionalStatus {
     offerPrice: price
   }
 	...on TransactionalStatusBuyNow {
-    buyNowPrice: price
+    price
   }
   ...on TransactionalStatusAuction {
     auction { id }

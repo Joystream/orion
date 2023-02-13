@@ -35,6 +35,18 @@ export type AuctionTypeFieldsFragment =
   | AuctionTypeFields_AuctionTypeEnglish_Fragment
   | AuctionTypeFields_AuctionTypeOpen_Fragment
 
+export type BidFieldsFragment = {
+  id: string
+  createdAt: any
+  amount: string
+  isCanceled: boolean
+  createdInBlock: number
+  indexInBlock: number
+  auction: { id: string }
+  nft: { id: string }
+  bidder: { id: string }
+}
+
 export type StateQueryV1QueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type StateQueryV1Query = {
@@ -292,7 +304,7 @@ export type StateQueryV1Query = {
     ownerMember?: Types.Maybe<{ id: string }>
     ownerCuratorGroup?: Types.Maybe<{ id: string }>
     transactionalStatus?: Types.Maybe<
-      | { __typename: 'TransactionalStatusBuyNow'; buyNowPrice: number }
+      | { __typename: 'TransactionalStatusBuyNow'; price: number }
       | { __typename: 'TransactionalStatusIdle' }
       | {
           __typename: 'TransactionalStatusInitiatedOfferToMember'
@@ -320,17 +332,7 @@ export type StateQueryV1Query = {
     bids: Array<{ id: string }>
     whitelistedMembers: Array<{ id: string }>
   }>
-  bids: Array<{
-    id: string
-    createdAt: any
-    amount: string
-    isCanceled: boolean
-    createdInBlock: number
-    indexInBlock: number
-    auction: { id: string }
-    nft: { id: string }
-    bidder: { id: string }
-  }>
+  bids: Array<BidFieldsFragment>
   storageBuckets: Array<{
     id: string
     acceptingNewBags: boolean
@@ -540,6 +542,25 @@ export const AuctionTypeFields = gql`
     ... on AuctionTypeOpen {
       bidLockDuration
     }
+  }
+`
+export const BidFields = gql`
+  fragment BidFields on Bid {
+    id
+    createdAt
+    auction {
+      id
+    }
+    nft {
+      id
+    }
+    bidder {
+      id
+    }
+    amount
+    isCanceled
+    createdInBlock
+    indexInBlock
   }
 `
 export const StateQueryV1 = gql`
@@ -938,7 +959,7 @@ export const StateQueryV1 = gql`
           offerPrice: price
         }
         ... on TransactionalStatusBuyNow {
-          buyNowPrice: price
+          price
         }
       }
       transactionalStatusAuction {
@@ -980,21 +1001,7 @@ export const StateQueryV1 = gql`
       }
     }
     bids(limit: 9999) {
-      id
-      createdAt
-      auction {
-        id
-      }
-      nft {
-        id
-      }
-      bidder {
-        id
-      }
-      amount
-      isCanceled
-      createdInBlock
-      indexInBlock
+      ...BidFields
     }
     storageBuckets(limit: 9999) {
       id
@@ -1294,4 +1301,5 @@ export const StateQueryV1 = gql`
   }
   ${ActorFields}
   ${AuctionTypeFields}
+  ${BidFields}
 `

@@ -284,8 +284,8 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
   // Returns all entities scheduled for removal
   private getAllIdsToBeRemoved(): string[] {
     return [...this.cached.entries()]
-      .filter(({ 1: { state } }) => state === CachedEntityState.ToBeRemoved)
-      .map(({ 0: id }) => id)
+      .filter(([, { state }]) => state === CachedEntityState.ToBeRemoved)
+      .map(([id]) => id)
   }
 
   // Execute all scheduled entity inserts/updates
@@ -299,7 +299,11 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
       )
       await this.repository.save(toBeSaved)
       // Remove saved entities from cache
-      toBeSaved.forEach((e) => this.cached.delete(e.id))
+      toBeSaved.forEach((e) => {
+        if (!this.cached.delete(e.id)) {
+          criticalError(`Could not remove cached ${this.entityName} entity by id ${e.id}!`)
+        }
+      })
     }
   }
 
@@ -312,9 +316,13 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
       logger.debug(
         `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
       )
-      await this.repository.remove(toBeRemoved)
+      await this.repository.remove(_.cloneDeep(toBeRemoved))
       // Remove deleted entities from cache
-      toBeRemoved.forEach((e) => this.cached.delete(e.id))
+      toBeRemoved.forEach((e) => {
+        if (!this.cached.delete(e.id)) {
+          criticalError(`Could not remove cached ${this.entityName} entity by id ${e.id}!`)
+        }
+      })
     }
   }
 }
