@@ -7,7 +7,12 @@ import {
 } from '@apollo/client/core'
 import _ from 'lodash'
 import { has, isObject } from '../utils/misc'
-import { StateQueryV1, StateQueryV1Query, StateQueryV1QueryVariables } from './v1/generated/queries'
+import {
+  BidFieldsFragment,
+  StateQueryV1,
+  StateQueryV1Query,
+  StateQueryV1QueryVariables,
+} from './v1/generated/queries'
 import {
   AuctionRefFieldsFragment,
   BidRefFieldsFragment,
@@ -74,7 +79,14 @@ function prepareV1Data(data: StateQueryV1Query) {
       return { buyNowPrice: null }
     }
     if (path.endsWith('.topBid') && isObject(val) && has(val, 'id') && has(val, 'isCanceled')) {
-      return { topBid: val.isCanceled ? null : { id: val.id } }
+      return {
+        topBid:
+          val.isCanceled &&
+          !data.bidMadeCompletingAuctionEvents.find((e) => e.winningBid.id === val.id) &&
+          !data.openAuctionBidAcceptedEvents.find((e) => e.winningBid?.id === val.id)
+            ? null
+            : { id: val.id },
+      }
     }
     if (path.endsWith('.reactionsCountByReactionId') && Array.isArray(val) && val.length === 0) {
       return { reactionsCountByReactionId: null }
@@ -82,11 +94,17 @@ function prepareV1Data(data: StateQueryV1Query) {
     if (path.endsWith('.areas') && Array.isArray(val) && val.length === 0) {
       return { areas: null }
     }
+    if (path.endsWith('.areas.area') && isObject(val)) {
+      return { ...val }
+    }
     if (path.endsWith('storageBags.owner.channelId') && typeof val === 'number') {
       return { channelId: val.toString() }
     }
     if (path.endsWith('videoCategories.description') && val === '') {
       return { description: null }
+    }
+    if (path.endsWith('transactionalStatus.price') && typeof val === 'number') {
+      return { price: BigInt(val).toString() }
     }
     if (
       path.endsWith('bids.isCanceled') &&
@@ -97,6 +115,13 @@ function prepareV1Data(data: StateQueryV1Query) {
         data.openAuctionBidAcceptedEvents.find((e) => e.winningBid?.id === parent.id))
     ) {
       // Known bug in Orion v1 - bid is getting canceled even when it's a winning bid in already completed auction
+      // We also need to fix auction.topBid in this case (as it gets set to `null`)
+      const auctionId = (parent as BidFieldsFragment).auction.id
+      const auction = data.auctions.find((a) => a.id === auctionId)
+      if (!auction) {
+        throw new Error(`Auction ${auctionId} not found!`)
+      }
+      ;(auction.topBid as { id: string }) = { id: (parent as BidFieldsFragment).id }
       return { isCanceled: false }
     }
   })

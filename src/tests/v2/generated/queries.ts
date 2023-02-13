@@ -39,7 +39,7 @@ type TransactionalStatusFields_TransactionalStatusAuction_Fragment = {
 
 type TransactionalStatusFields_TransactionalStatusBuyNow_Fragment = {
   __typename: 'TransactionalStatusBuyNow'
-  buyNowPrice: string
+  price: string
 }
 
 type TransactionalStatusFields_TransactionalStatusIdle_Fragment = {
@@ -87,7 +87,6 @@ export type BidRefFieldsFragment = {
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment = {
   __typename: 'MetaprotocolTransactionResultChannelPaid'
-  channelPaid?: Types.Maybe<{ id: string }>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment = {
@@ -539,7 +538,7 @@ export const TransactionalStatusFields = gql`
       offerPrice: price
     }
     ... on TransactionalStatusBuyNow {
-      buyNowPrice: price
+      price
     }
     ... on TransactionalStatusAuction {
       auction {
@@ -635,11 +634,6 @@ export const MetaprotocolTransactionResultFields = gql`
     }
     ... on MetaprotocolTransactionResultCommentEdited {
       commentEdited {
-        id
-      }
-    }
-    ... on MetaprotocolTransactionResultChannelPaid {
-      channelPaid {
         id
       }
     }

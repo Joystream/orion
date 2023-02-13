@@ -21,6 +21,18 @@ fragment AuctionTypeFields on AuctionType {
   }
 }
 
+fragment BidFields on Bid {
+  id
+  createdAt
+  auction { id }
+  nft { id }
+  bidder { id }
+  amount
+  isCanceled
+  createdInBlock
+  indexInBlock
+}
+
 query StateQueryV1 {
   channels(limit: 9999) {
     id
@@ -280,7 +292,7 @@ query StateQueryV1 {
         offerPrice: price
       }
       ...on TransactionalStatusBuyNow {
-        buyNowPrice: price
+        price
       }
     }
     transactionalStatusAuction {
@@ -314,15 +326,7 @@ query StateQueryV1 {
     whitelistedMembers { id }
   }
   bids(limit: 9999) {
-    id
-  	createdAt
-    auction { id }
-    nft { id }
-    bidder { id }
-    amount
-    isCanceled
-    createdInBlock
-    indexInBlock
+    ...BidFields
   }
   storageBuckets(limit: 9999) {
     id

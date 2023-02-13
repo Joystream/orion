@@ -336,7 +336,7 @@ export async function getCurrentAuctionFromVideo(
   return overlay.getRepository(Auction).getByIdOrFail(nft.transactionalStatus.auction)
 }
 
-export function findTopBid(bids: Flat<Bid>[]): Flat<Bid> | undefined {
+export function findTopBid(bids: Flat<Bid>[]): Flat<Bid> | null {
   return bids.reduce((topBid, bid) => {
     if (bid.isCanceled) {
       return topBid
@@ -358,7 +358,7 @@ export function findTopBid(bids: Flat<Bid>[]): Flat<Bid> | undefined {
       (topBid.createdInBlock === bid.createdInBlock && topBid.indexInBlock < bid.indexInBlock)
       ? topBid
       : bid
-  }, undefined as Flat<Bid> | undefined)
+  }, null as Flat<Bid> | null)
 }
 
 export async function createBid(
@@ -407,7 +407,7 @@ export async function createBid(
     auction.topBidId = newBid.id
   } else {
     // handle case 3
-    auction.topBidId = findTopBid(auctionBids)?.id
+    auction.topBidId = findTopBid(auctionBids)?.id || null
   }
 
   // Only set previous top bid if auction.topBid has been updated
