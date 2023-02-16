@@ -14,13 +14,15 @@ class AdminInput implements Admin {
 @ArgsType()
 class AppActionSignatureInput {
   @Field()
+  nonce: number
+  @Field()
   creatorId: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  assets: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAction: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAppActionMetadata: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  assets?: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  rawAction?: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  rawAppActionMetadata?: string
 }
 
 @Resolver()
@@ -41,17 +43,22 @@ export class AdminResolver {
 
   @Mutation(() => GeneratedSignature)
   async signAppActionCommitment(
-    @Args() { rawAppActionMetadata, rawAction, assets, creatorId }: AppActionSignatureInput
+    @Args() { rawAppActionMetadata, rawAction, assets, creatorId, nonce }: AppActionSignatureInput
   ) {
-    if (!isHex(assets) || !isHex(rawAction) || !isHex(rawAppActionMetadata)) {
+    if (
+      (assets && !isHex(assets)) ||
+      (rawAction && !isHex(rawAction)) ||
+      (rawAppActionMetadata && !isHex(rawAppActionMetadata))
+    ) {
       throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
     }
-
+    console.log(assets, hexToU8a(assets))
     const message = generateAppActionCommitment(
+      nonce,
       creatorId,
       hexToU8a(assets),
-      hexToU8a(rawAction),
-      hexToU8a(rawAppActionMetadata)
+      rawAction ? hexToU8a(rawAction) : undefined,
+      rawAppActionMetadata ? hexToU8a(rawAppActionMetadata) : undefined
     )
     const signature = ed25519Sign(message, config.appKeypair)
     return { signature: u8aToHex(signature) }

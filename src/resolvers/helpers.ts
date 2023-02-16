@@ -49,12 +49,19 @@ export const getMostFollowedChannelsIds = (context: OrionContext, { period, limi
 }
 
 // preferably this would be imported from @joystream/js -> https://github.com/Joystream/joystream/pull/4586
-export const generateAppActionCommitment = (
+export function generateAppActionCommitment(
+  nonce: number,
   creatorId: string,
   assets: Uint8Array,
-  rawAction: Uint8Array,
-  rawAppActionMetadata: Uint8Array
-): string => {
-  const rawCommitment = [creatorId, u8aToHex(assets), u8aToHex(rawAction), u8aToHex(rawAppActionMetadata)]
+  rawAction?: Uint8Array,
+  rawAppActionMetadata?: Uint8Array
+): string {
+  const rawCommitment = [
+    nonce,
+    creatorId,
+    u8aToHex(assets),
+    ...(rawAction ? [u8aToHex(rawAction)] : []),
+    ...(rawAppActionMetadata ? [u8aToHex(rawAppActionMetadata)] : []),
+  ]
   return stringToHex(JSON.stringify(rawCommitment))
 }
