@@ -5,6 +5,9 @@ import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Event, MetaprotocolTransactionResultFailed } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
+import { Bytes } from '@polkadot/types/primitive'
+import { createType } from '@joystream/types'
+import { u8aToHex } from '@polkadot/util'
 
 export const JOYSTREAM_SS58_PREFIX = 126
 
@@ -14,15 +17,23 @@ export function bytesToString(b: Uint8Array): string {
 
 export function deserializeMetadata<T>(
   metadataType: AnyMetadataClass<T>,
-  metadataBytes: Uint8Array
+  metadataBytes: Uint8Array,
+  opts = {
+    skipWarning: false,
+  }
 ): DecodedMetadataObject<T> | null {
+  Logger.get().debug(
+    `Trying to deserialize ${Buffer.from(metadataBytes).toString('hex')} as ${metadataType.name}...`
+  )
   try {
     const message = metadataType.decode(metadataBytes)
     return metaToObject(metadataType, message)
   } catch (e) {
-    invalidMetadata(metadataType, 'Could not decode the input ', {
-      encodedMessage: Buffer.from(metadataBytes).toString('hex'),
-    })
+    if (!opts.skipWarning) {
+      invalidMetadata(metadataType, 'Could not decode the input ', {
+        encodedMessage: Buffer.from(metadataBytes).toString('hex'),
+      })
+    }
     return null
   }
 }
@@ -73,4 +84,8 @@ export function metaprotocolTransactionFailure<T>(
 
 export function backwardCompatibleMetaID(block: SubstrateBlock, indexInBlock: number) {
   return `METAPROTOCOL-OLYMPIA-${block.height}-${indexInBlock}`
+}
+
+export function u8aToBytes(array?: DecodedMetadataObject<Uint8Array> | null): Bytes {
+  return createType('Bytes', array ? u8aToHex(array as Uint8Array) : '')
 }

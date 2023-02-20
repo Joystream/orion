@@ -1,4 +1,10 @@
-import { IChannelMetadata, ISubtitleMetadata, IVideoMetadata } from '@joystream/metadata-protobuf'
+import {
+  AppAction,
+  IAppAction,
+  IChannelMetadata,
+  ISubtitleMetadata,
+  IVideoMetadata,
+} from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
   DataObjectTypeChannelAvatar,
@@ -35,6 +41,7 @@ import {
   VideoMediaMetadata,
   VideoReaction,
   VideoMediaEncoding,
+  App,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -45,8 +52,12 @@ import {
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
 } from '../../types/v1000'
-import { genericEventFields } from '../utils'
+import { genericEventFields, invalidMetadata } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
+import { ed25519Verify } from '@polkadot/util-crypto'
+import { integrateMeta } from '@joystream/metadata-protobuf/utils'
+import { Bytes } from '@polkadot/types/primitive'
+import { u8aToHex, stringToHex } from '@polkadot/util'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -481,4 +492,98 @@ export async function finishAuction(
   auction.endedAtBlock = block.height
 
   return { winningBid, nft, auction, previousNftOwner }
+}
+
+async function validateAndGetApp(
+  overlay: EntityManagerOverlay,
+  validationContext: {
+    ownerNonce: number | undefined
+    appCommitment: string | undefined
+  },
+  appAction: DecodedMetadataObject<IAppAction>
+): Promise<Flat<App> | undefined> {
+  // If one is missing we cannot verify the signature
+  if (
+    !appAction.appId ||
+    !appAction.signature ||
+    typeof appAction.nonce !== 'number' ||
+    !validationContext.appCommitment
+  ) {
+    invalidMetadata(AppAction, 'Missing action fields to verify app', { decodedMessage: appAction })
+    return undefined
+  }
+
+  const app = await overlay.getRepository(App).getById(appAction.appId)
+
+  if (!app || !app.authKey) {
+    invalidMetadata(AppAction, 'No app of given id found', { decodedMessage: appAction })
+    return undefined
+  }
+
+  if (
+    typeof validationContext.ownerNonce === 'undefined' ||
+    validationContext.ownerNonce !== appAction.nonce
+  ) {
+    invalidMetadata(AppAction, 'Invalid app action nonce', { decodedMessage: appAction })
+
+    return undefined
+  }
+
+  try {
+    const isSignatureValid = ed25519Verify(
+      validationContext.appCommitment,
+      appAction.signature as Uint8Array,
+      app.authKey
+    )
+
+    if (!isSignatureValid) {
+      invalidMetadata(AppAction, 'Invalid app action signature', { decodedMessage: appAction })
+    }
+
+    return isSignatureValid ? app : undefined
+  } catch (e) {
+    invalidMetadata(AppAction, `Could not verify signature: ${(e as Error)?.message}`, {
+      decodedMessage: appAction,
+    })
+    return undefined
+  }
+}
+
+export async function processAppActionMetadata<
+  T extends { entryAppId?: string | null | undefined }
+>(
+  overlay: EntityManagerOverlay,
+  entity: T,
+  meta: DecodedMetadataObject<IAppAction>,
+  validationContext: {
+    ownerNonce: number | undefined
+    appCommitment: string | undefined
+  },
+  entityMetadataProcessor: (entity: T) => Promise<void>
+): Promise<void> {
+  const app = await validateAndGetApp(overlay, validationContext, meta)
+  if (!app) {
+    return entityMetadataProcessor(entity)
+  }
+
+  integrateMeta(entity, { entryAppId: app.id }, ['entryAppId'])
+
+  return entityMetadataProcessor(entity)
+}
+
+export function generateAppActionCommitment(
+  nonce: number,
+  creatorId: string,
+  assets: Uint8Array,
+  rawAction?: Bytes,
+  rawAppActionMetadata?: Bytes
+): string {
+  const rawCommitment = [
+    nonce,
+    creatorId,
+    u8aToHex(assets),
+    ...(rawAction ? [u8aToHex(rawAction)] : []),
+    ...(rawAppActionMetadata ? [u8aToHex(rawAppActionMetadata)] : []),
+  ]
+  return stringToHex(JSON.stringify(rawCommitment))
 }

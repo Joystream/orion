@@ -1,9 +1,22 @@
-import { ContentMetadata } from '@joystream/metadata-protobuf'
-import { Video } from '../../model'
+import {
+  AppAction,
+  AppActionMetadata,
+  ContentMetadata,
+  IVideoMetadata,
+} from '@joystream/metadata-protobuf'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { integrateMeta } from '@joystream/metadata-protobuf/utils'
+import { createType } from '@joystream/types'
+import { Channel, Membership, Video } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata } from '../utils'
+import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
-import { deleteVideo, processNft } from './utils'
+import {
+  deleteVideo,
+  generateAppActionCommitment,
+  processAppActionMetadata,
+  processNft,
+} from './utils'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -15,9 +28,6 @@ export async function processVideoCreatedEvent({
   },
 }: EventHandlerContext<'Content.VideoCreated'>): Promise<void> {
   const { meta, expectedVideoStateBloatBond, autoIssueNft } = contentCreationParameters
-
-  // deserialize & process metadata
-  const contentMetadata = meta && deserializeMetadata(ContentMetadata, meta)
 
   const video = overlay.getRepository(Video).new({
     id: contentId.toString(),
@@ -34,15 +44,72 @@ export async function processVideoCreatedEvent({
     viewsNum: 0,
   })
 
-  if (contentMetadata?.videoMetadata) {
-    await processVideoMetadata(
-      overlay,
-      block,
-      indexInBlock,
-      video,
-      contentMetadata.videoMetadata,
-      newDataObjectIds
+  // fetch related channel and owner
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+  const ownerMember = channel.ownerMemberId
+    ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
+    : undefined
+
+  // deserialize & process metadata
+  const appAction = meta && deserializeMetadata(AppAction, meta, { skipWarning: true })
+
+  if (appAction) {
+    const contentMetadataBytes = u8aToBytes(appAction.rawAction)
+    const videoMetadata =
+      deserializeMetadata(ContentMetadata, contentMetadataBytes.toU8a(true))?.videoMetadata ?? {}
+    const appActionMetadataBytes = appAction.metadata ? u8aToBytes(appAction.metadata) : undefined
+
+    const appCommitment = generateAppActionCommitment(
+      ownerMember?.totalVideosCreated ?? -1,
+      channel.id ?? '',
+      createType(
+        'Option<PalletContentStorageAssetsRecord>',
+        contentCreationParameters.assets as any
+      ).toU8a(),
+      appAction.rawAction ? contentMetadataBytes : undefined,
+      appActionMetadataBytes
     )
+    await processAppActionMetadata(
+      overlay,
+      video,
+      appAction,
+      { ownerNonce: ownerMember?.totalVideosCreated, appCommitment },
+      (entity) => {
+        if (entity.entryAppId && appActionMetadataBytes) {
+          const appActionMetadata = deserializeMetadata(
+            AppActionMetadata,
+            appActionMetadataBytes.toU8a(true)
+          )
+
+          appActionMetadata?.videoId &&
+            integrateMeta(entity, { ytVideoId: appActionMetadata.videoId }, ['ytVideoId'])
+        }
+        return processVideoMetadata(
+          overlay,
+          block,
+          indexInBlock,
+          entity,
+          videoMetadata,
+          newDataObjectIds
+        )
+      }
+    )
+  } else {
+    const contentMetadata = meta && deserializeMetadata(ContentMetadata, meta)
+    if (contentMetadata?.videoMetadata) {
+      await processVideoMetadata(
+        overlay,
+        block,
+        indexInBlock,
+        video,
+        contentMetadata.videoMetadata,
+        newDataObjectIds
+      )
+    }
+  }
+
+  if (ownerMember) {
+    ownerMember.totalVideosCreated += 1
   }
 
   if (autoIssueNft) {
@@ -62,15 +129,27 @@ export async function processVideoUpdatedEvent({
   const { newMeta, autoIssueNft } = contentUpdateParameters
   const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
 
-  const contentMetadata = newMeta && deserializeMetadata(ContentMetadata, newMeta)
+  const appAction = newMeta && deserializeMetadata(AppAction, newMeta, { skipWarning: true })
 
-  if (contentMetadata?.videoMetadata) {
+  let videoMetadataUpdate: DecodedMetadataObject<IVideoMetadata> | null | undefined
+  if (appAction) {
+    const contentMetadataBytes = u8aToBytes(appAction.rawAction)
+    videoMetadataUpdate = deserializeMetadata(
+      ContentMetadata,
+      contentMetadataBytes.toU8a(true)
+    )?.videoMetadata
+  } else {
+    const contentMetadata = newMeta && deserializeMetadata(ContentMetadata, newMeta)
+    videoMetadataUpdate = contentMetadata?.videoMetadata
+  }
+
+  if (videoMetadataUpdate) {
     await processVideoMetadata(
       overlay,
       block,
       indexInBlock,
       video,
-      contentMetadata.videoMetadata,
+      videoMetadataUpdate,
       newDataObjectIds
     )
   }

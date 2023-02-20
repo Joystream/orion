@@ -1,17 +1,24 @@
 import {
   Channel,
   Event,
+  Membership,
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionStatusEventData,
 } from '../../model'
-import { deserializeMetadata, genericEventFields, toAddress } from '../utils'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
+  AppAction,
   ChannelMetadata,
   ChannelModeratorRemarked,
   ChannelOwnerRemarked,
+  IChannelMetadata,
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
+import { createType } from '@joystream/types'
+import { processAppActionMetadata, generateAppActionCommitment } from './utils'
+import { Flat } from '../../utils/overlay'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -39,10 +46,45 @@ export async function processChannelCreatedEvent({
     videoViewsNum: 0,
   })
 
+  const ownerMember = channel.ownerMemberId
+    ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
+    : undefined
+
   // deserialize & process metadata
   if (channelCreationParameters.meta !== undefined) {
-    const metadata = deserializeMetadata(ChannelMetadata, channelCreationParameters.meta) || {}
-    await processChannelMetadata(overlay, block, channel, metadata, dataObjects)
+    const appAction = deserializeMetadata(AppAction, channelCreationParameters.meta, {
+      skipWarning: true,
+    })
+
+    if (appAction) {
+      const channelMetadataBytes = u8aToBytes(appAction.rawAction)
+      const channelMetadata = deserializeMetadata(ChannelMetadata, channelMetadataBytes.toU8a(true))
+      const appCommitment = generateAppActionCommitment(
+        ownerMember?.totalChannelsCreated ?? -1,
+        ownerMember?.id ? `m:${ownerMember.id}` : '',
+        createType(
+          'Option<PalletContentStorageAssetsRecord>',
+          channelCreationParameters.assets as any
+        ).toU8a(),
+        appAction.rawAction ? channelMetadataBytes : undefined,
+        appAction.metadata ? u8aToBytes(appAction.metadata) : undefined
+      )
+      await processAppActionMetadata<Flat<Channel>>(
+        overlay,
+        channel,
+        appAction,
+        { ownerNonce: ownerMember?.totalChannelsCreated, appCommitment },
+        (entity) =>
+          processChannelMetadata(overlay, block, entity, channelMetadata ?? {}, dataObjects)
+      )
+    } else {
+      const metadata = deserializeMetadata(ChannelMetadata, channelCreationParameters.meta) || {}
+      await processChannelMetadata(overlay, block, channel, metadata, dataObjects)
+    }
+  }
+
+  if (ownerMember) {
+    ownerMember.totalChannelsCreated += 1
   }
 }
 
@@ -57,8 +99,25 @@ export async function processChannelUpdatedEvent({
 
   //  update metadata if it was changed
   if (channelUpdateParameters.newMeta) {
-    const newMetadata = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta) || {}
-    await processChannelMetadata(overlay, block, channel, newMetadata, newDataObjects)
+    const appAction = deserializeMetadata(AppAction, channelUpdateParameters.newMeta, {
+      skipWarning: true,
+    })
+
+    let channelMetadataUpdate: DecodedMetadataObject<IChannelMetadata> | null | undefined
+    if (appAction) {
+      const channelMetadataBytes = u8aToBytes(appAction.rawAction)
+      channelMetadataUpdate = deserializeMetadata(ChannelMetadata, channelMetadataBytes.toU8a(true))
+    } else {
+      channelMetadataUpdate = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta)
+    }
+
+    await processChannelMetadata(
+      overlay,
+      block,
+      channel,
+      channelMetadataUpdate ?? {},
+      newDataObjects
+    )
   }
 }
 
