@@ -68,8 +68,7 @@
     "Members.MemberInvited",
     "Members.MemberProfileUpdated",
     "Members.MemberAccountsUpdated",
-    "Members.MemberRemarked",
-    "ContentWorkingGroup.LeadRemarked"
+    "Members.MemberRemarked"
   ],
   "calls": [],
   "storage": []

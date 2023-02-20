@@ -675,39 +675,6 @@ export class ContentVideoVisibilitySetByModeratorEvent {
     }
 }
 
-export class ContentWorkingGroupLeadRemarkedEvent {
-    private readonly _chain: Chain
-    private readonly event: Event
-
-    constructor(ctx: EventContext)
-    constructor(ctx: ChainContext, event: Event)
-    constructor(ctx: EventContext, event?: Event) {
-        event = event || ctx.event
-        assert(event.name === 'ContentWorkingGroup.LeadRemarked')
-        this._chain = ctx._chain
-        this.event = event
-    }
-
-    /**
-     * Emits on Lead making a remark message
-     * Params:
-     * - message
-     */
-    get isV1000(): boolean {
-        return this._chain.getEventHash('ContentWorkingGroup.LeadRemarked') === '2f3c83e89fe8252155817328a8c403c0bd3d9afea4de66b5b6e2ad04b3011a7a'
-    }
-
-    /**
-     * Emits on Lead making a remark message
-     * Params:
-     * - message
-     */
-    get asV1000(): Uint8Array {
-        assert(this.isV1000)
-        return this._chain.decodeEvent(this.event)
-    }
-}
-
 export class MembersMemberAccountsUpdatedEvent {
     private readonly _chain: Chain
     private readonly event: Event
