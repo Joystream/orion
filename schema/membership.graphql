@@ -48,4 +48,10 @@ type Membership @entity {
 
   "Channels the member is banned from (in terms of commenting/reacting)"
   bannedFromChannels: [BannedMember!] @derivedFrom(field: "member")
+
+  "Number of channels ever created by this member"
+  totalChannelsCreated: Int!
+
+  "Number of videos ever created by this member"
+  totalVideosCreated: Int!
 }

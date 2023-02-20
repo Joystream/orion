@@ -114,6 +114,12 @@ type Video @entity {
 
   "Number of video views (to speed up orderBy queries by avoiding COUNT aggregation)"
   viewsNum: Int!
+
+  "Application used for video creation"
+  entryApp: App
+
+  "Video ID coming from YPP"
+  ytVideoId: String
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {

@@ -52,6 +52,9 @@ type Channel @entity {
 
   "List of members blocked from commenting/reacting on any video of the channel."
   bannedMembers: [BannedMember!] @derivedFrom(field: "channel")
+
+  "Application used for channel creation"
+  entryApp: App
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
