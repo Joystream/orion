@@ -16,7 +16,7 @@ export async function processCreateAppMessage(
   blockNumber: number,
   indexInBlock: number,
   decodedMessage: DecodedMetadataObject<ICreateApp>,
-  memberId?: string
+  memberId: string
 ): Promise<MetaprotocolTransactionResult> {
   const { name, appMetadata } = decodedMessage
   const appId = `${blockNumber}-${indexInBlock}`
@@ -33,7 +33,6 @@ export async function processCreateAppMessage(
     name,
     id: appId,
     ownerMemberId: memberId,
-    isLeadOwned: !memberId,
     websiteUrl: appMetadata?.websiteUrl || undefined,
     useUri: appMetadata?.useUri || undefined,
     smallIcon: appMetadata?.smallIcon || undefined,
@@ -53,7 +52,7 @@ export async function processCreateAppMessage(
 export async function processUpdateAppMessage(
   overlay: EntityManagerOverlay,
   decodedMessage: DecodedMetadataObject<IUpdateApp>,
-  memberId?: string
+  memberId: string
 ): Promise<MetaprotocolTransactionResult> {
   const { appId, appMetadata } = decodedMessage
 
@@ -65,13 +64,10 @@ export async function processUpdateAppMessage(
     })
   }
 
-  // TODO: Should lead be able to delete non-owned apps?
   if (app.ownerMemberId !== memberId) {
     return metaprotocolTransactionFailure(
       UpdateApp,
-      `Cannot update app; app does not belong to the ${
-        memberId ? `member: ${memberId}` : `content lead`
-      }`,
+      `Cannot update app; app does not belong to the member: ${memberId}`,
       { decodedMessage, memberId }
     )
   }
@@ -98,7 +94,7 @@ export async function processUpdateAppMessage(
 export async function processDeleteAppMessage(
   overlay: EntityManagerOverlay,
   decodedMessage: DecodedMetadataObject<IDeleteApp>,
-  memberId?: string
+  memberId: string
 ): Promise<MetaprotocolTransactionResult> {
   const { appId } = decodedMessage
 
@@ -110,13 +106,10 @@ export async function processDeleteAppMessage(
     })
   }
 
-  // TODO: Should lead be able to delete non-owned apps?
   if (app.ownerMemberId !== memberId) {
     return metaprotocolTransactionFailure(
       UpdateApp,
-      `Cannot update app; app does not belong to the ${
-        memberId ? `member: ${memberId}` : `content lead`
-      }`,
+      `Cannot update app; app does not belong to the member: ${memberId}`,
       { decodedMessage, memberId }
     )
   }

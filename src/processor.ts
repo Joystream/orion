@@ -80,9 +80,6 @@ import {
   processNewMember,
   processMemberRemarkedEvent,
 } from './mappings/membership'
-import {
-  processLeadRemarkedEvent
-} from './mappings/contentWorkingGroup'
 import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
@@ -172,7 +169,6 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
   .addEvent('Members.MemberProfileUpdated', defaultEventOptions)
   .addEvent('Members.MemberRemarked', defaultEventOptions)
-  .addEvent('ContentWorkingGroup.LeadRemarked', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -248,7 +244,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
-  'ContentWorkingGroup.LeadRemarked': processLeadRemarkedEvent,
 }
 
 async function processEvent<EventName extends EventNames>(

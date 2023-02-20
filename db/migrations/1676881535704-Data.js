@@ -1,5 +1,5 @@
-module.exports = class Data1676313668880 {
-    name = 'Data1676313668880'
+module.exports = class Data1676881535704 {
+    name = 'Data1676881535704'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -90,7 +90,7 @@ module.exports = class Data1676313668880 {
         await db.query(`CREATE TABLE "video_media_metadata" ("id" character varying NOT NULL, "encoding_id" character varying, "pixel_width" integer, "pixel_height" integer, "size" numeric, "video_id" character varying NOT NULL, "created_in_block" integer NOT NULL, CONSTRAINT "VideoMediaMetadata_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_4dc101240e8e1536b770aee202" UNIQUE ("video_id"), CONSTRAINT "PK_86a13815734e589cd86d0465e2d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5944dc5896cb16bd395414a0ce" ON "video_media_metadata" ("encoding_id") `)
         await db.query(`CREATE INDEX "IDX_4dc101240e8e1536b770aee202" ON "video_media_metadata" ("video_id") `)
-        await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "is_lead_owned" boolean, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
         await db.query(`CREATE TABLE "channel_follow" ("id" SERIAL NOT NULL, "ip" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "cancel_token" character varying NOT NULL, "channel_id" character varying NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
