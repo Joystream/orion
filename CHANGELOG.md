@@ -12,16 +12,62 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 ### Queries
 
 - Significantly improved query speed should be observed in most cases.
-- Generally reduced set of supported queries and queryable entity fields. Only queries for the entities based on `members`, `content` and `storage` Joystream modules, which are relevant to Atlas, are now supported by Orion.
+- Generally reduced set of supported queries and queryable entity fields. Only queries for the entities based on `members`, `content` and `storage` Joystream modules, which are relevant to Atlas, are now supported by Orion. Additionally, fields like `ownerCuratorGroup`, channel's `collaborators` etc., which are not yet supported by Atlas are also not yet supported in Orion v2.
 - `Event` interface has been replaced with `EventData` union, as GraphQL interfaces are not supported in Subsquid. This affects the way `events` query works, as well as removes specific event queries (like `categoryCreatedEvents`, `videoReactedEvents` etc.)
 - Deeply nested filtering (for example: `videos(where: { channel: { avatarPhoto: { storageBag: { storageBuckets_some: { id_eq: "1" } } } } })`) is now supported, as well as [nested field queries](https://docs.subsquid.io/query-squid/nested-field-queries/)
 - New properties for `where` inputs of queries, like `filed_isNull`, `field_containsInsensitive`, `field_not_(eq|in|contains|containsInsensitive|endsWith|startsWith)`
-- Some redundant relationships were removed (for example, entities that had relation to both `Video` and video's `Channel`, now may only have relation to a `Video`. Similarly, entities that contained `ownerMember`/`ownerCuratorGroup` fields, but also had a relation to `Channel`, no longer include redundant channel ownership information), which were previously required to workaround lack of deeply nested filtering.
-- Entity fields like `nftOwnerMember`, `isNftOwnerChannel`, `nftOwnerCuratorGroup` have been relaplace with a single `NftOwner` union.
-- `Channel.followsNum`, `Channel.videoViewsNum` and `Video.viewsNum` fields have been added and can now be used for filtering, sorting etc.
+- Some redundant relationships were removed (for example, entities that had relation to both `Video` and video's `Channel`, now may only have relation to a `Video`. Similarly, entities that contained `ownerMember`/`ownerCuratorGroup` fields, but also had a relation to `Channel`, no longer include redundant channel ownership information), which were previously required to workaround lack of deeply nested filtering. For the same reason, other relations were replaced with more specific ones (for exmaple `auction` instead of `video`). Some examples of this include:
+    - Auction bid canceled event has a relation to `bid` instead of `video`,
+    - Auction bid made event no longer has `bidAmount`, `previousTopBid` and `previousTopBidder`. They can all be derived from the related `bid` instead,
+    - Auction canceled event has a relation to `auction` instead of `video`,
+    - Event with `winningBid` field no longer contian relations like `video` or `winner`, as they can be derived from `winningBid`,
+    - Most of other nft-related events now have a relation to `nft` instead of `video`.
+- NFT's `transactionalStatus` and `transactionalStatusAuction` is now represented as a single `transactionalStatus` which includes `TransactionalStatusAuction` as one of the variants.
+- Entity fields like `nftOwnerMember`, `isNftOwnerChannel`, `nftOwnerCuratorGroup` have been relaplaced with a single `NftOwner` union.
+- `Channel.followsNum`, `Channel.videoViewsNum` and `Video.viewsNum` fields have been added and can now be used for filtering, sorting etc. (in Orion v1 fields like `Channel.follows`, `Channel.views` and `Video.views` also existed, but had limited functionality)
+- Some small differences in the representation of empty values:
+    - `Auction.buyNowPrice`: `0` => `null`
+    - `Comment.reactionsCountByReactionId`: `[]` => `null`
+    - `DistributionBucketFamilyMetadata.areas`: `[]` => `null`
+    - `VideoCategory.description`: `''` => `null`
+- Some small differences in types:
+    - `StorageBag.owner.channelId`: `number` => `string`
+- `DistributionBucketFamilyMetadata.areas` is now a `jsonb` field, so it was possible to skip one level of nesting:
+    - `DistributionBucketFamilyMetadata.areas.area` => `DistributionBucketFamilyMetadata.areas`
+- Some fileds were renamed:
+    - `Event.createdAt` => `Event.timestamp`
+    - `*Event.contentActor` => `*EventData.actor`
+    - `NftBoughtEvent.member` => `NftBoughtEventData.buyer`
+    - `Membership.memberBannedFromChannels` => `Membership.bannedFromChannels`
+- **Bug fix:** `Auction.topBid` can no longer be a canceled bid (this was previously possible in `OpenAuction`). In case the top bid gets canceled, the next best bid is set as `Auction.topBid`. In case there is no next best bid, `Auction.topBid` is set to `null`.
+- **Bug fix:** In Orion v1 (Query Node), when a member placed a bid in `OpenAuction`, it was possible for their bid in an old, already finalized auction for the same nft to get canceled (even if it was already a winning bid). Now this will no longer happen.
+- **Bug fix:** `Video.pinnedComment` relation was incorrectly declared in Orion v1 (Query Node) input schema, which resulted in some comments, which were never actually pinned, being returned as `Video.pinnedComment`. This should no longer happen in Orion v2.
+- **Bug fix:** In Orion v1 (Query Node) sometimes the `createdAt` field of an entity (like `Memberships`) would be incorrectly modified on update. This will no longer happen in Orion v2, as fields like `createdAt` need to be added explicitly in Subsquid and are no longer automatically managed.
+- **Bug fix:** Using property aliases was not working in Orion v1 (for example: `channels { channelId: id }`), this is no longer an issue in Orion v2. 
+- Some entity ids are not backward-compatible:
+    - `DistributionBucketFamilyMetadata`
+    - `StorageBucketOperatorMetadata`
+    - `DistributionBucketOperatorMetadata`
+    - `MemberMetadata`
+    - `Event`
+- Some entities no longer have ids, as are now stored as `jsonb` objects in the parent table:
+    - `GeoCoordinates`
+    - `NodeLocationMetadata`
+    - `DistributionBucketFamilyGeographicArea`
+- In Orion v1 providing a non-existing category id resulted in a creation of empty video category (without any `name` or `description`). Such categories are no longer created, providing non-existing category as part of `ContentMetadata` results in setting `Video.category` to `null` instead.
 - `Channel.activeVideoCounter` and `VideoCategory.activeVideoCounter` fields have been removed, instead custom `extendedChannels` and `extendedVideoCategories` queries have been introduced, which allow retrieving the number of active videos per channel/category.
 - `createdAt` and `updatedAt` fields are no longer automatically added to entities in Subsquid, so most of the entities no longer include them (unless they were explicitly required by Atlas).
-- `Many-to-Many` entity relationships are not supported in Subsquid, so relationships like `StorageBag.distributionBuckets`, `StorageBag.storageBuckets` etc. were refactored to 2-side Many-to-One relationships with a specific "join entity". This means that some queries may now require one more level of nesting, for example: `{ storageBags { storageBuckets { id } } }` => `{ storageBags { storageBuckets { storageBucket { id } } } }`
+- `Many-to-Many` entity relationships are not supported in Subsquid, so those relationships were refactored to 2-side Many-to-One relationships with a specific "join entity". This means that some queries may now require one more level of nesting, ie.:
+    - `Channel.bannedMembers.id` => `Channel.bannedMembers.member.id`
+    - `Auction.whitelistedMembers.id` => `Auction.whitelistedMembers.member.id`
+    - `Membership.whitelistedInAuctions.id` => `Membership.whitelistedInAuctions.auction.id`
+    - `StorageBucket.bags.id` => `StorageBucket.bags.bag.id`
+    - `DistributionBucket.bags.id` => `DistributionBucket.bags.bag.id`
+    - `StorageBag.storageBuckets.id` => `StorageBag.storageBuckets.storageBucket.id`
+    - `StorageBag.distributionBuckets.id` => `StorageBag.distributionBuckets.distributionBucket.id`
+- `Language` entity has been removed. Language is now represented as a simple ISO code `string`.
+- `DataTime` format is slightly different:
+    - `2022-01-01T00:00:00.000Z` => `2022-01-01T00:00:00.000000Z`
 - `{ entity { relatedEntityId } }` syntax is not supported in Subsquid, `{ entity { relatedEntity { id } } }` has to be used instead
 - the type of entity `id` property is now `String` (previously `ID`)
 - `entityByUniqueInput` queries are no longer supported. The new `entityById` queries can be used instead in some cases.
