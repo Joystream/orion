@@ -11,7 +11,9 @@ module.exports = class Views2000000000000 {
       CREATE VIEW "channel" AS
         SELECT *
         FROM "processor"."channel"
-        WHERE "is_censored" = '0' AND "is_excluded" = '0'
+        WHERE
+          ${process.env.ALLOW_CENSORED !== '1' ? `"is_censored" = '0' AND` :'' }
+          "is_excluded" = '0'
     `)
     // Videos view:
     // All videos except:
@@ -42,7 +44,7 @@ module.exports = class Views2000000000000 {
               )='1'
             )
           )
-          AND "is_censored"='0'
+          ${process.env.ALLOW_CENSORED !== '1' ? `AND "is_censored"='0'` :'' }
           AND "is_excluded"='0'
     `)
     // Categories view:
@@ -170,10 +172,6 @@ module.exports = class Views2000000000000 {
           AND ("data"->>'auction' IS NULL OR EXISTS(SELECT 1 FROM "auction" WHERE "id"="data"->>'auction'))
           AND ("data"->>'bid' IS NULL OR EXISTS(SELECT 1 FROM "bid" WHERE "id"="data"->>'bid'))
           AND ("data"->>'comment' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->>'comment'))
-          AND ("data"->'result'->>'commentCreated' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->'result'->>'commentCreated'))
-          AND ("data"->'result'->>'commentEdited' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->'result'->>'commentEdited'))
-          AND ("data"->'result'->>'commentDeleted' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->'result'->>'commentDeleted'))
-          AND ("data"->'result'->>'commentModerated' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->'result'->>'commentModerated'))
     `)
   }
 
