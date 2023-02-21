@@ -31,7 +31,8 @@ export function buildExtendedChannelsQuery(
 
   // Check whether the query includes non-standard fields / filters
   const isExtraQuery =
-    !!tree.fieldsByTypeName.ExtendedChannel.activeVideosCount || !!args.where?.activeVideosCount_gt
+    !!tree.fieldsByTypeName.ExtendedChannel.activeVideosCount ||
+    args.where?.activeVideosCount_gt !== undefined
 
   // If it does...
   if (isExtraQuery) {
@@ -69,7 +70,7 @@ export function buildExtendedChannelsQuery(
     )
 
     // If `where: { activeVideosCount_gt: x }` was provided...
-    if (args.where?.activeVideosCount_gt) {
+    if (args.where?.activeVideosCount_gt !== undefined) {
       // Extend WHERE condition of the original query
       listQuerySql = extendClause(
         listQuerySql,
