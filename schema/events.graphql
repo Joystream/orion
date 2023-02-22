@@ -6,7 +6,7 @@ type Event @entity {
   inBlock: Int!
 
   "Hash of the extrinsic the event was emitted in"
-  inExtrinsic: String
+  inExtrinsic: String @index
 
   "Index of event in block from which it was emitted."
   indexInBlock: Int!
