@@ -1,0 +1,200 @@
+Orion V1 endpoint: https://143.42.109.82.nip.io/orion/graphql
+Orion V2 endpoint: https://143.42.109.35.nip.io/orion/graphql
+{
+  v1Query: 'GetNotifications',
+  v2Query: 'GetNotifications',
+  v1Input: { limit: 1000, channelId: '7757', memberId: '798' },
+  v2Input: { limit: 1000, channelId: '7757', memberId: '798' },
+  v1Rows: 110,
+  v2Rows: 110,
+  v1Results: [
+    1106.0513463020325,
+    635.3214621543884,
+    665.5094952583313,
+    594.7931537628174,
+    562.6600451469421
+  ],
+  v2Results: [
+    1904.6169037818909,
+    1453.1587672233582,
+    1531.671293258667,
+    1379.4050331115723,
+    1408.2432866096497
+  ],
+  v1Avg: 712.8671005249023,
+  v2Avg: 1535.4190567970277
+}
+{
+  v1Query: 'GetNotifications',
+  v2Query: 'GetNotifications',
+  v1Input: { limit: 1000, channelId: '7692', memberId: '2962' },
+  v2Input: { limit: 1000, channelId: '7692', memberId: '2962' },
+  v1Rows: 38,
+  v2Rows: 38,
+  v1Results: [
+    390.9999623298645,
+    341.74745512008667,
+    314.5849962234497,
+    284.43431186676025,
+    313.59731101989746
+  ],
+  v2Results: [
+    1470.9821829795837,
+    1350.1738820075989,
+    1468.8746967315674,
+    1523.363648891449,
+    1455.382926940918
+  ],
+  v1Avg: 329.0728073120117,
+  v2Avg: 1453.7554675102233
+}
+{
+  v1Query: 'GetNftHistory',
+  v2Query: 'GetNftHistory',
+  v1Input: { nftId: '5' },
+  v2Input: { nftId: '5' },
+  v1Rows: 20,
+  v2Rows: 20,
+  v1Results: [
+    224.9494423866272,
+    175.72976970672607,
+    179.2677140235901,
+    174.42952299118042,
+    187.78701496124268
+  ],
+  v2Results: [
+    1092.545313835144,
+    1077.791911125183,
+    1116.974962234497,
+    1140.339367866516,
+    1093.845244884491
+  ],
+  v1Avg: 188.4326928138733,
+  v2Avg: 1104.2993599891663
+}
+{
+  v1Query: 'GetNftHistory',
+  v2Query: 'GetNftHistory',
+  v1Input: { nftId: '14' },
+  v2Input: { nftId: '14' },
+  v1Rows: 9,
+  v2Rows: 9,
+  v1Results: [
+    141.68778324127197,
+    157.10310316085815,
+    161.84043407440186,
+    149.2254762649536,
+    168.77385425567627
+  ],
+  v2Results: [
+    1169.3571248054504,
+    1089.0723886489868,
+    1106.8910360336304,
+    1092.0042786598206,
+    1179.6475882530212
+  ],
+  v1Avg: 155.72613019943236,
+  v2Avg: 1127.394483280182
+}
+{
+  v1Query: 'GetNftHistory',
+  v2Query: 'GetNftHistory',
+  v1Input: { nftId: '338' },
+  v2Input: { nftId: '338' },
+  v1Rows: 14,
+  v2Rows: 14,
+  v1Results: [
+    163.89581203460693,
+    175.90639400482178,
+    163.9634346961975,
+    176.35755491256714,
+    170.54833889007568
+  ],
+  v2Results: [
+    1103.8704543113708,
+    1152.5445137023926,
+    1109.7572317123413,
+    1150.9899983406067,
+    1109.5024557113647
+  ],
+  v1Avg: 170.1343069076538,
+  v2Avg: 1125.3329307556153
+}
+{
+  v1Query: 'GetNftActivities',
+  v2Query: 'GetNftActivities',
+  v1Input: { limit: 1000, memberId: '4537' },
+  v2Input: { limit: 1000, memberId: '4537' },
+  v1Rows: 446,
+  v2Rows: 450,
+  v1Results: [
+    2268.2287921905518,
+    2035.5242977142334,
+    2156.759829044342,
+    2010.4331917762756,
+    2034.2985792160034
+  ],
+  v2Results: [
+    4527.932033061981,
+    4637.940931797028,
+    4728.392993927002,
+    4538.484937667847,
+    4606.6357679367065
+  ],
+  v1Avg: 2101.048937988281,
+  v2Avg: 4607.877332878113
+}
+{
+  v1Query: 'GetNftActivities',
+  v2Query: 'GetNftActivities',
+  v1Input: { limit: 1000, memberId: '798' },
+  v2Input: { limit: 1000, memberId: '798' },
+  v1Rows: 376,
+  v2Rows: 380,
+  v1Results: [
+    1839.6556577682495,
+    1941.33367395401,
+    1860.6781787872314,
+    1713.2440829277039,
+    1941.1711330413818
+  ],
+  v2Results: [
+    4371.274667739868,
+    4356.305029392242,
+    4343.96886920929,
+    4397.0060358047485,
+    4485.6696701049805
+  ],
+  v1Avg: 1859.2165452957154,
+  v2Avg: 4390.844854450226
+}
+========= QUERIES IN 0ms - Infinity RANGE =========
+Tested queries in this range: 7
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-340.58%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-341.77%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-346.05%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [31m-366.92%[39m
+
+========= QUERIES IN 0ms - 100ms RANGE =========
+Tested queries in this range: 0
+
+========= QUERIES IN 101ms - 500ms RANGE =========
+Tested queries in this range: 4
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-503.30%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-523.74%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-508.09%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [31m-530.44%[39m
+
+========= QUERIES IN 501ms - 2000ms RANGE =========
+Tested queries in this range: 2
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-125.78%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-125.78%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-131.83%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [31m-131.83%[39m
+
+========= QUERIES IN 2000ms - Infinity RANGE =========
+Tested queries in this range: 1
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-119.31%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-119.31%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-126.31%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [31m-126.31%[39m
