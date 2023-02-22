@@ -1,5 +1,5 @@
-module.exports = class Data1677077889085 {
-    name = 'Data1677077889085'
+module.exports = class Data1677082837280 {
+    name = 'Data1677082837280'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -85,6 +85,7 @@ module.exports = class Data1677077889085 {
         await db.query(`CREATE TABLE "distribution_bucket_operator_metadata" ("id" character varying NOT NULL, "distirbution_bucket_operator_id" character varying NOT NULL, "node_endpoint" text, "node_location" jsonb, "extra" text, CONSTRAINT "DistributionBucketOperatorMetadata_distirbutionBucketOperator" UNIQUE ("distirbution_bucket_operator_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_69ec9bdc975b95f7dff94a7106" UNIQUE ("distirbution_bucket_operator_id"), CONSTRAINT "PK_9bbecaa12f30e3826922688274f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_69ec9bdc975b95f7dff94a7106" ON "distribution_bucket_operator_metadata" ("distirbution_bucket_operator_id") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
         await db.query(`CREATE TABLE "notification" ("id" character varying NOT NULL, "member_id" character varying, "event_id" character varying, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_ac8de39626657d3c0e909d9d82" ON "notification" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_122be1f0696e0255acf95f9e33" ON "notification" ("event_id") `)
@@ -263,6 +264,7 @@ module.exports = class Data1677077889085 {
         await db.query(`DROP TABLE "distribution_bucket_operator_metadata"`)
         await db.query(`DROP INDEX "public"."IDX_69ec9bdc975b95f7dff94a7106"`)
         await db.query(`DROP TABLE "event"`)
+        await db.query(`DROP INDEX "public"."IDX_8f3f220c4e717207d841d4e6d4"`)
         await db.query(`DROP TABLE "notification"`)
         await db.query(`DROP INDEX "public"."IDX_ac8de39626657d3c0e909d9d82"`)
         await db.query(`DROP INDEX "public"."IDX_122be1f0696e0255acf95f9e33"`)
