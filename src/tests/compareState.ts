@@ -14,14 +14,14 @@ import {
   StateQueryV1QueryVariables,
 } from './v1/generated/queries'
 import {
-  AuctionRefFieldsFragment,
-  BidRefFieldsFragment,
-  MetaprotocolTransactionResultFieldsFragment,
-  NftOwnerFieldsFragment,
+  StateQueryAuctionRefFieldsFragment,
+  StateQueryBidRefFieldsFragment,
+  StateQueryMetaprotocolTransactionResultFieldsFragment,
+  StateQueryNftOwnerFieldsFragment,
   StateQueryV2,
   StateQueryV2Query,
   StateQueryV2QueryVariables,
-  TransactionalStatusFieldsFragment,
+  StateQueryTransactionalStatusFieldsFragment,
 } from './v2/generated/queries'
 import fs from 'fs'
 import { exec } from 'child_process'
@@ -142,13 +142,13 @@ function prepareV2Data(data: StateQueryV2Query) {
       return { ...val }
     }
     if (path.endsWith('auctionBidCanceledEvents.bid') && isObject(val)) {
-      const bid = val as BidRefFieldsFragment
+      const bid = val as StateQueryBidRefFieldsFragment
       return {
         video: { id: bid.auction.nft.id },
       }
     }
     if (path.endsWith('auctionBidMadeEvents.bid') && isObject(val)) {
-      const bid = val as BidRefFieldsFragment
+      const bid = val as StateQueryBidRefFieldsFragment
       return {
         bidAmount: bid.amount,
         previousTopBid: bid.previousTopBid ? { id: bid.previousTopBid.id } : null,
@@ -156,11 +156,11 @@ function prepareV2Data(data: StateQueryV2Query) {
       }
     }
     if (path.endsWith('auctionCanceledEvents.auction') && isObject(val)) {
-      const auction = val as AuctionRefFieldsFragment
+      const auction = val as StateQueryAuctionRefFieldsFragment
       return { video: { id: auction.nft.id } }
     }
     if (path.endsWith('openAuctionStartedEvents.auction') && isObject(val) && has(val, 'nft')) {
-      const auction = val as AuctionRefFieldsFragment
+      const auction = val as StateQueryAuctionRefFieldsFragment
       return { auction: { id: auction.id } }
     }
     if (path.endsWith('Events.nft')) {
@@ -181,7 +181,7 @@ function prepareV2Data(data: StateQueryV2Query) {
       lastKey === 'previousNftOwner' ||
       path.endsWith('ownedNfts.owner')
     ) {
-      const nftOwner = val as NftOwnerFieldsFragment
+      const nftOwner = val as StateQueryNftOwnerFieldsFragment
       if (nftOwner.__typename === 'NftOwnerChannel') {
         return {
           ownerMember: nftOwner.channel.ownerMember,
@@ -201,7 +201,7 @@ function prepareV2Data(data: StateQueryV2Query) {
       isObject(parent) &&
       !('transactionalStatusAuction' in parent)
     ) {
-      const transactionalStatus = val as TransactionalStatusFieldsFragment
+      const transactionalStatus = val as StateQueryTransactionalStatusFieldsFragment
       if (transactionalStatus.__typename === 'TransactionalStatusAuction') {
         return {
           transactionalStatus: null,
@@ -227,7 +227,7 @@ function prepareV2Data(data: StateQueryV2Query) {
       return { id: val.id }
     }
     if (path.endsWith('Events.result') && isObject(val)) {
-      const result = val as MetaprotocolTransactionResultFieldsFragment
+      const result = val as StateQueryMetaprotocolTransactionResultFieldsFragment
       if (result.__typename !== 'MetaprotocolTransactionResultFailed') {
         return {
           status: {
@@ -250,7 +250,7 @@ function prepareV2Data(data: StateQueryV2Query) {
       }
     }
     if (lastKey === 'winningBid' && isObject(val) && has(val, 'auction')) {
-      const winningBid = val as BidRefFieldsFragment
+      const winningBid = val as StateQueryBidRefFieldsFragment
       if (path.includes('englishAuctionSettledEvents')) {
         return {
           winningBid: { id: winningBid.id },
@@ -332,3 +332,7 @@ export async function compareState() {
     }
   }
 }
+
+compareState()
+  .then(() => process.exit(0))
+  .catch(console.error)

@@ -1,46 +1,46 @@
-export type Maybe<T> = T | null
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> }
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> }
+export type Maybe<T> = T | null;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: string
-  String: string
-  Boolean: boolean
-  Int: number
-  Float: number
-  BigInt: string
-  DateTime: any
-}
+  ID: string;
+  String: string;
+  Boolean: boolean;
+  Int: number;
+  Float: number;
+  BigInt: string;
+  DateTime: any;
+};
 
 export type AddVideoViewResult = {
-  added: Scalars['Boolean']
-  videoId: Scalars['String']
-  viewId: Scalars['Int']
-  viewsNum: Scalars['Int']
-}
+  added: Scalars['Boolean'];
+  videoId: Scalars['String'];
+  viewId: Scalars['Int'];
+  viewsNum: Scalars['Int'];
+};
 
 export type App = {
-  authKey?: Maybe<Scalars['String']>
-  bigIcon?: Maybe<Scalars['String']>
-  category?: Maybe<Scalars['String']>
-  channel: Channel
-  description?: Maybe<Scalars['String']>
-  id: Scalars['String']
-  mediumIcon?: Maybe<Scalars['String']>
-  name: Scalars['String']
-  oneLiner?: Maybe<Scalars['String']>
-  platforms?: Maybe<Array<Maybe<Scalars['String']>>>
-  smallIcon?: Maybe<Scalars['String']>
-  termsOfService?: Maybe<Scalars['String']>
-  useUri?: Maybe<Scalars['String']>
-  websiteUrl?: Maybe<Scalars['String']>
-}
+  authKey?: Maybe<Scalars['String']>;
+  bigIcon?: Maybe<Scalars['String']>;
+  category?: Maybe<Scalars['String']>;
+  channel: Channel;
+  description?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  mediumIcon?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  oneLiner?: Maybe<Scalars['String']>;
+  platforms?: Maybe<Array<Maybe<Scalars['String']>>>;
+  smallIcon?: Maybe<Scalars['String']>;
+  termsOfService?: Maybe<Scalars['String']>;
+  useUri?: Maybe<Scalars['String']>;
+  websiteUrl?: Maybe<Scalars['String']>;
+};
 
 export type AppEdge = {
-  cursor: Scalars['String']
-  node: App
-}
+  cursor: Scalars['String'];
+  node: App;
+};
 
 export enum AppOrderByInput {
   AuthKeyAsc = 'authKey_ASC',
@@ -94,281 +94,283 @@ export enum AppOrderByInput {
   UseUriAsc = 'useUri_ASC',
   UseUriDesc = 'useUri_DESC',
   WebsiteUrlAsc = 'websiteUrl_ASC',
-  WebsiteUrlDesc = 'websiteUrl_DESC',
+  WebsiteUrlDesc = 'websiteUrl_DESC'
 }
 
 export type AppWhereInput = {
-  AND?: Maybe<Array<AppWhereInput>>
-  OR?: Maybe<Array<AppWhereInput>>
-  authKey_contains?: Maybe<Scalars['String']>
-  authKey_containsInsensitive?: Maybe<Scalars['String']>
-  authKey_endsWith?: Maybe<Scalars['String']>
-  authKey_eq?: Maybe<Scalars['String']>
-  authKey_gt?: Maybe<Scalars['String']>
-  authKey_gte?: Maybe<Scalars['String']>
-  authKey_in?: Maybe<Array<Scalars['String']>>
-  authKey_isNull?: Maybe<Scalars['Boolean']>
-  authKey_lt?: Maybe<Scalars['String']>
-  authKey_lte?: Maybe<Scalars['String']>
-  authKey_not_contains?: Maybe<Scalars['String']>
-  authKey_not_containsInsensitive?: Maybe<Scalars['String']>
-  authKey_not_endsWith?: Maybe<Scalars['String']>
-  authKey_not_eq?: Maybe<Scalars['String']>
-  authKey_not_in?: Maybe<Array<Scalars['String']>>
-  authKey_not_startsWith?: Maybe<Scalars['String']>
-  authKey_startsWith?: Maybe<Scalars['String']>
-  bigIcon_contains?: Maybe<Scalars['String']>
-  bigIcon_containsInsensitive?: Maybe<Scalars['String']>
-  bigIcon_endsWith?: Maybe<Scalars['String']>
-  bigIcon_eq?: Maybe<Scalars['String']>
-  bigIcon_gt?: Maybe<Scalars['String']>
-  bigIcon_gte?: Maybe<Scalars['String']>
-  bigIcon_in?: Maybe<Array<Scalars['String']>>
-  bigIcon_isNull?: Maybe<Scalars['Boolean']>
-  bigIcon_lt?: Maybe<Scalars['String']>
-  bigIcon_lte?: Maybe<Scalars['String']>
-  bigIcon_not_contains?: Maybe<Scalars['String']>
-  bigIcon_not_containsInsensitive?: Maybe<Scalars['String']>
-  bigIcon_not_endsWith?: Maybe<Scalars['String']>
-  bigIcon_not_eq?: Maybe<Scalars['String']>
-  bigIcon_not_in?: Maybe<Array<Scalars['String']>>
-  bigIcon_not_startsWith?: Maybe<Scalars['String']>
-  bigIcon_startsWith?: Maybe<Scalars['String']>
-  category_contains?: Maybe<Scalars['String']>
-  category_containsInsensitive?: Maybe<Scalars['String']>
-  category_endsWith?: Maybe<Scalars['String']>
-  category_eq?: Maybe<Scalars['String']>
-  category_gt?: Maybe<Scalars['String']>
-  category_gte?: Maybe<Scalars['String']>
-  category_in?: Maybe<Array<Scalars['String']>>
-  category_isNull?: Maybe<Scalars['Boolean']>
-  category_lt?: Maybe<Scalars['String']>
-  category_lte?: Maybe<Scalars['String']>
-  category_not_contains?: Maybe<Scalars['String']>
-  category_not_containsInsensitive?: Maybe<Scalars['String']>
-  category_not_endsWith?: Maybe<Scalars['String']>
-  category_not_eq?: Maybe<Scalars['String']>
-  category_not_in?: Maybe<Array<Scalars['String']>>
-  category_not_startsWith?: Maybe<Scalars['String']>
-  category_startsWith?: Maybe<Scalars['String']>
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  description_contains?: Maybe<Scalars['String']>
-  description_containsInsensitive?: Maybe<Scalars['String']>
-  description_endsWith?: Maybe<Scalars['String']>
-  description_eq?: Maybe<Scalars['String']>
-  description_gt?: Maybe<Scalars['String']>
-  description_gte?: Maybe<Scalars['String']>
-  description_in?: Maybe<Array<Scalars['String']>>
-  description_isNull?: Maybe<Scalars['Boolean']>
-  description_lt?: Maybe<Scalars['String']>
-  description_lte?: Maybe<Scalars['String']>
-  description_not_contains?: Maybe<Scalars['String']>
-  description_not_containsInsensitive?: Maybe<Scalars['String']>
-  description_not_endsWith?: Maybe<Scalars['String']>
-  description_not_eq?: Maybe<Scalars['String']>
-  description_not_in?: Maybe<Array<Scalars['String']>>
-  description_not_startsWith?: Maybe<Scalars['String']>
-  description_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  mediumIcon_contains?: Maybe<Scalars['String']>
-  mediumIcon_containsInsensitive?: Maybe<Scalars['String']>
-  mediumIcon_endsWith?: Maybe<Scalars['String']>
-  mediumIcon_eq?: Maybe<Scalars['String']>
-  mediumIcon_gt?: Maybe<Scalars['String']>
-  mediumIcon_gte?: Maybe<Scalars['String']>
-  mediumIcon_in?: Maybe<Array<Scalars['String']>>
-  mediumIcon_isNull?: Maybe<Scalars['Boolean']>
-  mediumIcon_lt?: Maybe<Scalars['String']>
-  mediumIcon_lte?: Maybe<Scalars['String']>
-  mediumIcon_not_contains?: Maybe<Scalars['String']>
-  mediumIcon_not_containsInsensitive?: Maybe<Scalars['String']>
-  mediumIcon_not_endsWith?: Maybe<Scalars['String']>
-  mediumIcon_not_eq?: Maybe<Scalars['String']>
-  mediumIcon_not_in?: Maybe<Array<Scalars['String']>>
-  mediumIcon_not_startsWith?: Maybe<Scalars['String']>
-  mediumIcon_startsWith?: Maybe<Scalars['String']>
-  name_contains?: Maybe<Scalars['String']>
-  name_containsInsensitive?: Maybe<Scalars['String']>
-  name_endsWith?: Maybe<Scalars['String']>
-  name_eq?: Maybe<Scalars['String']>
-  name_gt?: Maybe<Scalars['String']>
-  name_gte?: Maybe<Scalars['String']>
-  name_in?: Maybe<Array<Scalars['String']>>
-  name_isNull?: Maybe<Scalars['Boolean']>
-  name_lt?: Maybe<Scalars['String']>
-  name_lte?: Maybe<Scalars['String']>
-  name_not_contains?: Maybe<Scalars['String']>
-  name_not_containsInsensitive?: Maybe<Scalars['String']>
-  name_not_endsWith?: Maybe<Scalars['String']>
-  name_not_eq?: Maybe<Scalars['String']>
-  name_not_in?: Maybe<Array<Scalars['String']>>
-  name_not_startsWith?: Maybe<Scalars['String']>
-  name_startsWith?: Maybe<Scalars['String']>
-  oneLiner_contains?: Maybe<Scalars['String']>
-  oneLiner_containsInsensitive?: Maybe<Scalars['String']>
-  oneLiner_endsWith?: Maybe<Scalars['String']>
-  oneLiner_eq?: Maybe<Scalars['String']>
-  oneLiner_gt?: Maybe<Scalars['String']>
-  oneLiner_gte?: Maybe<Scalars['String']>
-  oneLiner_in?: Maybe<Array<Scalars['String']>>
-  oneLiner_isNull?: Maybe<Scalars['Boolean']>
-  oneLiner_lt?: Maybe<Scalars['String']>
-  oneLiner_lte?: Maybe<Scalars['String']>
-  oneLiner_not_contains?: Maybe<Scalars['String']>
-  oneLiner_not_containsInsensitive?: Maybe<Scalars['String']>
-  oneLiner_not_endsWith?: Maybe<Scalars['String']>
-  oneLiner_not_eq?: Maybe<Scalars['String']>
-  oneLiner_not_in?: Maybe<Array<Scalars['String']>>
-  oneLiner_not_startsWith?: Maybe<Scalars['String']>
-  oneLiner_startsWith?: Maybe<Scalars['String']>
-  platforms_containsAll?: Maybe<Array<Maybe<Scalars['String']>>>
-  platforms_containsAny?: Maybe<Array<Maybe<Scalars['String']>>>
-  platforms_containsNone?: Maybe<Array<Maybe<Scalars['String']>>>
-  platforms_isNull?: Maybe<Scalars['Boolean']>
-  smallIcon_contains?: Maybe<Scalars['String']>
-  smallIcon_containsInsensitive?: Maybe<Scalars['String']>
-  smallIcon_endsWith?: Maybe<Scalars['String']>
-  smallIcon_eq?: Maybe<Scalars['String']>
-  smallIcon_gt?: Maybe<Scalars['String']>
-  smallIcon_gte?: Maybe<Scalars['String']>
-  smallIcon_in?: Maybe<Array<Scalars['String']>>
-  smallIcon_isNull?: Maybe<Scalars['Boolean']>
-  smallIcon_lt?: Maybe<Scalars['String']>
-  smallIcon_lte?: Maybe<Scalars['String']>
-  smallIcon_not_contains?: Maybe<Scalars['String']>
-  smallIcon_not_containsInsensitive?: Maybe<Scalars['String']>
-  smallIcon_not_endsWith?: Maybe<Scalars['String']>
-  smallIcon_not_eq?: Maybe<Scalars['String']>
-  smallIcon_not_in?: Maybe<Array<Scalars['String']>>
-  smallIcon_not_startsWith?: Maybe<Scalars['String']>
-  smallIcon_startsWith?: Maybe<Scalars['String']>
-  termsOfService_contains?: Maybe<Scalars['String']>
-  termsOfService_containsInsensitive?: Maybe<Scalars['String']>
-  termsOfService_endsWith?: Maybe<Scalars['String']>
-  termsOfService_eq?: Maybe<Scalars['String']>
-  termsOfService_gt?: Maybe<Scalars['String']>
-  termsOfService_gte?: Maybe<Scalars['String']>
-  termsOfService_in?: Maybe<Array<Scalars['String']>>
-  termsOfService_isNull?: Maybe<Scalars['Boolean']>
-  termsOfService_lt?: Maybe<Scalars['String']>
-  termsOfService_lte?: Maybe<Scalars['String']>
-  termsOfService_not_contains?: Maybe<Scalars['String']>
-  termsOfService_not_containsInsensitive?: Maybe<Scalars['String']>
-  termsOfService_not_endsWith?: Maybe<Scalars['String']>
-  termsOfService_not_eq?: Maybe<Scalars['String']>
-  termsOfService_not_in?: Maybe<Array<Scalars['String']>>
-  termsOfService_not_startsWith?: Maybe<Scalars['String']>
-  termsOfService_startsWith?: Maybe<Scalars['String']>
-  useUri_contains?: Maybe<Scalars['String']>
-  useUri_containsInsensitive?: Maybe<Scalars['String']>
-  useUri_endsWith?: Maybe<Scalars['String']>
-  useUri_eq?: Maybe<Scalars['String']>
-  useUri_gt?: Maybe<Scalars['String']>
-  useUri_gte?: Maybe<Scalars['String']>
-  useUri_in?: Maybe<Array<Scalars['String']>>
-  useUri_isNull?: Maybe<Scalars['Boolean']>
-  useUri_lt?: Maybe<Scalars['String']>
-  useUri_lte?: Maybe<Scalars['String']>
-  useUri_not_contains?: Maybe<Scalars['String']>
-  useUri_not_containsInsensitive?: Maybe<Scalars['String']>
-  useUri_not_endsWith?: Maybe<Scalars['String']>
-  useUri_not_eq?: Maybe<Scalars['String']>
-  useUri_not_in?: Maybe<Array<Scalars['String']>>
-  useUri_not_startsWith?: Maybe<Scalars['String']>
-  useUri_startsWith?: Maybe<Scalars['String']>
-  websiteUrl_contains?: Maybe<Scalars['String']>
-  websiteUrl_containsInsensitive?: Maybe<Scalars['String']>
-  websiteUrl_endsWith?: Maybe<Scalars['String']>
-  websiteUrl_eq?: Maybe<Scalars['String']>
-  websiteUrl_gt?: Maybe<Scalars['String']>
-  websiteUrl_gte?: Maybe<Scalars['String']>
-  websiteUrl_in?: Maybe<Array<Scalars['String']>>
-  websiteUrl_isNull?: Maybe<Scalars['Boolean']>
-  websiteUrl_lt?: Maybe<Scalars['String']>
-  websiteUrl_lte?: Maybe<Scalars['String']>
-  websiteUrl_not_contains?: Maybe<Scalars['String']>
-  websiteUrl_not_containsInsensitive?: Maybe<Scalars['String']>
-  websiteUrl_not_endsWith?: Maybe<Scalars['String']>
-  websiteUrl_not_eq?: Maybe<Scalars['String']>
-  websiteUrl_not_in?: Maybe<Array<Scalars['String']>>
-  websiteUrl_not_startsWith?: Maybe<Scalars['String']>
-  websiteUrl_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<AppWhereInput>>;
+  OR?: Maybe<Array<AppWhereInput>>;
+  authKey_contains?: Maybe<Scalars['String']>;
+  authKey_containsInsensitive?: Maybe<Scalars['String']>;
+  authKey_endsWith?: Maybe<Scalars['String']>;
+  authKey_eq?: Maybe<Scalars['String']>;
+  authKey_gt?: Maybe<Scalars['String']>;
+  authKey_gte?: Maybe<Scalars['String']>;
+  authKey_in?: Maybe<Array<Scalars['String']>>;
+  authKey_isNull?: Maybe<Scalars['Boolean']>;
+  authKey_lt?: Maybe<Scalars['String']>;
+  authKey_lte?: Maybe<Scalars['String']>;
+  authKey_not_contains?: Maybe<Scalars['String']>;
+  authKey_not_containsInsensitive?: Maybe<Scalars['String']>;
+  authKey_not_endsWith?: Maybe<Scalars['String']>;
+  authKey_not_eq?: Maybe<Scalars['String']>;
+  authKey_not_in?: Maybe<Array<Scalars['String']>>;
+  authKey_not_startsWith?: Maybe<Scalars['String']>;
+  authKey_startsWith?: Maybe<Scalars['String']>;
+  bigIcon_contains?: Maybe<Scalars['String']>;
+  bigIcon_containsInsensitive?: Maybe<Scalars['String']>;
+  bigIcon_endsWith?: Maybe<Scalars['String']>;
+  bigIcon_eq?: Maybe<Scalars['String']>;
+  bigIcon_gt?: Maybe<Scalars['String']>;
+  bigIcon_gte?: Maybe<Scalars['String']>;
+  bigIcon_in?: Maybe<Array<Scalars['String']>>;
+  bigIcon_isNull?: Maybe<Scalars['Boolean']>;
+  bigIcon_lt?: Maybe<Scalars['String']>;
+  bigIcon_lte?: Maybe<Scalars['String']>;
+  bigIcon_not_contains?: Maybe<Scalars['String']>;
+  bigIcon_not_containsInsensitive?: Maybe<Scalars['String']>;
+  bigIcon_not_endsWith?: Maybe<Scalars['String']>;
+  bigIcon_not_eq?: Maybe<Scalars['String']>;
+  bigIcon_not_in?: Maybe<Array<Scalars['String']>>;
+  bigIcon_not_startsWith?: Maybe<Scalars['String']>;
+  bigIcon_startsWith?: Maybe<Scalars['String']>;
+  category_contains?: Maybe<Scalars['String']>;
+  category_containsInsensitive?: Maybe<Scalars['String']>;
+  category_endsWith?: Maybe<Scalars['String']>;
+  category_eq?: Maybe<Scalars['String']>;
+  category_gt?: Maybe<Scalars['String']>;
+  category_gte?: Maybe<Scalars['String']>;
+  category_in?: Maybe<Array<Scalars['String']>>;
+  category_isNull?: Maybe<Scalars['Boolean']>;
+  category_lt?: Maybe<Scalars['String']>;
+  category_lte?: Maybe<Scalars['String']>;
+  category_not_contains?: Maybe<Scalars['String']>;
+  category_not_containsInsensitive?: Maybe<Scalars['String']>;
+  category_not_endsWith?: Maybe<Scalars['String']>;
+  category_not_eq?: Maybe<Scalars['String']>;
+  category_not_in?: Maybe<Array<Scalars['String']>>;
+  category_not_startsWith?: Maybe<Scalars['String']>;
+  category_startsWith?: Maybe<Scalars['String']>;
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_containsInsensitive?: Maybe<Scalars['String']>;
+  description_endsWith?: Maybe<Scalars['String']>;
+  description_eq?: Maybe<Scalars['String']>;
+  description_gt?: Maybe<Scalars['String']>;
+  description_gte?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Scalars['String']>>;
+  description_isNull?: Maybe<Scalars['Boolean']>;
+  description_lt?: Maybe<Scalars['String']>;
+  description_lte?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_not_containsInsensitive?: Maybe<Scalars['String']>;
+  description_not_endsWith?: Maybe<Scalars['String']>;
+  description_not_eq?: Maybe<Scalars['String']>;
+  description_not_in?: Maybe<Array<Scalars['String']>>;
+  description_not_startsWith?: Maybe<Scalars['String']>;
+  description_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  mediumIcon_contains?: Maybe<Scalars['String']>;
+  mediumIcon_containsInsensitive?: Maybe<Scalars['String']>;
+  mediumIcon_endsWith?: Maybe<Scalars['String']>;
+  mediumIcon_eq?: Maybe<Scalars['String']>;
+  mediumIcon_gt?: Maybe<Scalars['String']>;
+  mediumIcon_gte?: Maybe<Scalars['String']>;
+  mediumIcon_in?: Maybe<Array<Scalars['String']>>;
+  mediumIcon_isNull?: Maybe<Scalars['Boolean']>;
+  mediumIcon_lt?: Maybe<Scalars['String']>;
+  mediumIcon_lte?: Maybe<Scalars['String']>;
+  mediumIcon_not_contains?: Maybe<Scalars['String']>;
+  mediumIcon_not_containsInsensitive?: Maybe<Scalars['String']>;
+  mediumIcon_not_endsWith?: Maybe<Scalars['String']>;
+  mediumIcon_not_eq?: Maybe<Scalars['String']>;
+  mediumIcon_not_in?: Maybe<Array<Scalars['String']>>;
+  mediumIcon_not_startsWith?: Maybe<Scalars['String']>;
+  mediumIcon_startsWith?: Maybe<Scalars['String']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_containsInsensitive?: Maybe<Scalars['String']>;
+  name_endsWith?: Maybe<Scalars['String']>;
+  name_eq?: Maybe<Scalars['String']>;
+  name_gt?: Maybe<Scalars['String']>;
+  name_gte?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Scalars['String']>>;
+  name_isNull?: Maybe<Scalars['Boolean']>;
+  name_lt?: Maybe<Scalars['String']>;
+  name_lte?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_not_containsInsensitive?: Maybe<Scalars['String']>;
+  name_not_endsWith?: Maybe<Scalars['String']>;
+  name_not_eq?: Maybe<Scalars['String']>;
+  name_not_in?: Maybe<Array<Scalars['String']>>;
+  name_not_startsWith?: Maybe<Scalars['String']>;
+  name_startsWith?: Maybe<Scalars['String']>;
+  oneLiner_contains?: Maybe<Scalars['String']>;
+  oneLiner_containsInsensitive?: Maybe<Scalars['String']>;
+  oneLiner_endsWith?: Maybe<Scalars['String']>;
+  oneLiner_eq?: Maybe<Scalars['String']>;
+  oneLiner_gt?: Maybe<Scalars['String']>;
+  oneLiner_gte?: Maybe<Scalars['String']>;
+  oneLiner_in?: Maybe<Array<Scalars['String']>>;
+  oneLiner_isNull?: Maybe<Scalars['Boolean']>;
+  oneLiner_lt?: Maybe<Scalars['String']>;
+  oneLiner_lte?: Maybe<Scalars['String']>;
+  oneLiner_not_contains?: Maybe<Scalars['String']>;
+  oneLiner_not_containsInsensitive?: Maybe<Scalars['String']>;
+  oneLiner_not_endsWith?: Maybe<Scalars['String']>;
+  oneLiner_not_eq?: Maybe<Scalars['String']>;
+  oneLiner_not_in?: Maybe<Array<Scalars['String']>>;
+  oneLiner_not_startsWith?: Maybe<Scalars['String']>;
+  oneLiner_startsWith?: Maybe<Scalars['String']>;
+  platforms_containsAll?: Maybe<Array<Maybe<Scalars['String']>>>;
+  platforms_containsAny?: Maybe<Array<Maybe<Scalars['String']>>>;
+  platforms_containsNone?: Maybe<Array<Maybe<Scalars['String']>>>;
+  platforms_isNull?: Maybe<Scalars['Boolean']>;
+  smallIcon_contains?: Maybe<Scalars['String']>;
+  smallIcon_containsInsensitive?: Maybe<Scalars['String']>;
+  smallIcon_endsWith?: Maybe<Scalars['String']>;
+  smallIcon_eq?: Maybe<Scalars['String']>;
+  smallIcon_gt?: Maybe<Scalars['String']>;
+  smallIcon_gte?: Maybe<Scalars['String']>;
+  smallIcon_in?: Maybe<Array<Scalars['String']>>;
+  smallIcon_isNull?: Maybe<Scalars['Boolean']>;
+  smallIcon_lt?: Maybe<Scalars['String']>;
+  smallIcon_lte?: Maybe<Scalars['String']>;
+  smallIcon_not_contains?: Maybe<Scalars['String']>;
+  smallIcon_not_containsInsensitive?: Maybe<Scalars['String']>;
+  smallIcon_not_endsWith?: Maybe<Scalars['String']>;
+  smallIcon_not_eq?: Maybe<Scalars['String']>;
+  smallIcon_not_in?: Maybe<Array<Scalars['String']>>;
+  smallIcon_not_startsWith?: Maybe<Scalars['String']>;
+  smallIcon_startsWith?: Maybe<Scalars['String']>;
+  termsOfService_contains?: Maybe<Scalars['String']>;
+  termsOfService_containsInsensitive?: Maybe<Scalars['String']>;
+  termsOfService_endsWith?: Maybe<Scalars['String']>;
+  termsOfService_eq?: Maybe<Scalars['String']>;
+  termsOfService_gt?: Maybe<Scalars['String']>;
+  termsOfService_gte?: Maybe<Scalars['String']>;
+  termsOfService_in?: Maybe<Array<Scalars['String']>>;
+  termsOfService_isNull?: Maybe<Scalars['Boolean']>;
+  termsOfService_lt?: Maybe<Scalars['String']>;
+  termsOfService_lte?: Maybe<Scalars['String']>;
+  termsOfService_not_contains?: Maybe<Scalars['String']>;
+  termsOfService_not_containsInsensitive?: Maybe<Scalars['String']>;
+  termsOfService_not_endsWith?: Maybe<Scalars['String']>;
+  termsOfService_not_eq?: Maybe<Scalars['String']>;
+  termsOfService_not_in?: Maybe<Array<Scalars['String']>>;
+  termsOfService_not_startsWith?: Maybe<Scalars['String']>;
+  termsOfService_startsWith?: Maybe<Scalars['String']>;
+  useUri_contains?: Maybe<Scalars['String']>;
+  useUri_containsInsensitive?: Maybe<Scalars['String']>;
+  useUri_endsWith?: Maybe<Scalars['String']>;
+  useUri_eq?: Maybe<Scalars['String']>;
+  useUri_gt?: Maybe<Scalars['String']>;
+  useUri_gte?: Maybe<Scalars['String']>;
+  useUri_in?: Maybe<Array<Scalars['String']>>;
+  useUri_isNull?: Maybe<Scalars['Boolean']>;
+  useUri_lt?: Maybe<Scalars['String']>;
+  useUri_lte?: Maybe<Scalars['String']>;
+  useUri_not_contains?: Maybe<Scalars['String']>;
+  useUri_not_containsInsensitive?: Maybe<Scalars['String']>;
+  useUri_not_endsWith?: Maybe<Scalars['String']>;
+  useUri_not_eq?: Maybe<Scalars['String']>;
+  useUri_not_in?: Maybe<Array<Scalars['String']>>;
+  useUri_not_startsWith?: Maybe<Scalars['String']>;
+  useUri_startsWith?: Maybe<Scalars['String']>;
+  websiteUrl_contains?: Maybe<Scalars['String']>;
+  websiteUrl_containsInsensitive?: Maybe<Scalars['String']>;
+  websiteUrl_endsWith?: Maybe<Scalars['String']>;
+  websiteUrl_eq?: Maybe<Scalars['String']>;
+  websiteUrl_gt?: Maybe<Scalars['String']>;
+  websiteUrl_gte?: Maybe<Scalars['String']>;
+  websiteUrl_in?: Maybe<Array<Scalars['String']>>;
+  websiteUrl_isNull?: Maybe<Scalars['Boolean']>;
+  websiteUrl_lt?: Maybe<Scalars['String']>;
+  websiteUrl_lte?: Maybe<Scalars['String']>;
+  websiteUrl_not_contains?: Maybe<Scalars['String']>;
+  websiteUrl_not_containsInsensitive?: Maybe<Scalars['String']>;
+  websiteUrl_not_endsWith?: Maybe<Scalars['String']>;
+  websiteUrl_not_eq?: Maybe<Scalars['String']>;
+  websiteUrl_not_in?: Maybe<Array<Scalars['String']>>;
+  websiteUrl_not_startsWith?: Maybe<Scalars['String']>;
+  websiteUrl_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type AppsConnection = {
-  edges: Array<AppEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<AppEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type Auction = {
-  auctionType: AuctionType
-  bids: Array<Bid>
-  buyNowPrice?: Maybe<Scalars['BigInt']>
-  endedAtBlock?: Maybe<Scalars['Int']>
-  id: Scalars['String']
-  isCanceled: Scalars['Boolean']
-  isCompleted: Scalars['Boolean']
-  nft: OwnedNft
-  startingPrice: Scalars['BigInt']
-  startsAtBlock: Scalars['Int']
-  topBid?: Maybe<Bid>
-  whitelistedMembers: Array<AuctionWhitelistedMember>
-  winningMember?: Maybe<Membership>
-}
+  auctionType: AuctionType;
+  bids: Array<Bid>;
+  buyNowPrice?: Maybe<Scalars['BigInt']>;
+  endedAtBlock?: Maybe<Scalars['Int']>;
+  id: Scalars['String'];
+  isCanceled: Scalars['Boolean'];
+  isCompleted: Scalars['Boolean'];
+  nft: OwnedNft;
+  startingPrice: Scalars['BigInt'];
+  startsAtBlock: Scalars['Int'];
+  topBid?: Maybe<Bid>;
+  whitelistedMembers: Array<AuctionWhitelistedMember>;
+  winningMember?: Maybe<Membership>;
+};
+
 
 export type AuctionBidsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BidOrderByInput>>
-  where?: Maybe<BidWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BidOrderByInput>>;
+  where?: Maybe<BidWhereInput>;
+};
+
 
 export type AuctionWhitelistedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>
-  where?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>;
+  where?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
 
 export type AuctionBidCanceledEventData = {
-  bid: Bid
-  member: Membership
-  nftOwner: NftOwner
-}
+  bid: Bid;
+  member: Membership;
+  nftOwner: NftOwner;
+};
 
 export type AuctionBidMadeEventData = {
-  bid: Bid
-  nftOwner: NftOwner
-}
+  bid: Bid;
+  nftOwner: NftOwner;
+};
 
 export type AuctionCanceledEventData = {
-  actor: ContentActor
-  auction: Auction
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  auction: Auction;
+  nftOwner: NftOwner;
+};
 
 export type AuctionEdge = {
-  cursor: Scalars['String']
-  node: Auction
-}
+  cursor: Scalars['String'];
+  node: Auction;
+};
 
 export enum AuctionOrderByInput {
   AuctionTypeBidLockDurationAsc = 'auctionType_bidLockDuration_ASC',
@@ -426,175 +428,175 @@ export enum AuctionOrderByInput {
   WinningMemberHandleAsc = 'winningMember_handle_ASC',
   WinningMemberHandleDesc = 'winningMember_handle_DESC',
   WinningMemberIdAsc = 'winningMember_id_ASC',
-  WinningMemberIdDesc = 'winningMember_id_DESC',
+  WinningMemberIdDesc = 'winningMember_id_DESC'
 }
 
-export type AuctionType = AuctionTypeEnglish | AuctionTypeOpen
+export type AuctionType = AuctionTypeEnglish | AuctionTypeOpen;
 
 export type AuctionTypeEnglish = {
-  duration: Scalars['Int']
-  extensionPeriod: Scalars['Int']
-  minimalBidStep: Scalars['BigInt']
-  plannedEndAtBlock: Scalars['Int']
-}
+  duration: Scalars['Int'];
+  extensionPeriod: Scalars['Int'];
+  minimalBidStep: Scalars['BigInt'];
+  plannedEndAtBlock: Scalars['Int'];
+};
 
 export type AuctionTypeOpen = {
-  bidLockDuration: Scalars['Int']
-}
+  bidLockDuration: Scalars['Int'];
+};
 
 export type AuctionTypeWhereInput = {
-  bidLockDuration_eq?: Maybe<Scalars['Int']>
-  bidLockDuration_gt?: Maybe<Scalars['Int']>
-  bidLockDuration_gte?: Maybe<Scalars['Int']>
-  bidLockDuration_in?: Maybe<Array<Scalars['Int']>>
-  bidLockDuration_isNull?: Maybe<Scalars['Boolean']>
-  bidLockDuration_lt?: Maybe<Scalars['Int']>
-  bidLockDuration_lte?: Maybe<Scalars['Int']>
-  bidLockDuration_not_eq?: Maybe<Scalars['Int']>
-  bidLockDuration_not_in?: Maybe<Array<Scalars['Int']>>
-  duration_eq?: Maybe<Scalars['Int']>
-  duration_gt?: Maybe<Scalars['Int']>
-  duration_gte?: Maybe<Scalars['Int']>
-  duration_in?: Maybe<Array<Scalars['Int']>>
-  duration_isNull?: Maybe<Scalars['Boolean']>
-  duration_lt?: Maybe<Scalars['Int']>
-  duration_lte?: Maybe<Scalars['Int']>
-  duration_not_eq?: Maybe<Scalars['Int']>
-  duration_not_in?: Maybe<Array<Scalars['Int']>>
-  extensionPeriod_eq?: Maybe<Scalars['Int']>
-  extensionPeriod_gt?: Maybe<Scalars['Int']>
-  extensionPeriod_gte?: Maybe<Scalars['Int']>
-  extensionPeriod_in?: Maybe<Array<Scalars['Int']>>
-  extensionPeriod_isNull?: Maybe<Scalars['Boolean']>
-  extensionPeriod_lt?: Maybe<Scalars['Int']>
-  extensionPeriod_lte?: Maybe<Scalars['Int']>
-  extensionPeriod_not_eq?: Maybe<Scalars['Int']>
-  extensionPeriod_not_in?: Maybe<Array<Scalars['Int']>>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  minimalBidStep_eq?: Maybe<Scalars['BigInt']>
-  minimalBidStep_gt?: Maybe<Scalars['BigInt']>
-  minimalBidStep_gte?: Maybe<Scalars['BigInt']>
-  minimalBidStep_in?: Maybe<Array<Scalars['BigInt']>>
-  minimalBidStep_isNull?: Maybe<Scalars['Boolean']>
-  minimalBidStep_lt?: Maybe<Scalars['BigInt']>
-  minimalBidStep_lte?: Maybe<Scalars['BigInt']>
-  minimalBidStep_not_eq?: Maybe<Scalars['BigInt']>
-  minimalBidStep_not_in?: Maybe<Array<Scalars['BigInt']>>
-  plannedEndAtBlock_eq?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_gt?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_gte?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_in?: Maybe<Array<Scalars['Int']>>
-  plannedEndAtBlock_isNull?: Maybe<Scalars['Boolean']>
-  plannedEndAtBlock_lt?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_lte?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_not_eq?: Maybe<Scalars['Int']>
-  plannedEndAtBlock_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  bidLockDuration_eq?: Maybe<Scalars['Int']>;
+  bidLockDuration_gt?: Maybe<Scalars['Int']>;
+  bidLockDuration_gte?: Maybe<Scalars['Int']>;
+  bidLockDuration_in?: Maybe<Array<Scalars['Int']>>;
+  bidLockDuration_isNull?: Maybe<Scalars['Boolean']>;
+  bidLockDuration_lt?: Maybe<Scalars['Int']>;
+  bidLockDuration_lte?: Maybe<Scalars['Int']>;
+  bidLockDuration_not_eq?: Maybe<Scalars['Int']>;
+  bidLockDuration_not_in?: Maybe<Array<Scalars['Int']>>;
+  duration_eq?: Maybe<Scalars['Int']>;
+  duration_gt?: Maybe<Scalars['Int']>;
+  duration_gte?: Maybe<Scalars['Int']>;
+  duration_in?: Maybe<Array<Scalars['Int']>>;
+  duration_isNull?: Maybe<Scalars['Boolean']>;
+  duration_lt?: Maybe<Scalars['Int']>;
+  duration_lte?: Maybe<Scalars['Int']>;
+  duration_not_eq?: Maybe<Scalars['Int']>;
+  duration_not_in?: Maybe<Array<Scalars['Int']>>;
+  extensionPeriod_eq?: Maybe<Scalars['Int']>;
+  extensionPeriod_gt?: Maybe<Scalars['Int']>;
+  extensionPeriod_gte?: Maybe<Scalars['Int']>;
+  extensionPeriod_in?: Maybe<Array<Scalars['Int']>>;
+  extensionPeriod_isNull?: Maybe<Scalars['Boolean']>;
+  extensionPeriod_lt?: Maybe<Scalars['Int']>;
+  extensionPeriod_lte?: Maybe<Scalars['Int']>;
+  extensionPeriod_not_eq?: Maybe<Scalars['Int']>;
+  extensionPeriod_not_in?: Maybe<Array<Scalars['Int']>>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  minimalBidStep_eq?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_gt?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_gte?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_in?: Maybe<Array<Scalars['BigInt']>>;
+  minimalBidStep_isNull?: Maybe<Scalars['Boolean']>;
+  minimalBidStep_lt?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_lte?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_not_eq?: Maybe<Scalars['BigInt']>;
+  minimalBidStep_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  plannedEndAtBlock_eq?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_gt?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_gte?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_in?: Maybe<Array<Scalars['Int']>>;
+  plannedEndAtBlock_isNull?: Maybe<Scalars['Boolean']>;
+  plannedEndAtBlock_lt?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_lte?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_not_eq?: Maybe<Scalars['Int']>;
+  plannedEndAtBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export type AuctionWhereInput = {
-  AND?: Maybe<Array<AuctionWhereInput>>
-  OR?: Maybe<Array<AuctionWhereInput>>
-  auctionType?: Maybe<AuctionTypeWhereInput>
-  auctionType_isNull?: Maybe<Scalars['Boolean']>
-  bids_every?: Maybe<BidWhereInput>
-  bids_none?: Maybe<BidWhereInput>
-  bids_some?: Maybe<BidWhereInput>
-  buyNowPrice_eq?: Maybe<Scalars['BigInt']>
-  buyNowPrice_gt?: Maybe<Scalars['BigInt']>
-  buyNowPrice_gte?: Maybe<Scalars['BigInt']>
-  buyNowPrice_in?: Maybe<Array<Scalars['BigInt']>>
-  buyNowPrice_isNull?: Maybe<Scalars['Boolean']>
-  buyNowPrice_lt?: Maybe<Scalars['BigInt']>
-  buyNowPrice_lte?: Maybe<Scalars['BigInt']>
-  buyNowPrice_not_eq?: Maybe<Scalars['BigInt']>
-  buyNowPrice_not_in?: Maybe<Array<Scalars['BigInt']>>
-  endedAtBlock_eq?: Maybe<Scalars['Int']>
-  endedAtBlock_gt?: Maybe<Scalars['Int']>
-  endedAtBlock_gte?: Maybe<Scalars['Int']>
-  endedAtBlock_in?: Maybe<Array<Scalars['Int']>>
-  endedAtBlock_isNull?: Maybe<Scalars['Boolean']>
-  endedAtBlock_lt?: Maybe<Scalars['Int']>
-  endedAtBlock_lte?: Maybe<Scalars['Int']>
-  endedAtBlock_not_eq?: Maybe<Scalars['Int']>
-  endedAtBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isCanceled_eq?: Maybe<Scalars['Boolean']>
-  isCanceled_isNull?: Maybe<Scalars['Boolean']>
-  isCanceled_not_eq?: Maybe<Scalars['Boolean']>
-  isCompleted_eq?: Maybe<Scalars['Boolean']>
-  isCompleted_isNull?: Maybe<Scalars['Boolean']>
-  isCompleted_not_eq?: Maybe<Scalars['Boolean']>
-  nft?: Maybe<OwnedNftWhereInput>
-  nft_isNull?: Maybe<Scalars['Boolean']>
-  startingPrice_eq?: Maybe<Scalars['BigInt']>
-  startingPrice_gt?: Maybe<Scalars['BigInt']>
-  startingPrice_gte?: Maybe<Scalars['BigInt']>
-  startingPrice_in?: Maybe<Array<Scalars['BigInt']>>
-  startingPrice_isNull?: Maybe<Scalars['Boolean']>
-  startingPrice_lt?: Maybe<Scalars['BigInt']>
-  startingPrice_lte?: Maybe<Scalars['BigInt']>
-  startingPrice_not_eq?: Maybe<Scalars['BigInt']>
-  startingPrice_not_in?: Maybe<Array<Scalars['BigInt']>>
-  startsAtBlock_eq?: Maybe<Scalars['Int']>
-  startsAtBlock_gt?: Maybe<Scalars['Int']>
-  startsAtBlock_gte?: Maybe<Scalars['Int']>
-  startsAtBlock_in?: Maybe<Array<Scalars['Int']>>
-  startsAtBlock_isNull?: Maybe<Scalars['Boolean']>
-  startsAtBlock_lt?: Maybe<Scalars['Int']>
-  startsAtBlock_lte?: Maybe<Scalars['Int']>
-  startsAtBlock_not_eq?: Maybe<Scalars['Int']>
-  startsAtBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  topBid?: Maybe<BidWhereInput>
-  topBid_isNull?: Maybe<Scalars['Boolean']>
-  whitelistedMembers_every?: Maybe<AuctionWhitelistedMemberWhereInput>
-  whitelistedMembers_none?: Maybe<AuctionWhitelistedMemberWhereInput>
-  whitelistedMembers_some?: Maybe<AuctionWhitelistedMemberWhereInput>
-  winningMember?: Maybe<MembershipWhereInput>
-  winningMember_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<AuctionWhereInput>>;
+  OR?: Maybe<Array<AuctionWhereInput>>;
+  auctionType?: Maybe<AuctionTypeWhereInput>;
+  auctionType_isNull?: Maybe<Scalars['Boolean']>;
+  bids_every?: Maybe<BidWhereInput>;
+  bids_none?: Maybe<BidWhereInput>;
+  bids_some?: Maybe<BidWhereInput>;
+  buyNowPrice_eq?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_gt?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_gte?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_in?: Maybe<Array<Scalars['BigInt']>>;
+  buyNowPrice_isNull?: Maybe<Scalars['Boolean']>;
+  buyNowPrice_lt?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_lte?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_not_eq?: Maybe<Scalars['BigInt']>;
+  buyNowPrice_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  endedAtBlock_eq?: Maybe<Scalars['Int']>;
+  endedAtBlock_gt?: Maybe<Scalars['Int']>;
+  endedAtBlock_gte?: Maybe<Scalars['Int']>;
+  endedAtBlock_in?: Maybe<Array<Scalars['Int']>>;
+  endedAtBlock_isNull?: Maybe<Scalars['Boolean']>;
+  endedAtBlock_lt?: Maybe<Scalars['Int']>;
+  endedAtBlock_lte?: Maybe<Scalars['Int']>;
+  endedAtBlock_not_eq?: Maybe<Scalars['Int']>;
+  endedAtBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isCanceled_eq?: Maybe<Scalars['Boolean']>;
+  isCanceled_isNull?: Maybe<Scalars['Boolean']>;
+  isCanceled_not_eq?: Maybe<Scalars['Boolean']>;
+  isCompleted_eq?: Maybe<Scalars['Boolean']>;
+  isCompleted_isNull?: Maybe<Scalars['Boolean']>;
+  isCompleted_not_eq?: Maybe<Scalars['Boolean']>;
+  nft?: Maybe<OwnedNftWhereInput>;
+  nft_isNull?: Maybe<Scalars['Boolean']>;
+  startingPrice_eq?: Maybe<Scalars['BigInt']>;
+  startingPrice_gt?: Maybe<Scalars['BigInt']>;
+  startingPrice_gte?: Maybe<Scalars['BigInt']>;
+  startingPrice_in?: Maybe<Array<Scalars['BigInt']>>;
+  startingPrice_isNull?: Maybe<Scalars['Boolean']>;
+  startingPrice_lt?: Maybe<Scalars['BigInt']>;
+  startingPrice_lte?: Maybe<Scalars['BigInt']>;
+  startingPrice_not_eq?: Maybe<Scalars['BigInt']>;
+  startingPrice_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  startsAtBlock_eq?: Maybe<Scalars['Int']>;
+  startsAtBlock_gt?: Maybe<Scalars['Int']>;
+  startsAtBlock_gte?: Maybe<Scalars['Int']>;
+  startsAtBlock_in?: Maybe<Array<Scalars['Int']>>;
+  startsAtBlock_isNull?: Maybe<Scalars['Boolean']>;
+  startsAtBlock_lt?: Maybe<Scalars['Int']>;
+  startsAtBlock_lte?: Maybe<Scalars['Int']>;
+  startsAtBlock_not_eq?: Maybe<Scalars['Int']>;
+  startsAtBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  topBid?: Maybe<BidWhereInput>;
+  topBid_isNull?: Maybe<Scalars['Boolean']>;
+  whitelistedMembers_every?: Maybe<AuctionWhitelistedMemberWhereInput>;
+  whitelistedMembers_none?: Maybe<AuctionWhitelistedMemberWhereInput>;
+  whitelistedMembers_some?: Maybe<AuctionWhitelistedMemberWhereInput>;
+  winningMember?: Maybe<MembershipWhereInput>;
+  winningMember_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type AuctionWhitelistedMember = {
-  auction: Auction
-  id: Scalars['String']
-  member: Membership
-}
+  auction: Auction;
+  id: Scalars['String'];
+  member: Membership;
+};
 
 export type AuctionWhitelistedMemberEdge = {
-  cursor: Scalars['String']
-  node: AuctionWhitelistedMember
-}
+  cursor: Scalars['String'];
+  node: AuctionWhitelistedMember;
+};
 
 export enum AuctionWhitelistedMemberOrderByInput {
   AuctionBuyNowPriceAsc = 'auction_buyNowPrice_ASC',
@@ -620,106 +622,106 @@ export enum AuctionWhitelistedMemberOrderByInput {
   MemberHandleAsc = 'member_handle_ASC',
   MemberHandleDesc = 'member_handle_DESC',
   MemberIdAsc = 'member_id_ASC',
-  MemberIdDesc = 'member_id_DESC',
+  MemberIdDesc = 'member_id_DESC'
 }
 
 export type AuctionWhitelistedMemberWhereInput = {
-  AND?: Maybe<Array<AuctionWhitelistedMemberWhereInput>>
-  OR?: Maybe<Array<AuctionWhitelistedMemberWhereInput>>
-  auction?: Maybe<AuctionWhereInput>
-  auction_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<AuctionWhitelistedMemberWhereInput>>;
+  OR?: Maybe<Array<AuctionWhitelistedMemberWhereInput>>;
+  auction?: Maybe<AuctionWhereInput>;
+  auction_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type AuctionWhitelistedMembersConnection = {
-  edges: Array<AuctionWhitelistedMemberEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<AuctionWhitelistedMemberEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type AuctionsConnection = {
-  edges: Array<AuctionEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<AuctionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
-export type Avatar = AvatarObject | AvatarUri
+export type Avatar = AvatarObject | AvatarUri;
 
 export type AvatarObject = {
-  avatarObject: StorageDataObject
-}
+  avatarObject: StorageDataObject;
+};
 
 export type AvatarUri = {
-  avatarUri: Scalars['String']
-}
+  avatarUri: Scalars['String'];
+};
 
 export type AvatarWhereInput = {
-  avatarObject?: Maybe<StorageDataObjectWhereInput>
-  avatarObject_isNull?: Maybe<Scalars['Boolean']>
-  avatarUri_contains?: Maybe<Scalars['String']>
-  avatarUri_containsInsensitive?: Maybe<Scalars['String']>
-  avatarUri_endsWith?: Maybe<Scalars['String']>
-  avatarUri_eq?: Maybe<Scalars['String']>
-  avatarUri_gt?: Maybe<Scalars['String']>
-  avatarUri_gte?: Maybe<Scalars['String']>
-  avatarUri_in?: Maybe<Array<Scalars['String']>>
-  avatarUri_isNull?: Maybe<Scalars['Boolean']>
-  avatarUri_lt?: Maybe<Scalars['String']>
-  avatarUri_lte?: Maybe<Scalars['String']>
-  avatarUri_not_contains?: Maybe<Scalars['String']>
-  avatarUri_not_containsInsensitive?: Maybe<Scalars['String']>
-  avatarUri_not_endsWith?: Maybe<Scalars['String']>
-  avatarUri_not_eq?: Maybe<Scalars['String']>
-  avatarUri_not_in?: Maybe<Array<Scalars['String']>>
-  avatarUri_not_startsWith?: Maybe<Scalars['String']>
-  avatarUri_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-}
+  avatarObject?: Maybe<StorageDataObjectWhereInput>;
+  avatarObject_isNull?: Maybe<Scalars['Boolean']>;
+  avatarUri_contains?: Maybe<Scalars['String']>;
+  avatarUri_containsInsensitive?: Maybe<Scalars['String']>;
+  avatarUri_endsWith?: Maybe<Scalars['String']>;
+  avatarUri_eq?: Maybe<Scalars['String']>;
+  avatarUri_gt?: Maybe<Scalars['String']>;
+  avatarUri_gte?: Maybe<Scalars['String']>;
+  avatarUri_in?: Maybe<Array<Scalars['String']>>;
+  avatarUri_isNull?: Maybe<Scalars['Boolean']>;
+  avatarUri_lt?: Maybe<Scalars['String']>;
+  avatarUri_lte?: Maybe<Scalars['String']>;
+  avatarUri_not_contains?: Maybe<Scalars['String']>;
+  avatarUri_not_containsInsensitive?: Maybe<Scalars['String']>;
+  avatarUri_not_endsWith?: Maybe<Scalars['String']>;
+  avatarUri_not_eq?: Maybe<Scalars['String']>;
+  avatarUri_not_in?: Maybe<Array<Scalars['String']>>;
+  avatarUri_not_startsWith?: Maybe<Scalars['String']>;
+  avatarUri_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type BannedMember = {
-  channel: Channel
-  id: Scalars['String']
-  member: Membership
-}
+  channel: Channel;
+  id: Scalars['String'];
+  member: Membership;
+};
 
 export type BannedMemberEdge = {
-  cursor: Scalars['String']
-  node: BannedMember
-}
+  cursor: Scalars['String'];
+  node: BannedMember;
+};
 
 export enum BannedMemberOrderByInput {
   ChannelChannelStateBloatBondAsc = 'channel_channelStateBloatBond_ASC',
@@ -759,63 +761,63 @@ export enum BannedMemberOrderByInput {
   MemberHandleAsc = 'member_handle_ASC',
   MemberHandleDesc = 'member_handle_DESC',
   MemberIdAsc = 'member_id_ASC',
-  MemberIdDesc = 'member_id_DESC',
+  MemberIdDesc = 'member_id_DESC'
 }
 
 export type BannedMemberWhereInput = {
-  AND?: Maybe<Array<BannedMemberWhereInput>>
-  OR?: Maybe<Array<BannedMemberWhereInput>>
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<BannedMemberWhereInput>>;
+  OR?: Maybe<Array<BannedMemberWhereInput>>;
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type BannedMembersConnection = {
-  edges: Array<BannedMemberEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<BannedMemberEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type Bid = {
-  amount: Scalars['BigInt']
-  auction: Auction
-  bidder: Membership
-  createdAt: Scalars['DateTime']
-  createdInBlock: Scalars['Int']
-  id: Scalars['String']
-  indexInBlock: Scalars['Int']
-  isCanceled: Scalars['Boolean']
-  nft: OwnedNft
-  previousTopBid?: Maybe<Bid>
-}
+  amount: Scalars['BigInt'];
+  auction: Auction;
+  bidder: Membership;
+  createdAt: Scalars['DateTime'];
+  createdInBlock: Scalars['Int'];
+  id: Scalars['String'];
+  indexInBlock: Scalars['Int'];
+  isCanceled: Scalars['Boolean'];
+  nft: OwnedNft;
+  previousTopBid?: Maybe<Bid>;
+};
 
 export type BidEdge = {
-  cursor: Scalars['String']
-  node: Bid
-}
+  cursor: Scalars['String'];
+  node: Bid;
+};
 
 export type BidMadeCompletingAuctionEventData = {
-  previousNftOwner: NftOwner
-  winningBid: Bid
-}
+  previousNftOwner: NftOwner;
+  winningBid: Bid;
+};
 
 export enum BidOrderByInput {
   AmountAsc = 'amount_ASC',
@@ -873,162 +875,165 @@ export enum BidOrderByInput {
   PreviousTopBidIndexInBlockAsc = 'previousTopBid_indexInBlock_ASC',
   PreviousTopBidIndexInBlockDesc = 'previousTopBid_indexInBlock_DESC',
   PreviousTopBidIsCanceledAsc = 'previousTopBid_isCanceled_ASC',
-  PreviousTopBidIsCanceledDesc = 'previousTopBid_isCanceled_DESC',
+  PreviousTopBidIsCanceledDesc = 'previousTopBid_isCanceled_DESC'
 }
 
 export type BidWhereInput = {
-  AND?: Maybe<Array<BidWhereInput>>
-  OR?: Maybe<Array<BidWhereInput>>
-  amount_eq?: Maybe<Scalars['BigInt']>
-  amount_gt?: Maybe<Scalars['BigInt']>
-  amount_gte?: Maybe<Scalars['BigInt']>
-  amount_in?: Maybe<Array<Scalars['BigInt']>>
-  amount_isNull?: Maybe<Scalars['Boolean']>
-  amount_lt?: Maybe<Scalars['BigInt']>
-  amount_lte?: Maybe<Scalars['BigInt']>
-  amount_not_eq?: Maybe<Scalars['BigInt']>
-  amount_not_in?: Maybe<Array<Scalars['BigInt']>>
-  auction?: Maybe<AuctionWhereInput>
-  auction_isNull?: Maybe<Scalars['Boolean']>
-  bidder?: Maybe<MembershipWhereInput>
-  bidder_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  createdInBlock_eq?: Maybe<Scalars['Int']>
-  createdInBlock_gt?: Maybe<Scalars['Int']>
-  createdInBlock_gte?: Maybe<Scalars['Int']>
-  createdInBlock_in?: Maybe<Array<Scalars['Int']>>
-  createdInBlock_isNull?: Maybe<Scalars['Boolean']>
-  createdInBlock_lt?: Maybe<Scalars['Int']>
-  createdInBlock_lte?: Maybe<Scalars['Int']>
-  createdInBlock_not_eq?: Maybe<Scalars['Int']>
-  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  indexInBlock_eq?: Maybe<Scalars['Int']>
-  indexInBlock_gt?: Maybe<Scalars['Int']>
-  indexInBlock_gte?: Maybe<Scalars['Int']>
-  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
-  indexInBlock_isNull?: Maybe<Scalars['Boolean']>
-  indexInBlock_lt?: Maybe<Scalars['Int']>
-  indexInBlock_lte?: Maybe<Scalars['Int']>
-  indexInBlock_not_eq?: Maybe<Scalars['Int']>
-  indexInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  isCanceled_eq?: Maybe<Scalars['Boolean']>
-  isCanceled_isNull?: Maybe<Scalars['Boolean']>
-  isCanceled_not_eq?: Maybe<Scalars['Boolean']>
-  nft?: Maybe<OwnedNftWhereInput>
-  nft_isNull?: Maybe<Scalars['Boolean']>
-  previousTopBid?: Maybe<BidWhereInput>
-  previousTopBid_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<BidWhereInput>>;
+  OR?: Maybe<Array<BidWhereInput>>;
+  amount_eq?: Maybe<Scalars['BigInt']>;
+  amount_gt?: Maybe<Scalars['BigInt']>;
+  amount_gte?: Maybe<Scalars['BigInt']>;
+  amount_in?: Maybe<Array<Scalars['BigInt']>>;
+  amount_isNull?: Maybe<Scalars['Boolean']>;
+  amount_lt?: Maybe<Scalars['BigInt']>;
+  amount_lte?: Maybe<Scalars['BigInt']>;
+  amount_not_eq?: Maybe<Scalars['BigInt']>;
+  amount_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  auction?: Maybe<AuctionWhereInput>;
+  auction_isNull?: Maybe<Scalars['Boolean']>;
+  bidder?: Maybe<MembershipWhereInput>;
+  bidder_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdInBlock_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_gt?: Maybe<Scalars['Int']>;
+  createdInBlock_gte?: Maybe<Scalars['Int']>;
+  createdInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  createdInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  createdInBlock_lt?: Maybe<Scalars['Int']>;
+  createdInBlock_lte?: Maybe<Scalars['Int']>;
+  createdInBlock_not_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  indexInBlock_eq?: Maybe<Scalars['Int']>;
+  indexInBlock_gt?: Maybe<Scalars['Int']>;
+  indexInBlock_gte?: Maybe<Scalars['Int']>;
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  indexInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  indexInBlock_lt?: Maybe<Scalars['Int']>;
+  indexInBlock_lte?: Maybe<Scalars['Int']>;
+  indexInBlock_not_eq?: Maybe<Scalars['Int']>;
+  indexInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  isCanceled_eq?: Maybe<Scalars['Boolean']>;
+  isCanceled_isNull?: Maybe<Scalars['Boolean']>;
+  isCanceled_not_eq?: Maybe<Scalars['Boolean']>;
+  nft?: Maybe<OwnedNftWhereInput>;
+  nft_isNull?: Maybe<Scalars['Boolean']>;
+  previousTopBid?: Maybe<BidWhereInput>;
+  previousTopBid_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type BidsConnection = {
-  edges: Array<BidEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<BidEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
 
 export type BuyNowCanceledEventData = {
-  actor: ContentActor
-  nft: OwnedNft
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  nft: OwnedNft;
+  nftOwner: NftOwner;
+};
 
 export type BuyNowPriceUpdatedEventData = {
-  actor: ContentActor
-  newPrice: Scalars['BigInt']
-  nft: OwnedNft
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  newPrice: Scalars['BigInt'];
+  nft: OwnedNft;
+  nftOwner: NftOwner;
+};
 
 export type Channel = {
-  app?: Maybe<App>
-  avatarPhoto?: Maybe<StorageDataObject>
-  bannedMembers: Array<BannedMember>
-  channelStateBloatBond: Scalars['BigInt']
-  coverPhoto?: Maybe<StorageDataObject>
-  createdAt: Scalars['DateTime']
-  createdInBlock: Scalars['Int']
-  cumulativeRewardClaimed?: Maybe<Scalars['BigInt']>
-  description?: Maybe<Scalars['String']>
-  followsNum: Scalars['Int']
-  id: Scalars['String']
-  isCensored: Scalars['Boolean']
-  isExcluded: Scalars['Boolean']
-  isPublic?: Maybe<Scalars['Boolean']>
-  language?: Maybe<Scalars['String']>
-  ownerMember?: Maybe<Membership>
-  rewardAccount: Scalars['String']
-  title?: Maybe<Scalars['String']>
-  videoViewsNum: Scalars['Int']
-  videos: Array<Video>
-}
+  app?: Maybe<App>;
+  avatarPhoto?: Maybe<StorageDataObject>;
+  bannedMembers: Array<BannedMember>;
+  channelStateBloatBond: Scalars['BigInt'];
+  coverPhoto?: Maybe<StorageDataObject>;
+  createdAt: Scalars['DateTime'];
+  createdInBlock: Scalars['Int'];
+  cumulativeRewardClaimed?: Maybe<Scalars['BigInt']>;
+  description?: Maybe<Scalars['String']>;
+  followsNum: Scalars['Int'];
+  id: Scalars['String'];
+  isCensored: Scalars['Boolean'];
+  isExcluded: Scalars['Boolean'];
+  isPublic?: Maybe<Scalars['Boolean']>;
+  language?: Maybe<Scalars['String']>;
+  ownerMember?: Maybe<Membership>;
+  rewardAccount: Scalars['String'];
+  title?: Maybe<Scalars['String']>;
+  videoViewsNum: Scalars['Int'];
+  videos: Array<Video>;
+};
+
 
 export type ChannelBannedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BannedMemberOrderByInput>>
-  where?: Maybe<BannedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BannedMemberOrderByInput>>;
+  where?: Maybe<BannedMemberWhereInput>;
+};
+
 
 export type ChannelVideosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoOrderByInput>>
-  where?: Maybe<VideoWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoOrderByInput>>;
+  where?: Maybe<VideoWhereInput>;
+};
 
 export type ChannelEdge = {
-  cursor: Scalars['String']
-  node: Channel
-}
+  cursor: Scalars['String'];
+  node: Channel;
+};
 
 export type ChannelFollowResult = {
-  added: Scalars['Boolean']
-  cancelToken: Scalars['String']
-  channelId: Scalars['String']
-  followId: Scalars['Int']
-  follows: Scalars['Int']
-}
+  added: Scalars['Boolean'];
+  cancelToken: Scalars['String'];
+  channelId: Scalars['String'];
+  followId: Scalars['Int'];
+  follows: Scalars['Int'];
+};
 
 export type ChannelFundsWithdrawnEventData = {
-  account?: Maybe<Scalars['String']>
-  actor: ContentActor
-  amount: Scalars['BigInt']
-  channel: Channel
-}
+  account?: Maybe<Scalars['String']>;
+  actor: ContentActor;
+  amount: Scalars['BigInt'];
+  channel: Channel;
+};
 
 export type ChannelNftCollector = {
-  amount: Scalars['Int']
-  member: Membership
-}
+  amount: Scalars['Int'];
+  member: Membership;
+};
 
 export enum ChannelNftCollectorsOrderByInput {
   AmountAsc = 'amount_ASC',
-  AmountDesc = 'amount_DESC',
+  AmountDesc = 'amount_DESC'
 }
 
 export enum ChannelOrderByInput {
@@ -1119,263 +1124,264 @@ export enum ChannelOrderByInput {
   TitleAsc = 'title_ASC',
   TitleDesc = 'title_DESC',
   VideoViewsNumAsc = 'videoViewsNum_ASC',
-  VideoViewsNumDesc = 'videoViewsNum_DESC',
+  VideoViewsNumDesc = 'videoViewsNum_DESC'
 }
 
 export type ChannelPaymentMadeEventData = {
-  amount: Scalars['BigInt']
-  payeeChannel?: Maybe<Channel>
-  payer: Membership
-  paymentContext?: Maybe<PaymentContext>
-  rationale?: Maybe<Scalars['String']>
-}
+  amount: Scalars['BigInt'];
+  payeeChannel?: Maybe<Channel>;
+  payer: Membership;
+  paymentContext?: Maybe<PaymentContext>;
+  rationale?: Maybe<Scalars['String']>;
+};
 
 export type ChannelPayoutsUpdatedEventData = {
-  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>
-  commitment?: Maybe<Scalars['String']>
-  maxCashoutAllowed?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed?: Maybe<Scalars['BigInt']>
-  payloadDataObject?: Maybe<StorageDataObject>
-}
+  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>;
+  commitment?: Maybe<Scalars['String']>;
+  maxCashoutAllowed?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed?: Maybe<Scalars['BigInt']>;
+  payloadDataObject?: Maybe<StorageDataObject>;
+};
 
 export type ChannelReportInfo = {
-  channelId: Scalars['String']
-  created: Scalars['Boolean']
-  createdAt: Scalars['DateTime']
-  id: Scalars['Int']
-  rationale: Scalars['String']
-  reporterIp: Scalars['String']
-}
+  channelId: Scalars['String'];
+  created: Scalars['Boolean'];
+  createdAt: Scalars['DateTime'];
+  id: Scalars['Int'];
+  rationale: Scalars['String'];
+  reporterIp: Scalars['String'];
+};
 
 export type ChannelRewardClaimedAndWithdrawnEventData = {
-  account?: Maybe<Scalars['String']>
-  actor: ContentActor
-  amount: Scalars['BigInt']
-  channel: Channel
-}
+  account?: Maybe<Scalars['String']>;
+  actor: ContentActor;
+  amount: Scalars['BigInt'];
+  channel: Channel;
+};
 
 export type ChannelRewardClaimedEventData = {
-  amount: Scalars['BigInt']
-  channel: Channel
-}
+  amount: Scalars['BigInt'];
+  channel: Channel;
+};
 
 export type ChannelUnfollowResult = {
-  channelId: Scalars['String']
-  follows: Scalars['Int']
-  removed: Scalars['Boolean']
-}
+  channelId: Scalars['String'];
+  follows: Scalars['Int'];
+  removed: Scalars['Boolean'];
+};
 
 export type ChannelWhereInput = {
-  AND?: Maybe<Array<ChannelWhereInput>>
-  OR?: Maybe<Array<ChannelWhereInput>>
-  app?: Maybe<AppWhereInput>
-  app_isNull?: Maybe<Scalars['Boolean']>
-  avatarPhoto?: Maybe<StorageDataObjectWhereInput>
-  avatarPhoto_isNull?: Maybe<Scalars['Boolean']>
-  bannedMembers_every?: Maybe<BannedMemberWhereInput>
-  bannedMembers_none?: Maybe<BannedMemberWhereInput>
-  bannedMembers_some?: Maybe<BannedMemberWhereInput>
-  channelStateBloatBond_eq?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_gt?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_gte?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>
-  channelStateBloatBond_isNull?: Maybe<Scalars['Boolean']>
-  channelStateBloatBond_lt?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_lte?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_not_eq?: Maybe<Scalars['BigInt']>
-  channelStateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>
-  coverPhoto?: Maybe<StorageDataObjectWhereInput>
-  coverPhoto_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  createdInBlock_eq?: Maybe<Scalars['Int']>
-  createdInBlock_gt?: Maybe<Scalars['Int']>
-  createdInBlock_gte?: Maybe<Scalars['Int']>
-  createdInBlock_in?: Maybe<Array<Scalars['Int']>>
-  createdInBlock_isNull?: Maybe<Scalars['Boolean']>
-  createdInBlock_lt?: Maybe<Scalars['Int']>
-  createdInBlock_lte?: Maybe<Scalars['Int']>
-  createdInBlock_not_eq?: Maybe<Scalars['Int']>
-  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  cumulativeRewardClaimed_eq?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_gt?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_gte?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_in?: Maybe<Array<Scalars['BigInt']>>
-  cumulativeRewardClaimed_isNull?: Maybe<Scalars['Boolean']>
-  cumulativeRewardClaimed_lt?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_lte?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_not_eq?: Maybe<Scalars['BigInt']>
-  cumulativeRewardClaimed_not_in?: Maybe<Array<Scalars['BigInt']>>
-  description_contains?: Maybe<Scalars['String']>
-  description_containsInsensitive?: Maybe<Scalars['String']>
-  description_endsWith?: Maybe<Scalars['String']>
-  description_eq?: Maybe<Scalars['String']>
-  description_gt?: Maybe<Scalars['String']>
-  description_gte?: Maybe<Scalars['String']>
-  description_in?: Maybe<Array<Scalars['String']>>
-  description_isNull?: Maybe<Scalars['Boolean']>
-  description_lt?: Maybe<Scalars['String']>
-  description_lte?: Maybe<Scalars['String']>
-  description_not_contains?: Maybe<Scalars['String']>
-  description_not_containsInsensitive?: Maybe<Scalars['String']>
-  description_not_endsWith?: Maybe<Scalars['String']>
-  description_not_eq?: Maybe<Scalars['String']>
-  description_not_in?: Maybe<Array<Scalars['String']>>
-  description_not_startsWith?: Maybe<Scalars['String']>
-  description_startsWith?: Maybe<Scalars['String']>
-  followsNum_eq?: Maybe<Scalars['Int']>
-  followsNum_gt?: Maybe<Scalars['Int']>
-  followsNum_gte?: Maybe<Scalars['Int']>
-  followsNum_in?: Maybe<Array<Scalars['Int']>>
-  followsNum_isNull?: Maybe<Scalars['Boolean']>
-  followsNum_lt?: Maybe<Scalars['Int']>
-  followsNum_lte?: Maybe<Scalars['Int']>
-  followsNum_not_eq?: Maybe<Scalars['Int']>
-  followsNum_not_in?: Maybe<Array<Scalars['Int']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isCensored_eq?: Maybe<Scalars['Boolean']>
-  isCensored_isNull?: Maybe<Scalars['Boolean']>
-  isCensored_not_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_isNull?: Maybe<Scalars['Boolean']>
-  isExcluded_not_eq?: Maybe<Scalars['Boolean']>
-  isPublic_eq?: Maybe<Scalars['Boolean']>
-  isPublic_isNull?: Maybe<Scalars['Boolean']>
-  isPublic_not_eq?: Maybe<Scalars['Boolean']>
-  language_contains?: Maybe<Scalars['String']>
-  language_containsInsensitive?: Maybe<Scalars['String']>
-  language_endsWith?: Maybe<Scalars['String']>
-  language_eq?: Maybe<Scalars['String']>
-  language_gt?: Maybe<Scalars['String']>
-  language_gte?: Maybe<Scalars['String']>
-  language_in?: Maybe<Array<Scalars['String']>>
-  language_isNull?: Maybe<Scalars['Boolean']>
-  language_lt?: Maybe<Scalars['String']>
-  language_lte?: Maybe<Scalars['String']>
-  language_not_contains?: Maybe<Scalars['String']>
-  language_not_containsInsensitive?: Maybe<Scalars['String']>
-  language_not_endsWith?: Maybe<Scalars['String']>
-  language_not_eq?: Maybe<Scalars['String']>
-  language_not_in?: Maybe<Array<Scalars['String']>>
-  language_not_startsWith?: Maybe<Scalars['String']>
-  language_startsWith?: Maybe<Scalars['String']>
-  ownerMember?: Maybe<MembershipWhereInput>
-  ownerMember_isNull?: Maybe<Scalars['Boolean']>
-  rewardAccount_contains?: Maybe<Scalars['String']>
-  rewardAccount_containsInsensitive?: Maybe<Scalars['String']>
-  rewardAccount_endsWith?: Maybe<Scalars['String']>
-  rewardAccount_eq?: Maybe<Scalars['String']>
-  rewardAccount_gt?: Maybe<Scalars['String']>
-  rewardAccount_gte?: Maybe<Scalars['String']>
-  rewardAccount_in?: Maybe<Array<Scalars['String']>>
-  rewardAccount_isNull?: Maybe<Scalars['Boolean']>
-  rewardAccount_lt?: Maybe<Scalars['String']>
-  rewardAccount_lte?: Maybe<Scalars['String']>
-  rewardAccount_not_contains?: Maybe<Scalars['String']>
-  rewardAccount_not_containsInsensitive?: Maybe<Scalars['String']>
-  rewardAccount_not_endsWith?: Maybe<Scalars['String']>
-  rewardAccount_not_eq?: Maybe<Scalars['String']>
-  rewardAccount_not_in?: Maybe<Array<Scalars['String']>>
-  rewardAccount_not_startsWith?: Maybe<Scalars['String']>
-  rewardAccount_startsWith?: Maybe<Scalars['String']>
-  title_contains?: Maybe<Scalars['String']>
-  title_containsInsensitive?: Maybe<Scalars['String']>
-  title_endsWith?: Maybe<Scalars['String']>
-  title_eq?: Maybe<Scalars['String']>
-  title_gt?: Maybe<Scalars['String']>
-  title_gte?: Maybe<Scalars['String']>
-  title_in?: Maybe<Array<Scalars['String']>>
-  title_isNull?: Maybe<Scalars['Boolean']>
-  title_lt?: Maybe<Scalars['String']>
-  title_lte?: Maybe<Scalars['String']>
-  title_not_contains?: Maybe<Scalars['String']>
-  title_not_containsInsensitive?: Maybe<Scalars['String']>
-  title_not_endsWith?: Maybe<Scalars['String']>
-  title_not_eq?: Maybe<Scalars['String']>
-  title_not_in?: Maybe<Array<Scalars['String']>>
-  title_not_startsWith?: Maybe<Scalars['String']>
-  title_startsWith?: Maybe<Scalars['String']>
-  videoViewsNum_eq?: Maybe<Scalars['Int']>
-  videoViewsNum_gt?: Maybe<Scalars['Int']>
-  videoViewsNum_gte?: Maybe<Scalars['Int']>
-  videoViewsNum_in?: Maybe<Array<Scalars['Int']>>
-  videoViewsNum_isNull?: Maybe<Scalars['Boolean']>
-  videoViewsNum_lt?: Maybe<Scalars['Int']>
-  videoViewsNum_lte?: Maybe<Scalars['Int']>
-  videoViewsNum_not_eq?: Maybe<Scalars['Int']>
-  videoViewsNum_not_in?: Maybe<Array<Scalars['Int']>>
-  videos_every?: Maybe<VideoWhereInput>
-  videos_none?: Maybe<VideoWhereInput>
-  videos_some?: Maybe<VideoWhereInput>
-}
+  AND?: Maybe<Array<ChannelWhereInput>>;
+  OR?: Maybe<Array<ChannelWhereInput>>;
+  app?: Maybe<AppWhereInput>;
+  app_isNull?: Maybe<Scalars['Boolean']>;
+  avatarPhoto?: Maybe<StorageDataObjectWhereInput>;
+  avatarPhoto_isNull?: Maybe<Scalars['Boolean']>;
+  bannedMembers_every?: Maybe<BannedMemberWhereInput>;
+  bannedMembers_none?: Maybe<BannedMemberWhereInput>;
+  bannedMembers_some?: Maybe<BannedMemberWhereInput>;
+  channelStateBloatBond_eq?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_gt?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_gte?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>;
+  channelStateBloatBond_isNull?: Maybe<Scalars['Boolean']>;
+  channelStateBloatBond_lt?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_lte?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_not_eq?: Maybe<Scalars['BigInt']>;
+  channelStateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  coverPhoto?: Maybe<StorageDataObjectWhereInput>;
+  coverPhoto_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdInBlock_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_gt?: Maybe<Scalars['Int']>;
+  createdInBlock_gte?: Maybe<Scalars['Int']>;
+  createdInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  createdInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  createdInBlock_lt?: Maybe<Scalars['Int']>;
+  createdInBlock_lte?: Maybe<Scalars['Int']>;
+  createdInBlock_not_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  cumulativeRewardClaimed_eq?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_gt?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_gte?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_in?: Maybe<Array<Scalars['BigInt']>>;
+  cumulativeRewardClaimed_isNull?: Maybe<Scalars['Boolean']>;
+  cumulativeRewardClaimed_lt?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_lte?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_not_eq?: Maybe<Scalars['BigInt']>;
+  cumulativeRewardClaimed_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_containsInsensitive?: Maybe<Scalars['String']>;
+  description_endsWith?: Maybe<Scalars['String']>;
+  description_eq?: Maybe<Scalars['String']>;
+  description_gt?: Maybe<Scalars['String']>;
+  description_gte?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Scalars['String']>>;
+  description_isNull?: Maybe<Scalars['Boolean']>;
+  description_lt?: Maybe<Scalars['String']>;
+  description_lte?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_not_containsInsensitive?: Maybe<Scalars['String']>;
+  description_not_endsWith?: Maybe<Scalars['String']>;
+  description_not_eq?: Maybe<Scalars['String']>;
+  description_not_in?: Maybe<Array<Scalars['String']>>;
+  description_not_startsWith?: Maybe<Scalars['String']>;
+  description_startsWith?: Maybe<Scalars['String']>;
+  followsNum_eq?: Maybe<Scalars['Int']>;
+  followsNum_gt?: Maybe<Scalars['Int']>;
+  followsNum_gte?: Maybe<Scalars['Int']>;
+  followsNum_in?: Maybe<Array<Scalars['Int']>>;
+  followsNum_isNull?: Maybe<Scalars['Boolean']>;
+  followsNum_lt?: Maybe<Scalars['Int']>;
+  followsNum_lte?: Maybe<Scalars['Int']>;
+  followsNum_not_eq?: Maybe<Scalars['Int']>;
+  followsNum_not_in?: Maybe<Array<Scalars['Int']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isCensored_eq?: Maybe<Scalars['Boolean']>;
+  isCensored_isNull?: Maybe<Scalars['Boolean']>;
+  isCensored_not_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_isNull?: Maybe<Scalars['Boolean']>;
+  isExcluded_not_eq?: Maybe<Scalars['Boolean']>;
+  isPublic_eq?: Maybe<Scalars['Boolean']>;
+  isPublic_isNull?: Maybe<Scalars['Boolean']>;
+  isPublic_not_eq?: Maybe<Scalars['Boolean']>;
+  language_contains?: Maybe<Scalars['String']>;
+  language_containsInsensitive?: Maybe<Scalars['String']>;
+  language_endsWith?: Maybe<Scalars['String']>;
+  language_eq?: Maybe<Scalars['String']>;
+  language_gt?: Maybe<Scalars['String']>;
+  language_gte?: Maybe<Scalars['String']>;
+  language_in?: Maybe<Array<Scalars['String']>>;
+  language_isNull?: Maybe<Scalars['Boolean']>;
+  language_lt?: Maybe<Scalars['String']>;
+  language_lte?: Maybe<Scalars['String']>;
+  language_not_contains?: Maybe<Scalars['String']>;
+  language_not_containsInsensitive?: Maybe<Scalars['String']>;
+  language_not_endsWith?: Maybe<Scalars['String']>;
+  language_not_eq?: Maybe<Scalars['String']>;
+  language_not_in?: Maybe<Array<Scalars['String']>>;
+  language_not_startsWith?: Maybe<Scalars['String']>;
+  language_startsWith?: Maybe<Scalars['String']>;
+  ownerMember?: Maybe<MembershipWhereInput>;
+  ownerMember_isNull?: Maybe<Scalars['Boolean']>;
+  rewardAccount_contains?: Maybe<Scalars['String']>;
+  rewardAccount_containsInsensitive?: Maybe<Scalars['String']>;
+  rewardAccount_endsWith?: Maybe<Scalars['String']>;
+  rewardAccount_eq?: Maybe<Scalars['String']>;
+  rewardAccount_gt?: Maybe<Scalars['String']>;
+  rewardAccount_gte?: Maybe<Scalars['String']>;
+  rewardAccount_in?: Maybe<Array<Scalars['String']>>;
+  rewardAccount_isNull?: Maybe<Scalars['Boolean']>;
+  rewardAccount_lt?: Maybe<Scalars['String']>;
+  rewardAccount_lte?: Maybe<Scalars['String']>;
+  rewardAccount_not_contains?: Maybe<Scalars['String']>;
+  rewardAccount_not_containsInsensitive?: Maybe<Scalars['String']>;
+  rewardAccount_not_endsWith?: Maybe<Scalars['String']>;
+  rewardAccount_not_eq?: Maybe<Scalars['String']>;
+  rewardAccount_not_in?: Maybe<Array<Scalars['String']>>;
+  rewardAccount_not_startsWith?: Maybe<Scalars['String']>;
+  rewardAccount_startsWith?: Maybe<Scalars['String']>;
+  title_contains?: Maybe<Scalars['String']>;
+  title_containsInsensitive?: Maybe<Scalars['String']>;
+  title_endsWith?: Maybe<Scalars['String']>;
+  title_eq?: Maybe<Scalars['String']>;
+  title_gt?: Maybe<Scalars['String']>;
+  title_gte?: Maybe<Scalars['String']>;
+  title_in?: Maybe<Array<Scalars['String']>>;
+  title_isNull?: Maybe<Scalars['Boolean']>;
+  title_lt?: Maybe<Scalars['String']>;
+  title_lte?: Maybe<Scalars['String']>;
+  title_not_contains?: Maybe<Scalars['String']>;
+  title_not_containsInsensitive?: Maybe<Scalars['String']>;
+  title_not_endsWith?: Maybe<Scalars['String']>;
+  title_not_eq?: Maybe<Scalars['String']>;
+  title_not_in?: Maybe<Array<Scalars['String']>>;
+  title_not_startsWith?: Maybe<Scalars['String']>;
+  title_startsWith?: Maybe<Scalars['String']>;
+  videoViewsNum_eq?: Maybe<Scalars['Int']>;
+  videoViewsNum_gt?: Maybe<Scalars['Int']>;
+  videoViewsNum_gte?: Maybe<Scalars['Int']>;
+  videoViewsNum_in?: Maybe<Array<Scalars['Int']>>;
+  videoViewsNum_isNull?: Maybe<Scalars['Boolean']>;
+  videoViewsNum_lt?: Maybe<Scalars['Int']>;
+  videoViewsNum_lte?: Maybe<Scalars['Int']>;
+  videoViewsNum_not_eq?: Maybe<Scalars['Int']>;
+  videoViewsNum_not_in?: Maybe<Array<Scalars['Int']>>;
+  videos_every?: Maybe<VideoWhereInput>;
+  videos_none?: Maybe<VideoWhereInput>;
+  videos_some?: Maybe<VideoWhereInput>;
+};
 
 export type ChannelsConnection = {
-  edges: Array<ChannelEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<ChannelEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type ChannelsSearchResult = {
-  channel: Channel
-  relevance: Scalars['Int']
-}
+  channel: Channel;
+  relevance: Scalars['Int'];
+};
 
 export type Comment = {
-  author: Membership
-  createdAt: Scalars['DateTime']
-  id: Scalars['String']
-  isEdited: Scalars['Boolean']
-  isExcluded: Scalars['Boolean']
-  parentComment?: Maybe<Comment>
-  reactions: Array<CommentReaction>
-  reactionsAndRepliesCount: Scalars['Int']
-  reactionsCount: Scalars['Int']
-  reactionsCountByReactionId?: Maybe<Array<CommentReactionsCountByReactionId>>
-  repliesCount: Scalars['Int']
-  status: CommentStatus
-  text: Scalars['String']
-  video: Video
-}
+  author: Membership;
+  createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  isEdited: Scalars['Boolean'];
+  isExcluded: Scalars['Boolean'];
+  parentComment?: Maybe<Comment>;
+  reactions: Array<CommentReaction>;
+  reactionsAndRepliesCount: Scalars['Int'];
+  reactionsCount: Scalars['Int'];
+  reactionsCountByReactionId?: Maybe<Array<CommentReactionsCountByReactionId>>;
+  repliesCount: Scalars['Int'];
+  status: CommentStatus;
+  text: Scalars['String'];
+  video: Video;
+};
+
 
 export type CommentReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentReactionOrderByInput>>
-  where?: Maybe<CommentReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentReactionOrderByInput>>;
+  where?: Maybe<CommentReactionWhereInput>;
+};
 
 export type CommentCreatedEventData = {
-  comment: Comment
-  text: Scalars['String']
-}
+  comment: Comment;
+  text: Scalars['String'];
+};
 
 export type CommentEdge = {
-  cursor: Scalars['String']
-  node: Comment
-}
+  cursor: Scalars['String'];
+  node: Comment;
+};
 
 export enum CommentOrderByInput {
   AuthorControllerAccountAsc = 'author_controllerAccount_ASC',
@@ -1459,21 +1465,21 @@ export enum CommentOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type CommentReaction = {
-  comment: Comment
-  id: Scalars['String']
-  member: Membership
-  reactionId: Scalars['Int']
-  video: Video
-}
+  comment: Comment;
+  id: Scalars['String'];
+  member: Membership;
+  reactionId: Scalars['Int'];
+  video: Video;
+};
 
 export type CommentReactionEdge = {
-  cursor: Scalars['String']
-  node: CommentReaction
-}
+  cursor: Scalars['String'];
+  node: CommentReaction;
+};
 
 export enum CommentReactionOrderByInput {
   CommentCreatedAtAsc = 'comment_createdAt_ASC',
@@ -1543,216 +1549,216 @@ export enum CommentReactionOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type CommentReactionWhereInput = {
-  AND?: Maybe<Array<CommentReactionWhereInput>>
-  OR?: Maybe<Array<CommentReactionWhereInput>>
-  comment?: Maybe<CommentWhereInput>
-  comment_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  reactionId_eq?: Maybe<Scalars['Int']>
-  reactionId_gt?: Maybe<Scalars['Int']>
-  reactionId_gte?: Maybe<Scalars['Int']>
-  reactionId_in?: Maybe<Array<Scalars['Int']>>
-  reactionId_isNull?: Maybe<Scalars['Boolean']>
-  reactionId_lt?: Maybe<Scalars['Int']>
-  reactionId_lte?: Maybe<Scalars['Int']>
-  reactionId_not_eq?: Maybe<Scalars['Int']>
-  reactionId_not_in?: Maybe<Array<Scalars['Int']>>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<CommentReactionWhereInput>>;
+  OR?: Maybe<Array<CommentReactionWhereInput>>;
+  comment?: Maybe<CommentWhereInput>;
+  comment_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  reactionId_eq?: Maybe<Scalars['Int']>;
+  reactionId_gt?: Maybe<Scalars['Int']>;
+  reactionId_gte?: Maybe<Scalars['Int']>;
+  reactionId_in?: Maybe<Array<Scalars['Int']>>;
+  reactionId_isNull?: Maybe<Scalars['Boolean']>;
+  reactionId_lt?: Maybe<Scalars['Int']>;
+  reactionId_lte?: Maybe<Scalars['Int']>;
+  reactionId_not_eq?: Maybe<Scalars['Int']>;
+  reactionId_not_in?: Maybe<Array<Scalars['Int']>>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type CommentReactionsConnection = {
-  edges: Array<CommentReactionEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<CommentReactionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type CommentReactionsCountByReactionId = {
-  count: Scalars['Int']
-  reactionId: Scalars['Int']
-}
+  count: Scalars['Int'];
+  reactionId: Scalars['Int'];
+};
 
 export enum CommentStatus {
   Deleted = 'DELETED',
   Moderated = 'MODERATED',
-  Visible = 'VISIBLE',
+  Visible = 'VISIBLE'
 }
 
 export type CommentTextUpdatedEventData = {
-  comment: Comment
-  newText: Scalars['String']
-}
+  comment: Comment;
+  newText: Scalars['String'];
+};
 
 export type CommentWhereInput = {
-  AND?: Maybe<Array<CommentWhereInput>>
-  OR?: Maybe<Array<CommentWhereInput>>
-  author?: Maybe<MembershipWhereInput>
-  author_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isEdited_eq?: Maybe<Scalars['Boolean']>
-  isEdited_isNull?: Maybe<Scalars['Boolean']>
-  isEdited_not_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_isNull?: Maybe<Scalars['Boolean']>
-  isExcluded_not_eq?: Maybe<Scalars['Boolean']>
-  parentComment?: Maybe<CommentWhereInput>
-  parentComment_isNull?: Maybe<Scalars['Boolean']>
-  reactionsAndRepliesCount_eq?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_gt?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_gte?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_in?: Maybe<Array<Scalars['Int']>>
-  reactionsAndRepliesCount_isNull?: Maybe<Scalars['Boolean']>
-  reactionsAndRepliesCount_lt?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_lte?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_not_eq?: Maybe<Scalars['Int']>
-  reactionsAndRepliesCount_not_in?: Maybe<Array<Scalars['Int']>>
-  reactionsCountByReactionId_isNull?: Maybe<Scalars['Boolean']>
-  reactionsCount_eq?: Maybe<Scalars['Int']>
-  reactionsCount_gt?: Maybe<Scalars['Int']>
-  reactionsCount_gte?: Maybe<Scalars['Int']>
-  reactionsCount_in?: Maybe<Array<Scalars['Int']>>
-  reactionsCount_isNull?: Maybe<Scalars['Boolean']>
-  reactionsCount_lt?: Maybe<Scalars['Int']>
-  reactionsCount_lte?: Maybe<Scalars['Int']>
-  reactionsCount_not_eq?: Maybe<Scalars['Int']>
-  reactionsCount_not_in?: Maybe<Array<Scalars['Int']>>
-  reactions_every?: Maybe<CommentReactionWhereInput>
-  reactions_none?: Maybe<CommentReactionWhereInput>
-  reactions_some?: Maybe<CommentReactionWhereInput>
-  repliesCount_eq?: Maybe<Scalars['Int']>
-  repliesCount_gt?: Maybe<Scalars['Int']>
-  repliesCount_gte?: Maybe<Scalars['Int']>
-  repliesCount_in?: Maybe<Array<Scalars['Int']>>
-  repliesCount_isNull?: Maybe<Scalars['Boolean']>
-  repliesCount_lt?: Maybe<Scalars['Int']>
-  repliesCount_lte?: Maybe<Scalars['Int']>
-  repliesCount_not_eq?: Maybe<Scalars['Int']>
-  repliesCount_not_in?: Maybe<Array<Scalars['Int']>>
-  status_eq?: Maybe<CommentStatus>
-  status_in?: Maybe<Array<CommentStatus>>
-  status_isNull?: Maybe<Scalars['Boolean']>
-  status_not_eq?: Maybe<CommentStatus>
-  status_not_in?: Maybe<Array<CommentStatus>>
-  text_contains?: Maybe<Scalars['String']>
-  text_containsInsensitive?: Maybe<Scalars['String']>
-  text_endsWith?: Maybe<Scalars['String']>
-  text_eq?: Maybe<Scalars['String']>
-  text_gt?: Maybe<Scalars['String']>
-  text_gte?: Maybe<Scalars['String']>
-  text_in?: Maybe<Array<Scalars['String']>>
-  text_isNull?: Maybe<Scalars['Boolean']>
-  text_lt?: Maybe<Scalars['String']>
-  text_lte?: Maybe<Scalars['String']>
-  text_not_contains?: Maybe<Scalars['String']>
-  text_not_containsInsensitive?: Maybe<Scalars['String']>
-  text_not_endsWith?: Maybe<Scalars['String']>
-  text_not_eq?: Maybe<Scalars['String']>
-  text_not_in?: Maybe<Array<Scalars['String']>>
-  text_not_startsWith?: Maybe<Scalars['String']>
-  text_startsWith?: Maybe<Scalars['String']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<CommentWhereInput>>;
+  OR?: Maybe<Array<CommentWhereInput>>;
+  author?: Maybe<MembershipWhereInput>;
+  author_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isEdited_eq?: Maybe<Scalars['Boolean']>;
+  isEdited_isNull?: Maybe<Scalars['Boolean']>;
+  isEdited_not_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_isNull?: Maybe<Scalars['Boolean']>;
+  isExcluded_not_eq?: Maybe<Scalars['Boolean']>;
+  parentComment?: Maybe<CommentWhereInput>;
+  parentComment_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsAndRepliesCount_eq?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_gt?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_gte?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_in?: Maybe<Array<Scalars['Int']>>;
+  reactionsAndRepliesCount_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsAndRepliesCount_lt?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_lte?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_not_eq?: Maybe<Scalars['Int']>;
+  reactionsAndRepliesCount_not_in?: Maybe<Array<Scalars['Int']>>;
+  reactionsCountByReactionId_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsCount_eq?: Maybe<Scalars['Int']>;
+  reactionsCount_gt?: Maybe<Scalars['Int']>;
+  reactionsCount_gte?: Maybe<Scalars['Int']>;
+  reactionsCount_in?: Maybe<Array<Scalars['Int']>>;
+  reactionsCount_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsCount_lt?: Maybe<Scalars['Int']>;
+  reactionsCount_lte?: Maybe<Scalars['Int']>;
+  reactionsCount_not_eq?: Maybe<Scalars['Int']>;
+  reactionsCount_not_in?: Maybe<Array<Scalars['Int']>>;
+  reactions_every?: Maybe<CommentReactionWhereInput>;
+  reactions_none?: Maybe<CommentReactionWhereInput>;
+  reactions_some?: Maybe<CommentReactionWhereInput>;
+  repliesCount_eq?: Maybe<Scalars['Int']>;
+  repliesCount_gt?: Maybe<Scalars['Int']>;
+  repliesCount_gte?: Maybe<Scalars['Int']>;
+  repliesCount_in?: Maybe<Array<Scalars['Int']>>;
+  repliesCount_isNull?: Maybe<Scalars['Boolean']>;
+  repliesCount_lt?: Maybe<Scalars['Int']>;
+  repliesCount_lte?: Maybe<Scalars['Int']>;
+  repliesCount_not_eq?: Maybe<Scalars['Int']>;
+  repliesCount_not_in?: Maybe<Array<Scalars['Int']>>;
+  status_eq?: Maybe<CommentStatus>;
+  status_in?: Maybe<Array<CommentStatus>>;
+  status_isNull?: Maybe<Scalars['Boolean']>;
+  status_not_eq?: Maybe<CommentStatus>;
+  status_not_in?: Maybe<Array<CommentStatus>>;
+  text_contains?: Maybe<Scalars['String']>;
+  text_containsInsensitive?: Maybe<Scalars['String']>;
+  text_endsWith?: Maybe<Scalars['String']>;
+  text_eq?: Maybe<Scalars['String']>;
+  text_gt?: Maybe<Scalars['String']>;
+  text_gte?: Maybe<Scalars['String']>;
+  text_in?: Maybe<Array<Scalars['String']>>;
+  text_isNull?: Maybe<Scalars['Boolean']>;
+  text_lt?: Maybe<Scalars['String']>;
+  text_lte?: Maybe<Scalars['String']>;
+  text_not_contains?: Maybe<Scalars['String']>;
+  text_not_containsInsensitive?: Maybe<Scalars['String']>;
+  text_not_endsWith?: Maybe<Scalars['String']>;
+  text_not_eq?: Maybe<Scalars['String']>;
+  text_not_in?: Maybe<Array<Scalars['String']>>;
+  text_not_startsWith?: Maybe<Scalars['String']>;
+  text_startsWith?: Maybe<Scalars['String']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type CommentsConnection = {
-  edges: Array<CommentEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<CommentEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
-export type ContentActor = ContentActorCurator | ContentActorLead | ContentActorMember
+export type ContentActor = ContentActorCurator | ContentActorLead | ContentActorMember;
 
 export type ContentActorCurator = {
-  curator: Curator
-}
+  curator: Curator;
+};
 
 export type ContentActorLead = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type ContentActorMember = {
-  member: Membership
-}
+  member: Membership;
+};
 
 export type ContentActorWhereInput = {
-  curator?: Maybe<CuratorWhereInput>
-  curator_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  curator?: Maybe<CuratorWhereInput>;
+  curator_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export enum Continent {
   Af = 'AF',
@@ -1761,201 +1767,198 @@ export enum Continent {
   Eu = 'EU',
   Na = 'NA',
   Oc = 'OC',
-  Sa = 'SA',
+  Sa = 'SA'
 }
 
 export type Curator = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
 
 export type CuratorEdge = {
-  cursor: Scalars['String']
-  node: Curator
-}
+  cursor: Scalars['String'];
+  node: Curator;
+};
 
 export type CuratorGroup = {
-  id: Scalars['String']
-  isActive: Scalars['Boolean']
-}
+  id: Scalars['String'];
+  isActive: Scalars['Boolean'];
+};
 
 export type CuratorGroupEdge = {
-  cursor: Scalars['String']
-  node: CuratorGroup
-}
+  cursor: Scalars['String'];
+  node: CuratorGroup;
+};
 
 export enum CuratorGroupOrderByInput {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
   IsActiveAsc = 'isActive_ASC',
-  IsActiveDesc = 'isActive_DESC',
+  IsActiveDesc = 'isActive_DESC'
 }
 
 export type CuratorGroupWhereInput = {
-  AND?: Maybe<Array<CuratorGroupWhereInput>>
-  OR?: Maybe<Array<CuratorGroupWhereInput>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isActive_eq?: Maybe<Scalars['Boolean']>
-  isActive_isNull?: Maybe<Scalars['Boolean']>
-  isActive_not_eq?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<CuratorGroupWhereInput>>;
+  OR?: Maybe<Array<CuratorGroupWhereInput>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isActive_eq?: Maybe<Scalars['Boolean']>;
+  isActive_isNull?: Maybe<Scalars['Boolean']>;
+  isActive_not_eq?: Maybe<Scalars['Boolean']>;
+};
 
 export type CuratorGroupsConnection = {
-  edges: Array<CuratorGroupEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<CuratorGroupEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export enum CuratorOrderByInput {
   IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
+  IdDesc = 'id_DESC'
 }
 
 export type CuratorWhereInput = {
-  AND?: Maybe<Array<CuratorWhereInput>>
-  OR?: Maybe<Array<CuratorWhereInput>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<CuratorWhereInput>>;
+  OR?: Maybe<Array<CuratorWhereInput>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type CuratorsConnection = {
-  edges: Array<CuratorEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<CuratorEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
-export type DataObjectType =
-  | DataObjectTypeChannelAvatar
-  | DataObjectTypeChannelCoverPhoto
-  | DataObjectTypeChannelPayoutsPayload
-  | DataObjectTypeVideoMedia
-  | DataObjectTypeVideoSubtitle
-  | DataObjectTypeVideoThumbnail
+export type DataObjectType = DataObjectTypeChannelAvatar | DataObjectTypeChannelCoverPhoto | DataObjectTypeChannelPayoutsPayload | DataObjectTypeVideoMedia | DataObjectTypeVideoSubtitle | DataObjectTypeVideoThumbnail;
 
 export type DataObjectTypeChannelAvatar = {
-  channel: Channel
-}
+  channel: Channel;
+};
 
 export type DataObjectTypeChannelCoverPhoto = {
-  channel: Channel
-}
+  channel: Channel;
+};
 
 export type DataObjectTypeChannelPayoutsPayload = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type DataObjectTypeVideoMedia = {
-  video: Video
-}
+  video: Video;
+};
 
 export type DataObjectTypeVideoSubtitle = {
-  subtitle: VideoSubtitle
-  video: Video
-}
+  subtitle: VideoSubtitle;
+  video: Video;
+};
 
 export type DataObjectTypeVideoThumbnail = {
-  video: Video
-}
+  video: Video;
+};
 
 export type DataObjectTypeWhereInput = {
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-  subtitle?: Maybe<VideoSubtitleWhereInput>
-  subtitle_isNull?: Maybe<Scalars['Boolean']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+  subtitle?: Maybe<VideoSubtitleWhereInput>;
+  subtitle_isNull?: Maybe<Scalars['Boolean']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
+
 
 export type DistributionBucket = {
-  acceptingNewBags: Scalars['Boolean']
-  bags: Array<DistributionBucketBag>
-  bucketIndex: Scalars['Int']
-  distributing: Scalars['Boolean']
-  family: DistributionBucketFamily
-  id: Scalars['String']
-  operators: Array<DistributionBucketOperator>
-}
+  acceptingNewBags: Scalars['Boolean'];
+  bags: Array<DistributionBucketBag>;
+  bucketIndex: Scalars['Int'];
+  distributing: Scalars['Boolean'];
+  family: DistributionBucketFamily;
+  id: Scalars['String'];
+  operators: Array<DistributionBucketOperator>;
+};
+
 
 export type DistributionBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>
-  where?: Maybe<DistributionBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>;
+  where?: Maybe<DistributionBucketBagWhereInput>;
+};
+
 
 export type DistributionBucketOperatorsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>
-  where?: Maybe<DistributionBucketOperatorWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>;
+  where?: Maybe<DistributionBucketOperatorWhereInput>;
+};
 
 export type DistributionBucketBag = {
-  bag: StorageBag
-  distributionBucket: DistributionBucket
-  id: Scalars['String']
-}
+  bag: StorageBag;
+  distributionBucket: DistributionBucket;
+  id: Scalars['String'];
+};
 
 export type DistributionBucketBagEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucketBag
-}
+  cursor: Scalars['String'];
+  node: DistributionBucketBag;
+};
 
 export enum DistributionBucketBagOrderByInput {
   BagIdAsc = 'bag_id_ASC',
@@ -1969,89 +1972,90 @@ export enum DistributionBucketBagOrderByInput {
   DistributionBucketIdAsc = 'distributionBucket_id_ASC',
   DistributionBucketIdDesc = 'distributionBucket_id_DESC',
   IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
+  IdDesc = 'id_DESC'
 }
 
 export type DistributionBucketBagWhereInput = {
-  AND?: Maybe<Array<DistributionBucketBagWhereInput>>
-  OR?: Maybe<Array<DistributionBucketBagWhereInput>>
-  bag?: Maybe<StorageBagWhereInput>
-  bag_isNull?: Maybe<Scalars['Boolean']>
-  distributionBucket?: Maybe<DistributionBucketWhereInput>
-  distributionBucket_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<DistributionBucketBagWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketBagWhereInput>>;
+  bag?: Maybe<StorageBagWhereInput>;
+  bag_isNull?: Maybe<Scalars['Boolean']>;
+  distributionBucket?: Maybe<DistributionBucketWhereInput>;
+  distributionBucket_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type DistributionBucketBagsConnection = {
-  edges: Array<DistributionBucketBagEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketBagEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type DistributionBucketEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucket
-}
+  cursor: Scalars['String'];
+  node: DistributionBucket;
+};
 
 export type DistributionBucketFamiliesConnection = {
-  edges: Array<DistributionBucketFamilyEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketFamilyEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type DistributionBucketFamily = {
-  buckets: Array<DistributionBucket>
-  id: Scalars['String']
-  metadata?: Maybe<DistributionBucketFamilyMetadata>
-}
+  buckets: Array<DistributionBucket>;
+  id: Scalars['String'];
+  metadata?: Maybe<DistributionBucketFamilyMetadata>;
+};
+
 
 export type DistributionBucketFamilyBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>
-  where?: Maybe<DistributionBucketWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>;
+  where?: Maybe<DistributionBucketWhereInput>;
+};
 
 export type DistributionBucketFamilyEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucketFamily
-}
+  cursor: Scalars['String'];
+  node: DistributionBucketFamily;
+};
 
 export type DistributionBucketFamilyMetadata = {
-  areas?: Maybe<Array<GeographicalArea>>
-  description?: Maybe<Scalars['String']>
-  family: DistributionBucketFamily
-  id: Scalars['String']
-  latencyTestTargets?: Maybe<Array<Maybe<Scalars['String']>>>
-  region?: Maybe<Scalars['String']>
-}
+  areas?: Maybe<Array<GeographicalArea>>;
+  description?: Maybe<Scalars['String']>;
+  family: DistributionBucketFamily;
+  id: Scalars['String'];
+  latencyTestTargets?: Maybe<Array<Maybe<Scalars['String']>>>;
+  region?: Maybe<Scalars['String']>;
+};
 
 export type DistributionBucketFamilyMetadataConnection = {
-  edges: Array<DistributionBucketFamilyMetadataEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketFamilyMetadataEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type DistributionBucketFamilyMetadataEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucketFamilyMetadata
-}
+  cursor: Scalars['String'];
+  node: DistributionBucketFamilyMetadata;
+};
 
 export enum DistributionBucketFamilyMetadataOrderByInput {
   DescriptionAsc = 'description_ASC',
@@ -2061,71 +2065,71 @@ export enum DistributionBucketFamilyMetadataOrderByInput {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
   RegionAsc = 'region_ASC',
-  RegionDesc = 'region_DESC',
+  RegionDesc = 'region_DESC'
 }
 
 export type DistributionBucketFamilyMetadataWhereInput = {
-  AND?: Maybe<Array<DistributionBucketFamilyMetadataWhereInput>>
-  OR?: Maybe<Array<DistributionBucketFamilyMetadataWhereInput>>
-  areas_isNull?: Maybe<Scalars['Boolean']>
-  description_contains?: Maybe<Scalars['String']>
-  description_containsInsensitive?: Maybe<Scalars['String']>
-  description_endsWith?: Maybe<Scalars['String']>
-  description_eq?: Maybe<Scalars['String']>
-  description_gt?: Maybe<Scalars['String']>
-  description_gte?: Maybe<Scalars['String']>
-  description_in?: Maybe<Array<Scalars['String']>>
-  description_isNull?: Maybe<Scalars['Boolean']>
-  description_lt?: Maybe<Scalars['String']>
-  description_lte?: Maybe<Scalars['String']>
-  description_not_contains?: Maybe<Scalars['String']>
-  description_not_containsInsensitive?: Maybe<Scalars['String']>
-  description_not_endsWith?: Maybe<Scalars['String']>
-  description_not_eq?: Maybe<Scalars['String']>
-  description_not_in?: Maybe<Array<Scalars['String']>>
-  description_not_startsWith?: Maybe<Scalars['String']>
-  description_startsWith?: Maybe<Scalars['String']>
-  family?: Maybe<DistributionBucketFamilyWhereInput>
-  family_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  latencyTestTargets_containsAll?: Maybe<Array<Maybe<Scalars['String']>>>
-  latencyTestTargets_containsAny?: Maybe<Array<Maybe<Scalars['String']>>>
-  latencyTestTargets_containsNone?: Maybe<Array<Maybe<Scalars['String']>>>
-  latencyTestTargets_isNull?: Maybe<Scalars['Boolean']>
-  region_contains?: Maybe<Scalars['String']>
-  region_containsInsensitive?: Maybe<Scalars['String']>
-  region_endsWith?: Maybe<Scalars['String']>
-  region_eq?: Maybe<Scalars['String']>
-  region_gt?: Maybe<Scalars['String']>
-  region_gte?: Maybe<Scalars['String']>
-  region_in?: Maybe<Array<Scalars['String']>>
-  region_isNull?: Maybe<Scalars['Boolean']>
-  region_lt?: Maybe<Scalars['String']>
-  region_lte?: Maybe<Scalars['String']>
-  region_not_contains?: Maybe<Scalars['String']>
-  region_not_containsInsensitive?: Maybe<Scalars['String']>
-  region_not_endsWith?: Maybe<Scalars['String']>
-  region_not_eq?: Maybe<Scalars['String']>
-  region_not_in?: Maybe<Array<Scalars['String']>>
-  region_not_startsWith?: Maybe<Scalars['String']>
-  region_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<DistributionBucketFamilyMetadataWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketFamilyMetadataWhereInput>>;
+  areas_isNull?: Maybe<Scalars['Boolean']>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_containsInsensitive?: Maybe<Scalars['String']>;
+  description_endsWith?: Maybe<Scalars['String']>;
+  description_eq?: Maybe<Scalars['String']>;
+  description_gt?: Maybe<Scalars['String']>;
+  description_gte?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Scalars['String']>>;
+  description_isNull?: Maybe<Scalars['Boolean']>;
+  description_lt?: Maybe<Scalars['String']>;
+  description_lte?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_not_containsInsensitive?: Maybe<Scalars['String']>;
+  description_not_endsWith?: Maybe<Scalars['String']>;
+  description_not_eq?: Maybe<Scalars['String']>;
+  description_not_in?: Maybe<Array<Scalars['String']>>;
+  description_not_startsWith?: Maybe<Scalars['String']>;
+  description_startsWith?: Maybe<Scalars['String']>;
+  family?: Maybe<DistributionBucketFamilyWhereInput>;
+  family_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  latencyTestTargets_containsAll?: Maybe<Array<Maybe<Scalars['String']>>>;
+  latencyTestTargets_containsAny?: Maybe<Array<Maybe<Scalars['String']>>>;
+  latencyTestTargets_containsNone?: Maybe<Array<Maybe<Scalars['String']>>>;
+  latencyTestTargets_isNull?: Maybe<Scalars['Boolean']>;
+  region_contains?: Maybe<Scalars['String']>;
+  region_containsInsensitive?: Maybe<Scalars['String']>;
+  region_endsWith?: Maybe<Scalars['String']>;
+  region_eq?: Maybe<Scalars['String']>;
+  region_gt?: Maybe<Scalars['String']>;
+  region_gte?: Maybe<Scalars['String']>;
+  region_in?: Maybe<Array<Scalars['String']>>;
+  region_isNull?: Maybe<Scalars['Boolean']>;
+  region_lt?: Maybe<Scalars['String']>;
+  region_lte?: Maybe<Scalars['String']>;
+  region_not_contains?: Maybe<Scalars['String']>;
+  region_not_containsInsensitive?: Maybe<Scalars['String']>;
+  region_not_endsWith?: Maybe<Scalars['String']>;
+  region_not_eq?: Maybe<Scalars['String']>;
+  region_not_in?: Maybe<Array<Scalars['String']>>;
+  region_not_startsWith?: Maybe<Scalars['String']>;
+  region_startsWith?: Maybe<Scalars['String']>;
+};
 
 export enum DistributionBucketFamilyOrderByInput {
   IdAsc = 'id_ASC',
@@ -2135,67 +2139,67 @@ export enum DistributionBucketFamilyOrderByInput {
   MetadataIdAsc = 'metadata_id_ASC',
   MetadataIdDesc = 'metadata_id_DESC',
   MetadataRegionAsc = 'metadata_region_ASC',
-  MetadataRegionDesc = 'metadata_region_DESC',
+  MetadataRegionDesc = 'metadata_region_DESC'
 }
 
 export type DistributionBucketFamilyWhereInput = {
-  AND?: Maybe<Array<DistributionBucketFamilyWhereInput>>
-  OR?: Maybe<Array<DistributionBucketFamilyWhereInput>>
-  buckets_every?: Maybe<DistributionBucketWhereInput>
-  buckets_none?: Maybe<DistributionBucketWhereInput>
-  buckets_some?: Maybe<DistributionBucketWhereInput>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  metadata?: Maybe<DistributionBucketFamilyMetadataWhereInput>
-  metadata_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<DistributionBucketFamilyWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketFamilyWhereInput>>;
+  buckets_every?: Maybe<DistributionBucketWhereInput>;
+  buckets_none?: Maybe<DistributionBucketWhereInput>;
+  buckets_some?: Maybe<DistributionBucketWhereInput>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  metadata?: Maybe<DistributionBucketFamilyMetadataWhereInput>;
+  metadata_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type DistributionBucketOperator = {
-  distributionBucket: DistributionBucket
-  id: Scalars['String']
-  metadata?: Maybe<DistributionBucketOperatorMetadata>
-  status: DistributionBucketOperatorStatus
-  workerId: Scalars['Int']
-}
+  distributionBucket: DistributionBucket;
+  id: Scalars['String'];
+  metadata?: Maybe<DistributionBucketOperatorMetadata>;
+  status: DistributionBucketOperatorStatus;
+  workerId: Scalars['Int'];
+};
 
 export type DistributionBucketOperatorEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucketOperator
-}
+  cursor: Scalars['String'];
+  node: DistributionBucketOperator;
+};
 
 export type DistributionBucketOperatorMetadata = {
-  distirbutionBucketOperator: DistributionBucketOperator
-  extra?: Maybe<Scalars['String']>
-  id: Scalars['String']
-  nodeEndpoint?: Maybe<Scalars['String']>
-  nodeLocation?: Maybe<NodeLocationMetadata>
-}
+  distirbutionBucketOperator: DistributionBucketOperator;
+  extra?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  nodeEndpoint?: Maybe<Scalars['String']>;
+  nodeLocation?: Maybe<NodeLocationMetadata>;
+};
 
 export type DistributionBucketOperatorMetadataConnection = {
-  edges: Array<DistributionBucketOperatorMetadataEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketOperatorMetadataEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type DistributionBucketOperatorMetadataEdge = {
-  cursor: Scalars['String']
-  node: DistributionBucketOperatorMetadata
-}
+  cursor: Scalars['String'];
+  node: DistributionBucketOperatorMetadata;
+};
 
 export enum DistributionBucketOperatorMetadataOrderByInput {
   DistirbutionBucketOperatorIdAsc = 'distirbutionBucketOperator_id_ASC',
@@ -2213,68 +2217,68 @@ export enum DistributionBucketOperatorMetadataOrderByInput {
   NodeLocationCityAsc = 'nodeLocation_city_ASC',
   NodeLocationCityDesc = 'nodeLocation_city_DESC',
   NodeLocationCountryCodeAsc = 'nodeLocation_countryCode_ASC',
-  NodeLocationCountryCodeDesc = 'nodeLocation_countryCode_DESC',
+  NodeLocationCountryCodeDesc = 'nodeLocation_countryCode_DESC'
 }
 
 export type DistributionBucketOperatorMetadataWhereInput = {
-  AND?: Maybe<Array<DistributionBucketOperatorMetadataWhereInput>>
-  OR?: Maybe<Array<DistributionBucketOperatorMetadataWhereInput>>
-  distirbutionBucketOperator?: Maybe<DistributionBucketOperatorWhereInput>
-  distirbutionBucketOperator_isNull?: Maybe<Scalars['Boolean']>
-  extra_contains?: Maybe<Scalars['String']>
-  extra_containsInsensitive?: Maybe<Scalars['String']>
-  extra_endsWith?: Maybe<Scalars['String']>
-  extra_eq?: Maybe<Scalars['String']>
-  extra_gt?: Maybe<Scalars['String']>
-  extra_gte?: Maybe<Scalars['String']>
-  extra_in?: Maybe<Array<Scalars['String']>>
-  extra_isNull?: Maybe<Scalars['Boolean']>
-  extra_lt?: Maybe<Scalars['String']>
-  extra_lte?: Maybe<Scalars['String']>
-  extra_not_contains?: Maybe<Scalars['String']>
-  extra_not_containsInsensitive?: Maybe<Scalars['String']>
-  extra_not_endsWith?: Maybe<Scalars['String']>
-  extra_not_eq?: Maybe<Scalars['String']>
-  extra_not_in?: Maybe<Array<Scalars['String']>>
-  extra_not_startsWith?: Maybe<Scalars['String']>
-  extra_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_contains?: Maybe<Scalars['String']>
-  nodeEndpoint_containsInsensitive?: Maybe<Scalars['String']>
-  nodeEndpoint_endsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_eq?: Maybe<Scalars['String']>
-  nodeEndpoint_gt?: Maybe<Scalars['String']>
-  nodeEndpoint_gte?: Maybe<Scalars['String']>
-  nodeEndpoint_in?: Maybe<Array<Scalars['String']>>
-  nodeEndpoint_isNull?: Maybe<Scalars['Boolean']>
-  nodeEndpoint_lt?: Maybe<Scalars['String']>
-  nodeEndpoint_lte?: Maybe<Scalars['String']>
-  nodeEndpoint_not_contains?: Maybe<Scalars['String']>
-  nodeEndpoint_not_containsInsensitive?: Maybe<Scalars['String']>
-  nodeEndpoint_not_endsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_not_eq?: Maybe<Scalars['String']>
-  nodeEndpoint_not_in?: Maybe<Array<Scalars['String']>>
-  nodeEndpoint_not_startsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_startsWith?: Maybe<Scalars['String']>
-  nodeLocation?: Maybe<NodeLocationMetadataWhereInput>
-  nodeLocation_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<DistributionBucketOperatorMetadataWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketOperatorMetadataWhereInput>>;
+  distirbutionBucketOperator?: Maybe<DistributionBucketOperatorWhereInput>;
+  distirbutionBucketOperator_isNull?: Maybe<Scalars['Boolean']>;
+  extra_contains?: Maybe<Scalars['String']>;
+  extra_containsInsensitive?: Maybe<Scalars['String']>;
+  extra_endsWith?: Maybe<Scalars['String']>;
+  extra_eq?: Maybe<Scalars['String']>;
+  extra_gt?: Maybe<Scalars['String']>;
+  extra_gte?: Maybe<Scalars['String']>;
+  extra_in?: Maybe<Array<Scalars['String']>>;
+  extra_isNull?: Maybe<Scalars['Boolean']>;
+  extra_lt?: Maybe<Scalars['String']>;
+  extra_lte?: Maybe<Scalars['String']>;
+  extra_not_contains?: Maybe<Scalars['String']>;
+  extra_not_containsInsensitive?: Maybe<Scalars['String']>;
+  extra_not_endsWith?: Maybe<Scalars['String']>;
+  extra_not_eq?: Maybe<Scalars['String']>;
+  extra_not_in?: Maybe<Array<Scalars['String']>>;
+  extra_not_startsWith?: Maybe<Scalars['String']>;
+  extra_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_contains?: Maybe<Scalars['String']>;
+  nodeEndpoint_containsInsensitive?: Maybe<Scalars['String']>;
+  nodeEndpoint_endsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_eq?: Maybe<Scalars['String']>;
+  nodeEndpoint_gt?: Maybe<Scalars['String']>;
+  nodeEndpoint_gte?: Maybe<Scalars['String']>;
+  nodeEndpoint_in?: Maybe<Array<Scalars['String']>>;
+  nodeEndpoint_isNull?: Maybe<Scalars['Boolean']>;
+  nodeEndpoint_lt?: Maybe<Scalars['String']>;
+  nodeEndpoint_lte?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_contains?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_containsInsensitive?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_endsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_eq?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_in?: Maybe<Array<Scalars['String']>>;
+  nodeEndpoint_not_startsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_startsWith?: Maybe<Scalars['String']>;
+  nodeLocation?: Maybe<NodeLocationMetadataWhereInput>;
+  nodeLocation_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export enum DistributionBucketOperatorOrderByInput {
   DistributionBucketAcceptingNewBagsAsc = 'distributionBucket_acceptingNewBags_ASC',
@@ -2296,59 +2300,59 @@ export enum DistributionBucketOperatorOrderByInput {
   StatusAsc = 'status_ASC',
   StatusDesc = 'status_DESC',
   WorkerIdAsc = 'workerId_ASC',
-  WorkerIdDesc = 'workerId_DESC',
+  WorkerIdDesc = 'workerId_DESC'
 }
 
 export enum DistributionBucketOperatorStatus {
   Active = 'ACTIVE',
-  Invited = 'INVITED',
+  Invited = 'INVITED'
 }
 
 export type DistributionBucketOperatorWhereInput = {
-  AND?: Maybe<Array<DistributionBucketOperatorWhereInput>>
-  OR?: Maybe<Array<DistributionBucketOperatorWhereInput>>
-  distributionBucket?: Maybe<DistributionBucketWhereInput>
-  distributionBucket_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  metadata?: Maybe<DistributionBucketOperatorMetadataWhereInput>
-  metadata_isNull?: Maybe<Scalars['Boolean']>
-  status_eq?: Maybe<DistributionBucketOperatorStatus>
-  status_in?: Maybe<Array<DistributionBucketOperatorStatus>>
-  status_isNull?: Maybe<Scalars['Boolean']>
-  status_not_eq?: Maybe<DistributionBucketOperatorStatus>
-  status_not_in?: Maybe<Array<DistributionBucketOperatorStatus>>
-  workerId_eq?: Maybe<Scalars['Int']>
-  workerId_gt?: Maybe<Scalars['Int']>
-  workerId_gte?: Maybe<Scalars['Int']>
-  workerId_in?: Maybe<Array<Scalars['Int']>>
-  workerId_isNull?: Maybe<Scalars['Boolean']>
-  workerId_lt?: Maybe<Scalars['Int']>
-  workerId_lte?: Maybe<Scalars['Int']>
-  workerId_not_eq?: Maybe<Scalars['Int']>
-  workerId_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  AND?: Maybe<Array<DistributionBucketOperatorWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketOperatorWhereInput>>;
+  distributionBucket?: Maybe<DistributionBucketWhereInput>;
+  distributionBucket_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  metadata?: Maybe<DistributionBucketOperatorMetadataWhereInput>;
+  metadata_isNull?: Maybe<Scalars['Boolean']>;
+  status_eq?: Maybe<DistributionBucketOperatorStatus>;
+  status_in?: Maybe<Array<DistributionBucketOperatorStatus>>;
+  status_isNull?: Maybe<Scalars['Boolean']>;
+  status_not_eq?: Maybe<DistributionBucketOperatorStatus>;
+  status_not_in?: Maybe<Array<DistributionBucketOperatorStatus>>;
+  workerId_eq?: Maybe<Scalars['Int']>;
+  workerId_gt?: Maybe<Scalars['Int']>;
+  workerId_gte?: Maybe<Scalars['Int']>;
+  workerId_in?: Maybe<Array<Scalars['Int']>>;
+  workerId_isNull?: Maybe<Scalars['Boolean']>;
+  workerId_lt?: Maybe<Scalars['Int']>;
+  workerId_lte?: Maybe<Scalars['Int']>;
+  workerId_not_eq?: Maybe<Scalars['Int']>;
+  workerId_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export type DistributionBucketOperatorsConnection = {
-  edges: Array<DistributionBucketOperatorEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketOperatorEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export enum DistributionBucketOrderByInput {
   AcceptingNewBagsAsc = 'acceptingNewBags_ASC',
@@ -2360,300 +2364,279 @@ export enum DistributionBucketOrderByInput {
   FamilyIdAsc = 'family_id_ASC',
   FamilyIdDesc = 'family_id_DESC',
   IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
+  IdDesc = 'id_DESC'
 }
 
 export type DistributionBucketWhereInput = {
-  AND?: Maybe<Array<DistributionBucketWhereInput>>
-  OR?: Maybe<Array<DistributionBucketWhereInput>>
-  acceptingNewBags_eq?: Maybe<Scalars['Boolean']>
-  acceptingNewBags_isNull?: Maybe<Scalars['Boolean']>
-  acceptingNewBags_not_eq?: Maybe<Scalars['Boolean']>
-  bags_every?: Maybe<DistributionBucketBagWhereInput>
-  bags_none?: Maybe<DistributionBucketBagWhereInput>
-  bags_some?: Maybe<DistributionBucketBagWhereInput>
-  bucketIndex_eq?: Maybe<Scalars['Int']>
-  bucketIndex_gt?: Maybe<Scalars['Int']>
-  bucketIndex_gte?: Maybe<Scalars['Int']>
-  bucketIndex_in?: Maybe<Array<Scalars['Int']>>
-  bucketIndex_isNull?: Maybe<Scalars['Boolean']>
-  bucketIndex_lt?: Maybe<Scalars['Int']>
-  bucketIndex_lte?: Maybe<Scalars['Int']>
-  bucketIndex_not_eq?: Maybe<Scalars['Int']>
-  bucketIndex_not_in?: Maybe<Array<Scalars['Int']>>
-  distributing_eq?: Maybe<Scalars['Boolean']>
-  distributing_isNull?: Maybe<Scalars['Boolean']>
-  distributing_not_eq?: Maybe<Scalars['Boolean']>
-  family?: Maybe<DistributionBucketFamilyWhereInput>
-  family_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  operators_every?: Maybe<DistributionBucketOperatorWhereInput>
-  operators_none?: Maybe<DistributionBucketOperatorWhereInput>
-  operators_some?: Maybe<DistributionBucketOperatorWhereInput>
-}
+  AND?: Maybe<Array<DistributionBucketWhereInput>>;
+  OR?: Maybe<Array<DistributionBucketWhereInput>>;
+  acceptingNewBags_eq?: Maybe<Scalars['Boolean']>;
+  acceptingNewBags_isNull?: Maybe<Scalars['Boolean']>;
+  acceptingNewBags_not_eq?: Maybe<Scalars['Boolean']>;
+  bags_every?: Maybe<DistributionBucketBagWhereInput>;
+  bags_none?: Maybe<DistributionBucketBagWhereInput>;
+  bags_some?: Maybe<DistributionBucketBagWhereInput>;
+  bucketIndex_eq?: Maybe<Scalars['Int']>;
+  bucketIndex_gt?: Maybe<Scalars['Int']>;
+  bucketIndex_gte?: Maybe<Scalars['Int']>;
+  bucketIndex_in?: Maybe<Array<Scalars['Int']>>;
+  bucketIndex_isNull?: Maybe<Scalars['Boolean']>;
+  bucketIndex_lt?: Maybe<Scalars['Int']>;
+  bucketIndex_lte?: Maybe<Scalars['Int']>;
+  bucketIndex_not_eq?: Maybe<Scalars['Int']>;
+  bucketIndex_not_in?: Maybe<Array<Scalars['Int']>>;
+  distributing_eq?: Maybe<Scalars['Boolean']>;
+  distributing_isNull?: Maybe<Scalars['Boolean']>;
+  distributing_not_eq?: Maybe<Scalars['Boolean']>;
+  family?: Maybe<DistributionBucketFamilyWhereInput>;
+  family_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  operators_every?: Maybe<DistributionBucketOperatorWhereInput>;
+  operators_none?: Maybe<DistributionBucketOperatorWhereInput>;
+  operators_some?: Maybe<DistributionBucketOperatorWhereInput>;
+};
 
 export type DistributionBucketsConnection = {
-  edges: Array<DistributionBucketEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<DistributionBucketEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type EnglishAuctionSettledEventData = {
-  previousNftOwner: NftOwner
-  winningBid: Bid
-}
+  previousNftOwner: NftOwner;
+  winningBid: Bid;
+};
 
 export type EnglishAuctionStartedEventData = {
-  actor: ContentActor
-  auction: Auction
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  auction: Auction;
+  nftOwner: NftOwner;
+};
 
 export type EntityReportInfo = {
-  created: Scalars['Boolean']
-  createdAt: Scalars['DateTime']
-  id: Scalars['Int']
-  rationale: Scalars['String']
-  reporterIp: Scalars['String']
-}
+  created: Scalars['Boolean'];
+  createdAt: Scalars['DateTime'];
+  id: Scalars['Int'];
+  rationale: Scalars['String'];
+  reporterIp: Scalars['String'];
+};
 
 export type Event = {
-  data: EventData
-  id: Scalars['String']
-  inBlock: Scalars['Int']
-  inExtrinsic?: Maybe<Scalars['String']>
-  indexInBlock: Scalars['Int']
-  timestamp: Scalars['DateTime']
-}
+  data: EventData;
+  id: Scalars['String'];
+  inBlock: Scalars['Int'];
+  inExtrinsic?: Maybe<Scalars['String']>;
+  indexInBlock: Scalars['Int'];
+  timestamp: Scalars['DateTime'];
+};
 
-export type EventData =
-  | AuctionBidCanceledEventData
-  | AuctionBidMadeEventData
-  | AuctionCanceledEventData
-  | BidMadeCompletingAuctionEventData
-  | BuyNowCanceledEventData
-  | BuyNowPriceUpdatedEventData
-  | ChannelFundsWithdrawnEventData
-  | ChannelPaymentMadeEventData
-  | ChannelPayoutsUpdatedEventData
-  | ChannelRewardClaimedAndWithdrawnEventData
-  | ChannelRewardClaimedEventData
-  | CommentCreatedEventData
-  | CommentTextUpdatedEventData
-  | EnglishAuctionSettledEventData
-  | EnglishAuctionStartedEventData
-  | MetaprotocolTransactionStatusEventData
-  | NftBoughtEventData
-  | NftIssuedEventData
-  | NftSellOrderMadeEventData
-  | OpenAuctionBidAcceptedEventData
-  | OpenAuctionStartedEventData
+export type EventData = AuctionBidCanceledEventData | AuctionBidMadeEventData | AuctionCanceledEventData | BidMadeCompletingAuctionEventData | BuyNowCanceledEventData | BuyNowPriceUpdatedEventData | ChannelFundsWithdrawnEventData | ChannelPaymentMadeEventData | ChannelPayoutsUpdatedEventData | ChannelRewardClaimedAndWithdrawnEventData | ChannelRewardClaimedEventData | CommentCreatedEventData | CommentTextUpdatedEventData | EnglishAuctionSettledEventData | EnglishAuctionStartedEventData | MetaprotocolTransactionStatusEventData | NftBoughtEventData | NftIssuedEventData | NftSellOrderMadeEventData | OpenAuctionBidAcceptedEventData | OpenAuctionStartedEventData;
 
 export type EventDataWhereInput = {
-  account_contains?: Maybe<Scalars['String']>
-  account_containsInsensitive?: Maybe<Scalars['String']>
-  account_endsWith?: Maybe<Scalars['String']>
-  account_eq?: Maybe<Scalars['String']>
-  account_gt?: Maybe<Scalars['String']>
-  account_gte?: Maybe<Scalars['String']>
-  account_in?: Maybe<Array<Scalars['String']>>
-  account_isNull?: Maybe<Scalars['Boolean']>
-  account_lt?: Maybe<Scalars['String']>
-  account_lte?: Maybe<Scalars['String']>
-  account_not_contains?: Maybe<Scalars['String']>
-  account_not_containsInsensitive?: Maybe<Scalars['String']>
-  account_not_endsWith?: Maybe<Scalars['String']>
-  account_not_eq?: Maybe<Scalars['String']>
-  account_not_in?: Maybe<Array<Scalars['String']>>
-  account_not_startsWith?: Maybe<Scalars['String']>
-  account_startsWith?: Maybe<Scalars['String']>
-  actor?: Maybe<ContentActorWhereInput>
-  actor_isNull?: Maybe<Scalars['Boolean']>
-  amount_eq?: Maybe<Scalars['BigInt']>
-  amount_gt?: Maybe<Scalars['BigInt']>
-  amount_gte?: Maybe<Scalars['BigInt']>
-  amount_in?: Maybe<Array<Scalars['BigInt']>>
-  amount_isNull?: Maybe<Scalars['Boolean']>
-  amount_lt?: Maybe<Scalars['BigInt']>
-  amount_lte?: Maybe<Scalars['BigInt']>
-  amount_not_eq?: Maybe<Scalars['BigInt']>
-  amount_not_in?: Maybe<Array<Scalars['BigInt']>>
-  auction?: Maybe<AuctionWhereInput>
-  auction_isNull?: Maybe<Scalars['Boolean']>
-  bid?: Maybe<BidWhereInput>
-  bid_isNull?: Maybe<Scalars['Boolean']>
-  buyer?: Maybe<MembershipWhereInput>
-  buyer_isNull?: Maybe<Scalars['Boolean']>
-  channel?: Maybe<ChannelWhereInput>
-  channelCashoutsEnabled_eq?: Maybe<Scalars['Boolean']>
-  channelCashoutsEnabled_isNull?: Maybe<Scalars['Boolean']>
-  channelCashoutsEnabled_not_eq?: Maybe<Scalars['Boolean']>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  comment?: Maybe<CommentWhereInput>
-  comment_isNull?: Maybe<Scalars['Boolean']>
-  commitment_contains?: Maybe<Scalars['String']>
-  commitment_containsInsensitive?: Maybe<Scalars['String']>
-  commitment_endsWith?: Maybe<Scalars['String']>
-  commitment_eq?: Maybe<Scalars['String']>
-  commitment_gt?: Maybe<Scalars['String']>
-  commitment_gte?: Maybe<Scalars['String']>
-  commitment_in?: Maybe<Array<Scalars['String']>>
-  commitment_isNull?: Maybe<Scalars['Boolean']>
-  commitment_lt?: Maybe<Scalars['String']>
-  commitment_lte?: Maybe<Scalars['String']>
-  commitment_not_contains?: Maybe<Scalars['String']>
-  commitment_not_containsInsensitive?: Maybe<Scalars['String']>
-  commitment_not_endsWith?: Maybe<Scalars['String']>
-  commitment_not_eq?: Maybe<Scalars['String']>
-  commitment_not_in?: Maybe<Array<Scalars['String']>>
-  commitment_not_startsWith?: Maybe<Scalars['String']>
-  commitment_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  maxCashoutAllowed_eq?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_gt?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_gte?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>
-  maxCashoutAllowed_isNull?: Maybe<Scalars['Boolean']>
-  maxCashoutAllowed_lt?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_lte?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_not_eq?: Maybe<Scalars['BigInt']>
-  maxCashoutAllowed_not_in?: Maybe<Array<Scalars['BigInt']>>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  minCashoutAllowed_eq?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_gt?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_gte?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>
-  minCashoutAllowed_isNull?: Maybe<Scalars['Boolean']>
-  minCashoutAllowed_lt?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_lte?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_not_eq?: Maybe<Scalars['BigInt']>
-  minCashoutAllowed_not_in?: Maybe<Array<Scalars['BigInt']>>
-  newPrice_eq?: Maybe<Scalars['BigInt']>
-  newPrice_gt?: Maybe<Scalars['BigInt']>
-  newPrice_gte?: Maybe<Scalars['BigInt']>
-  newPrice_in?: Maybe<Array<Scalars['BigInt']>>
-  newPrice_isNull?: Maybe<Scalars['Boolean']>
-  newPrice_lt?: Maybe<Scalars['BigInt']>
-  newPrice_lte?: Maybe<Scalars['BigInt']>
-  newPrice_not_eq?: Maybe<Scalars['BigInt']>
-  newPrice_not_in?: Maybe<Array<Scalars['BigInt']>>
-  newText_contains?: Maybe<Scalars['String']>
-  newText_containsInsensitive?: Maybe<Scalars['String']>
-  newText_endsWith?: Maybe<Scalars['String']>
-  newText_eq?: Maybe<Scalars['String']>
-  newText_gt?: Maybe<Scalars['String']>
-  newText_gte?: Maybe<Scalars['String']>
-  newText_in?: Maybe<Array<Scalars['String']>>
-  newText_isNull?: Maybe<Scalars['Boolean']>
-  newText_lt?: Maybe<Scalars['String']>
-  newText_lte?: Maybe<Scalars['String']>
-  newText_not_contains?: Maybe<Scalars['String']>
-  newText_not_containsInsensitive?: Maybe<Scalars['String']>
-  newText_not_endsWith?: Maybe<Scalars['String']>
-  newText_not_eq?: Maybe<Scalars['String']>
-  newText_not_in?: Maybe<Array<Scalars['String']>>
-  newText_not_startsWith?: Maybe<Scalars['String']>
-  newText_startsWith?: Maybe<Scalars['String']>
-  nft?: Maybe<OwnedNftWhereInput>
-  nftOwner?: Maybe<NftOwnerWhereInput>
-  nftOwner_isNull?: Maybe<Scalars['Boolean']>
-  nft_isNull?: Maybe<Scalars['Boolean']>
-  payeeChannel?: Maybe<ChannelWhereInput>
-  payeeChannel_isNull?: Maybe<Scalars['Boolean']>
-  payer?: Maybe<MembershipWhereInput>
-  payer_isNull?: Maybe<Scalars['Boolean']>
-  payloadDataObject?: Maybe<StorageDataObjectWhereInput>
-  payloadDataObject_isNull?: Maybe<Scalars['Boolean']>
-  paymentContext?: Maybe<PaymentContextWhereInput>
-  paymentContext_isNull?: Maybe<Scalars['Boolean']>
-  previousNftOwner?: Maybe<NftOwnerWhereInput>
-  previousNftOwner_isNull?: Maybe<Scalars['Boolean']>
-  price_eq?: Maybe<Scalars['BigInt']>
-  price_gt?: Maybe<Scalars['BigInt']>
-  price_gte?: Maybe<Scalars['BigInt']>
-  price_in?: Maybe<Array<Scalars['BigInt']>>
-  price_isNull?: Maybe<Scalars['Boolean']>
-  price_lt?: Maybe<Scalars['BigInt']>
-  price_lte?: Maybe<Scalars['BigInt']>
-  price_not_eq?: Maybe<Scalars['BigInt']>
-  price_not_in?: Maybe<Array<Scalars['BigInt']>>
-  rationale_contains?: Maybe<Scalars['String']>
-  rationale_containsInsensitive?: Maybe<Scalars['String']>
-  rationale_endsWith?: Maybe<Scalars['String']>
-  rationale_eq?: Maybe<Scalars['String']>
-  rationale_gt?: Maybe<Scalars['String']>
-  rationale_gte?: Maybe<Scalars['String']>
-  rationale_in?: Maybe<Array<Scalars['String']>>
-  rationale_isNull?: Maybe<Scalars['Boolean']>
-  rationale_lt?: Maybe<Scalars['String']>
-  rationale_lte?: Maybe<Scalars['String']>
-  rationale_not_contains?: Maybe<Scalars['String']>
-  rationale_not_containsInsensitive?: Maybe<Scalars['String']>
-  rationale_not_endsWith?: Maybe<Scalars['String']>
-  rationale_not_eq?: Maybe<Scalars['String']>
-  rationale_not_in?: Maybe<Array<Scalars['String']>>
-  rationale_not_startsWith?: Maybe<Scalars['String']>
-  rationale_startsWith?: Maybe<Scalars['String']>
-  result?: Maybe<MetaprotocolTransactionResultWhereInput>
-  result_isNull?: Maybe<Scalars['Boolean']>
-  text_contains?: Maybe<Scalars['String']>
-  text_containsInsensitive?: Maybe<Scalars['String']>
-  text_endsWith?: Maybe<Scalars['String']>
-  text_eq?: Maybe<Scalars['String']>
-  text_gt?: Maybe<Scalars['String']>
-  text_gte?: Maybe<Scalars['String']>
-  text_in?: Maybe<Array<Scalars['String']>>
-  text_isNull?: Maybe<Scalars['Boolean']>
-  text_lt?: Maybe<Scalars['String']>
-  text_lte?: Maybe<Scalars['String']>
-  text_not_contains?: Maybe<Scalars['String']>
-  text_not_containsInsensitive?: Maybe<Scalars['String']>
-  text_not_endsWith?: Maybe<Scalars['String']>
-  text_not_eq?: Maybe<Scalars['String']>
-  text_not_in?: Maybe<Array<Scalars['String']>>
-  text_not_startsWith?: Maybe<Scalars['String']>
-  text_startsWith?: Maybe<Scalars['String']>
-  winningBid?: Maybe<BidWhereInput>
-  winningBid_isNull?: Maybe<Scalars['Boolean']>
-}
+  account_contains?: Maybe<Scalars['String']>;
+  account_containsInsensitive?: Maybe<Scalars['String']>;
+  account_endsWith?: Maybe<Scalars['String']>;
+  account_eq?: Maybe<Scalars['String']>;
+  account_gt?: Maybe<Scalars['String']>;
+  account_gte?: Maybe<Scalars['String']>;
+  account_in?: Maybe<Array<Scalars['String']>>;
+  account_isNull?: Maybe<Scalars['Boolean']>;
+  account_lt?: Maybe<Scalars['String']>;
+  account_lte?: Maybe<Scalars['String']>;
+  account_not_contains?: Maybe<Scalars['String']>;
+  account_not_containsInsensitive?: Maybe<Scalars['String']>;
+  account_not_endsWith?: Maybe<Scalars['String']>;
+  account_not_eq?: Maybe<Scalars['String']>;
+  account_not_in?: Maybe<Array<Scalars['String']>>;
+  account_not_startsWith?: Maybe<Scalars['String']>;
+  account_startsWith?: Maybe<Scalars['String']>;
+  actor?: Maybe<ContentActorWhereInput>;
+  actor_isNull?: Maybe<Scalars['Boolean']>;
+  amount_eq?: Maybe<Scalars['BigInt']>;
+  amount_gt?: Maybe<Scalars['BigInt']>;
+  amount_gte?: Maybe<Scalars['BigInt']>;
+  amount_in?: Maybe<Array<Scalars['BigInt']>>;
+  amount_isNull?: Maybe<Scalars['Boolean']>;
+  amount_lt?: Maybe<Scalars['BigInt']>;
+  amount_lte?: Maybe<Scalars['BigInt']>;
+  amount_not_eq?: Maybe<Scalars['BigInt']>;
+  amount_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  auction?: Maybe<AuctionWhereInput>;
+  auction_isNull?: Maybe<Scalars['Boolean']>;
+  bid?: Maybe<BidWhereInput>;
+  bid_isNull?: Maybe<Scalars['Boolean']>;
+  buyer?: Maybe<MembershipWhereInput>;
+  buyer_isNull?: Maybe<Scalars['Boolean']>;
+  channel?: Maybe<ChannelWhereInput>;
+  channelCashoutsEnabled_eq?: Maybe<Scalars['Boolean']>;
+  channelCashoutsEnabled_isNull?: Maybe<Scalars['Boolean']>;
+  channelCashoutsEnabled_not_eq?: Maybe<Scalars['Boolean']>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  comment?: Maybe<CommentWhereInput>;
+  comment_isNull?: Maybe<Scalars['Boolean']>;
+  commitment_contains?: Maybe<Scalars['String']>;
+  commitment_containsInsensitive?: Maybe<Scalars['String']>;
+  commitment_endsWith?: Maybe<Scalars['String']>;
+  commitment_eq?: Maybe<Scalars['String']>;
+  commitment_gt?: Maybe<Scalars['String']>;
+  commitment_gte?: Maybe<Scalars['String']>;
+  commitment_in?: Maybe<Array<Scalars['String']>>;
+  commitment_isNull?: Maybe<Scalars['Boolean']>;
+  commitment_lt?: Maybe<Scalars['String']>;
+  commitment_lte?: Maybe<Scalars['String']>;
+  commitment_not_contains?: Maybe<Scalars['String']>;
+  commitment_not_containsInsensitive?: Maybe<Scalars['String']>;
+  commitment_not_endsWith?: Maybe<Scalars['String']>;
+  commitment_not_eq?: Maybe<Scalars['String']>;
+  commitment_not_in?: Maybe<Array<Scalars['String']>>;
+  commitment_not_startsWith?: Maybe<Scalars['String']>;
+  commitment_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  maxCashoutAllowed_eq?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_gt?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_gte?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>;
+  maxCashoutAllowed_isNull?: Maybe<Scalars['Boolean']>;
+  maxCashoutAllowed_lt?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_lte?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_not_eq?: Maybe<Scalars['BigInt']>;
+  maxCashoutAllowed_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  minCashoutAllowed_eq?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_gt?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_gte?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>;
+  minCashoutAllowed_isNull?: Maybe<Scalars['Boolean']>;
+  minCashoutAllowed_lt?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_lte?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_not_eq?: Maybe<Scalars['BigInt']>;
+  minCashoutAllowed_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  newPrice_eq?: Maybe<Scalars['BigInt']>;
+  newPrice_gt?: Maybe<Scalars['BigInt']>;
+  newPrice_gte?: Maybe<Scalars['BigInt']>;
+  newPrice_in?: Maybe<Array<Scalars['BigInt']>>;
+  newPrice_isNull?: Maybe<Scalars['Boolean']>;
+  newPrice_lt?: Maybe<Scalars['BigInt']>;
+  newPrice_lte?: Maybe<Scalars['BigInt']>;
+  newPrice_not_eq?: Maybe<Scalars['BigInt']>;
+  newPrice_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  newText_contains?: Maybe<Scalars['String']>;
+  newText_containsInsensitive?: Maybe<Scalars['String']>;
+  newText_endsWith?: Maybe<Scalars['String']>;
+  newText_eq?: Maybe<Scalars['String']>;
+  newText_gt?: Maybe<Scalars['String']>;
+  newText_gte?: Maybe<Scalars['String']>;
+  newText_in?: Maybe<Array<Scalars['String']>>;
+  newText_isNull?: Maybe<Scalars['Boolean']>;
+  newText_lt?: Maybe<Scalars['String']>;
+  newText_lte?: Maybe<Scalars['String']>;
+  newText_not_contains?: Maybe<Scalars['String']>;
+  newText_not_containsInsensitive?: Maybe<Scalars['String']>;
+  newText_not_endsWith?: Maybe<Scalars['String']>;
+  newText_not_eq?: Maybe<Scalars['String']>;
+  newText_not_in?: Maybe<Array<Scalars['String']>>;
+  newText_not_startsWith?: Maybe<Scalars['String']>;
+  newText_startsWith?: Maybe<Scalars['String']>;
+  nft?: Maybe<OwnedNftWhereInput>;
+  nftOwner?: Maybe<NftOwnerWhereInput>;
+  nftOwner_isNull?: Maybe<Scalars['Boolean']>;
+  nft_isNull?: Maybe<Scalars['Boolean']>;
+  payeeChannel?: Maybe<ChannelWhereInput>;
+  payeeChannel_isNull?: Maybe<Scalars['Boolean']>;
+  payer?: Maybe<MembershipWhereInput>;
+  payer_isNull?: Maybe<Scalars['Boolean']>;
+  payloadDataObject?: Maybe<StorageDataObjectWhereInput>;
+  payloadDataObject_isNull?: Maybe<Scalars['Boolean']>;
+  paymentContext?: Maybe<PaymentContextWhereInput>;
+  paymentContext_isNull?: Maybe<Scalars['Boolean']>;
+  previousNftOwner?: Maybe<NftOwnerWhereInput>;
+  previousNftOwner_isNull?: Maybe<Scalars['Boolean']>;
+  price_eq?: Maybe<Scalars['BigInt']>;
+  price_gt?: Maybe<Scalars['BigInt']>;
+  price_gte?: Maybe<Scalars['BigInt']>;
+  price_in?: Maybe<Array<Scalars['BigInt']>>;
+  price_isNull?: Maybe<Scalars['Boolean']>;
+  price_lt?: Maybe<Scalars['BigInt']>;
+  price_lte?: Maybe<Scalars['BigInt']>;
+  price_not_eq?: Maybe<Scalars['BigInt']>;
+  price_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  rationale_contains?: Maybe<Scalars['String']>;
+  rationale_containsInsensitive?: Maybe<Scalars['String']>;
+  rationale_endsWith?: Maybe<Scalars['String']>;
+  rationale_eq?: Maybe<Scalars['String']>;
+  rationale_gt?: Maybe<Scalars['String']>;
+  rationale_gte?: Maybe<Scalars['String']>;
+  rationale_in?: Maybe<Array<Scalars['String']>>;
+  rationale_isNull?: Maybe<Scalars['Boolean']>;
+  rationale_lt?: Maybe<Scalars['String']>;
+  rationale_lte?: Maybe<Scalars['String']>;
+  rationale_not_contains?: Maybe<Scalars['String']>;
+  rationale_not_containsInsensitive?: Maybe<Scalars['String']>;
+  rationale_not_endsWith?: Maybe<Scalars['String']>;
+  rationale_not_eq?: Maybe<Scalars['String']>;
+  rationale_not_in?: Maybe<Array<Scalars['String']>>;
+  rationale_not_startsWith?: Maybe<Scalars['String']>;
+  rationale_startsWith?: Maybe<Scalars['String']>;
+  result?: Maybe<MetaprotocolTransactionResultWhereInput>;
+  result_isNull?: Maybe<Scalars['Boolean']>;
+  text_contains?: Maybe<Scalars['String']>;
+  text_containsInsensitive?: Maybe<Scalars['String']>;
+  text_endsWith?: Maybe<Scalars['String']>;
+  text_eq?: Maybe<Scalars['String']>;
+  text_gt?: Maybe<Scalars['String']>;
+  text_gte?: Maybe<Scalars['String']>;
+  text_in?: Maybe<Array<Scalars['String']>>;
+  text_isNull?: Maybe<Scalars['Boolean']>;
+  text_lt?: Maybe<Scalars['String']>;
+  text_lte?: Maybe<Scalars['String']>;
+  text_not_contains?: Maybe<Scalars['String']>;
+  text_not_containsInsensitive?: Maybe<Scalars['String']>;
+  text_not_endsWith?: Maybe<Scalars['String']>;
+  text_not_eq?: Maybe<Scalars['String']>;
+  text_not_in?: Maybe<Array<Scalars['String']>>;
+  text_not_startsWith?: Maybe<Scalars['String']>;
+  text_startsWith?: Maybe<Scalars['String']>;
+  winningBid?: Maybe<BidWhereInput>;
+  winningBid_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type EventEdge = {
-  cursor: Scalars['String']
-  node: Event
-}
+  cursor: Scalars['String'];
+  node: Event;
+};
 
 export enum EventOrderByInput {
   DataAccountAsc = 'data_account_ASC',
@@ -2689,175 +2672,172 @@ export enum EventOrderByInput {
   IndexInBlockAsc = 'indexInBlock_ASC',
   IndexInBlockDesc = 'indexInBlock_DESC',
   TimestampAsc = 'timestamp_ASC',
-  TimestampDesc = 'timestamp_DESC',
+  TimestampDesc = 'timestamp_DESC'
 }
 
 export type EventWhereInput = {
-  AND?: Maybe<Array<EventWhereInput>>
-  OR?: Maybe<Array<EventWhereInput>>
-  data?: Maybe<EventDataWhereInput>
-  data_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  inBlock_eq?: Maybe<Scalars['Int']>
-  inBlock_gt?: Maybe<Scalars['Int']>
-  inBlock_gte?: Maybe<Scalars['Int']>
-  inBlock_in?: Maybe<Array<Scalars['Int']>>
-  inBlock_isNull?: Maybe<Scalars['Boolean']>
-  inBlock_lt?: Maybe<Scalars['Int']>
-  inBlock_lte?: Maybe<Scalars['Int']>
-  inBlock_not_eq?: Maybe<Scalars['Int']>
-  inBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  inExtrinsic_contains?: Maybe<Scalars['String']>
-  inExtrinsic_containsInsensitive?: Maybe<Scalars['String']>
-  inExtrinsic_endsWith?: Maybe<Scalars['String']>
-  inExtrinsic_eq?: Maybe<Scalars['String']>
-  inExtrinsic_gt?: Maybe<Scalars['String']>
-  inExtrinsic_gte?: Maybe<Scalars['String']>
-  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
-  inExtrinsic_isNull?: Maybe<Scalars['Boolean']>
-  inExtrinsic_lt?: Maybe<Scalars['String']>
-  inExtrinsic_lte?: Maybe<Scalars['String']>
-  inExtrinsic_not_contains?: Maybe<Scalars['String']>
-  inExtrinsic_not_containsInsensitive?: Maybe<Scalars['String']>
-  inExtrinsic_not_endsWith?: Maybe<Scalars['String']>
-  inExtrinsic_not_eq?: Maybe<Scalars['String']>
-  inExtrinsic_not_in?: Maybe<Array<Scalars['String']>>
-  inExtrinsic_not_startsWith?: Maybe<Scalars['String']>
-  inExtrinsic_startsWith?: Maybe<Scalars['String']>
-  indexInBlock_eq?: Maybe<Scalars['Int']>
-  indexInBlock_gt?: Maybe<Scalars['Int']>
-  indexInBlock_gte?: Maybe<Scalars['Int']>
-  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
-  indexInBlock_isNull?: Maybe<Scalars['Boolean']>
-  indexInBlock_lt?: Maybe<Scalars['Int']>
-  indexInBlock_lte?: Maybe<Scalars['Int']>
-  indexInBlock_not_eq?: Maybe<Scalars['Int']>
-  indexInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  timestamp_eq?: Maybe<Scalars['DateTime']>
-  timestamp_gt?: Maybe<Scalars['DateTime']>
-  timestamp_gte?: Maybe<Scalars['DateTime']>
-  timestamp_in?: Maybe<Array<Scalars['DateTime']>>
-  timestamp_isNull?: Maybe<Scalars['Boolean']>
-  timestamp_lt?: Maybe<Scalars['DateTime']>
-  timestamp_lte?: Maybe<Scalars['DateTime']>
-  timestamp_not_eq?: Maybe<Scalars['DateTime']>
-  timestamp_not_in?: Maybe<Array<Scalars['DateTime']>>
-}
+  AND?: Maybe<Array<EventWhereInput>>;
+  OR?: Maybe<Array<EventWhereInput>>;
+  data?: Maybe<EventDataWhereInput>;
+  data_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  inBlock_eq?: Maybe<Scalars['Int']>;
+  inBlock_gt?: Maybe<Scalars['Int']>;
+  inBlock_gte?: Maybe<Scalars['Int']>;
+  inBlock_in?: Maybe<Array<Scalars['Int']>>;
+  inBlock_isNull?: Maybe<Scalars['Boolean']>;
+  inBlock_lt?: Maybe<Scalars['Int']>;
+  inBlock_lte?: Maybe<Scalars['Int']>;
+  inBlock_not_eq?: Maybe<Scalars['Int']>;
+  inBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  inExtrinsic_contains?: Maybe<Scalars['String']>;
+  inExtrinsic_containsInsensitive?: Maybe<Scalars['String']>;
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>;
+  inExtrinsic_eq?: Maybe<Scalars['String']>;
+  inExtrinsic_gt?: Maybe<Scalars['String']>;
+  inExtrinsic_gte?: Maybe<Scalars['String']>;
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>;
+  inExtrinsic_isNull?: Maybe<Scalars['Boolean']>;
+  inExtrinsic_lt?: Maybe<Scalars['String']>;
+  inExtrinsic_lte?: Maybe<Scalars['String']>;
+  inExtrinsic_not_contains?: Maybe<Scalars['String']>;
+  inExtrinsic_not_containsInsensitive?: Maybe<Scalars['String']>;
+  inExtrinsic_not_endsWith?: Maybe<Scalars['String']>;
+  inExtrinsic_not_eq?: Maybe<Scalars['String']>;
+  inExtrinsic_not_in?: Maybe<Array<Scalars['String']>>;
+  inExtrinsic_not_startsWith?: Maybe<Scalars['String']>;
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>;
+  indexInBlock_eq?: Maybe<Scalars['Int']>;
+  indexInBlock_gt?: Maybe<Scalars['Int']>;
+  indexInBlock_gte?: Maybe<Scalars['Int']>;
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  indexInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  indexInBlock_lt?: Maybe<Scalars['Int']>;
+  indexInBlock_lte?: Maybe<Scalars['Int']>;
+  indexInBlock_not_eq?: Maybe<Scalars['Int']>;
+  indexInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  timestamp_eq?: Maybe<Scalars['DateTime']>;
+  timestamp_gt?: Maybe<Scalars['DateTime']>;
+  timestamp_gte?: Maybe<Scalars['DateTime']>;
+  timestamp_in?: Maybe<Array<Scalars['DateTime']>>;
+  timestamp_isNull?: Maybe<Scalars['Boolean']>;
+  timestamp_lt?: Maybe<Scalars['DateTime']>;
+  timestamp_lte?: Maybe<Scalars['DateTime']>;
+  timestamp_not_eq?: Maybe<Scalars['DateTime']>;
+  timestamp_not_in?: Maybe<Array<Scalars['DateTime']>>;
+};
 
 export type EventsConnection = {
-  edges: Array<EventEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<EventEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export enum ExcludableContentType {
   Channel = 'Channel',
   Comment = 'Comment',
-  Video = 'Video',
+  Video = 'Video'
 }
 
 export type ExcludeContentResult = {
-  numberOfEntitiesAffected: Scalars['Int']
-}
+  numberOfEntitiesAffected: Scalars['Int'];
+};
 
 export type ExtendedChannel = {
-  activeVideosCount: Scalars['Int']
-  channel: Channel
-}
+  activeVideosCount: Scalars['Int'];
+  channel: Channel;
+};
 
 export type ExtendedChannelWhereInput = {
-  activeVideosCount_gt?: Maybe<Scalars['Int']>
-  channel?: Maybe<ChannelWhereInput>
-}
+  activeVideosCount_gt?: Maybe<Scalars['Int']>;
+  channel?: Maybe<ChannelWhereInput>;
+};
 
 export type ExtendedVideoCategory = {
-  activeVideosCount: Scalars['Int']
-  category: VideoCategory
-}
+  activeVideosCount: Scalars['Int'];
+  category: VideoCategory;
+};
 
 export type FeaturedVideoInput = {
-  videoCutUrl?: Maybe<Scalars['String']>
-  videoId: Scalars['String']
-}
+  videoCutUrl?: Maybe<Scalars['String']>;
+  videoId: Scalars['String'];
+};
 
 export type GeneratedSignature = {
-  signature: Scalars['String']
-}
+  signature: Scalars['String'];
+};
 
 export type GeoCoordinates = {
-  latitude: Scalars['Float']
-  longitude: Scalars['Float']
-}
+  latitude: Scalars['Float'];
+  longitude: Scalars['Float'];
+};
 
 export type GeoCoordinatesWhereInput = {
-  latitude_eq?: Maybe<Scalars['Float']>
-  latitude_gt?: Maybe<Scalars['Float']>
-  latitude_gte?: Maybe<Scalars['Float']>
-  latitude_in?: Maybe<Array<Scalars['Float']>>
-  latitude_isNull?: Maybe<Scalars['Boolean']>
-  latitude_lt?: Maybe<Scalars['Float']>
-  latitude_lte?: Maybe<Scalars['Float']>
-  latitude_not_eq?: Maybe<Scalars['Float']>
-  latitude_not_in?: Maybe<Array<Scalars['Float']>>
-  longitude_eq?: Maybe<Scalars['Float']>
-  longitude_gt?: Maybe<Scalars['Float']>
-  longitude_gte?: Maybe<Scalars['Float']>
-  longitude_in?: Maybe<Array<Scalars['Float']>>
-  longitude_isNull?: Maybe<Scalars['Boolean']>
-  longitude_lt?: Maybe<Scalars['Float']>
-  longitude_lte?: Maybe<Scalars['Float']>
-  longitude_not_eq?: Maybe<Scalars['Float']>
-  longitude_not_in?: Maybe<Array<Scalars['Float']>>
-}
+  latitude_eq?: Maybe<Scalars['Float']>;
+  latitude_gt?: Maybe<Scalars['Float']>;
+  latitude_gte?: Maybe<Scalars['Float']>;
+  latitude_in?: Maybe<Array<Scalars['Float']>>;
+  latitude_isNull?: Maybe<Scalars['Boolean']>;
+  latitude_lt?: Maybe<Scalars['Float']>;
+  latitude_lte?: Maybe<Scalars['Float']>;
+  latitude_not_eq?: Maybe<Scalars['Float']>;
+  latitude_not_in?: Maybe<Array<Scalars['Float']>>;
+  longitude_eq?: Maybe<Scalars['Float']>;
+  longitude_gt?: Maybe<Scalars['Float']>;
+  longitude_gte?: Maybe<Scalars['Float']>;
+  longitude_in?: Maybe<Array<Scalars['Float']>>;
+  longitude_isNull?: Maybe<Scalars['Boolean']>;
+  longitude_lt?: Maybe<Scalars['Float']>;
+  longitude_lte?: Maybe<Scalars['Float']>;
+  longitude_not_eq?: Maybe<Scalars['Float']>;
+  longitude_not_in?: Maybe<Array<Scalars['Float']>>;
+};
 
-export type GeographicalArea =
-  | GeographicalAreaContinent
-  | GeographicalAreaCountry
-  | GeographicalAreaSubdivistion
+export type GeographicalArea = GeographicalAreaContinent | GeographicalAreaCountry | GeographicalAreaSubdivistion;
 
 export type GeographicalAreaContinent = {
-  continentCode?: Maybe<Continent>
-}
+  continentCode?: Maybe<Continent>;
+};
 
 export type GeographicalAreaCountry = {
-  countryCode?: Maybe<Scalars['String']>
-}
+  countryCode?: Maybe<Scalars['String']>;
+};
 
 export type GeographicalAreaSubdivistion = {
-  subdivisionCode?: Maybe<Scalars['String']>
-}
+  subdivisionCode?: Maybe<Scalars['String']>;
+};
 
 export type KillSwitch = {
-  isKilled: Scalars['Boolean']
-}
+  isKilled: Scalars['Boolean'];
+};
 
 export type License = {
-  attribution?: Maybe<Scalars['String']>
-  code?: Maybe<Scalars['Int']>
-  customText?: Maybe<Scalars['String']>
-  id: Scalars['String']
-}
+  attribution?: Maybe<Scalars['String']>;
+  code?: Maybe<Scalars['Int']>;
+  customText?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+};
 
 export type LicenseEdge = {
-  cursor: Scalars['String']
-  node: License
-}
+  cursor: Scalars['String'];
+  node: License;
+};
 
 export enum LicenseOrderByInput {
   AttributionAsc = 'attribution_ASC',
@@ -2867,98 +2847,98 @@ export enum LicenseOrderByInput {
   CustomTextAsc = 'customText_ASC',
   CustomTextDesc = 'customText_DESC',
   IdAsc = 'id_ASC',
-  IdDesc = 'id_DESC',
+  IdDesc = 'id_DESC'
 }
 
 export type LicenseWhereInput = {
-  AND?: Maybe<Array<LicenseWhereInput>>
-  OR?: Maybe<Array<LicenseWhereInput>>
-  attribution_contains?: Maybe<Scalars['String']>
-  attribution_containsInsensitive?: Maybe<Scalars['String']>
-  attribution_endsWith?: Maybe<Scalars['String']>
-  attribution_eq?: Maybe<Scalars['String']>
-  attribution_gt?: Maybe<Scalars['String']>
-  attribution_gte?: Maybe<Scalars['String']>
-  attribution_in?: Maybe<Array<Scalars['String']>>
-  attribution_isNull?: Maybe<Scalars['Boolean']>
-  attribution_lt?: Maybe<Scalars['String']>
-  attribution_lte?: Maybe<Scalars['String']>
-  attribution_not_contains?: Maybe<Scalars['String']>
-  attribution_not_containsInsensitive?: Maybe<Scalars['String']>
-  attribution_not_endsWith?: Maybe<Scalars['String']>
-  attribution_not_eq?: Maybe<Scalars['String']>
-  attribution_not_in?: Maybe<Array<Scalars['String']>>
-  attribution_not_startsWith?: Maybe<Scalars['String']>
-  attribution_startsWith?: Maybe<Scalars['String']>
-  code_eq?: Maybe<Scalars['Int']>
-  code_gt?: Maybe<Scalars['Int']>
-  code_gte?: Maybe<Scalars['Int']>
-  code_in?: Maybe<Array<Scalars['Int']>>
-  code_isNull?: Maybe<Scalars['Boolean']>
-  code_lt?: Maybe<Scalars['Int']>
-  code_lte?: Maybe<Scalars['Int']>
-  code_not_eq?: Maybe<Scalars['Int']>
-  code_not_in?: Maybe<Array<Scalars['Int']>>
-  customText_contains?: Maybe<Scalars['String']>
-  customText_containsInsensitive?: Maybe<Scalars['String']>
-  customText_endsWith?: Maybe<Scalars['String']>
-  customText_eq?: Maybe<Scalars['String']>
-  customText_gt?: Maybe<Scalars['String']>
-  customText_gte?: Maybe<Scalars['String']>
-  customText_in?: Maybe<Array<Scalars['String']>>
-  customText_isNull?: Maybe<Scalars['Boolean']>
-  customText_lt?: Maybe<Scalars['String']>
-  customText_lte?: Maybe<Scalars['String']>
-  customText_not_contains?: Maybe<Scalars['String']>
-  customText_not_containsInsensitive?: Maybe<Scalars['String']>
-  customText_not_endsWith?: Maybe<Scalars['String']>
-  customText_not_eq?: Maybe<Scalars['String']>
-  customText_not_in?: Maybe<Array<Scalars['String']>>
-  customText_not_startsWith?: Maybe<Scalars['String']>
-  customText_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<LicenseWhereInput>>;
+  OR?: Maybe<Array<LicenseWhereInput>>;
+  attribution_contains?: Maybe<Scalars['String']>;
+  attribution_containsInsensitive?: Maybe<Scalars['String']>;
+  attribution_endsWith?: Maybe<Scalars['String']>;
+  attribution_eq?: Maybe<Scalars['String']>;
+  attribution_gt?: Maybe<Scalars['String']>;
+  attribution_gte?: Maybe<Scalars['String']>;
+  attribution_in?: Maybe<Array<Scalars['String']>>;
+  attribution_isNull?: Maybe<Scalars['Boolean']>;
+  attribution_lt?: Maybe<Scalars['String']>;
+  attribution_lte?: Maybe<Scalars['String']>;
+  attribution_not_contains?: Maybe<Scalars['String']>;
+  attribution_not_containsInsensitive?: Maybe<Scalars['String']>;
+  attribution_not_endsWith?: Maybe<Scalars['String']>;
+  attribution_not_eq?: Maybe<Scalars['String']>;
+  attribution_not_in?: Maybe<Array<Scalars['String']>>;
+  attribution_not_startsWith?: Maybe<Scalars['String']>;
+  attribution_startsWith?: Maybe<Scalars['String']>;
+  code_eq?: Maybe<Scalars['Int']>;
+  code_gt?: Maybe<Scalars['Int']>;
+  code_gte?: Maybe<Scalars['Int']>;
+  code_in?: Maybe<Array<Scalars['Int']>>;
+  code_isNull?: Maybe<Scalars['Boolean']>;
+  code_lt?: Maybe<Scalars['Int']>;
+  code_lte?: Maybe<Scalars['Int']>;
+  code_not_eq?: Maybe<Scalars['Int']>;
+  code_not_in?: Maybe<Array<Scalars['Int']>>;
+  customText_contains?: Maybe<Scalars['String']>;
+  customText_containsInsensitive?: Maybe<Scalars['String']>;
+  customText_endsWith?: Maybe<Scalars['String']>;
+  customText_eq?: Maybe<Scalars['String']>;
+  customText_gt?: Maybe<Scalars['String']>;
+  customText_gte?: Maybe<Scalars['String']>;
+  customText_in?: Maybe<Array<Scalars['String']>>;
+  customText_isNull?: Maybe<Scalars['Boolean']>;
+  customText_lt?: Maybe<Scalars['String']>;
+  customText_lte?: Maybe<Scalars['String']>;
+  customText_not_contains?: Maybe<Scalars['String']>;
+  customText_not_containsInsensitive?: Maybe<Scalars['String']>;
+  customText_not_endsWith?: Maybe<Scalars['String']>;
+  customText_not_eq?: Maybe<Scalars['String']>;
+  customText_not_in?: Maybe<Array<Scalars['String']>>;
+  customText_not_startsWith?: Maybe<Scalars['String']>;
+  customText_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type LicensesConnection = {
-  edges: Array<LicenseEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<LicenseEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type MemberMetadata = {
-  about?: Maybe<Scalars['String']>
-  avatar?: Maybe<Avatar>
-  id: Scalars['String']
-  member: Membership
-  name?: Maybe<Scalars['String']>
-}
+  about?: Maybe<Scalars['String']>;
+  avatar?: Maybe<Avatar>;
+  id: Scalars['String'];
+  member: Membership;
+  name?: Maybe<Scalars['String']>;
+};
 
 export type MemberMetadataConnection = {
-  edges: Array<MemberMetadataEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<MemberMetadataEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type MemberMetadataEdge = {
-  cursor: Scalars['String']
-  node: MemberMetadata
-}
+  cursor: Scalars['String'];
+  node: MemberMetadata;
+};
 
 export enum MemberMetadataOrderByInput {
   AboutAsc = 'about_ASC',
@@ -2978,105 +2958,108 @@ export enum MemberMetadataOrderByInput {
   MemberIdAsc = 'member_id_ASC',
   MemberIdDesc = 'member_id_DESC',
   NameAsc = 'name_ASC',
-  NameDesc = 'name_DESC',
+  NameDesc = 'name_DESC'
 }
 
 export type MemberMetadataWhereInput = {
-  AND?: Maybe<Array<MemberMetadataWhereInput>>
-  OR?: Maybe<Array<MemberMetadataWhereInput>>
-  about_contains?: Maybe<Scalars['String']>
-  about_containsInsensitive?: Maybe<Scalars['String']>
-  about_endsWith?: Maybe<Scalars['String']>
-  about_eq?: Maybe<Scalars['String']>
-  about_gt?: Maybe<Scalars['String']>
-  about_gte?: Maybe<Scalars['String']>
-  about_in?: Maybe<Array<Scalars['String']>>
-  about_isNull?: Maybe<Scalars['Boolean']>
-  about_lt?: Maybe<Scalars['String']>
-  about_lte?: Maybe<Scalars['String']>
-  about_not_contains?: Maybe<Scalars['String']>
-  about_not_containsInsensitive?: Maybe<Scalars['String']>
-  about_not_endsWith?: Maybe<Scalars['String']>
-  about_not_eq?: Maybe<Scalars['String']>
-  about_not_in?: Maybe<Array<Scalars['String']>>
-  about_not_startsWith?: Maybe<Scalars['String']>
-  about_startsWith?: Maybe<Scalars['String']>
-  avatar?: Maybe<AvatarWhereInput>
-  avatar_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  name_contains?: Maybe<Scalars['String']>
-  name_containsInsensitive?: Maybe<Scalars['String']>
-  name_endsWith?: Maybe<Scalars['String']>
-  name_eq?: Maybe<Scalars['String']>
-  name_gt?: Maybe<Scalars['String']>
-  name_gte?: Maybe<Scalars['String']>
-  name_in?: Maybe<Array<Scalars['String']>>
-  name_isNull?: Maybe<Scalars['Boolean']>
-  name_lt?: Maybe<Scalars['String']>
-  name_lte?: Maybe<Scalars['String']>
-  name_not_contains?: Maybe<Scalars['String']>
-  name_not_containsInsensitive?: Maybe<Scalars['String']>
-  name_not_endsWith?: Maybe<Scalars['String']>
-  name_not_eq?: Maybe<Scalars['String']>
-  name_not_in?: Maybe<Array<Scalars['String']>>
-  name_not_startsWith?: Maybe<Scalars['String']>
-  name_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<MemberMetadataWhereInput>>;
+  OR?: Maybe<Array<MemberMetadataWhereInput>>;
+  about_contains?: Maybe<Scalars['String']>;
+  about_containsInsensitive?: Maybe<Scalars['String']>;
+  about_endsWith?: Maybe<Scalars['String']>;
+  about_eq?: Maybe<Scalars['String']>;
+  about_gt?: Maybe<Scalars['String']>;
+  about_gte?: Maybe<Scalars['String']>;
+  about_in?: Maybe<Array<Scalars['String']>>;
+  about_isNull?: Maybe<Scalars['Boolean']>;
+  about_lt?: Maybe<Scalars['String']>;
+  about_lte?: Maybe<Scalars['String']>;
+  about_not_contains?: Maybe<Scalars['String']>;
+  about_not_containsInsensitive?: Maybe<Scalars['String']>;
+  about_not_endsWith?: Maybe<Scalars['String']>;
+  about_not_eq?: Maybe<Scalars['String']>;
+  about_not_in?: Maybe<Array<Scalars['String']>>;
+  about_not_startsWith?: Maybe<Scalars['String']>;
+  about_startsWith?: Maybe<Scalars['String']>;
+  avatar?: Maybe<AvatarWhereInput>;
+  avatar_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_containsInsensitive?: Maybe<Scalars['String']>;
+  name_endsWith?: Maybe<Scalars['String']>;
+  name_eq?: Maybe<Scalars['String']>;
+  name_gt?: Maybe<Scalars['String']>;
+  name_gte?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Scalars['String']>>;
+  name_isNull?: Maybe<Scalars['Boolean']>;
+  name_lt?: Maybe<Scalars['String']>;
+  name_lte?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_not_containsInsensitive?: Maybe<Scalars['String']>;
+  name_not_endsWith?: Maybe<Scalars['String']>;
+  name_not_eq?: Maybe<Scalars['String']>;
+  name_not_in?: Maybe<Array<Scalars['String']>>;
+  name_not_startsWith?: Maybe<Scalars['String']>;
+  name_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type Membership = {
-  bannedFromChannels: Array<BannedMember>
-  channels: Array<Channel>
-  controllerAccount: Scalars['String']
-  createdAt: Scalars['DateTime']
-  handle: Scalars['String']
-  id: Scalars['String']
-  metadata?: Maybe<MemberMetadata>
-  whitelistedInAuctions: Array<AuctionWhitelistedMember>
-}
+  bannedFromChannels: Array<BannedMember>;
+  channels: Array<Channel>;
+  controllerAccount: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  handle: Scalars['String'];
+  id: Scalars['String'];
+  metadata?: Maybe<MemberMetadata>;
+  whitelistedInAuctions: Array<AuctionWhitelistedMember>;
+};
+
 
 export type MembershipBannedFromChannelsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BannedMemberOrderByInput>>
-  where?: Maybe<BannedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BannedMemberOrderByInput>>;
+  where?: Maybe<BannedMemberWhereInput>;
+};
+
 
 export type MembershipChannelsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<ChannelOrderByInput>>
-  where?: Maybe<ChannelWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<ChannelOrderByInput>>;
+  where?: Maybe<ChannelWhereInput>;
+};
+
 
 export type MembershipWhitelistedInAuctionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>
-  where?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>;
+  where?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
 
 export type MembershipEdge = {
-  cursor: Scalars['String']
-  node: Membership
-}
+  cursor: Scalars['String'];
+  node: Membership;
+};
 
 export enum MembershipOrderByInput {
   ControllerAccountAsc = 'controllerAccount_ASC',
@@ -3092,412 +3075,420 @@ export enum MembershipOrderByInput {
   MetadataIdAsc = 'metadata_id_ASC',
   MetadataIdDesc = 'metadata_id_DESC',
   MetadataNameAsc = 'metadata_name_ASC',
-  MetadataNameDesc = 'metadata_name_DESC',
+  MetadataNameDesc = 'metadata_name_DESC'
 }
 
 export type MembershipWhereInput = {
-  AND?: Maybe<Array<MembershipWhereInput>>
-  OR?: Maybe<Array<MembershipWhereInput>>
-  bannedFromChannels_every?: Maybe<BannedMemberWhereInput>
-  bannedFromChannels_none?: Maybe<BannedMemberWhereInput>
-  bannedFromChannels_some?: Maybe<BannedMemberWhereInput>
-  channels_every?: Maybe<ChannelWhereInput>
-  channels_none?: Maybe<ChannelWhereInput>
-  channels_some?: Maybe<ChannelWhereInput>
-  controllerAccount_contains?: Maybe<Scalars['String']>
-  controllerAccount_containsInsensitive?: Maybe<Scalars['String']>
-  controllerAccount_endsWith?: Maybe<Scalars['String']>
-  controllerAccount_eq?: Maybe<Scalars['String']>
-  controllerAccount_gt?: Maybe<Scalars['String']>
-  controllerAccount_gte?: Maybe<Scalars['String']>
-  controllerAccount_in?: Maybe<Array<Scalars['String']>>
-  controllerAccount_isNull?: Maybe<Scalars['Boolean']>
-  controllerAccount_lt?: Maybe<Scalars['String']>
-  controllerAccount_lte?: Maybe<Scalars['String']>
-  controllerAccount_not_contains?: Maybe<Scalars['String']>
-  controllerAccount_not_containsInsensitive?: Maybe<Scalars['String']>
-  controllerAccount_not_endsWith?: Maybe<Scalars['String']>
-  controllerAccount_not_eq?: Maybe<Scalars['String']>
-  controllerAccount_not_in?: Maybe<Array<Scalars['String']>>
-  controllerAccount_not_startsWith?: Maybe<Scalars['String']>
-  controllerAccount_startsWith?: Maybe<Scalars['String']>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  handle_contains?: Maybe<Scalars['String']>
-  handle_containsInsensitive?: Maybe<Scalars['String']>
-  handle_endsWith?: Maybe<Scalars['String']>
-  handle_eq?: Maybe<Scalars['String']>
-  handle_gt?: Maybe<Scalars['String']>
-  handle_gte?: Maybe<Scalars['String']>
-  handle_in?: Maybe<Array<Scalars['String']>>
-  handle_isNull?: Maybe<Scalars['Boolean']>
-  handle_lt?: Maybe<Scalars['String']>
-  handle_lte?: Maybe<Scalars['String']>
-  handle_not_contains?: Maybe<Scalars['String']>
-  handle_not_containsInsensitive?: Maybe<Scalars['String']>
-  handle_not_endsWith?: Maybe<Scalars['String']>
-  handle_not_eq?: Maybe<Scalars['String']>
-  handle_not_in?: Maybe<Array<Scalars['String']>>
-  handle_not_startsWith?: Maybe<Scalars['String']>
-  handle_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  metadata?: Maybe<MemberMetadataWhereInput>
-  metadata_isNull?: Maybe<Scalars['Boolean']>
-  whitelistedInAuctions_every?: Maybe<AuctionWhitelistedMemberWhereInput>
-  whitelistedInAuctions_none?: Maybe<AuctionWhitelistedMemberWhereInput>
-  whitelistedInAuctions_some?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  AND?: Maybe<Array<MembershipWhereInput>>;
+  OR?: Maybe<Array<MembershipWhereInput>>;
+  bannedFromChannels_every?: Maybe<BannedMemberWhereInput>;
+  bannedFromChannels_none?: Maybe<BannedMemberWhereInput>;
+  bannedFromChannels_some?: Maybe<BannedMemberWhereInput>;
+  channels_every?: Maybe<ChannelWhereInput>;
+  channels_none?: Maybe<ChannelWhereInput>;
+  channels_some?: Maybe<ChannelWhereInput>;
+  controllerAccount_contains?: Maybe<Scalars['String']>;
+  controllerAccount_containsInsensitive?: Maybe<Scalars['String']>;
+  controllerAccount_endsWith?: Maybe<Scalars['String']>;
+  controllerAccount_eq?: Maybe<Scalars['String']>;
+  controllerAccount_gt?: Maybe<Scalars['String']>;
+  controllerAccount_gte?: Maybe<Scalars['String']>;
+  controllerAccount_in?: Maybe<Array<Scalars['String']>>;
+  controllerAccount_isNull?: Maybe<Scalars['Boolean']>;
+  controllerAccount_lt?: Maybe<Scalars['String']>;
+  controllerAccount_lte?: Maybe<Scalars['String']>;
+  controllerAccount_not_contains?: Maybe<Scalars['String']>;
+  controllerAccount_not_containsInsensitive?: Maybe<Scalars['String']>;
+  controllerAccount_not_endsWith?: Maybe<Scalars['String']>;
+  controllerAccount_not_eq?: Maybe<Scalars['String']>;
+  controllerAccount_not_in?: Maybe<Array<Scalars['String']>>;
+  controllerAccount_not_startsWith?: Maybe<Scalars['String']>;
+  controllerAccount_startsWith?: Maybe<Scalars['String']>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  handle_contains?: Maybe<Scalars['String']>;
+  handle_containsInsensitive?: Maybe<Scalars['String']>;
+  handle_endsWith?: Maybe<Scalars['String']>;
+  handle_eq?: Maybe<Scalars['String']>;
+  handle_gt?: Maybe<Scalars['String']>;
+  handle_gte?: Maybe<Scalars['String']>;
+  handle_in?: Maybe<Array<Scalars['String']>>;
+  handle_isNull?: Maybe<Scalars['Boolean']>;
+  handle_lt?: Maybe<Scalars['String']>;
+  handle_lte?: Maybe<Scalars['String']>;
+  handle_not_contains?: Maybe<Scalars['String']>;
+  handle_not_containsInsensitive?: Maybe<Scalars['String']>;
+  handle_not_endsWith?: Maybe<Scalars['String']>;
+  handle_not_eq?: Maybe<Scalars['String']>;
+  handle_not_in?: Maybe<Array<Scalars['String']>>;
+  handle_not_startsWith?: Maybe<Scalars['String']>;
+  handle_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  metadata?: Maybe<MemberMetadataWhereInput>;
+  metadata_isNull?: Maybe<Scalars['Boolean']>;
+  whitelistedInAuctions_every?: Maybe<AuctionWhitelistedMemberWhereInput>;
+  whitelistedInAuctions_none?: Maybe<AuctionWhitelistedMemberWhereInput>;
+  whitelistedInAuctions_some?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
 
 export type MembershipsConnection = {
-  edges: Array<MembershipEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<MembershipEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
-export type MetaprotocolTransactionResult =
-  | MetaprotocolTransactionResultChannelPaid
-  | MetaprotocolTransactionResultCommentCreated
-  | MetaprotocolTransactionResultCommentDeleted
-  | MetaprotocolTransactionResultCommentEdited
-  | MetaprotocolTransactionResultCommentModerated
-  | MetaprotocolTransactionResultFailed
-  | MetaprotocolTransactionResultOk
+export type MetaprotocolTransactionResult = MetaprotocolTransactionResultChannelPaid | MetaprotocolTransactionResultCommentCreated | MetaprotocolTransactionResultCommentDeleted | MetaprotocolTransactionResultCommentEdited | MetaprotocolTransactionResultCommentModerated | MetaprotocolTransactionResultFailed | MetaprotocolTransactionResultOk;
 
 export type MetaprotocolTransactionResultChannelPaid = {
-  channelPaid?: Maybe<Channel>
-}
+  channelPaid?: Maybe<Channel>;
+};
 
 export type MetaprotocolTransactionResultCommentCreated = {
-  commentCreated?: Maybe<Comment>
-}
+  commentCreated?: Maybe<Comment>;
+};
 
 export type MetaprotocolTransactionResultCommentDeleted = {
-  commentDeleted?: Maybe<Comment>
-}
+  commentDeleted?: Maybe<Comment>;
+};
 
 export type MetaprotocolTransactionResultCommentEdited = {
-  commentEdited?: Maybe<Comment>
-}
+  commentEdited?: Maybe<Comment>;
+};
 
 export type MetaprotocolTransactionResultCommentModerated = {
-  commentModerated?: Maybe<Comment>
-}
+  commentModerated?: Maybe<Comment>;
+};
 
 export type MetaprotocolTransactionResultFailed = {
-  errorMessage: Scalars['String']
-}
+  errorMessage: Scalars['String'];
+};
 
 export type MetaprotocolTransactionResultOk = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type MetaprotocolTransactionResultWhereInput = {
-  channelPaid?: Maybe<ChannelWhereInput>
-  channelPaid_isNull?: Maybe<Scalars['Boolean']>
-  commentCreated?: Maybe<CommentWhereInput>
-  commentCreated_isNull?: Maybe<Scalars['Boolean']>
-  commentDeleted?: Maybe<CommentWhereInput>
-  commentDeleted_isNull?: Maybe<Scalars['Boolean']>
-  commentEdited?: Maybe<CommentWhereInput>
-  commentEdited_isNull?: Maybe<Scalars['Boolean']>
-  commentModerated?: Maybe<CommentWhereInput>
-  commentModerated_isNull?: Maybe<Scalars['Boolean']>
-  errorMessage_contains?: Maybe<Scalars['String']>
-  errorMessage_containsInsensitive?: Maybe<Scalars['String']>
-  errorMessage_endsWith?: Maybe<Scalars['String']>
-  errorMessage_eq?: Maybe<Scalars['String']>
-  errorMessage_gt?: Maybe<Scalars['String']>
-  errorMessage_gte?: Maybe<Scalars['String']>
-  errorMessage_in?: Maybe<Array<Scalars['String']>>
-  errorMessage_isNull?: Maybe<Scalars['Boolean']>
-  errorMessage_lt?: Maybe<Scalars['String']>
-  errorMessage_lte?: Maybe<Scalars['String']>
-  errorMessage_not_contains?: Maybe<Scalars['String']>
-  errorMessage_not_containsInsensitive?: Maybe<Scalars['String']>
-  errorMessage_not_endsWith?: Maybe<Scalars['String']>
-  errorMessage_not_eq?: Maybe<Scalars['String']>
-  errorMessage_not_in?: Maybe<Array<Scalars['String']>>
-  errorMessage_not_startsWith?: Maybe<Scalars['String']>
-  errorMessage_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  channelPaid?: Maybe<ChannelWhereInput>;
+  channelPaid_isNull?: Maybe<Scalars['Boolean']>;
+  commentCreated?: Maybe<CommentWhereInput>;
+  commentCreated_isNull?: Maybe<Scalars['Boolean']>;
+  commentDeleted?: Maybe<CommentWhereInput>;
+  commentDeleted_isNull?: Maybe<Scalars['Boolean']>;
+  commentEdited?: Maybe<CommentWhereInput>;
+  commentEdited_isNull?: Maybe<Scalars['Boolean']>;
+  commentModerated?: Maybe<CommentWhereInput>;
+  commentModerated_isNull?: Maybe<Scalars['Boolean']>;
+  errorMessage_contains?: Maybe<Scalars['String']>;
+  errorMessage_containsInsensitive?: Maybe<Scalars['String']>;
+  errorMessage_endsWith?: Maybe<Scalars['String']>;
+  errorMessage_eq?: Maybe<Scalars['String']>;
+  errorMessage_gt?: Maybe<Scalars['String']>;
+  errorMessage_gte?: Maybe<Scalars['String']>;
+  errorMessage_in?: Maybe<Array<Scalars['String']>>;
+  errorMessage_isNull?: Maybe<Scalars['Boolean']>;
+  errorMessage_lt?: Maybe<Scalars['String']>;
+  errorMessage_lte?: Maybe<Scalars['String']>;
+  errorMessage_not_contains?: Maybe<Scalars['String']>;
+  errorMessage_not_containsInsensitive?: Maybe<Scalars['String']>;
+  errorMessage_not_endsWith?: Maybe<Scalars['String']>;
+  errorMessage_not_eq?: Maybe<Scalars['String']>;
+  errorMessage_not_in?: Maybe<Array<Scalars['String']>>;
+  errorMessage_not_startsWith?: Maybe<Scalars['String']>;
+  errorMessage_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export type MetaprotocolTransactionStatusEventData = {
-  result: MetaprotocolTransactionResult
-}
+  result: MetaprotocolTransactionResult;
+};
 
 export type Mutation = {
-  addVideoView: AddVideoViewResult
-  excludeContent: ExcludeContentResult
-  followChannel: ChannelFollowResult
-  reportChannel: ChannelReportInfo
-  reportVideo: VideoReportInfo
-  restoreContent: RestoreContentResult
-  setCategoryFeaturedVideos: SetCategoryFeaturedVideosResult
-  setKillSwitch: KillSwitch
-  setSupportedCategories: SetSupportedCategoriesResult
-  setVideoHero: SetVideoHeroResult
-  setVideoViewPerIpTimeLimit: VideoViewPerIpTimeLimit
-  signAppActionCommitment: GeneratedSignature
-  unfollowChannel: ChannelUnfollowResult
-}
+  addVideoView: AddVideoViewResult;
+  excludeContent: ExcludeContentResult;
+  followChannel: ChannelFollowResult;
+  reportChannel: ChannelReportInfo;
+  reportVideo: VideoReportInfo;
+  restoreContent: RestoreContentResult;
+  setCategoryFeaturedVideos: SetCategoryFeaturedVideosResult;
+  setKillSwitch: KillSwitch;
+  setSupportedCategories: SetSupportedCategoriesResult;
+  setVideoHero: SetVideoHeroResult;
+  setVideoViewPerIpTimeLimit: VideoViewPerIpTimeLimit;
+  signAppActionCommitment: GeneratedSignature;
+  unfollowChannel: ChannelUnfollowResult;
+};
+
 
 export type MutationAddVideoViewArgs = {
-  videoId: Scalars['String']
-}
+  videoId: Scalars['String'];
+};
+
 
 export type MutationExcludeContentArgs = {
-  ids: Array<Scalars['String']>
-  type: ExcludableContentType
-}
+  ids: Array<Scalars['String']>;
+  type: ExcludableContentType;
+};
+
 
 export type MutationFollowChannelArgs = {
-  channelId: Scalars['String']
-}
+  channelId: Scalars['String'];
+};
+
 
 export type MutationReportChannelArgs = {
-  channelId: Scalars['String']
-  rationale: Scalars['String']
-}
+  channelId: Scalars['String'];
+  rationale: Scalars['String'];
+};
+
 
 export type MutationReportVideoArgs = {
-  rationale: Scalars['String']
-  videoId: Scalars['String']
-}
+  rationale: Scalars['String'];
+  videoId: Scalars['String'];
+};
+
 
 export type MutationRestoreContentArgs = {
-  ids: Array<Scalars['String']>
-  type: ExcludableContentType
-}
+  ids: Array<Scalars['String']>;
+  type: ExcludableContentType;
+};
+
 
 export type MutationSetCategoryFeaturedVideosArgs = {
-  categoryId: Scalars['String']
-  videos: Array<FeaturedVideoInput>
-}
+  categoryId: Scalars['String'];
+  videos: Array<FeaturedVideoInput>;
+};
+
 
 export type MutationSetKillSwitchArgs = {
-  isKilled: Scalars['Boolean']
-}
+  isKilled: Scalars['Boolean'];
+};
+
 
 export type MutationSetSupportedCategoriesArgs = {
-  supportNewCategories?: Maybe<Scalars['Boolean']>
-  supportNoCategoryVideos?: Maybe<Scalars['Boolean']>
-  supportedCategoriesIds?: Maybe<Array<Scalars['String']>>
-}
+  supportNewCategories?: Maybe<Scalars['Boolean']>;
+  supportNoCategoryVideos?: Maybe<Scalars['Boolean']>;
+  supportedCategoriesIds?: Maybe<Array<Scalars['String']>>;
+};
+
 
 export type MutationSetVideoHeroArgs = {
-  heroPosterUrl: Scalars['String']
-  heroTitle: Scalars['String']
-  videoCutUrl: Scalars['String']
-  videoId: Scalars['String']
-}
+  heroPosterUrl: Scalars['String'];
+  heroTitle: Scalars['String'];
+  videoCutUrl: Scalars['String'];
+  videoId: Scalars['String'];
+};
+
 
 export type MutationSetVideoViewPerIpTimeLimitArgs = {
-  limitInSeconds: Scalars['Int']
-}
+  limitInSeconds: Scalars['Int'];
+};
+
 
 export type MutationSignAppActionCommitmentArgs = {
-  assets: Scalars['String']
-  creatorId: Scalars['String']
-  rawAction: Scalars['String']
-  rawAppActionMetadata: Scalars['String']
-}
+  assets: Scalars['String'];
+  creatorId: Scalars['String'];
+  rawAction: Scalars['String'];
+  rawAppActionMetadata: Scalars['String'];
+};
+
 
 export type MutationUnfollowChannelArgs = {
-  channelId: Scalars['String']
-  token: Scalars['String']
-}
+  channelId: Scalars['String'];
+  token: Scalars['String'];
+};
 
 export type NftBoughtEventData = {
-  buyer: Membership
-  nft: OwnedNft
-  previousNftOwner: NftOwner
-  price: Scalars['BigInt']
-}
+  buyer: Membership;
+  nft: OwnedNft;
+  previousNftOwner: NftOwner;
+  price: Scalars['BigInt'];
+};
 
 export type NftIssuedEventData = {
-  actor: ContentActor
-  nft: OwnedNft
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  nft: OwnedNft;
+  nftOwner: NftOwner;
+};
 
-export type NftOwner = NftOwnerChannel | NftOwnerMember
+export type NftOwner = NftOwnerChannel | NftOwnerMember;
 
 export type NftOwnerChannel = {
-  channel: Channel
-}
+  channel: Channel;
+};
 
 export type NftOwnerMember = {
-  member: Membership
-}
+  member: Membership;
+};
 
 export type NftOwnerWhereInput = {
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-}
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type NftSellOrderMadeEventData = {
-  actor: ContentActor
-  nft: OwnedNft
-  nftOwner: NftOwner
-  price: Scalars['BigInt']
-}
+  actor: ContentActor;
+  nft: OwnedNft;
+  nftOwner: NftOwner;
+  price: Scalars['BigInt'];
+};
 
 export type NodeLocationMetadata = {
-  city?: Maybe<Scalars['String']>
-  coordinates?: Maybe<GeoCoordinates>
-  countryCode?: Maybe<Scalars['String']>
-}
+  city?: Maybe<Scalars['String']>;
+  coordinates?: Maybe<GeoCoordinates>;
+  countryCode?: Maybe<Scalars['String']>;
+};
 
 export type NodeLocationMetadataWhereInput = {
-  city_contains?: Maybe<Scalars['String']>
-  city_containsInsensitive?: Maybe<Scalars['String']>
-  city_endsWith?: Maybe<Scalars['String']>
-  city_eq?: Maybe<Scalars['String']>
-  city_gt?: Maybe<Scalars['String']>
-  city_gte?: Maybe<Scalars['String']>
-  city_in?: Maybe<Array<Scalars['String']>>
-  city_isNull?: Maybe<Scalars['Boolean']>
-  city_lt?: Maybe<Scalars['String']>
-  city_lte?: Maybe<Scalars['String']>
-  city_not_contains?: Maybe<Scalars['String']>
-  city_not_containsInsensitive?: Maybe<Scalars['String']>
-  city_not_endsWith?: Maybe<Scalars['String']>
-  city_not_eq?: Maybe<Scalars['String']>
-  city_not_in?: Maybe<Array<Scalars['String']>>
-  city_not_startsWith?: Maybe<Scalars['String']>
-  city_startsWith?: Maybe<Scalars['String']>
-  coordinates?: Maybe<GeoCoordinatesWhereInput>
-  coordinates_isNull?: Maybe<Scalars['Boolean']>
-  countryCode_contains?: Maybe<Scalars['String']>
-  countryCode_containsInsensitive?: Maybe<Scalars['String']>
-  countryCode_endsWith?: Maybe<Scalars['String']>
-  countryCode_eq?: Maybe<Scalars['String']>
-  countryCode_gt?: Maybe<Scalars['String']>
-  countryCode_gte?: Maybe<Scalars['String']>
-  countryCode_in?: Maybe<Array<Scalars['String']>>
-  countryCode_isNull?: Maybe<Scalars['Boolean']>
-  countryCode_lt?: Maybe<Scalars['String']>
-  countryCode_lte?: Maybe<Scalars['String']>
-  countryCode_not_contains?: Maybe<Scalars['String']>
-  countryCode_not_containsInsensitive?: Maybe<Scalars['String']>
-  countryCode_not_endsWith?: Maybe<Scalars['String']>
-  countryCode_not_eq?: Maybe<Scalars['String']>
-  countryCode_not_in?: Maybe<Array<Scalars['String']>>
-  countryCode_not_startsWith?: Maybe<Scalars['String']>
-  countryCode_startsWith?: Maybe<Scalars['String']>
-}
+  city_contains?: Maybe<Scalars['String']>;
+  city_containsInsensitive?: Maybe<Scalars['String']>;
+  city_endsWith?: Maybe<Scalars['String']>;
+  city_eq?: Maybe<Scalars['String']>;
+  city_gt?: Maybe<Scalars['String']>;
+  city_gte?: Maybe<Scalars['String']>;
+  city_in?: Maybe<Array<Scalars['String']>>;
+  city_isNull?: Maybe<Scalars['Boolean']>;
+  city_lt?: Maybe<Scalars['String']>;
+  city_lte?: Maybe<Scalars['String']>;
+  city_not_contains?: Maybe<Scalars['String']>;
+  city_not_containsInsensitive?: Maybe<Scalars['String']>;
+  city_not_endsWith?: Maybe<Scalars['String']>;
+  city_not_eq?: Maybe<Scalars['String']>;
+  city_not_in?: Maybe<Array<Scalars['String']>>;
+  city_not_startsWith?: Maybe<Scalars['String']>;
+  city_startsWith?: Maybe<Scalars['String']>;
+  coordinates?: Maybe<GeoCoordinatesWhereInput>;
+  coordinates_isNull?: Maybe<Scalars['Boolean']>;
+  countryCode_contains?: Maybe<Scalars['String']>;
+  countryCode_containsInsensitive?: Maybe<Scalars['String']>;
+  countryCode_endsWith?: Maybe<Scalars['String']>;
+  countryCode_eq?: Maybe<Scalars['String']>;
+  countryCode_gt?: Maybe<Scalars['String']>;
+  countryCode_gte?: Maybe<Scalars['String']>;
+  countryCode_in?: Maybe<Array<Scalars['String']>>;
+  countryCode_isNull?: Maybe<Scalars['Boolean']>;
+  countryCode_lt?: Maybe<Scalars['String']>;
+  countryCode_lte?: Maybe<Scalars['String']>;
+  countryCode_not_contains?: Maybe<Scalars['String']>;
+  countryCode_not_containsInsensitive?: Maybe<Scalars['String']>;
+  countryCode_not_endsWith?: Maybe<Scalars['String']>;
+  countryCode_not_eq?: Maybe<Scalars['String']>;
+  countryCode_not_in?: Maybe<Array<Scalars['String']>>;
+  countryCode_not_startsWith?: Maybe<Scalars['String']>;
+  countryCode_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type OpenAuctionBidAcceptedEventData = {
-  actor: ContentActor
-  previousNftOwner: NftOwner
-  winningBid: Bid
-}
+  actor: ContentActor;
+  previousNftOwner: NftOwner;
+  winningBid: Bid;
+};
 
 export type OpenAuctionStartedEventData = {
-  actor: ContentActor
-  auction: Auction
-  nftOwner: NftOwner
-}
+  actor: ContentActor;
+  auction: Auction;
+  nftOwner: NftOwner;
+};
 
 export type OwnedNft = {
-  auctions: Array<Auction>
-  bids: Array<Bid>
-  createdAt: Scalars['DateTime']
-  creatorRoyalty?: Maybe<Scalars['Float']>
-  id: Scalars['String']
-  lastSaleDate?: Maybe<Scalars['DateTime']>
-  lastSalePrice?: Maybe<Scalars['BigInt']>
-  owner: NftOwner
-  transactionalStatus?: Maybe<TransactionalStatus>
-  video: Video
-}
+  auctions: Array<Auction>;
+  bids: Array<Bid>;
+  createdAt: Scalars['DateTime'];
+  creatorRoyalty?: Maybe<Scalars['Float']>;
+  id: Scalars['String'];
+  lastSaleDate?: Maybe<Scalars['DateTime']>;
+  lastSalePrice?: Maybe<Scalars['BigInt']>;
+  owner: NftOwner;
+  transactionalStatus?: Maybe<TransactionalStatus>;
+  video: Video;
+};
+
 
 export type OwnedNftAuctionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionOrderByInput>>
-  where?: Maybe<AuctionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionOrderByInput>>;
+  where?: Maybe<AuctionWhereInput>;
+};
+
 
 export type OwnedNftBidsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BidOrderByInput>>
-  where?: Maybe<BidWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BidOrderByInput>>;
+  where?: Maybe<BidWhereInput>;
+};
 
 export type OwnedNftEdge = {
-  cursor: Scalars['String']
-  node: OwnedNft
-}
+  cursor: Scalars['String'];
+  node: OwnedNft;
+};
 
 export enum OwnedNftOrderByInput {
   CreatedAtAsc = 'createdAt_ASC',
@@ -3555,1146 +3546,1289 @@ export enum OwnedNftOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type OwnedNftWhereInput = {
-  AND?: Maybe<Array<OwnedNftWhereInput>>
-  OR?: Maybe<Array<OwnedNftWhereInput>>
-  auctions_every?: Maybe<AuctionWhereInput>
-  auctions_none?: Maybe<AuctionWhereInput>
-  auctions_some?: Maybe<AuctionWhereInput>
-  bids_every?: Maybe<BidWhereInput>
-  bids_none?: Maybe<BidWhereInput>
-  bids_some?: Maybe<BidWhereInput>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  creatorRoyalty_eq?: Maybe<Scalars['Float']>
-  creatorRoyalty_gt?: Maybe<Scalars['Float']>
-  creatorRoyalty_gte?: Maybe<Scalars['Float']>
-  creatorRoyalty_in?: Maybe<Array<Scalars['Float']>>
-  creatorRoyalty_isNull?: Maybe<Scalars['Boolean']>
-  creatorRoyalty_lt?: Maybe<Scalars['Float']>
-  creatorRoyalty_lte?: Maybe<Scalars['Float']>
-  creatorRoyalty_not_eq?: Maybe<Scalars['Float']>
-  creatorRoyalty_not_in?: Maybe<Array<Scalars['Float']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  lastSaleDate_eq?: Maybe<Scalars['DateTime']>
-  lastSaleDate_gt?: Maybe<Scalars['DateTime']>
-  lastSaleDate_gte?: Maybe<Scalars['DateTime']>
-  lastSaleDate_in?: Maybe<Array<Scalars['DateTime']>>
-  lastSaleDate_isNull?: Maybe<Scalars['Boolean']>
-  lastSaleDate_lt?: Maybe<Scalars['DateTime']>
-  lastSaleDate_lte?: Maybe<Scalars['DateTime']>
-  lastSaleDate_not_eq?: Maybe<Scalars['DateTime']>
-  lastSaleDate_not_in?: Maybe<Array<Scalars['DateTime']>>
-  lastSalePrice_eq?: Maybe<Scalars['BigInt']>
-  lastSalePrice_gt?: Maybe<Scalars['BigInt']>
-  lastSalePrice_gte?: Maybe<Scalars['BigInt']>
-  lastSalePrice_in?: Maybe<Array<Scalars['BigInt']>>
-  lastSalePrice_isNull?: Maybe<Scalars['Boolean']>
-  lastSalePrice_lt?: Maybe<Scalars['BigInt']>
-  lastSalePrice_lte?: Maybe<Scalars['BigInt']>
-  lastSalePrice_not_eq?: Maybe<Scalars['BigInt']>
-  lastSalePrice_not_in?: Maybe<Array<Scalars['BigInt']>>
-  owner?: Maybe<NftOwnerWhereInput>
-  owner_isNull?: Maybe<Scalars['Boolean']>
-  transactionalStatus?: Maybe<TransactionalStatusWhereInput>
-  transactionalStatus_isNull?: Maybe<Scalars['Boolean']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<OwnedNftWhereInput>>;
+  OR?: Maybe<Array<OwnedNftWhereInput>>;
+  auctions_every?: Maybe<AuctionWhereInput>;
+  auctions_none?: Maybe<AuctionWhereInput>;
+  auctions_some?: Maybe<AuctionWhereInput>;
+  bids_every?: Maybe<BidWhereInput>;
+  bids_none?: Maybe<BidWhereInput>;
+  bids_some?: Maybe<BidWhereInput>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  creatorRoyalty_eq?: Maybe<Scalars['Float']>;
+  creatorRoyalty_gt?: Maybe<Scalars['Float']>;
+  creatorRoyalty_gte?: Maybe<Scalars['Float']>;
+  creatorRoyalty_in?: Maybe<Array<Scalars['Float']>>;
+  creatorRoyalty_isNull?: Maybe<Scalars['Boolean']>;
+  creatorRoyalty_lt?: Maybe<Scalars['Float']>;
+  creatorRoyalty_lte?: Maybe<Scalars['Float']>;
+  creatorRoyalty_not_eq?: Maybe<Scalars['Float']>;
+  creatorRoyalty_not_in?: Maybe<Array<Scalars['Float']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  lastSaleDate_eq?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_gt?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_gte?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_in?: Maybe<Array<Scalars['DateTime']>>;
+  lastSaleDate_isNull?: Maybe<Scalars['Boolean']>;
+  lastSaleDate_lt?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_lte?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_not_eq?: Maybe<Scalars['DateTime']>;
+  lastSaleDate_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  lastSalePrice_eq?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_gt?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_gte?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_in?: Maybe<Array<Scalars['BigInt']>>;
+  lastSalePrice_isNull?: Maybe<Scalars['Boolean']>;
+  lastSalePrice_lt?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_lte?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_not_eq?: Maybe<Scalars['BigInt']>;
+  lastSalePrice_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  owner?: Maybe<NftOwnerWhereInput>;
+  owner_isNull?: Maybe<Scalars['Boolean']>;
+  transactionalStatus?: Maybe<TransactionalStatusWhereInput>;
+  transactionalStatus_isNull?: Maybe<Scalars['Boolean']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type OwnedNftsConnection = {
-  edges: Array<OwnedNftEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<OwnedNftEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type PageInfo = {
-  endCursor: Scalars['String']
-  hasNextPage: Scalars['Boolean']
-  hasPreviousPage: Scalars['Boolean']
-  startCursor: Scalars['String']
-}
+  endCursor: Scalars['String'];
+  hasNextPage: Scalars['Boolean'];
+  hasPreviousPage: Scalars['Boolean'];
+  startCursor: Scalars['String'];
+};
 
-export type PaymentContext = PaymentContextChannel | PaymentContextVideo
+export type PaymentContext = PaymentContextChannel | PaymentContextVideo;
 
 export type PaymentContextChannel = {
-  channel: Channel
-}
+  channel: Channel;
+};
 
 export type PaymentContextVideo = {
-  video: Video
-}
+  video: Video;
+};
 
 export type PaymentContextWhereInput = {
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type ProcessorState = {
-  chainHead: Scalars['Int']
-  lastProcessedBlock: Scalars['Int']
-}
+  chainHead: Scalars['Int'];
+  lastProcessedBlock: Scalars['Int'];
+};
 
 export type Query = {
-  appById?: Maybe<App>
+  appById?: Maybe<App>;
   /** @deprecated Use appById */
-  appByUniqueInput?: Maybe<App>
-  apps: Array<App>
-  appsConnection: AppsConnection
-  auctionById?: Maybe<Auction>
+  appByUniqueInput?: Maybe<App>;
+  apps: Array<App>;
+  appsConnection: AppsConnection;
+  auctionById?: Maybe<Auction>;
   /** @deprecated Use auctionById */
-  auctionByUniqueInput?: Maybe<Auction>
-  auctionWhitelistedMemberById?: Maybe<AuctionWhitelistedMember>
+  auctionByUniqueInput?: Maybe<Auction>;
+  auctionWhitelistedMemberById?: Maybe<AuctionWhitelistedMember>;
   /** @deprecated Use auctionWhitelistedMemberById */
-  auctionWhitelistedMemberByUniqueInput?: Maybe<AuctionWhitelistedMember>
-  auctionWhitelistedMembers: Array<AuctionWhitelistedMember>
-  auctionWhitelistedMembersConnection: AuctionWhitelistedMembersConnection
-  auctions: Array<Auction>
-  auctionsConnection: AuctionsConnection
-  bannedMemberById?: Maybe<BannedMember>
+  auctionWhitelistedMemberByUniqueInput?: Maybe<AuctionWhitelistedMember>;
+  auctionWhitelistedMembers: Array<AuctionWhitelistedMember>;
+  auctionWhitelistedMembersConnection: AuctionWhitelistedMembersConnection;
+  auctions: Array<Auction>;
+  auctionsConnection: AuctionsConnection;
+  bannedMemberById?: Maybe<BannedMember>;
   /** @deprecated Use bannedMemberById */
-  bannedMemberByUniqueInput?: Maybe<BannedMember>
-  bannedMembers: Array<BannedMember>
-  bannedMembersConnection: BannedMembersConnection
-  bidById?: Maybe<Bid>
+  bannedMemberByUniqueInput?: Maybe<BannedMember>;
+  bannedMembers: Array<BannedMember>;
+  bannedMembersConnection: BannedMembersConnection;
+  bidById?: Maybe<Bid>;
   /** @deprecated Use bidById */
-  bidByUniqueInput?: Maybe<Bid>
-  bids: Array<Bid>
-  bidsConnection: BidsConnection
-  channelById?: Maybe<Channel>
+  bidByUniqueInput?: Maybe<Bid>;
+  bids: Array<Bid>;
+  bidsConnection: BidsConnection;
+  channelById?: Maybe<Channel>;
   /** @deprecated Use channelById */
-  channelByUniqueInput?: Maybe<Channel>
-  channelNftCollectors: Array<ChannelNftCollector>
-  channels: Array<Channel>
-  channelsConnection: ChannelsConnection
-  commentById?: Maybe<Comment>
+  channelByUniqueInput?: Maybe<Channel>;
+  channelNftCollectors: Array<ChannelNftCollector>;
+  channels: Array<Channel>;
+  channelsConnection: ChannelsConnection;
+  commentById?: Maybe<Comment>;
   /** @deprecated Use commentById */
-  commentByUniqueInput?: Maybe<Comment>
-  commentReactionById?: Maybe<CommentReaction>
+  commentByUniqueInput?: Maybe<Comment>;
+  commentReactionById?: Maybe<CommentReaction>;
   /** @deprecated Use commentReactionById */
-  commentReactionByUniqueInput?: Maybe<CommentReaction>
-  commentReactions: Array<CommentReaction>
-  commentReactionsConnection: CommentReactionsConnection
-  comments: Array<Comment>
-  commentsConnection: CommentsConnection
-  curatorById?: Maybe<Curator>
+  commentReactionByUniqueInput?: Maybe<CommentReaction>;
+  commentReactions: Array<CommentReaction>;
+  commentReactionsConnection: CommentReactionsConnection;
+  comments: Array<Comment>;
+  commentsConnection: CommentsConnection;
+  curatorById?: Maybe<Curator>;
   /** @deprecated Use curatorById */
-  curatorByUniqueInput?: Maybe<Curator>
-  curatorGroupById?: Maybe<CuratorGroup>
+  curatorByUniqueInput?: Maybe<Curator>;
+  curatorGroupById?: Maybe<CuratorGroup>;
   /** @deprecated Use curatorGroupById */
-  curatorGroupByUniqueInput?: Maybe<CuratorGroup>
-  curatorGroups: Array<CuratorGroup>
-  curatorGroupsConnection: CuratorGroupsConnection
-  curators: Array<Curator>
-  curatorsConnection: CuratorsConnection
-  distributionBucketBagById?: Maybe<DistributionBucketBag>
+  curatorGroupByUniqueInput?: Maybe<CuratorGroup>;
+  curatorGroups: Array<CuratorGroup>;
+  curatorGroupsConnection: CuratorGroupsConnection;
+  curators: Array<Curator>;
+  curatorsConnection: CuratorsConnection;
+  distributionBucketBagById?: Maybe<DistributionBucketBag>;
   /** @deprecated Use distributionBucketBagById */
-  distributionBucketBagByUniqueInput?: Maybe<DistributionBucketBag>
-  distributionBucketBags: Array<DistributionBucketBag>
-  distributionBucketBagsConnection: DistributionBucketBagsConnection
-  distributionBucketById?: Maybe<DistributionBucket>
+  distributionBucketBagByUniqueInput?: Maybe<DistributionBucketBag>;
+  distributionBucketBags: Array<DistributionBucketBag>;
+  distributionBucketBagsConnection: DistributionBucketBagsConnection;
+  distributionBucketById?: Maybe<DistributionBucket>;
   /** @deprecated Use distributionBucketById */
-  distributionBucketByUniqueInput?: Maybe<DistributionBucket>
-  distributionBucketFamilies: Array<DistributionBucketFamily>
-  distributionBucketFamiliesConnection: DistributionBucketFamiliesConnection
-  distributionBucketFamilyById?: Maybe<DistributionBucketFamily>
+  distributionBucketByUniqueInput?: Maybe<DistributionBucket>;
+  distributionBucketFamilies: Array<DistributionBucketFamily>;
+  distributionBucketFamiliesConnection: DistributionBucketFamiliesConnection;
+  distributionBucketFamilyById?: Maybe<DistributionBucketFamily>;
   /** @deprecated Use distributionBucketFamilyById */
-  distributionBucketFamilyByUniqueInput?: Maybe<DistributionBucketFamily>
-  distributionBucketFamilyMetadata: Array<DistributionBucketFamilyMetadata>
-  distributionBucketFamilyMetadataById?: Maybe<DistributionBucketFamilyMetadata>
+  distributionBucketFamilyByUniqueInput?: Maybe<DistributionBucketFamily>;
+  distributionBucketFamilyMetadata: Array<DistributionBucketFamilyMetadata>;
+  distributionBucketFamilyMetadataById?: Maybe<DistributionBucketFamilyMetadata>;
   /** @deprecated Use distributionBucketFamilyMetadataById */
-  distributionBucketFamilyMetadataByUniqueInput?: Maybe<DistributionBucketFamilyMetadata>
-  distributionBucketFamilyMetadataConnection: DistributionBucketFamilyMetadataConnection
-  distributionBucketOperatorById?: Maybe<DistributionBucketOperator>
+  distributionBucketFamilyMetadataByUniqueInput?: Maybe<DistributionBucketFamilyMetadata>;
+  distributionBucketFamilyMetadataConnection: DistributionBucketFamilyMetadataConnection;
+  distributionBucketOperatorById?: Maybe<DistributionBucketOperator>;
   /** @deprecated Use distributionBucketOperatorById */
-  distributionBucketOperatorByUniqueInput?: Maybe<DistributionBucketOperator>
-  distributionBucketOperatorMetadata: Array<DistributionBucketOperatorMetadata>
-  distributionBucketOperatorMetadataById?: Maybe<DistributionBucketOperatorMetadata>
+  distributionBucketOperatorByUniqueInput?: Maybe<DistributionBucketOperator>;
+  distributionBucketOperatorMetadata: Array<DistributionBucketOperatorMetadata>;
+  distributionBucketOperatorMetadataById?: Maybe<DistributionBucketOperatorMetadata>;
   /** @deprecated Use distributionBucketOperatorMetadataById */
-  distributionBucketOperatorMetadataByUniqueInput?: Maybe<DistributionBucketOperatorMetadata>
-  distributionBucketOperatorMetadataConnection: DistributionBucketOperatorMetadataConnection
-  distributionBucketOperators: Array<DistributionBucketOperator>
-  distributionBucketOperatorsConnection: DistributionBucketOperatorsConnection
-  distributionBuckets: Array<DistributionBucket>
-  distributionBucketsConnection: DistributionBucketsConnection
-  eventById?: Maybe<Event>
+  distributionBucketOperatorMetadataByUniqueInput?: Maybe<DistributionBucketOperatorMetadata>;
+  distributionBucketOperatorMetadataConnection: DistributionBucketOperatorMetadataConnection;
+  distributionBucketOperators: Array<DistributionBucketOperator>;
+  distributionBucketOperatorsConnection: DistributionBucketOperatorsConnection;
+  distributionBuckets: Array<DistributionBucket>;
+  distributionBucketsConnection: DistributionBucketsConnection;
+  eventById?: Maybe<Event>;
   /** @deprecated Use eventById */
-  eventByUniqueInput?: Maybe<Event>
-  events: Array<Event>
-  eventsConnection: EventsConnection
-  extendedChannels: Array<ExtendedChannel>
-  extendedVideoCategories: Array<ExtendedVideoCategory>
-  getKillSwitch: KillSwitch
-  getVideoViewPerIpTimeLimit: VideoViewPerIpTimeLimit
-  licenseById?: Maybe<License>
+  eventByUniqueInput?: Maybe<Event>;
+  events: Array<Event>;
+  eventsConnection: EventsConnection;
+  extendedChannels: Array<ExtendedChannel>;
+  extendedVideoCategories: Array<ExtendedVideoCategory>;
+  getKillSwitch: KillSwitch;
+  getVideoViewPerIpTimeLimit: VideoViewPerIpTimeLimit;
+  licenseById?: Maybe<License>;
   /** @deprecated Use licenseById */
-  licenseByUniqueInput?: Maybe<License>
-  licenses: Array<License>
-  licensesConnection: LicensesConnection
-  memberMetadata: Array<MemberMetadata>
-  memberMetadataById?: Maybe<MemberMetadata>
+  licenseByUniqueInput?: Maybe<License>;
+  licenses: Array<License>;
+  licensesConnection: LicensesConnection;
+  memberMetadata: Array<MemberMetadata>;
+  memberMetadataById?: Maybe<MemberMetadata>;
   /** @deprecated Use memberMetadataById */
-  memberMetadataByUniqueInput?: Maybe<MemberMetadata>
-  memberMetadataConnection: MemberMetadataConnection
-  membershipById?: Maybe<Membership>
+  memberMetadataByUniqueInput?: Maybe<MemberMetadata>;
+  memberMetadataConnection: MemberMetadataConnection;
+  membershipById?: Maybe<Membership>;
   /** @deprecated Use membershipById */
-  membershipByUniqueInput?: Maybe<Membership>
-  memberships: Array<Membership>
-  membershipsConnection: MembershipsConnection
-  mostRecentChannels: Array<ExtendedChannel>
-  mostViewedVideosConnection: VideosConnection
-  ownedNftById?: Maybe<OwnedNft>
+  membershipByUniqueInput?: Maybe<Membership>;
+  memberships: Array<Membership>;
+  membershipsConnection: MembershipsConnection;
+  mostRecentChannels: Array<ExtendedChannel>;
+  mostViewedVideosConnection: VideosConnection;
+  ownedNftById?: Maybe<OwnedNft>;
   /** @deprecated Use ownedNftById */
-  ownedNftByUniqueInput?: Maybe<OwnedNft>
-  ownedNfts: Array<OwnedNft>
-  ownedNftsConnection: OwnedNftsConnection
-  squidStatus?: Maybe<SquidStatus>
-  storageBagById?: Maybe<StorageBag>
+  ownedNftByUniqueInput?: Maybe<OwnedNft>;
+  ownedNfts: Array<OwnedNft>;
+  ownedNftsConnection: OwnedNftsConnection;
+  squidStatus?: Maybe<SquidStatus>;
+  storageBagById?: Maybe<StorageBag>;
   /** @deprecated Use storageBagById */
-  storageBagByUniqueInput?: Maybe<StorageBag>
-  storageBags: Array<StorageBag>
-  storageBagsConnection: StorageBagsConnection
-  storageBucketBagById?: Maybe<StorageBucketBag>
+  storageBagByUniqueInput?: Maybe<StorageBag>;
+  storageBags: Array<StorageBag>;
+  storageBagsConnection: StorageBagsConnection;
+  storageBucketBagById?: Maybe<StorageBucketBag>;
   /** @deprecated Use storageBucketBagById */
-  storageBucketBagByUniqueInput?: Maybe<StorageBucketBag>
-  storageBucketBags: Array<StorageBucketBag>
-  storageBucketBagsConnection: StorageBucketBagsConnection
-  storageBucketById?: Maybe<StorageBucket>
+  storageBucketBagByUniqueInput?: Maybe<StorageBucketBag>;
+  storageBucketBags: Array<StorageBucketBag>;
+  storageBucketBagsConnection: StorageBucketBagsConnection;
+  storageBucketById?: Maybe<StorageBucket>;
   /** @deprecated Use storageBucketById */
-  storageBucketByUniqueInput?: Maybe<StorageBucket>
-  storageBucketOperatorMetadata: Array<StorageBucketOperatorMetadata>
-  storageBucketOperatorMetadataById?: Maybe<StorageBucketOperatorMetadata>
+  storageBucketByUniqueInput?: Maybe<StorageBucket>;
+  storageBucketOperatorMetadata: Array<StorageBucketOperatorMetadata>;
+  storageBucketOperatorMetadataById?: Maybe<StorageBucketOperatorMetadata>;
   /** @deprecated Use storageBucketOperatorMetadataById */
-  storageBucketOperatorMetadataByUniqueInput?: Maybe<StorageBucketOperatorMetadata>
-  storageBucketOperatorMetadataConnection: StorageBucketOperatorMetadataConnection
-  storageBuckets: Array<StorageBucket>
-  storageBucketsConnection: StorageBucketsConnection
-  storageDataObjectById?: Maybe<StorageDataObject>
+  storageBucketOperatorMetadataByUniqueInput?: Maybe<StorageBucketOperatorMetadata>;
+  storageBucketOperatorMetadataConnection: StorageBucketOperatorMetadataConnection;
+  storageBuckets: Array<StorageBucket>;
+  storageBucketsConnection: StorageBucketsConnection;
+  storageDataObjectById?: Maybe<StorageDataObject>;
   /** @deprecated Use storageDataObjectById */
-  storageDataObjectByUniqueInput?: Maybe<StorageDataObject>
-  storageDataObjects: Array<StorageDataObject>
-  storageDataObjectsConnection: StorageDataObjectsConnection
-  videoById?: Maybe<Video>
+  storageDataObjectByUniqueInput?: Maybe<StorageDataObject>;
+  storageDataObjects: Array<StorageDataObject>;
+  storageDataObjectsConnection: StorageDataObjectsConnection;
+  videoById?: Maybe<Video>;
   /** @deprecated Use videoById */
-  videoByUniqueInput?: Maybe<Video>
-  videoCategories: Array<VideoCategory>
-  videoCategoriesConnection: VideoCategoriesConnection
-  videoCategoryById?: Maybe<VideoCategory>
+  videoByUniqueInput?: Maybe<Video>;
+  videoCategories: Array<VideoCategory>;
+  videoCategoriesConnection: VideoCategoriesConnection;
+  videoCategoryById?: Maybe<VideoCategory>;
   /** @deprecated Use videoCategoryById */
-  videoCategoryByUniqueInput?: Maybe<VideoCategory>
-  videoFeaturedInCategories: Array<VideoFeaturedInCategory>
-  videoFeaturedInCategoriesConnection: VideoFeaturedInCategoriesConnection
-  videoFeaturedInCategoryById?: Maybe<VideoFeaturedInCategory>
+  videoCategoryByUniqueInput?: Maybe<VideoCategory>;
+  videoFeaturedInCategories: Array<VideoFeaturedInCategory>;
+  videoFeaturedInCategoriesConnection: VideoFeaturedInCategoriesConnection;
+  videoFeaturedInCategoryById?: Maybe<VideoFeaturedInCategory>;
   /** @deprecated Use videoFeaturedInCategoryById */
-  videoFeaturedInCategoryByUniqueInput?: Maybe<VideoFeaturedInCategory>
-  videoHero?: Maybe<VideoHero>
-  videoHeroById?: Maybe<VideoHero>
+  videoFeaturedInCategoryByUniqueInput?: Maybe<VideoFeaturedInCategory>;
+  videoHero?: Maybe<VideoHero>;
+  videoHeroById?: Maybe<VideoHero>;
   /** @deprecated Use videoHeroById */
-  videoHeroByUniqueInput?: Maybe<VideoHero>
-  videoHeros: Array<VideoHero>
-  videoHerosConnection: VideoHerosConnection
-  videoMediaEncodingById?: Maybe<VideoMediaEncoding>
+  videoHeroByUniqueInput?: Maybe<VideoHero>;
+  videoHeros: Array<VideoHero>;
+  videoHerosConnection: VideoHerosConnection;
+  videoMediaEncodingById?: Maybe<VideoMediaEncoding>;
   /** @deprecated Use videoMediaEncodingById */
-  videoMediaEncodingByUniqueInput?: Maybe<VideoMediaEncoding>
-  videoMediaEncodings: Array<VideoMediaEncoding>
-  videoMediaEncodingsConnection: VideoMediaEncodingsConnection
-  videoMediaMetadata: Array<VideoMediaMetadata>
-  videoMediaMetadataById?: Maybe<VideoMediaMetadata>
+  videoMediaEncodingByUniqueInput?: Maybe<VideoMediaEncoding>;
+  videoMediaEncodings: Array<VideoMediaEncoding>;
+  videoMediaEncodingsConnection: VideoMediaEncodingsConnection;
+  videoMediaMetadata: Array<VideoMediaMetadata>;
+  videoMediaMetadataById?: Maybe<VideoMediaMetadata>;
   /** @deprecated Use videoMediaMetadataById */
-  videoMediaMetadataByUniqueInput?: Maybe<VideoMediaMetadata>
-  videoMediaMetadataConnection: VideoMediaMetadataConnection
-  videoReactionById?: Maybe<VideoReaction>
+  videoMediaMetadataByUniqueInput?: Maybe<VideoMediaMetadata>;
+  videoMediaMetadataConnection: VideoMediaMetadataConnection;
+  videoReactionById?: Maybe<VideoReaction>;
   /** @deprecated Use videoReactionById */
-  videoReactionByUniqueInput?: Maybe<VideoReaction>
-  videoReactions: Array<VideoReaction>
-  videoReactionsConnection: VideoReactionsConnection
-  videoSubtitleById?: Maybe<VideoSubtitle>
+  videoReactionByUniqueInput?: Maybe<VideoReaction>;
+  videoReactions: Array<VideoReaction>;
+  videoReactionsConnection: VideoReactionsConnection;
+  videoSubtitleById?: Maybe<VideoSubtitle>;
   /** @deprecated Use videoSubtitleById */
-  videoSubtitleByUniqueInput?: Maybe<VideoSubtitle>
-  videoSubtitles: Array<VideoSubtitle>
-  videoSubtitlesConnection: VideoSubtitlesConnection
-  videos: Array<Video>
-  videosConnection: VideosConnection
-}
+  videoSubtitleByUniqueInput?: Maybe<VideoSubtitle>;
+  videoSubtitles: Array<VideoSubtitle>;
+  videoSubtitlesConnection: VideoSubtitlesConnection;
+  videos: Array<Video>;
+  videosConnection: VideosConnection;
+};
+
 
 export type QueryAppByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryAppByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryAppsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AppOrderByInput>>
-  where?: Maybe<AppWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AppOrderByInput>>;
+  where?: Maybe<AppWhereInput>;
+};
+
 
 export type QueryAppsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<AppOrderByInput>
-  where?: Maybe<AppWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<AppOrderByInput>;
+  where?: Maybe<AppWhereInput>;
+};
+
 
 export type QueryAuctionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryAuctionByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryAuctionWhitelistedMemberByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryAuctionWhitelistedMemberByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryAuctionWhitelistedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>
-  where?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>;
+  where?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
+
 
 export type QueryAuctionWhitelistedMembersConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<AuctionWhitelistedMemberOrderByInput>
-  where?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<AuctionWhitelistedMemberOrderByInput>;
+  where?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
+
 
 export type QueryAuctionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionOrderByInput>>
-  where?: Maybe<AuctionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionOrderByInput>>;
+  where?: Maybe<AuctionWhereInput>;
+};
+
 
 export type QueryAuctionsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<AuctionOrderByInput>
-  where?: Maybe<AuctionWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<AuctionOrderByInput>;
+  where?: Maybe<AuctionWhereInput>;
+};
+
 
 export type QueryBannedMemberByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryBannedMemberByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryBannedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BannedMemberOrderByInput>>
-  where?: Maybe<BannedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BannedMemberOrderByInput>>;
+  where?: Maybe<BannedMemberWhereInput>;
+};
+
 
 export type QueryBannedMembersConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<BannedMemberOrderByInput>
-  where?: Maybe<BannedMemberWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<BannedMemberOrderByInput>;
+  where?: Maybe<BannedMemberWhereInput>;
+};
+
 
 export type QueryBidByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryBidByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryBidsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BidOrderByInput>>
-  where?: Maybe<BidWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BidOrderByInput>>;
+  where?: Maybe<BidWhereInput>;
+};
+
 
 export type QueryBidsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<BidOrderByInput>
-  where?: Maybe<BidWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<BidOrderByInput>;
+  where?: Maybe<BidWhereInput>;
+};
+
 
 export type QueryChannelByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryChannelByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryChannelNftCollectorsArgs = {
-  channelId: Scalars['String']
-  limit?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<ChannelNftCollectorsOrderByInput>
-}
+  channelId: Scalars['String'];
+  limit?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<ChannelNftCollectorsOrderByInput>;
+};
+
 
 export type QueryChannelsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<ChannelOrderByInput>>
-  where?: Maybe<ChannelWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<ChannelOrderByInput>>;
+  where?: Maybe<ChannelWhereInput>;
+};
+
 
 export type QueryChannelsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<ChannelOrderByInput>
-  where?: Maybe<ChannelWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<ChannelOrderByInput>;
+  where?: Maybe<ChannelWhereInput>;
+};
+
 
 export type QueryCommentByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryCommentByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryCommentReactionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryCommentReactionByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryCommentReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentReactionOrderByInput>>
-  where?: Maybe<CommentReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentReactionOrderByInput>>;
+  where?: Maybe<CommentReactionWhereInput>;
+};
+
 
 export type QueryCommentReactionsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<CommentReactionOrderByInput>
-  where?: Maybe<CommentReactionWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<CommentReactionOrderByInput>;
+  where?: Maybe<CommentReactionWhereInput>;
+};
+
 
 export type QueryCommentsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentOrderByInput>>
-  where?: Maybe<CommentWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentOrderByInput>>;
+  where?: Maybe<CommentWhereInput>;
+};
+
 
 export type QueryCommentsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<CommentOrderByInput>
-  where?: Maybe<CommentWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<CommentOrderByInput>;
+  where?: Maybe<CommentWhereInput>;
+};
+
 
 export type QueryCuratorByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryCuratorByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryCuratorGroupByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryCuratorGroupByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryCuratorGroupsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CuratorGroupOrderByInput>>
-  where?: Maybe<CuratorGroupWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CuratorGroupOrderByInput>>;
+  where?: Maybe<CuratorGroupWhereInput>;
+};
+
 
 export type QueryCuratorGroupsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<CuratorGroupOrderByInput>
-  where?: Maybe<CuratorGroupWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<CuratorGroupOrderByInput>;
+  where?: Maybe<CuratorGroupWhereInput>;
+};
+
 
 export type QueryCuratorsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CuratorOrderByInput>>
-  where?: Maybe<CuratorWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CuratorOrderByInput>>;
+  where?: Maybe<CuratorWhereInput>;
+};
+
 
 export type QueryCuratorsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<CuratorOrderByInput>
-  where?: Maybe<CuratorWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<CuratorOrderByInput>;
+  where?: Maybe<CuratorWhereInput>;
+};
+
 
 export type QueryDistributionBucketBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketBagByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>
-  where?: Maybe<DistributionBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>;
+  where?: Maybe<DistributionBucketBagWhereInput>;
+};
+
 
 export type QueryDistributionBucketBagsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketBagOrderByInput>
-  where?: Maybe<DistributionBucketBagWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketBagOrderByInput>;
+  where?: Maybe<DistributionBucketBagWhereInput>;
+};
+
 
 export type QueryDistributionBucketByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketFamiliesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketFamilyOrderByInput>>
-  where?: Maybe<DistributionBucketFamilyWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketFamilyOrderByInput>>;
+  where?: Maybe<DistributionBucketFamilyWhereInput>;
+};
+
 
 export type QueryDistributionBucketFamiliesConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketFamilyOrderByInput>
-  where?: Maybe<DistributionBucketFamilyWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketFamilyOrderByInput>;
+  where?: Maybe<DistributionBucketFamilyWhereInput>;
+};
+
 
 export type QueryDistributionBucketFamilyByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketFamilyByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketFamilyMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketFamilyMetadataOrderByInput>>
-  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketFamilyMetadataOrderByInput>>;
+  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>;
+};
+
 
 export type QueryDistributionBucketFamilyMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketFamilyMetadataByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketFamilyMetadataConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketFamilyMetadataOrderByInput>
-  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketFamilyMetadataOrderByInput>;
+  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>;
+};
+
 
 export type QueryDistributionBucketOperatorByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketOperatorByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketOperatorMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOperatorMetadataOrderByInput>>
-  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOperatorMetadataOrderByInput>>;
+  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>;
+};
+
 
 export type QueryDistributionBucketOperatorMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryDistributionBucketOperatorMetadataByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryDistributionBucketOperatorMetadataConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketOperatorMetadataOrderByInput>
-  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketOperatorMetadataOrderByInput>;
+  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>;
+};
+
 
 export type QueryDistributionBucketOperatorsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>
-  where?: Maybe<DistributionBucketOperatorWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>;
+  where?: Maybe<DistributionBucketOperatorWhereInput>;
+};
+
 
 export type QueryDistributionBucketOperatorsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketOperatorOrderByInput>
-  where?: Maybe<DistributionBucketOperatorWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketOperatorOrderByInput>;
+  where?: Maybe<DistributionBucketOperatorWhereInput>;
+};
+
 
 export type QueryDistributionBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>
-  where?: Maybe<DistributionBucketWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>;
+  where?: Maybe<DistributionBucketWhereInput>;
+};
+
 
 export type QueryDistributionBucketsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<DistributionBucketOrderByInput>
-  where?: Maybe<DistributionBucketWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<DistributionBucketOrderByInput>;
+  where?: Maybe<DistributionBucketWhereInput>;
+};
+
 
 export type QueryEventByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryEventByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryEventsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<EventOrderByInput>>
-  where?: Maybe<EventWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<EventOrderByInput>>;
+  where?: Maybe<EventWhereInput>;
+};
+
 
 export type QueryEventsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<EventOrderByInput>
-  where?: Maybe<EventWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<EventOrderByInput>;
+  where?: Maybe<EventWhereInput>;
+};
+
 
 export type QueryExtendedChannelsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<ChannelOrderByInput>>
-  where?: Maybe<ExtendedChannelWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<ChannelOrderByInput>>;
+  where?: Maybe<ExtendedChannelWhereInput>;
+};
+
 
 export type QueryLicenseByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryLicenseByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryLicensesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<LicenseOrderByInput>>
-  where?: Maybe<LicenseWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<LicenseOrderByInput>>;
+  where?: Maybe<LicenseWhereInput>;
+};
+
 
 export type QueryLicensesConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<LicenseOrderByInput>
-  where?: Maybe<LicenseWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<LicenseOrderByInput>;
+  where?: Maybe<LicenseWhereInput>;
+};
+
 
 export type QueryMemberMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<MemberMetadataOrderByInput>>
-  where?: Maybe<MemberMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<MemberMetadataOrderByInput>>;
+  where?: Maybe<MemberMetadataWhereInput>;
+};
+
 
 export type QueryMemberMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryMemberMetadataByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryMemberMetadataConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<MemberMetadataOrderByInput>
-  where?: Maybe<MemberMetadataWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<MemberMetadataOrderByInput>;
+  where?: Maybe<MemberMetadataWhereInput>;
+};
+
 
 export type QueryMembershipByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryMembershipByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryMembershipsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<MembershipOrderByInput>>
-  where?: Maybe<MembershipWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<MembershipOrderByInput>>;
+  where?: Maybe<MembershipWhereInput>;
+};
+
 
 export type QueryMembershipsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<MembershipOrderByInput>
-  where?: Maybe<MembershipWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<MembershipOrderByInput>;
+  where?: Maybe<MembershipWhereInput>;
+};
+
 
 export type QueryMostRecentChannelsArgs = {
-  mostRecentLimit: Scalars['Int']
-  orderBy?: Maybe<Array<ChannelOrderByInput>>
-  resultsLimit?: Maybe<Scalars['Int']>
-  where?: Maybe<ExtendedChannelWhereInput>
-}
+  mostRecentLimit: Scalars['Int'];
+  orderBy?: Maybe<Array<ChannelOrderByInput>>;
+  resultsLimit?: Maybe<Scalars['Int']>;
+  where?: Maybe<ExtendedChannelWhereInput>;
+};
+
 
 export type QueryMostViewedVideosConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  limit: Scalars['Int']
-  orderBy: Array<VideoOrderByInput>
-  periodDays?: Maybe<Scalars['Int']>
-  where?: Maybe<VideoWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  limit: Scalars['Int'];
+  orderBy: Array<VideoOrderByInput>;
+  periodDays?: Maybe<Scalars['Int']>;
+  where?: Maybe<VideoWhereInput>;
+};
+
 
 export type QueryOwnedNftByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryOwnedNftByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryOwnedNftsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<OwnedNftOrderByInput>>
-  where?: Maybe<OwnedNftWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<OwnedNftOrderByInput>>;
+  where?: Maybe<OwnedNftWhereInput>;
+};
+
 
 export type QueryOwnedNftsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<OwnedNftOrderByInput>
-  where?: Maybe<OwnedNftWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<OwnedNftOrderByInput>;
+  where?: Maybe<OwnedNftWhereInput>;
+};
+
 
 export type QueryStorageBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryStorageBagByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryStorageBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBagOrderByInput>>
-  where?: Maybe<StorageBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBagOrderByInput>>;
+  where?: Maybe<StorageBagWhereInput>;
+};
+
 
 export type QueryStorageBagsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<StorageBagOrderByInput>
-  where?: Maybe<StorageBagWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<StorageBagOrderByInput>;
+  where?: Maybe<StorageBagWhereInput>;
+};
+
 
 export type QueryStorageBucketBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryStorageBucketBagByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryStorageBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>
-  where?: Maybe<StorageBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>;
+  where?: Maybe<StorageBucketBagWhereInput>;
+};
+
 
 export type QueryStorageBucketBagsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<StorageBucketBagOrderByInput>
-  where?: Maybe<StorageBucketBagWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<StorageBucketBagOrderByInput>;
+  where?: Maybe<StorageBucketBagWhereInput>;
+};
+
 
 export type QueryStorageBucketByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryStorageBucketByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryStorageBucketOperatorMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketOperatorMetadataOrderByInput>>
-  where?: Maybe<StorageBucketOperatorMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketOperatorMetadataOrderByInput>>;
+  where?: Maybe<StorageBucketOperatorMetadataWhereInput>;
+};
+
 
 export type QueryStorageBucketOperatorMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryStorageBucketOperatorMetadataByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryStorageBucketOperatorMetadataConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<StorageBucketOperatorMetadataOrderByInput>
-  where?: Maybe<StorageBucketOperatorMetadataWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<StorageBucketOperatorMetadataOrderByInput>;
+  where?: Maybe<StorageBucketOperatorMetadataWhereInput>;
+};
+
 
 export type QueryStorageBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketOrderByInput>>
-  where?: Maybe<StorageBucketWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketOrderByInput>>;
+  where?: Maybe<StorageBucketWhereInput>;
+};
+
 
 export type QueryStorageBucketsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<StorageBucketOrderByInput>
-  where?: Maybe<StorageBucketWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<StorageBucketOrderByInput>;
+  where?: Maybe<StorageBucketWhereInput>;
+};
+
 
 export type QueryStorageDataObjectByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryStorageDataObjectByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryStorageDataObjectsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>
-  where?: Maybe<StorageDataObjectWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>;
+  where?: Maybe<StorageDataObjectWhereInput>;
+};
+
 
 export type QueryStorageDataObjectsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<StorageDataObjectOrderByInput>
-  where?: Maybe<StorageDataObjectWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<StorageDataObjectOrderByInput>;
+  where?: Maybe<StorageDataObjectWhereInput>;
+};
+
 
 export type QueryVideoByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoCategoriesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoCategoryOrderByInput>>
-  where?: Maybe<VideoCategoryWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoCategoryOrderByInput>>;
+  where?: Maybe<VideoCategoryWhereInput>;
+};
+
 
 export type QueryVideoCategoriesConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoCategoryOrderByInput>
-  where?: Maybe<VideoCategoryWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoCategoryOrderByInput>;
+  where?: Maybe<VideoCategoryWhereInput>;
+};
+
 
 export type QueryVideoCategoryByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoCategoryByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoFeaturedInCategoriesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>
-  where?: Maybe<VideoFeaturedInCategoryWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>;
+  where?: Maybe<VideoFeaturedInCategoryWhereInput>;
+};
+
 
 export type QueryVideoFeaturedInCategoriesConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoFeaturedInCategoryOrderByInput>
-  where?: Maybe<VideoFeaturedInCategoryWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoFeaturedInCategoryOrderByInput>;
+  where?: Maybe<VideoFeaturedInCategoryWhereInput>;
+};
+
 
 export type QueryVideoFeaturedInCategoryByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoFeaturedInCategoryByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoHeroByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoHeroByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoHerosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoHeroOrderByInput>>
-  where?: Maybe<VideoHeroWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoHeroOrderByInput>>;
+  where?: Maybe<VideoHeroWhereInput>;
+};
+
 
 export type QueryVideoHerosConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoHeroOrderByInput>
-  where?: Maybe<VideoHeroWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoHeroOrderByInput>;
+  where?: Maybe<VideoHeroWhereInput>;
+};
+
 
 export type QueryVideoMediaEncodingByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoMediaEncodingByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoMediaEncodingsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoMediaEncodingOrderByInput>>
-  where?: Maybe<VideoMediaEncodingWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoMediaEncodingOrderByInput>>;
+  where?: Maybe<VideoMediaEncodingWhereInput>;
+};
+
 
 export type QueryVideoMediaEncodingsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoMediaEncodingOrderByInput>
-  where?: Maybe<VideoMediaEncodingWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoMediaEncodingOrderByInput>;
+  where?: Maybe<VideoMediaEncodingWhereInput>;
+};
+
 
 export type QueryVideoMediaMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoMediaMetadataOrderByInput>>
-  where?: Maybe<VideoMediaMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoMediaMetadataOrderByInput>>;
+  where?: Maybe<VideoMediaMetadataWhereInput>;
+};
+
 
 export type QueryVideoMediaMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoMediaMetadataByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoMediaMetadataConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoMediaMetadataOrderByInput>
-  where?: Maybe<VideoMediaMetadataWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoMediaMetadataOrderByInput>;
+  where?: Maybe<VideoMediaMetadataWhereInput>;
+};
+
 
 export type QueryVideoReactionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoReactionByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoReactionOrderByInput>>
-  where?: Maybe<VideoReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoReactionOrderByInput>>;
+  where?: Maybe<VideoReactionWhereInput>;
+};
+
 
 export type QueryVideoReactionsConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoReactionOrderByInput>
-  where?: Maybe<VideoReactionWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoReactionOrderByInput>;
+  where?: Maybe<VideoReactionWhereInput>;
+};
+
 
 export type QueryVideoSubtitleByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type QueryVideoSubtitleByUniqueInputArgs = {
-  where: WhereIdInput
-}
+  where: WhereIdInput;
+};
+
 
 export type QueryVideoSubtitlesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>
-  where?: Maybe<VideoSubtitleWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>;
+  where?: Maybe<VideoSubtitleWhereInput>;
+};
+
 
 export type QueryVideoSubtitlesConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoSubtitleOrderByInput>
-  where?: Maybe<VideoSubtitleWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoSubtitleOrderByInput>;
+  where?: Maybe<VideoSubtitleWhereInput>;
+};
+
 
 export type QueryVideosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoOrderByInput>>
-  where?: Maybe<VideoWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoOrderByInput>>;
+  where?: Maybe<VideoWhereInput>;
+};
+
 
 export type QueryVideosConnectionArgs = {
-  after?: Maybe<Scalars['String']>
-  first?: Maybe<Scalars['Int']>
-  orderBy: Array<VideoOrderByInput>
-  where?: Maybe<VideoWhereInput>
-}
+  after?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['Int']>;
+  orderBy: Array<VideoOrderByInput>;
+  where?: Maybe<VideoWhereInput>;
+};
 
 export type RestoreContentResult = {
-  numberOfEntitiesAffected: Scalars['Int']
-}
+  numberOfEntitiesAffected: Scalars['Int'];
+};
 
 export type SetCategoryFeaturedVideosResult = {
-  categoryId: Scalars['String']
-  numberOfFeaturedVideosSet: Scalars['Int']
-  numberOfFeaturedVideosUnset: Scalars['Int']
-}
+  categoryId: Scalars['String'];
+  numberOfFeaturedVideosSet: Scalars['Int'];
+  numberOfFeaturedVideosUnset: Scalars['Int'];
+};
 
 export type SetSupportedCategoriesResult = {
-  newNumberOfCategoriesSupported?: Maybe<Scalars['Int']>
-  newlyCreatedCategoriesSupported: Scalars['Boolean']
-  noCategoryVideosSupported: Scalars['Boolean']
-}
+  newNumberOfCategoriesSupported?: Maybe<Scalars['Int']>;
+  newlyCreatedCategoriesSupported: Scalars['Boolean'];
+  noCategoryVideosSupported: Scalars['Boolean'];
+};
 
 export type SetVideoHeroResult = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
 
 export type SquidStatus = {
-  height?: Maybe<Scalars['Int']>
-}
+  height?: Maybe<Scalars['Int']>;
+};
 
 export type StorageBag = {
-  distributionBuckets: Array<DistributionBucketBag>
-  id: Scalars['String']
-  objects: Array<StorageDataObject>
-  owner: StorageBagOwner
-  storageBuckets: Array<StorageBucketBag>
-}
+  distributionBuckets: Array<DistributionBucketBag>;
+  id: Scalars['String'];
+  objects: Array<StorageDataObject>;
+  owner: StorageBagOwner;
+  storageBuckets: Array<StorageBucketBag>;
+};
+
 
 export type StorageBagDistributionBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>
-  where?: Maybe<DistributionBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>;
+  where?: Maybe<DistributionBucketBagWhereInput>;
+};
+
 
 export type StorageBagObjectsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>
-  where?: Maybe<StorageDataObjectWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>;
+  where?: Maybe<StorageDataObjectWhereInput>;
+};
+
 
 export type StorageBagStorageBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>
-  where?: Maybe<StorageBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>;
+  where?: Maybe<StorageBucketBagWhereInput>;
+};
 
 export type StorageBagEdge = {
-  cursor: Scalars['String']
-  node: StorageBag
-}
+  cursor: Scalars['String'];
+  node: StorageBag;
+};
 
 export enum StorageBagOrderByInput {
   IdAsc = 'id_ASC',
@@ -4710,193 +4844,189 @@ export enum StorageBagOrderByInput {
   OwnerPhantomAsc = 'owner_phantom_ASC',
   OwnerPhantomDesc = 'owner_phantom_DESC',
   OwnerWorkingGroupIdAsc = 'owner_workingGroupId_ASC',
-  OwnerWorkingGroupIdDesc = 'owner_workingGroupId_DESC',
+  OwnerWorkingGroupIdDesc = 'owner_workingGroupId_DESC'
 }
 
-export type StorageBagOwner =
-  | StorageBagOwnerChannel
-  | StorageBagOwnerCouncil
-  | StorageBagOwnerDao
-  | StorageBagOwnerMember
-  | StorageBagOwnerWorkingGroup
+export type StorageBagOwner = StorageBagOwnerChannel | StorageBagOwnerCouncil | StorageBagOwnerDao | StorageBagOwnerMember | StorageBagOwnerWorkingGroup;
 
 export type StorageBagOwnerChannel = {
-  channelId: Scalars['String']
-}
+  channelId: Scalars['String'];
+};
 
 export type StorageBagOwnerCouncil = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type StorageBagOwnerDao = {
-  daoId?: Maybe<Scalars['Int']>
-}
+  daoId?: Maybe<Scalars['Int']>;
+};
 
 export type StorageBagOwnerMember = {
-  memberId: Scalars['String']
-}
+  memberId: Scalars['String'];
+};
 
 export type StorageBagOwnerWhereInput = {
-  channelId_contains?: Maybe<Scalars['String']>
-  channelId_containsInsensitive?: Maybe<Scalars['String']>
-  channelId_endsWith?: Maybe<Scalars['String']>
-  channelId_eq?: Maybe<Scalars['String']>
-  channelId_gt?: Maybe<Scalars['String']>
-  channelId_gte?: Maybe<Scalars['String']>
-  channelId_in?: Maybe<Array<Scalars['String']>>
-  channelId_isNull?: Maybe<Scalars['Boolean']>
-  channelId_lt?: Maybe<Scalars['String']>
-  channelId_lte?: Maybe<Scalars['String']>
-  channelId_not_contains?: Maybe<Scalars['String']>
-  channelId_not_containsInsensitive?: Maybe<Scalars['String']>
-  channelId_not_endsWith?: Maybe<Scalars['String']>
-  channelId_not_eq?: Maybe<Scalars['String']>
-  channelId_not_in?: Maybe<Array<Scalars['String']>>
-  channelId_not_startsWith?: Maybe<Scalars['String']>
-  channelId_startsWith?: Maybe<Scalars['String']>
-  daoId_eq?: Maybe<Scalars['Int']>
-  daoId_gt?: Maybe<Scalars['Int']>
-  daoId_gte?: Maybe<Scalars['Int']>
-  daoId_in?: Maybe<Array<Scalars['Int']>>
-  daoId_isNull?: Maybe<Scalars['Boolean']>
-  daoId_lt?: Maybe<Scalars['Int']>
-  daoId_lte?: Maybe<Scalars['Int']>
-  daoId_not_eq?: Maybe<Scalars['Int']>
-  daoId_not_in?: Maybe<Array<Scalars['Int']>>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  memberId_contains?: Maybe<Scalars['String']>
-  memberId_containsInsensitive?: Maybe<Scalars['String']>
-  memberId_endsWith?: Maybe<Scalars['String']>
-  memberId_eq?: Maybe<Scalars['String']>
-  memberId_gt?: Maybe<Scalars['String']>
-  memberId_gte?: Maybe<Scalars['String']>
-  memberId_in?: Maybe<Array<Scalars['String']>>
-  memberId_isNull?: Maybe<Scalars['Boolean']>
-  memberId_lt?: Maybe<Scalars['String']>
-  memberId_lte?: Maybe<Scalars['String']>
-  memberId_not_contains?: Maybe<Scalars['String']>
-  memberId_not_containsInsensitive?: Maybe<Scalars['String']>
-  memberId_not_endsWith?: Maybe<Scalars['String']>
-  memberId_not_eq?: Maybe<Scalars['String']>
-  memberId_not_in?: Maybe<Array<Scalars['String']>>
-  memberId_not_startsWith?: Maybe<Scalars['String']>
-  memberId_startsWith?: Maybe<Scalars['String']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-  workingGroupId_contains?: Maybe<Scalars['String']>
-  workingGroupId_containsInsensitive?: Maybe<Scalars['String']>
-  workingGroupId_endsWith?: Maybe<Scalars['String']>
-  workingGroupId_eq?: Maybe<Scalars['String']>
-  workingGroupId_gt?: Maybe<Scalars['String']>
-  workingGroupId_gte?: Maybe<Scalars['String']>
-  workingGroupId_in?: Maybe<Array<Scalars['String']>>
-  workingGroupId_isNull?: Maybe<Scalars['Boolean']>
-  workingGroupId_lt?: Maybe<Scalars['String']>
-  workingGroupId_lte?: Maybe<Scalars['String']>
-  workingGroupId_not_contains?: Maybe<Scalars['String']>
-  workingGroupId_not_containsInsensitive?: Maybe<Scalars['String']>
-  workingGroupId_not_endsWith?: Maybe<Scalars['String']>
-  workingGroupId_not_eq?: Maybe<Scalars['String']>
-  workingGroupId_not_in?: Maybe<Array<Scalars['String']>>
-  workingGroupId_not_startsWith?: Maybe<Scalars['String']>
-  workingGroupId_startsWith?: Maybe<Scalars['String']>
-}
+  channelId_contains?: Maybe<Scalars['String']>;
+  channelId_containsInsensitive?: Maybe<Scalars['String']>;
+  channelId_endsWith?: Maybe<Scalars['String']>;
+  channelId_eq?: Maybe<Scalars['String']>;
+  channelId_gt?: Maybe<Scalars['String']>;
+  channelId_gte?: Maybe<Scalars['String']>;
+  channelId_in?: Maybe<Array<Scalars['String']>>;
+  channelId_isNull?: Maybe<Scalars['Boolean']>;
+  channelId_lt?: Maybe<Scalars['String']>;
+  channelId_lte?: Maybe<Scalars['String']>;
+  channelId_not_contains?: Maybe<Scalars['String']>;
+  channelId_not_containsInsensitive?: Maybe<Scalars['String']>;
+  channelId_not_endsWith?: Maybe<Scalars['String']>;
+  channelId_not_eq?: Maybe<Scalars['String']>;
+  channelId_not_in?: Maybe<Array<Scalars['String']>>;
+  channelId_not_startsWith?: Maybe<Scalars['String']>;
+  channelId_startsWith?: Maybe<Scalars['String']>;
+  daoId_eq?: Maybe<Scalars['Int']>;
+  daoId_gt?: Maybe<Scalars['Int']>;
+  daoId_gte?: Maybe<Scalars['Int']>;
+  daoId_in?: Maybe<Array<Scalars['Int']>>;
+  daoId_isNull?: Maybe<Scalars['Boolean']>;
+  daoId_lt?: Maybe<Scalars['Int']>;
+  daoId_lte?: Maybe<Scalars['Int']>;
+  daoId_not_eq?: Maybe<Scalars['Int']>;
+  daoId_not_in?: Maybe<Array<Scalars['Int']>>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  memberId_contains?: Maybe<Scalars['String']>;
+  memberId_containsInsensitive?: Maybe<Scalars['String']>;
+  memberId_endsWith?: Maybe<Scalars['String']>;
+  memberId_eq?: Maybe<Scalars['String']>;
+  memberId_gt?: Maybe<Scalars['String']>;
+  memberId_gte?: Maybe<Scalars['String']>;
+  memberId_in?: Maybe<Array<Scalars['String']>>;
+  memberId_isNull?: Maybe<Scalars['Boolean']>;
+  memberId_lt?: Maybe<Scalars['String']>;
+  memberId_lte?: Maybe<Scalars['String']>;
+  memberId_not_contains?: Maybe<Scalars['String']>;
+  memberId_not_containsInsensitive?: Maybe<Scalars['String']>;
+  memberId_not_endsWith?: Maybe<Scalars['String']>;
+  memberId_not_eq?: Maybe<Scalars['String']>;
+  memberId_not_in?: Maybe<Array<Scalars['String']>>;
+  memberId_not_startsWith?: Maybe<Scalars['String']>;
+  memberId_startsWith?: Maybe<Scalars['String']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+  workingGroupId_contains?: Maybe<Scalars['String']>;
+  workingGroupId_containsInsensitive?: Maybe<Scalars['String']>;
+  workingGroupId_endsWith?: Maybe<Scalars['String']>;
+  workingGroupId_eq?: Maybe<Scalars['String']>;
+  workingGroupId_gt?: Maybe<Scalars['String']>;
+  workingGroupId_gte?: Maybe<Scalars['String']>;
+  workingGroupId_in?: Maybe<Array<Scalars['String']>>;
+  workingGroupId_isNull?: Maybe<Scalars['Boolean']>;
+  workingGroupId_lt?: Maybe<Scalars['String']>;
+  workingGroupId_lte?: Maybe<Scalars['String']>;
+  workingGroupId_not_contains?: Maybe<Scalars['String']>;
+  workingGroupId_not_containsInsensitive?: Maybe<Scalars['String']>;
+  workingGroupId_not_endsWith?: Maybe<Scalars['String']>;
+  workingGroupId_not_eq?: Maybe<Scalars['String']>;
+  workingGroupId_not_in?: Maybe<Array<Scalars['String']>>;
+  workingGroupId_not_startsWith?: Maybe<Scalars['String']>;
+  workingGroupId_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type StorageBagOwnerWorkingGroup = {
-  workingGroupId?: Maybe<Scalars['String']>
-}
+  workingGroupId?: Maybe<Scalars['String']>;
+};
 
 export type StorageBagWhereInput = {
-  AND?: Maybe<Array<StorageBagWhereInput>>
-  OR?: Maybe<Array<StorageBagWhereInput>>
-  distributionBuckets_every?: Maybe<DistributionBucketBagWhereInput>
-  distributionBuckets_none?: Maybe<DistributionBucketBagWhereInput>
-  distributionBuckets_some?: Maybe<DistributionBucketBagWhereInput>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  objects_every?: Maybe<StorageDataObjectWhereInput>
-  objects_none?: Maybe<StorageDataObjectWhereInput>
-  objects_some?: Maybe<StorageDataObjectWhereInput>
-  owner?: Maybe<StorageBagOwnerWhereInput>
-  owner_isNull?: Maybe<Scalars['Boolean']>
-  storageBuckets_every?: Maybe<StorageBucketBagWhereInput>
-  storageBuckets_none?: Maybe<StorageBucketBagWhereInput>
-  storageBuckets_some?: Maybe<StorageBucketBagWhereInput>
-}
+  AND?: Maybe<Array<StorageBagWhereInput>>;
+  OR?: Maybe<Array<StorageBagWhereInput>>;
+  distributionBuckets_every?: Maybe<DistributionBucketBagWhereInput>;
+  distributionBuckets_none?: Maybe<DistributionBucketBagWhereInput>;
+  distributionBuckets_some?: Maybe<DistributionBucketBagWhereInput>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  objects_every?: Maybe<StorageDataObjectWhereInput>;
+  objects_none?: Maybe<StorageDataObjectWhereInput>;
+  objects_some?: Maybe<StorageDataObjectWhereInput>;
+  owner?: Maybe<StorageBagOwnerWhereInput>;
+  owner_isNull?: Maybe<Scalars['Boolean']>;
+  storageBuckets_every?: Maybe<StorageBucketBagWhereInput>;
+  storageBuckets_none?: Maybe<StorageBucketBagWhereInput>;
+  storageBuckets_some?: Maybe<StorageBucketBagWhereInput>;
+};
 
 export type StorageBagsConnection = {
-  edges: Array<StorageBagEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<StorageBagEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type StorageBucket = {
-  acceptingNewBags: Scalars['Boolean']
-  bags: Array<StorageBucketBag>
-  dataObjectCountLimit: Scalars['BigInt']
-  dataObjectsCount: Scalars['BigInt']
-  dataObjectsSize: Scalars['BigInt']
-  dataObjectsSizeLimit: Scalars['BigInt']
-  id: Scalars['String']
-  operatorMetadata?: Maybe<StorageBucketOperatorMetadata>
-  operatorStatus: StorageBucketOperatorStatus
-}
+  acceptingNewBags: Scalars['Boolean'];
+  bags: Array<StorageBucketBag>;
+  dataObjectCountLimit: Scalars['BigInt'];
+  dataObjectsCount: Scalars['BigInt'];
+  dataObjectsSize: Scalars['BigInt'];
+  dataObjectsSizeLimit: Scalars['BigInt'];
+  id: Scalars['String'];
+  operatorMetadata?: Maybe<StorageBucketOperatorMetadata>;
+  operatorStatus: StorageBucketOperatorStatus;
+};
+
 
 export type StorageBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>
-  where?: Maybe<StorageBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>;
+  where?: Maybe<StorageBucketBagWhereInput>;
+};
 
 export type StorageBucketBag = {
-  bag: StorageBag
-  id: Scalars['String']
-  storageBucket: StorageBucket
-}
+  bag: StorageBag;
+  id: Scalars['String'];
+  storageBucket: StorageBucket;
+};
 
 export type StorageBucketBagEdge = {
-  cursor: Scalars['String']
-  node: StorageBucketBag
-}
+  cursor: Scalars['String'];
+  node: StorageBucketBag;
+};
 
 export enum StorageBucketBagOrderByInput {
   BagIdAsc = 'bag_id_ASC',
@@ -4914,64 +5044,64 @@ export enum StorageBucketBagOrderByInput {
   StorageBucketDataObjectsSizeAsc = 'storageBucket_dataObjectsSize_ASC',
   StorageBucketDataObjectsSizeDesc = 'storageBucket_dataObjectsSize_DESC',
   StorageBucketIdAsc = 'storageBucket_id_ASC',
-  StorageBucketIdDesc = 'storageBucket_id_DESC',
+  StorageBucketIdDesc = 'storageBucket_id_DESC'
 }
 
 export type StorageBucketBagWhereInput = {
-  AND?: Maybe<Array<StorageBucketBagWhereInput>>
-  OR?: Maybe<Array<StorageBucketBagWhereInput>>
-  bag?: Maybe<StorageBagWhereInput>
-  bag_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  storageBucket?: Maybe<StorageBucketWhereInput>
-  storageBucket_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<StorageBucketBagWhereInput>>;
+  OR?: Maybe<Array<StorageBucketBagWhereInput>>;
+  bag?: Maybe<StorageBagWhereInput>;
+  bag_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  storageBucket?: Maybe<StorageBucketWhereInput>;
+  storageBucket_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type StorageBucketBagsConnection = {
-  edges: Array<StorageBucketBagEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<StorageBucketBagEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type StorageBucketEdge = {
-  cursor: Scalars['String']
-  node: StorageBucket
-}
+  cursor: Scalars['String'];
+  node: StorageBucket;
+};
 
 export type StorageBucketOperatorMetadata = {
-  extra?: Maybe<Scalars['String']>
-  id: Scalars['String']
-  nodeEndpoint?: Maybe<Scalars['String']>
-  nodeLocation?: Maybe<NodeLocationMetadata>
-  storageBucket: StorageBucket
-}
+  extra?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  nodeEndpoint?: Maybe<Scalars['String']>;
+  nodeLocation?: Maybe<NodeLocationMetadata>;
+  storageBucket: StorageBucket;
+};
 
 export type StorageBucketOperatorMetadataConnection = {
-  edges: Array<StorageBucketOperatorMetadataEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<StorageBucketOperatorMetadataEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type StorageBucketOperatorMetadataEdge = {
-  cursor: Scalars['String']
-  node: StorageBucketOperatorMetadata
-}
+  cursor: Scalars['String'];
+  node: StorageBucketOperatorMetadata;
+};
 
 export enum StorageBucketOperatorMetadataOrderByInput {
   ExtraAsc = 'extra_ASC',
@@ -4995,141 +5125,138 @@ export enum StorageBucketOperatorMetadataOrderByInput {
   StorageBucketDataObjectsSizeAsc = 'storageBucket_dataObjectsSize_ASC',
   StorageBucketDataObjectsSizeDesc = 'storageBucket_dataObjectsSize_DESC',
   StorageBucketIdAsc = 'storageBucket_id_ASC',
-  StorageBucketIdDesc = 'storageBucket_id_DESC',
+  StorageBucketIdDesc = 'storageBucket_id_DESC'
 }
 
 export type StorageBucketOperatorMetadataWhereInput = {
-  AND?: Maybe<Array<StorageBucketOperatorMetadataWhereInput>>
-  OR?: Maybe<Array<StorageBucketOperatorMetadataWhereInput>>
-  extra_contains?: Maybe<Scalars['String']>
-  extra_containsInsensitive?: Maybe<Scalars['String']>
-  extra_endsWith?: Maybe<Scalars['String']>
-  extra_eq?: Maybe<Scalars['String']>
-  extra_gt?: Maybe<Scalars['String']>
-  extra_gte?: Maybe<Scalars['String']>
-  extra_in?: Maybe<Array<Scalars['String']>>
-  extra_isNull?: Maybe<Scalars['Boolean']>
-  extra_lt?: Maybe<Scalars['String']>
-  extra_lte?: Maybe<Scalars['String']>
-  extra_not_contains?: Maybe<Scalars['String']>
-  extra_not_containsInsensitive?: Maybe<Scalars['String']>
-  extra_not_endsWith?: Maybe<Scalars['String']>
-  extra_not_eq?: Maybe<Scalars['String']>
-  extra_not_in?: Maybe<Array<Scalars['String']>>
-  extra_not_startsWith?: Maybe<Scalars['String']>
-  extra_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_contains?: Maybe<Scalars['String']>
-  nodeEndpoint_containsInsensitive?: Maybe<Scalars['String']>
-  nodeEndpoint_endsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_eq?: Maybe<Scalars['String']>
-  nodeEndpoint_gt?: Maybe<Scalars['String']>
-  nodeEndpoint_gte?: Maybe<Scalars['String']>
-  nodeEndpoint_in?: Maybe<Array<Scalars['String']>>
-  nodeEndpoint_isNull?: Maybe<Scalars['Boolean']>
-  nodeEndpoint_lt?: Maybe<Scalars['String']>
-  nodeEndpoint_lte?: Maybe<Scalars['String']>
-  nodeEndpoint_not_contains?: Maybe<Scalars['String']>
-  nodeEndpoint_not_containsInsensitive?: Maybe<Scalars['String']>
-  nodeEndpoint_not_endsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_not_eq?: Maybe<Scalars['String']>
-  nodeEndpoint_not_in?: Maybe<Array<Scalars['String']>>
-  nodeEndpoint_not_startsWith?: Maybe<Scalars['String']>
-  nodeEndpoint_startsWith?: Maybe<Scalars['String']>
-  nodeLocation?: Maybe<NodeLocationMetadataWhereInput>
-  nodeLocation_isNull?: Maybe<Scalars['Boolean']>
-  storageBucket?: Maybe<StorageBucketWhereInput>
-  storageBucket_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<StorageBucketOperatorMetadataWhereInput>>;
+  OR?: Maybe<Array<StorageBucketOperatorMetadataWhereInput>>;
+  extra_contains?: Maybe<Scalars['String']>;
+  extra_containsInsensitive?: Maybe<Scalars['String']>;
+  extra_endsWith?: Maybe<Scalars['String']>;
+  extra_eq?: Maybe<Scalars['String']>;
+  extra_gt?: Maybe<Scalars['String']>;
+  extra_gte?: Maybe<Scalars['String']>;
+  extra_in?: Maybe<Array<Scalars['String']>>;
+  extra_isNull?: Maybe<Scalars['Boolean']>;
+  extra_lt?: Maybe<Scalars['String']>;
+  extra_lte?: Maybe<Scalars['String']>;
+  extra_not_contains?: Maybe<Scalars['String']>;
+  extra_not_containsInsensitive?: Maybe<Scalars['String']>;
+  extra_not_endsWith?: Maybe<Scalars['String']>;
+  extra_not_eq?: Maybe<Scalars['String']>;
+  extra_not_in?: Maybe<Array<Scalars['String']>>;
+  extra_not_startsWith?: Maybe<Scalars['String']>;
+  extra_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_contains?: Maybe<Scalars['String']>;
+  nodeEndpoint_containsInsensitive?: Maybe<Scalars['String']>;
+  nodeEndpoint_endsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_eq?: Maybe<Scalars['String']>;
+  nodeEndpoint_gt?: Maybe<Scalars['String']>;
+  nodeEndpoint_gte?: Maybe<Scalars['String']>;
+  nodeEndpoint_in?: Maybe<Array<Scalars['String']>>;
+  nodeEndpoint_isNull?: Maybe<Scalars['Boolean']>;
+  nodeEndpoint_lt?: Maybe<Scalars['String']>;
+  nodeEndpoint_lte?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_contains?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_containsInsensitive?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_endsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_eq?: Maybe<Scalars['String']>;
+  nodeEndpoint_not_in?: Maybe<Array<Scalars['String']>>;
+  nodeEndpoint_not_startsWith?: Maybe<Scalars['String']>;
+  nodeEndpoint_startsWith?: Maybe<Scalars['String']>;
+  nodeLocation?: Maybe<NodeLocationMetadataWhereInput>;
+  nodeLocation_isNull?: Maybe<Scalars['Boolean']>;
+  storageBucket?: Maybe<StorageBucketWhereInput>;
+  storageBucket_isNull?: Maybe<Scalars['Boolean']>;
+};
 
-export type StorageBucketOperatorStatus =
-  | StorageBucketOperatorStatusActive
-  | StorageBucketOperatorStatusInvited
-  | StorageBucketOperatorStatusMissing
+export type StorageBucketOperatorStatus = StorageBucketOperatorStatusActive | StorageBucketOperatorStatusInvited | StorageBucketOperatorStatusMissing;
 
 export type StorageBucketOperatorStatusActive = {
-  transactorAccountId: Scalars['String']
-  workerId: Scalars['Int']
-}
+  transactorAccountId: Scalars['String'];
+  workerId: Scalars['Int'];
+};
 
 export type StorageBucketOperatorStatusInvited = {
-  workerId: Scalars['Int']
-}
+  workerId: Scalars['Int'];
+};
 
 export type StorageBucketOperatorStatusMissing = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type StorageBucketOperatorStatusWhereInput = {
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-  transactorAccountId_contains?: Maybe<Scalars['String']>
-  transactorAccountId_containsInsensitive?: Maybe<Scalars['String']>
-  transactorAccountId_endsWith?: Maybe<Scalars['String']>
-  transactorAccountId_eq?: Maybe<Scalars['String']>
-  transactorAccountId_gt?: Maybe<Scalars['String']>
-  transactorAccountId_gte?: Maybe<Scalars['String']>
-  transactorAccountId_in?: Maybe<Array<Scalars['String']>>
-  transactorAccountId_isNull?: Maybe<Scalars['Boolean']>
-  transactorAccountId_lt?: Maybe<Scalars['String']>
-  transactorAccountId_lte?: Maybe<Scalars['String']>
-  transactorAccountId_not_contains?: Maybe<Scalars['String']>
-  transactorAccountId_not_containsInsensitive?: Maybe<Scalars['String']>
-  transactorAccountId_not_endsWith?: Maybe<Scalars['String']>
-  transactorAccountId_not_eq?: Maybe<Scalars['String']>
-  transactorAccountId_not_in?: Maybe<Array<Scalars['String']>>
-  transactorAccountId_not_startsWith?: Maybe<Scalars['String']>
-  transactorAccountId_startsWith?: Maybe<Scalars['String']>
-  workerId_eq?: Maybe<Scalars['Int']>
-  workerId_gt?: Maybe<Scalars['Int']>
-  workerId_gte?: Maybe<Scalars['Int']>
-  workerId_in?: Maybe<Array<Scalars['Int']>>
-  workerId_isNull?: Maybe<Scalars['Boolean']>
-  workerId_lt?: Maybe<Scalars['Int']>
-  workerId_lte?: Maybe<Scalars['Int']>
-  workerId_not_eq?: Maybe<Scalars['Int']>
-  workerId_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+  transactorAccountId_contains?: Maybe<Scalars['String']>;
+  transactorAccountId_containsInsensitive?: Maybe<Scalars['String']>;
+  transactorAccountId_endsWith?: Maybe<Scalars['String']>;
+  transactorAccountId_eq?: Maybe<Scalars['String']>;
+  transactorAccountId_gt?: Maybe<Scalars['String']>;
+  transactorAccountId_gte?: Maybe<Scalars['String']>;
+  transactorAccountId_in?: Maybe<Array<Scalars['String']>>;
+  transactorAccountId_isNull?: Maybe<Scalars['Boolean']>;
+  transactorAccountId_lt?: Maybe<Scalars['String']>;
+  transactorAccountId_lte?: Maybe<Scalars['String']>;
+  transactorAccountId_not_contains?: Maybe<Scalars['String']>;
+  transactorAccountId_not_containsInsensitive?: Maybe<Scalars['String']>;
+  transactorAccountId_not_endsWith?: Maybe<Scalars['String']>;
+  transactorAccountId_not_eq?: Maybe<Scalars['String']>;
+  transactorAccountId_not_in?: Maybe<Array<Scalars['String']>>;
+  transactorAccountId_not_startsWith?: Maybe<Scalars['String']>;
+  transactorAccountId_startsWith?: Maybe<Scalars['String']>;
+  workerId_eq?: Maybe<Scalars['Int']>;
+  workerId_gt?: Maybe<Scalars['Int']>;
+  workerId_gte?: Maybe<Scalars['Int']>;
+  workerId_in?: Maybe<Array<Scalars['Int']>>;
+  workerId_isNull?: Maybe<Scalars['Boolean']>;
+  workerId_lt?: Maybe<Scalars['Int']>;
+  workerId_lte?: Maybe<Scalars['Int']>;
+  workerId_not_eq?: Maybe<Scalars['Int']>;
+  workerId_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export enum StorageBucketOrderByInput {
   AcceptingNewBagsAsc = 'acceptingNewBags_ASC',
@@ -5157,99 +5284,99 @@ export enum StorageBucketOrderByInput {
   OperatorStatusTransactorAccountIdAsc = 'operatorStatus_transactorAccountId_ASC',
   OperatorStatusTransactorAccountIdDesc = 'operatorStatus_transactorAccountId_DESC',
   OperatorStatusWorkerIdAsc = 'operatorStatus_workerId_ASC',
-  OperatorStatusWorkerIdDesc = 'operatorStatus_workerId_DESC',
+  OperatorStatusWorkerIdDesc = 'operatorStatus_workerId_DESC'
 }
 
 export type StorageBucketWhereInput = {
-  AND?: Maybe<Array<StorageBucketWhereInput>>
-  OR?: Maybe<Array<StorageBucketWhereInput>>
-  acceptingNewBags_eq?: Maybe<Scalars['Boolean']>
-  acceptingNewBags_isNull?: Maybe<Scalars['Boolean']>
-  acceptingNewBags_not_eq?: Maybe<Scalars['Boolean']>
-  bags_every?: Maybe<StorageBucketBagWhereInput>
-  bags_none?: Maybe<StorageBucketBagWhereInput>
-  bags_some?: Maybe<StorageBucketBagWhereInput>
-  dataObjectCountLimit_eq?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_gt?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_gte?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectCountLimit_isNull?: Maybe<Scalars['Boolean']>
-  dataObjectCountLimit_lt?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_lte?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_not_eq?: Maybe<Scalars['BigInt']>
-  dataObjectCountLimit_not_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsCount_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_gt?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_gte?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsCount_isNull?: Maybe<Scalars['Boolean']>
-  dataObjectsCount_lt?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_lte?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_not_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsCount_not_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsSizeLimit_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_gt?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_gte?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsSizeLimit_isNull?: Maybe<Scalars['Boolean']>
-  dataObjectsSizeLimit_lt?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_lte?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_not_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsSizeLimit_not_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsSize_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_gt?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_gte?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_in?: Maybe<Array<Scalars['BigInt']>>
-  dataObjectsSize_isNull?: Maybe<Scalars['Boolean']>
-  dataObjectsSize_lt?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_lte?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_not_eq?: Maybe<Scalars['BigInt']>
-  dataObjectsSize_not_in?: Maybe<Array<Scalars['BigInt']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  operatorMetadata?: Maybe<StorageBucketOperatorMetadataWhereInput>
-  operatorMetadata_isNull?: Maybe<Scalars['Boolean']>
-  operatorStatus?: Maybe<StorageBucketOperatorStatusWhereInput>
-  operatorStatus_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<StorageBucketWhereInput>>;
+  OR?: Maybe<Array<StorageBucketWhereInput>>;
+  acceptingNewBags_eq?: Maybe<Scalars['Boolean']>;
+  acceptingNewBags_isNull?: Maybe<Scalars['Boolean']>;
+  acceptingNewBags_not_eq?: Maybe<Scalars['Boolean']>;
+  bags_every?: Maybe<StorageBucketBagWhereInput>;
+  bags_none?: Maybe<StorageBucketBagWhereInput>;
+  bags_some?: Maybe<StorageBucketBagWhereInput>;
+  dataObjectCountLimit_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_gt?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_gte?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectCountLimit_isNull?: Maybe<Scalars['Boolean']>;
+  dataObjectCountLimit_lt?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_lte?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_not_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectCountLimit_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsCount_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_gt?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_gte?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsCount_isNull?: Maybe<Scalars['Boolean']>;
+  dataObjectsCount_lt?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_lte?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_not_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsCount_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsSizeLimit_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_gt?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_gte?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsSizeLimit_isNull?: Maybe<Scalars['Boolean']>;
+  dataObjectsSizeLimit_lt?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_lte?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_not_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsSizeLimit_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsSize_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_gt?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_gte?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_in?: Maybe<Array<Scalars['BigInt']>>;
+  dataObjectsSize_isNull?: Maybe<Scalars['Boolean']>;
+  dataObjectsSize_lt?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_lte?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_not_eq?: Maybe<Scalars['BigInt']>;
+  dataObjectsSize_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  operatorMetadata?: Maybe<StorageBucketOperatorMetadataWhereInput>;
+  operatorMetadata_isNull?: Maybe<Scalars['Boolean']>;
+  operatorStatus?: Maybe<StorageBucketOperatorStatusWhereInput>;
+  operatorStatus_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type StorageBucketsConnection = {
-  edges: Array<StorageBucketEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<StorageBucketEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type StorageDataObject = {
-  createdAt: Scalars['DateTime']
-  id: Scalars['String']
-  ipfsHash: Scalars['String']
-  isAccepted: Scalars['Boolean']
-  size: Scalars['BigInt']
-  stateBloatBond: Scalars['BigInt']
-  storageBag: StorageBag
-  type?: Maybe<DataObjectType>
-  unsetAt?: Maybe<Scalars['DateTime']>
-}
+  createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  ipfsHash: Scalars['String'];
+  isAccepted: Scalars['Boolean'];
+  size: Scalars['BigInt'];
+  stateBloatBond: Scalars['BigInt'];
+  storageBag: StorageBag;
+  type?: Maybe<DataObjectType>;
+  unsetAt?: Maybe<Scalars['DateTime']>;
+};
 
 export type StorageDataObjectEdge = {
-  cursor: Scalars['String']
-  node: StorageDataObject
-}
+  cursor: Scalars['String'];
+  node: StorageDataObject;
+};
 
 export enum StorageDataObjectOrderByInput {
   CreatedAtAsc = 'createdAt_ASC',
@@ -5271,698 +5398,767 @@ export enum StorageDataObjectOrderByInput {
   TypePhantomAsc = 'type_phantom_ASC',
   TypePhantomDesc = 'type_phantom_DESC',
   UnsetAtAsc = 'unsetAt_ASC',
-  UnsetAtDesc = 'unsetAt_DESC',
+  UnsetAtDesc = 'unsetAt_DESC'
 }
 
 export type StorageDataObjectWhereInput = {
-  AND?: Maybe<Array<StorageDataObjectWhereInput>>
-  OR?: Maybe<Array<StorageDataObjectWhereInput>>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  ipfsHash_contains?: Maybe<Scalars['String']>
-  ipfsHash_containsInsensitive?: Maybe<Scalars['String']>
-  ipfsHash_endsWith?: Maybe<Scalars['String']>
-  ipfsHash_eq?: Maybe<Scalars['String']>
-  ipfsHash_gt?: Maybe<Scalars['String']>
-  ipfsHash_gte?: Maybe<Scalars['String']>
-  ipfsHash_in?: Maybe<Array<Scalars['String']>>
-  ipfsHash_isNull?: Maybe<Scalars['Boolean']>
-  ipfsHash_lt?: Maybe<Scalars['String']>
-  ipfsHash_lte?: Maybe<Scalars['String']>
-  ipfsHash_not_contains?: Maybe<Scalars['String']>
-  ipfsHash_not_containsInsensitive?: Maybe<Scalars['String']>
-  ipfsHash_not_endsWith?: Maybe<Scalars['String']>
-  ipfsHash_not_eq?: Maybe<Scalars['String']>
-  ipfsHash_not_in?: Maybe<Array<Scalars['String']>>
-  ipfsHash_not_startsWith?: Maybe<Scalars['String']>
-  ipfsHash_startsWith?: Maybe<Scalars['String']>
-  isAccepted_eq?: Maybe<Scalars['Boolean']>
-  isAccepted_isNull?: Maybe<Scalars['Boolean']>
-  isAccepted_not_eq?: Maybe<Scalars['Boolean']>
-  size_eq?: Maybe<Scalars['BigInt']>
-  size_gt?: Maybe<Scalars['BigInt']>
-  size_gte?: Maybe<Scalars['BigInt']>
-  size_in?: Maybe<Array<Scalars['BigInt']>>
-  size_isNull?: Maybe<Scalars['Boolean']>
-  size_lt?: Maybe<Scalars['BigInt']>
-  size_lte?: Maybe<Scalars['BigInt']>
-  size_not_eq?: Maybe<Scalars['BigInt']>
-  size_not_in?: Maybe<Array<Scalars['BigInt']>>
-  stateBloatBond_eq?: Maybe<Scalars['BigInt']>
-  stateBloatBond_gt?: Maybe<Scalars['BigInt']>
-  stateBloatBond_gte?: Maybe<Scalars['BigInt']>
-  stateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>
-  stateBloatBond_isNull?: Maybe<Scalars['Boolean']>
-  stateBloatBond_lt?: Maybe<Scalars['BigInt']>
-  stateBloatBond_lte?: Maybe<Scalars['BigInt']>
-  stateBloatBond_not_eq?: Maybe<Scalars['BigInt']>
-  stateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>
-  storageBag?: Maybe<StorageBagWhereInput>
-  storageBag_isNull?: Maybe<Scalars['Boolean']>
-  type?: Maybe<DataObjectTypeWhereInput>
-  type_isNull?: Maybe<Scalars['Boolean']>
-  unsetAt_eq?: Maybe<Scalars['DateTime']>
-  unsetAt_gt?: Maybe<Scalars['DateTime']>
-  unsetAt_gte?: Maybe<Scalars['DateTime']>
-  unsetAt_in?: Maybe<Array<Scalars['DateTime']>>
-  unsetAt_isNull?: Maybe<Scalars['Boolean']>
-  unsetAt_lt?: Maybe<Scalars['DateTime']>
-  unsetAt_lte?: Maybe<Scalars['DateTime']>
-  unsetAt_not_eq?: Maybe<Scalars['DateTime']>
-  unsetAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-}
+  AND?: Maybe<Array<StorageDataObjectWhereInput>>;
+  OR?: Maybe<Array<StorageDataObjectWhereInput>>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  ipfsHash_contains?: Maybe<Scalars['String']>;
+  ipfsHash_containsInsensitive?: Maybe<Scalars['String']>;
+  ipfsHash_endsWith?: Maybe<Scalars['String']>;
+  ipfsHash_eq?: Maybe<Scalars['String']>;
+  ipfsHash_gt?: Maybe<Scalars['String']>;
+  ipfsHash_gte?: Maybe<Scalars['String']>;
+  ipfsHash_in?: Maybe<Array<Scalars['String']>>;
+  ipfsHash_isNull?: Maybe<Scalars['Boolean']>;
+  ipfsHash_lt?: Maybe<Scalars['String']>;
+  ipfsHash_lte?: Maybe<Scalars['String']>;
+  ipfsHash_not_contains?: Maybe<Scalars['String']>;
+  ipfsHash_not_containsInsensitive?: Maybe<Scalars['String']>;
+  ipfsHash_not_endsWith?: Maybe<Scalars['String']>;
+  ipfsHash_not_eq?: Maybe<Scalars['String']>;
+  ipfsHash_not_in?: Maybe<Array<Scalars['String']>>;
+  ipfsHash_not_startsWith?: Maybe<Scalars['String']>;
+  ipfsHash_startsWith?: Maybe<Scalars['String']>;
+  isAccepted_eq?: Maybe<Scalars['Boolean']>;
+  isAccepted_isNull?: Maybe<Scalars['Boolean']>;
+  isAccepted_not_eq?: Maybe<Scalars['Boolean']>;
+  size_eq?: Maybe<Scalars['BigInt']>;
+  size_gt?: Maybe<Scalars['BigInt']>;
+  size_gte?: Maybe<Scalars['BigInt']>;
+  size_in?: Maybe<Array<Scalars['BigInt']>>;
+  size_isNull?: Maybe<Scalars['Boolean']>;
+  size_lt?: Maybe<Scalars['BigInt']>;
+  size_lte?: Maybe<Scalars['BigInt']>;
+  size_not_eq?: Maybe<Scalars['BigInt']>;
+  size_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  stateBloatBond_eq?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_gt?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_gte?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>;
+  stateBloatBond_isNull?: Maybe<Scalars['Boolean']>;
+  stateBloatBond_lt?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_lte?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_not_eq?: Maybe<Scalars['BigInt']>;
+  stateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  storageBag?: Maybe<StorageBagWhereInput>;
+  storageBag_isNull?: Maybe<Scalars['Boolean']>;
+  type?: Maybe<DataObjectTypeWhereInput>;
+  type_isNull?: Maybe<Scalars['Boolean']>;
+  unsetAt_eq?: Maybe<Scalars['DateTime']>;
+  unsetAt_gt?: Maybe<Scalars['DateTime']>;
+  unsetAt_gte?: Maybe<Scalars['DateTime']>;
+  unsetAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  unsetAt_isNull?: Maybe<Scalars['Boolean']>;
+  unsetAt_lt?: Maybe<Scalars['DateTime']>;
+  unsetAt_lte?: Maybe<Scalars['DateTime']>;
+  unsetAt_not_eq?: Maybe<Scalars['DateTime']>;
+  unsetAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+};
 
 export type StorageDataObjectsConnection = {
-  edges: Array<StorageDataObjectEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<StorageDataObjectEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type Subscription = {
-  appById?: Maybe<App>
-  apps: Array<App>
-  auctionById?: Maybe<Auction>
-  auctionWhitelistedMemberById?: Maybe<AuctionWhitelistedMember>
-  auctionWhitelistedMembers: Array<AuctionWhitelistedMember>
-  auctions: Array<Auction>
-  bannedMemberById?: Maybe<BannedMember>
-  bannedMembers: Array<BannedMember>
-  bidById?: Maybe<Bid>
-  bids: Array<Bid>
-  channelById?: Maybe<Channel>
-  channels: Array<Channel>
-  commentById?: Maybe<Comment>
-  commentReactionById?: Maybe<CommentReaction>
-  commentReactions: Array<CommentReaction>
-  comments: Array<Comment>
-  curatorById?: Maybe<Curator>
-  curatorGroupById?: Maybe<CuratorGroup>
-  curatorGroups: Array<CuratorGroup>
-  curators: Array<Curator>
-  distributionBucketBagById?: Maybe<DistributionBucketBag>
-  distributionBucketBags: Array<DistributionBucketBag>
-  distributionBucketById?: Maybe<DistributionBucket>
-  distributionBucketFamilies: Array<DistributionBucketFamily>
-  distributionBucketFamilyById?: Maybe<DistributionBucketFamily>
-  distributionBucketFamilyMetadata: Array<DistributionBucketFamilyMetadata>
-  distributionBucketFamilyMetadataById?: Maybe<DistributionBucketFamilyMetadata>
-  distributionBucketOperatorById?: Maybe<DistributionBucketOperator>
-  distributionBucketOperatorMetadata: Array<DistributionBucketOperatorMetadata>
-  distributionBucketOperatorMetadataById?: Maybe<DistributionBucketOperatorMetadata>
-  distributionBucketOperators: Array<DistributionBucketOperator>
-  distributionBuckets: Array<DistributionBucket>
-  eventById?: Maybe<Event>
-  events: Array<Event>
-  licenseById?: Maybe<License>
-  licenses: Array<License>
-  memberMetadata: Array<MemberMetadata>
-  memberMetadataById?: Maybe<MemberMetadata>
-  membershipById?: Maybe<Membership>
-  memberships: Array<Membership>
-  ownedNftById?: Maybe<OwnedNft>
-  ownedNfts: Array<OwnedNft>
-  processorState: ProcessorState
-  storageBagById?: Maybe<StorageBag>
-  storageBags: Array<StorageBag>
-  storageBucketBagById?: Maybe<StorageBucketBag>
-  storageBucketBags: Array<StorageBucketBag>
-  storageBucketById?: Maybe<StorageBucket>
-  storageBucketOperatorMetadata: Array<StorageBucketOperatorMetadata>
-  storageBucketOperatorMetadataById?: Maybe<StorageBucketOperatorMetadata>
-  storageBuckets: Array<StorageBucket>
-  storageDataObjectById?: Maybe<StorageDataObject>
-  storageDataObjects: Array<StorageDataObject>
-  videoById?: Maybe<Video>
-  videoCategories: Array<VideoCategory>
-  videoCategoryById?: Maybe<VideoCategory>
-  videoFeaturedInCategories: Array<VideoFeaturedInCategory>
-  videoFeaturedInCategoryById?: Maybe<VideoFeaturedInCategory>
-  videoHeroById?: Maybe<VideoHero>
-  videoHeros: Array<VideoHero>
-  videoMediaEncodingById?: Maybe<VideoMediaEncoding>
-  videoMediaEncodings: Array<VideoMediaEncoding>
-  videoMediaMetadata: Array<VideoMediaMetadata>
-  videoMediaMetadataById?: Maybe<VideoMediaMetadata>
-  videoReactionById?: Maybe<VideoReaction>
-  videoReactions: Array<VideoReaction>
-  videoSubtitleById?: Maybe<VideoSubtitle>
-  videoSubtitles: Array<VideoSubtitle>
-  videos: Array<Video>
-}
+  appById?: Maybe<App>;
+  apps: Array<App>;
+  auctionById?: Maybe<Auction>;
+  auctionWhitelistedMemberById?: Maybe<AuctionWhitelistedMember>;
+  auctionWhitelistedMembers: Array<AuctionWhitelistedMember>;
+  auctions: Array<Auction>;
+  bannedMemberById?: Maybe<BannedMember>;
+  bannedMembers: Array<BannedMember>;
+  bidById?: Maybe<Bid>;
+  bids: Array<Bid>;
+  channelById?: Maybe<Channel>;
+  channels: Array<Channel>;
+  commentById?: Maybe<Comment>;
+  commentReactionById?: Maybe<CommentReaction>;
+  commentReactions: Array<CommentReaction>;
+  comments: Array<Comment>;
+  curatorById?: Maybe<Curator>;
+  curatorGroupById?: Maybe<CuratorGroup>;
+  curatorGroups: Array<CuratorGroup>;
+  curators: Array<Curator>;
+  distributionBucketBagById?: Maybe<DistributionBucketBag>;
+  distributionBucketBags: Array<DistributionBucketBag>;
+  distributionBucketById?: Maybe<DistributionBucket>;
+  distributionBucketFamilies: Array<DistributionBucketFamily>;
+  distributionBucketFamilyById?: Maybe<DistributionBucketFamily>;
+  distributionBucketFamilyMetadata: Array<DistributionBucketFamilyMetadata>;
+  distributionBucketFamilyMetadataById?: Maybe<DistributionBucketFamilyMetadata>;
+  distributionBucketOperatorById?: Maybe<DistributionBucketOperator>;
+  distributionBucketOperatorMetadata: Array<DistributionBucketOperatorMetadata>;
+  distributionBucketOperatorMetadataById?: Maybe<DistributionBucketOperatorMetadata>;
+  distributionBucketOperators: Array<DistributionBucketOperator>;
+  distributionBuckets: Array<DistributionBucket>;
+  eventById?: Maybe<Event>;
+  events: Array<Event>;
+  licenseById?: Maybe<License>;
+  licenses: Array<License>;
+  memberMetadata: Array<MemberMetadata>;
+  memberMetadataById?: Maybe<MemberMetadata>;
+  membershipById?: Maybe<Membership>;
+  memberships: Array<Membership>;
+  ownedNftById?: Maybe<OwnedNft>;
+  ownedNfts: Array<OwnedNft>;
+  processorState: ProcessorState;
+  storageBagById?: Maybe<StorageBag>;
+  storageBags: Array<StorageBag>;
+  storageBucketBagById?: Maybe<StorageBucketBag>;
+  storageBucketBags: Array<StorageBucketBag>;
+  storageBucketById?: Maybe<StorageBucket>;
+  storageBucketOperatorMetadata: Array<StorageBucketOperatorMetadata>;
+  storageBucketOperatorMetadataById?: Maybe<StorageBucketOperatorMetadata>;
+  storageBuckets: Array<StorageBucket>;
+  storageDataObjectById?: Maybe<StorageDataObject>;
+  storageDataObjects: Array<StorageDataObject>;
+  videoById?: Maybe<Video>;
+  videoCategories: Array<VideoCategory>;
+  videoCategoryById?: Maybe<VideoCategory>;
+  videoFeaturedInCategories: Array<VideoFeaturedInCategory>;
+  videoFeaturedInCategoryById?: Maybe<VideoFeaturedInCategory>;
+  videoHeroById?: Maybe<VideoHero>;
+  videoHeros: Array<VideoHero>;
+  videoMediaEncodingById?: Maybe<VideoMediaEncoding>;
+  videoMediaEncodings: Array<VideoMediaEncoding>;
+  videoMediaMetadata: Array<VideoMediaMetadata>;
+  videoMediaMetadataById?: Maybe<VideoMediaMetadata>;
+  videoReactionById?: Maybe<VideoReaction>;
+  videoReactions: Array<VideoReaction>;
+  videoSubtitleById?: Maybe<VideoSubtitle>;
+  videoSubtitles: Array<VideoSubtitle>;
+  videos: Array<Video>;
+};
+
 
 export type SubscriptionAppByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionAppsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AppOrderByInput>>
-  where?: Maybe<AppWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AppOrderByInput>>;
+  where?: Maybe<AppWhereInput>;
+};
+
 
 export type SubscriptionAuctionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionAuctionWhitelistedMemberByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionAuctionWhitelistedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>
-  where?: Maybe<AuctionWhitelistedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionWhitelistedMemberOrderByInput>>;
+  where?: Maybe<AuctionWhitelistedMemberWhereInput>;
+};
+
 
 export type SubscriptionAuctionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<AuctionOrderByInput>>
-  where?: Maybe<AuctionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<AuctionOrderByInput>>;
+  where?: Maybe<AuctionWhereInput>;
+};
+
 
 export type SubscriptionBannedMemberByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionBannedMembersArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BannedMemberOrderByInput>>
-  where?: Maybe<BannedMemberWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BannedMemberOrderByInput>>;
+  where?: Maybe<BannedMemberWhereInput>;
+};
+
 
 export type SubscriptionBidByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionBidsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<BidOrderByInput>>
-  where?: Maybe<BidWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<BidOrderByInput>>;
+  where?: Maybe<BidWhereInput>;
+};
+
 
 export type SubscriptionChannelByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionChannelsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<ChannelOrderByInput>>
-  where?: Maybe<ChannelWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<ChannelOrderByInput>>;
+  where?: Maybe<ChannelWhereInput>;
+};
+
 
 export type SubscriptionCommentByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionCommentReactionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionCommentReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentReactionOrderByInput>>
-  where?: Maybe<CommentReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentReactionOrderByInput>>;
+  where?: Maybe<CommentReactionWhereInput>;
+};
+
 
 export type SubscriptionCommentsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentOrderByInput>>
-  where?: Maybe<CommentWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentOrderByInput>>;
+  where?: Maybe<CommentWhereInput>;
+};
+
 
 export type SubscriptionCuratorByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionCuratorGroupByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionCuratorGroupsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CuratorGroupOrderByInput>>
-  where?: Maybe<CuratorGroupWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CuratorGroupOrderByInput>>;
+  where?: Maybe<CuratorGroupWhereInput>;
+};
+
 
 export type SubscriptionCuratorsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CuratorOrderByInput>>
-  where?: Maybe<CuratorWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CuratorOrderByInput>>;
+  where?: Maybe<CuratorWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>
-  where?: Maybe<DistributionBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketBagOrderByInput>>;
+  where?: Maybe<DistributionBucketBagWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketFamiliesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketFamilyOrderByInput>>
-  where?: Maybe<DistributionBucketFamilyWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketFamilyOrderByInput>>;
+  where?: Maybe<DistributionBucketFamilyWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketFamilyByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketFamilyMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketFamilyMetadataOrderByInput>>
-  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketFamilyMetadataOrderByInput>>;
+  where?: Maybe<DistributionBucketFamilyMetadataWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketFamilyMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketOperatorByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketOperatorMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOperatorMetadataOrderByInput>>
-  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOperatorMetadataOrderByInput>>;
+  where?: Maybe<DistributionBucketOperatorMetadataWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketOperatorMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionDistributionBucketOperatorsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>
-  where?: Maybe<DistributionBucketOperatorWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOperatorOrderByInput>>;
+  where?: Maybe<DistributionBucketOperatorWhereInput>;
+};
+
 
 export type SubscriptionDistributionBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>
-  where?: Maybe<DistributionBucketWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<DistributionBucketOrderByInput>>;
+  where?: Maybe<DistributionBucketWhereInput>;
+};
+
 
 export type SubscriptionEventByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionEventsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<EventOrderByInput>>
-  where?: Maybe<EventWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<EventOrderByInput>>;
+  where?: Maybe<EventWhereInput>;
+};
+
 
 export type SubscriptionLicenseByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionLicensesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<LicenseOrderByInput>>
-  where?: Maybe<LicenseWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<LicenseOrderByInput>>;
+  where?: Maybe<LicenseWhereInput>;
+};
+
 
 export type SubscriptionMemberMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<MemberMetadataOrderByInput>>
-  where?: Maybe<MemberMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<MemberMetadataOrderByInput>>;
+  where?: Maybe<MemberMetadataWhereInput>;
+};
+
 
 export type SubscriptionMemberMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionMembershipByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionMembershipsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<MembershipOrderByInput>>
-  where?: Maybe<MembershipWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<MembershipOrderByInput>>;
+  where?: Maybe<MembershipWhereInput>;
+};
+
 
 export type SubscriptionOwnedNftByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionOwnedNftsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<OwnedNftOrderByInput>>
-  where?: Maybe<OwnedNftWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<OwnedNftOrderByInput>>;
+  where?: Maybe<OwnedNftWhereInput>;
+};
+
 
 export type SubscriptionStorageBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionStorageBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBagOrderByInput>>
-  where?: Maybe<StorageBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBagOrderByInput>>;
+  where?: Maybe<StorageBagWhereInput>;
+};
+
 
 export type SubscriptionStorageBucketBagByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionStorageBucketBagsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>
-  where?: Maybe<StorageBucketBagWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketBagOrderByInput>>;
+  where?: Maybe<StorageBucketBagWhereInput>;
+};
+
 
 export type SubscriptionStorageBucketByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionStorageBucketOperatorMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketOperatorMetadataOrderByInput>>
-  where?: Maybe<StorageBucketOperatorMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketOperatorMetadataOrderByInput>>;
+  where?: Maybe<StorageBucketOperatorMetadataWhereInput>;
+};
+
 
 export type SubscriptionStorageBucketOperatorMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionStorageBucketsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageBucketOrderByInput>>
-  where?: Maybe<StorageBucketWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageBucketOrderByInput>>;
+  where?: Maybe<StorageBucketWhereInput>;
+};
+
 
 export type SubscriptionStorageDataObjectByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionStorageDataObjectsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>
-  where?: Maybe<StorageDataObjectWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<StorageDataObjectOrderByInput>>;
+  where?: Maybe<StorageDataObjectWhereInput>;
+};
+
 
 export type SubscriptionVideoByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoCategoriesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoCategoryOrderByInput>>
-  where?: Maybe<VideoCategoryWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoCategoryOrderByInput>>;
+  where?: Maybe<VideoCategoryWhereInput>;
+};
+
 
 export type SubscriptionVideoCategoryByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoFeaturedInCategoriesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>
-  where?: Maybe<VideoFeaturedInCategoryWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>;
+  where?: Maybe<VideoFeaturedInCategoryWhereInput>;
+};
+
 
 export type SubscriptionVideoFeaturedInCategoryByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoHeroByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoHerosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoHeroOrderByInput>>
-  where?: Maybe<VideoHeroWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoHeroOrderByInput>>;
+  where?: Maybe<VideoHeroWhereInput>;
+};
+
 
 export type SubscriptionVideoMediaEncodingByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoMediaEncodingsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoMediaEncodingOrderByInput>>
-  where?: Maybe<VideoMediaEncodingWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoMediaEncodingOrderByInput>>;
+  where?: Maybe<VideoMediaEncodingWhereInput>;
+};
+
 
 export type SubscriptionVideoMediaMetadataArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoMediaMetadataOrderByInput>>
-  where?: Maybe<VideoMediaMetadataWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoMediaMetadataOrderByInput>>;
+  where?: Maybe<VideoMediaMetadataWhereInput>;
+};
+
 
 export type SubscriptionVideoMediaMetadataByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoReactionByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoReactionOrderByInput>>
-  where?: Maybe<VideoReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoReactionOrderByInput>>;
+  where?: Maybe<VideoReactionWhereInput>;
+};
+
 
 export type SubscriptionVideoSubtitleByIdArgs = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};
+
 
 export type SubscriptionVideoSubtitlesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>
-  where?: Maybe<VideoSubtitleWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>;
+  where?: Maybe<VideoSubtitleWhereInput>;
+};
+
 
 export type SubscriptionVideosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoOrderByInput>>
-  where?: Maybe<VideoWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoOrderByInput>>;
+  where?: Maybe<VideoWhereInput>;
+};
 
-export type TransactionalStatus =
-  | TransactionalStatusAuction
-  | TransactionalStatusBuyNow
-  | TransactionalStatusIdle
-  | TransactionalStatusInitiatedOfferToMember
+export type TransactionalStatus = TransactionalStatusAuction | TransactionalStatusBuyNow | TransactionalStatusIdle | TransactionalStatusInitiatedOfferToMember;
 
 export type TransactionalStatusAuction = {
-  auction: Auction
-}
+  auction: Auction;
+};
 
 export type TransactionalStatusBuyNow = {
-  price: Scalars['BigInt']
-}
+  price: Scalars['BigInt'];
+};
 
 export type TransactionalStatusIdle = {
-  phantom?: Maybe<Scalars['Int']>
-}
+  phantom?: Maybe<Scalars['Int']>;
+};
 
 export type TransactionalStatusInitiatedOfferToMember = {
-  member: Membership
-  price?: Maybe<Scalars['BigInt']>
-}
+  member: Membership;
+  price?: Maybe<Scalars['BigInt']>;
+};
 
 export type TransactionalStatusWhereInput = {
-  auction?: Maybe<AuctionWhereInput>
-  auction_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_contains?: Maybe<Scalars['String']>
-  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_eq?: Maybe<Scalars['String']>
-  isTypeOf_gt?: Maybe<Scalars['String']>
-  isTypeOf_gte?: Maybe<Scalars['String']>
-  isTypeOf_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_isNull?: Maybe<Scalars['Boolean']>
-  isTypeOf_lt?: Maybe<Scalars['String']>
-  isTypeOf_lte?: Maybe<Scalars['String']>
-  isTypeOf_not_contains?: Maybe<Scalars['String']>
-  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>
-  isTypeOf_not_endsWith?: Maybe<Scalars['String']>
-  isTypeOf_not_eq?: Maybe<Scalars['String']>
-  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>
-  isTypeOf_not_startsWith?: Maybe<Scalars['String']>
-  isTypeOf_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  phantom_eq?: Maybe<Scalars['Int']>
-  phantom_gt?: Maybe<Scalars['Int']>
-  phantom_gte?: Maybe<Scalars['Int']>
-  phantom_in?: Maybe<Array<Scalars['Int']>>
-  phantom_isNull?: Maybe<Scalars['Boolean']>
-  phantom_lt?: Maybe<Scalars['Int']>
-  phantom_lte?: Maybe<Scalars['Int']>
-  phantom_not_eq?: Maybe<Scalars['Int']>
-  phantom_not_in?: Maybe<Array<Scalars['Int']>>
-  price_eq?: Maybe<Scalars['BigInt']>
-  price_gt?: Maybe<Scalars['BigInt']>
-  price_gte?: Maybe<Scalars['BigInt']>
-  price_in?: Maybe<Array<Scalars['BigInt']>>
-  price_isNull?: Maybe<Scalars['Boolean']>
-  price_lt?: Maybe<Scalars['BigInt']>
-  price_lte?: Maybe<Scalars['BigInt']>
-  price_not_eq?: Maybe<Scalars['BigInt']>
-  price_not_in?: Maybe<Array<Scalars['BigInt']>>
-}
+  auction?: Maybe<AuctionWhereInput>;
+  auction_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_contains?: Maybe<Scalars['String']>;
+  isTypeOf_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_eq?: Maybe<Scalars['String']>;
+  isTypeOf_gt?: Maybe<Scalars['String']>;
+  isTypeOf_gte?: Maybe<Scalars['String']>;
+  isTypeOf_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_isNull?: Maybe<Scalars['Boolean']>;
+  isTypeOf_lt?: Maybe<Scalars['String']>;
+  isTypeOf_lte?: Maybe<Scalars['String']>;
+  isTypeOf_not_contains?: Maybe<Scalars['String']>;
+  isTypeOf_not_containsInsensitive?: Maybe<Scalars['String']>;
+  isTypeOf_not_endsWith?: Maybe<Scalars['String']>;
+  isTypeOf_not_eq?: Maybe<Scalars['String']>;
+  isTypeOf_not_in?: Maybe<Array<Scalars['String']>>;
+  isTypeOf_not_startsWith?: Maybe<Scalars['String']>;
+  isTypeOf_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_eq?: Maybe<Scalars['Int']>;
+  phantom_gt?: Maybe<Scalars['Int']>;
+  phantom_gte?: Maybe<Scalars['Int']>;
+  phantom_in?: Maybe<Array<Scalars['Int']>>;
+  phantom_isNull?: Maybe<Scalars['Boolean']>;
+  phantom_lt?: Maybe<Scalars['Int']>;
+  phantom_lte?: Maybe<Scalars['Int']>;
+  phantom_not_eq?: Maybe<Scalars['Int']>;
+  phantom_not_in?: Maybe<Array<Scalars['Int']>>;
+  price_eq?: Maybe<Scalars['BigInt']>;
+  price_gt?: Maybe<Scalars['BigInt']>;
+  price_gte?: Maybe<Scalars['BigInt']>;
+  price_in?: Maybe<Array<Scalars['BigInt']>>;
+  price_isNull?: Maybe<Scalars['Boolean']>;
+  price_lt?: Maybe<Scalars['BigInt']>;
+  price_lte?: Maybe<Scalars['BigInt']>;
+  price_not_eq?: Maybe<Scalars['BigInt']>;
+  price_not_in?: Maybe<Array<Scalars['BigInt']>>;
+};
 
 export type Video = {
-  category?: Maybe<VideoCategory>
-  channel: Channel
-  comments: Array<Comment>
-  commentsCount: Scalars['Int']
-  createdAt: Scalars['DateTime']
-  createdInBlock: Scalars['Int']
-  description?: Maybe<Scalars['String']>
-  duration?: Maybe<Scalars['Int']>
-  hasMarketing?: Maybe<Scalars['Boolean']>
-  id: Scalars['String']
-  isCensored: Scalars['Boolean']
-  isCommentSectionEnabled: Scalars['Boolean']
-  isExcluded: Scalars['Boolean']
-  isExplicit?: Maybe<Scalars['Boolean']>
-  isPublic?: Maybe<Scalars['Boolean']>
-  isReactionFeatureEnabled: Scalars['Boolean']
-  language?: Maybe<Scalars['String']>
-  license?: Maybe<License>
-  media?: Maybe<StorageDataObject>
-  mediaMetadata?: Maybe<VideoMediaMetadata>
-  nft?: Maybe<OwnedNft>
-  pinnedComment?: Maybe<Comment>
-  publishedBeforeJoystream?: Maybe<Scalars['DateTime']>
-  reactions: Array<VideoReaction>
-  reactionsCount: Scalars['Int']
-  reactionsCountByReactionId?: Maybe<Array<VideoReactionsCountByReactionType>>
-  subtitles: Array<VideoSubtitle>
-  thumbnailPhoto?: Maybe<StorageDataObject>
-  title?: Maybe<Scalars['String']>
-  videoStateBloatBond: Scalars['BigInt']
-  viewsNum: Scalars['Int']
-}
+  category?: Maybe<VideoCategory>;
+  channel: Channel;
+  comments: Array<Comment>;
+  commentsCount: Scalars['Int'];
+  createdAt: Scalars['DateTime'];
+  createdInBlock: Scalars['Int'];
+  description?: Maybe<Scalars['String']>;
+  duration?: Maybe<Scalars['Int']>;
+  hasMarketing?: Maybe<Scalars['Boolean']>;
+  id: Scalars['String'];
+  isCensored: Scalars['Boolean'];
+  isCommentSectionEnabled: Scalars['Boolean'];
+  isExcluded: Scalars['Boolean'];
+  isExplicit?: Maybe<Scalars['Boolean']>;
+  isPublic?: Maybe<Scalars['Boolean']>;
+  isReactionFeatureEnabled: Scalars['Boolean'];
+  language?: Maybe<Scalars['String']>;
+  license?: Maybe<License>;
+  media?: Maybe<StorageDataObject>;
+  mediaMetadata?: Maybe<VideoMediaMetadata>;
+  nft?: Maybe<OwnedNft>;
+  pinnedComment?: Maybe<Comment>;
+  publishedBeforeJoystream?: Maybe<Scalars['DateTime']>;
+  reactions: Array<VideoReaction>;
+  reactionsCount: Scalars['Int'];
+  reactionsCountByReactionId?: Maybe<Array<VideoReactionsCountByReactionType>>;
+  subtitles: Array<VideoSubtitle>;
+  thumbnailPhoto?: Maybe<StorageDataObject>;
+  title?: Maybe<Scalars['String']>;
+  videoStateBloatBond: Scalars['BigInt'];
+  viewsNum: Scalars['Int'];
+};
+
 
 export type VideoCommentsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<CommentOrderByInput>>
-  where?: Maybe<CommentWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<CommentOrderByInput>>;
+  where?: Maybe<CommentWhereInput>;
+};
+
 
 export type VideoReactionsArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoReactionOrderByInput>>
-  where?: Maybe<VideoReactionWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoReactionOrderByInput>>;
+  where?: Maybe<VideoReactionWhereInput>;
+};
+
 
 export type VideoSubtitlesArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>
-  where?: Maybe<VideoSubtitleWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoSubtitleOrderByInput>>;
+  where?: Maybe<VideoSubtitleWhereInput>;
+};
 
 export type VideoCategoriesConnection = {
-  edges: Array<VideoCategoryEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoCategoryEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoCategory = {
-  createdInBlock: Scalars['Int']
-  description?: Maybe<Scalars['String']>
-  featuredVideos: Array<VideoFeaturedInCategory>
-  id: Scalars['String']
-  isSupported: Scalars['Boolean']
-  name?: Maybe<Scalars['String']>
-  parentCategory?: Maybe<VideoCategory>
-  videos: Array<Video>
-}
+  createdInBlock: Scalars['Int'];
+  description?: Maybe<Scalars['String']>;
+  featuredVideos: Array<VideoFeaturedInCategory>;
+  id: Scalars['String'];
+  isSupported: Scalars['Boolean'];
+  name?: Maybe<Scalars['String']>;
+  parentCategory?: Maybe<VideoCategory>;
+  videos: Array<Video>;
+};
+
 
 export type VideoCategoryFeaturedVideosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>
-  where?: Maybe<VideoFeaturedInCategoryWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoFeaturedInCategoryOrderByInput>>;
+  where?: Maybe<VideoFeaturedInCategoryWhereInput>;
+};
+
 
 export type VideoCategoryVideosArgs = {
-  limit?: Maybe<Scalars['Int']>
-  offset?: Maybe<Scalars['Int']>
-  orderBy?: Maybe<Array<VideoOrderByInput>>
-  where?: Maybe<VideoWhereInput>
-}
+  limit?: Maybe<Scalars['Int']>;
+  offset?: Maybe<Scalars['Int']>;
+  orderBy?: Maybe<Array<VideoOrderByInput>>;
+  where?: Maybe<VideoWhereInput>;
+};
 
 export type VideoCategoryEdge = {
-  cursor: Scalars['String']
-  node: VideoCategory
-}
+  cursor: Scalars['String'];
+  node: VideoCategory;
+};
 
 export enum VideoCategoryOrderByInput {
   CreatedInBlockAsc = 'createdInBlock_ASC',
@@ -5984,107 +6180,107 @@ export enum VideoCategoryOrderByInput {
   ParentCategoryIsSupportedAsc = 'parentCategory_isSupported_ASC',
   ParentCategoryIsSupportedDesc = 'parentCategory_isSupported_DESC',
   ParentCategoryNameAsc = 'parentCategory_name_ASC',
-  ParentCategoryNameDesc = 'parentCategory_name_DESC',
+  ParentCategoryNameDesc = 'parentCategory_name_DESC'
 }
 
 export type VideoCategoryWhereInput = {
-  AND?: Maybe<Array<VideoCategoryWhereInput>>
-  OR?: Maybe<Array<VideoCategoryWhereInput>>
-  createdInBlock_eq?: Maybe<Scalars['Int']>
-  createdInBlock_gt?: Maybe<Scalars['Int']>
-  createdInBlock_gte?: Maybe<Scalars['Int']>
-  createdInBlock_in?: Maybe<Array<Scalars['Int']>>
-  createdInBlock_isNull?: Maybe<Scalars['Boolean']>
-  createdInBlock_lt?: Maybe<Scalars['Int']>
-  createdInBlock_lte?: Maybe<Scalars['Int']>
-  createdInBlock_not_eq?: Maybe<Scalars['Int']>
-  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  description_contains?: Maybe<Scalars['String']>
-  description_containsInsensitive?: Maybe<Scalars['String']>
-  description_endsWith?: Maybe<Scalars['String']>
-  description_eq?: Maybe<Scalars['String']>
-  description_gt?: Maybe<Scalars['String']>
-  description_gte?: Maybe<Scalars['String']>
-  description_in?: Maybe<Array<Scalars['String']>>
-  description_isNull?: Maybe<Scalars['Boolean']>
-  description_lt?: Maybe<Scalars['String']>
-  description_lte?: Maybe<Scalars['String']>
-  description_not_contains?: Maybe<Scalars['String']>
-  description_not_containsInsensitive?: Maybe<Scalars['String']>
-  description_not_endsWith?: Maybe<Scalars['String']>
-  description_not_eq?: Maybe<Scalars['String']>
-  description_not_in?: Maybe<Array<Scalars['String']>>
-  description_not_startsWith?: Maybe<Scalars['String']>
-  description_startsWith?: Maybe<Scalars['String']>
-  featuredVideos_every?: Maybe<VideoFeaturedInCategoryWhereInput>
-  featuredVideos_none?: Maybe<VideoFeaturedInCategoryWhereInput>
-  featuredVideos_some?: Maybe<VideoFeaturedInCategoryWhereInput>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isSupported_eq?: Maybe<Scalars['Boolean']>
-  isSupported_isNull?: Maybe<Scalars['Boolean']>
-  isSupported_not_eq?: Maybe<Scalars['Boolean']>
-  name_contains?: Maybe<Scalars['String']>
-  name_containsInsensitive?: Maybe<Scalars['String']>
-  name_endsWith?: Maybe<Scalars['String']>
-  name_eq?: Maybe<Scalars['String']>
-  name_gt?: Maybe<Scalars['String']>
-  name_gte?: Maybe<Scalars['String']>
-  name_in?: Maybe<Array<Scalars['String']>>
-  name_isNull?: Maybe<Scalars['Boolean']>
-  name_lt?: Maybe<Scalars['String']>
-  name_lte?: Maybe<Scalars['String']>
-  name_not_contains?: Maybe<Scalars['String']>
-  name_not_containsInsensitive?: Maybe<Scalars['String']>
-  name_not_endsWith?: Maybe<Scalars['String']>
-  name_not_eq?: Maybe<Scalars['String']>
-  name_not_in?: Maybe<Array<Scalars['String']>>
-  name_not_startsWith?: Maybe<Scalars['String']>
-  name_startsWith?: Maybe<Scalars['String']>
-  parentCategory?: Maybe<VideoCategoryWhereInput>
-  parentCategory_isNull?: Maybe<Scalars['Boolean']>
-  videos_every?: Maybe<VideoWhereInput>
-  videos_none?: Maybe<VideoWhereInput>
-  videos_some?: Maybe<VideoWhereInput>
-}
+  AND?: Maybe<Array<VideoCategoryWhereInput>>;
+  OR?: Maybe<Array<VideoCategoryWhereInput>>;
+  createdInBlock_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_gt?: Maybe<Scalars['Int']>;
+  createdInBlock_gte?: Maybe<Scalars['Int']>;
+  createdInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  createdInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  createdInBlock_lt?: Maybe<Scalars['Int']>;
+  createdInBlock_lte?: Maybe<Scalars['Int']>;
+  createdInBlock_not_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_containsInsensitive?: Maybe<Scalars['String']>;
+  description_endsWith?: Maybe<Scalars['String']>;
+  description_eq?: Maybe<Scalars['String']>;
+  description_gt?: Maybe<Scalars['String']>;
+  description_gte?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Scalars['String']>>;
+  description_isNull?: Maybe<Scalars['Boolean']>;
+  description_lt?: Maybe<Scalars['String']>;
+  description_lte?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_not_containsInsensitive?: Maybe<Scalars['String']>;
+  description_not_endsWith?: Maybe<Scalars['String']>;
+  description_not_eq?: Maybe<Scalars['String']>;
+  description_not_in?: Maybe<Array<Scalars['String']>>;
+  description_not_startsWith?: Maybe<Scalars['String']>;
+  description_startsWith?: Maybe<Scalars['String']>;
+  featuredVideos_every?: Maybe<VideoFeaturedInCategoryWhereInput>;
+  featuredVideos_none?: Maybe<VideoFeaturedInCategoryWhereInput>;
+  featuredVideos_some?: Maybe<VideoFeaturedInCategoryWhereInput>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isSupported_eq?: Maybe<Scalars['Boolean']>;
+  isSupported_isNull?: Maybe<Scalars['Boolean']>;
+  isSupported_not_eq?: Maybe<Scalars['Boolean']>;
+  name_contains?: Maybe<Scalars['String']>;
+  name_containsInsensitive?: Maybe<Scalars['String']>;
+  name_endsWith?: Maybe<Scalars['String']>;
+  name_eq?: Maybe<Scalars['String']>;
+  name_gt?: Maybe<Scalars['String']>;
+  name_gte?: Maybe<Scalars['String']>;
+  name_in?: Maybe<Array<Scalars['String']>>;
+  name_isNull?: Maybe<Scalars['Boolean']>;
+  name_lt?: Maybe<Scalars['String']>;
+  name_lte?: Maybe<Scalars['String']>;
+  name_not_contains?: Maybe<Scalars['String']>;
+  name_not_containsInsensitive?: Maybe<Scalars['String']>;
+  name_not_endsWith?: Maybe<Scalars['String']>;
+  name_not_eq?: Maybe<Scalars['String']>;
+  name_not_in?: Maybe<Array<Scalars['String']>>;
+  name_not_startsWith?: Maybe<Scalars['String']>;
+  name_startsWith?: Maybe<Scalars['String']>;
+  parentCategory?: Maybe<VideoCategoryWhereInput>;
+  parentCategory_isNull?: Maybe<Scalars['Boolean']>;
+  videos_every?: Maybe<VideoWhereInput>;
+  videos_none?: Maybe<VideoWhereInput>;
+  videos_some?: Maybe<VideoWhereInput>;
+};
 
 export type VideoEdge = {
-  cursor: Scalars['String']
-  node: Video
-}
+  cursor: Scalars['String'];
+  node: Video;
+};
 
 export type VideoFeaturedInCategoriesConnection = {
-  edges: Array<VideoFeaturedInCategoryEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoFeaturedInCategoryEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoFeaturedInCategory = {
-  category: VideoCategory
-  id: Scalars['String']
-  video: Video
-  videoCutUrl?: Maybe<Scalars['String']>
-}
+  category: VideoCategory;
+  id: Scalars['String'];
+  video: Video;
+  videoCutUrl?: Maybe<Scalars['String']>;
+};
 
 export type VideoFeaturedInCategoryEdge = {
-  cursor: Scalars['String']
-  node: VideoFeaturedInCategory
-}
+  cursor: Scalars['String'];
+  node: VideoFeaturedInCategory;
+};
 
 export enum VideoFeaturedInCategoryOrderByInput {
   CategoryCreatedInBlockAsc = 'category_createdInBlock_ASC',
@@ -6138,65 +6334,65 @@ export enum VideoFeaturedInCategoryOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type VideoFeaturedInCategoryWhereInput = {
-  AND?: Maybe<Array<VideoFeaturedInCategoryWhereInput>>
-  OR?: Maybe<Array<VideoFeaturedInCategoryWhereInput>>
-  category?: Maybe<VideoCategoryWhereInput>
-  category_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  video?: Maybe<VideoWhereInput>
-  videoCutUrl_contains?: Maybe<Scalars['String']>
-  videoCutUrl_containsInsensitive?: Maybe<Scalars['String']>
-  videoCutUrl_endsWith?: Maybe<Scalars['String']>
-  videoCutUrl_eq?: Maybe<Scalars['String']>
-  videoCutUrl_gt?: Maybe<Scalars['String']>
-  videoCutUrl_gte?: Maybe<Scalars['String']>
-  videoCutUrl_in?: Maybe<Array<Scalars['String']>>
-  videoCutUrl_isNull?: Maybe<Scalars['Boolean']>
-  videoCutUrl_lt?: Maybe<Scalars['String']>
-  videoCutUrl_lte?: Maybe<Scalars['String']>
-  videoCutUrl_not_contains?: Maybe<Scalars['String']>
-  videoCutUrl_not_containsInsensitive?: Maybe<Scalars['String']>
-  videoCutUrl_not_endsWith?: Maybe<Scalars['String']>
-  videoCutUrl_not_eq?: Maybe<Scalars['String']>
-  videoCutUrl_not_in?: Maybe<Array<Scalars['String']>>
-  videoCutUrl_not_startsWith?: Maybe<Scalars['String']>
-  videoCutUrl_startsWith?: Maybe<Scalars['String']>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<VideoFeaturedInCategoryWhereInput>>;
+  OR?: Maybe<Array<VideoFeaturedInCategoryWhereInput>>;
+  category?: Maybe<VideoCategoryWhereInput>;
+  category_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  video?: Maybe<VideoWhereInput>;
+  videoCutUrl_contains?: Maybe<Scalars['String']>;
+  videoCutUrl_containsInsensitive?: Maybe<Scalars['String']>;
+  videoCutUrl_endsWith?: Maybe<Scalars['String']>;
+  videoCutUrl_eq?: Maybe<Scalars['String']>;
+  videoCutUrl_gt?: Maybe<Scalars['String']>;
+  videoCutUrl_gte?: Maybe<Scalars['String']>;
+  videoCutUrl_in?: Maybe<Array<Scalars['String']>>;
+  videoCutUrl_isNull?: Maybe<Scalars['Boolean']>;
+  videoCutUrl_lt?: Maybe<Scalars['String']>;
+  videoCutUrl_lte?: Maybe<Scalars['String']>;
+  videoCutUrl_not_contains?: Maybe<Scalars['String']>;
+  videoCutUrl_not_containsInsensitive?: Maybe<Scalars['String']>;
+  videoCutUrl_not_endsWith?: Maybe<Scalars['String']>;
+  videoCutUrl_not_eq?: Maybe<Scalars['String']>;
+  videoCutUrl_not_in?: Maybe<Array<Scalars['String']>>;
+  videoCutUrl_not_startsWith?: Maybe<Scalars['String']>;
+  videoCutUrl_startsWith?: Maybe<Scalars['String']>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type VideoHero = {
-  activatedAt?: Maybe<Scalars['DateTime']>
-  heroPosterUrl: Scalars['String']
-  heroTitle: Scalars['String']
-  heroVideoCutUrl: Scalars['String']
-  id: Scalars['String']
-  video: Video
-}
+  activatedAt?: Maybe<Scalars['DateTime']>;
+  heroPosterUrl: Scalars['String'];
+  heroTitle: Scalars['String'];
+  heroVideoCutUrl: Scalars['String'];
+  id: Scalars['String'];
+  video: Video;
+};
 
 export type VideoHeroEdge = {
-  cursor: Scalars['String']
-  node: VideoHero
-}
+  cursor: Scalars['String'];
+  node: VideoHero;
+};
 
 export enum VideoHeroOrderByInput {
   ActivatedAtAsc = 'activatedAt_ASC',
@@ -6246,110 +6442,110 @@ export enum VideoHeroOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type VideoHeroWhereInput = {
-  AND?: Maybe<Array<VideoHeroWhereInput>>
-  OR?: Maybe<Array<VideoHeroWhereInput>>
-  activatedAt_eq?: Maybe<Scalars['DateTime']>
-  activatedAt_gt?: Maybe<Scalars['DateTime']>
-  activatedAt_gte?: Maybe<Scalars['DateTime']>
-  activatedAt_in?: Maybe<Array<Scalars['DateTime']>>
-  activatedAt_isNull?: Maybe<Scalars['Boolean']>
-  activatedAt_lt?: Maybe<Scalars['DateTime']>
-  activatedAt_lte?: Maybe<Scalars['DateTime']>
-  activatedAt_not_eq?: Maybe<Scalars['DateTime']>
-  activatedAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  heroPosterUrl_contains?: Maybe<Scalars['String']>
-  heroPosterUrl_containsInsensitive?: Maybe<Scalars['String']>
-  heroPosterUrl_endsWith?: Maybe<Scalars['String']>
-  heroPosterUrl_eq?: Maybe<Scalars['String']>
-  heroPosterUrl_gt?: Maybe<Scalars['String']>
-  heroPosterUrl_gte?: Maybe<Scalars['String']>
-  heroPosterUrl_in?: Maybe<Array<Scalars['String']>>
-  heroPosterUrl_isNull?: Maybe<Scalars['Boolean']>
-  heroPosterUrl_lt?: Maybe<Scalars['String']>
-  heroPosterUrl_lte?: Maybe<Scalars['String']>
-  heroPosterUrl_not_contains?: Maybe<Scalars['String']>
-  heroPosterUrl_not_containsInsensitive?: Maybe<Scalars['String']>
-  heroPosterUrl_not_endsWith?: Maybe<Scalars['String']>
-  heroPosterUrl_not_eq?: Maybe<Scalars['String']>
-  heroPosterUrl_not_in?: Maybe<Array<Scalars['String']>>
-  heroPosterUrl_not_startsWith?: Maybe<Scalars['String']>
-  heroPosterUrl_startsWith?: Maybe<Scalars['String']>
-  heroTitle_contains?: Maybe<Scalars['String']>
-  heroTitle_containsInsensitive?: Maybe<Scalars['String']>
-  heroTitle_endsWith?: Maybe<Scalars['String']>
-  heroTitle_eq?: Maybe<Scalars['String']>
-  heroTitle_gt?: Maybe<Scalars['String']>
-  heroTitle_gte?: Maybe<Scalars['String']>
-  heroTitle_in?: Maybe<Array<Scalars['String']>>
-  heroTitle_isNull?: Maybe<Scalars['Boolean']>
-  heroTitle_lt?: Maybe<Scalars['String']>
-  heroTitle_lte?: Maybe<Scalars['String']>
-  heroTitle_not_contains?: Maybe<Scalars['String']>
-  heroTitle_not_containsInsensitive?: Maybe<Scalars['String']>
-  heroTitle_not_endsWith?: Maybe<Scalars['String']>
-  heroTitle_not_eq?: Maybe<Scalars['String']>
-  heroTitle_not_in?: Maybe<Array<Scalars['String']>>
-  heroTitle_not_startsWith?: Maybe<Scalars['String']>
-  heroTitle_startsWith?: Maybe<Scalars['String']>
-  heroVideoCutUrl_contains?: Maybe<Scalars['String']>
-  heroVideoCutUrl_containsInsensitive?: Maybe<Scalars['String']>
-  heroVideoCutUrl_endsWith?: Maybe<Scalars['String']>
-  heroVideoCutUrl_eq?: Maybe<Scalars['String']>
-  heroVideoCutUrl_gt?: Maybe<Scalars['String']>
-  heroVideoCutUrl_gte?: Maybe<Scalars['String']>
-  heroVideoCutUrl_in?: Maybe<Array<Scalars['String']>>
-  heroVideoCutUrl_isNull?: Maybe<Scalars['Boolean']>
-  heroVideoCutUrl_lt?: Maybe<Scalars['String']>
-  heroVideoCutUrl_lte?: Maybe<Scalars['String']>
-  heroVideoCutUrl_not_contains?: Maybe<Scalars['String']>
-  heroVideoCutUrl_not_containsInsensitive?: Maybe<Scalars['String']>
-  heroVideoCutUrl_not_endsWith?: Maybe<Scalars['String']>
-  heroVideoCutUrl_not_eq?: Maybe<Scalars['String']>
-  heroVideoCutUrl_not_in?: Maybe<Array<Scalars['String']>>
-  heroVideoCutUrl_not_startsWith?: Maybe<Scalars['String']>
-  heroVideoCutUrl_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<VideoHeroWhereInput>>;
+  OR?: Maybe<Array<VideoHeroWhereInput>>;
+  activatedAt_eq?: Maybe<Scalars['DateTime']>;
+  activatedAt_gt?: Maybe<Scalars['DateTime']>;
+  activatedAt_gte?: Maybe<Scalars['DateTime']>;
+  activatedAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  activatedAt_isNull?: Maybe<Scalars['Boolean']>;
+  activatedAt_lt?: Maybe<Scalars['DateTime']>;
+  activatedAt_lte?: Maybe<Scalars['DateTime']>;
+  activatedAt_not_eq?: Maybe<Scalars['DateTime']>;
+  activatedAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  heroPosterUrl_contains?: Maybe<Scalars['String']>;
+  heroPosterUrl_containsInsensitive?: Maybe<Scalars['String']>;
+  heroPosterUrl_endsWith?: Maybe<Scalars['String']>;
+  heroPosterUrl_eq?: Maybe<Scalars['String']>;
+  heroPosterUrl_gt?: Maybe<Scalars['String']>;
+  heroPosterUrl_gte?: Maybe<Scalars['String']>;
+  heroPosterUrl_in?: Maybe<Array<Scalars['String']>>;
+  heroPosterUrl_isNull?: Maybe<Scalars['Boolean']>;
+  heroPosterUrl_lt?: Maybe<Scalars['String']>;
+  heroPosterUrl_lte?: Maybe<Scalars['String']>;
+  heroPosterUrl_not_contains?: Maybe<Scalars['String']>;
+  heroPosterUrl_not_containsInsensitive?: Maybe<Scalars['String']>;
+  heroPosterUrl_not_endsWith?: Maybe<Scalars['String']>;
+  heroPosterUrl_not_eq?: Maybe<Scalars['String']>;
+  heroPosterUrl_not_in?: Maybe<Array<Scalars['String']>>;
+  heroPosterUrl_not_startsWith?: Maybe<Scalars['String']>;
+  heroPosterUrl_startsWith?: Maybe<Scalars['String']>;
+  heroTitle_contains?: Maybe<Scalars['String']>;
+  heroTitle_containsInsensitive?: Maybe<Scalars['String']>;
+  heroTitle_endsWith?: Maybe<Scalars['String']>;
+  heroTitle_eq?: Maybe<Scalars['String']>;
+  heroTitle_gt?: Maybe<Scalars['String']>;
+  heroTitle_gte?: Maybe<Scalars['String']>;
+  heroTitle_in?: Maybe<Array<Scalars['String']>>;
+  heroTitle_isNull?: Maybe<Scalars['Boolean']>;
+  heroTitle_lt?: Maybe<Scalars['String']>;
+  heroTitle_lte?: Maybe<Scalars['String']>;
+  heroTitle_not_contains?: Maybe<Scalars['String']>;
+  heroTitle_not_containsInsensitive?: Maybe<Scalars['String']>;
+  heroTitle_not_endsWith?: Maybe<Scalars['String']>;
+  heroTitle_not_eq?: Maybe<Scalars['String']>;
+  heroTitle_not_in?: Maybe<Array<Scalars['String']>>;
+  heroTitle_not_startsWith?: Maybe<Scalars['String']>;
+  heroTitle_startsWith?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_contains?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_containsInsensitive?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_endsWith?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_eq?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_gt?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_gte?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_in?: Maybe<Array<Scalars['String']>>;
+  heroVideoCutUrl_isNull?: Maybe<Scalars['Boolean']>;
+  heroVideoCutUrl_lt?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_lte?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_not_contains?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_not_containsInsensitive?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_not_endsWith?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_not_eq?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_not_in?: Maybe<Array<Scalars['String']>>;
+  heroVideoCutUrl_not_startsWith?: Maybe<Scalars['String']>;
+  heroVideoCutUrl_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type VideoHerosConnection = {
-  edges: Array<VideoHeroEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoHeroEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoMediaEncoding = {
-  codecName?: Maybe<Scalars['String']>
-  container?: Maybe<Scalars['String']>
-  id: Scalars['String']
-  mimeMediaType?: Maybe<Scalars['String']>
-}
+  codecName?: Maybe<Scalars['String']>;
+  container?: Maybe<Scalars['String']>;
+  id: Scalars['String'];
+  mimeMediaType?: Maybe<Scalars['String']>;
+};
 
 export type VideoMediaEncodingEdge = {
-  cursor: Scalars['String']
-  node: VideoMediaEncoding
-}
+  cursor: Scalars['String'];
+  node: VideoMediaEncoding;
+};
 
 export enum VideoMediaEncodingOrderByInput {
   CodecNameAsc = 'codecName_ASC',
@@ -6359,108 +6555,108 @@ export enum VideoMediaEncodingOrderByInput {
   IdAsc = 'id_ASC',
   IdDesc = 'id_DESC',
   MimeMediaTypeAsc = 'mimeMediaType_ASC',
-  MimeMediaTypeDesc = 'mimeMediaType_DESC',
+  MimeMediaTypeDesc = 'mimeMediaType_DESC'
 }
 
 export type VideoMediaEncodingWhereInput = {
-  AND?: Maybe<Array<VideoMediaEncodingWhereInput>>
-  OR?: Maybe<Array<VideoMediaEncodingWhereInput>>
-  codecName_contains?: Maybe<Scalars['String']>
-  codecName_containsInsensitive?: Maybe<Scalars['String']>
-  codecName_endsWith?: Maybe<Scalars['String']>
-  codecName_eq?: Maybe<Scalars['String']>
-  codecName_gt?: Maybe<Scalars['String']>
-  codecName_gte?: Maybe<Scalars['String']>
-  codecName_in?: Maybe<Array<Scalars['String']>>
-  codecName_isNull?: Maybe<Scalars['Boolean']>
-  codecName_lt?: Maybe<Scalars['String']>
-  codecName_lte?: Maybe<Scalars['String']>
-  codecName_not_contains?: Maybe<Scalars['String']>
-  codecName_not_containsInsensitive?: Maybe<Scalars['String']>
-  codecName_not_endsWith?: Maybe<Scalars['String']>
-  codecName_not_eq?: Maybe<Scalars['String']>
-  codecName_not_in?: Maybe<Array<Scalars['String']>>
-  codecName_not_startsWith?: Maybe<Scalars['String']>
-  codecName_startsWith?: Maybe<Scalars['String']>
-  container_contains?: Maybe<Scalars['String']>
-  container_containsInsensitive?: Maybe<Scalars['String']>
-  container_endsWith?: Maybe<Scalars['String']>
-  container_eq?: Maybe<Scalars['String']>
-  container_gt?: Maybe<Scalars['String']>
-  container_gte?: Maybe<Scalars['String']>
-  container_in?: Maybe<Array<Scalars['String']>>
-  container_isNull?: Maybe<Scalars['Boolean']>
-  container_lt?: Maybe<Scalars['String']>
-  container_lte?: Maybe<Scalars['String']>
-  container_not_contains?: Maybe<Scalars['String']>
-  container_not_containsInsensitive?: Maybe<Scalars['String']>
-  container_not_endsWith?: Maybe<Scalars['String']>
-  container_not_eq?: Maybe<Scalars['String']>
-  container_not_in?: Maybe<Array<Scalars['String']>>
-  container_not_startsWith?: Maybe<Scalars['String']>
-  container_startsWith?: Maybe<Scalars['String']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  mimeMediaType_contains?: Maybe<Scalars['String']>
-  mimeMediaType_containsInsensitive?: Maybe<Scalars['String']>
-  mimeMediaType_endsWith?: Maybe<Scalars['String']>
-  mimeMediaType_eq?: Maybe<Scalars['String']>
-  mimeMediaType_gt?: Maybe<Scalars['String']>
-  mimeMediaType_gte?: Maybe<Scalars['String']>
-  mimeMediaType_in?: Maybe<Array<Scalars['String']>>
-  mimeMediaType_isNull?: Maybe<Scalars['Boolean']>
-  mimeMediaType_lt?: Maybe<Scalars['String']>
-  mimeMediaType_lte?: Maybe<Scalars['String']>
-  mimeMediaType_not_contains?: Maybe<Scalars['String']>
-  mimeMediaType_not_containsInsensitive?: Maybe<Scalars['String']>
-  mimeMediaType_not_endsWith?: Maybe<Scalars['String']>
-  mimeMediaType_not_eq?: Maybe<Scalars['String']>
-  mimeMediaType_not_in?: Maybe<Array<Scalars['String']>>
-  mimeMediaType_not_startsWith?: Maybe<Scalars['String']>
-  mimeMediaType_startsWith?: Maybe<Scalars['String']>
-}
+  AND?: Maybe<Array<VideoMediaEncodingWhereInput>>;
+  OR?: Maybe<Array<VideoMediaEncodingWhereInput>>;
+  codecName_contains?: Maybe<Scalars['String']>;
+  codecName_containsInsensitive?: Maybe<Scalars['String']>;
+  codecName_endsWith?: Maybe<Scalars['String']>;
+  codecName_eq?: Maybe<Scalars['String']>;
+  codecName_gt?: Maybe<Scalars['String']>;
+  codecName_gte?: Maybe<Scalars['String']>;
+  codecName_in?: Maybe<Array<Scalars['String']>>;
+  codecName_isNull?: Maybe<Scalars['Boolean']>;
+  codecName_lt?: Maybe<Scalars['String']>;
+  codecName_lte?: Maybe<Scalars['String']>;
+  codecName_not_contains?: Maybe<Scalars['String']>;
+  codecName_not_containsInsensitive?: Maybe<Scalars['String']>;
+  codecName_not_endsWith?: Maybe<Scalars['String']>;
+  codecName_not_eq?: Maybe<Scalars['String']>;
+  codecName_not_in?: Maybe<Array<Scalars['String']>>;
+  codecName_not_startsWith?: Maybe<Scalars['String']>;
+  codecName_startsWith?: Maybe<Scalars['String']>;
+  container_contains?: Maybe<Scalars['String']>;
+  container_containsInsensitive?: Maybe<Scalars['String']>;
+  container_endsWith?: Maybe<Scalars['String']>;
+  container_eq?: Maybe<Scalars['String']>;
+  container_gt?: Maybe<Scalars['String']>;
+  container_gte?: Maybe<Scalars['String']>;
+  container_in?: Maybe<Array<Scalars['String']>>;
+  container_isNull?: Maybe<Scalars['Boolean']>;
+  container_lt?: Maybe<Scalars['String']>;
+  container_lte?: Maybe<Scalars['String']>;
+  container_not_contains?: Maybe<Scalars['String']>;
+  container_not_containsInsensitive?: Maybe<Scalars['String']>;
+  container_not_endsWith?: Maybe<Scalars['String']>;
+  container_not_eq?: Maybe<Scalars['String']>;
+  container_not_in?: Maybe<Array<Scalars['String']>>;
+  container_not_startsWith?: Maybe<Scalars['String']>;
+  container_startsWith?: Maybe<Scalars['String']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  mimeMediaType_contains?: Maybe<Scalars['String']>;
+  mimeMediaType_containsInsensitive?: Maybe<Scalars['String']>;
+  mimeMediaType_endsWith?: Maybe<Scalars['String']>;
+  mimeMediaType_eq?: Maybe<Scalars['String']>;
+  mimeMediaType_gt?: Maybe<Scalars['String']>;
+  mimeMediaType_gte?: Maybe<Scalars['String']>;
+  mimeMediaType_in?: Maybe<Array<Scalars['String']>>;
+  mimeMediaType_isNull?: Maybe<Scalars['Boolean']>;
+  mimeMediaType_lt?: Maybe<Scalars['String']>;
+  mimeMediaType_lte?: Maybe<Scalars['String']>;
+  mimeMediaType_not_contains?: Maybe<Scalars['String']>;
+  mimeMediaType_not_containsInsensitive?: Maybe<Scalars['String']>;
+  mimeMediaType_not_endsWith?: Maybe<Scalars['String']>;
+  mimeMediaType_not_eq?: Maybe<Scalars['String']>;
+  mimeMediaType_not_in?: Maybe<Array<Scalars['String']>>;
+  mimeMediaType_not_startsWith?: Maybe<Scalars['String']>;
+  mimeMediaType_startsWith?: Maybe<Scalars['String']>;
+};
 
 export type VideoMediaEncodingsConnection = {
-  edges: Array<VideoMediaEncodingEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoMediaEncodingEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoMediaMetadata = {
-  createdInBlock: Scalars['Int']
-  encoding?: Maybe<VideoMediaEncoding>
-  id: Scalars['String']
-  pixelHeight?: Maybe<Scalars['Int']>
-  pixelWidth?: Maybe<Scalars['Int']>
-  size?: Maybe<Scalars['BigInt']>
-  video: Video
-}
+  createdInBlock: Scalars['Int'];
+  encoding?: Maybe<VideoMediaEncoding>;
+  id: Scalars['String'];
+  pixelHeight?: Maybe<Scalars['Int']>;
+  pixelWidth?: Maybe<Scalars['Int']>;
+  size?: Maybe<Scalars['BigInt']>;
+  video: Video;
+};
 
 export type VideoMediaMetadataConnection = {
-  edges: Array<VideoMediaMetadataEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoMediaMetadataEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoMediaMetadataEdge = {
-  cursor: Scalars['String']
-  node: VideoMediaMetadata
-}
+  cursor: Scalars['String'];
+  node: VideoMediaMetadata;
+};
 
 export enum VideoMediaMetadataOrderByInput {
   CreatedInBlockAsc = 'createdInBlock_ASC',
@@ -6518,70 +6714,70 @@ export enum VideoMediaMetadataOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type VideoMediaMetadataWhereInput = {
-  AND?: Maybe<Array<VideoMediaMetadataWhereInput>>
-  OR?: Maybe<Array<VideoMediaMetadataWhereInput>>
-  createdInBlock_eq?: Maybe<Scalars['Int']>
-  createdInBlock_gt?: Maybe<Scalars['Int']>
-  createdInBlock_gte?: Maybe<Scalars['Int']>
-  createdInBlock_in?: Maybe<Array<Scalars['Int']>>
-  createdInBlock_isNull?: Maybe<Scalars['Boolean']>
-  createdInBlock_lt?: Maybe<Scalars['Int']>
-  createdInBlock_lte?: Maybe<Scalars['Int']>
-  createdInBlock_not_eq?: Maybe<Scalars['Int']>
-  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  encoding?: Maybe<VideoMediaEncodingWhereInput>
-  encoding_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  pixelHeight_eq?: Maybe<Scalars['Int']>
-  pixelHeight_gt?: Maybe<Scalars['Int']>
-  pixelHeight_gte?: Maybe<Scalars['Int']>
-  pixelHeight_in?: Maybe<Array<Scalars['Int']>>
-  pixelHeight_isNull?: Maybe<Scalars['Boolean']>
-  pixelHeight_lt?: Maybe<Scalars['Int']>
-  pixelHeight_lte?: Maybe<Scalars['Int']>
-  pixelHeight_not_eq?: Maybe<Scalars['Int']>
-  pixelHeight_not_in?: Maybe<Array<Scalars['Int']>>
-  pixelWidth_eq?: Maybe<Scalars['Int']>
-  pixelWidth_gt?: Maybe<Scalars['Int']>
-  pixelWidth_gte?: Maybe<Scalars['Int']>
-  pixelWidth_in?: Maybe<Array<Scalars['Int']>>
-  pixelWidth_isNull?: Maybe<Scalars['Boolean']>
-  pixelWidth_lt?: Maybe<Scalars['Int']>
-  pixelWidth_lte?: Maybe<Scalars['Int']>
-  pixelWidth_not_eq?: Maybe<Scalars['Int']>
-  pixelWidth_not_in?: Maybe<Array<Scalars['Int']>>
-  size_eq?: Maybe<Scalars['BigInt']>
-  size_gt?: Maybe<Scalars['BigInt']>
-  size_gte?: Maybe<Scalars['BigInt']>
-  size_in?: Maybe<Array<Scalars['BigInt']>>
-  size_isNull?: Maybe<Scalars['Boolean']>
-  size_lt?: Maybe<Scalars['BigInt']>
-  size_lte?: Maybe<Scalars['BigInt']>
-  size_not_eq?: Maybe<Scalars['BigInt']>
-  size_not_in?: Maybe<Array<Scalars['BigInt']>>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<VideoMediaMetadataWhereInput>>;
+  OR?: Maybe<Array<VideoMediaMetadataWhereInput>>;
+  createdInBlock_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_gt?: Maybe<Scalars['Int']>;
+  createdInBlock_gte?: Maybe<Scalars['Int']>;
+  createdInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  createdInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  createdInBlock_lt?: Maybe<Scalars['Int']>;
+  createdInBlock_lte?: Maybe<Scalars['Int']>;
+  createdInBlock_not_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  encoding?: Maybe<VideoMediaEncodingWhereInput>;
+  encoding_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  pixelHeight_eq?: Maybe<Scalars['Int']>;
+  pixelHeight_gt?: Maybe<Scalars['Int']>;
+  pixelHeight_gte?: Maybe<Scalars['Int']>;
+  pixelHeight_in?: Maybe<Array<Scalars['Int']>>;
+  pixelHeight_isNull?: Maybe<Scalars['Boolean']>;
+  pixelHeight_lt?: Maybe<Scalars['Int']>;
+  pixelHeight_lte?: Maybe<Scalars['Int']>;
+  pixelHeight_not_eq?: Maybe<Scalars['Int']>;
+  pixelHeight_not_in?: Maybe<Array<Scalars['Int']>>;
+  pixelWidth_eq?: Maybe<Scalars['Int']>;
+  pixelWidth_gt?: Maybe<Scalars['Int']>;
+  pixelWidth_gte?: Maybe<Scalars['Int']>;
+  pixelWidth_in?: Maybe<Array<Scalars['Int']>>;
+  pixelWidth_isNull?: Maybe<Scalars['Boolean']>;
+  pixelWidth_lt?: Maybe<Scalars['Int']>;
+  pixelWidth_lte?: Maybe<Scalars['Int']>;
+  pixelWidth_not_eq?: Maybe<Scalars['Int']>;
+  pixelWidth_not_in?: Maybe<Array<Scalars['Int']>>;
+  size_eq?: Maybe<Scalars['BigInt']>;
+  size_gt?: Maybe<Scalars['BigInt']>;
+  size_gte?: Maybe<Scalars['BigInt']>;
+  size_in?: Maybe<Array<Scalars['BigInt']>>;
+  size_isNull?: Maybe<Scalars['Boolean']>;
+  size_lt?: Maybe<Scalars['BigInt']>;
+  size_lte?: Maybe<Scalars['BigInt']>;
+  size_not_eq?: Maybe<Scalars['BigInt']>;
+  size_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export enum VideoOrderByInput {
   CategoryCreatedInBlockAsc = 'category_createdInBlock_ASC',
@@ -6733,25 +6929,25 @@ export enum VideoOrderByInput {
   VideoStateBloatBondAsc = 'videoStateBloatBond_ASC',
   VideoStateBloatBondDesc = 'videoStateBloatBond_DESC',
   ViewsNumAsc = 'viewsNum_ASC',
-  ViewsNumDesc = 'viewsNum_DESC',
+  ViewsNumDesc = 'viewsNum_DESC'
 }
 
 export type VideoReaction = {
-  createdAt: Scalars['DateTime']
-  id: Scalars['String']
-  member: Membership
-  reaction: VideoReactionOptions
-  video: Video
-}
+  createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  member: Membership;
+  reaction: VideoReactionOptions;
+  video: Video;
+};
 
 export type VideoReactionEdge = {
-  cursor: Scalars['String']
-  node: VideoReaction
-}
+  cursor: Scalars['String'];
+  node: VideoReaction;
+};
 
 export enum VideoReactionOptions {
   Like = 'LIKE',
-  Unlike = 'UNLIKE',
+  Unlike = 'UNLIKE'
 }
 
 export enum VideoReactionOrderByInput {
@@ -6806,82 +7002,82 @@ export enum VideoReactionOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type VideoReactionWhereInput = {
-  AND?: Maybe<Array<VideoReactionWhereInput>>
-  OR?: Maybe<Array<VideoReactionWhereInput>>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  member?: Maybe<MembershipWhereInput>
-  member_isNull?: Maybe<Scalars['Boolean']>
-  reaction_eq?: Maybe<VideoReactionOptions>
-  reaction_in?: Maybe<Array<VideoReactionOptions>>
-  reaction_isNull?: Maybe<Scalars['Boolean']>
-  reaction_not_eq?: Maybe<VideoReactionOptions>
-  reaction_not_in?: Maybe<Array<VideoReactionOptions>>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<VideoReactionWhereInput>>;
+  OR?: Maybe<Array<VideoReactionWhereInput>>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  member?: Maybe<MembershipWhereInput>;
+  member_isNull?: Maybe<Scalars['Boolean']>;
+  reaction_eq?: Maybe<VideoReactionOptions>;
+  reaction_in?: Maybe<Array<VideoReactionOptions>>;
+  reaction_isNull?: Maybe<Scalars['Boolean']>;
+  reaction_not_eq?: Maybe<VideoReactionOptions>;
+  reaction_not_in?: Maybe<Array<VideoReactionOptions>>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type VideoReactionsConnection = {
-  edges: Array<VideoReactionEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoReactionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoReactionsCountByReactionType = {
-  count: Scalars['Int']
-  reaction: VideoReactionOptions
-}
+  count: Scalars['Int'];
+  reaction: VideoReactionOptions;
+};
 
 export type VideoReportInfo = {
-  created: Scalars['Boolean']
-  createdAt: Scalars['DateTime']
-  id: Scalars['Int']
-  rationale: Scalars['String']
-  reporterIp: Scalars['String']
-  videoId: Scalars['String']
-}
+  created: Scalars['Boolean'];
+  createdAt: Scalars['DateTime'];
+  id: Scalars['Int'];
+  rationale: Scalars['String'];
+  reporterIp: Scalars['String'];
+  videoId: Scalars['String'];
+};
 
 export type VideoSubtitle = {
-  asset?: Maybe<StorageDataObject>
-  id: Scalars['String']
-  language?: Maybe<Scalars['String']>
-  mimeType: Scalars['String']
-  type: Scalars['String']
-  video: Video
-}
+  asset?: Maybe<StorageDataObject>;
+  id: Scalars['String'];
+  language?: Maybe<Scalars['String']>;
+  mimeType: Scalars['String'];
+  type: Scalars['String'];
+  video: Video;
+};
 
 export type VideoSubtitleEdge = {
-  cursor: Scalars['String']
-  node: VideoSubtitle
-}
+  cursor: Scalars['String'];
+  node: VideoSubtitle;
+};
 
 export enum VideoSubtitleOrderByInput {
   AssetCreatedAtAsc = 'asset_createdAt_ASC',
@@ -6943,299 +7139,299 @@ export enum VideoSubtitleOrderByInput {
   VideoVideoStateBloatBondAsc = 'video_videoStateBloatBond_ASC',
   VideoVideoStateBloatBondDesc = 'video_videoStateBloatBond_DESC',
   VideoViewsNumAsc = 'video_viewsNum_ASC',
-  VideoViewsNumDesc = 'video_viewsNum_DESC',
+  VideoViewsNumDesc = 'video_viewsNum_DESC'
 }
 
 export type VideoSubtitleWhereInput = {
-  AND?: Maybe<Array<VideoSubtitleWhereInput>>
-  OR?: Maybe<Array<VideoSubtitleWhereInput>>
-  asset?: Maybe<StorageDataObjectWhereInput>
-  asset_isNull?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  language_contains?: Maybe<Scalars['String']>
-  language_containsInsensitive?: Maybe<Scalars['String']>
-  language_endsWith?: Maybe<Scalars['String']>
-  language_eq?: Maybe<Scalars['String']>
-  language_gt?: Maybe<Scalars['String']>
-  language_gte?: Maybe<Scalars['String']>
-  language_in?: Maybe<Array<Scalars['String']>>
-  language_isNull?: Maybe<Scalars['Boolean']>
-  language_lt?: Maybe<Scalars['String']>
-  language_lte?: Maybe<Scalars['String']>
-  language_not_contains?: Maybe<Scalars['String']>
-  language_not_containsInsensitive?: Maybe<Scalars['String']>
-  language_not_endsWith?: Maybe<Scalars['String']>
-  language_not_eq?: Maybe<Scalars['String']>
-  language_not_in?: Maybe<Array<Scalars['String']>>
-  language_not_startsWith?: Maybe<Scalars['String']>
-  language_startsWith?: Maybe<Scalars['String']>
-  mimeType_contains?: Maybe<Scalars['String']>
-  mimeType_containsInsensitive?: Maybe<Scalars['String']>
-  mimeType_endsWith?: Maybe<Scalars['String']>
-  mimeType_eq?: Maybe<Scalars['String']>
-  mimeType_gt?: Maybe<Scalars['String']>
-  mimeType_gte?: Maybe<Scalars['String']>
-  mimeType_in?: Maybe<Array<Scalars['String']>>
-  mimeType_isNull?: Maybe<Scalars['Boolean']>
-  mimeType_lt?: Maybe<Scalars['String']>
-  mimeType_lte?: Maybe<Scalars['String']>
-  mimeType_not_contains?: Maybe<Scalars['String']>
-  mimeType_not_containsInsensitive?: Maybe<Scalars['String']>
-  mimeType_not_endsWith?: Maybe<Scalars['String']>
-  mimeType_not_eq?: Maybe<Scalars['String']>
-  mimeType_not_in?: Maybe<Array<Scalars['String']>>
-  mimeType_not_startsWith?: Maybe<Scalars['String']>
-  mimeType_startsWith?: Maybe<Scalars['String']>
-  type_contains?: Maybe<Scalars['String']>
-  type_containsInsensitive?: Maybe<Scalars['String']>
-  type_endsWith?: Maybe<Scalars['String']>
-  type_eq?: Maybe<Scalars['String']>
-  type_gt?: Maybe<Scalars['String']>
-  type_gte?: Maybe<Scalars['String']>
-  type_in?: Maybe<Array<Scalars['String']>>
-  type_isNull?: Maybe<Scalars['Boolean']>
-  type_lt?: Maybe<Scalars['String']>
-  type_lte?: Maybe<Scalars['String']>
-  type_not_contains?: Maybe<Scalars['String']>
-  type_not_containsInsensitive?: Maybe<Scalars['String']>
-  type_not_endsWith?: Maybe<Scalars['String']>
-  type_not_eq?: Maybe<Scalars['String']>
-  type_not_in?: Maybe<Array<Scalars['String']>>
-  type_not_startsWith?: Maybe<Scalars['String']>
-  type_startsWith?: Maybe<Scalars['String']>
-  video?: Maybe<VideoWhereInput>
-  video_isNull?: Maybe<Scalars['Boolean']>
-}
+  AND?: Maybe<Array<VideoSubtitleWhereInput>>;
+  OR?: Maybe<Array<VideoSubtitleWhereInput>>;
+  asset?: Maybe<StorageDataObjectWhereInput>;
+  asset_isNull?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  language_contains?: Maybe<Scalars['String']>;
+  language_containsInsensitive?: Maybe<Scalars['String']>;
+  language_endsWith?: Maybe<Scalars['String']>;
+  language_eq?: Maybe<Scalars['String']>;
+  language_gt?: Maybe<Scalars['String']>;
+  language_gte?: Maybe<Scalars['String']>;
+  language_in?: Maybe<Array<Scalars['String']>>;
+  language_isNull?: Maybe<Scalars['Boolean']>;
+  language_lt?: Maybe<Scalars['String']>;
+  language_lte?: Maybe<Scalars['String']>;
+  language_not_contains?: Maybe<Scalars['String']>;
+  language_not_containsInsensitive?: Maybe<Scalars['String']>;
+  language_not_endsWith?: Maybe<Scalars['String']>;
+  language_not_eq?: Maybe<Scalars['String']>;
+  language_not_in?: Maybe<Array<Scalars['String']>>;
+  language_not_startsWith?: Maybe<Scalars['String']>;
+  language_startsWith?: Maybe<Scalars['String']>;
+  mimeType_contains?: Maybe<Scalars['String']>;
+  mimeType_containsInsensitive?: Maybe<Scalars['String']>;
+  mimeType_endsWith?: Maybe<Scalars['String']>;
+  mimeType_eq?: Maybe<Scalars['String']>;
+  mimeType_gt?: Maybe<Scalars['String']>;
+  mimeType_gte?: Maybe<Scalars['String']>;
+  mimeType_in?: Maybe<Array<Scalars['String']>>;
+  mimeType_isNull?: Maybe<Scalars['Boolean']>;
+  mimeType_lt?: Maybe<Scalars['String']>;
+  mimeType_lte?: Maybe<Scalars['String']>;
+  mimeType_not_contains?: Maybe<Scalars['String']>;
+  mimeType_not_containsInsensitive?: Maybe<Scalars['String']>;
+  mimeType_not_endsWith?: Maybe<Scalars['String']>;
+  mimeType_not_eq?: Maybe<Scalars['String']>;
+  mimeType_not_in?: Maybe<Array<Scalars['String']>>;
+  mimeType_not_startsWith?: Maybe<Scalars['String']>;
+  mimeType_startsWith?: Maybe<Scalars['String']>;
+  type_contains?: Maybe<Scalars['String']>;
+  type_containsInsensitive?: Maybe<Scalars['String']>;
+  type_endsWith?: Maybe<Scalars['String']>;
+  type_eq?: Maybe<Scalars['String']>;
+  type_gt?: Maybe<Scalars['String']>;
+  type_gte?: Maybe<Scalars['String']>;
+  type_in?: Maybe<Array<Scalars['String']>>;
+  type_isNull?: Maybe<Scalars['Boolean']>;
+  type_lt?: Maybe<Scalars['String']>;
+  type_lte?: Maybe<Scalars['String']>;
+  type_not_contains?: Maybe<Scalars['String']>;
+  type_not_containsInsensitive?: Maybe<Scalars['String']>;
+  type_not_endsWith?: Maybe<Scalars['String']>;
+  type_not_eq?: Maybe<Scalars['String']>;
+  type_not_in?: Maybe<Array<Scalars['String']>>;
+  type_not_startsWith?: Maybe<Scalars['String']>;
+  type_startsWith?: Maybe<Scalars['String']>;
+  video?: Maybe<VideoWhereInput>;
+  video_isNull?: Maybe<Scalars['Boolean']>;
+};
 
 export type VideoSubtitlesConnection = {
-  edges: Array<VideoSubtitleEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoSubtitleEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideoViewPerIpTimeLimit = {
-  limitInSeconds: Scalars['Int']
-}
+  limitInSeconds: Scalars['Int'];
+};
 
 export type VideoWhereInput = {
-  AND?: Maybe<Array<VideoWhereInput>>
-  OR?: Maybe<Array<VideoWhereInput>>
-  category?: Maybe<VideoCategoryWhereInput>
-  category_isNull?: Maybe<Scalars['Boolean']>
-  channel?: Maybe<ChannelWhereInput>
-  channel_isNull?: Maybe<Scalars['Boolean']>
-  commentsCount_eq?: Maybe<Scalars['Int']>
-  commentsCount_gt?: Maybe<Scalars['Int']>
-  commentsCount_gte?: Maybe<Scalars['Int']>
-  commentsCount_in?: Maybe<Array<Scalars['Int']>>
-  commentsCount_isNull?: Maybe<Scalars['Boolean']>
-  commentsCount_lt?: Maybe<Scalars['Int']>
-  commentsCount_lte?: Maybe<Scalars['Int']>
-  commentsCount_not_eq?: Maybe<Scalars['Int']>
-  commentsCount_not_in?: Maybe<Array<Scalars['Int']>>
-  comments_every?: Maybe<CommentWhereInput>
-  comments_none?: Maybe<CommentWhereInput>
-  comments_some?: Maybe<CommentWhereInput>
-  createdAt_eq?: Maybe<Scalars['DateTime']>
-  createdAt_gt?: Maybe<Scalars['DateTime']>
-  createdAt_gte?: Maybe<Scalars['DateTime']>
-  createdAt_in?: Maybe<Array<Scalars['DateTime']>>
-  createdAt_isNull?: Maybe<Scalars['Boolean']>
-  createdAt_lt?: Maybe<Scalars['DateTime']>
-  createdAt_lte?: Maybe<Scalars['DateTime']>
-  createdAt_not_eq?: Maybe<Scalars['DateTime']>
-  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>
-  createdInBlock_eq?: Maybe<Scalars['Int']>
-  createdInBlock_gt?: Maybe<Scalars['Int']>
-  createdInBlock_gte?: Maybe<Scalars['Int']>
-  createdInBlock_in?: Maybe<Array<Scalars['Int']>>
-  createdInBlock_isNull?: Maybe<Scalars['Boolean']>
-  createdInBlock_lt?: Maybe<Scalars['Int']>
-  createdInBlock_lte?: Maybe<Scalars['Int']>
-  createdInBlock_not_eq?: Maybe<Scalars['Int']>
-  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>
-  description_contains?: Maybe<Scalars['String']>
-  description_containsInsensitive?: Maybe<Scalars['String']>
-  description_endsWith?: Maybe<Scalars['String']>
-  description_eq?: Maybe<Scalars['String']>
-  description_gt?: Maybe<Scalars['String']>
-  description_gte?: Maybe<Scalars['String']>
-  description_in?: Maybe<Array<Scalars['String']>>
-  description_isNull?: Maybe<Scalars['Boolean']>
-  description_lt?: Maybe<Scalars['String']>
-  description_lte?: Maybe<Scalars['String']>
-  description_not_contains?: Maybe<Scalars['String']>
-  description_not_containsInsensitive?: Maybe<Scalars['String']>
-  description_not_endsWith?: Maybe<Scalars['String']>
-  description_not_eq?: Maybe<Scalars['String']>
-  description_not_in?: Maybe<Array<Scalars['String']>>
-  description_not_startsWith?: Maybe<Scalars['String']>
-  description_startsWith?: Maybe<Scalars['String']>
-  duration_eq?: Maybe<Scalars['Int']>
-  duration_gt?: Maybe<Scalars['Int']>
-  duration_gte?: Maybe<Scalars['Int']>
-  duration_in?: Maybe<Array<Scalars['Int']>>
-  duration_isNull?: Maybe<Scalars['Boolean']>
-  duration_lt?: Maybe<Scalars['Int']>
-  duration_lte?: Maybe<Scalars['Int']>
-  duration_not_eq?: Maybe<Scalars['Int']>
-  duration_not_in?: Maybe<Array<Scalars['Int']>>
-  hasMarketing_eq?: Maybe<Scalars['Boolean']>
-  hasMarketing_isNull?: Maybe<Scalars['Boolean']>
-  hasMarketing_not_eq?: Maybe<Scalars['Boolean']>
-  id_contains?: Maybe<Scalars['String']>
-  id_containsInsensitive?: Maybe<Scalars['String']>
-  id_endsWith?: Maybe<Scalars['String']>
-  id_eq?: Maybe<Scalars['String']>
-  id_gt?: Maybe<Scalars['String']>
-  id_gte?: Maybe<Scalars['String']>
-  id_in?: Maybe<Array<Scalars['String']>>
-  id_isNull?: Maybe<Scalars['Boolean']>
-  id_lt?: Maybe<Scalars['String']>
-  id_lte?: Maybe<Scalars['String']>
-  id_not_contains?: Maybe<Scalars['String']>
-  id_not_containsInsensitive?: Maybe<Scalars['String']>
-  id_not_endsWith?: Maybe<Scalars['String']>
-  id_not_eq?: Maybe<Scalars['String']>
-  id_not_in?: Maybe<Array<Scalars['String']>>
-  id_not_startsWith?: Maybe<Scalars['String']>
-  id_startsWith?: Maybe<Scalars['String']>
-  isCensored_eq?: Maybe<Scalars['Boolean']>
-  isCensored_isNull?: Maybe<Scalars['Boolean']>
-  isCensored_not_eq?: Maybe<Scalars['Boolean']>
-  isCommentSectionEnabled_eq?: Maybe<Scalars['Boolean']>
-  isCommentSectionEnabled_isNull?: Maybe<Scalars['Boolean']>
-  isCommentSectionEnabled_not_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_eq?: Maybe<Scalars['Boolean']>
-  isExcluded_isNull?: Maybe<Scalars['Boolean']>
-  isExcluded_not_eq?: Maybe<Scalars['Boolean']>
-  isExplicit_eq?: Maybe<Scalars['Boolean']>
-  isExplicit_isNull?: Maybe<Scalars['Boolean']>
-  isExplicit_not_eq?: Maybe<Scalars['Boolean']>
-  isPublic_eq?: Maybe<Scalars['Boolean']>
-  isPublic_isNull?: Maybe<Scalars['Boolean']>
-  isPublic_not_eq?: Maybe<Scalars['Boolean']>
-  isReactionFeatureEnabled_eq?: Maybe<Scalars['Boolean']>
-  isReactionFeatureEnabled_isNull?: Maybe<Scalars['Boolean']>
-  isReactionFeatureEnabled_not_eq?: Maybe<Scalars['Boolean']>
-  language_contains?: Maybe<Scalars['String']>
-  language_containsInsensitive?: Maybe<Scalars['String']>
-  language_endsWith?: Maybe<Scalars['String']>
-  language_eq?: Maybe<Scalars['String']>
-  language_gt?: Maybe<Scalars['String']>
-  language_gte?: Maybe<Scalars['String']>
-  language_in?: Maybe<Array<Scalars['String']>>
-  language_isNull?: Maybe<Scalars['Boolean']>
-  language_lt?: Maybe<Scalars['String']>
-  language_lte?: Maybe<Scalars['String']>
-  language_not_contains?: Maybe<Scalars['String']>
-  language_not_containsInsensitive?: Maybe<Scalars['String']>
-  language_not_endsWith?: Maybe<Scalars['String']>
-  language_not_eq?: Maybe<Scalars['String']>
-  language_not_in?: Maybe<Array<Scalars['String']>>
-  language_not_startsWith?: Maybe<Scalars['String']>
-  language_startsWith?: Maybe<Scalars['String']>
-  license?: Maybe<LicenseWhereInput>
-  license_isNull?: Maybe<Scalars['Boolean']>
-  media?: Maybe<StorageDataObjectWhereInput>
-  mediaMetadata?: Maybe<VideoMediaMetadataWhereInput>
-  mediaMetadata_isNull?: Maybe<Scalars['Boolean']>
-  media_isNull?: Maybe<Scalars['Boolean']>
-  nft?: Maybe<OwnedNftWhereInput>
-  nft_isNull?: Maybe<Scalars['Boolean']>
-  pinnedComment?: Maybe<CommentWhereInput>
-  pinnedComment_isNull?: Maybe<Scalars['Boolean']>
-  publishedBeforeJoystream_eq?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_gt?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_gte?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_in?: Maybe<Array<Scalars['DateTime']>>
-  publishedBeforeJoystream_isNull?: Maybe<Scalars['Boolean']>
-  publishedBeforeJoystream_lt?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_lte?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_not_eq?: Maybe<Scalars['DateTime']>
-  publishedBeforeJoystream_not_in?: Maybe<Array<Scalars['DateTime']>>
-  reactionsCountByReactionId_isNull?: Maybe<Scalars['Boolean']>
-  reactionsCount_eq?: Maybe<Scalars['Int']>
-  reactionsCount_gt?: Maybe<Scalars['Int']>
-  reactionsCount_gte?: Maybe<Scalars['Int']>
-  reactionsCount_in?: Maybe<Array<Scalars['Int']>>
-  reactionsCount_isNull?: Maybe<Scalars['Boolean']>
-  reactionsCount_lt?: Maybe<Scalars['Int']>
-  reactionsCount_lte?: Maybe<Scalars['Int']>
-  reactionsCount_not_eq?: Maybe<Scalars['Int']>
-  reactionsCount_not_in?: Maybe<Array<Scalars['Int']>>
-  reactions_every?: Maybe<VideoReactionWhereInput>
-  reactions_none?: Maybe<VideoReactionWhereInput>
-  reactions_some?: Maybe<VideoReactionWhereInput>
-  subtitles_every?: Maybe<VideoSubtitleWhereInput>
-  subtitles_none?: Maybe<VideoSubtitleWhereInput>
-  subtitles_some?: Maybe<VideoSubtitleWhereInput>
-  thumbnailPhoto?: Maybe<StorageDataObjectWhereInput>
-  thumbnailPhoto_isNull?: Maybe<Scalars['Boolean']>
-  title_contains?: Maybe<Scalars['String']>
-  title_containsInsensitive?: Maybe<Scalars['String']>
-  title_endsWith?: Maybe<Scalars['String']>
-  title_eq?: Maybe<Scalars['String']>
-  title_gt?: Maybe<Scalars['String']>
-  title_gte?: Maybe<Scalars['String']>
-  title_in?: Maybe<Array<Scalars['String']>>
-  title_isNull?: Maybe<Scalars['Boolean']>
-  title_lt?: Maybe<Scalars['String']>
-  title_lte?: Maybe<Scalars['String']>
-  title_not_contains?: Maybe<Scalars['String']>
-  title_not_containsInsensitive?: Maybe<Scalars['String']>
-  title_not_endsWith?: Maybe<Scalars['String']>
-  title_not_eq?: Maybe<Scalars['String']>
-  title_not_in?: Maybe<Array<Scalars['String']>>
-  title_not_startsWith?: Maybe<Scalars['String']>
-  title_startsWith?: Maybe<Scalars['String']>
-  videoStateBloatBond_eq?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_gt?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_gte?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>
-  videoStateBloatBond_isNull?: Maybe<Scalars['Boolean']>
-  videoStateBloatBond_lt?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_lte?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_not_eq?: Maybe<Scalars['BigInt']>
-  videoStateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>
-  viewsNum_eq?: Maybe<Scalars['Int']>
-  viewsNum_gt?: Maybe<Scalars['Int']>
-  viewsNum_gte?: Maybe<Scalars['Int']>
-  viewsNum_in?: Maybe<Array<Scalars['Int']>>
-  viewsNum_isNull?: Maybe<Scalars['Boolean']>
-  viewsNum_lt?: Maybe<Scalars['Int']>
-  viewsNum_lte?: Maybe<Scalars['Int']>
-  viewsNum_not_eq?: Maybe<Scalars['Int']>
-  viewsNum_not_in?: Maybe<Array<Scalars['Int']>>
-}
+  AND?: Maybe<Array<VideoWhereInput>>;
+  OR?: Maybe<Array<VideoWhereInput>>;
+  category?: Maybe<VideoCategoryWhereInput>;
+  category_isNull?: Maybe<Scalars['Boolean']>;
+  channel?: Maybe<ChannelWhereInput>;
+  channel_isNull?: Maybe<Scalars['Boolean']>;
+  commentsCount_eq?: Maybe<Scalars['Int']>;
+  commentsCount_gt?: Maybe<Scalars['Int']>;
+  commentsCount_gte?: Maybe<Scalars['Int']>;
+  commentsCount_in?: Maybe<Array<Scalars['Int']>>;
+  commentsCount_isNull?: Maybe<Scalars['Boolean']>;
+  commentsCount_lt?: Maybe<Scalars['Int']>;
+  commentsCount_lte?: Maybe<Scalars['Int']>;
+  commentsCount_not_eq?: Maybe<Scalars['Int']>;
+  commentsCount_not_in?: Maybe<Array<Scalars['Int']>>;
+  comments_every?: Maybe<CommentWhereInput>;
+  comments_none?: Maybe<CommentWhereInput>;
+  comments_some?: Maybe<CommentWhereInput>;
+  createdAt_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_gt?: Maybe<Scalars['DateTime']>;
+  createdAt_gte?: Maybe<Scalars['DateTime']>;
+  createdAt_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdAt_isNull?: Maybe<Scalars['Boolean']>;
+  createdAt_lt?: Maybe<Scalars['DateTime']>;
+  createdAt_lte?: Maybe<Scalars['DateTime']>;
+  createdAt_not_eq?: Maybe<Scalars['DateTime']>;
+  createdAt_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  createdInBlock_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_gt?: Maybe<Scalars['Int']>;
+  createdInBlock_gte?: Maybe<Scalars['Int']>;
+  createdInBlock_in?: Maybe<Array<Scalars['Int']>>;
+  createdInBlock_isNull?: Maybe<Scalars['Boolean']>;
+  createdInBlock_lt?: Maybe<Scalars['Int']>;
+  createdInBlock_lte?: Maybe<Scalars['Int']>;
+  createdInBlock_not_eq?: Maybe<Scalars['Int']>;
+  createdInBlock_not_in?: Maybe<Array<Scalars['Int']>>;
+  description_contains?: Maybe<Scalars['String']>;
+  description_containsInsensitive?: Maybe<Scalars['String']>;
+  description_endsWith?: Maybe<Scalars['String']>;
+  description_eq?: Maybe<Scalars['String']>;
+  description_gt?: Maybe<Scalars['String']>;
+  description_gte?: Maybe<Scalars['String']>;
+  description_in?: Maybe<Array<Scalars['String']>>;
+  description_isNull?: Maybe<Scalars['Boolean']>;
+  description_lt?: Maybe<Scalars['String']>;
+  description_lte?: Maybe<Scalars['String']>;
+  description_not_contains?: Maybe<Scalars['String']>;
+  description_not_containsInsensitive?: Maybe<Scalars['String']>;
+  description_not_endsWith?: Maybe<Scalars['String']>;
+  description_not_eq?: Maybe<Scalars['String']>;
+  description_not_in?: Maybe<Array<Scalars['String']>>;
+  description_not_startsWith?: Maybe<Scalars['String']>;
+  description_startsWith?: Maybe<Scalars['String']>;
+  duration_eq?: Maybe<Scalars['Int']>;
+  duration_gt?: Maybe<Scalars['Int']>;
+  duration_gte?: Maybe<Scalars['Int']>;
+  duration_in?: Maybe<Array<Scalars['Int']>>;
+  duration_isNull?: Maybe<Scalars['Boolean']>;
+  duration_lt?: Maybe<Scalars['Int']>;
+  duration_lte?: Maybe<Scalars['Int']>;
+  duration_not_eq?: Maybe<Scalars['Int']>;
+  duration_not_in?: Maybe<Array<Scalars['Int']>>;
+  hasMarketing_eq?: Maybe<Scalars['Boolean']>;
+  hasMarketing_isNull?: Maybe<Scalars['Boolean']>;
+  hasMarketing_not_eq?: Maybe<Scalars['Boolean']>;
+  id_contains?: Maybe<Scalars['String']>;
+  id_containsInsensitive?: Maybe<Scalars['String']>;
+  id_endsWith?: Maybe<Scalars['String']>;
+  id_eq?: Maybe<Scalars['String']>;
+  id_gt?: Maybe<Scalars['String']>;
+  id_gte?: Maybe<Scalars['String']>;
+  id_in?: Maybe<Array<Scalars['String']>>;
+  id_isNull?: Maybe<Scalars['Boolean']>;
+  id_lt?: Maybe<Scalars['String']>;
+  id_lte?: Maybe<Scalars['String']>;
+  id_not_contains?: Maybe<Scalars['String']>;
+  id_not_containsInsensitive?: Maybe<Scalars['String']>;
+  id_not_endsWith?: Maybe<Scalars['String']>;
+  id_not_eq?: Maybe<Scalars['String']>;
+  id_not_in?: Maybe<Array<Scalars['String']>>;
+  id_not_startsWith?: Maybe<Scalars['String']>;
+  id_startsWith?: Maybe<Scalars['String']>;
+  isCensored_eq?: Maybe<Scalars['Boolean']>;
+  isCensored_isNull?: Maybe<Scalars['Boolean']>;
+  isCensored_not_eq?: Maybe<Scalars['Boolean']>;
+  isCommentSectionEnabled_eq?: Maybe<Scalars['Boolean']>;
+  isCommentSectionEnabled_isNull?: Maybe<Scalars['Boolean']>;
+  isCommentSectionEnabled_not_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_eq?: Maybe<Scalars['Boolean']>;
+  isExcluded_isNull?: Maybe<Scalars['Boolean']>;
+  isExcluded_not_eq?: Maybe<Scalars['Boolean']>;
+  isExplicit_eq?: Maybe<Scalars['Boolean']>;
+  isExplicit_isNull?: Maybe<Scalars['Boolean']>;
+  isExplicit_not_eq?: Maybe<Scalars['Boolean']>;
+  isPublic_eq?: Maybe<Scalars['Boolean']>;
+  isPublic_isNull?: Maybe<Scalars['Boolean']>;
+  isPublic_not_eq?: Maybe<Scalars['Boolean']>;
+  isReactionFeatureEnabled_eq?: Maybe<Scalars['Boolean']>;
+  isReactionFeatureEnabled_isNull?: Maybe<Scalars['Boolean']>;
+  isReactionFeatureEnabled_not_eq?: Maybe<Scalars['Boolean']>;
+  language_contains?: Maybe<Scalars['String']>;
+  language_containsInsensitive?: Maybe<Scalars['String']>;
+  language_endsWith?: Maybe<Scalars['String']>;
+  language_eq?: Maybe<Scalars['String']>;
+  language_gt?: Maybe<Scalars['String']>;
+  language_gte?: Maybe<Scalars['String']>;
+  language_in?: Maybe<Array<Scalars['String']>>;
+  language_isNull?: Maybe<Scalars['Boolean']>;
+  language_lt?: Maybe<Scalars['String']>;
+  language_lte?: Maybe<Scalars['String']>;
+  language_not_contains?: Maybe<Scalars['String']>;
+  language_not_containsInsensitive?: Maybe<Scalars['String']>;
+  language_not_endsWith?: Maybe<Scalars['String']>;
+  language_not_eq?: Maybe<Scalars['String']>;
+  language_not_in?: Maybe<Array<Scalars['String']>>;
+  language_not_startsWith?: Maybe<Scalars['String']>;
+  language_startsWith?: Maybe<Scalars['String']>;
+  license?: Maybe<LicenseWhereInput>;
+  license_isNull?: Maybe<Scalars['Boolean']>;
+  media?: Maybe<StorageDataObjectWhereInput>;
+  mediaMetadata?: Maybe<VideoMediaMetadataWhereInput>;
+  mediaMetadata_isNull?: Maybe<Scalars['Boolean']>;
+  media_isNull?: Maybe<Scalars['Boolean']>;
+  nft?: Maybe<OwnedNftWhereInput>;
+  nft_isNull?: Maybe<Scalars['Boolean']>;
+  pinnedComment?: Maybe<CommentWhereInput>;
+  pinnedComment_isNull?: Maybe<Scalars['Boolean']>;
+  publishedBeforeJoystream_eq?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_gt?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_gte?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_in?: Maybe<Array<Scalars['DateTime']>>;
+  publishedBeforeJoystream_isNull?: Maybe<Scalars['Boolean']>;
+  publishedBeforeJoystream_lt?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_lte?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_not_eq?: Maybe<Scalars['DateTime']>;
+  publishedBeforeJoystream_not_in?: Maybe<Array<Scalars['DateTime']>>;
+  reactionsCountByReactionId_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsCount_eq?: Maybe<Scalars['Int']>;
+  reactionsCount_gt?: Maybe<Scalars['Int']>;
+  reactionsCount_gte?: Maybe<Scalars['Int']>;
+  reactionsCount_in?: Maybe<Array<Scalars['Int']>>;
+  reactionsCount_isNull?: Maybe<Scalars['Boolean']>;
+  reactionsCount_lt?: Maybe<Scalars['Int']>;
+  reactionsCount_lte?: Maybe<Scalars['Int']>;
+  reactionsCount_not_eq?: Maybe<Scalars['Int']>;
+  reactionsCount_not_in?: Maybe<Array<Scalars['Int']>>;
+  reactions_every?: Maybe<VideoReactionWhereInput>;
+  reactions_none?: Maybe<VideoReactionWhereInput>;
+  reactions_some?: Maybe<VideoReactionWhereInput>;
+  subtitles_every?: Maybe<VideoSubtitleWhereInput>;
+  subtitles_none?: Maybe<VideoSubtitleWhereInput>;
+  subtitles_some?: Maybe<VideoSubtitleWhereInput>;
+  thumbnailPhoto?: Maybe<StorageDataObjectWhereInput>;
+  thumbnailPhoto_isNull?: Maybe<Scalars['Boolean']>;
+  title_contains?: Maybe<Scalars['String']>;
+  title_containsInsensitive?: Maybe<Scalars['String']>;
+  title_endsWith?: Maybe<Scalars['String']>;
+  title_eq?: Maybe<Scalars['String']>;
+  title_gt?: Maybe<Scalars['String']>;
+  title_gte?: Maybe<Scalars['String']>;
+  title_in?: Maybe<Array<Scalars['String']>>;
+  title_isNull?: Maybe<Scalars['Boolean']>;
+  title_lt?: Maybe<Scalars['String']>;
+  title_lte?: Maybe<Scalars['String']>;
+  title_not_contains?: Maybe<Scalars['String']>;
+  title_not_containsInsensitive?: Maybe<Scalars['String']>;
+  title_not_endsWith?: Maybe<Scalars['String']>;
+  title_not_eq?: Maybe<Scalars['String']>;
+  title_not_in?: Maybe<Array<Scalars['String']>>;
+  title_not_startsWith?: Maybe<Scalars['String']>;
+  title_startsWith?: Maybe<Scalars['String']>;
+  videoStateBloatBond_eq?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_gt?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_gte?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>;
+  videoStateBloatBond_isNull?: Maybe<Scalars['Boolean']>;
+  videoStateBloatBond_lt?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_lte?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_not_eq?: Maybe<Scalars['BigInt']>;
+  videoStateBloatBond_not_in?: Maybe<Array<Scalars['BigInt']>>;
+  viewsNum_eq?: Maybe<Scalars['Int']>;
+  viewsNum_gt?: Maybe<Scalars['Int']>;
+  viewsNum_gte?: Maybe<Scalars['Int']>;
+  viewsNum_in?: Maybe<Array<Scalars['Int']>>;
+  viewsNum_isNull?: Maybe<Scalars['Boolean']>;
+  viewsNum_lt?: Maybe<Scalars['Int']>;
+  viewsNum_lte?: Maybe<Scalars['Int']>;
+  viewsNum_not_eq?: Maybe<Scalars['Int']>;
+  viewsNum_not_in?: Maybe<Array<Scalars['Int']>>;
+};
 
 export type VideosConnection = {
-  edges: Array<VideoEdge>
-  pageInfo: PageInfo
-  totalCount: Scalars['Int']
-}
+  edges: Array<VideoEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
 
 export type VideosSearchResult = {
-  relevance: Scalars['Int']
-  video: Video
-}
+  relevance: Scalars['Int'];
+  video: Video;
+};
 
 export type WhereIdInput = {
-  id: Scalars['String']
-}
+  id: Scalars['String'];
+};

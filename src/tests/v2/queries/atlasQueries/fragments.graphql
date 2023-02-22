@@ -316,7 +316,6 @@ fragment FullBidFields on Bid {
 
 # No changes
 fragment CommentReactionsCountByReactionIdFields on CommentReactionsCountByReactionId {
-  id
   count
   reactionId
 }

@@ -12,7 +12,7 @@ query GetVideoHero {
 
 query GetAllCategoriesFeaturedVideos {
   # CHANGE: Using `videoCategories` instead of custom `allCategoriesFeaturedVideos` query
-  videoCategories {
+  videoCategories(where: { featuredVideos_some: { video_isNull: false } }) {
     id
     name
     # CHANGE: Can now apply limit to children

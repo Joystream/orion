@@ -15,7 +15,8 @@
     "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
     "postinstall": "patch-package --patch-dir assets/patches",
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
-    "tests": "npx ts-node ./src/tests/index.ts"
+    "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
+    "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts"
   },
   "overrides": {
     "@polkadot/api": "8.9.1",
