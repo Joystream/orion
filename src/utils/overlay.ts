@@ -298,12 +298,6 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
         `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
       )
       await this.repository.save(toBeSaved)
-      // Remove saved entities from cache
-      toBeSaved.forEach((e) => {
-        if (!this.cached.delete(e.id)) {
-          criticalError(`Could not remove cached ${this.entityName} entity by id ${e.id}!`)
-        }
-      })
     }
   }
 
@@ -317,13 +311,11 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
         `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
       )
       await this.repository.remove(_.cloneDeep(toBeRemoved))
-      // Remove deleted entities from cache
-      toBeRemoved.forEach((e) => {
-        if (!this.cached.delete(e.id)) {
-          criticalError(`Could not remove cached ${this.entityName} entity by id ${e.id}!`)
-        }
-      })
     }
+  }
+
+  cleanCache(): void {
+    this.cached.clear()
   }
 }
 
@@ -372,10 +364,11 @@ export class EntityManagerOverlay {
   // Update database - "flush" the cached state
   async updateDatabase() {
     await Promise.all(
-      Array.from(this.repositories.values()).map((r) => r.executeScheduledUpdates())
-    )
-    await Promise.all(
-      Array.from(this.repositories.values()).map((r) => r.executeScheduledRemovals())
+      Array.from(this.repositories.values()).map(async (r) => {
+        await r.executeScheduledUpdates()
+        await r.executeScheduledRemovals()
+        r.cleanCache()
+      })
     )
     const nextIds = Array.from(this.repositories.values()).map(
       (r) =>
