@@ -2,7 +2,13 @@ import { metaToObject } from '@joystream/metadata-protobuf/utils'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { Logger } from '../logger'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
-import { Event, MetaprotocolTransactionResultFailed } from '../model'
+import {
+  Event,
+  MetaprotocolTransactionResultFailed,
+  NftActivity,
+  NftHistoryEntry,
+  Notification,
+} from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
 import { Bytes } from '@polkadot/types/primitive'
@@ -64,6 +70,41 @@ export function genericEventFields(
     indexInBlock,
     timestamp: new Date(block.timestamp),
     inExtrinsic: txHash,
+  }
+}
+
+export function addNotification(
+  overlay: EntityManagerOverlay,
+  memberIds: (string | undefined | null)[],
+  eventId: string
+) {
+  const repository = overlay.getRepository(Notification)
+  for (const memberId of memberIds.filter((m) => m)) {
+    repository.new({ id: repository.getNewEntityId(), memberId, eventId })
+  }
+}
+
+export function addNftHistoryEntry(overlay: EntityManagerOverlay, nftId: string, eventId: string) {
+  const repository = overlay.getRepository(NftHistoryEntry)
+  repository.new({
+    id: repository.getNewEntityId(),
+    nftId,
+    eventId,
+  })
+}
+
+export function addNftActivity(
+  overlay: EntityManagerOverlay,
+  memberIds: (string | null | undefined)[],
+  eventId: string
+) {
+  const repository = overlay.getRepository(NftActivity)
+  for (const memberId of memberIds.filter((m) => m)) {
+    repository.new({
+      id: repository.getNewEntityId(),
+      memberId,
+      eventId,
+    })
   }
 }
 

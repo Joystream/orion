@@ -18,6 +18,39 @@ type Event @entity {
   data: EventData!
 }
 
+type Notification @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Member that should recieve the notification"
+  member: Membership!
+
+  "The notification event"
+  event: Event!
+}
+
+type NftHistoryEntry @entity {
+  "Autoincremented"
+  id: ID!
+
+  "The NFT the event relates to"
+  nft: OwnedNft!
+
+  "Nft-related event"
+  event: Event!
+}
+
+type NftActivity @entity {
+  "Autoincremented"
+  id: ID!
+
+  "The member the activity relates to"
+  member: Membership!
+
+  "Nft-related activity"
+  event: Event!
+}
+
 union EventData =
     CommentCreatedEventData
   | CommentTextUpdatedEventData

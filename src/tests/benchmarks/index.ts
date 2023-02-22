@@ -166,9 +166,7 @@ export async function benchmark() {
         v1Avg: _.mean(v1Results),
         v2Avg: _.mean(v2Results),
       })
-      // For GetNftActivities, 4 new results were added in Orion v2
-      // (nftsBought, nftsSold, nftsIssued, nftsBidded)
-      if (!(v1Rows === v2Rows || (v1QueryName === 'GetNftActivities' && v1Rows + 4 === v2Rows))) {
+      if (v1Rows !== v2Rows) {
         throw new Error('Number of rows returned does not match!')
       }
     }
