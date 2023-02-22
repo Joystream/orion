@@ -1,0 +1,11 @@
+query GetMembership($where: MembershipWhereUniqueInput!) {
+  membershipByUniqueInput(where: $where) {
+    ...FullMembershipFields
+  }
+}
+
+query GetMemberships($where: MembershipWhereInput!, $limit: Int) {
+  memberships(where: $where, limit: $limit, orderBy: [createdAt_ASC]) {
+    ...FullMembershipFields
+  }
+}

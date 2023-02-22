@@ -1,88 +1,456 @@
 import * as Types from './schema'
 
 import gql from 'graphql-tag'
-type ActorFields_ContentActorCurator_Fragment = {
-  __typename: 'ContentActorCurator'
-  curator: { id: string }
+export type GetKillSwitchQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetKillSwitchQuery = { getKillSwitch: { isKilled: boolean } }
+
+export type SetKillSwitchMutationVariables = Types.Exact<{
+  isKilled: Types.Scalars['Boolean']
+}>
+
+export type SetKillSwitchMutation = { setKillSwitch: { isKilled: boolean } }
+
+export type GetBidsQueryVariables = Types.Exact<{
+  where: Types.BidWhereInput
+  limit?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetBidsQuery = { bids: Array<FullBidFieldsFragment> }
+
+export type GetExtendedVideoCategoriesQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetExtendedVideoCategoriesQuery = {
+  extendedVideoCategories: Array<ExtendedVideoCategoryFieldsFragment>
 }
 
-type ActorFields_ContentActorLead_Fragment = { __typename: 'ContentActorLead' }
+export type GetFullChannelQueryVariables = Types.Exact<{
+  id: Types.Scalars['String']
+}>
 
-type ActorFields_ContentActorMember_Fragment = {
-  __typename: 'ContentActorMember'
-  member: { id: string }
+export type GetFullChannelQuery = { channelById?: Types.Maybe<FullChannelFieldsFragment> }
+
+export type GetVideoCountQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetVideoCountQuery = { videosConnection: { totalCount: number } }
+
+export type GetExtendedBasicChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  orderBy?: Types.Maybe<Array<Types.ChannelOrderByInput> | Types.ChannelOrderByInput>
+}>
+
+export type GetExtendedBasicChannelsQuery = {
+  extendedChannels: Array<ExtendedBasicChannelFieldsFragment>
 }
 
-export type ActorFieldsFragment =
-  | ActorFields_ContentActorCurator_Fragment
-  | ActorFields_ContentActorLead_Fragment
-  | ActorFields_ContentActorMember_Fragment
+export type GetExtendedFullChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  orderBy?: Types.Maybe<Array<Types.ChannelOrderByInput> | Types.ChannelOrderByInput>
+}>
 
-type NftOwnerFields_NftOwnerChannel_Fragment = {
-  __typename: 'NftOwnerChannel'
-  channel: { id: string; ownerMember?: Types.Maybe<{ id: string }> }
+export type GetExtendedFullChannelsQuery = {
+  extendedChannels: Array<ExtendedFullChannelFieldsFragment>
 }
 
-type NftOwnerFields_NftOwnerMember_Fragment = {
-  __typename: 'NftOwnerMember'
-  member: { id: string }
+export type GetBasicChannelsConnectionQueryVariables = Types.Exact<{
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  where?: Types.Maybe<Types.ChannelWhereInput>
+  orderBy?: Types.Maybe<Array<Types.ChannelOrderByInput> | Types.ChannelOrderByInput>
+}>
+
+export type GetBasicChannelsConnectionQuery = {
+  channelsConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: BasicChannelFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
 }
 
-export type NftOwnerFieldsFragment =
-  | NftOwnerFields_NftOwnerChannel_Fragment
-  | NftOwnerFields_NftOwnerMember_Fragment
+export type FollowChannelMutationVariables = Types.Exact<{
+  channelId: Types.Scalars['String']
+}>
 
-type TransactionalStatusFields_TransactionalStatusAuction_Fragment = {
-  __typename: 'TransactionalStatusAuction'
-  auction: { id: string }
+export type FollowChannelMutation = {
+  followChannel: { channelId: string; follows: number; cancelToken: string }
 }
 
-type TransactionalStatusFields_TransactionalStatusBuyNow_Fragment = {
-  __typename: 'TransactionalStatusBuyNow'
-  price: string
+export type UnfollowChannelMutationVariables = Types.Exact<{
+  channelId: Types.Scalars['String']
+  token: Types.Scalars['String']
+}>
+
+export type UnfollowChannelMutation = { unfollowChannel: { channelId: string; follows: number } }
+
+export type GetTop10ChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+}>
+
+export type GetTop10ChannelsQuery = {
+  extendedChannels: Array<{ channel: BasicChannelFieldsFragment }>
 }
 
-type TransactionalStatusFields_TransactionalStatusIdle_Fragment = {
-  __typename: 'TransactionalStatusIdle'
+export type GetPromisingChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+}>
+
+export type GetPromisingChannelsQuery = {
+  mostRecentChannels: Array<{ channel: BasicChannelFieldsFragment }>
 }
 
-type TransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment = {
-  __typename: 'TransactionalStatusInitiatedOfferToMember'
-  offerPrice?: Types.Maybe<string>
-  member: { id: string }
+export type GetDiscoverChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+}>
+
+export type GetDiscoverChannelsQuery = {
+  mostRecentChannels: Array<{ channel: BasicChannelFieldsFragment }>
 }
 
-export type TransactionalStatusFieldsFragment =
-  | TransactionalStatusFields_TransactionalStatusAuction_Fragment
-  | TransactionalStatusFields_TransactionalStatusBuyNow_Fragment
-  | TransactionalStatusFields_TransactionalStatusIdle_Fragment
-  | TransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment
+export type GetPopularChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+}>
 
-type AuctionTypeFields_AuctionTypeEnglish_Fragment = {
-  __typename: 'AuctionTypeEnglish'
-  duration: number
-  extensionPeriod: number
-  plannedEndAtBlock: number
-  minimalBidStep: string
+export type GetPopularChannelsQuery = {
+  extendedChannels: Array<{ channel: BasicChannelFieldsFragment }>
 }
 
-type AuctionTypeFields_AuctionTypeOpen_Fragment = {
-  __typename: 'AuctionTypeOpen'
-  bidLockDuration: number
+export type GetChannelNftCollectorsQueryVariables = Types.Exact<{
+  channelId: Types.Scalars['String']
+  orderBy?: Types.Maybe<Types.ChannelNftCollectorsOrderByInput>
+}>
+
+export type GetChannelNftCollectorsQuery = {
+  channelNftCollectors: Array<{ amount: number; member: BasicMembershipFieldsFragment }>
 }
 
-export type AuctionTypeFieldsFragment =
-  | AuctionTypeFields_AuctionTypeEnglish_Fragment
-  | AuctionTypeFields_AuctionTypeOpen_Fragment
+export type ReportChannelMutationVariables = Types.Exact<{
+  channelId: Types.Scalars['String']
+  rationale: Types.Scalars['String']
+}>
 
-export type AuctionRefFieldsFragment = { id: string; nft: { id: string } }
+export type ReportChannelMutation = { reportChannel: { id: number; channelId: string } }
 
-export type BidRefFieldsFragment = {
+export type GetCommentQueryVariables = Types.Exact<{
+  commentId: Types.Scalars['String']
+}>
+
+export type GetCommentQuery = { commentById?: Types.Maybe<CommentFieldsFragment> }
+
+export type GetCommentRepliesConnectionQueryVariables = Types.Exact<{
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  parentCommentId: Types.Scalars['String']
+  orderBy?: Types.Maybe<Array<Types.CommentOrderByInput> | Types.CommentOrderByInput>
+}>
+
+export type GetCommentRepliesConnectionQuery = {
+  commentsConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: CommentFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetUserCommentsAndVideoCommentsConnectionQueryVariables = Types.Exact<{
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  memberId?: Types.Maybe<Types.Scalars['String']>
+  videoId?: Types.Maybe<Types.Scalars['String']>
+  orderBy?: Types.Maybe<Array<Types.CommentOrderByInput> | Types.CommentOrderByInput>
+}>
+
+export type GetUserCommentsAndVideoCommentsConnectionQuery = {
+  userComments: Array<CommentFieldsFragment>
+  videoCommentsConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: CommentFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetUserCommentsReactionsQueryVariables = Types.Exact<{
+  memberId: Types.Scalars['String']
+  videoId: Types.Scalars['String']
+}>
+
+export type GetUserCommentsReactionsQuery = {
+  commentReactions: Array<{ reactionId: number; comment: { id: string } }>
+}
+
+export type GetCommentEditsQueryVariables = Types.Exact<{
+  commentId: Types.Scalars['String']
+}>
+
+export type GetCommentEditsQuery = {
+  events: Array<{ id: string; timestamp: any; data: { text: string } | { newText: string } }>
+}
+
+export type GetDataObjectAvailabilityQueryVariables = Types.Exact<{
+  id_eq?: Types.Maybe<Types.Scalars['String']>
+  id_in?: Types.Maybe<Array<Types.Scalars['String']> | Types.Scalars['String']>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetDataObjectAvailabilityQuery = {
+  storageDataObjects: Array<{ id: string; isAccepted: boolean }>
+}
+
+export type GetVideoHeroQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetVideoHeroQuery = {
+  videoHero?: Types.Maybe<{
+    heroTitle: string
+    heroVideoCutUrl: string
+    heroPosterUrl: string
+    video: BasicVideoFieldsFragment
+  }>
+}
+
+export type GetAllCategoriesFeaturedVideosQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetAllCategoriesFeaturedVideosQuery = {
+  videoCategories: Array<{
+    id: string
+    name?: Types.Maybe<string>
+    featuredVideos: Array<{ videoCutUrl?: Types.Maybe<string>; video: BasicVideoFieldsFragment }>
+  }>
+}
+
+export type GetCategoriesFeaturedVideosQueryVariables = Types.Exact<{
+  categoryId: Types.Scalars['String']
+}>
+
+export type GetCategoriesFeaturedVideosQuery = {
+  videoCategoryById?: Types.Maybe<{
+    featuredVideos: Array<{ videoCutUrl?: Types.Maybe<string>; video: FullVideoFieldsFragment }>
+  }>
+}
+
+export type ExtendedVideoCategoryFieldsFragment = {
+  activeVideosCount: number
+  category: { id: string; name?: Types.Maybe<string> }
+}
+
+export type BasicChannelFieldsFragment = {
   id: string
+  title?: Types.Maybe<string>
+  description?: Types.Maybe<string>
+  createdAt: any
+  followsNum: number
+  rewardAccount: string
+  channelStateBloatBond: string
+  avatarPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+}
+
+export type FullChannelFieldsFragment = {
+  videoViewsNum: number
+  description?: Types.Maybe<string>
+  isPublic?: Types.Maybe<boolean>
+  isCensored: boolean
+  language?: Types.Maybe<string>
+  ownerMember?: Types.Maybe<BasicMembershipFieldsFragment>
+  coverPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+} & BasicChannelFieldsFragment
+
+export type ExtendedFullChannelFieldsFragment = {
+  activeVideosCount: number
+  channel: FullChannelFieldsFragment
+}
+
+export type ExtendedBasicChannelFieldsFragment = {
+  activeVideosCount: number
+  channel: BasicChannelFieldsFragment
+}
+
+export type BasicMembershipFieldsFragment = {
+  id: string
+  handle: string
+  metadata?: Types.Maybe<{
+    about?: Types.Maybe<string>
+    avatar?: Types.Maybe<{ avatarObject: StorageDataObjectFieldsFragment } | { avatarUri: string }>
+  }>
+}
+
+export type FullMembershipFieldsFragment = {
+  controllerAccount: string
+  createdAt: any
+  channels: Array<
+    {
+      description?: Types.Maybe<string>
+      coverPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+    } & BasicChannelFieldsFragment
+  >
+} & BasicMembershipFieldsFragment
+
+export type StorageDataObjectFieldsFragment = {
+  id: string
+  createdAt: any
+  size: string
+  isAccepted: boolean
+  ipfsHash: string
+  storageBag: { id: string }
+  type?: Types.Maybe<
+    | { __typename: 'DataObjectTypeChannelAvatar' }
+    | { __typename: 'DataObjectTypeChannelCoverPhoto' }
+    | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
+    | { __typename: 'DataObjectTypeVideoMedia' }
+    | { __typename: 'DataObjectTypeVideoSubtitle' }
+    | { __typename: 'DataObjectTypeVideoThumbnail' }
+  >
+}
+
+export type DistributionBucketOperatorFieldFragment = {
+  id: string
+  status: Types.DistributionBucketOperatorStatus
+  metadata?: Types.Maybe<{
+    nodeEndpoint?: Types.Maybe<string>
+    nodeLocation?: Types.Maybe<{
+      coordinates?: Types.Maybe<{ latitude: number; longitude: number }>
+    }>
+  }>
+}
+
+export type VideoMediaMetadataFieldsFragment = {
+  id: string
+  pixelHeight?: Types.Maybe<number>
+  pixelWidth?: Types.Maybe<number>
+}
+
+export type LicenseFieldsFragment = {
+  id: string
+  code?: Types.Maybe<number>
+  attribution?: Types.Maybe<string>
+  customText?: Types.Maybe<string>
+}
+
+export type SubtitlesFieldsFragment = {
+  id: string
+  language?: Types.Maybe<string>
+  mimeType: string
+  type: string
+  asset?: Types.Maybe<StorageDataObjectFieldsFragment>
+}
+
+export type BasicVideoFieldsFragment = {
+  id: string
+  title?: Types.Maybe<string>
+  viewsNum: number
+  createdAt: any
+  duration?: Types.Maybe<number>
+  reactionsCount: number
+  commentsCount: number
+  channel: BasicChannelFieldsFragment
+  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+  nft?: Types.Maybe<BasicNftFieldsFragment>
+}
+
+export type FullVideoFieldsFragment = {
+  id: string
+  title?: Types.Maybe<string>
+  description?: Types.Maybe<string>
+  reactionsCount: number
+  viewsNum: number
+  duration?: Types.Maybe<number>
+  createdAt: any
+  isPublic?: Types.Maybe<boolean>
+  isExplicit?: Types.Maybe<boolean>
+  hasMarketing?: Types.Maybe<boolean>
+  isCensored: boolean
+  isCommentSectionEnabled: boolean
+  commentsCount: number
+  language?: Types.Maybe<string>
+  publishedBeforeJoystream?: Types.Maybe<any>
+  reactions: Array<{
+    id: string
+    createdAt: any
+    reaction: Types.VideoReactionOptions
+    member: { id: string }
+  }>
+  category?: Types.Maybe<{ id: string; name?: Types.Maybe<string> }>
+  mediaMetadata?: Types.Maybe<VideoMediaMetadataFieldsFragment>
+  media?: Types.Maybe<StorageDataObjectFieldsFragment>
+  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+  channel: FullChannelFieldsFragment
+  license?: Types.Maybe<LicenseFieldsFragment>
+  nft?: Types.Maybe<BasicNftFieldsFragment>
+  subtitles: Array<SubtitlesFieldsFragment>
+}
+
+export type BasicNftFieldsFragment = {
+  id: string
+  createdAt: any
+  creatorRoyalty?: Types.Maybe<number>
+  lastSaleDate?: Types.Maybe<any>
+  lastSalePrice?: Types.Maybe<string>
+  owner: { channel: BasicChannelFieldsFragment } | { member: BasicMembershipFieldsFragment }
+  transactionalStatus?: Types.Maybe<
+    | {
+        __typename: 'TransactionalStatusAuction'
+        auction: {
+          id: string
+          isCompleted: boolean
+          buyNowPrice?: Types.Maybe<string>
+          startingPrice: string
+          startsAtBlock: number
+          endedAtBlock?: Types.Maybe<number>
+          auctionType:
+            | {
+                __typename: 'AuctionTypeEnglish'
+                duration: number
+                extensionPeriod: number
+                minimalBidStep: string
+                plannedEndAtBlock: number
+              }
+            | { __typename: 'AuctionTypeOpen'; bidLockDuration: number }
+          topBid?: Types.Maybe<BasicBidFieldsFragment>
+          bids: Array<BasicBidFieldsFragment>
+          whitelistedMembers: Array<{ member: BasicMembershipFieldsFragment }>
+        }
+      }
+    | { __typename: 'TransactionalStatusBuyNow'; price: string }
+    | { __typename: 'TransactionalStatusIdle' }
+    | { __typename: 'TransactionalStatusInitiatedOfferToMember' }
+  >
+}
+
+export type FullNftFieldsFragment = {
+  video: { channel: BasicChannelFieldsFragment } & BasicVideoFieldsFragment
+} & BasicNftFieldsFragment
+
+export type BasicBidFieldsFragment = {
   amount: string
-  bidder: { id: string }
-  previousTopBid?: Types.Maybe<{ id: string; bidder: { id: string } }>
-  auction: AuctionRefFieldsFragment
+  createdAt: any
+  isCanceled: boolean
+  createdInBlock: number
+  id: string
+  bidder: BasicMembershipFieldsFragment
+}
+
+export type FullBidFieldsFragment = {
+  auction: {
+    isCompleted: boolean
+    id: string
+    auctionType: { __typename: 'AuctionTypeEnglish' } | { __typename: 'AuctionTypeOpen' }
+    winningMember?: Types.Maybe<{ id: string }>
+  }
+} & BasicBidFieldsFragment
+
+export type CommentReactionsCountByReactionIdFieldsFragment = { count: number; reactionId: number }
+
+export type CommentFieldsFragment = {
+  id: string
+  createdAt: any
+  isEdited: boolean
+  repliesCount: number
+  text: string
+  status: Types.CommentStatus
+  author: BasicMembershipFieldsFragment
+  reactionsCountByReactionId?: Types.Maybe<Array<CommentReactionsCountByReactionIdFieldsFragment>>
+  parentComment?: Types.Maybe<{ id: string }>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment = {
@@ -91,22 +459,22 @@ type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPai
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment = {
   __typename: 'MetaprotocolTransactionResultCommentCreated'
-  commentCreated?: Types.Maybe<{ id: string }>
+  commentCreated?: Types.Maybe<CommentFieldsFragment>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment = {
   __typename: 'MetaprotocolTransactionResultCommentDeleted'
-  commentDeleted?: Types.Maybe<{ id: string }>
+  commentDeleted?: Types.Maybe<CommentFieldsFragment>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment = {
   __typename: 'MetaprotocolTransactionResultCommentEdited'
-  commentEdited?: Types.Maybe<{ id: string }>
+  commentEdited?: Types.Maybe<CommentFieldsFragment>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment = {
   __typename: 'MetaprotocolTransactionResultCommentModerated'
-  commentModerated?: Types.Maybe<{ id: string }>
+  commentModerated?: Types.Maybe<CommentFieldsFragment>
 }
 
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment = {
@@ -127,7 +495,691 @@ export type MetaprotocolTransactionResultFieldsFragment =
   | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment
   | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment
 
-export type EventFieldsFragment = {
+type BasicNftOwnerFields_NftOwnerChannel_Fragment = {
+  __typename: 'NftOwnerChannel'
+  channel: { ownerMember?: Types.Maybe<BasicMembershipFieldsFragment> }
+}
+
+type BasicNftOwnerFields_NftOwnerMember_Fragment = {
+  __typename: 'NftOwnerMember'
+  member: BasicMembershipFieldsFragment
+}
+
+export type BasicNftOwnerFieldsFragment =
+  | BasicNftOwnerFields_NftOwnerChannel_Fragment
+  | BasicNftOwnerFields_NftOwnerMember_Fragment
+
+export type GetMembershipsQueryVariables = Types.Exact<{
+  where: Types.MembershipWhereInput
+  limit?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetMembershipsQuery = { memberships: Array<FullMembershipFieldsFragment> }
+
+export type GetNftQueryVariables = Types.Exact<{
+  id: Types.Scalars['String']
+}>
+
+export type GetNftQuery = { ownedNftById?: Types.Maybe<FullNftFieldsFragment> }
+
+export type GetNftsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.OwnedNftWhereInput>
+  orderBy?: Types.Maybe<Array<Types.OwnedNftOrderByInput> | Types.OwnedNftOrderByInput>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetNftsQuery = { ownedNfts: Array<FullNftFieldsFragment> }
+
+export type GetNftsConnectionQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.OwnedNftWhereInput>
+  orderBy?: Types.Maybe<Array<Types.OwnedNftOrderByInput> | Types.OwnedNftOrderByInput>
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+}>
+
+export type GetNftsConnectionQuery = {
+  ownedNftsConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: FullNftFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetNotificationsQueryVariables = Types.Exact<{
+  channelId: Types.Scalars['String']
+  memberId: Types.Scalars['String']
+  limit: Types.Scalars['Int']
+}>
+
+export type GetNotificationsQuery = {
+  events: Array<{
+    id: string
+    timestamp: any
+    inBlock: number
+    data:
+      | {
+          bid: {
+            bidder: BasicMembershipFieldsFragment
+            previousTopBid?: Types.Maybe<{ bidder: BasicMembershipFieldsFragment }>
+            auction: { nft: { video: { id: string; title?: Types.Maybe<string> } } }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          winningBid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            nft: { video: { id: string; title?: Types.Maybe<string> } }
+          }
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          comment: {
+            id: string
+            video: { id: string; title?: Types.Maybe<string> }
+            parentComment?: Types.Maybe<{ id: string }>
+            author: BasicMembershipFieldsFragment
+          }
+        }
+      | {
+          winningBid: {
+            bidder: BasicMembershipFieldsFragment
+            auction: { nft: { video: { id: string; title?: Types.Maybe<string> } } }
+          }
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          price: string
+          buyer: BasicMembershipFieldsFragment
+          nft: { video: { id: string; title?: Types.Maybe<string> } }
+        }
+      | {
+          winningBid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            auction: { nft: { video: { id: string; title?: Types.Maybe<string> } } }
+          }
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+  }>
+}
+
+export type GetNftHistoryQueryVariables = Types.Exact<{
+  nftId: Types.Scalars['String']
+}>
+
+export type GetNftHistoryQuery = {
+  events: Array<{
+    id: string
+    timestamp: any
+    data:
+      | { member: BasicMembershipFieldsFragment }
+      | { bid: { amount: string; bidder: BasicMembershipFieldsFragment } }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          winningBid: { amount: string; bidder: BasicMembershipFieldsFragment }
+        }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          newPrice: string
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          winningBid: { bidder: BasicMembershipFieldsFragment }
+        }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | { price: string; buyer: BasicMembershipFieldsFragment }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          price: string
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          winningBid: { amount: string; bidder: BasicMembershipFieldsFragment }
+        }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+  }>
+}
+
+export type GetNftActivitiesQueryVariables = Types.Exact<{
+  memberId: Types.Scalars['String']
+  limit: Types.Scalars['Int']
+}>
+
+export type GetNftActivitiesQuery = {
+  nftsBought: { totalCount: number }
+  nftsSold: { totalCount: number }
+  nftsIssued: { totalCount: number }
+  nftsBidded: { totalCount: number }
+  events: Array<{
+    id: string
+    timestamp: any
+    inBlock: number
+    data:
+      | {
+          member: BasicMembershipFieldsFragment
+          bid: {
+            auction: {
+              nft: {
+                video: {
+                  id: string
+                  title?: Types.Maybe<string>
+                  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+                }
+              }
+            }
+          }
+        }
+      | {
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          bid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            previousTopBid?: Types.Maybe<{ bidder: BasicMembershipFieldsFragment }>
+            auction: {
+              nft: {
+                video: {
+                  id: string
+                  title?: Types.Maybe<string>
+                  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+                }
+              }
+            }
+          }
+        }
+      | {
+          auction: {
+            nft: {
+              video: {
+                id: string
+                title?: Types.Maybe<string>
+                thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+              }
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          winningBid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            auction: {
+              nft: {
+                video: {
+                  id: string
+                  title?: Types.Maybe<string>
+                  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+                }
+              }
+            }
+          }
+        }
+      | {
+          nft: {
+            video: {
+              id: string
+              title?: Types.Maybe<string>
+              thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          newPrice: string
+          nft: {
+            video: {
+              id: string
+              title?: Types.Maybe<string>
+              thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          winningBid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            auction: {
+              nft: {
+                video: {
+                  id: string
+                  title?: Types.Maybe<string>
+                  thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+                }
+              }
+            }
+          }
+        }
+      | {
+          auction: {
+            nft: {
+              video: {
+                id: string
+                title?: Types.Maybe<string>
+                thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+              }
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          price: string
+          buyer: BasicMembershipFieldsFragment
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+          nft: {
+            video: {
+              id: string
+              title?: Types.Maybe<string>
+              thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+            }
+          }
+        }
+      | {
+          nft: {
+            video: {
+              id: string
+              title?: Types.Maybe<string>
+              thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          price: string
+          nft: {
+            video: {
+              id: string
+              title?: Types.Maybe<string>
+              thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          winningBid: {
+            amount: string
+            bidder: BasicMembershipFieldsFragment
+            auction: {
+              nft: {
+                video: {
+                  id: string
+                  title?: Types.Maybe<string>
+                  thumbnailPhoto?: Types.Maybe<{ id: string }>
+                }
+              }
+            }
+          }
+          previousNftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+      | {
+          auction: {
+            nft: {
+              video: {
+                id: string
+                title?: Types.Maybe<string>
+                thumbnailPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
+              }
+            }
+          }
+          nftOwner:
+            | BasicNftOwnerFields_NftOwnerChannel_Fragment
+            | BasicNftOwnerFields_NftOwnerMember_Fragment
+        }
+  }>
+}
+
+export type GetQueryNodeStateSubscriptionVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetQueryNodeStateSubscription = {
+  processorState: { lastProcessedBlock: number; chainHead: number }
+}
+
+export type GetDistributionBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetDistributionBucketsWithBagsQuery = {
+  distributionBuckets: Array<{
+    id: string
+    bags: Array<{ bag: { id: string } }>
+    operators: Array<DistributionBucketOperatorFieldFragment>
+  }>
+}
+
+export type GetStorageBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetStorageBucketsWithBagsQuery = {
+  storageBuckets: Array<{
+    id: string
+    operatorMetadata?: Types.Maybe<{ nodeEndpoint?: Types.Maybe<string> }>
+    bags: Array<{ bag: { id: string } }>
+  }>
+}
+
+export type GetBasicDistributionBucketsQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetBasicDistributionBucketsQuery = {
+  distributionBuckets: Array<{ id: string; bucketIndex: number; family: { id: string } }>
+}
+
+export type GetBasicStorageBucketsQueryVariables = Types.Exact<{ [key: string]: never }>
+
+export type GetBasicStorageBucketsQuery = { storageBuckets: Array<{ id: string }> }
+
+export type GetMetaprotocolTransactionStatusEventsQueryVariables = Types.Exact<{
+  transactionHash: Types.Scalars['String']
+}>
+
+export type GetMetaprotocolTransactionStatusEventsQuery = {
+  events: Array<{
+    inExtrinsic?: Types.Maybe<string>
+    inBlock: number
+    data: {
+      result:
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment
+    }
+  }>
+}
+
+export type GetFullVideoQueryVariables = Types.Exact<{
+  id: Types.Scalars['String']
+}>
+
+export type GetFullVideoQuery = { videoById?: Types.Maybe<FullVideoFieldsFragment> }
+
+export type GetBasicVideosConnectionQueryVariables = Types.Exact<{
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  orderBy?: Types.Maybe<Array<Types.VideoOrderByInput> | Types.VideoOrderByInput>
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetBasicVideosConnectionQuery = {
+  videosConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: BasicVideoFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetFullVideosConnectionQueryVariables = Types.Exact<{
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  orderBy?: Types.Maybe<Array<Types.VideoOrderByInput> | Types.VideoOrderByInput>
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetFullVideosConnectionQuery = {
+  videosConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: FullVideoFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetBasicVideosQueryVariables = Types.Exact<{
+  offset?: Types.Maybe<Types.Scalars['Int']>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  where?: Types.Maybe<Types.VideoWhereInput>
+  orderBy?: Types.Maybe<Array<Types.VideoOrderByInput> | Types.VideoOrderByInput>
+}>
+
+export type GetBasicVideosQuery = { videos: Array<BasicVideoFieldsFragment> }
+
+export type GetFullVideosQueryVariables = Types.Exact<{
+  offset?: Types.Maybe<Types.Scalars['Int']>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  where?: Types.Maybe<Types.VideoWhereInput>
+  orderBy?: Types.Maybe<Array<Types.VideoOrderByInput> | Types.VideoOrderByInput>
+}>
+
+export type GetFullVideosQuery = { videos: Array<FullVideoFieldsFragment> }
+
+export type GetMostViewedVideosConnectionQueryVariables = Types.Exact<{
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  periodDays?: Types.Maybe<Types.Scalars['Int']>
+  first?: Types.Maybe<Types.Scalars['Int']>
+  after?: Types.Maybe<Types.Scalars['String']>
+  orderBy?: Types.Maybe<Array<Types.VideoOrderByInput> | Types.VideoOrderByInput>
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetMostViewedVideosConnectionQuery = {
+  mostViewedVideosConnection: {
+    totalCount: number
+    edges: Array<{ cursor: string; node: BasicVideoFieldsFragment }>
+    pageInfo: { hasNextPage: boolean; endCursor: string }
+  }
+}
+
+export type GetTop10VideosThisWeekQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetTop10VideosThisWeekQuery = {
+  mostViewedVideosConnection: { edges: Array<{ node: BasicVideoFieldsFragment }> }
+}
+
+export type GetTop10VideosThisMonthQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.VideoWhereInput>
+}>
+
+export type GetTop10VideosThisMonthQuery = {
+  mostViewedVideosConnection: { edges: Array<{ node: BasicVideoFieldsFragment }> }
+}
+
+export type AddVideoViewMutationVariables = Types.Exact<{
+  videoId: Types.Scalars['String']
+}>
+
+export type AddVideoViewMutation = { addVideoView: { videoId: string; viewsNum: number } }
+
+export type ReportVideoMutationVariables = Types.Exact<{
+  videoId: Types.Scalars['String']
+  rationale: Types.Scalars['String']
+}>
+
+export type ReportVideoMutation = { reportVideo: { id: number; videoId: string } }
+
+type StateQueryActorFields_ContentActorCurator_Fragment = {
+  __typename: 'ContentActorCurator'
+  curator: { id: string }
+}
+
+type StateQueryActorFields_ContentActorLead_Fragment = { __typename: 'ContentActorLead' }
+
+type StateQueryActorFields_ContentActorMember_Fragment = {
+  __typename: 'ContentActorMember'
+  member: { id: string }
+}
+
+export type StateQueryActorFieldsFragment =
+  | StateQueryActorFields_ContentActorCurator_Fragment
+  | StateQueryActorFields_ContentActorLead_Fragment
+  | StateQueryActorFields_ContentActorMember_Fragment
+
+type StateQueryNftOwnerFields_NftOwnerChannel_Fragment = {
+  __typename: 'NftOwnerChannel'
+  channel: { id: string; ownerMember?: Types.Maybe<{ id: string }> }
+}
+
+type StateQueryNftOwnerFields_NftOwnerMember_Fragment = {
+  __typename: 'NftOwnerMember'
+  member: { id: string }
+}
+
+export type StateQueryNftOwnerFieldsFragment =
+  | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+  | StateQueryNftOwnerFields_NftOwnerMember_Fragment
+
+type StateQueryTransactionalStatusFields_TransactionalStatusAuction_Fragment = {
+  __typename: 'TransactionalStatusAuction'
+  auction: { id: string }
+}
+
+type StateQueryTransactionalStatusFields_TransactionalStatusBuyNow_Fragment = {
+  __typename: 'TransactionalStatusBuyNow'
+  price: string
+}
+
+type StateQueryTransactionalStatusFields_TransactionalStatusIdle_Fragment = {
+  __typename: 'TransactionalStatusIdle'
+}
+
+type StateQueryTransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment = {
+  __typename: 'TransactionalStatusInitiatedOfferToMember'
+  offerPrice?: Types.Maybe<string>
+  member: { id: string }
+}
+
+export type StateQueryTransactionalStatusFieldsFragment =
+  | StateQueryTransactionalStatusFields_TransactionalStatusAuction_Fragment
+  | StateQueryTransactionalStatusFields_TransactionalStatusBuyNow_Fragment
+  | StateQueryTransactionalStatusFields_TransactionalStatusIdle_Fragment
+  | StateQueryTransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment
+
+type StateQueryAuctionTypeFields_AuctionTypeEnglish_Fragment = {
+  __typename: 'AuctionTypeEnglish'
+  duration: number
+  extensionPeriod: number
+  plannedEndAtBlock: number
+  minimalBidStep: string
+}
+
+type StateQueryAuctionTypeFields_AuctionTypeOpen_Fragment = {
+  __typename: 'AuctionTypeOpen'
+  bidLockDuration: number
+}
+
+export type StateQueryAuctionTypeFieldsFragment =
+  | StateQueryAuctionTypeFields_AuctionTypeEnglish_Fragment
+  | StateQueryAuctionTypeFields_AuctionTypeOpen_Fragment
+
+export type StateQueryAuctionRefFieldsFragment = { id: string; nft: { id: string } }
+
+export type StateQueryBidRefFieldsFragment = {
+  id: string
+  amount: string
+  bidder: { id: string }
+  previousTopBid?: Types.Maybe<{ id: string; bidder: { id: string } }>
+  auction: StateQueryAuctionRefFieldsFragment
+}
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment =
+  { __typename: 'MetaprotocolTransactionResultChannelPaid' }
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment =
+  {
+    __typename: 'MetaprotocolTransactionResultCommentCreated'
+    commentCreated?: Types.Maybe<{ id: string }>
+  }
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment =
+  {
+    __typename: 'MetaprotocolTransactionResultCommentDeleted'
+    commentDeleted?: Types.Maybe<{ id: string }>
+  }
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment =
+  {
+    __typename: 'MetaprotocolTransactionResultCommentEdited'
+    commentEdited?: Types.Maybe<{ id: string }>
+  }
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment =
+  {
+    __typename: 'MetaprotocolTransactionResultCommentModerated'
+    commentModerated?: Types.Maybe<{ id: string }>
+  }
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment = {
+  __typename: 'MetaprotocolTransactionResultFailed'
+  errorMessage: string
+}
+
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment = {
+  __typename: 'MetaprotocolTransactionResultOK'
+}
+
+export type StateQueryMetaprotocolTransactionResultFieldsFragment =
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment
+
+export type StateQueryEventFieldsFragment = {
   id: string
   inBlock: number
   inExtrinsic?: Types.Maybe<string>
@@ -136,112 +1188,130 @@ export type EventFieldsFragment = {
   data:
     | {
         member: { id: string }
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
-        bid: BidRefFieldsFragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
+        bid: StateQueryBidRefFieldsFragment
       }
     | {
-        bid: BidRefFieldsFragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+        bid: StateQueryBidRefFieldsFragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
-        auction: AuctionRefFieldsFragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
+        auction: StateQueryAuctionRefFieldsFragment
       }
     | {
-        winningBid: BidRefFieldsFragment
+        winningBid: StateQueryBidRefFieldsFragment
         previousNftOwner:
-          | NftOwnerFields_NftOwnerChannel_Fragment
-          | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         nft: { id: string }
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         newPrice: string
         nft: { id: string }
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | { text: string; comment: { id: string } }
     | { newText: string; comment: { id: string } }
     | {
-        winningBid: BidRefFieldsFragment
+        winningBid: StateQueryBidRefFieldsFragment
         previousNftOwner:
-          | NftOwnerFields_NftOwnerChannel_Fragment
-          | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         actor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
         auction: { id: string }
       }
     | {
         result:
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment
-          | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentModerated_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultFailed_Fragment
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragment
       }
     | {
         price: string
         nft: { id: string }
         member: { id: string }
         previousNftOwner:
-          | NftOwnerFields_NftOwnerChannel_Fragment
-          | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
         nft: { id: string }
       }
     | {
         price: string
         nft: { id: string }
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         contentActor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        winningBid: BidRefFieldsFragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        winningBid: StateQueryBidRefFieldsFragment
         previousNftOwner:
-          | NftOwnerFields_NftOwnerChannel_Fragment
-          | NftOwnerFields_NftOwnerMember_Fragment
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
     | {
         actor:
-          | ActorFields_ContentActorCurator_Fragment
-          | ActorFields_ContentActorLead_Fragment
-          | ActorFields_ContentActorMember_Fragment
-        nftOwner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
-        auction: AuctionRefFieldsFragment
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+        nftOwner:
+          | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+          | StateQueryNftOwnerFields_NftOwnerMember_Fragment
+        auction: StateQueryAuctionRefFieldsFragment
       }
 }
 
@@ -265,22 +1335,22 @@ export type StateQueryV2Query = {
     videos: Array<{ id: string }>
     bannedMembers: Array<{ member: { id: string } }>
   }>
-  commentCreatedEvents: Array<EventFieldsFragment>
-  commentTextUpdatedEvents: Array<EventFieldsFragment>
-  openAuctionStartedEvents: Array<EventFieldsFragment>
-  englishAuctionStartedEvents: Array<EventFieldsFragment>
-  nftIssuedEvents: Array<EventFieldsFragment>
-  auctionBidMadeEvents: Array<EventFieldsFragment>
-  auctionBidCanceledEvents: Array<EventFieldsFragment>
-  auctionCanceledEvents: Array<EventFieldsFragment>
-  englishAuctionSettledEvents: Array<EventFieldsFragment>
-  bidMadeCompletingAuctionEvents: Array<EventFieldsFragment>
-  openAuctionBidAcceptedEvents: Array<EventFieldsFragment>
-  nftSellOrderMadeEvents: Array<EventFieldsFragment>
-  nftBoughtEvents: Array<EventFieldsFragment>
-  buyNowCanceledEvents: Array<EventFieldsFragment>
-  buyNowPriceUpdatedEvents: Array<EventFieldsFragment>
-  metaprotocolTransactionStatusEvents: Array<EventFieldsFragment>
+  commentCreatedEvents: Array<StateQueryEventFieldsFragment>
+  commentTextUpdatedEvents: Array<StateQueryEventFieldsFragment>
+  openAuctionStartedEvents: Array<StateQueryEventFieldsFragment>
+  englishAuctionStartedEvents: Array<StateQueryEventFieldsFragment>
+  nftIssuedEvents: Array<StateQueryEventFieldsFragment>
+  auctionBidMadeEvents: Array<StateQueryEventFieldsFragment>
+  auctionBidCanceledEvents: Array<StateQueryEventFieldsFragment>
+  auctionCanceledEvents: Array<StateQueryEventFieldsFragment>
+  englishAuctionSettledEvents: Array<StateQueryEventFieldsFragment>
+  bidMadeCompletingAuctionEvents: Array<StateQueryEventFieldsFragment>
+  openAuctionBidAcceptedEvents: Array<StateQueryEventFieldsFragment>
+  nftSellOrderMadeEvents: Array<StateQueryEventFieldsFragment>
+  nftBoughtEvents: Array<StateQueryEventFieldsFragment>
+  buyNowCanceledEvents: Array<StateQueryEventFieldsFragment>
+  buyNowPriceUpdatedEvents: Array<StateQueryEventFieldsFragment>
+  metaprotocolTransactionStatusEvents: Array<StateQueryEventFieldsFragment>
   memberships: Array<{
     id: string
     createdAt: any
@@ -305,12 +1375,14 @@ export type StateQueryV2Query = {
     lastSaleDate?: Types.Maybe<any>
     video: { id: string; channel: { id: string } }
     auctions: Array<{ id: string }>
-    owner: NftOwnerFields_NftOwnerChannel_Fragment | NftOwnerFields_NftOwnerMember_Fragment
+    owner:
+      | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
+      | StateQueryNftOwnerFields_NftOwnerMember_Fragment
     transactionalStatus?: Types.Maybe<
-      | TransactionalStatusFields_TransactionalStatusAuction_Fragment
-      | TransactionalStatusFields_TransactionalStatusBuyNow_Fragment
-      | TransactionalStatusFields_TransactionalStatusIdle_Fragment
-      | TransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment
+      | StateQueryTransactionalStatusFields_TransactionalStatusAuction_Fragment
+      | StateQueryTransactionalStatusFields_TransactionalStatusBuyNow_Fragment
+      | StateQueryTransactionalStatusFields_TransactionalStatusIdle_Fragment
+      | StateQueryTransactionalStatusFields_TransactionalStatusInitiatedOfferToMember_Fragment
     >
     bids: Array<{ id: string }>
   }>
@@ -325,8 +1397,8 @@ export type StateQueryV2Query = {
     nft: { id: string }
     winningMember?: Types.Maybe<{ id: string }>
     auctionType:
-      | AuctionTypeFields_AuctionTypeEnglish_Fragment
-      | AuctionTypeFields_AuctionTypeOpen_Fragment
+      | StateQueryAuctionTypeFields_AuctionTypeEnglish_Fragment
+      | StateQueryAuctionTypeFields_AuctionTypeOpen_Fragment
     topBid?: Types.Maybe<{ id: string }>
     bids: Array<{ id: string }>
     whitelistedMembers: Array<{ member: { id: string } }>
@@ -528,8 +1600,424 @@ export type StateQueryV2Query = {
   }>
 }
 
-export const TransactionalStatusFields = gql`
-  fragment TransactionalStatusFields on TransactionalStatus {
+export const ExtendedVideoCategoryFields = gql`
+  fragment ExtendedVideoCategoryFields on ExtendedVideoCategory {
+    category {
+      id
+      name
+    }
+    activeVideosCount
+  }
+`
+export const StorageDataObjectFields = gql`
+  fragment StorageDataObjectFields on StorageDataObject {
+    id
+    createdAt
+    size
+    isAccepted
+    ipfsHash
+    storageBag {
+      id
+    }
+    type {
+      __typename
+    }
+  }
+`
+export const BasicChannelFields = gql`
+  fragment BasicChannelFields on Channel {
+    id
+    title
+    description
+    createdAt
+    followsNum
+    rewardAccount
+    channelStateBloatBond
+    avatarPhoto {
+      ...StorageDataObjectFields
+    }
+  }
+  ${StorageDataObjectFields}
+`
+export const BasicMembershipFields = gql`
+  fragment BasicMembershipFields on Membership {
+    id
+    handle
+    metadata {
+      avatar {
+        ... on AvatarObject {
+          avatarObject {
+            ...StorageDataObjectFields
+          }
+        }
+        ... on AvatarUri {
+          avatarUri
+        }
+      }
+      about
+    }
+  }
+  ${StorageDataObjectFields}
+`
+export const FullChannelFields = gql`
+  fragment FullChannelFields on Channel {
+    ...BasicChannelFields
+    videoViewsNum
+    description
+    isPublic
+    isCensored
+    language
+    ownerMember {
+      ...BasicMembershipFields
+    }
+    coverPhoto {
+      ...StorageDataObjectFields
+    }
+  }
+  ${BasicChannelFields}
+  ${BasicMembershipFields}
+  ${StorageDataObjectFields}
+`
+export const ExtendedFullChannelFields = gql`
+  fragment ExtendedFullChannelFields on ExtendedChannel {
+    channel {
+      ...FullChannelFields
+    }
+    activeVideosCount
+  }
+  ${FullChannelFields}
+`
+export const ExtendedBasicChannelFields = gql`
+  fragment ExtendedBasicChannelFields on ExtendedChannel {
+    channel {
+      ...BasicChannelFields
+    }
+    activeVideosCount
+  }
+  ${BasicChannelFields}
+`
+export const FullMembershipFields = gql`
+  fragment FullMembershipFields on Membership {
+    ...BasicMembershipFields
+    controllerAccount
+    createdAt
+    channels {
+      ...BasicChannelFields
+      description
+      coverPhoto {
+        ...StorageDataObjectFields
+      }
+    }
+  }
+  ${BasicMembershipFields}
+  ${BasicChannelFields}
+  ${StorageDataObjectFields}
+`
+export const DistributionBucketOperatorField = gql`
+  fragment DistributionBucketOperatorField on DistributionBucketOperator {
+    id
+    metadata {
+      nodeEndpoint
+      nodeLocation {
+        coordinates {
+          latitude
+          longitude
+        }
+      }
+    }
+    status
+  }
+`
+export const VideoMediaMetadataFields = gql`
+  fragment VideoMediaMetadataFields on VideoMediaMetadata {
+    id
+    pixelHeight
+    pixelWidth
+  }
+`
+export const LicenseFields = gql`
+  fragment LicenseFields on License {
+    id
+    code
+    attribution
+    customText
+  }
+`
+export const BasicBidFields = gql`
+  fragment BasicBidFields on Bid {
+    bidder {
+      ...BasicMembershipFields
+    }
+    amount
+    createdAt
+    isCanceled
+    createdInBlock
+    id
+  }
+  ${BasicMembershipFields}
+`
+export const BasicNftFields = gql`
+  fragment BasicNftFields on OwnedNft {
+    id
+    createdAt
+    creatorRoyalty
+    lastSaleDate
+    lastSalePrice
+    owner {
+      ... on NftOwnerChannel {
+        channel {
+          ...BasicChannelFields
+        }
+      }
+      ... on NftOwnerMember {
+        member {
+          ...BasicMembershipFields
+        }
+      }
+    }
+    transactionalStatus {
+      __typename
+      ... on TransactionalStatusBuyNow {
+        price
+      }
+      ... on TransactionalStatusAuction {
+        auction {
+          id
+          auctionType {
+            __typename
+            ... on AuctionTypeEnglish {
+              duration
+              extensionPeriod
+              minimalBidStep
+              plannedEndAtBlock
+            }
+            ... on AuctionTypeOpen {
+              bidLockDuration
+            }
+          }
+          isCompleted
+          buyNowPrice
+          startingPrice
+          startsAtBlock
+          endedAtBlock
+          topBid {
+            ...BasicBidFields
+          }
+          bids {
+            ...BasicBidFields
+          }
+          whitelistedMembers {
+            member {
+              ...BasicMembershipFields
+            }
+          }
+        }
+      }
+    }
+  }
+  ${BasicChannelFields}
+  ${BasicMembershipFields}
+  ${BasicBidFields}
+`
+export const SubtitlesFields = gql`
+  fragment SubtitlesFields on VideoSubtitle {
+    id
+    language
+    asset {
+      ...StorageDataObjectFields
+    }
+    mimeType
+    type
+  }
+  ${StorageDataObjectFields}
+`
+export const FullVideoFields = gql`
+  fragment FullVideoFields on Video {
+    id
+    title
+    description
+    reactionsCount
+    reactions {
+      id
+      createdAt
+      reaction
+      member {
+        id
+      }
+    }
+    category {
+      id
+      name
+    }
+    viewsNum
+    duration
+    createdAt
+    isPublic
+    isExplicit
+    hasMarketing
+    isCensored
+    isCommentSectionEnabled
+    commentsCount
+    language
+    publishedBeforeJoystream
+    mediaMetadata {
+      ...VideoMediaMetadataFields
+    }
+    media {
+      ...StorageDataObjectFields
+    }
+    thumbnailPhoto {
+      ...StorageDataObjectFields
+    }
+    channel {
+      ...FullChannelFields
+    }
+    license {
+      ...LicenseFields
+    }
+    nft {
+      ...BasicNftFields
+    }
+    subtitles {
+      ...SubtitlesFields
+    }
+  }
+  ${VideoMediaMetadataFields}
+  ${StorageDataObjectFields}
+  ${FullChannelFields}
+  ${LicenseFields}
+  ${BasicNftFields}
+  ${SubtitlesFields}
+`
+export const BasicVideoFields = gql`
+  fragment BasicVideoFields on Video {
+    id
+    title
+    viewsNum
+    createdAt
+    duration
+    reactionsCount
+    commentsCount
+    channel {
+      ...BasicChannelFields
+    }
+    thumbnailPhoto {
+      ...StorageDataObjectFields
+    }
+    nft {
+      ...BasicNftFields
+    }
+  }
+  ${BasicChannelFields}
+  ${StorageDataObjectFields}
+  ${BasicNftFields}
+`
+export const FullNftFields = gql`
+  fragment FullNftFields on OwnedNft {
+    ...BasicNftFields
+    video {
+      ...BasicVideoFields
+      channel {
+        ...BasicChannelFields
+      }
+    }
+  }
+  ${BasicNftFields}
+  ${BasicVideoFields}
+  ${BasicChannelFields}
+`
+export const FullBidFields = gql`
+  fragment FullBidFields on Bid {
+    ...BasicBidFields
+    auction {
+      auctionType {
+        __typename
+      }
+      isCompleted
+      winningMember {
+        id
+      }
+      id
+    }
+  }
+  ${BasicBidFields}
+`
+export const CommentReactionsCountByReactionIdFields = gql`
+  fragment CommentReactionsCountByReactionIdFields on CommentReactionsCountByReactionId {
+    count
+    reactionId
+  }
+`
+export const CommentFields = gql`
+  fragment CommentFields on Comment {
+    id
+    author {
+      ...BasicMembershipFields
+    }
+    createdAt
+    isEdited
+    reactionsCountByReactionId {
+      ...CommentReactionsCountByReactionIdFields
+    }
+    parentComment {
+      id
+    }
+    repliesCount
+    text
+    status
+  }
+  ${BasicMembershipFields}
+  ${CommentReactionsCountByReactionIdFields}
+`
+export const MetaprotocolTransactionResultFields = gql`
+  fragment MetaprotocolTransactionResultFields on MetaprotocolTransactionResult {
+    __typename
+    ... on MetaprotocolTransactionResultCommentCreated {
+      commentCreated {
+        ...CommentFields
+      }
+    }
+    ... on MetaprotocolTransactionResultCommentEdited {
+      commentEdited {
+        ...CommentFields
+      }
+    }
+    ... on MetaprotocolTransactionResultCommentDeleted {
+      commentDeleted {
+        ...CommentFields
+      }
+    }
+    ... on MetaprotocolTransactionResultCommentModerated {
+      commentModerated {
+        ...CommentFields
+      }
+    }
+    ... on MetaprotocolTransactionResultFailed {
+      errorMessage
+    }
+  }
+  ${CommentFields}
+`
+export const BasicNftOwnerFields = gql`
+  fragment BasicNftOwnerFields on NftOwner {
+    __typename
+    ... on NftOwnerMember {
+      member {
+        ...BasicMembershipFields
+      }
+    }
+    ... on NftOwnerChannel {
+      channel {
+        ownerMember {
+          ...BasicMembershipFields
+        }
+      }
+    }
+  }
+  ${BasicMembershipFields}
+`
+export const StateQueryTransactionalStatusFields = gql`
+  fragment StateQueryTransactionalStatusFields on TransactionalStatus {
     __typename
     ... on TransactionalStatusInitiatedOfferToMember {
       member {
@@ -547,8 +2035,8 @@ export const TransactionalStatusFields = gql`
     }
   }
 `
-export const AuctionTypeFields = gql`
-  fragment AuctionTypeFields on AuctionType {
+export const StateQueryAuctionTypeFields = gql`
+  fragment StateQueryAuctionTypeFields on AuctionType {
     __typename
     ... on AuctionTypeEnglish {
       duration
@@ -561,8 +2049,8 @@ export const AuctionTypeFields = gql`
     }
   }
 `
-export const ActorFields = gql`
-  fragment ActorFields on ContentActor {
+export const StateQueryActorFields = gql`
+  fragment StateQueryActorFields on ContentActor {
     __typename
     ... on ContentActorCurator {
       curator {
@@ -576,8 +2064,8 @@ export const ActorFields = gql`
     }
   }
 `
-export const NftOwnerFields = gql`
-  fragment NftOwnerFields on NftOwner {
+export const StateQueryNftOwnerFields = gql`
+  fragment StateQueryNftOwnerFields on NftOwner {
     __typename
     ... on NftOwnerMember {
       member {
@@ -594,16 +2082,16 @@ export const NftOwnerFields = gql`
     }
   }
 `
-export const AuctionRefFields = gql`
-  fragment AuctionRefFields on Auction {
+export const StateQueryAuctionRefFields = gql`
+  fragment StateQueryAuctionRefFields on Auction {
     id
     nft {
       id
     }
   }
 `
-export const BidRefFields = gql`
-  fragment BidRefFields on Bid {
+export const StateQueryBidRefFields = gql`
+  fragment StateQueryBidRefFields on Bid {
     id
     amount
     bidder {
@@ -616,13 +2104,13 @@ export const BidRefFields = gql`
       }
     }
     auction {
-      ...AuctionRefFields
+      ...StateQueryAuctionRefFields
     }
   }
-  ${AuctionRefFields}
+  ${StateQueryAuctionRefFields}
 `
-export const MetaprotocolTransactionResultFields = gql`
-  fragment MetaprotocolTransactionResultFields on MetaprotocolTransactionResult {
+export const StateQueryMetaprotocolTransactionResultFields = gql`
+  fragment StateQueryMetaprotocolTransactionResultFields on MetaprotocolTransactionResult {
     __typename
     ... on MetaprotocolTransactionResultFailed {
       errorMessage
@@ -649,8 +2137,8 @@ export const MetaprotocolTransactionResultFields = gql`
     }
   }
 `
-export const EventFields = gql`
-  fragment EventFields on Event {
+export const StateQueryEventFields = gql`
+  fragment StateQueryEventFields on Event {
     id
     inBlock
     inExtrinsic
@@ -671,21 +2159,21 @@ export const EventFields = gql`
       }
       ... on OpenAuctionStartedEventData {
         actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         auction {
-          ...AuctionRefFields
+          ...StateQueryAuctionRefFields
         }
       }
       ... on EnglishAuctionStartedEventData {
         actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         auction {
           id
@@ -693,10 +2181,10 @@ export const EventFields = gql`
       }
       ... on NftIssuedEventData {
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         nft {
           id
@@ -704,10 +2192,10 @@ export const EventFields = gql`
       }
       ... on AuctionBidMadeEventData {
         bid {
-          ...BidRefFields
+          ...StateQueryBidRefFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
       }
       ... on AuctionBidCanceledEventData {
@@ -715,48 +2203,48 @@ export const EventFields = gql`
           id
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         bid {
-          ...BidRefFields
+          ...StateQueryBidRefFields
         }
       }
       ... on AuctionCanceledEventData {
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         auction {
-          ...AuctionRefFields
+          ...StateQueryAuctionRefFields
         }
       }
       ... on EnglishAuctionSettledEventData {
         winningBid {
-          ...BidRefFields
+          ...StateQueryBidRefFields
         }
         previousNftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
       }
       ... on BidMadeCompletingAuctionEventData {
         winningBid {
-          ...BidRefFields
+          ...StateQueryBidRefFields
         }
         previousNftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
       }
       ... on OpenAuctionBidAcceptedEventData {
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         winningBid {
-          ...BidRefFields
+          ...StateQueryBidRefFields
         }
         previousNftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
       }
       ... on NftSellOrderMadeEventData {
@@ -764,10 +2252,10 @@ export const EventFields = gql`
           id
         }
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         price
       }
@@ -779,7 +2267,7 @@ export const EventFields = gql`
           id
         }
         previousNftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         price
       }
@@ -788,10 +2276,10 @@ export const EventFields = gql`
           id
         }
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
       }
       ... on BuyNowPriceUpdatedEventData {
@@ -799,25 +2287,1397 @@ export const EventFields = gql`
           id
         }
         contentActor: actor {
-          ...ActorFields
+          ...StateQueryActorFields
         }
         nftOwner {
-          ...NftOwnerFields
+          ...StateQueryNftOwnerFields
         }
         newPrice
       }
       ... on MetaprotocolTransactionStatusEventData {
         result {
-          ...MetaprotocolTransactionResultFields
+          ...StateQueryMetaprotocolTransactionResultFields
         }
       }
     }
   }
-  ${ActorFields}
-  ${NftOwnerFields}
-  ${AuctionRefFields}
-  ${BidRefFields}
+  ${StateQueryActorFields}
+  ${StateQueryNftOwnerFields}
+  ${StateQueryAuctionRefFields}
+  ${StateQueryBidRefFields}
+  ${StateQueryMetaprotocolTransactionResultFields}
+`
+export const GetKillSwitch = gql`
+  query GetKillSwitch {
+    getKillSwitch {
+      isKilled
+    }
+  }
+`
+export const SetKillSwitch = gql`
+  mutation SetKillSwitch($isKilled: Boolean!) {
+    setKillSwitch(isKilled: $isKilled) {
+      isKilled
+    }
+  }
+`
+export const GetBids = gql`
+  query GetBids($where: BidWhereInput!, $limit: Int) {
+    bids(where: $where, limit: $limit, orderBy: [createdAt_ASC]) {
+      ...FullBidFields
+    }
+  }
+  ${FullBidFields}
+`
+export const GetExtendedVideoCategories = gql`
+  query GetExtendedVideoCategories {
+    extendedVideoCategories {
+      ...ExtendedVideoCategoryFields
+    }
+  }
+  ${ExtendedVideoCategoryFields}
+`
+export const GetFullChannel = gql`
+  query GetFullChannel($id: String!) {
+    channelById(id: $id) {
+      ...FullChannelFields
+    }
+  }
+  ${FullChannelFields}
+`
+export const GetVideoCount = gql`
+  query GetVideoCount($where: VideoWhereInput) {
+    videosConnection(first: 0, where: $where, orderBy: id_ASC) {
+      totalCount
+    }
+  }
+`
+export const GetExtendedBasicChannels = gql`
+  query GetExtendedBasicChannels(
+    $where: ExtendedChannelWhereInput
+    $limit: Int = 50
+    $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+  ) {
+    extendedChannels(where: $where, orderBy: $orderBy, limit: $limit) {
+      ...ExtendedBasicChannelFields
+    }
+  }
+  ${ExtendedBasicChannelFields}
+`
+export const GetExtendedFullChannels = gql`
+  query GetExtendedFullChannels(
+    $where: ExtendedChannelWhereInput
+    $limit: Int = 50
+    $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+  ) {
+    extendedChannels(where: $where, orderBy: $orderBy, limit: $limit) {
+      ...ExtendedFullChannelFields
+    }
+  }
+  ${ExtendedFullChannelFields}
+`
+export const GetBasicChannelsConnection = gql`
+  query GetBasicChannelsConnection(
+    $first: Int
+    $after: String
+    $where: ChannelWhereInput
+    $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+  ) {
+    channelsConnection(first: $first, after: $after, where: $where, orderBy: $orderBy) {
+      edges {
+        cursor
+        node {
+          ...BasicChannelFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${BasicChannelFields}
+`
+export const FollowChannel = gql`
+  mutation FollowChannel($channelId: String!) {
+    followChannel(channelId: $channelId) {
+      channelId
+      follows
+      cancelToken
+    }
+  }
+`
+export const UnfollowChannel = gql`
+  mutation UnfollowChannel($channelId: String!, $token: String!) {
+    unfollowChannel(channelId: $channelId, token: $token) {
+      channelId
+      follows
+    }
+  }
+`
+export const GetTop10Channels = gql`
+  query GetTop10Channels($where: ExtendedChannelWhereInput) {
+    extendedChannels(where: $where, orderBy: followsNum_DESC, limit: 10) {
+      channel {
+        ...BasicChannelFields
+      }
+    }
+  }
+  ${BasicChannelFields}
+`
+export const GetPromisingChannels = gql`
+  query GetPromisingChannels($where: ExtendedChannelWhereInput) {
+    mostRecentChannels(
+      where: $where
+      orderBy: videoViewsNum_DESC
+      mostRecentLimit: 100
+      resultsLimit: 15
+    ) {
+      channel {
+        ...BasicChannelFields
+      }
+    }
+  }
+  ${BasicChannelFields}
+`
+export const GetDiscoverChannels = gql`
+  query GetDiscoverChannels($where: ExtendedChannelWhereInput) {
+    mostRecentChannels(
+      where: $where
+      orderBy: followsNum_DESC
+      mostRecentLimit: 100
+      resultsLimit: 15
+    ) {
+      channel {
+        ...BasicChannelFields
+      }
+    }
+  }
+  ${BasicChannelFields}
+`
+export const GetPopularChannels = gql`
+  query GetPopularChannels($where: ExtendedChannelWhereInput) {
+    extendedChannels(where: $where, orderBy: videoViewsNum_DESC, limit: 15) {
+      channel {
+        ...BasicChannelFields
+      }
+    }
+  }
+  ${BasicChannelFields}
+`
+export const GetChannelNftCollectors = gql`
+  query GetChannelNftCollectors(
+    $channelId: String!
+    $orderBy: ChannelNftCollectorsOrderByInput = amount_DESC
+  ) {
+    channelNftCollectors(channelId: $channelId, orderBy: $orderBy) {
+      member {
+        ...BasicMembershipFields
+      }
+      amount
+    }
+  }
+  ${BasicMembershipFields}
+`
+export const ReportChannel = gql`
+  mutation ReportChannel($channelId: String!, $rationale: String!) {
+    reportChannel(channelId: $channelId, rationale: $rationale) {
+      id
+      channelId
+    }
+  }
+`
+export const GetComment = gql`
+  query GetComment($commentId: String!) {
+    commentById(id: $commentId) {
+      ...CommentFields
+    }
+  }
+  ${CommentFields}
+`
+export const GetCommentRepliesConnection = gql`
+  query GetCommentRepliesConnection(
+    $first: Int
+    $after: String
+    $parentCommentId: String!
+    $orderBy: [CommentOrderByInput!] = [createdAt_ASC]
+  ) {
+    commentsConnection(
+      first: $first
+      after: $after
+      where: { parentComment: { id_eq: $parentCommentId }, status_eq: VISIBLE }
+      orderBy: $orderBy
+    ) {
+      edges {
+        cursor
+        node {
+          ...CommentFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${CommentFields}
+`
+export const GetUserCommentsAndVideoCommentsConnection = gql`
+  query GetUserCommentsAndVideoCommentsConnection(
+    $first: Int
+    $after: String
+    $memberId: String
+    $videoId: String
+    $orderBy: [CommentOrderByInput!] = [createdAt_DESC]
+  ) {
+    userComments: comments(
+      where: {
+        AND: [
+          { parentComment: { id_isNull: true } }
+          { video: { id_eq: $videoId } }
+          { author: { id_eq: $memberId } }
+          { OR: [{ status_eq: VISIBLE }, { repliesCount_gt: 0 }] }
+        ]
+      }
+      orderBy: [createdAt_DESC]
+    ) {
+      ...CommentFields
+    }
+    videoCommentsConnection: commentsConnection(
+      first: $first
+      after: $after
+      where: {
+        AND: [
+          { video: { id_eq: $videoId } }
+          { parentComment: { id_isNull: true } }
+          { OR: [{ status_eq: VISIBLE }, { repliesCount_gt: 0 }] }
+        ]
+      }
+      orderBy: $orderBy
+    ) {
+      edges {
+        cursor
+        node {
+          ...CommentFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${CommentFields}
+`
+export const GetUserCommentsReactions = gql`
+  query GetUserCommentsReactions($memberId: String!, $videoId: String!) {
+    commentReactions(
+      where: { member: { id_eq: $memberId }, video: { id_eq: $videoId } }
+      limit: 1000
+    ) {
+      reactionId
+      comment {
+        id
+      }
+    }
+  }
+`
+export const GetCommentEdits = gql`
+  query GetCommentEdits($commentId: String!) {
+    events(
+      where: {
+        data: {
+          isTypeOf_in: ["CommentCreatedEventData", "CommentTextUpdatedEventData"]
+          comment: { id_eq: $commentId }
+        }
+      }
+    ) {
+      id
+      timestamp
+      data {
+        ... on CommentCreatedEventData {
+          text
+        }
+        ... on CommentTextUpdatedEventData {
+          newText
+        }
+      }
+    }
+  }
+`
+export const GetDataObjectAvailability = gql`
+  query GetDataObjectAvailability($id_eq: String, $id_in: [String!], $limit: Int) {
+    storageDataObjects(where: { id_eq: $id_eq, id_in: $id_in }, limit: $limit) {
+      id
+      isAccepted
+    }
+  }
+`
+export const GetVideoHero = gql`
+  query GetVideoHero {
+    videoHero {
+      heroTitle
+      heroVideoCutUrl
+      heroPosterUrl
+      video {
+        ...BasicVideoFields
+      }
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetAllCategoriesFeaturedVideos = gql`
+  query GetAllCategoriesFeaturedVideos {
+    videoCategories(where: { featuredVideos_some: { video_isNull: false } }) {
+      id
+      name
+      featuredVideos(limit: 3) {
+        videoCutUrl
+        video {
+          ...BasicVideoFields
+        }
+      }
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetCategoriesFeaturedVideos = gql`
+  query GetCategoriesFeaturedVideos($categoryId: String!) {
+    videoCategoryById(id: $categoryId) {
+      featuredVideos {
+        videoCutUrl
+        video {
+          ...FullVideoFields
+        }
+      }
+    }
+  }
+  ${FullVideoFields}
+`
+export const GetMemberships = gql`
+  query GetMemberships($where: MembershipWhereInput!, $limit: Int) {
+    memberships(where: $where, orderBy: [createdAt_ASC], limit: $limit) {
+      ...FullMembershipFields
+    }
+  }
+  ${FullMembershipFields}
+`
+export const GetNft = gql`
+  query GetNft($id: String!) {
+    ownedNftById(id: $id) {
+      ...FullNftFields
+    }
+  }
+  ${FullNftFields}
+`
+export const GetNfts = gql`
+  query GetNfts(
+    $where: OwnedNftWhereInput
+    $orderBy: [OwnedNftOrderByInput!] = [createdAt_DESC]
+    $limit: Int
+  ) {
+    ownedNfts(where: $where, orderBy: $orderBy, limit: $limit) {
+      ...FullNftFields
+    }
+  }
+  ${FullNftFields}
+`
+export const GetNftsConnection = gql`
+  query GetNftsConnection(
+    $where: OwnedNftWhereInput
+    $orderBy: [OwnedNftOrderByInput!] = [createdAt_DESC]
+    $first: Int
+    $after: String
+  ) {
+    ownedNftsConnection(where: $where, orderBy: $orderBy, first: $first, after: $after) {
+      edges {
+        cursor
+        node {
+          ...FullNftFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${FullNftFields}
+`
+export const GetNotifications = gql`
+  query GetNotifications($channelId: String!, $memberId: String!, $limit: Int!) {
+    events(
+      limit: $limit
+      orderBy: timestamp_DESC
+      where: {
+        OR: [
+          {
+            data: {
+              isTypeOf_eq: "AuctionBidMadeEventData"
+              nftOwner: { member: { id_eq: $memberId } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_eq: "AuctionBidMadeEventData"
+              nftOwner: { channel: { ownerMember: { id_eq: $memberId } } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_eq: "AuctionBidMadeEventData"
+              bid: { previousTopBid: { bidder: { id_eq: $memberId } } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "NftBoughtEventData"
+              ]
+              previousNftOwner: { member: { id_eq: $memberId } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "NftBoughtEventData"
+              ]
+              previousNftOwner: { channel: { ownerMember: { id_eq: $memberId } } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+              ]
+              winningBid: { auction: { bids_some: { bidder: { id_eq: $memberId } } } }
+            }
+          }
+          {
+            AND: [
+              {
+                data: {
+                  isTypeOf_eq: "CommentCreatedEventData"
+                  comment: { author: { id_not_eq: $memberId } }
+                }
+              }
+              {
+                OR: [
+                  {
+                    data: {
+                      comment: {
+                        video: { channel: { id_eq: $channelId } }
+                        parentComment_isNull: true
+                      }
+                    }
+                  }
+                  { data: { comment: { parentComment: { author: { id_eq: $memberId } } } } }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ) {
+      id
+      timestamp
+      inBlock
+      data {
+        ... on AuctionBidMadeEventData {
+          bid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            previousTopBid {
+              bidder {
+                ...BasicMembershipFields
+              }
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                }
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on NftBoughtEventData {
+          buyer {
+            ...BasicMembershipFields
+          }
+          price
+          nft {
+            video {
+              id
+              title
+            }
+          }
+        }
+        ... on BidMadeCompletingAuctionEventData {
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            amount
+            nft {
+              video {
+                id
+                title
+              }
+            }
+          }
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on OpenAuctionBidAcceptedEventData {
+          winningBid {
+            amount
+            bidder {
+              ...BasicMembershipFields
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                }
+              }
+            }
+          }
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on EnglishAuctionSettledEventData {
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                }
+              }
+            }
+          }
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on CommentCreatedEventData {
+          comment {
+            id
+            video {
+              id
+              title
+            }
+            parentComment {
+              id
+            }
+            author {
+              ...BasicMembershipFields
+            }
+          }
+        }
+      }
+    }
+  }
+  ${BasicMembershipFields}
+  ${BasicNftOwnerFields}
+`
+export const GetNftHistory = gql`
+  query GetNftHistory($nftId: String!) {
+    events(
+      orderBy: timestamp_DESC
+      where: {
+        OR: [
+          {
+            data: {
+              isTypeOf_in: [
+                "OpenAuctionStartedEventData"
+                "EnglishAuctionStartedEventData"
+                "AuctionCanceledEventData"
+              ]
+              auction: { nft: { id_eq: $nftId } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "NftIssuedEventData"
+                "NftSellOrderMadeEventData"
+                "NftBoughtEventData"
+                "BuyNowCanceledEventData"
+                "BuyNowPriceUpdatedEventData"
+              ]
+              nft: { id_eq: $nftId }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: ["AuctionBidMadeEventData", "AuctionBidCanceledEventData"]
+              bid: { auction: { nft: { id_eq: $nftId } } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+              ]
+              winningBid: { auction: { nft: { id_eq: $nftId } } }
+            }
+          }
+        ]
+      }
+    ) {
+      id
+      timestamp
+      data {
+        ... on NftIssuedEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on OpenAuctionStartedEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on EnglishAuctionStartedEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on NftSellOrderMadeEventData {
+          price
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on AuctionBidMadeEventData {
+          bid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            amount
+          }
+        }
+        ... on BidMadeCompletingAuctionEventData {
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            amount
+          }
+        }
+        ... on NftBoughtEventData {
+          buyer {
+            ...BasicMembershipFields
+          }
+          price
+        }
+        ... on EnglishAuctionSettledEventData {
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+          }
+        }
+        ... on OpenAuctionBidAcceptedEventData {
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          winningBid {
+            amount
+            bidder {
+              ...BasicMembershipFields
+            }
+          }
+        }
+        ... on AuctionBidCanceledEventData {
+          member {
+            ...BasicMembershipFields
+          }
+        }
+        ... on AuctionCanceledEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on BuyNowCanceledEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on BuyNowPriceUpdatedEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+          newPrice
+        }
+      }
+    }
+  }
+  ${BasicNftOwnerFields}
+  ${BasicMembershipFields}
+`
+export const GetNftActivities = gql`
+  query GetNftActivities($memberId: String!, $limit: Int!) {
+    nftsBought: eventsConnection(
+      where: {
+        OR: [
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+              ]
+              winningBid: { bidder: { id_eq: $memberId } }
+            }
+          }
+          { data: { isTypeOf_eq: "NftBoughtEventData", buyer: { id_eq: $memberId } } }
+        ]
+      }
+      orderBy: timestamp_DESC
+    ) {
+      totalCount
+    }
+    nftsSold: eventsConnection(
+      where: {
+        AND: [
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+                "NftBoughtEventData"
+              ]
+            }
+          }
+          {
+            OR: [
+              { data: { previousNftOwner: { member: { id_eq: $memberId } } } }
+              { data: { previousNftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+            ]
+          }
+        ]
+      }
+      orderBy: timestamp_DESC
+    ) {
+      totalCount
+    }
+    nftsIssued: eventsConnection(
+      where: {
+        AND: [
+          { data: { isTypeOf_eq: "NftIssuedEventData" } }
+          {
+            OR: [
+              { data: { nftOwner: { member: { id_eq: $memberId } } } }
+              { data: { nftOwner: { channel: { ownerMember: { id_eq: $memberId } } } } }
+            ]
+          }
+        ]
+      }
+      orderBy: timestamp_DESC
+    ) {
+      totalCount
+    }
+    nftsBidded: eventsConnection(
+      where: {
+        data: { isTypeOf_eq: "AuctionBidMadeEventData", bid: { bidder: { id_eq: $memberId } } }
+      }
+      orderBy: timestamp_DESC
+    ) {
+      totalCount
+    }
+    events(
+      limit: $limit
+      orderBy: timestamp_DESC
+      where: {
+        OR: [
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+              ]
+              winningBid: { bidder: { id_eq: $memberId } }
+            }
+          }
+          { data: { isTypeOf_eq: "NftBoughtEventData", buyer: { id_eq: $memberId } } }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+                "NftBoughtEventData"
+              ]
+              previousNftOwner: { member: { id_eq: $memberId } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "EnglishAuctionSettledEventData"
+                "BidMadeCompletingAuctionEventData"
+                "OpenAuctionBidAcceptedEventData"
+                "NftBoughtEventData"
+              ]
+              previousNftOwner: { channel: { ownerMember: { id_eq: $memberId } } }
+            }
+          }
+          {
+            data: { isTypeOf_eq: "AuctionBidMadeEventData", bid: { bidder: { id_eq: $memberId } } }
+          }
+          {
+            data: {
+              isTypeOf_eq: "AuctionBidMadeEventData"
+              bid: { previousTopBid: { bidder: { id_eq: $memberId } } }
+            }
+          }
+          { data: { isTypeOf_eq: "AuctionBidCanceledEventData", member: { id_eq: $memberId } } }
+          {
+            data: {
+              isTypeOf_in: [
+                "NftIssuedEventData"
+                "AuctionCanceledEventData"
+                "BuyNowPriceUpdatedEventData"
+                "BuyNowCanceledEventData"
+                "NftSellOrderMadeEventData"
+                "OpenAuctionStartedEventData"
+                "EnglishAuctionStartedEventData"
+              ]
+              nftOwner: { member: { id_eq: $memberId } }
+            }
+          }
+          {
+            data: {
+              isTypeOf_in: [
+                "NftIssuedEventData"
+                "AuctionCanceledEventData"
+                "BuyNowPriceUpdatedEventData"
+                "BuyNowCanceledEventData"
+                "NftSellOrderMadeEventData"
+                "OpenAuctionStartedEventData"
+                "EnglishAuctionStartedEventData"
+              ]
+              nftOwner: { channel: { ownerMember: { id_eq: $memberId } } }
+            }
+          }
+        ]
+      }
+    ) {
+      id
+      timestamp
+      inBlock
+      data {
+        ... on AuctionBidMadeEventData {
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+          bid {
+            amount
+            bidder {
+              ...BasicMembershipFields
+            }
+            previousTopBid {
+              bidder {
+                ...BasicMembershipFields
+              }
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                  thumbnailPhoto {
+                    ...StorageDataObjectFields
+                  }
+                }
+              }
+            }
+          }
+        }
+        ... on EnglishAuctionSettledEventData {
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            amount
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                  thumbnailPhoto {
+                    ...StorageDataObjectFields
+                  }
+                }
+              }
+            }
+          }
+        }
+        ... on NftBoughtEventData {
+          buyer {
+            ...BasicMembershipFields
+          }
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          nft {
+            video {
+              id
+              title
+              thumbnailPhoto {
+                ...StorageDataObjectFields
+              }
+            }
+          }
+          price
+        }
+        ... on BidMadeCompletingAuctionEventData {
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+          winningBid {
+            bidder {
+              ...BasicMembershipFields
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                  thumbnailPhoto {
+                    ...StorageDataObjectFields
+                  }
+                }
+              }
+            }
+            amount
+          }
+        }
+        ... on OpenAuctionBidAcceptedEventData {
+          winningBid {
+            amount
+            bidder {
+              ...BasicMembershipFields
+            }
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                  thumbnailPhoto {
+                    id
+                  }
+                }
+              }
+            }
+          }
+          previousNftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on EnglishAuctionStartedEventData {
+          auction {
+            nft {
+              video {
+                id
+                title
+                thumbnailPhoto {
+                  ...StorageDataObjectFields
+                }
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on OpenAuctionStartedEventData {
+          auction {
+            nft {
+              video {
+                id
+                title
+                thumbnailPhoto {
+                  ...StorageDataObjectFields
+                }
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on NftSellOrderMadeEventData {
+          price
+          nft {
+            video {
+              id
+              title
+              thumbnailPhoto {
+                ...StorageDataObjectFields
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on AuctionBidCanceledEventData {
+          member {
+            ...BasicMembershipFields
+          }
+          bid {
+            auction {
+              nft {
+                video {
+                  id
+                  title
+                  thumbnailPhoto {
+                    ...StorageDataObjectFields
+                  }
+                }
+              }
+            }
+          }
+        }
+        ... on BuyNowCanceledEventData {
+          nft {
+            video {
+              id
+              title
+              thumbnailPhoto {
+                ...StorageDataObjectFields
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on AuctionCanceledEventData {
+          auction {
+            nft {
+              video {
+                id
+                title
+                thumbnailPhoto {
+                  ...StorageDataObjectFields
+                }
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on BuyNowPriceUpdatedEventData {
+          newPrice
+          nft {
+            video {
+              id
+              title
+              thumbnailPhoto {
+                ...StorageDataObjectFields
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+        ... on NftIssuedEventData {
+          nft {
+            video {
+              id
+              title
+              thumbnailPhoto {
+                ...StorageDataObjectFields
+              }
+            }
+          }
+          nftOwner {
+            ...BasicNftOwnerFields
+          }
+        }
+      }
+    }
+  }
+  ${BasicNftOwnerFields}
+  ${BasicMembershipFields}
+  ${StorageDataObjectFields}
+`
+export const GetQueryNodeState = gql`
+  subscription GetQueryNodeState {
+    processorState {
+      lastProcessedBlock
+      chainHead
+    }
+  }
+`
+export const GetDistributionBucketsWithBags = gql`
+  query GetDistributionBucketsWithBags {
+    distributionBuckets(limit: 500, where: { distributing_eq: true }) {
+      id
+      bags {
+        bag {
+          id
+        }
+      }
+      operators {
+        ...DistributionBucketOperatorField
+      }
+    }
+  }
+  ${DistributionBucketOperatorField}
+`
+export const GetStorageBucketsWithBags = gql`
+  query GetStorageBucketsWithBags {
+    storageBuckets(
+      limit: 500
+      where: {
+        operatorStatus: { isTypeOf_eq: "StorageBucketOperatorStatusActive" }
+        operatorMetadata: { nodeEndpoint_contains: "http" }
+      }
+    ) {
+      id
+      operatorMetadata {
+        nodeEndpoint
+      }
+      bags {
+        bag {
+          id
+        }
+      }
+    }
+  }
+`
+export const GetBasicDistributionBuckets = gql`
+  query GetBasicDistributionBuckets {
+    distributionBuckets(limit: 500, where: { acceptingNewBags_eq: true }) {
+      id
+      bucketIndex
+      family {
+        id
+      }
+    }
+  }
+`
+export const GetBasicStorageBuckets = gql`
+  query GetBasicStorageBuckets {
+    storageBuckets(limit: 500, where: { acceptingNewBags_eq: true }) {
+      id
+    }
+  }
+`
+export const GetMetaprotocolTransactionStatusEvents = gql`
+  query GetMetaprotocolTransactionStatusEvents($transactionHash: String!) {
+    events(
+      where: {
+        data: { isTypeOf_eq: "MetaprotocolTransactionStatusEventData" }
+        inExtrinsic_eq: $transactionHash
+      }
+    ) {
+      inExtrinsic
+      inBlock
+      data {
+        ... on MetaprotocolTransactionStatusEventData {
+          result {
+            ...MetaprotocolTransactionResultFields
+          }
+        }
+      }
+    }
+  }
   ${MetaprotocolTransactionResultFields}
+`
+export const GetFullVideo = gql`
+  query GetFullVideo($id: String!) {
+    videoById(id: $id) {
+      ...FullVideoFields
+    }
+  }
+  ${FullVideoFields}
+`
+export const GetBasicVideosConnection = gql`
+  query GetBasicVideosConnection(
+    $first: Int
+    $after: String
+    $orderBy: [VideoOrderByInput!] = [createdAt_DESC]
+    $where: VideoWhereInput
+  ) {
+    videosConnection(first: $first, after: $after, where: $where, orderBy: $orderBy) {
+      edges {
+        cursor
+        node {
+          ...BasicVideoFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetFullVideosConnection = gql`
+  query GetFullVideosConnection(
+    $first: Int
+    $after: String
+    $orderBy: [VideoOrderByInput!] = [createdAt_DESC]
+    $where: VideoWhereInput
+  ) {
+    videosConnection(first: $first, after: $after, where: $where, orderBy: $orderBy) {
+      edges {
+        cursor
+        node {
+          ...FullVideoFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${FullVideoFields}
+`
+export const GetBasicVideos = gql`
+  query GetBasicVideos(
+    $offset: Int
+    $limit: Int
+    $where: VideoWhereInput
+    $orderBy: [VideoOrderByInput!] = [createdAt_DESC]
+  ) {
+    videos(offset: $offset, limit: $limit, where: $where, orderBy: $orderBy) {
+      ...BasicVideoFields
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetFullVideos = gql`
+  query GetFullVideos(
+    $offset: Int
+    $limit: Int
+    $where: VideoWhereInput
+    $orderBy: [VideoOrderByInput!] = [createdAt_DESC]
+  ) {
+    videos(offset: $offset, limit: $limit, where: $where, orderBy: $orderBy) {
+      ...FullVideoFields
+    }
+  }
+  ${FullVideoFields}
+`
+export const GetMostViewedVideosConnection = gql`
+  query GetMostViewedVideosConnection(
+    $limit: Int = 50
+    $periodDays: Int
+    $first: Int
+    $after: String
+    $orderBy: [VideoOrderByInput!] = [createdAt_DESC]
+    $where: VideoWhereInput
+  ) {
+    mostViewedVideosConnection(
+      limit: $limit
+      first: $first
+      after: $after
+      periodDays: $periodDays
+      orderBy: $orderBy
+      where: $where
+    ) {
+      edges {
+        cursor
+        node {
+          ...BasicVideoFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetTop10VideosThisWeek = gql`
+  query GetTop10VideosThisWeek($where: VideoWhereInput) {
+    mostViewedVideosConnection(limit: 10, where: $where, periodDays: 7, orderBy: createdAt_DESC) {
+      edges {
+        node {
+          ...BasicVideoFields
+        }
+      }
+    }
+  }
+  ${BasicVideoFields}
+`
+export const GetTop10VideosThisMonth = gql`
+  query GetTop10VideosThisMonth($where: VideoWhereInput) {
+    mostViewedVideosConnection(limit: 10, where: $where, periodDays: 30, orderBy: createdAt_DESC) {
+      edges {
+        node {
+          ...BasicVideoFields
+        }
+      }
+    }
+  }
+  ${BasicVideoFields}
+`
+export const AddVideoView = gql`
+  mutation AddVideoView($videoId: String!) {
+    addVideoView(videoId: $videoId) {
+      videoId
+      viewsNum
+    }
+  }
+`
+export const ReportVideo = gql`
+  mutation ReportVideo($videoId: String!, $rationale: String!) {
+    reportVideo(videoId: $videoId, rationale: $rationale) {
+      id
+      videoId
+    }
+  }
 `
 export const StateQueryV2 = gql`
   query StateQueryV2 {
@@ -854,91 +3714,91 @@ export const StateQueryV2 = gql`
       limit: 9999
       where: { data: { isTypeOf_eq: "CommentCreatedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     commentTextUpdatedEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "CommentTextUpdatedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     openAuctionStartedEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "OpenAuctionStartedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     englishAuctionStartedEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "EnglishAuctionStartedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     nftIssuedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "NftIssuedEventData" } }) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     auctionBidMadeEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "AuctionBidMadeEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     auctionBidCanceledEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "AuctionBidCanceledEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     auctionCanceledEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "AuctionCanceledEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     englishAuctionSettledEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "EnglishAuctionSettledEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     bidMadeCompletingAuctionEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "BidMadeCompletingAuctionEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     openAuctionBidAcceptedEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "OpenAuctionBidAcceptedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     nftSellOrderMadeEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "NftSellOrderMadeEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     nftBoughtEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "NftBoughtEventData" } }) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     buyNowCanceledEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "BuyNowCanceledEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     buyNowPriceUpdatedEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "BuyNowPriceUpdatedEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     metaprotocolTransactionStatusEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "MetaprotocolTransactionStatusEventData" } }
     ) {
-      ...EventFields
+      ...StateQueryEventFields
     }
     memberships(limit: 9999) {
       id
@@ -982,10 +3842,10 @@ export const StateQueryV2 = gql`
         id
       }
       owner {
-        ...NftOwnerFields
+        ...StateQueryNftOwnerFields
       }
       transactionalStatus {
-        ...TransactionalStatusFields
+        ...StateQueryTransactionalStatusFields
       }
       creatorRoyalty
       lastSalePrice
@@ -1005,7 +3865,7 @@ export const StateQueryV2 = gql`
       startingPrice
       buyNowPrice
       auctionType {
-        ...AuctionTypeFields
+        ...StateQueryAuctionTypeFields
       }
       topBid {
         id
@@ -1338,8 +4198,8 @@ export const StateQueryV2 = gql`
       }
     }
   }
-  ${EventFields}
-  ${NftOwnerFields}
-  ${TransactionalStatusFields}
-  ${AuctionTypeFields}
+  ${StateQueryEventFields}
+  ${StateQueryNftOwnerFields}
+  ${StateQueryTransactionalStatusFields}
+  ${StateQueryAuctionTypeFields}
 `

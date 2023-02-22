@@ -3,7 +3,7 @@ overwrite: true
 schema: 'src/tests/v1/schema.graphql'
 
 documents:
-  - 'src/tests/v1/queries/*.graphql'
+  - 'src/tests/v1/queries/**/*.graphql'
 
 config:
   scalars:

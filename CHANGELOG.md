@@ -54,6 +54,8 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
     - `GeoCoordinates`
     - `NodeLocationMetadata`
     - `DistributionBucketFamilyGeographicArea`
+    - `CommentReactionsCountByReactionId`
+    - `VideoReactionsCountByReactionType`
 - In Orion v1 providing a non-existing category id resulted in a creation of empty video category (without any `name` or `description`). Such categories are no longer created, providing non-existing category as part of `ContentMetadata` results in setting `Video.category` to `null` instead.
 - `Channel.activeVideoCounter` and `VideoCategory.activeVideoCounter` fields have been removed, instead custom `extendedChannels` and `extendedVideoCategories` queries have been introduced, which allow retrieving the number of active videos per channel/category.
 - `createdAt` and `updatedAt` fields are no longer automatically added to entities in Subsquid, so most of the entities no longer include them (unless they were explicitly required by Atlas).
@@ -90,6 +92,7 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - `MetaprotocolTransactionStatus` has been renamed to `MetaprotocolTransactionResult` and now also includes variants that have been previously represented by optional fields of `MetaprotocolTransactionSuccessful` (`MetaprotocolTransactionResultCommentCreated`, `MetaprotocolTransactionResultCommentEdited` etc.). To check if the transaction was generally successful you can now use `event.result.isTypeOf !== 'MetaprotocolTransactionResultFailed'`
 - `MetaprotocolTransactionErrored` variant has been replaced with `MetaprotocolTransactionResultFailed` and may include slightly different error messages. The error messages should be completely removed and replaced with error codes in the future.
 - **New query:** `getVideoViewPerIpTimeLimit` allows retrieving the current value of `VideoViewPerIpTimeLimit` config value (see also: `setVideoViewPerIpTimeLimit` under [operator mutations](#operator-mutations))
+- The default limit for number of returned rows when no limit was provided in Orion v1 was `50`. In Orion v2 there is no default limit(!)
 
 ### Subscriptions
 - `stateSubscription` has been renamed to `processorState`, properties have been reduced to `lastProcessedBlock` and `chainHead`

@@ -2,8 +2,8 @@
 # In order to ge membership by handle, either use `GetMemberships` or a custom query needs to be added
 # query GetMembership(...) { ... }
 
-query GetMemberships($where: MembershipWhereInput!) {
-  memberships(where: $where, orderBy: [createdAt_ASC]) {
+query GetMemberships($where: MembershipWhereInput!, $limit: Int) {
+  memberships(where: $where, orderBy: [createdAt_ASC], limit: $limit) {
     ...FullMembershipFields
   }
 }
