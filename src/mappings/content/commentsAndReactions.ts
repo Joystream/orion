@@ -38,10 +38,12 @@ import {
 import { config, ConfigVariable } from '../../utils/config'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
+  addNotification,
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
 } from '../utils'
+import { getChannelOwnerMemberByChannelId } from './utils'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -403,13 +405,22 @@ export async function processCreateCommentMessage(
   })
 
   // add CommentCreated event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new CommentCreatedEventData({
       comment: comment.id,
       text: body,
     }),
   })
+
+  if (parentComment) {
+    // Notify parent comment author
+    addNotification(overlay, [parentComment.authorId], event.id)
+  } else {
+    // Notify channel owner
+    const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
+    addNotification(overlay, [channelOwnerMemberId], event.id)
+  }
 
   return new MetaprotocolTransactionResultCommentCreated({ commentCreated: comment.id })
 }

@@ -317,12 +317,16 @@ export const GetNftsConnectionInputs: QueryVariant<
   ),
 ]
 
+// Due to the fact that in Orion v2 the GetNotifications query includes
+// notifications about comments posted in all of the member's channels
+// (in Orion v1 this was only possible for one channel), `memberId` should
+// ideally be of a member that has only one channel (in order for the number of rows to be the same)
 export const GetNotificationsInputs: QueryVariant<
   v1.GetNotificationsQueryVariables,
   v2.GetNotificationsQueryVariables
 >[] = [
-  createQueryVariant({ limit: 1000, channelId: '7757', memberId: '798' }),
-  createQueryVariant({ limit: 1000, channelId: '7692', memberId: '2962' }),
+  createQueryVariant({ limit: 50, channelId: '7692', memberId: '2962' }),
+  createQueryVariant({ limit: 50, channelId: '7693', memberId: '3233' }),
 ]
 
 export const GetNftHistoryInputs: QueryVariant<

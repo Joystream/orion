@@ -173,17 +173,62 @@ module.exports = class Views2000000000000 {
           AND ("data"->>'bid' IS NULL OR EXISTS(SELECT 1 FROM "bid" WHERE "id"="data"->>'bid'))
           AND ("data"->>'comment' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->>'comment'))
     `)
+    // Notifications view: All notifications except those related to events
+    // that are not part of the `events` view
+    await db.query(`ALTER TABLE "notification" SET SCHEMA "processor"`)
+    await db.query(`
+      CREATE VIEW "notification" AS
+        SELECT *
+        FROM "processor"."notification"
+        WHERE
+          EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")
+    `)
+    // Nft history entry view: All nft history entries except those related to events
+    // that are not part of the `events` view
+    await db.query(`ALTER TABLE "nft_history_entry" SET SCHEMA "processor"`)
+    await db.query(`
+      CREATE VIEW "nft_history_entry" AS
+        SELECT *
+        FROM "processor"."nft_history_entry"
+        WHERE
+          EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")
+    `)
+    // Nft activity view: All nft activities except those related to events
+    // that are not part of the `events` view
+    await db.query(`ALTER TABLE "nft_activity" SET SCHEMA "processor"`)
+    await db.query(`
+      CREATE VIEW "nft_activity" AS
+        SELECT *
+        FROM "processor"."nft_activity"
+        WHERE
+          EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")
+    `)
   }
 
   async down(db) {
-    await db.query(`DROP VIEW "channel"`)
-    await db.query(`ALTER TABLE "processor"."channel" SET SCHEMA "public"`)
-    await db.query(`DROP VIEW "video"`)
-    await db.query(`ALTER TABLE "processor"."video" SET SCHEMA "public"`)
-    await db.query(`DROP VIEW "video_category"`)
-    await db.query(`ALTER TABLE "processor"."video_category" SET SCHEMA "public"`)
-    await db.query(`DROP VIEW "owned_nft"`)
-    await db.query(`ALTER TABLE "processor"."owned_nft" SET SCHEMA "public"`)
+    const views = [
+      "channel",
+      "video",
+      "video_category",
+      "owned_nft",
+      "auction",
+      "bid",
+      "comment",
+      "comment_reaction",
+      "license",
+      "video_media_metadata",
+      "video_media_encoding",
+      "video_reaction",
+      "video_subtitle",
+      "event",
+      "notification",
+      "nft_history_entry",
+      "nft_activity"
+    ]
+    for (const viewName of views) {
+      await db.query(`DROP VIEW "${viewName}"`)
+      await db.query(`ALTER TABLE "processor"."${viewName}" SET SCHEMA "public"`)
+    }
     await db.query(`DROP SCHEMA "processor"`)
   }
 }

@@ -52,7 +52,7 @@ import {
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
 } from '../../types/v1000'
-import { genericEventFields, invalidMetadata } from '../utils'
+import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import { ed25519Verify } from '@polkadot/util-crypto'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
@@ -172,7 +172,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   videoRepository.remove(video)
 }
 
-export function processNft(
+export async function processNft(
   overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
@@ -180,7 +180,7 @@ export function processNft(
   video: Flat<Video>,
   issuer: ContentActor,
   nftIssuanceParameters: NftIssuanceParametersRecord
-): void {
+): Promise<void> {
   const owner =
     nftIssuanceParameters.nonChannelOwner !== undefined
       ? new NftOwnerMember({ member: nftIssuanceParameters.nonChannelOwner.toString() })
@@ -210,7 +210,7 @@ export function processNft(
   )
 
   // Push a new NftIssued event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new NftIssuedEventData({
       actor: parseContentActor(issuer),
@@ -218,6 +218,11 @@ export function processNft(
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export function processNftInitialTransactionalStatus(
@@ -379,7 +384,12 @@ export async function createBid(
   memberId: string,
   videoId: string,
   bidAmount?: bigint
-): Promise<{ bid: Flat<Bid>; auction: Flat<Auction> }> {
+): Promise<{
+  bid: Flat<Bid>
+  auctionBids: Flat<Bid>[]
+  auction: Flat<Auction>
+  previousTopBid?: Flat<Bid>
+}> {
   const auction = await getCurrentAuctionFromVideo(overlay, videoId)
   const bidRepository = overlay.getRepository(Bid)
   const auctionBids = await bidRepository.getManyByRelation('auctionId', auction.id)
@@ -428,9 +438,37 @@ export async function createBid(
     auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
   ) {
     newBid.previousTopBidId = previousTopBidId
+    return { bid: newBid, auction, previousTopBid, auctionBids }
   }
 
-  return { bid: newBid, auction }
+  return { bid: newBid, auction, auctionBids }
+}
+
+export async function getChannelOwnerMemberByVideoId(
+  overlay: EntityManagerOverlay,
+  videoId: string
+): Promise<string | undefined> {
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId)
+  if (video.channelId) {
+    return getChannelOwnerMemberByChannelId(overlay, video.channelId)
+  }
+}
+
+export async function getChannelOwnerMemberByChannelId(
+  overlay: EntityManagerOverlay,
+  channelId: string
+): Promise<string | undefined> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+  return channel.ownerMemberId ?? undefined
+}
+
+export async function getNftOwnerMemberId(
+  overlay: EntityManagerOverlay,
+  nftOwner: NftOwner
+): Promise<string | undefined> {
+  return nftOwner.isTypeOf === 'NftOwnerMember'
+    ? nftOwner.member
+    : getChannelOwnerMemberByChannelId(overlay, nftOwner.channel)
 }
 
 export async function finishAuction(
@@ -441,6 +479,7 @@ export async function finishAuction(
 ): Promise<{
   winningBid: Flat<Bid>
   auction: Flat<Auction>
+  auctionBids: Flat<Bid>[]
   nft: Flat<OwnedNft>
   previousNftOwner: NftOwner
 }> {
@@ -491,7 +530,7 @@ export async function finishAuction(
   auction.winningMemberId = winningBid.bidderId
   auction.endedAtBlock = block.height
 
-  return { winningBid, nft, auction, previousNftOwner }
+  return { winningBid, nft, auction, previousNftOwner, auctionBids }
 }
 
 async function validateAndGetApp(

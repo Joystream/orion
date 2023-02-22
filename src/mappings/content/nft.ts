@@ -6,6 +6,7 @@ import {
   findTopBid,
   finishAuction,
   getCurrentAuctionFromVideo,
+  getNftOwnerMemberId,
   parseContentActor,
   processNft,
 } from './utils'
@@ -34,7 +35,7 @@ import {
   TransactionalStatusInitiatedOfferToMember,
   Video,
 } from '../../model'
-import { genericEventFields } from '../utils'
+import { addNftActivity, addNftHistoryEntry, addNotification, genericEventFields } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
 
 export async function processOpenAuctionStartedEvent({
@@ -57,7 +58,7 @@ export async function processOpenAuctionStartedEvent({
   })
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new OpenAuctionStartedEventData({
       actor: parseContentActor(contentActor),
@@ -65,6 +66,11 @@ export async function processOpenAuctionStartedEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processEnglishAuctionStartedEvent({
@@ -87,7 +93,7 @@ export async function processEnglishAuctionStartedEvent({
   })
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new EnglishAuctionStartedEventData({
       actor: parseContentActor(contentActor),
@@ -95,6 +101,11 @@ export async function processEnglishAuctionStartedEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processNftIssuedEvent({
@@ -110,7 +121,7 @@ export async function processNftIssuedEvent({
   const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
 
   // prepare the new nft
-  processNft(overlay, block, indexInBlock, extrinsicHash, video, actor, nftIssuanceParameters)
+  await processNft(overlay, block, indexInBlock, extrinsicHash, video, actor, nftIssuanceParameters)
 }
 
 export async function processAuctionBidMadeEvent({
@@ -123,7 +134,7 @@ export async function processAuctionBidMadeEvent({
   },
 }: EventHandlerContext<'Content.AuctionBidMade'>): Promise<void> {
   // create a new bid
-  const { bid, auction } = await createBid(
+  const { bid, auction, previousTopBid } = await createBid(
     overlay,
     block,
     indexInBlock,
@@ -142,13 +153,20 @@ export async function processAuctionBidMadeEvent({
   }
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new AuctionBidMadeEventData({
       bid: bid.id,
       nftOwner: nft.owner,
     }),
   })
+
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  // Notify outbidded member and the nft owner
+  addNotification(overlay, [previousTopBid?.bidderId, nftOwnerMemberId], event.id)
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
 }
 
 export async function processAuctionBidCanceledEvent({
@@ -182,7 +200,7 @@ export async function processAuctionBidCanceledEvent({
   }
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new AuctionBidCanceledEventData({
       bid: memberBid.id,
@@ -190,6 +208,10 @@ export async function processAuctionBidCanceledEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [memberId.toString()], event.id)
 }
 
 export async function processAuctionCanceledEvent({
@@ -210,7 +232,7 @@ export async function processAuctionCanceledEvent({
   auction.isCanceled = true
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new AuctionCanceledEventData({
       actor: parseContentActor(contentActor),
@@ -218,6 +240,11 @@ export async function processAuctionCanceledEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processEnglishAuctionSettledEvent({
@@ -230,7 +257,7 @@ export async function processEnglishAuctionSettledEvent({
   },
 }: EventHandlerContext<'Content.EnglishAuctionSettled'>): Promise<void> {
   // finish auction
-  const { winningBid, auction, previousNftOwner, nft } = await finishAuction(
+  const { winningBid, auction, previousNftOwner, nft, auctionBids } = await finishAuction(
     overlay,
     videoId.toString(),
     block
@@ -248,13 +275,24 @@ export async function processEnglishAuctionSettledEvent({
   nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new EnglishAuctionSettledEventData({
       previousNftOwner,
       winningBid: winningBid.id,
     }),
   })
+
+  // Notfy all bidders and the (previous) nft owner
+  const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
+  addNotification(
+    overlay,
+    [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
+    event.id
+  )
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [previousNftOwnerMemberId, winnerId.toString()], event.id)
 }
 
 // called when auction bid's value is higher than buy-now value
@@ -268,7 +306,7 @@ export async function processBidMadeCompletingAuctionEvent({
   },
 }: EventHandlerContext<'Content.BidMadeCompletingAuction'>): Promise<void> {
   // create record for winning bid
-  const { bid } = await createBid(
+  const { bid, auctionBids } = await createBid(
     overlay,
     block,
     indexInBlock,
@@ -288,13 +326,24 @@ export async function processBidMadeCompletingAuctionEvent({
   nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new BidMadeCompletingAuctionEventData({
       previousNftOwner,
       winningBid: bid.id,
     }),
   })
+
+  // Notify all bidders and the (previous) nft owner
+  const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
+  addNotification(
+    overlay,
+    [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
+    event.id
+  )
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [previousNftOwnerMemberId, memberId.toString()], event.id)
 }
 
 export async function processOpenAuctionBidAcceptedEvent({
@@ -307,7 +356,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   },
 }: EventHandlerContext<'Content.OpenAuctionBidAccepted'>): Promise<void> {
   // finish auction
-  const { previousNftOwner, winningBid, nft } = await finishAuction(
+  const { previousNftOwner, winningBid, nft, auctionBids } = await finishAuction(
     overlay,
     videoId.toString(),
     block,
@@ -322,7 +371,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   nft.lastSaleDate = new Date(block.timestamp)
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new OpenAuctionBidAcceptedEventData({
       actor: parseContentActor(contentActor),
@@ -330,6 +379,17 @@ export async function processOpenAuctionBidAcceptedEvent({
       winningBid: winningBid.id,
     }),
   })
+
+  // Notify all bidders (the owner should be the one who triggered the event)
+  const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
+  addNotification(
+    overlay,
+    auctionBids.map((b) => b.bidderId),
+    event.id
+  )
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [previousNftOwnerMemberId, winnerId.toString()], event.id)
 }
 
 export async function processOfferStartedEvent({
@@ -411,7 +471,7 @@ export async function processNftSellOrderMadeEvent({
   nft.transactionalStatus = transactionalStatus
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new NftSellOrderMadeEventData({
       actor: parseContentActor(contentActor),
@@ -420,6 +480,11 @@ export async function processNftSellOrderMadeEvent({
       price,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processNftBoughtEvent({
@@ -448,7 +513,7 @@ export async function processNftBoughtEvent({
   nft.owner = new NftOwnerMember({ member: memberId.toString() })
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new NftBoughtEventData({
       buyer: memberId.toString(),
@@ -457,6 +522,13 @@ export async function processNftBoughtEvent({
       price,
     }),
   })
+
+  // Notify (previous) nft owner
+  const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
+  addNotification(overlay, [previousNftOwnerMemberId], event.id)
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [previousNftOwnerMemberId, memberId.toString()], event.id)
 }
 
 export async function processBuyNowCanceledEvent({
@@ -475,7 +547,7 @@ export async function processBuyNowCanceledEvent({
   nft.transactionalStatus = new TransactionalStatusIdle()
 
   // add new event
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new BuyNowCanceledEventData({
       actor: parseContentActor(contentActor),
@@ -483,6 +555,11 @@ export async function processBuyNowCanceledEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processBuyNowPriceUpdatedEvent({
@@ -505,7 +582,7 @@ export async function processBuyNowPriceUpdatedEvent({
   }
 
   nft.transactionalStatus = new TransactionalStatusBuyNow({ price: newPrice })
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new BuyNowPriceUpdatedEventData({
       actor: parseContentActor(contentActor),
@@ -514,6 +591,11 @@ export async function processBuyNowPriceUpdatedEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // Add nft history and activities entry
+  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
 
 export async function processNftSlingedBackToTheOriginalArtistEvent({
