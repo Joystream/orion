@@ -33,6 +33,7 @@ import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import { extendClause } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
+import { ContextWithIP } from '../../check'
 
 @Resolver()
 export class VideosResolver {
@@ -145,10 +146,10 @@ export class VideosResolver {
   @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
-    @Ctx() ctx: Context
+    @Ctx() ctx: ContextWithIP
   ): Promise<AddVideoViewResult> {
     const em = await this.em()
-    const ip = ctx.req.ip
+    const { ip } = ctx
     return em.transaction(async (em) => {
       // Check if the video actually exists & lock it for update
       const video = await em.findOne(Video, {
@@ -204,10 +205,10 @@ export class VideosResolver {
   @Mutation(() => VideoReportInfo)
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: ContextWithIP
   ): Promise<VideoReportInfo> {
     const em = await this.em()
-    const { ip } = ctx.req
+    const { ip } = ctx
     return em.transaction(async (em) => {
       // Try to retrieve the video+channel first
       const video = await em.findOne(Video, {

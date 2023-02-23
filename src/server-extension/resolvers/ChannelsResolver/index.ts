@@ -26,6 +26,7 @@ import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
+import { ContextWithIP } from '../../check'
 
 @Resolver()
 export class ChannelsResolver {
@@ -147,10 +148,10 @@ export class ChannelsResolver {
   @Mutation(() => ChannelFollowResult)
   async followChannel(
     @Args() { channelId }: FollowChannelArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: ContextWithIP
   ): Promise<ChannelFollowResult> {
     const em = await this.em()
-    const { ip } = ctx.req
+    const { ip } = ctx
     return em.transaction(async (em) => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
@@ -230,10 +231,10 @@ export class ChannelsResolver {
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,
-    @Ctx() ctx: Context
+    @Ctx() ctx: ContextWithIP
   ): Promise<ChannelReportInfo> {
     const em = await this.em()
-    const { ip } = ctx.req
+    const { ip } = ctx
     return em.transaction(async (em) => {
       // Try to retrieve the channel first
       const channel = await em.findOne(Channel, {

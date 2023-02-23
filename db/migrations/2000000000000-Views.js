@@ -4,25 +4,31 @@ module.exports = class Views2000000000000 {
   async up(db) {
     // Create new schema for the processor in order to be easily able to access "hidden" entities
     await db.query(`CREATE SCHEMA "processor"`)
-    // Channel view:
-    // All channels except censored ones
+    // A schema that includes both public and excluded entities
+    await db.query(`CREATE SCHEMA "with_excluded"`)
+    // Channel views:
+    // with_excluded view: All channels except censored ones
     await db.query(`ALTER TABLE "channel" SET SCHEMA "processor"`)
     await db.query(`
-      CREATE VIEW "channel" AS
+      CREATE VIEW "with_excluded"."channel" AS
         SELECT *
         FROM "processor"."channel"
-        WHERE
-          ${process.env.ALLOW_CENSORED !== '1' ? `"is_censored" = '0' AND` :'' }
-          "is_excluded" = '0'
+        ${process.env.ALLOW_CENSORED !== '1' ? `WHERE "is_censored" = '0'` : '' }
     `)
-    // Videos view:
-    // All videos except:
+    // public view: All channels from `with_excluded` view except the excluded ones
+    await db.query(`CREATE VIEW "channel" AS
+      SELECT *
+      FROM "with_excluded"."channel"
+      WHERE "is_excluded" = '0'`
+    )
+    // Videos views:
+    // with_excluded view: All videos except:
     // - those that are censored,
     // - those belonging to channels that are not part of channels view 
     // - those belonging to categories not supported by the Gateway
     await db.query(`ALTER TABLE "video" SET SCHEMA "processor"`)
     await db.query(`
-      CREATE VIEW "video" AS
+      CREATE VIEW "with_excluded"."video" AS
         SELECT *
         FROM "processor"."video"
         WHERE
@@ -45,8 +51,13 @@ module.exports = class Views2000000000000 {
             )
           )
           ${process.env.ALLOW_CENSORED !== '1' ? `AND "is_censored"='0'` :'' }
-          AND "is_excluded"='0'
     `)
+    // public view: All videos from `with_excluded` view except the excluded ones
+    await db.query(`CREATE VIEW "video" AS
+      SELECT *
+      FROM "with_excluded"."video"
+      WHERE "is_excluded" = '0'`
+    )
     // Categories view:
     // All categories except those not supported by the Gateway
     await db.query(`ALTER TABLE "video_category" SET SCHEMA "processor"`)
@@ -86,17 +97,22 @@ module.exports = class Views2000000000000 {
         WHERE
           EXISTS(SELECT 1 FROM "owned_nft" WHERE "id"="nft_id")
     `)
-    // Comments view:
-    // All comments expect those related to vidoes that are not part of the video view
+    // Comments views:
     await db.query(`ALTER TABLE "comment" SET SCHEMA "processor"`)
+    // with_excluded view: All comments expect those related to vidoes that are not part of the video view
     await db.query(`
-      CREATE VIEW "comment" AS
+      CREATE VIEW "with_excluded"."comment" AS
         SELECT *
         FROM "processor"."comment"
         WHERE
           EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")
-          AND "is_excluded"='0'
     `)
+    // public view: All comments from `with_excluded` view except the excluded ones
+    await db.query(`CREATE VIEW "comment" AS
+      SELECT *
+      FROM "with_excluded"."comment"
+      WHERE "is_excluded" = '0'`
+    )
     // Comments reactions view:
     // All comment reactions expect those related to comments that are not part of the comment view
     await db.query(`ALTER TABLE "comment_reaction" SET SCHEMA "processor"`)
