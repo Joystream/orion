@@ -42,6 +42,7 @@ import {
   VideoReaction,
   VideoMediaEncoding,
   App,
+  ChannelFollow,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -136,6 +137,14 @@ export const ASSETS_MAP: AssetsMap = {
         new DataObjectTypeVideoSubtitle({ video: assertNotNull(e.videoId), subtitle: e.id }),
     },
   ],
+}
+
+export async function deleteChannel(overlay: EntityManagerOverlay, channelId: bigint) {
+  const follows = await overlay
+    .getRepository(ChannelFollow)
+    .getManyByRelation('channelId', channelId.toString())
+  overlay.getRepository(ChannelFollow).remove(...follows)
+  overlay.getRepository(Channel).remove(channelId.toString())
 }
 
 export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint) {

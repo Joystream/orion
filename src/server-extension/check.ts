@@ -1,6 +1,7 @@
 import { RequestCheckFunction } from '@subsquid/graphql-server/lib/check'
 import { Context } from '@subsquid/openreader/lib/context'
 import { TypeormOpenreaderContext } from '@subsquid/graphql-server/lib/typeorm'
+import { isOperatorRequest } from './resolvers/middleware'
 
 export type ContextWithIP = Context & { ip: string }
 
@@ -15,11 +16,15 @@ export const requestCheck: RequestCheckFunction = async (ctx) => {
     (trustedReverseProxies && forwardedFor?.split(',').splice(-trustedReverseProxies, 1)[0]) ||
     context.req.ip
 
-  // Set search_path accordingly to x-allow-excluded header
-  const em = await (context.openreader as unknown as TypeormOpenreaderContext).getEntityManager()
-  const allowExcluded = context.req.headers['x-allow-excluded']
-  if (allowExcluded) {
-    await em.query('SET LOCAL search_path TO with_excluded,public')
+  // Set search_path accordingly if it's an operator request
+  if (isOperatorRequest(context.req)) {
+    const displayHiddenEntities = context.req.headers['x-display-hidden-entities']
+    if (displayHiddenEntities === 'all') {
+      const em = await (
+        context.openreader as unknown as TypeormOpenreaderContext
+      ).getEntityManager()
+      await em.query('SET LOCAL search_path TO processor,public')
+    }
   }
 
   return true
