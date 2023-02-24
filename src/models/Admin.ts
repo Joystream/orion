@@ -9,6 +9,13 @@ export class Admin {
   isKilled: boolean
 }
 
+@ObjectType()
+@ArgsType()
+export class GeneratedSignature {
+  @Field({ description: 'App signature converted to hexadecimal string.' })
+  signature: string
+}
+
 export const AdminModel = getModelForClass(Admin, { schemaOptions: { collection: 'admin' } })
 
 export const getAdminDoc = async (): Promise<DocumentType<Admin>> => {
