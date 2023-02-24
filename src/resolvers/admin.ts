@@ -3,7 +3,8 @@ import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
 import { ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
-import { generateAppActionCommitment } from './helpers'
+import { generateAppActionCommitment } from '@joystream/js/utils'
+import { createType } from '@joystream/types'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -52,13 +53,12 @@ export class AdminResolver {
     ) {
       throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
     }
-    console.log(assets, hexToU8a(assets))
     const message = generateAppActionCommitment(
       nonce,
       creatorId,
       hexToU8a(assets),
-      rawAction ? hexToU8a(rawAction) : undefined,
-      rawAppActionMetadata ? hexToU8a(rawAppActionMetadata) : undefined
+      rawAction ? createType('Bytes', rawAction) : undefined,
+      rawAppActionMetadata ? createType('Bytes', rawAppActionMetadata) : undefined
     )
     const signature = ed25519Sign(message, config.appKeypair)
     return { signature: u8aToHex(signature) }
