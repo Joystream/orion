@@ -16,7 +16,7 @@ import {
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
 import { createType } from '@joystream/types'
-import { processAppActionMetadata, generateAppActionCommitment } from './utils'
+import { processAppActionMetadata, generateAppActionCommitment, deleteChannel } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 
@@ -127,7 +127,7 @@ export async function processChannelDeletedEvent({
     asV1000: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
-  overlay.getRepository(Channel).remove(channelId.toString())
+  await deleteChannel(overlay, channelId)
 }
 
 export async function processChannelDeletedByModeratorEvent({
@@ -136,7 +136,7 @@ export async function processChannelDeletedByModeratorEvent({
     asV1000: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
-  overlay.getRepository(Channel).remove(channelId.toString())
+  await deleteChannel(overlay, channelId)
 }
 
 export async function processChannelVisibilitySetByModeratorEvent({

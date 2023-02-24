@@ -108,9 +108,6 @@ export class ChannelFollowResult {
   channelId!: string
 
   @Field(() => Int, { nullable: false })
-  followId!: number
-
-  @Field(() => Int, { nullable: false })
   follows!: number
 
   @Field(() => String, { nullable: false })

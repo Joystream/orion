@@ -17,9 +17,8 @@ import {
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
-import { Channel, ChannelFollow } from '../../../model'
+import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { Report } from '../../../model/Report'
 import { extendClause } from '../../../utils/sql'
 import { buildExtendedChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
@@ -169,17 +168,16 @@ export class ChannelsResolver {
       if (existingFollow) {
         return {
           channelId,
-          followId: existingFollow.id,
+          cancelToken: existingFollow.id,
           follows: channel.followsNum,
-          cancelToken: existingFollow.cancelToken,
           added: false,
         }
       }
       // Otherwise add a new follow
-      const cancelToken = randomAsHex(32).replace('0x', '')
+      const cancelToken = randomAsHex(16).replace('0x', '')
       channel.followsNum += 1
       const newFollow = new ChannelFollow({
-        cancelToken,
+        id: cancelToken,
         channel,
         ip,
         timestamp: new Date(),
@@ -189,7 +187,6 @@ export class ChannelsResolver {
 
       return {
         channelId,
-        followId: newFollow.id,
         follows: channel.followsNum,
         cancelToken,
         added: true,
@@ -213,7 +210,7 @@ export class ChannelsResolver {
       }
       // Check if there's a follow matching the request data
       const follow = await em.findOne(ChannelFollow, {
-        where: { channel: { id: channelId }, cancelToken: token },
+        where: { channel: { id: channelId }, id: token },
       })
       // If not - just return the current number of follows
       if (!follow) {
@@ -245,7 +242,7 @@ export class ChannelsResolver {
       }
       // We allow only one report per specific entity per ip
       const existingReport = await em.findOne(Report, {
-        where: { ip, channel: { id: channelId }, video: IsNull() },
+        where: { ip, channelId, videoId: IsNull() },
       })
       // If report already exists - return its data with { created: false }
       if (existingReport) {
@@ -260,7 +257,8 @@ export class ChannelsResolver {
       }
       // If report doesn't exist, create a new one
       const newReport = new Report({
-        channel,
+        id: randomAsHex(16).replace('0x', ''),
+        channelId,
         ip,
         rationale,
         timestamp: new Date(),

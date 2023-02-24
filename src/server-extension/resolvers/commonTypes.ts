@@ -1,10 +1,10 @@
-import { Field, Int, ObjectType } from 'type-graphql'
+import { Field, ObjectType } from 'type-graphql'
 import { DateTime } from '@subsquid/graphql-server'
 
 @ObjectType()
 export class EntityReportInfo {
-  @Field(() => Int, { nullable: false })
-  id!: number
+  @Field(() => String, { nullable: false })
+  id!: string
 
   @Field(() => String, { nullable: false })
   rationale!: string

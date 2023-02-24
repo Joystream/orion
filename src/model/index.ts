@@ -1,6 +1,3 @@
 export * from './generated'
-export { ChannelFollow } from './ChannelFollow'
 export { NextEntityId } from './NextEntityId'
-export { VideoViewEvent } from './VideoViewEvent'
-export { Report } from './Report'
 export { GatewayConfig } from './GatewayConfig'

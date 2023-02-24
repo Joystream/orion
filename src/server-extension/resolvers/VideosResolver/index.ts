@@ -9,8 +9,7 @@ import {
 } from './types'
 import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
-import { VideoViewEvent, Video } from '../../../model'
-import { Report } from '../../../model/Report'
+import { VideoViewEvent, Video, Report } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -34,6 +33,7 @@ import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query
 import { extendClause } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
 import { ContextWithIP } from '../../check'
+import { randomAsHex } from '@polkadot/util-crypto'
 
 @Resolver()
 export class VideosResolver {
@@ -170,7 +170,7 @@ export class VideosResolver {
       const recentView = await em.findOne(VideoViewEvent, {
         where: {
           ip,
-          video: { id: videoId },
+          videoId,
           timestamp: MoreThan(new Date(Date.now() - timeLimitInSeconds * 1000)),
         },
       })
@@ -188,9 +188,10 @@ export class VideosResolver {
       video.viewsNum += 1
       video.channel.videoViewsNum += 1
       const newView = new VideoViewEvent({
+        id: `${videoId}-${video.viewsNum}`,
         ip,
         timestamp: new Date(),
-        video,
+        videoId,
       })
       await em.save([video, video.channel, newView])
       return {
@@ -220,7 +221,7 @@ export class VideosResolver {
       }
       // We allow only one report per specific entity per ip
       const existingReport = await em.findOne(Report, {
-        where: { ip, video: { id: videoId } },
+        where: { ip, videoId },
       })
       // If report already exists - return its data with { created: false }
       if (existingReport) {
@@ -235,8 +236,9 @@ export class VideosResolver {
       }
       // If report doesn't exist, create a new one
       const newReport = new Report({
-        video,
-        channel: video.channel,
+        id: randomAsHex(16).replace('0x', ''),
+        videoId,
+        channelId: video.channel.id,
         ip,
         rationale,
         timestamp: new Date(),

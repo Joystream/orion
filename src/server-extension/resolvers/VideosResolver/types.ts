@@ -59,8 +59,8 @@ export class AddVideoViewResult {
   @Field(() => String, { nullable: false })
   videoId!: string
 
-  @Field(() => Int, { nullable: false })
-  viewId!: number
+  @Field(() => String, { nullable: false })
+  viewId!: string
 
   @Field(() => Int, { nullable: false })
   viewsNum!: number
