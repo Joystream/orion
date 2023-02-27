@@ -12,7 +12,6 @@ type VideoViewEvent @entity {
   timestamp: DateTime!
 }
 
-
 type Report @entity {
   "Unique identifier of the report"
   id: ID!
