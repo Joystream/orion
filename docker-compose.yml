@@ -12,7 +12,16 @@ services:
     ports:
       - '127.0.0.1:${DB_PORT}:${DB_PORT}'
       - '[::1]:${DB_PORT}:${DB_PORT}'
-    command: ['postgres', '-c', 'log_statement=all', '-p', '${DB_PORT}', '-c', 'autovacuum_analyze_scale_factor=0.01']
+    command:
+      [
+        'postgres',
+        '-c',
+        'log_statement=all',
+        '-p',
+        '${DB_PORT}',
+        '-c',
+        'autovacuum_analyze_scale_factor=0.01',
+      ]
     shm_size: 1g
     volumes:
       - orion_db_data:/var/lib/postgresql/data

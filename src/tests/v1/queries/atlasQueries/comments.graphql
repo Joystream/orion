@@ -76,7 +76,10 @@ query GetUserCommentsAndVideoCommentsConnection(
 }
 
 query GetUserCommentsReactions($memberId: ID!, $videoId: ID!) {
-  commentReactions(where: { member: { id_eq: $memberId }, video: { id_eq: $videoId } }, limit: 1000) {
+  commentReactions(
+    where: { member: { id_eq: $memberId }, video: { id_eq: $videoId } }
+    limit: 1000
+  ) {
     reactionId
     commentId
   }

@@ -1,7 +1,9 @@
 query GetNotifications($channelId: ID!, $memberId: ID!, $limit: Int!) {
   auctionBidMadeEvents(
     limit: $limit
-    where: { OR: [{ ownerMember: { id_eq: $memberId } }, { previousTopBidder: { id_eq: $memberId } }] }
+    where: {
+      OR: [{ ownerMember: { id_eq: $memberId } }, { previousTopBidder: { id_eq: $memberId } }]
+    }
     orderBy: [createdAt_DESC]
   ) {
     id
@@ -23,7 +25,11 @@ query GetNotifications($channelId: ID!, $memberId: ID!, $limit: Int!) {
     bidAmount
   }
 
-  nftBoughtEvents(where: { ownerMember: { id_eq: $memberId } }, limit: $limit, orderBy: [createdAt_DESC]) {
+  nftBoughtEvents(
+    where: { ownerMember: { id_eq: $memberId } }
+    limit: $limit
+    orderBy: [createdAt_DESC]
+  ) {
     id
     createdAt
     inBlock
@@ -712,7 +718,11 @@ query GetNftActivities($memberId: ID!, $limit: Int!) {
     totalCount
   }
   # minted
-  nftIssuedEventsConnection(where: { ownerMember: { id_eq: $memberId } }, first: $limit, orderBy: [createdAt_DESC]) {
+  nftIssuedEventsConnection(
+    where: { ownerMember: { id_eq: $memberId } }
+    first: $limit
+    orderBy: [createdAt_DESC]
+  ) {
     edges {
       node {
         id

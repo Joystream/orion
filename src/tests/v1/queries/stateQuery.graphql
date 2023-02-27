@@ -1,22 +1,26 @@
 fragment ActorFields on ContentActor {
   __typename
-  ...on ContentActorCurator {
-    curator { id }
+  ... on ContentActorCurator {
+    curator {
+      id
+    }
   }
-  ...on ContentActorMember {
-    member { id }
+  ... on ContentActorMember {
+    member {
+      id
+    }
   }
 }
 
 fragment AuctionTypeFields on AuctionType {
   __typename
-  ...on AuctionTypeEnglish {
+  ... on AuctionTypeEnglish {
     duration
     extensionPeriod
     plannedEndAtBlock
     minimalBidStep
   }
-  ...on AuctionTypeOpen {
+  ... on AuctionTypeOpen {
     bidLockDuration
   }
 }
@@ -24,9 +28,15 @@ fragment AuctionTypeFields on AuctionType {
 fragment BidFields on Bid {
   id
   createdAt
-  auction { id }
-  nft { id }
-  bidder { id }
+  auction {
+    id
+  }
+  nft {
+    id
+  }
+  bidder {
+    id
+  }
   amount
   isCanceled
   createdInBlock
@@ -50,7 +60,9 @@ query StateQueryV1 {
     }
     isPublic
     isCensored
-    language { iso }
+    language {
+      iso
+    }
     videos {
       id
     }
@@ -62,190 +74,316 @@ query StateQueryV1 {
     }
   }
   commentCreatedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    comment { id }
+    comment {
+      id
+    }
     text
   }
   commentTextUpdatedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    comment { id }
+    comment {
+      id
+    }
     newText
   }
   openAuctionStartedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    actor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    auction { id }
+    actor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    auction {
+      id
+    }
   }
   englishAuctionStartedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-		actor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    auction { id }
+    actor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    auction {
+      id
+    }
   }
   nftIssuedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-		contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
   }
   auctionBidMadeEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    ownerMember { id }
-    ownerCuratorGroup { id }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
     bidAmount
-    previousTopBid { id }
-    previousTopBidder { id }
+    previousTopBid {
+      id
+    }
+    previousTopBidder {
+      id
+    }
   }
   auctionBidCanceledEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    member { id }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    member {
+      id
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
   }
   auctionCanceledEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
   }
   englishAuctionSettledEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    winningBid { id }
-    winner { id }
-    video { id }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    winner {
+      id
+    }
+    video {
+      id
+    }
   }
   bidMadeCompletingAuctionEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    winningBid { id }
-    video { id }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    video {
+      id
+    }
   }
   openAuctionBidAcceptedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    winningBid { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    video {
+      id
+    }
   }
   nftSellOrderMadeEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
     price
   }
   nftBoughtEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    member { id }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    member {
+      id
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
     price
   }
   buyNowCanceledEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
   }
   buyNowPriceUpdatedEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
-    contentActor { ...ActorFields }
-    ownerMember { id }
-    ownerCuratorGroup { id }
-    video { id }
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
     newPrice
   }
   metaprotocolTransactionStatusEvents(limit: 9999) {
-		id
+    id
     inBlock
     inExtrinsic
     indexInBlock
     createdAt
     status {
       __typename
-      ...on MetaprotocolTransactionSuccessful {
-				commentCreated { id }
-        commentEdited { id }
-        commentDeleted { id }
-        commentModerated { id }
-        videoCategoryCreated { id }
-        videoCategoryUpdated { id }
-        videoCategoryDeleted { id }
+      ... on MetaprotocolTransactionSuccessful {
+        commentCreated {
+          id
+        }
+        commentEdited {
+          id
+        }
+        commentDeleted {
+          id
+        }
+        commentModerated {
+          id
+        }
+        videoCategoryCreated {
+          id
+        }
+        videoCategoryUpdated {
+          id
+        }
+        videoCategoryDeleted {
+          id
+        }
       }
-      ...on MetaprotocolTransactionErrored {
+      ... on MetaprotocolTransactionErrored {
         message
       }
     }
@@ -265,11 +403,15 @@ query StateQueryV1 {
       about
     }
     controllerAccount
-    whitelistedInAuctions { id }
+    whitelistedInAuctions {
+      id
+    }
     channels {
       id
     }
-    memberBannedFromChannels { id }
+    memberBannedFromChannels {
+      id
+    }
   }
   ownedNfts(limit: 9999) {
     id
@@ -283,15 +425,19 @@ query StateQueryV1 {
     auctions {
       id
     }
-   	ownerMember { id }
-  	ownerCuratorGroup { id }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
     transactionalStatus {
       __typename
-			...on TransactionalStatusInitiatedOfferToMember {
+      ... on TransactionalStatusInitiatedOfferToMember {
         memberId
         offerPrice: price
       }
-      ...on TransactionalStatusBuyNow {
+      ... on TransactionalStatusBuyNow {
         price
       }
     }
@@ -301,29 +447,37 @@ query StateQueryV1 {
     creatorRoyalty
     lastSalePrice
     lastSaleDate
-  	bids {
+    bids {
       id
     }
   }
   auctions(limit: 9999) {
     id
-    nft { id }
-    winningMember { id }
+    nft {
+      id
+    }
+    winningMember {
+      id
+    }
     startingPrice
     buyNowPrice
     auctionType {
-			...AuctionTypeFields
+      ...AuctionTypeFields
     }
     topBid {
       id
       isCanceled
     }
-    bids { id }
+    bids {
+      id
+    }
     startsAtBlock
     endedAtBlock
     isCanceled
     isCompleted
-    whitelistedMembers { id }
+    whitelistedMembers {
+      id
+    }
   }
   bids(limit: 9999) {
     ...BidFields
@@ -332,8 +486,12 @@ query StateQueryV1 {
     id
     operatorStatus {
       __typename
-      ...on StorageBucketOperatorStatusInvited { workerId }
-      ...on StorageBucketOperatorStatusActive { workerId }
+      ... on StorageBucketOperatorStatusInvited {
+        workerId
+      }
+      ... on StorageBucketOperatorStatusActive {
+        workerId
+      }
     }
     operatorMetadata {
       nodeEndpoint
@@ -344,29 +502,37 @@ query StateQueryV1 {
       extra
     }
     acceptingNewBags
-    bags { id }
+    bags {
+      id
+    }
     dataObjectsSizeLimit
     dataObjectCountLimit
     dataObjectsCount
     dataObjectsSize
   }
- 	storageBags(limit: 9999) {
+  storageBags(limit: 9999) {
     id
-    objects { id }
-    storageBuckets { id }
-    distributionBuckets { id }
+    objects {
+      id
+    }
+    storageBuckets {
+      id
+    }
+    distributionBuckets {
+      id
+    }
     owner {
       __typename
-      ...on StorageBagOwnerWorkingGroup {
+      ... on StorageBagOwnerWorkingGroup {
         workingGroupId
       }
-      ...on StorageBagOwnerMember {
+      ... on StorageBagOwnerMember {
         memberId
       }
-      ...on StorageBagOwnerChannel {
+      ... on StorageBagOwnerChannel {
         channelId
       }
-      ...on StorageBagOwnerDAO {
+      ... on StorageBagOwnerDAO {
         daoId
       }
     }
@@ -376,25 +542,39 @@ query StateQueryV1 {
     createdAt
     isAccepted
     size
-    storageBag { id }
+    storageBag {
+      id
+    }
     ipfsHash
     type {
       __typename
-      ...on DataObjectTypeChannelAvatar {
-        channel { id }
+      ... on DataObjectTypeChannelAvatar {
+        channel {
+          id
+        }
       }
-      ...on DataObjectTypeChannelCoverPhoto {
-        channel { id }
+      ... on DataObjectTypeChannelCoverPhoto {
+        channel {
+          id
+        }
       }
-      ...on DataObjectTypeVideoMedia {
-        video { id }
+      ... on DataObjectTypeVideoMedia {
+        video {
+          id
+        }
       }
-      ...on DataObjectTypeVideoThumbnail {
-        video { id }
+      ... on DataObjectTypeVideoThumbnail {
+        video {
+          id
+        }
       }
-      ...on DataObjectTypeVideoSubtitle {
-        subtitle { id }
-        video { id }
+      ... on DataObjectTypeVideoSubtitle {
+        subtitle {
+          id
+        }
+        video {
+          id
+        }
       }
     }
     stateBloatBond
@@ -408,13 +588,13 @@ query StateQueryV1 {
       areas {
         area {
           __typename
-          ...on GeographicalAreaContinent {
+          ... on GeographicalAreaContinent {
             continentCode: code
           }
-          ...on GeographicalAreaCountry {
+          ... on GeographicalAreaCountry {
             countryCode: code
           }
-          ...on GeographicalAreaSubdivistion {
+          ... on GeographicalAreaSubdivistion {
             subdivisionCode: code
           }
         }
@@ -427,16 +607,24 @@ query StateQueryV1 {
   }
   distributionBuckets(limit: 9999) {
     id
-    family { id }
+    family {
+      id
+    }
     bucketIndex
-    operators { id }
+    operators {
+      id
+    }
     acceptingNewBags
     distributing
-    bags { id }
+    bags {
+      id
+    }
   }
   distributionBucketOperators(limit: 9999) {
     id
-    distributionBucket { id }
+    distributionBucket {
+      id
+    }
     workerId
     status
     metadata {
@@ -451,18 +639,30 @@ query StateQueryV1 {
   commentReactions(limit: 9999) {
     id
     reactionId
-    member { id }
-    comment { id }
-    video { id }
+    member {
+      id
+    }
+    comment {
+      id
+    }
+    video {
+      id
+    }
   }
   comments(limit: 9999) {
     id
     createdAt
-    author { id }
+    author {
+      id
+    }
     text
-    video { id }
+    video {
+      id
+    }
     status
-    reactions { id }
+    reactions {
+      id
+    }
     reactionsCountByReactionId {
       reactionId
       count
@@ -476,7 +676,7 @@ query StateQueryV1 {
     isEdited
   }
   videoCategories(
-    limit: 9999,
+    limit: 9999
     # Filter out "empty" categories, as they are not created in Orion v2
     where: { name_contains: "" }
   ) {
@@ -507,7 +707,9 @@ query StateQueryV1 {
     thumbnailPhoto {
       id
     }
-    language { iso }
+    language {
+      iso
+    }
     hasMarketing
     publishedBeforeJoystream
     isPublic
@@ -564,9 +766,13 @@ query StateQueryV1 {
   }
   videoSubtitles(limit: 9999) {
     id
-    video { id }
+    video {
+      id
+    }
     type
-    language { iso }
+    language {
+      iso
+    }
     mimeType
     asset {
       id
@@ -576,7 +782,11 @@ query StateQueryV1 {
     id
     createdAt
     reaction
-    member { id }
-    video { id }
+    member {
+      id
+    }
+    video {
+      id
+    }
   }
 }

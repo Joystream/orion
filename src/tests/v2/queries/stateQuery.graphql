@@ -1,49 +1,61 @@
 fragment StateQueryActorFields on ContentActor {
   __typename
-  ...on ContentActorCurator {
-    curator { id }
+  ... on ContentActorCurator {
+    curator {
+      id
+    }
   }
-  ...on ContentActorMember {
-    member { id }
+  ... on ContentActorMember {
+    member {
+      id
+    }
   }
 }
 
 fragment StateQueryNftOwnerFields on NftOwner {
   __typename
   ... on NftOwnerMember {
-    member { id }
+    member {
+      id
+    }
   }
   ... on NftOwnerChannel {
     channel {
       id
-      ownerMember { id }
+      ownerMember {
+        id
+      }
     }
   }
 }
 
 fragment StateQueryTransactionalStatusFields on TransactionalStatus {
-	__typename
-	...on TransactionalStatusInitiatedOfferToMember {
-    member { id }
+  __typename
+  ... on TransactionalStatusInitiatedOfferToMember {
+    member {
+      id
+    }
     offerPrice: price
   }
-	...on TransactionalStatusBuyNow {
+  ... on TransactionalStatusBuyNow {
     price
   }
-  ...on TransactionalStatusAuction {
-    auction { id }
+  ... on TransactionalStatusAuction {
+    auction {
+      id
+    }
   }
 }
 
 fragment StateQueryAuctionTypeFields on AuctionType {
   __typename
-  ...on AuctionTypeEnglish {
+  ... on AuctionTypeEnglish {
     duration
     extensionPeriod
     plannedEndAtBlock
     minimalBidStep
   }
-  ...on AuctionTypeOpen {
+  ... on AuctionTypeOpen {
     bidLockDuration
   }
 }
@@ -74,24 +86,32 @@ fragment StateQueryBidRefFields on Bid {
 
 fragment StateQueryMetaprotocolTransactionResultFields on MetaprotocolTransactionResult {
   __typename
-  ...on MetaprotocolTransactionResultFailed {
+  ... on MetaprotocolTransactionResultFailed {
     errorMessage
   }
-  ...on MetaprotocolTransactionResultCommentCreated {
-    commentCreated { id }
+  ... on MetaprotocolTransactionResultCommentCreated {
+    commentCreated {
+      id
+    }
   }
-  ...on MetaprotocolTransactionResultCommentEdited {
-    commentEdited { id }
+  ... on MetaprotocolTransactionResultCommentEdited {
+    commentEdited {
+      id
+    }
   }
   # TODO: Ephesus
   # ...on MetaprotocolTransactionResultChannelPaid {
   #   channelPaid { id }
   # }
-  ...on MetaprotocolTransactionResultCommentModerated {
-    commentModerated { id }
+  ... on MetaprotocolTransactionResultCommentModerated {
+    commentModerated {
+      id
+    }
   }
-  ...on MetaprotocolTransactionResultCommentDeleted {
-    commentDeleted { id }
+  ... on MetaprotocolTransactionResultCommentDeleted {
+    commentDeleted {
+      id
+    }
   }
 }
 
@@ -102,82 +122,156 @@ fragment StateQueryEventFields on Event {
   indexInBlock
   createdAt: timestamp
   data {
-		...on CommentCreatedEventData {
-      comment { id }
+    ... on CommentCreatedEventData {
+      comment {
+        id
+      }
       text
     }
-    ...on CommentTextUpdatedEventData {
+    ... on CommentTextUpdatedEventData {
       comment {
         id
       }
       newText
     }
-    ...on OpenAuctionStartedEventData {
-      actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
-      auction { ...StateQueryAuctionRefFields }
+    ... on OpenAuctionStartedEventData {
+      actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
+      auction {
+        ...StateQueryAuctionRefFields
+      }
     }
-    ...on EnglishAuctionStartedEventData {
-      actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
-      auction { id }
+    ... on EnglishAuctionStartedEventData {
+      actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
+      auction {
+        id
+      }
     }
-    ...on NftIssuedEventData {
-      contentActor: actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
-      nft { id }
+    ... on NftIssuedEventData {
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
+      nft {
+        id
+      }
     }
-    ...on AuctionBidMadeEventData {
-      bid { ...StateQueryBidRefFields }
-      nftOwner { ...StateQueryNftOwnerFields }
+    ... on AuctionBidMadeEventData {
+      bid {
+        ...StateQueryBidRefFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
     }
-	...on AuctionBidCanceledEventData {
-      member { id }
-      nftOwner { ...StateQueryNftOwnerFields }
-      bid { ...StateQueryBidRefFields }
+    ... on AuctionBidCanceledEventData {
+      member {
+        id
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
+      bid {
+        ...StateQueryBidRefFields
+      }
     }
-	...on AuctionCanceledEventData {
-      contentActor: actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
-      auction { ...StateQueryAuctionRefFields }
+    ... on AuctionCanceledEventData {
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
+      auction {
+        ...StateQueryAuctionRefFields
+      }
     }
-    ...on EnglishAuctionSettledEventData {
-      winningBid { ...StateQueryBidRefFields }
-      previousNftOwner { ...StateQueryNftOwnerFields }
+    ... on EnglishAuctionSettledEventData {
+      winningBid {
+        ...StateQueryBidRefFields
+      }
+      previousNftOwner {
+        ...StateQueryNftOwnerFields
+      }
     }
-    ...on BidMadeCompletingAuctionEventData {
-      winningBid { ...StateQueryBidRefFields }
-      previousNftOwner { ...StateQueryNftOwnerFields }
+    ... on BidMadeCompletingAuctionEventData {
+      winningBid {
+        ...StateQueryBidRefFields
+      }
+      previousNftOwner {
+        ...StateQueryNftOwnerFields
+      }
     }
-    ...on OpenAuctionBidAcceptedEventData {
-      contentActor: actor { ...StateQueryActorFields }
-      winningBid { ...StateQueryBidRefFields }
-      previousNftOwner { ...StateQueryNftOwnerFields }
+    ... on OpenAuctionBidAcceptedEventData {
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      winningBid {
+        ...StateQueryBidRefFields
+      }
+      previousNftOwner {
+        ...StateQueryNftOwnerFields
+      }
     }
-	...on NftSellOrderMadeEventData {
-      nft { id }
-      contentActor: actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
+    ... on NftSellOrderMadeEventData {
+      nft {
+        id
+      }
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
       price
     }
-    ...on NftBoughtEventData {
-      nft { id }
-      member: buyer { id }
-      previousNftOwner { ...StateQueryNftOwnerFields }
+    ... on NftBoughtEventData {
+      nft {
+        id
+      }
+      member: buyer {
+        id
+      }
+      previousNftOwner {
+        ...StateQueryNftOwnerFields
+      }
       price
     }
-    ...on BuyNowCanceledEventData {
-      nft { id }
-      contentActor: actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
+    ... on BuyNowCanceledEventData {
+      nft {
+        id
+      }
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
     }
-    ...on BuyNowPriceUpdatedEventData {
-      nft { id }
-      contentActor: actor { ...StateQueryActorFields }
-      nftOwner { ...StateQueryNftOwnerFields }
+    ... on BuyNowPriceUpdatedEventData {
+      nft {
+        id
+      }
+      contentActor: actor {
+        ...StateQueryActorFields
+      }
+      nftOwner {
+        ...StateQueryNftOwnerFields
+      }
       newPrice
     }
-    ...on MetaprotocolTransactionStatusEventData {
+    ... on MetaprotocolTransactionStatusEventData {
       result {
         ...StateQueryMetaprotocolTransactionResultFields
       }
@@ -187,13 +281,13 @@ fragment StateQueryEventFields on Event {
     #   channel { id }
     #   amount
     # }
-	# 	...on ChannelRewardClaimedAndWithdrawnEventData {
+    # 	...on ChannelRewardClaimedAndWithdrawnEventData {
     #   channel { id }
     #   amount
     #   account
     #   actor { ...StateQueryActorFields }
     # }
-	# 	...on ChannelFundsWithdrawnEventData {
+    # 	...on ChannelFundsWithdrawnEventData {
     #   channel { id }
     #   amount
     #   account
@@ -225,23 +319,23 @@ fragment StateQueryEventFields on Event {
 }
 
 query StateQueryV2 {
-# TODO: Ephesus
-#   apps(limit: 9999) {
-#     id
-#     name
-#     websiteUrl
-#     useUri
-#     smallIcon
-#     mediumIcon
-#     bigIcon
-#     oneLiner
-#     description
-#     termsOfService
-#     platforms
-#     category
-#     authKey
-#     channel { id }
-#   }
+  # TODO: Ephesus
+  #   apps(limit: 9999) {
+  #     id
+  #     name
+  #     websiteUrl
+  #     useUri
+  #     smallIcon
+  #     mediumIcon
+  #     bigIcon
+  #     oneLiner
+  #     description
+  #     termsOfService
+  #     platforms
+  #     category
+  #     authKey
+  #     channel { id }
+  #   }
   channels(limit: 9999) {
     id
     createdAt
@@ -274,52 +368,94 @@ query StateQueryV2 {
     # cumulativeRewardClaimed
     # app { id }
   }
-  commentCreatedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "CommentCreatedEventData" } }) {
-   	...StateQueryEventFields
-  }
-  commentTextUpdatedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "CommentTextUpdatedEventData" } }) {
-   	...StateQueryEventFields
-  }
-  openAuctionStartedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "OpenAuctionStartedEventData" } }) {
+  commentCreatedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "CommentCreatedEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  englishAuctionStartedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "EnglishAuctionStartedEventData" } }) {
+  commentTextUpdatedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "CommentTextUpdatedEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  openAuctionStartedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "OpenAuctionStartedEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  englishAuctionStartedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "EnglishAuctionStartedEventData" } }
+  ) {
     ...StateQueryEventFields
   }
   nftIssuedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "NftIssuedEventData" } }) {
     ...StateQueryEventFields
   }
-  auctionBidMadeEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "AuctionBidMadeEventData" } }) {
+  auctionBidMadeEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "AuctionBidMadeEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  auctionBidCanceledEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "AuctionBidCanceledEventData" } }) {
+  auctionBidCanceledEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "AuctionBidCanceledEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  auctionCanceledEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "AuctionCanceledEventData" } }) {
+  auctionCanceledEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "AuctionCanceledEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  englishAuctionSettledEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "EnglishAuctionSettledEventData" } }) {
+  englishAuctionSettledEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "EnglishAuctionSettledEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  bidMadeCompletingAuctionEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "BidMadeCompletingAuctionEventData" } }) {
+  bidMadeCompletingAuctionEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "BidMadeCompletingAuctionEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  openAuctionBidAcceptedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "OpenAuctionBidAcceptedEventData" } }) {
+  openAuctionBidAcceptedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "OpenAuctionBidAcceptedEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  nftSellOrderMadeEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "NftSellOrderMadeEventData" } }) {
+  nftSellOrderMadeEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "NftSellOrderMadeEventData" } }
+  ) {
     ...StateQueryEventFields
   }
   nftBoughtEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "NftBoughtEventData" } }) {
     ...StateQueryEventFields
   }
-  buyNowCanceledEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "BuyNowCanceledEventData" } }) {
+  buyNowCanceledEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "BuyNowCanceledEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  buyNowPriceUpdatedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "BuyNowPriceUpdatedEventData" } }) {
+  buyNowPriceUpdatedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "BuyNowPriceUpdatedEventData" } }
+  ) {
     ...StateQueryEventFields
   }
-  metaprotocolTransactionStatusEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "MetaprotocolTransactionStatusEventData" } }) {
+  metaprotocolTransactionStatusEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "MetaprotocolTransactionStatusEventData" } }
+  ) {
     ...StateQueryEventFields
   }
   # TODO: Ephesus
@@ -354,7 +490,9 @@ query StateQueryV2 {
     }
     controllerAccount
     whitelistedInAuctions {
-      auction { id }
+      auction {
+        id
+      }
     }
     channels {
       id
@@ -381,40 +519,56 @@ query StateQueryV2 {
       ...StateQueryNftOwnerFields
     }
     transactionalStatus {
-     ...StateQueryTransactionalStatusFields
+      ...StateQueryTransactionalStatusFields
     }
     creatorRoyalty
     lastSalePrice
     lastSaleDate
-  	bids {
+    bids {
       id
     }
   }
   auctions(limit: 9999) {
     id
-    nft { id }
-    winningMember { id }
+    nft {
+      id
+    }
+    winningMember {
+      id
+    }
     startingPrice
     buyNowPrice
     auctionType {
-     ...StateQueryAuctionTypeFields 
+      ...StateQueryAuctionTypeFields
     }
-    topBid { id }
-    bids { id }
+    topBid {
+      id
+    }
+    bids {
+      id
+    }
     startsAtBlock
     endedAtBlock
     isCanceled
     isCompleted
     whitelistedMembers {
-      member { id }
+      member {
+        id
+      }
     }
   }
   bids(limit: 9999) {
     id
-  	createdAt
-    auction { id }
-    nft { id }
-    bidder { id }
+    createdAt
+    auction {
+      id
+    }
+    nft {
+      id
+    }
+    bidder {
+      id
+    }
     amount
     isCanceled
     createdInBlock
@@ -424,8 +578,12 @@ query StateQueryV2 {
     id
     operatorStatus {
       __typename
-      ...on StorageBucketOperatorStatusInvited { workerId }
-      ...on StorageBucketOperatorStatusActive { workerId }
+      ... on StorageBucketOperatorStatusInvited {
+        workerId
+      }
+      ... on StorageBucketOperatorStatusActive {
+        workerId
+      }
     }
     operatorMetadata {
       nodeEndpoint
@@ -436,29 +594,43 @@ query StateQueryV2 {
       extra
     }
     acceptingNewBags
-    bags { bag { id } }
+    bags {
+      bag {
+        id
+      }
+    }
     dataObjectsSizeLimit
     dataObjectCountLimit
     dataObjectsCount
     dataObjectsSize
   }
- 	storageBags(limit: 9999) {
+  storageBags(limit: 9999) {
     id
-    objects { id }
-    storageBuckets { storageBucket { id } }
-    distributionBuckets { distributionBucket { id } }
+    objects {
+      id
+    }
+    storageBuckets {
+      storageBucket {
+        id
+      }
+    }
+    distributionBuckets {
+      distributionBucket {
+        id
+      }
+    }
     owner {
       __typename
-      ...on StorageBagOwnerWorkingGroup {
+      ... on StorageBagOwnerWorkingGroup {
         workingGroupId
       }
-      ...on StorageBagOwnerMember {
+      ... on StorageBagOwnerMember {
         memberId
       }
-      ...on StorageBagOwnerChannel {
+      ... on StorageBagOwnerChannel {
         channelId
       }
-      ...on StorageBagOwnerDAO {
+      ... on StorageBagOwnerDAO {
         daoId
       }
     }
@@ -468,25 +640,39 @@ query StateQueryV2 {
     createdAt
     isAccepted
     size
-    storageBag { id }
+    storageBag {
+      id
+    }
     ipfsHash
     type {
       __typename
-      ...on DataObjectTypeChannelAvatar {
-        channel { id }
+      ... on DataObjectTypeChannelAvatar {
+        channel {
+          id
+        }
       }
-      ...on DataObjectTypeChannelCoverPhoto {
-        channel { id }
+      ... on DataObjectTypeChannelCoverPhoto {
+        channel {
+          id
+        }
       }
-      ...on DataObjectTypeVideoMedia {
-        video { id }
+      ... on DataObjectTypeVideoMedia {
+        video {
+          id
+        }
       }
-      ...on DataObjectTypeVideoThumbnail {
-        video { id }
+      ... on DataObjectTypeVideoThumbnail {
+        video {
+          id
+        }
       }
-      ...on DataObjectTypeVideoSubtitle {
-        subtitle { id }
-        video { id }
+      ... on DataObjectTypeVideoSubtitle {
+        subtitle {
+          id
+        }
+        video {
+          id
+        }
       }
     }
     stateBloatBond
@@ -499,13 +685,13 @@ query StateQueryV2 {
       description
       areas {
         __typename
-				...on GeographicalAreaContinent {
+        ... on GeographicalAreaContinent {
           continentCode
         }
-        ...on GeographicalAreaCountry {
+        ... on GeographicalAreaCountry {
           countryCode
         }
-        ...on GeographicalAreaSubdivistion {
+        ... on GeographicalAreaSubdivistion {
           subdivisionCode
         }
       }
@@ -517,16 +703,26 @@ query StateQueryV2 {
   }
   distributionBuckets(limit: 9999) {
     id
-    family { id }
+    family {
+      id
+    }
     bucketIndex
-    operators { id }
+    operators {
+      id
+    }
     acceptingNewBags
     distributing
-    bags { bag { id } }
+    bags {
+      bag {
+        id
+      }
+    }
   }
   distributionBucketOperators(limit: 9999) {
     id
-    distributionBucket { id }
+    distributionBucket {
+      id
+    }
     workerId
     status
     metadata {
@@ -541,18 +737,30 @@ query StateQueryV2 {
   commentReactions(limit: 9999) {
     id
     reactionId
-    member { id }
-    comment { id }
-    video { id }
+    member {
+      id
+    }
+    comment {
+      id
+    }
+    video {
+      id
+    }
   }
   comments(limit: 9999) {
     id
     createdAt
-    author { id }
+    author {
+      id
+    }
     text
-    video { id }
+    video {
+      id
+    }
     status
-    reactions { id }
+    reactions {
+      id
+    }
     reactionsCountByReactionId {
       reactionId
       count
@@ -650,7 +858,9 @@ query StateQueryV2 {
   }
   videoSubtitles(limit: 9999) {
     id
-    video { id }
+    video {
+      id
+    }
     type
     language
     mimeType
@@ -662,7 +872,11 @@ query StateQueryV2 {
     id
     createdAt
     reaction
-    member { id }
-    video { id }
+    member {
+      id
+    }
+    video {
+      id
+    }
   }
 }

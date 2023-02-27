@@ -78,7 +78,13 @@ query GetMostViewedChannelsConnection(
   $after: String
   $where: ChannelWhereInput
 ) {
-  mostViewedChannelsConnection(limit: $limit, first: $first, after: $after, periodDays: $periodDays, where: $where) {
+  mostViewedChannelsConnection(
+    limit: $limit
+    first: $first
+    after: $after
+    periodDays: $periodDays
+    where: $where
+  ) {
     edges {
       cursor
       node {
@@ -100,7 +106,13 @@ query GetMostFollowedChannelsConnection(
   $after: String
   $where: ChannelWhereInput
 ) {
-  mostFollowedChannelsConnection(limit: $limit, first: $first, after: $after, periodDays: $periodDays, where: $where) {
+  mostFollowedChannelsConnection(
+    limit: $limit
+    first: $first
+    after: $after
+    periodDays: $periodDays
+    where: $where
+  ) {
     edges {
       cursor
       node {
