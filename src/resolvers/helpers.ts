@@ -1,4 +1,3 @@
-import { stringToHex, u8aToHex } from '@polkadot/util'
 import { OrionContext } from '../types'
 import { mapPeriods } from '../helpers'
 
