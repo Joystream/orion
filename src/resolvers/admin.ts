@@ -3,7 +3,8 @@ import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
 import { ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
-import { generateAppActionCommitment } from './helpers'
+import { generateAppActionCommitment } from '@joystream/js/utils'
+import { createType } from '@joystream/types'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -14,13 +15,15 @@ class AdminInput implements Admin {
 @ArgsType()
 class AppActionSignatureInput {
   @Field()
+  nonce: number
+  @Field()
   creatorId: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  assets: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAction: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAppActionMetadata: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  assets?: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  rawAction?: string
+  @Field({ description: 'Hex string from UInt8Array', nullable: true })
+  rawAppActionMetadata?: string
 }
 
 @Resolver()
@@ -41,17 +44,21 @@ export class AdminResolver {
 
   @Mutation(() => GeneratedSignature)
   async signAppActionCommitment(
-    @Args() { rawAppActionMetadata, rawAction, assets, creatorId }: AppActionSignatureInput
+    @Args() { rawAppActionMetadata, rawAction, assets, creatorId, nonce }: AppActionSignatureInput
   ) {
-    if (!isHex(assets) || !isHex(rawAction) || !isHex(rawAppActionMetadata)) {
+    if (
+      (assets && !isHex(assets)) ||
+      (rawAction && !isHex(rawAction)) ||
+      (rawAppActionMetadata && !isHex(rawAppActionMetadata))
+    ) {
       throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
     }
-
     const message = generateAppActionCommitment(
+      nonce,
       creatorId,
       hexToU8a(assets),
-      hexToU8a(rawAction),
-      hexToU8a(rawAppActionMetadata)
+      rawAction ? createType('Bytes', rawAction) : undefined,
+      rawAppActionMetadata ? createType('Bytes', rawAppActionMetadata) : undefined
     )
     const signature = ed25519Sign(message, config.appKeypair)
     return { signature: u8aToHex(signature) }

@@ -77,7 +77,18 @@ type Mutation {
   setCategoryFeaturedVideos(categoryId: ID!, videos: [FeaturedVideoInput!]!): [FeaturedVideo!]!
   setKillSwitch(isKilled: Boolean!): Admin!
   setVideoHero(newVideoHero: VideoHeroInput!): VideoHero!
-  signAppActionCommitment(assets: String!, creatorId: String!, rawAction: String!, rawAppActionMetadata: String!): GeneratedSignature!
+  signAppActionCommitment(
+    """Hex string from UInt8Array"""
+    assets: String
+    creatorId: String!
+    nonce: Float!
+
+    """Hex string from UInt8Array"""
+    rawAction: String
+
+    """Hex string from UInt8Array"""
+    rawAppActionMetadata: String
+  ): GeneratedSignature!
 
   """Remove a single follow from the target channel"""
   unfollowChannel(channelId: ID!): ChannelFollowsInfo!
