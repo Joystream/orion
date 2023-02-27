@@ -3,7 +3,8 @@ import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
 import { ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
-import { generateAppActionCommitment } from './helpers'
+import { generateAppActionCommitment } from '@joystream/js/utils'
+import { createType } from '@joystream/types'
 
 @ArgsType()
 class AdminInput implements Admin {
@@ -14,13 +15,13 @@ class AdminInput implements Admin {
 @ArgsType()
 class AppActionSignatureInput {
   @Field()
+  nonce: number
+  @Field()
   creatorId: string
   @Field({ description: 'Hex string from UInt8Array' })
   assets: string
   @Field({ description: 'Hex string from UInt8Array' })
   rawAction: string
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAppActionMetadata: string
 }
 
 @Resolver()
@@ -41,17 +42,18 @@ export class AdminResolver {
 
   @Mutation(() => GeneratedSignature)
   async signAppActionCommitment(
-    @Args() { rawAppActionMetadata, rawAction, assets, creatorId }: AppActionSignatureInput
+    // FIXME: In the initial implementation we don't verify the nonce, but this should be changed in the future
+    @Args() { nonce, rawAction, assets, creatorId }: AppActionSignatureInput
   ) {
-    if (!isHex(assets) || !isHex(rawAction) || !isHex(rawAppActionMetadata)) {
-      throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
+    if (!isHex(assets) || !isHex(rawAction)) {
+      throw new Error('One of input is not hex: assets, rawAction')
     }
 
     const message = generateAppActionCommitment(
-      creatorId,
+      nonce,
+      `m:${creatorId}`,
       hexToU8a(assets),
-      hexToU8a(rawAction),
-      hexToU8a(rawAppActionMetadata)
+      createType('Bytes', rawAction)
     )
     const signature = ed25519Sign(message, config.appKeypair)
     return { signature: u8aToHex(signature) }
