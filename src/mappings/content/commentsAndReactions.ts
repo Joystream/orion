@@ -414,12 +414,16 @@ export async function processCreateCommentMessage(
   })
 
   if (parentComment) {
-    // Notify parent comment author
-    addNotification(overlay, [parentComment.authorId], event.id)
+    // Notify parent comment author (unless he's the author of the created comment)
+    if (parentComment.authorId !== comment.authorId) {
+      addNotification(overlay, [parentComment.authorId], event.id)
+    }
   } else {
-    // Notify channel owner
+    // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
-    addNotification(overlay, [channelOwnerMemberId], event.id)
+    if (channelOwnerMemberId !== comment.authorId) {
+      addNotification(overlay, [channelOwnerMemberId], event.id)
+    }
   }
 
   return new MetaprotocolTransactionResultCommentCreated({ commentCreated: comment.id })
