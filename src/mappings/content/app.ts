@@ -1,10 +1,4 @@
-import {
-  CreateApp,
-  ICreateApp,
-  IDeleteApp,
-  IUpdateApp,
-  UpdateApp,
-} from '@joystream/metadata-protobuf'
+import { CreateApp, ICreateApp, IUpdateApp, UpdateApp } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { App, MetaprotocolTransactionResult, MetaprotocolTransactionResultOK } from '../../model'
@@ -87,34 +81,6 @@ export async function processUpdateAppMessage(
       'authKey',
     ])
   }
-
-  return new MetaprotocolTransactionResultOK()
-}
-
-export async function processDeleteAppMessage(
-  overlay: EntityManagerOverlay,
-  decodedMessage: DecodedMetadataObject<IDeleteApp>,
-  memberId: string
-): Promise<MetaprotocolTransactionResult> {
-  const { appId } = decodedMessage
-
-  const app = await overlay.getRepository(App).getById(appId)
-
-  if (!app) {
-    return metaprotocolTransactionFailure(UpdateApp, `App doesn't exists: ${appId}`, {
-      decodedMessage,
-    })
-  }
-
-  if (app.ownerMemberId !== memberId) {
-    return metaprotocolTransactionFailure(
-      UpdateApp,
-      `Cannot update app; app does not belong to the member: ${memberId}`,
-      { decodedMessage, memberId }
-    )
-  }
-
-  overlay.getRepository(App).remove(app)
 
   return new MetaprotocolTransactionResultOK()
 }
