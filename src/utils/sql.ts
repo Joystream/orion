@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { EntityManager } from 'typeorm'
 
 export const selectQueryClauses = [
   'SELECT',
@@ -86,4 +87,11 @@ export function extendClause(
     `${glue} ${extension} ` +
     (clauseRange[1] ? selectQuery.substring(clauseRange[1]) : '')
   )
+}
+
+export async function withHiddenEntities<R>(em: EntityManager, func: () => Promise<R>): Promise<R> {
+  await em.query('SET LOCAL search_path TO processor,public')
+  const result = await func()
+  await em.query('SET LOCAL search_path TO DEFAULT')
+  return result
 }
