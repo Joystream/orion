@@ -26,7 +26,7 @@
     "@polkadot/util-crypto": "9.5.1"
   },
   "dependencies": {
-    "@joystream/metadata-protobuf": "2.6.0",
+    "@joystream/metadata-protobuf": "^2.8.0",
     "@joystream/types": "0.20.5",
     "@polkadot/util-crypto": "9.5.1",
     "@subsquid/archive-registry": "^2.1.0",
