@@ -16,9 +16,10 @@ import {
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
 import { createType } from '@joystream/types'
-import { processAppActionMetadata, generateAppActionCommitment, deleteChannel } from './utils'
+import { processAppActionMetadata, deleteChannel } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processChannelCreatedEvent({
   overlay,

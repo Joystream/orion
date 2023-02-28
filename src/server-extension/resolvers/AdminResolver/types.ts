@@ -170,6 +170,9 @@ export class RestoreContentResult {
 @ArgsType()
 export class AppActionSignatureInput {
   @Field()
+  nonce: number
+
+  @Field()
   creatorId: string
 
   @Field({ description: 'Hex string from UInt8Array' })
