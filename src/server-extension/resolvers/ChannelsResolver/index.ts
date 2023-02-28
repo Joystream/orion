@@ -19,7 +19,7 @@ import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { extendClause } from '../../../utils/sql'
+import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
@@ -151,7 +151,7 @@ export class ChannelsResolver {
   ): Promise<ChannelFollowResult> {
     const em = await this.em()
     const { ip } = ctx
-    return em.transaction(async (em) => {
+    return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
         where: { id: channelId },
@@ -199,7 +199,7 @@ export class ChannelsResolver {
     @Args() { channelId, token }: UnfollowChannelArgs
   ): Promise<ChannelUnfollowResult> {
     const em = await this.em()
-    return em.transaction(async (em) => {
+    return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
         where: { id: channelId },
@@ -232,7 +232,7 @@ export class ChannelsResolver {
   ): Promise<ChannelReportInfo> {
     const em = await this.em()
     const { ip } = ctx
-    return em.transaction(async (em) => {
+    return withHiddenEntities(em, async () => {
       // Try to retrieve the channel first
       const channel = await em.findOne(Channel, {
         where: { id: channelId },

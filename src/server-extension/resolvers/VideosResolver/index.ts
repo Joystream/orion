@@ -30,7 +30,7 @@ import { GraphQLResolveInfo } from 'graphql'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
-import { extendClause } from '../../../utils/sql'
+import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
 import { ContextWithIP } from '../../check'
 import { randomAsHex } from '@polkadot/util-crypto'
@@ -150,7 +150,7 @@ export class VideosResolver {
   ): Promise<AddVideoViewResult> {
     const em = await this.em()
     const { ip } = ctx
-    return em.transaction(async (em) => {
+    return withHiddenEntities(em, async () => {
       // Check if the video actually exists & lock it for update
       const video = await em.findOne(Video, {
         where: { id: videoId },
@@ -210,7 +210,7 @@ export class VideosResolver {
   ): Promise<VideoReportInfo> {
     const em = await this.em()
     const { ip } = ctx
-    return em.transaction(async (em) => {
+    return withHiddenEntities(em, async () => {
       // Try to retrieve the video+channel first
       const video = await em.findOne(Video, {
         where: { id: videoId },
