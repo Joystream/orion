@@ -49,12 +49,10 @@ export function getClauseRange(
   return [startIndex + clause.length, endIndex]
 }
 
-export function extendClause(
+export function getForcedClauseRange(
   selectQuery: string,
-  clause: SelectQueryClause,
-  extension: string,
-  glue = ','
-): string {
+  clause: SelectQueryClause
+): [number, number] {
   let clauseRange = getClauseRange(selectQuery, clause)
   for (
     let clauseIndex = selectQueryClauses.indexOf(clause) - 1;
@@ -68,8 +66,33 @@ export function extendClause(
       : undefined
   }
   if (!clauseRange) {
-    throw new Error(`Cannot extend ${clause} clause of query: ${selectQuery}`)
+    throw new Error(
+      `Cannot forcefully determine range of ${clause} clause in query: ${selectQuery}`
+    )
   }
+  return clauseRange as [number, number]
+}
+
+export function overrideClause(
+  selectQuery: string,
+  clause: SelectQueryClause,
+  newValue: string
+): string {
+  const clauseRange = getForcedClauseRange(selectQuery, clause)
+  return (
+    selectQuery.substring(0, clauseRange[0]) +
+    (clauseRange[0] === clauseRange[1] ? ` ${clause} ${newValue} ` : ` ${newValue} `) +
+    selectQuery.substring(clauseRange[1])
+  )
+}
+
+export function extendClause(
+  selectQuery: string,
+  clause: SelectQueryClause,
+  extension: string,
+  glue = ','
+): string {
+  const clauseRange = getForcedClauseRange(selectQuery, clause)
   if (clauseRange[0] === clauseRange[1]) {
     // Clause is missing
     return (

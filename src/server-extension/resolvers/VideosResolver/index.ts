@@ -30,10 +30,12 @@ import { GraphQLResolveInfo } from 'graphql'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
-import { extendClause, withHiddenEntities } from '../../../utils/sql'
+import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
 import { ContextWithIP } from '../../check'
 import { randomAsHex } from '@polkadot/util-crypto'
+import { isObject } from 'lodash'
+import { has } from '../../../utils/misc'
 
 @Resolver()
 export class VideosResolver {
@@ -50,6 +52,10 @@ export class VideosResolver {
     const typeName = 'Video'
     const outputType = 'VideosConnection'
     const edgeType = 'VideoEdge'
+
+    if (args.limit > 1000) {
+      throw new Error('The limit cannot exceed 1000')
+    }
 
     // Validation based on '@subsquid/openreader/src/opencrud/schema.ts'
     const orderByArg = ensureArray(args.orderBy)
@@ -95,28 +101,36 @@ export class VideosResolver {
 
     ctx.openreader.responseSizeLimit?.check(() => getConnectionSize(model, typeName, req) + 1)
 
-    const mostViewedInPeriodQueryString = `
-      SELECT
-        "video"."id"
-      FROM
-        "video"
-        LEFT JOIN "video_view_event"
-          ON "video_view_event"."video_id" = "video"."id"${
-            args.periodDays
-              ? ` AND "video_view_event"."timestamp" > '${new Date(
-                  Date.now() - args.periodDays * 24 * 60 * 60 * 1000
-                ).toISOString()}'`
-              : ''
-          }
-      GROUP BY "video"."id"
-      ORDER BY COUNT("video_view_event"."id") DESC
-      LIMIT ${args.limit} 
-    `
+    const idsQuery = new CountQuery(model, ctx.openreader.dialect, typeName, req.where)
+    let idsQuerySql = idsQuery.sql
+    idsQuerySql = extendClause(
+      idsQuerySql,
+      'FROM',
+      `LEFT JOIN "processor"."video_view_event" ` +
+        `ON "video_view_event"."video_id" = "video"."id"` +
+        (args.periodDays
+          ? ` AND "video_view_event"."timestamp" > '${new Date(
+              Date.now() - args.periodDays * 24 * 60 * 60 * 1000
+            ).toISOString()}'`
+          : ''),
+      ''
+    )
+    idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
+    idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
+    idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
+    idsQuerySql = overrideClause(idsQuerySql, 'LIMIT', `${args.limit}`)
+
+    const em = await this.em()
+    const results: unknown[] = await em.query(idsQuerySql)
+    const ids: string[] = results.flatMap((r) =>
+      isObject(r) && has(r, 'id') && typeof r.id === 'string' ? [r.id] : []
+    )
+
     const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
     const connectionQuerySql = extendClause(
       connectionQuery.sql,
       'WHERE',
-      `"video"."id" IN (${mostViewedInPeriodQueryString})`,
+      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       'AND'
     )
 
@@ -131,7 +145,7 @@ export class VideosResolver {
       const countQuerySql = extendClause(
         countQuery.sql,
         'WHERE',
-        `"video"."id" IN (${mostViewedInPeriodQueryString})`,
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
         'AND'
       )
       // Override the raw `sql` string in `countQuery` with the modified query
