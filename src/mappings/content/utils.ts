@@ -618,20 +618,3 @@ export async function processAppActionMetadata<
 
   return entityMetadataProcessor(entity)
 }
-
-export function generateAppActionCommitment(
-  nonce: number,
-  creatorId: string,
-  assets: Uint8Array,
-  rawAction?: Bytes,
-  rawAppActionMetadata?: Bytes
-): string {
-  const rawCommitment = [
-    nonce,
-    creatorId,
-    u8aToHex(assets),
-    ...(rawAction ? [u8aToHex(rawAction)] : []),
-    ...(rawAppActionMetadata ? [u8aToHex(rawAppActionMetadata)] : []),
-  ]
-  return stringToHex(JSON.stringify(rawCommitment))
-}

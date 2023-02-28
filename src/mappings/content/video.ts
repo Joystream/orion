@@ -11,12 +11,8 @@ import { Channel, Membership, Video } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
-import {
-  deleteVideo,
-  generateAppActionCommitment,
-  processAppActionMetadata,
-  processNft,
-} from './utils'
+import { deleteVideo, processAppActionMetadata, processNft } from './utils'
+import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processVideoCreatedEvent({
   overlay,

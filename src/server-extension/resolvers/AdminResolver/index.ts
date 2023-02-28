@@ -37,7 +37,8 @@ import { VideoHero } from '../baseTypes'
 import { model } from '../model'
 import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
-import { generateAppActionCommitment } from './utils'
+import { generateAppActionCommitment } from '@joystream/js/utils'
+import { createType } from '@joystream/types'
 
 @Resolver()
 export class AdminResolver {
@@ -252,19 +253,20 @@ export class AdminResolver {
   }
 
   @Mutation(() => GeneratedSignature)
+  // FIXME: In the initial implementation we don't verify the nonce (see: https://github.com/Joystream/joystream/issues/4672)
   async signAppActionCommitment(
-    @Args() { rawAppActionMetadata, rawAction, assets, creatorId }: AppActionSignatureInput
+    @Args() { rawAction, assets, creatorId, nonce }: AppActionSignatureInput
   ) {
     const em = await this.em()
-    if (!isHex(assets) || !isHex(rawAction) || !isHex(rawAppActionMetadata)) {
-      throw new Error('One of input is not hex: assets, rawAction, rawAppActionMetadata')
+    if (!isHex(assets) || !isHex(rawAction)) {
+      throw new Error('One of input is not hex: assets, rawAction')
     }
 
     const message = generateAppActionCommitment(
-      creatorId,
+      nonce,
+      `m:${creatorId}`,
       hexToU8a(assets),
-      hexToU8a(rawAction),
-      hexToU8a(rawAppActionMetadata)
+      createType('Bytes', rawAction)
     )
     const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
     const signature = ed25519Sign(message, appKeypair)
