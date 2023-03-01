@@ -1,5 +1,6 @@
 import {
   Channel,
+  ChannelFollow,
   Event,
   Membership,
   MetaprotocolTransactionResultFailed,
@@ -33,6 +34,10 @@ export async function processChannelCreatedEvent({
     ],
   },
 }: EventHandlerContext<'Content.ChannelCreated'>) {
+  const followsNum = await overlay
+    .getEm()
+    .getRepository(ChannelFollow)
+    .countBy({ channelId: channelId.toString() })
   // create entity
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
@@ -43,7 +48,7 @@ export async function processChannelCreatedEvent({
     ownerMemberId: owner.__kind === 'Member' ? owner.value.toString() : undefined,
     rewardAccount: toAddress(rewardAccount),
     channelStateBloatBond: channelStateBloatBond.amount,
-    followsNum: 0,
+    followsNum,
     videoViewsNum: 0,
   })
 

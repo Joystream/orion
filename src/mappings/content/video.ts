@@ -7,7 +7,7 @@ import {
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
-import { Channel, Membership, Video } from '../../model'
+import { Channel, Membership, Video, VideoViewEvent } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
@@ -25,8 +25,10 @@ export async function processVideoCreatedEvent({
 }: EventHandlerContext<'Content.VideoCreated'>): Promise<void> {
   const { meta, expectedVideoStateBloatBond, autoIssueNft } = contentCreationParameters
 
+  const videoId = contentId.toString()
+  const viewsNum = await overlay.getEm().getRepository(VideoViewEvent).countBy({ videoId })
   const video = overlay.getRepository(Video).new({
-    id: contentId.toString(),
+    id: videoId,
     createdAt: new Date(block.timestamp),
     channelId: channelId.toString(),
     isCensored: false,
@@ -37,7 +39,7 @@ export async function processVideoCreatedEvent({
     videoStateBloatBond: expectedVideoStateBloatBond,
     commentsCount: 0,
     reactionsCount: 0,
-    viewsNum: 0,
+    viewsNum,
   })
 
   // fetch related channel and owner
@@ -45,6 +47,9 @@ export async function processVideoCreatedEvent({
   const ownerMember = channel.ownerMemberId
     ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
     : undefined
+
+  // update channels videoViewsNum
+  channel.videoViewsNum += viewsNum
 
   // deserialize & process metadata
   const appAction = meta && deserializeMetadata(AppAction, meta, { skipWarning: true })

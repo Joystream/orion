@@ -39,8 +39,8 @@ type ChannelFollow @entity {
   "IP address of the follower"
   ip: String! @index
 
-  "Channel being followed"
-  channel: Channel!
+  "ID of the channel being followed (the channel may no longer exist)"
+  channelId: String! @index
 
   "Time when user started following the channel"
   timestamp: DateTime!
