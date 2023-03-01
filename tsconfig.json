@@ -13,7 +13,8 @@
     "strict": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist"]
 }
