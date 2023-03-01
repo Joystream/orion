@@ -42,7 +42,6 @@ import {
   VideoReaction,
   VideoMediaEncoding,
   App,
-  ChannelFollow,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -57,8 +56,6 @@ import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import { ed25519Verify } from '@polkadot/util-crypto'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Bytes } from '@polkadot/types/primitive'
-import { u8aToHex, stringToHex } from '@polkadot/util'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -140,10 +137,6 @@ export const ASSETS_MAP: AssetsMap = {
 }
 
 export async function deleteChannel(overlay: EntityManagerOverlay, channelId: bigint) {
-  const follows = await overlay
-    .getRepository(ChannelFollow)
-    .getManyByRelation('channelId', channelId.toString())
-  overlay.getRepository(ChannelFollow).remove(...follows)
   overlay.getRepository(Channel).remove(channelId.toString())
 }
 

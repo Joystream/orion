@@ -8,3 +8,4 @@
 /.idea
 src/model/generated
 /schema.graphql
+/db/persisted

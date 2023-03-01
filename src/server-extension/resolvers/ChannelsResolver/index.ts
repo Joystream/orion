@@ -162,7 +162,7 @@ export class ChannelsResolver {
       }
       // Check if there's already an existing follow by this IP
       const existingFollow = await em.findOne(ChannelFollow, {
-        where: { channel: { id: channelId }, ip },
+        where: { channelId, ip },
       })
       // If so - just return the result
       if (existingFollow) {
@@ -178,7 +178,7 @@ export class ChannelsResolver {
       channel.followsNum += 1
       const newFollow = new ChannelFollow({
         id: cancelToken,
-        channel,
+        channelId,
         ip,
         timestamp: new Date(),
       })
@@ -210,7 +210,7 @@ export class ChannelsResolver {
       }
       // Check if there's a follow matching the request data
       const follow = await em.findOne(ChannelFollow, {
-        where: { channel: { id: channelId }, id: token },
+        where: { channelId, id: token },
       })
       // If not - just return the current number of follows
       if (!follow) {
