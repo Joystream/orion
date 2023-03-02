@@ -121,10 +121,13 @@ export class VideosResolver {
     idsQuerySql = overrideClause(idsQuerySql, 'LIMIT', `${args.limit}`)
 
     const em = await this.em()
-    const results: unknown[] = await em.query(idsQuerySql)
-    const ids: string[] = results.flatMap((r) =>
+    const results: unknown[] = await em.query(idsQuerySql, idsQuery.params)
+    let ids: string[] = results.flatMap((r) =>
       isObject(r) && has(r, 'id') && typeof r.id === 'string' ? [r.id] : []
     )
+    if (ids.length === 0) {
+      ids = ['-1']
+    }
 
     const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
     const connectionQuerySql = extendClause(
