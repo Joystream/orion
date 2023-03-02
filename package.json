@@ -5,7 +5,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "generate:schema": "find schema -type f -exec cat {} \\; > schema.graphql",
+    "generate:schema": "./scripts/generate-schema-file.sh",
     "build": "npm run generate:schema; rm -rf lib && tsc",
     "lint": "eslint --ext .ts ./src",
     "format": "prettier --write .",
@@ -48,7 +48,8 @@
     "type-graphql": "^1.2.0-rc.1",
     "typeorm": "^0.3.11",
     "url-join": "^4",
-    "haversine-distance": "^1.2.1"
+    "haversine-distance": "^1.2.1",
+    "ajv": "^6.11.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
