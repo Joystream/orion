@@ -16,8 +16,7 @@ import {
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
-import { createType } from '@joystream/types'
-import { processAppActionMetadata, deleteChannel } from './utils'
+import { processAppActionMetadata, deleteChannel, encodeAssets } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -68,10 +67,7 @@ export async function processChannelCreatedEvent({
       const appCommitment = generateAppActionCommitment(
         ownerMember?.totalChannelsCreated ?? -1,
         ownerMember?.id ? `m:${ownerMember.id}` : '',
-        createType(
-          'Option<PalletContentStorageAssetsRecord>',
-          channelCreationParameters.assets as any
-        ).toU8a(),
+        encodeAssets(channelCreationParameters.assets),
         appAction.rawAction ? channelMetadataBytes : undefined,
         appAction.metadata ? u8aToBytes(appAction.metadata) : undefined
       )
