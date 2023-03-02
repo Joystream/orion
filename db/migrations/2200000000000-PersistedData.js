@@ -11,6 +11,9 @@ module.exports = class PersistedData2200000000000 {
     ]
 
     async up(db) {
+      if (process.env.SKIP_IMPORT === '1' || process.env.SKIP_IMPORT === 'true') {
+        return
+      }
       await db.query('SET LOCAL search_path TO processor,public')
       for (const tableName of this.tablesToImport) {
         const sourcePath = path.resolve(__dirname, `../persisted/${tableName}`)

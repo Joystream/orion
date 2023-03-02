@@ -17,6 +17,7 @@ FROM node-with-gyp AS deps
 WORKDIR /squid
 ADD package.json .
 ADD package-lock.json .
+ADD assets assets
 RUN npm ci --production
 
 FROM node AS squid
