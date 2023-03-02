@@ -6,12 +6,11 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { createType } from '@joystream/types'
 import { Channel, Membership, Video, VideoViewEvent } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
-import { deleteVideo, processAppActionMetadata, processNft } from './utils'
+import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processVideoCreatedEvent({
@@ -63,10 +62,7 @@ export async function processVideoCreatedEvent({
     const appCommitment = generateAppActionCommitment(
       ownerMember?.totalVideosCreated ?? -1,
       channel.id ?? '',
-      createType(
-        'Option<PalletContentStorageAssetsRecord>',
-        contentCreationParameters.assets as any
-      ).toU8a(),
+      encodeAssets(contentCreationParameters.assets),
       appAction.rawAction ? contentMetadataBytes : undefined,
       appActionMetadataBytes
     )

@@ -51,11 +51,14 @@ import {
   InitTransactionalStatusRecord,
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
+  StorageAssetsRecord,
 } from '../../types/v1000'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import { ed25519Verify } from '@polkadot/util-crypto'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
+import { createType } from '@joystream/types'
+import BN from 'bn.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -610,4 +613,19 @@ export async function processAppActionMetadata<
   integrateMeta(entity, { entryAppId: app.id }, ['entryAppId'])
 
   return entityMetadataProcessor(entity)
+}
+
+export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Array {
+  return createType(
+    'Option<PalletContentStorageAssetsRecord>',
+    assets
+      ? {
+          expectedDataSizeFee: new BN(assets.expectedDataSizeFee.toString()),
+          objectCreationList: assets.objectCreationList.map((o) => ({
+            size_: new BN(o.size.toString()),
+            ipfsContentId: Array.from(o.ipfsContentId),
+          })),
+        }
+      : null
+  ).toU8a()
 }
