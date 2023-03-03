@@ -2,7 +2,6 @@ import { FieldResolver, Root, ObjectType, Field, Resolver, Ctx } from 'type-grap
 import { EntityManager } from 'typeorm'
 import {
   StorageDataObject as DataObjectEntity,
-  DistributionBucketBag,
   DistributionBucket,
   DistributionBucketOperatorMetadata,
   DistributionBucketOperatorStatus,
@@ -67,16 +66,18 @@ class DistributionBucketsCache {
     this.em = await getEm()
     while (true) {
       try {
-        this.logger.debug('Loading distribution buckets and bags data...')
+        this.logger.debug('Reloading distribution buckets and bags cache data...')
         const start = performance.now()
         await this.loadData()
         this.logger.debug(
-          `Loading distribution buckets and bags data took ${performance.now() - start}ms`
+          `Reloading distribution buckets and bags cache data took ${(
+            performance.now() - start
+          ).toFixed(2)}ms`
         )
-        this.logger.debug(`Buckets loaded: ${this.bucketsById.size}`)
-        this.logger.debug(`Bags loaded: ${this.bucketIdsByBagId.size}`)
+        this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
+        this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
       } catch (e) {
-        this.logger.error(`Cannot get updated state: ${e instanceof Error ? e.message : ''}`)
+        this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
       }
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
@@ -112,23 +113,44 @@ class DistributionBucketsCache {
     const bucketIdsByBagId: DistributionBucketIdsByBagId = new Map()
     const bucketsById: BucketsById = new Map()
 
-    const bagToBuckets = await this.em.getRepository(DistributionBucketBag).find()
+    // We use .query() here instead of .find() for improved performance
+    const bagToBucketsStart = performance.now()
+    const bagToBuckets: { distribution_bucket_id: string; bag_id: string }[] = await this.em.query(
+      'SELECT distribution_bucket_id, bag_id FROM distribution_bucket_bag'
+    )
+    this.logger.debug(
+      `Found ${bagToBuckets.length} bucket-to-bag connections (took: ${(
+        performance.now() - bagToBucketsStart
+      ).toFixed(2)}ms)`
+    )
+
+    const distributionBucketsStart = performance.now()
     const distributionBuckets = await this.em.getRepository(DistributionBucket).find({
       where: {
         distributing: true,
       },
       relations: ['operators'],
     })
+    this.logger.debug(
+      `Found ${distributionBuckets.length} distribution buckets (took: ${(
+        performance.now() - distributionBucketsStart
+      ).toFixed(2)}ms)`
+    )
+
+    const operatorsMetaStart = performance.now()
     const operatorsMeta = _.groupBy(
       await this.em.getRepository(DistributionBucketOperatorMetadata).find(),
       (e) => e.distirbutionBucketOperatorId
     )
+    this.logger.debug(
+      `Found ${
+        Object.keys(operatorsMeta).length
+      } instances of distribution bucket operator metadata (took: ${(
+        performance.now() - operatorsMetaStart
+      ).toFixed(2)}ms)`
+    )
 
-    this.logger.debug(`Total number of distribution buckets: ${distributionBuckets.length}`)
-    this.logger.debug(`Total number of operators w/ metadata: ${Object.keys(operatorsMeta).length}`)
-    this.logger.debug(`Total number of bag-to-bucket connections: ${bagToBuckets.length}`)
-
-    for (const { bagId, distributionBucketId } of bagToBuckets) {
+    for (const { bag_id: bagId, distribution_bucket_id: distributionBucketId } of bagToBuckets) {
       const distributionBucket = distributionBuckets.find((b) => b.id === distributionBucketId)
       if (distributionBucket && distributionBucketId && bagId) {
         // Update DistributionBucketIdsByBagId
@@ -139,7 +161,9 @@ class DistributionBucketsCache {
         // Update BucketsById if the bucket not already loaded
         if (!bucketsById.get(distributionBucketId)) {
           const bucketData = this.resolveBucketData(distributionBucket, operatorsMeta)
-          bucketsById.set(distributionBucketId, bucketData)
+          if (bucketData.nodes.length) {
+            bucketsById.set(distributionBucketId, bucketData)
+          }
         }
       }
     }
