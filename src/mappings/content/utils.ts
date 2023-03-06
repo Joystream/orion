@@ -540,43 +540,34 @@ export async function finishAuction(
 
 async function validateAndGetApp(
   overlay: EntityManagerOverlay,
-  validationContext: {
-    ownerNonce: number | undefined
-    appCommitment: string | undefined
-  },
+  expectedSignedCommitment: string,
   appAction: DecodedMetadataObject<IAppAction>
 ): Promise<Flat<App> | undefined> {
   // If one is missing we cannot verify the signature
-  if (
-    !appAction.appId ||
-    !appAction.signature ||
-    typeof appAction.nonce !== 'number' ||
-    !validationContext.appCommitment
-  ) {
+  if (!appAction.appId || !appAction.signature) {
     invalidMetadata(AppAction, 'Missing action fields to verify app', { decodedMessage: appAction })
     return undefined
   }
 
   const app = await overlay.getRepository(App).getById(appAction.appId)
 
-  if (!app || !app.authKey) {
+  if (!app) {
     invalidMetadata(AppAction, 'No app of given id found', { decodedMessage: appAction })
     return undefined
   }
 
-  if (
-    typeof validationContext.ownerNonce === 'undefined' ||
-    validationContext.ownerNonce !== appAction.nonce
-  ) {
-    invalidMetadata(AppAction, 'Invalid app action nonce', { decodedMessage: appAction })
-
+  if (!app.authKey) {
+    invalidMetadata(AppAction, 'The provided app has no auth key assigned', {
+      decodedMessage: appAction,
+      app,
+    })
     return undefined
   }
 
   try {
     const isSignatureValid = ed25519Verify(
-      validationContext.appCommitment,
-      appAction.signature as Uint8Array,
+      expectedSignedCommitment,
+      appAction.signature,
       app.authKey
     )
 
@@ -599,13 +590,10 @@ export async function processAppActionMetadata<
   overlay: EntityManagerOverlay,
   entity: T,
   meta: DecodedMetadataObject<IAppAction>,
-  validationContext: {
-    ownerNonce: number | undefined
-    appCommitment: string | undefined
-  },
+  expectedSignedCommitment: string,
   entityMetadataProcessor: (entity: T) => Promise<void>
 ): Promise<void> {
-  const app = await validateAndGetApp(overlay, validationContext, meta)
+  const app = await validateAndGetApp(overlay, expectedSignedCommitment, meta)
   if (!app) {
     return entityMetadataProcessor(entity)
   }

@@ -30,7 +30,6 @@ export async function processNewMember({
     controllerAccount: toAddress(controllerAccount),
     handle: handle && bytesToString(handle),
     totalChannelsCreated: 0,
-    totalVideosCreated: 0,
   })
 
   if (metadata) {

@@ -127,6 +127,6 @@ export function backwardCompatibleMetaID(block: SubstrateBlock, indexInBlock: nu
   return `METAPROTOCOL-OLYMPIA-${block.height}-${indexInBlock}`
 }
 
-export function u8aToBytes(array?: DecodedMetadataObject<Uint8Array> | null): Bytes {
-  return createType('Bytes', array ? u8aToHex(array as Uint8Array) : '')
+export function u8aToBytes(array?: Uint8Array | null): Bytes {
+  return createType('Bytes', array ? u8aToHex(array) : '')
 }
