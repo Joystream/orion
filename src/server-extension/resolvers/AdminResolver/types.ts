@@ -1,4 +1,5 @@
 import { ArgsType, Field, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
+import { AppAction } from '@joystream/metadata-protobuf'
 
 @ArgsType()
 export class SetKillSwitchInput {
@@ -181,8 +182,8 @@ export class AppActionSignatureInput {
   @Field({ description: 'Hex string from UInt8Array' })
   rawAction: string
 
-  @Field({ description: 'Hex string from UInt8Array' })
-  rawAppActionMetadata: string
+  @Field(() => AppAction.ActionType)
+  actionType: AppAction.ActionType
 }
 
 @ObjectType()
@@ -190,3 +191,5 @@ export class GeneratedSignature {
   @Field({ description: 'App signature converted to hexadecimal string.' })
   signature: string
 }
+
+registerEnumType(AppAction.ActionType, { name: 'AppActionActionType' })

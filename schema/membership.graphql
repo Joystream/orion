@@ -51,7 +51,4 @@ type Membership @entity {
 
   "Number of channels ever created by this member"
   totalChannelsCreated: Int!
-
-  "Number of videos ever created by this member"
-  totalVideosCreated: Int!
 }

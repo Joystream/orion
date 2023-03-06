@@ -49,6 +49,7 @@ export async function processChannelCreatedEvent({
     channelStateBloatBond: channelStateBloatBond.amount,
     followsNum,
     videoViewsNum: 0,
+    totalVideosCreated: 0,
   })
 
   const ownerMember = channel.ownerMemberId
@@ -62,25 +63,31 @@ export async function processChannelCreatedEvent({
     })
 
     if (appAction) {
-      const channelMetadataBytes = u8aToBytes(appAction.rawAction)
-      const channelMetadata = deserializeMetadata(ChannelMetadata, channelMetadataBytes.toU8a(true))
-      const appCommitment = generateAppActionCommitment(
+      const channelMetadata = appAction.rawAction
+        ? deserializeMetadata(ChannelMetadata, appAction.rawAction) ?? {}
+        : {}
+      const creatorType = channel.ownerMemberId
+        ? AppAction.CreatorType.MEMBER
+        : AppAction.CreatorType.CURATOR_GROUP
+      const creatorId = channel.ownerMemberId ?? '' // curator groups not supported yet
+      const expectedCommitment = generateAppActionCommitment(
         ownerMember?.totalChannelsCreated ?? -1,
-        ownerMember?.id ? `m:${ownerMember.id}` : '',
+        creatorId,
+        AppAction.ActionType.CREATE_CHANNEL,
+        creatorType,
         encodeAssets(channelCreationParameters.assets),
-        appAction.rawAction ? channelMetadataBytes : undefined,
-        appAction.metadata ? u8aToBytes(appAction.metadata) : undefined
+        appAction.rawAction ?? undefined,
+        appAction.metadata ?? undefined
       )
       await processAppActionMetadata<Flat<Channel>>(
         overlay,
         channel,
         appAction,
-        { ownerNonce: ownerMember?.totalChannelsCreated, appCommitment },
-        (entity) =>
-          processChannelMetadata(overlay, block, entity, channelMetadata ?? {}, dataObjects)
+        expectedCommitment,
+        (entity) => processChannelMetadata(overlay, block, entity, channelMetadata, dataObjects)
       )
     } else {
-      const metadata = deserializeMetadata(ChannelMetadata, channelCreationParameters.meta) || {}
+      const metadata = deserializeMetadata(ChannelMetadata, channelCreationParameters.meta) ?? {}
       await processChannelMetadata(overlay, block, channel, metadata, dataObjects)
     }
   }

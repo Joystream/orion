@@ -6,7 +6,7 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, Membership, Video, VideoViewEvent } from '../../model'
+import { Channel, Video, VideoViewEvent } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
@@ -43,9 +43,6 @@ export async function processVideoCreatedEvent({
 
   // fetch related channel and owner
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
-  const ownerMember = channel.ownerMemberId
-    ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
-    : undefined
 
   // update channels videoViewsNum
   channel.videoViewsNum += viewsNum
@@ -54,43 +51,35 @@ export async function processVideoCreatedEvent({
   const appAction = meta && deserializeMetadata(AppAction, meta, { skipWarning: true })
 
   if (appAction) {
-    const contentMetadataBytes = u8aToBytes(appAction.rawAction)
-    const videoMetadata =
-      deserializeMetadata(ContentMetadata, contentMetadataBytes.toU8a(true))?.videoMetadata ?? {}
-    const appActionMetadataBytes = appAction.metadata ? u8aToBytes(appAction.metadata) : undefined
+    const videoMetadata = appAction.rawAction
+      ? deserializeMetadata(ContentMetadata, appAction.rawAction)?.videoMetadata ?? {}
+      : {}
 
-    const appCommitment = generateAppActionCommitment(
-      ownerMember?.totalVideosCreated ?? -1,
-      channel.id ?? '',
+    const expectedCommitment = generateAppActionCommitment(
+      channel.totalVideosCreated,
+      channel.id,
+      AppAction.ActionType.CREATE_VIDEO,
+      AppAction.CreatorType.CHANNEL,
       encodeAssets(contentCreationParameters.assets),
-      appAction.rawAction ? contentMetadataBytes : undefined,
-      appActionMetadataBytes
+      appAction.rawAction ?? undefined,
+      appAction.metadata ?? undefined
     )
-    await processAppActionMetadata(
-      overlay,
-      video,
-      appAction,
-      { ownerNonce: ownerMember?.totalVideosCreated, appCommitment },
-      (entity) => {
-        if (entity.entryAppId && appActionMetadataBytes) {
-          const appActionMetadata = deserializeMetadata(
-            AppActionMetadata,
-            appActionMetadataBytes.toU8a(true)
-          )
+    await processAppActionMetadata(overlay, video, appAction, expectedCommitment, (entity) => {
+      if (entity.entryAppId && appAction.metadata) {
+        const appActionMetadata = deserializeMetadata(AppActionMetadata, appAction.metadata)
 
-          appActionMetadata?.videoId &&
-            integrateMeta(entity, { ytVideoId: appActionMetadata.videoId }, ['ytVideoId'])
-        }
-        return processVideoMetadata(
-          overlay,
-          block,
-          indexInBlock,
-          entity,
-          videoMetadata,
-          newDataObjectIds
-        )
+        appActionMetadata?.videoId &&
+          integrateMeta(entity, { ytVideoId: appActionMetadata.videoId }, ['ytVideoId'])
       }
-    )
+      return processVideoMetadata(
+        overlay,
+        block,
+        indexInBlock,
+        entity,
+        videoMetadata,
+        newDataObjectIds
+      )
+    })
   } else {
     const contentMetadata = meta && deserializeMetadata(ContentMetadata, meta)
     if (contentMetadata?.videoMetadata) {
@@ -105,9 +94,7 @@ export async function processVideoCreatedEvent({
     }
   }
 
-  if (ownerMember) {
-    ownerMember.totalVideosCreated += 1
-  }
+  channel.totalVideosCreated += 1
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

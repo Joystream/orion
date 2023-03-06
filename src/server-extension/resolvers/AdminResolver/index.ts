@@ -38,7 +38,7 @@ import { model } from '../model'
 import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { createType } from '@joystream/types'
+import { AppAction } from '@joystream/metadata-protobuf'
 
 @Resolver()
 export class AdminResolver {
@@ -253,9 +253,10 @@ export class AdminResolver {
   }
 
   @Mutation(() => GeneratedSignature)
-  // FIXME: In the initial implementation we don't verify the nonce (see: https://github.com/Joystream/joystream/issues/4672)
   async signAppActionCommitment(
-    @Args() { rawAction, assets, creatorId, nonce }: AppActionSignatureInput
+    // FIXME: In the initial implementation we require the user to provide the nonce
+    // and don't verify it in any way, but this should be changed in the future
+    @Args() { nonce, rawAction, assets, creatorId, actionType }: AppActionSignatureInput
   ) {
     const em = await this.em()
     if (!isHex(assets) || !isHex(rawAction)) {
@@ -264,9 +265,13 @@ export class AdminResolver {
 
     const message = generateAppActionCommitment(
       nonce,
-      `m:${creatorId}`,
+      `${creatorId}`,
+      actionType,
+      actionType === AppAction.ActionType.CREATE_CHANNEL
+        ? AppAction.CreatorType.MEMBER // only members are supported as channel owners for now
+        : AppAction.CreatorType.CHANNEL,
       hexToU8a(assets),
-      createType('Bytes', rawAction)
+      hexToU8a(rawAction)
     )
     const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
     const signature = ed25519Sign(message, appKeypair)

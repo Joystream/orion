@@ -55,6 +55,9 @@ type Channel @entity {
 
   "Application used for channel creation"
   entryApp: App
+
+  "Number of videos ever created in this channel"
+  totalVideosCreated: Int!
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
