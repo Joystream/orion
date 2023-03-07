@@ -42,6 +42,7 @@ import {
   VideoReaction,
   VideoMediaEncoding,
   App,
+  BannedMember,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -140,6 +141,11 @@ export const ASSETS_MAP: AssetsMap = {
 }
 
 export async function deleteChannel(overlay: EntityManagerOverlay, channelId: bigint) {
+  const bannedMembers = await overlay
+    .getRepository(BannedMember)
+    .getManyByRelation('channelId', channelId.toString())
+
+  overlay.getRepository(BannedMember).remove(...bannedMembers)
   overlay.getRepository(Channel).remove(channelId.toString())
 }
 
