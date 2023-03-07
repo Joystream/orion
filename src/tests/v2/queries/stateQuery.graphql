@@ -319,23 +319,21 @@ fragment StateQueryEventFields on Event {
 }
 
 query StateQueryV2 {
-  # TODO: Ephesus
-  #   apps(limit: 9999) {
-  #     id
-  #     name
-  #     websiteUrl
-  #     useUri
-  #     smallIcon
-  #     mediumIcon
-  #     bigIcon
-  #     oneLiner
-  #     description
-  #     termsOfService
-  #     platforms
-  #     category
-  #     authKey
-  #     channel { id }
-  #   }
+  apps(limit: 9999) {
+    id
+    name
+    websiteUrl
+    useUri
+    smallIcon
+    mediumIcon
+    bigIcon
+    oneLiner
+    description
+    termsOfService
+    platforms
+    category
+    authKey
+  }
   channels(limit: 9999) {
     id
     createdAt
@@ -366,7 +364,10 @@ query StateQueryV2 {
     }
     # TODO: Ephesus
     # cumulativeRewardClaimed
-    # app { id }
+    entryApp {
+      id
+    }
+    totalVideosCreated
   }
   commentCreatedEvents: events(
     limit: 9999
@@ -502,6 +503,7 @@ query StateQueryV2 {
         id
       }
     }
+    totalChannelsCreated
   }
   ownedNfts(limit: 9999) {
     id
