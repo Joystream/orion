@@ -44,6 +44,21 @@ fragment BidFields on Bid {
 }
 
 query StateQueryV1 {
+  apps(limit: 9999) {
+    id
+    name
+    websiteUrl
+    useUri
+    smallIcon
+    mediumIcon
+    bigIcon
+    oneLiner
+    description
+    termsOfService
+    platforms
+    category
+    authKey
+  }
   channels(limit: 9999) {
     id
     createdAt
@@ -72,6 +87,10 @@ query StateQueryV1 {
     bannedMembers {
       id
     }
+    entryApp {
+      id
+    }
+    totalVideosCreated
   }
   commentCreatedEvents(limit: 9999) {
     id
@@ -412,6 +431,7 @@ query StateQueryV1 {
     memberBannedFromChannels {
       id
     }
+    totalChannelsCreated
   }
   ownedNfts(limit: 9999) {
     id
