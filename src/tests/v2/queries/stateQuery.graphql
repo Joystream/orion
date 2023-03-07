@@ -311,6 +311,11 @@ fragment StateQueryEventFields on Event {
       }
       rationale
     }
+    ...on MemberBannedFromChannelEventData {
+      channel { id }
+      member { id }
+      action
+    }
   }
 }
 
@@ -465,6 +470,9 @@ query StateQueryV2 {
     ...StateQueryEventFields
   }
   channelPaymentMadeEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelPaymentMadeEventData" } }) {
+    ...StateQueryEventFields
+  }
+  memberBannedFromChannelEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "MemberBannedFromChannelEventData" } }) {
     ...StateQueryEventFields
   }
   memberships(limit: 9999) {

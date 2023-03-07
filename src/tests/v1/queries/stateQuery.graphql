@@ -475,6 +475,16 @@ query StateQueryV1 {
     }
     rationale
   }
+  memberBannedFromChannelEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel { id }
+    member { id }
+    action
+  }
   memberships(limit: 9999) {
     id
     createdAt
