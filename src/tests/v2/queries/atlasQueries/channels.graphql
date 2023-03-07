@@ -139,10 +139,92 @@ query GetChannelNftCollectors(
   }
 }
 
+query GetPayloadDataObjectIdByCommitment($commitment: String!) {
+  # CHANGE: `channelPayoutsUpdatedEvents` replaced with the new `events` query
+  events(
+    where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData", commitment_eq: $commitment } }
+    limit: 1
+  ) {
+    data {
+      ... on ChannelPayoutsUpdatedEventData {
+        payloadDataObject {
+          id
+          storageBagId
+        }
+      }
+    }
+  }
+}
+
 # CHANGE: `ID` is now `String`
 mutation ReportChannel($channelId: String!, $rationale: String!) {
   reportChannel(channelId: $channelId, rationale: $rationale) {
     id
     channelId
+  }
+}
+
+# CHANGE: ID is now `String`
+# CHANGE: Specific event queries replaced with a generic `events` query
+query GetChannelPaymentEvents($ownerMemberId: String!, $channelId: String!) {
+  events(
+    where: {
+      OR: [
+        {
+          AND: [
+            {
+              data: {
+                isTypeOf_in: [
+                  "NftBoughtEventData"
+                  "BidMadeCompletingAuctionEventData"
+                  "EnglishAuctionSettledEventData"
+                  "OpenAuctionBidAcceptedEventData"
+                ]
+              }
+            }
+            {
+              OR: [
+                { data: { previousNftOwner: { member: { id_eq: $ownerMemberId } } } }
+                {
+                  data: {
+                    previousNftOwner: { channel: { ownerMember: { id_eq: $ownerMemberId } } }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+        {
+          data: {
+            isTypeOf_in: ["ChannelRewardClaimedEventData", "ChannelFundsWithdrawnEventData"]
+            channel: { id_eq: $channelId }
+          }
+        }
+      ]
+    }
+  ) {
+    inBlock
+    timestamp
+    data {
+      __typename
+      ... on NftBoughtEventData {
+        price
+      }
+      ... on BidMadeCompletingAuctionEventData {
+        winningBid {
+          amount
+        }
+      }
+      ... on EnglishAuctionSettledEventData {
+        winningBid {
+          amount
+        }
+      }
+      ... on OpenAuctionBidAcceptedEventData {
+        winningBid {
+          amount
+        }
+      }
+    }
   }
 }

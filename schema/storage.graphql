@@ -196,12 +196,17 @@ type DataObjectTypeVideoSubtitle {
   video: Video!
 }
 
+type DataObjectTypeChannelPayoutsPayload {
+  phantom: Int
+}
+
 union DataObjectType =
     DataObjectTypeChannelAvatar
   | DataObjectTypeChannelCoverPhoto
   | DataObjectTypeVideoMedia
   | DataObjectTypeVideoThumbnail
   | DataObjectTypeVideoSubtitle
+  | DataObjectTypeChannelPayoutsPayload
 
 type StorageDataObject @entity {
   "Data object runtime id"

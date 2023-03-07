@@ -99,14 +99,11 @@ fragment StateQueryMetaprotocolTransactionResultFields on MetaprotocolTransactio
       id
     }
   }
-  # TODO: Ephesus
-  # ...on MetaprotocolTransactionResultChannelPaid {
-  #   channelPaid { id }
-  # }
-  ... on MetaprotocolTransactionResultCommentModerated {
-    commentModerated {
-      id
-    }
+  ...on MetaprotocolTransactionResultChannelPaid {
+    channelPaid { id }
+  }
+  ...on MetaprotocolTransactionResultCommentModerated {
+    commentModerated { id }
   }
   ... on MetaprotocolTransactionResultCommentDeleted {
     commentDeleted {
