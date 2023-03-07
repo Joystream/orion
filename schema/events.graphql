@@ -68,6 +68,7 @@ union EventData =
   | BuyNowCanceledEventData
   | BuyNowPriceUpdatedEventData
   | MetaprotocolTransactionStatusEventData
+  | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentCreatedEventData {
@@ -280,4 +281,16 @@ union MetaprotocolTransactionResult =
 type MetaprotocolTransactionStatusEventData {
   "The result of metaprotocol action"
   result: MetaprotocolTransactionResult!
+}
+
+# This event is emitted both when a member is banned and when they are unbanned
+type MemberBannedFromChannelEventData {
+  "The chanel the member is being banned / unbanned from"
+  channel: Channel!
+
+  "The member being banned / unbanned"
+  member: Membership!
+
+  "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
+  action: Boolean!
 }
