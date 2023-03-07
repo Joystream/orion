@@ -107,6 +107,12 @@ type Channel {
 
   # Application used for channel creation
   entryApp: App
+
+  # Number of videos ever created in this channel
+  totalVideosCreated: Int!
+
+  # Cumulative rewards claimed by this channel
+  cumulativeRewardClaimed: BigInt
 }
 
 type Video {
@@ -318,9 +324,6 @@ type Membership {
 
   # Number of channels ever created by this member
   totalChannelsCreated: Int!
-
-  # Number of videos ever created by this member
-  totalVideosCreated: Int!
 }
 
 type VideosConnection {
@@ -330,7 +333,7 @@ type VideosConnection {
 }
 
 type EntityReportInfo {
-  id: Int!
+  id: String!
   rationale: String!
   createdAt: DateTime!
   reporterIp: String!
@@ -352,7 +355,6 @@ type ChannelNftCollector {
 
 type ChannelFollowResult {
   channelId: String!
-  followId: Int!
   follows: Int!
   cancelToken: String!
   added: Boolean!
@@ -365,7 +367,7 @@ type ChannelUnfollowResult {
 }
 
 type ChannelReportInfo {
-  id: Int!
+  id: String!
   rationale: String!
   createdAt: DateTime!
   reporterIp: String!
@@ -394,7 +396,7 @@ type VideosSearchResult {
 }
 
 type VideoReportInfo {
-  id: Int!
+  id: String!
   rationale: String!
   createdAt: DateTime!
   reporterIp: String!
@@ -404,9 +406,41 @@ type VideoReportInfo {
 
 type AddVideoViewResult {
   videoId: String!
-  viewId: Int!
+  viewId: String!
   viewsNum: Int!
   added: Boolean!
+}
+
+type StorageDataObject {
+  # Data object runtime id
+  id: String!
+
+  # Resolved asset url
+  resolvedUrl: String
+
+  # Timestamp of the block the data object was created at
+  createdAt: DateTime!
+
+  # Whether the data object was uploaded and accepted by the storage provider
+  isAccepted: Boolean!
+
+  # Data object size in bytes
+  size: BigInt!
+
+  # Storage bag the data object is part of
+  storageBag: StorageBag!
+
+  # IPFS content hash
+  ipfsHash: String!
+
+  # The type of the asset that the data object represents (if known)
+  type: DataObjectType
+
+  # State Bloat Bond for removing the data object
+  stateBloatBond: BigInt!
+
+  # If the object is no longer used as an asset - the time at which it was unset (if known)
+  unsetAt: DateTime
 }
 
 input FeaturedVideoInput {
@@ -573,6 +607,24 @@ input ChannelWhereInput {
   bannedMembers_none: BannedMemberWhereInput
   entryApp_isNull: Boolean
   entryApp: AppWhereInput
+  totalVideosCreated_isNull: Boolean
+  totalVideosCreated_eq: Int
+  totalVideosCreated_not_eq: Int
+  totalVideosCreated_gt: Int
+  totalVideosCreated_gte: Int
+  totalVideosCreated_lt: Int
+  totalVideosCreated_lte: Int
+  totalVideosCreated_in: [Int!]
+  totalVideosCreated_not_in: [Int!]
+  cumulativeRewardClaimed_isNull: Boolean
+  cumulativeRewardClaimed_eq: BigInt
+  cumulativeRewardClaimed_not_eq: BigInt
+  cumulativeRewardClaimed_gt: BigInt
+  cumulativeRewardClaimed_gte: BigInt
+  cumulativeRewardClaimed_lt: BigInt
+  cumulativeRewardClaimed_lte: BigInt
+  cumulativeRewardClaimed_in: [BigInt!]
+  cumulativeRewardClaimed_not_in: [BigInt!]
   AND: [ChannelWhereInput!]
   OR: [ChannelWhereInput!]
 }
@@ -1027,6 +1079,51 @@ type Query {
     first: Int
     where: CuratorWhereInput
   ): CuratorsConnection!
+  videoViewEvents(
+    where: VideoViewEventWhereInput
+    orderBy: [VideoViewEventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoViewEvent!]!
+  videoViewEventById(id: String!): VideoViewEvent
+  videoViewEventByUniqueInput(where: WhereIdInput!): VideoViewEvent
+    @deprecated(reason: "Use videoViewEventById")
+  videoViewEventsConnection(
+    orderBy: [VideoViewEventOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoViewEventWhereInput
+  ): VideoViewEventsConnection!
+  reports(
+    where: ReportWhereInput
+    orderBy: [ReportOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Report!]!
+  reportById(id: String!): Report
+  reportByUniqueInput(where: WhereIdInput!): Report
+    @deprecated(reason: "Use reportById")
+  reportsConnection(
+    orderBy: [ReportOrderByInput!]!
+    after: String
+    first: Int
+    where: ReportWhereInput
+  ): ReportsConnection!
+  channelFollows(
+    where: ChannelFollowWhereInput
+    orderBy: [ChannelFollowOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [ChannelFollow!]!
+  channelFollowById(id: String!): ChannelFollow
+  channelFollowByUniqueInput(where: WhereIdInput!): ChannelFollow
+    @deprecated(reason: "Use channelFollowById")
+  channelFollowsConnection(
+    orderBy: [ChannelFollowOrderByInput!]!
+    after: String
+    first: Int
+    where: ChannelFollowWhereInput
+  ): ChannelFollowsConnection!
   videoCategories(
     where: VideoCategoryWhereInput
     orderBy: [VideoCategoryOrderByInput!]
@@ -1196,8 +1293,6 @@ enum ChannelOrderByInput {
   ownerMember_controllerAccount_DESC
   ownerMember_totalChannelsCreated_ASC
   ownerMember_totalChannelsCreated_DESC
-  ownerMember_totalVideosCreated_ASC
-  ownerMember_totalVideosCreated_DESC
   title_ASC
   title_DESC
   description_ASC
@@ -1216,6 +1311,8 @@ enum ChannelOrderByInput {
   coverPhoto_stateBloatBond_DESC
   coverPhoto_unsetAt_ASC
   coverPhoto_unsetAt_DESC
+  coverPhoto_resolvedUrl_ASC
+  coverPhoto_resolvedUrl_DESC
   avatarPhoto_id_ASC
   avatarPhoto_id_DESC
   avatarPhoto_createdAt_ASC
@@ -1230,6 +1327,8 @@ enum ChannelOrderByInput {
   avatarPhoto_stateBloatBond_DESC
   avatarPhoto_unsetAt_ASC
   avatarPhoto_unsetAt_DESC
+  avatarPhoto_resolvedUrl_ASC
+  avatarPhoto_resolvedUrl_DESC
   isPublic_ASC
   isPublic_DESC
   isCensored_ASC
@@ -1272,6 +1371,10 @@ enum ChannelOrderByInput {
   entryApp_category_DESC
   entryApp_authKey_ASC
   entryApp_authKey_DESC
+  totalVideosCreated_ASC
+  totalVideosCreated_DESC
+  cumulativeRewardClaimed_ASC
+  cumulativeRewardClaimed_DESC
 }
 
 enum ChannelNftCollectorsOrderByInput {
@@ -1310,6 +1413,10 @@ enum VideoOrderByInput {
   channel_followsNum_DESC
   channel_videoViewsNum_ASC
   channel_videoViewsNum_DESC
+  channel_totalVideosCreated_ASC
+  channel_totalVideosCreated_DESC
+  channel_cumulativeRewardClaimed_ASC
+  channel_cumulativeRewardClaimed_DESC
   category_id_ASC
   category_id_DESC
   category_name_ASC
@@ -1340,6 +1447,8 @@ enum VideoOrderByInput {
   thumbnailPhoto_stateBloatBond_DESC
   thumbnailPhoto_unsetAt_ASC
   thumbnailPhoto_unsetAt_DESC
+  thumbnailPhoto_resolvedUrl_ASC
+  thumbnailPhoto_resolvedUrl_DESC
   language_ASC
   language_DESC
   hasMarketing_ASC
@@ -1386,6 +1495,8 @@ enum VideoOrderByInput {
   media_stateBloatBond_DESC
   media_unsetAt_ASC
   media_unsetAt_DESC
+  media_resolvedUrl_ASC
+  media_resolvedUrl_DESC
   videoStateBloatBond_ASC
   videoStateBloatBond_DESC
   mediaMetadata_id_ASC
@@ -1705,6 +1816,7 @@ type Mutation {
     ids: [String!]!
   ): RestoreContentResult!
   signAppActionCommitment(
+    nonce: Float!
     creatorId: String!
 
     # Hex string from UInt8Array
@@ -1712,9 +1824,7 @@ type Mutation {
 
     # Hex string from UInt8Array
     rawAction: String!
-
-    # Hex string from UInt8Array
-    rawAppActionMetadata: String!
+    actionType: AppActionActionType!
   ): GeneratedSignature!
   followChannel(channelId: String!): ChannelFollowResult!
   unfollowChannel(channelId: String!, token: String!): ChannelUnfollowResult!
@@ -1727,6 +1837,11 @@ enum ExcludableContentType {
   Channel
   Video
   Comment
+}
+
+enum AppActionActionType {
+  CREATE_VIDEO
+  CREATE_CHANNEL
 }
 
 type Subscription {
@@ -1924,6 +2039,27 @@ type Subscription {
     limit: Int
   ): [Curator!]!
   curatorById(id: String!): Curator
+  videoViewEvents(
+    where: VideoViewEventWhereInput
+    orderBy: [VideoViewEventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoViewEvent!]!
+  videoViewEventById(id: String!): VideoViewEvent
+  reports(
+    where: ReportWhereInput
+    orderBy: [ReportOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Report!]!
+  reportById(id: String!): Report
+  channelFollows(
+    where: ChannelFollowWhereInput
+    orderBy: [ChannelFollowOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [ChannelFollow!]!
+  channelFollowById(id: String!): ChannelFollow
   videoCategories(
     where: VideoCategoryWhereInput
     orderBy: [VideoCategoryOrderByInput!]
@@ -2059,35 +2195,6 @@ type AvatarObject {
   avatarObject: StorageDataObject!
 }
 
-type StorageDataObject {
-  # Data object runtime id
-  id: String!
-
-  # Timestamp of the block the data object was created at
-  createdAt: DateTime!
-
-  # Whether the data object was uploaded and accepted by the storage provider
-  isAccepted: Boolean!
-
-  # Data object size in bytes
-  size: BigInt!
-
-  # Storage bag the data object is part of
-  storageBag: StorageBag!
-
-  # IPFS content hash
-  ipfsHash: String!
-
-  # The type of the asset that the data object represents (if known)
-  type: DataObjectType
-
-  # State Bloat Bond for removing the data object
-  stateBloatBond: BigInt!
-
-  # If the object is no longer used as an asset - the time at which it was unset (if known)
-  unsetAt: DateTime
-}
-
 # Big number integer
 scalar BigInt
 
@@ -2201,6 +2308,23 @@ input StorageDataObjectWhereInput {
   unsetAt_lte: DateTime
   unsetAt_in: [DateTime!]
   unsetAt_not_in: [DateTime!]
+  resolvedUrl_isNull: Boolean
+  resolvedUrl_eq: String
+  resolvedUrl_not_eq: String
+  resolvedUrl_gt: String
+  resolvedUrl_gte: String
+  resolvedUrl_lt: String
+  resolvedUrl_lte: String
+  resolvedUrl_in: [String!]
+  resolvedUrl_not_in: [String!]
+  resolvedUrl_contains: String
+  resolvedUrl_not_contains: String
+  resolvedUrl_containsInsensitive: String
+  resolvedUrl_not_containsInsensitive: String
+  resolvedUrl_startsWith: String
+  resolvedUrl_not_startsWith: String
+  resolvedUrl_endsWith: String
+  resolvedUrl_not_endsWith: String
   AND: [StorageDataObjectWhereInput!]
   OR: [StorageDataObjectWhereInput!]
 }
@@ -2869,6 +2993,15 @@ input DataObjectTypeWhereInput {
   video: VideoWhereInput
   subtitle_isNull: Boolean
   subtitle: VideoSubtitleWhereInput
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -2969,15 +3102,6 @@ input MembershipWhereInput {
   totalChannelsCreated_lte: Int
   totalChannelsCreated_in: [Int!]
   totalChannelsCreated_not_in: [Int!]
-  totalVideosCreated_isNull: Boolean
-  totalVideosCreated_eq: Int
-  totalVideosCreated_not_eq: Int
-  totalVideosCreated_gt: Int
-  totalVideosCreated_gte: Int
-  totalVideosCreated_lt: Int
-  totalVideosCreated_lte: Int
-  totalVideosCreated_in: [Int!]
-  totalVideosCreated_not_in: [Int!]
   AND: [MembershipWhereInput!]
   OR: [MembershipWhereInput!]
 }
@@ -4295,12 +4419,16 @@ enum StorageDataObjectOrderByInput {
   storageBag_id_DESC
   ipfsHash_ASC
   ipfsHash_DESC
+  type_phantom_ASC
+  type_phantom_DESC
   type_isTypeOf_ASC
   type_isTypeOf_DESC
   stateBloatBond_ASC
   stateBloatBond_DESC
   unsetAt_ASC
   unsetAt_DESC
+  resolvedUrl_ASC
+  resolvedUrl_DESC
 }
 
 type StorageBucketBag {
@@ -4634,6 +4762,7 @@ union DataObjectType =
   | DataObjectTypeVideoMedia
   | DataObjectTypeVideoThumbnail
   | DataObjectTypeVideoSubtitle
+  | DataObjectTypeChannelPayoutsPayload
 
 type DataObjectTypeChannelAvatar {
   # Related channel entity
@@ -4681,6 +4810,10 @@ type VideoSubtitle {
 
   # Storage object representing the subtitle file
   asset: StorageDataObject
+}
+
+type DataObjectTypeChannelPayoutsPayload {
+  phantom: Int
 }
 
 type AvatarUri {
@@ -4843,8 +4976,6 @@ enum BidOrderByInput {
   bidder_controllerAccount_DESC
   bidder_totalChannelsCreated_ASC
   bidder_totalChannelsCreated_DESC
-  bidder_totalVideosCreated_ASC
-  bidder_totalVideosCreated_DESC
   amount_ASC
   amount_DESC
   isCanceled_ASC
@@ -4894,8 +5025,6 @@ enum AuctionWhitelistedMemberOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
 }
 
 type BannedMember {
@@ -4918,8 +5047,6 @@ enum BannedMemberOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
   channel_id_ASC
   channel_id_DESC
   channel_createdAt_ASC
@@ -4946,6 +5073,10 @@ enum BannedMemberOrderByInput {
   channel_followsNum_DESC
   channel_videoViewsNum_ASC
   channel_videoViewsNum_DESC
+  channel_totalVideosCreated_ASC
+  channel_totalVideosCreated_DESC
+  channel_cumulativeRewardClaimed_ASC
+  channel_cumulativeRewardClaimed_DESC
 }
 
 type App {
@@ -5170,6 +5301,8 @@ enum VideoSubtitleOrderByInput {
   asset_stateBloatBond_DESC
   asset_unsetAt_ASC
   asset_unsetAt_DESC
+  asset_resolvedUrl_ASC
+  asset_resolvedUrl_DESC
 }
 
 type Comment {
@@ -5253,8 +5386,6 @@ enum CommentReactionOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
   comment_id_ASC
   comment_id_DESC
   comment_createdAt_ASC
@@ -5338,8 +5469,6 @@ enum CommentOrderByInput {
   author_controllerAccount_DESC
   author_totalChannelsCreated_ASC
   author_totalChannelsCreated_DESC
-  author_totalVideosCreated_ASC
-  author_totalVideosCreated_DESC
   text_ASC
   text_DESC
   video_id_ASC
@@ -5448,8 +5577,6 @@ enum VideoReactionOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
   video_id_ASC
   video_id_DESC
   video_createdAt_ASC
@@ -5523,8 +5650,6 @@ enum AuctionOrderByInput {
   winningMember_controllerAccount_DESC
   winningMember_totalChannelsCreated_ASC
   winningMember_totalChannelsCreated_DESC
-  winningMember_totalVideosCreated_ASC
-  winningMember_totalVideosCreated_DESC
   startingPrice_ASC
   startingPrice_DESC
   buyNowPrice_ASC
@@ -6012,6 +6137,11 @@ union EventData =
   | BuyNowCanceledEventData
   | BuyNowPriceUpdatedEventData
   | MetaprotocolTransactionStatusEventData
+  | ChannelRewardClaimedEventData
+  | ChannelRewardClaimedAndWithdrawnEventData
+  | ChannelFundsWithdrawnEventData
+  | ChannelPayoutsUpdatedEventData
+  | ChannelPaymentMadeEventData
 
 type CommentCreatedEventData {
   # The comment that was added
@@ -6203,6 +6333,7 @@ union MetaprotocolTransactionResult =
   | MetaprotocolTransactionResultCommentDeleted
   | MetaprotocolTransactionResultCommentModerated
   | MetaprotocolTransactionResultFailed
+  | MetaprotocolTransactionResultChannelPaid
 
 type MetaprotocolTransactionResultOK {
   phantom: Int
@@ -6226,6 +6357,94 @@ type MetaprotocolTransactionResultCommentModerated {
 
 type MetaprotocolTransactionResultFailed {
   errorMessage: String!
+}
+
+type MetaprotocolTransactionResultChannelPaid {
+  channelPaid: Channel
+}
+
+type ChannelRewardClaimedEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+}
+
+type ChannelRewardClaimedAndWithdrawnEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
+type ChannelFundsWithdrawnEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
+type ChannelPayoutsUpdatedEventData {
+  # Merkle root of the channel payouts
+  commitment: String
+
+  # Storage data object corresponding to the channel payouts payload
+  payloadDataObject: StorageDataObject
+
+  # Minimum amount of channel reward cashout allowed at a time
+  minCashoutAllowed: BigInt
+
+  # Maximum amount of channel reward cashout allowed at a time
+  maxCashoutAllowed: BigInt
+
+  # Can channel cashout the rewards
+  channelCashoutsEnabled: Boolean
+}
+
+# Direct channel payment by any member by-passing the council payouts
+type ChannelPaymentMadeEventData {
+  # Actor that made the payment
+  payer: Membership!
+
+  # Amount of the payment
+  amount: BigInt!
+
+  # Payment and payee context
+  paymentContext: PaymentContext
+
+  # Channel that received the payment (if any)
+  payeeChannel: Channel
+
+  # Reason of the payment
+  rationale: String
+}
+
+# Various Channel Payment Contexts
+union PaymentContext = PaymentContextVideo | PaymentContextChannel
+
+type PaymentContextVideo {
+  # Video for which the payment was made
+  video: Video!
+}
+
+type PaymentContextChannel {
+  # Channel for which the payment was made
+  channel: Channel!
 }
 
 input EventWhereInput {
@@ -6371,6 +6590,97 @@ input EventDataWhereInput {
   newPrice_not_in: [BigInt!]
   result_isNull: Boolean
   result: MetaprotocolTransactionResultWhereInput
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  amount_isNull: Boolean
+  amount_eq: BigInt
+  amount_not_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  amount_not_in: [BigInt!]
+  account_isNull: Boolean
+  account_eq: String
+  account_not_eq: String
+  account_gt: String
+  account_gte: String
+  account_lt: String
+  account_lte: String
+  account_in: [String!]
+  account_not_in: [String!]
+  account_contains: String
+  account_not_contains: String
+  account_containsInsensitive: String
+  account_not_containsInsensitive: String
+  account_startsWith: String
+  account_not_startsWith: String
+  account_endsWith: String
+  account_not_endsWith: String
+  commitment_isNull: Boolean
+  commitment_eq: String
+  commitment_not_eq: String
+  commitment_gt: String
+  commitment_gte: String
+  commitment_lt: String
+  commitment_lte: String
+  commitment_in: [String!]
+  commitment_not_in: [String!]
+  commitment_contains: String
+  commitment_not_contains: String
+  commitment_containsInsensitive: String
+  commitment_not_containsInsensitive: String
+  commitment_startsWith: String
+  commitment_not_startsWith: String
+  commitment_endsWith: String
+  commitment_not_endsWith: String
+  payloadDataObject_isNull: Boolean
+  payloadDataObject: StorageDataObjectWhereInput
+  minCashoutAllowed_isNull: Boolean
+  minCashoutAllowed_eq: BigInt
+  minCashoutAllowed_not_eq: BigInt
+  minCashoutAllowed_gt: BigInt
+  minCashoutAllowed_gte: BigInt
+  minCashoutAllowed_lt: BigInt
+  minCashoutAllowed_lte: BigInt
+  minCashoutAllowed_in: [BigInt!]
+  minCashoutAllowed_not_in: [BigInt!]
+  maxCashoutAllowed_isNull: Boolean
+  maxCashoutAllowed_eq: BigInt
+  maxCashoutAllowed_not_eq: BigInt
+  maxCashoutAllowed_gt: BigInt
+  maxCashoutAllowed_gte: BigInt
+  maxCashoutAllowed_lt: BigInt
+  maxCashoutAllowed_lte: BigInt
+  maxCashoutAllowed_in: [BigInt!]
+  maxCashoutAllowed_not_in: [BigInt!]
+  channelCashoutsEnabled_isNull: Boolean
+  channelCashoutsEnabled_eq: Boolean
+  channelCashoutsEnabled_not_eq: Boolean
+  payer_isNull: Boolean
+  payer: MembershipWhereInput
+  paymentContext_isNull: Boolean
+  paymentContext: PaymentContextWhereInput
+  payeeChannel_isNull: Boolean
+  payeeChannel: ChannelWhereInput
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -6480,6 +6790,32 @@ input MetaprotocolTransactionResultWhereInput {
   errorMessage_not_startsWith: String
   errorMessage_endsWith: String
   errorMessage_not_endsWith: String
+  channelPaid_isNull: Boolean
+  channelPaid: ChannelWhereInput
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input PaymentContextWhereInput {
+  video_isNull: Boolean
+  video: VideoWhereInput
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -6518,6 +6854,20 @@ enum EventOrderByInput {
   data_price_DESC
   data_newPrice_ASC
   data_newPrice_DESC
+  data_amount_ASC
+  data_amount_DESC
+  data_account_ASC
+  data_account_DESC
+  data_commitment_ASC
+  data_commitment_DESC
+  data_minCashoutAllowed_ASC
+  data_minCashoutAllowed_DESC
+  data_maxCashoutAllowed_ASC
+  data_maxCashoutAllowed_DESC
+  data_channelCashoutsEnabled_ASC
+  data_channelCashoutsEnabled_DESC
+  data_rationale_ASC
+  data_rationale_DESC
   data_isTypeOf_ASC
   data_isTypeOf_DESC
 }
@@ -6583,8 +6933,6 @@ enum NotificationOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
   event_id_ASC
   event_id_DESC
   event_inBlock_ASC
@@ -6731,8 +7079,6 @@ enum NftActivityOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
   event_id_ASC
   event_id_DESC
   event_inBlock_ASC
@@ -6777,8 +7123,6 @@ enum MemberMetadataOrderByInput {
   member_controllerAccount_DESC
   member_totalChannelsCreated_ASC
   member_totalChannelsCreated_DESC
-  member_totalVideosCreated_ASC
-  member_totalVideosCreated_DESC
 }
 
 type MemberMetadataConnection {
@@ -6809,8 +7153,6 @@ enum MembershipOrderByInput {
   controllerAccount_DESC
   totalChannelsCreated_ASC
   totalChannelsCreated_DESC
-  totalVideosCreated_ASC
-  totalVideosCreated_DESC
 }
 
 type MembershipsConnection {
@@ -6910,6 +7252,353 @@ type CuratorsConnection {
 
 type CuratorEdge {
   node: Curator!
+  cursor: String!
+}
+
+type VideoViewEvent {
+  # Unique identifier of the video view event
+  id: String!
+
+  # ID of the video that was viewed (the video may no longer exist)
+  videoId: String!
+
+  # IP address of the viewer
+  ip: String!
+
+  # Video view event timestamp
+  timestamp: DateTime!
+}
+
+input VideoViewEventWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [VideoViewEventWhereInput!]
+  OR: [VideoViewEventWhereInput!]
+}
+
+enum VideoViewEventOrderByInput {
+  id_ASC
+  id_DESC
+  videoId_ASC
+  videoId_DESC
+  ip_ASC
+  ip_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type VideoViewEventsConnection {
+  edges: [VideoViewEventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoViewEventEdge {
+  node: VideoViewEvent!
+  cursor: String!
+}
+
+type Report {
+  # Unique identifier of the report
+  id: String!
+
+  # IP address of the reporter
+  ip: String!
+
+  # ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)
+  channelId: String!
+
+  # ID of the video being reported (the video may no longer exist)
+  videoId: String
+
+  # Time of the report
+  timestamp: DateTime!
+
+  # Rationale behind the report
+  rationale: String!
+}
+
+input ReportWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
+  AND: [ReportWhereInput!]
+  OR: [ReportWhereInput!]
+}
+
+enum ReportOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  videoId_ASC
+  videoId_DESC
+  timestamp_ASC
+  timestamp_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+type ReportsConnection {
+  edges: [ReportEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReportEdge {
+  node: Report!
+  cursor: String!
+}
+
+type ChannelFollow {
+  # Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)
+  id: String!
+
+  # IP address of the follower
+  ip: String!
+
+  # ID of the channel being followed (the channel may no longer exist)
+  channelId: String!
+
+  # Time when user started following the channel
+  timestamp: DateTime!
+}
+
+input ChannelFollowWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [ChannelFollowWhereInput!]
+  OR: [ChannelFollowWhereInput!]
+}
+
+enum ChannelFollowOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type ChannelFollowsConnection {
+  edges: [ChannelFollowEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChannelFollowEdge {
+  node: ChannelFollow!
   cursor: String!
 }
 
@@ -7264,8 +7953,6 @@ enum AppOrderByInput {
   ownerMember_controllerAccount_DESC
   ownerMember_totalChannelsCreated_ASC
   ownerMember_totalChannelsCreated_DESC
-  ownerMember_totalVideosCreated_ASC
-  ownerMember_totalVideosCreated_DESC
   websiteUrl_ASC
   websiteUrl_DESC
   useUri_ASC

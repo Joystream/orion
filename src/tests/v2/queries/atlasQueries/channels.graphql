@@ -149,7 +149,9 @@ query GetPayloadDataObjectIdByCommitment($commitment: String!) {
       ... on ChannelPayoutsUpdatedEventData {
         payloadDataObject {
           id
-          storageBagId
+          storageBag {
+            id
+          }
         }
       }
     }

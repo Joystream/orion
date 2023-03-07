@@ -44,6 +44,21 @@ fragment BidFields on Bid {
 }
 
 query StateQueryV1 {
+  apps(limit: 9999) {
+    id
+    name
+    websiteUrl
+    useUri
+    smallIcon
+    mediumIcon
+    bigIcon
+    oneLiner
+    description
+    termsOfService
+    platforms
+    category
+    authKey
+  }
   channels(limit: 9999) {
     id
     createdAt
@@ -72,6 +87,9 @@ query StateQueryV1 {
     bannedMembers {
       id
     }
+    cumulativeRewardClaimed
+    entryApp { id }
+    totalVideosCreated
   }
   commentCreatedEvents(limit: 9999) {
     id
@@ -388,6 +406,75 @@ query StateQueryV1 {
       }
     }
   }
+  channelRewardClaimedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel {
+      id
+    }
+    amount
+  }
+  channelRewardClaimedAndWithdrawnEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel { id }
+    amount
+    account
+    actor {
+      ...ActorFields
+    }
+  }
+  channelFundsWithdrawnEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel { id }
+    amount
+    account
+    actor {
+      ...ActorFields
+    }
+  }
+  channelPayoutsUpdatedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    commitment
+    payloadDataObject { id }
+    minCashoutAllowed
+    maxCashoutAllowed
+    channelCashoutsEnabled
+  }
+  channelPaymentMadeEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    payer { id }
+    amount
+    payeeChannel { id }
+    paymentContext {
+      __typename
+      ...on PaymentContextVideo {
+        video { id }
+      }
+      ...on PaymentContextChannel {
+        channel { id }
+      }
+    }
+    rationale
+  }
   memberships(limit: 9999) {
     id
     createdAt
@@ -412,6 +499,7 @@ query StateQueryV1 {
     memberBannedFromChannels {
       id
     }
+    totalChannelsCreated
   }
   ownedNfts(limit: 9999) {
     id

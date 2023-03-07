@@ -127,12 +127,56 @@ export type GetChannelNftCollectorsQuery = {
   channelNftCollectors: Array<{ amount: number; member: BasicMembershipFieldsFragment }>
 }
 
+export type GetPayloadDataObjectIdByCommitmentQueryVariables = Types.Exact<{
+  commitment: Types.Scalars['String']
+}>
+
+export type GetPayloadDataObjectIdByCommitmentQuery = {
+  events: Array<{
+    data: { payloadDataObject?: Types.Maybe<{ id: string; storageBag: { id: string } }> }
+  }>
+}
+
 export type ReportChannelMutationVariables = Types.Exact<{
   channelId: Types.Scalars['String']
   rationale: Types.Scalars['String']
 }>
 
-export type ReportChannelMutation = { reportChannel: { id: number; channelId: string } }
+export type ReportChannelMutation = { reportChannel: { id: string; channelId: string } }
+
+export type GetChannelPaymentEventsQueryVariables = Types.Exact<{
+  ownerMemberId: Types.Scalars['String']
+  channelId: Types.Scalars['String']
+}>
+
+export type GetChannelPaymentEventsQuery = {
+  events: Array<{
+    inBlock: number
+    timestamp: any
+    data:
+      | { __typename: 'AuctionBidCanceledEventData' }
+      | { __typename: 'AuctionBidMadeEventData' }
+      | { __typename: 'AuctionCanceledEventData' }
+      | { __typename: 'BidMadeCompletingAuctionEventData'; winningBid: { amount: string } }
+      | { __typename: 'BuyNowCanceledEventData' }
+      | { __typename: 'BuyNowPriceUpdatedEventData' }
+      | { __typename: 'ChannelFundsWithdrawnEventData' }
+      | { __typename: 'ChannelPaymentMadeEventData' }
+      | { __typename: 'ChannelPayoutsUpdatedEventData' }
+      | { __typename: 'ChannelRewardClaimedAndWithdrawnEventData' }
+      | { __typename: 'ChannelRewardClaimedEventData' }
+      | { __typename: 'CommentCreatedEventData' }
+      | { __typename: 'CommentTextUpdatedEventData' }
+      | { __typename: 'EnglishAuctionSettledEventData'; winningBid: { amount: string } }
+      | { __typename: 'EnglishAuctionStartedEventData' }
+      | { __typename: 'MetaprotocolTransactionStatusEventData' }
+      | { __typename: 'NftBoughtEventData'; price: string }
+      | { __typename: 'NftIssuedEventData' }
+      | { __typename: 'NftSellOrderMadeEventData' }
+      | { __typename: 'OpenAuctionBidAcceptedEventData'; winningBid: { amount: string } }
+      | { __typename: 'OpenAuctionStartedEventData' }
+  }>
+}
 
 export type GetCommentQueryVariables = Types.Exact<{
   commentId: Types.Scalars['String']
@@ -251,6 +295,7 @@ export type FullChannelFieldsFragment = {
   description?: Types.Maybe<string>
   isPublic?: Types.Maybe<boolean>
   isCensored: boolean
+  cumulativeRewardClaimed?: Types.Maybe<string>
   language?: Types.Maybe<string>
   ownerMember?: Types.Maybe<BasicMembershipFieldsFragment>
   coverPhoto?: Types.Maybe<StorageDataObjectFieldsFragment>
@@ -296,6 +341,7 @@ export type StorageDataObjectFieldsFragment = {
   type?: Types.Maybe<
     | { __typename: 'DataObjectTypeChannelAvatar' }
     | { __typename: 'DataObjectTypeChannelCoverPhoto' }
+    | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
     | { __typename: 'DataObjectTypeVideoMedia' }
     | { __typename: 'DataObjectTypeVideoSubtitle' }
     | { __typename: 'DataObjectTypeVideoThumbnail' }
@@ -452,6 +498,10 @@ export type CommentFieldsFragment = {
   parentComment?: Types.Maybe<{ id: string }>
 }
 
+type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment = {
+  __typename: 'MetaprotocolTransactionResultChannelPaid'
+}
+
 type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment = {
   __typename: 'MetaprotocolTransactionResultCommentCreated'
   commentCreated?: Types.Maybe<CommentFieldsFragment>
@@ -482,6 +532,7 @@ type MetaprotocolTransactionResultFields_MetaprotocolTransactionResultOk_Fragmen
 }
 
 export type MetaprotocolTransactionResultFieldsFragment =
+  | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
   | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
   | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
   | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
@@ -934,6 +985,7 @@ export type GetMetaprotocolTransactionStatusEventsQuery = {
     inBlock: number
     data: {
       result:
+        | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
         | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
         | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
         | MetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
@@ -1042,7 +1094,7 @@ export type ReportVideoMutationVariables = Types.Exact<{
   rationale: Types.Scalars['String']
 }>
 
-export type ReportVideoMutation = { reportVideo: { id: number; videoId: string } }
+export type ReportVideoMutation = { reportVideo: { id: string; videoId: string } }
 
 type StateQueryActorFields_ContentActorCurator_Fragment = {
   __typename: 'ContentActorCurator'
@@ -1128,6 +1180,12 @@ export type StateQueryBidRefFieldsFragment = {
   auction: StateQueryAuctionRefFieldsFragment
 }
 
+type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment =
+  {
+    __typename: 'MetaprotocolTransactionResultChannelPaid'
+    channelPaid?: Types.Maybe<{ id: string }>
+  }
+
 type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment =
   {
     __typename: 'MetaprotocolTransactionResultCommentCreated'
@@ -1162,6 +1220,7 @@ type StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResult
 }
 
 export type StateQueryMetaprotocolTransactionResultFieldsFragment =
+  | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
   | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
   | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
   | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
@@ -1226,6 +1285,42 @@ export type StateQueryEventFieldsFragment = {
           | StateQueryNftOwnerFields_NftOwnerChannel_Fragment
           | StateQueryNftOwnerFields_NftOwnerMember_Fragment
       }
+    | {
+        amount: string
+        account?: Types.Maybe<string>
+        channel: { id: string }
+        actor:
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+      }
+    | {
+        amount: string
+        rationale?: Types.Maybe<string>
+        payer: { id: string }
+        payeeChannel?: Types.Maybe<{ id: string }>
+        paymentContext?: Types.Maybe<
+          | { __typename: 'PaymentContextChannel'; channel: { id: string } }
+          | { __typename: 'PaymentContextVideo'; video: { id: string } }
+        >
+      }
+    | {
+        commitment?: Types.Maybe<string>
+        minCashoutAllowed?: Types.Maybe<string>
+        maxCashoutAllowed?: Types.Maybe<string>
+        channelCashoutsEnabled?: Types.Maybe<boolean>
+        payloadDataObject?: Types.Maybe<{ id: string }>
+      }
+    | {
+        amount: string
+        account?: Types.Maybe<string>
+        channel: { id: string }
+        actor:
+          | StateQueryActorFields_ContentActorCurator_Fragment
+          | StateQueryActorFields_ContentActorLead_Fragment
+          | StateQueryActorFields_ContentActorMember_Fragment
+      }
+    | { amount: string; channel: { id: string } }
     | { text: string; comment: { id: string } }
     | { newText: string; comment: { id: string } }
     | {
@@ -1246,6 +1341,7 @@ export type StateQueryEventFieldsFragment = {
       }
     | {
         result:
+          | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
           | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentCreated_Fragment
           | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentDeleted_Fragment
           | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultCommentEdited_Fragment
@@ -1307,6 +1403,21 @@ export type StateQueryEventFieldsFragment = {
 export type StateQueryV2QueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type StateQueryV2Query = {
+  apps: Array<{
+    id: string
+    name: string
+    websiteUrl?: Types.Maybe<string>
+    useUri?: Types.Maybe<string>
+    smallIcon?: Types.Maybe<string>
+    mediumIcon?: Types.Maybe<string>
+    bigIcon?: Types.Maybe<string>
+    oneLiner?: Types.Maybe<string>
+    description?: Types.Maybe<string>
+    termsOfService?: Types.Maybe<string>
+    platforms?: Types.Maybe<Array<Types.Maybe<string>>>
+    category?: Types.Maybe<string>
+    authKey?: Types.Maybe<string>
+  }>
   channels: Array<{
     id: string
     createdAt: any
@@ -1318,11 +1429,14 @@ export type StateQueryV2Query = {
     createdInBlock: number
     rewardAccount: string
     channelStateBloatBond: string
+    cumulativeRewardClaimed?: Types.Maybe<string>
+    totalVideosCreated: number
     ownerMember?: Types.Maybe<{ id: string }>
     coverPhoto?: Types.Maybe<{ id: string }>
     avatarPhoto?: Types.Maybe<{ id: string }>
     videos: Array<{ id: string }>
     bannedMembers: Array<{ member: { id: string } }>
+    entryApp?: Types.Maybe<{ id: string }>
   }>
   commentCreatedEvents: Array<StateQueryEventFieldsFragment>
   commentTextUpdatedEvents: Array<StateQueryEventFieldsFragment>
@@ -1340,11 +1454,17 @@ export type StateQueryV2Query = {
   buyNowCanceledEvents: Array<StateQueryEventFieldsFragment>
   buyNowPriceUpdatedEvents: Array<StateQueryEventFieldsFragment>
   metaprotocolTransactionStatusEvents: Array<StateQueryEventFieldsFragment>
+  channelRewardClaimedEvents: Array<StateQueryEventFieldsFragment>
+  channelRewardClaimedAndWithdrawnEvents: Array<StateQueryEventFieldsFragment>
+  channelFundsWithdrawnEvents: Array<StateQueryEventFieldsFragment>
+  channelPayoutsUpdatedEvents: Array<StateQueryEventFieldsFragment>
+  channelPaymentMadeEvents: Array<StateQueryEventFieldsFragment>
   memberships: Array<{
     id: string
     createdAt: any
     handle: string
     controllerAccount: string
+    totalChannelsCreated: number
     metadata?: Types.Maybe<{
       name?: Types.Maybe<string>
       about?: Types.Maybe<string>
@@ -1445,6 +1565,7 @@ export type StateQueryV2Query = {
     type?: Types.Maybe<
       | { __typename: 'DataObjectTypeChannelAvatar'; channel: { id: string } }
       | { __typename: 'DataObjectTypeChannelCoverPhoto'; channel: { id: string } }
+      | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
       | { __typename: 'DataObjectTypeVideoMedia'; video: { id: string } }
       | {
           __typename: 'DataObjectTypeVideoSubtitle'
@@ -1654,6 +1775,7 @@ export const FullChannelFields = gql`
     description
     isPublic
     isCensored
+    cumulativeRewardClaimed
     language
     ownerMember {
       ...BasicMembershipFields
@@ -2113,6 +2235,11 @@ export const StateQueryMetaprotocolTransactionResultFields = gql`
         id
       }
     }
+    ... on MetaprotocolTransactionResultChannelPaid {
+      channelPaid {
+        id
+      }
+    }
     ... on MetaprotocolTransactionResultCommentModerated {
       commentModerated {
         id
@@ -2286,6 +2413,64 @@ export const StateQueryEventFields = gql`
         result {
           ...StateQueryMetaprotocolTransactionResultFields
         }
+      }
+      ... on ChannelRewardClaimedEventData {
+        channel {
+          id
+        }
+        amount
+      }
+      ... on ChannelRewardClaimedAndWithdrawnEventData {
+        channel {
+          id
+        }
+        amount
+        account
+        actor {
+          ...StateQueryActorFields
+        }
+      }
+      ... on ChannelFundsWithdrawnEventData {
+        channel {
+          id
+        }
+        amount
+        account
+        actor {
+          ...StateQueryActorFields
+        }
+      }
+      ... on ChannelPayoutsUpdatedEventData {
+        commitment
+        payloadDataObject {
+          id
+        }
+        minCashoutAllowed
+        maxCashoutAllowed
+        channelCashoutsEnabled
+      }
+      ... on ChannelPaymentMadeEventData {
+        payer {
+          id
+        }
+        amount
+        payeeChannel {
+          id
+        }
+        paymentContext {
+          __typename
+          ... on PaymentContextVideo {
+            video {
+              id
+            }
+          }
+          ... on PaymentContextChannel {
+            channel {
+              id
+            }
+          }
+        }
+        rationale
       }
     }
   }
@@ -2468,11 +2653,94 @@ export const GetChannelNftCollectors = gql`
   }
   ${BasicMembershipFields}
 `
+export const GetPayloadDataObjectIdByCommitment = gql`
+  query GetPayloadDataObjectIdByCommitment($commitment: String!) {
+    events(
+      where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData", commitment_eq: $commitment } }
+      limit: 1
+    ) {
+      data {
+        ... on ChannelPayoutsUpdatedEventData {
+          payloadDataObject {
+            id
+            storageBag {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+`
 export const ReportChannel = gql`
   mutation ReportChannel($channelId: String!, $rationale: String!) {
     reportChannel(channelId: $channelId, rationale: $rationale) {
       id
       channelId
+    }
+  }
+`
+export const GetChannelPaymentEvents = gql`
+  query GetChannelPaymentEvents($ownerMemberId: String!, $channelId: String!) {
+    events(
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                data: {
+                  isTypeOf_in: [
+                    "NftBoughtEventData"
+                    "BidMadeCompletingAuctionEventData"
+                    "EnglishAuctionSettledEventData"
+                    "OpenAuctionBidAcceptedEventData"
+                  ]
+                }
+              }
+              {
+                OR: [
+                  { data: { previousNftOwner: { member: { id_eq: $ownerMemberId } } } }
+                  {
+                    data: {
+                      previousNftOwner: { channel: { ownerMember: { id_eq: $ownerMemberId } } }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+          {
+            data: {
+              isTypeOf_in: ["ChannelRewardClaimedEventData", "ChannelFundsWithdrawnEventData"]
+              channel: { id_eq: $channelId }
+            }
+          }
+        ]
+      }
+    ) {
+      inBlock
+      timestamp
+      data {
+        __typename
+        ... on NftBoughtEventData {
+          price
+        }
+        ... on BidMadeCompletingAuctionEventData {
+          winningBid {
+            amount
+          }
+        }
+        ... on EnglishAuctionSettledEventData {
+          winningBid {
+            amount
+          }
+        }
+        ... on OpenAuctionBidAcceptedEventData {
+          winningBid {
+            amount
+          }
+        }
+      }
     }
   }
 `
@@ -3414,6 +3682,21 @@ export const ReportVideo = gql`
 `
 export const StateQueryV2 = gql`
   query StateQueryV2 {
+    apps(limit: 9999) {
+      id
+      name
+      websiteUrl
+      useUri
+      smallIcon
+      mediumIcon
+      bigIcon
+      oneLiner
+      description
+      termsOfService
+      platforms
+      category
+      authKey
+    }
     channels(limit: 9999) {
       id
       createdAt
@@ -3442,6 +3725,11 @@ export const StateQueryV2 = gql`
           id
         }
       }
+      cumulativeRewardClaimed
+      entryApp {
+        id
+      }
+      totalVideosCreated
     }
     commentCreatedEvents: events(
       limit: 9999
@@ -3533,6 +3821,36 @@ export const StateQueryV2 = gql`
     ) {
       ...StateQueryEventFields
     }
+    channelRewardClaimedEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "ChannelRewardClaimedEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
+    channelRewardClaimedAndWithdrawnEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "ChannelRewardClaimedAndWithdrawnEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
+    channelFundsWithdrawnEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "ChannelFundsWithdrawnEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
+    channelPayoutsUpdatedEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
+    channelPaymentMadeEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "ChannelPaymentMadeEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
     memberships(limit: 9999) {
       id
       createdAt
@@ -3561,6 +3879,7 @@ export const StateQueryV2 = gql`
           id
         }
       }
+      totalChannelsCreated
     }
     ownedNfts(limit: 9999) {
       id

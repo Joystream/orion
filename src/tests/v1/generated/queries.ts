@@ -347,6 +347,7 @@ export type StorageDataObjectFieldsFragment = {
   type:
     | { __typename: 'DataObjectTypeChannelAvatar' }
     | { __typename: 'DataObjectTypeChannelCoverPhoto' }
+    | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
     | { __typename: 'DataObjectTypeUnknown' }
     | { __typename: 'DataObjectTypeVideoMedia' }
     | { __typename: 'DataObjectTypeVideoSubtitle' }
@@ -451,7 +452,7 @@ export type BasicNftFieldsFragment = {
           __typename: 'AuctionTypeEnglish'
           duration: number
           extensionPeriod: number
-          minimalBidStep: number
+          minimalBidStep: string
           plannedEndAtBlock: number
         }
       | { __typename: 'AuctionTypeOpen'; bidLockDuration: number }
@@ -461,7 +462,7 @@ export type BasicNftFieldsFragment = {
     whitelistedMembers: Array<BasicMembershipFieldsFragment>
   }>
   transactionalStatus?: Types.Maybe<
-    | { __typename: 'TransactionalStatusBuyNow'; price: number }
+    | { __typename: 'TransactionalStatusBuyNow'; price: string }
     | { __typename: 'TransactionalStatusIdle'; dummy?: Types.Maybe<number> }
     | { __typename: 'TransactionalStatusInitiatedOfferToMember' }
   >
@@ -1185,7 +1186,7 @@ type AuctionTypeFields_AuctionTypeEnglish_Fragment = {
   duration: number
   extensionPeriod: number
   plannedEndAtBlock: number
-  minimalBidStep: number
+  minimalBidStep: string
 }
 
 type AuctionTypeFields_AuctionTypeOpen_Fragment = {
@@ -1212,6 +1213,21 @@ export type BidFieldsFragment = {
 export type StateQueryV1QueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type StateQueryV1Query = {
+  apps: Array<{
+    id: string
+    name: string
+    websiteUrl?: Types.Maybe<string>
+    useUri?: Types.Maybe<string>
+    smallIcon?: Types.Maybe<string>
+    mediumIcon?: Types.Maybe<string>
+    bigIcon?: Types.Maybe<string>
+    oneLiner?: Types.Maybe<string>
+    description?: Types.Maybe<string>
+    termsOfService?: Types.Maybe<string>
+    platforms?: Types.Maybe<Array<string>>
+    category?: Types.Maybe<string>
+    authKey?: Types.Maybe<string>
+  }>
   channels: Array<{
     id: string
     createdAt: any
@@ -1222,12 +1238,15 @@ export type StateQueryV1Query = {
     createdInBlock: number
     rewardAccount: string
     channelStateBloatBond: string
+    cumulativeRewardClaimed?: Types.Maybe<string>
+    totalVideosCreated: number
     ownerMember?: Types.Maybe<{ id: string }>
     coverPhoto?: Types.Maybe<{ id: string }>
     avatarPhoto?: Types.Maybe<{ id: string }>
     language?: Types.Maybe<{ iso: string }>
     videos: Array<{ id: string }>
     bannedMembers: Array<{ id: string }>
+    entryApp?: Types.Maybe<{ id: string }>
   }>
   commentCreatedEvents: Array<{
     id: string
@@ -1439,11 +1458,76 @@ export type StateQueryV1Query = {
           videoCategoryDeleted?: Types.Maybe<{ id: string }>
         }
   }>
+  channelRewardClaimedEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    channel: { id: string }
+  }>
+  channelRewardClaimedAndWithdrawnEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    account?: Types.Maybe<string>
+    channel: { id: string }
+    actor:
+      | ActorFields_ContentActorCurator_Fragment
+      | ActorFields_ContentActorLead_Fragment
+      | ActorFields_ContentActorMember_Fragment
+  }>
+  channelFundsWithdrawnEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    account?: Types.Maybe<string>
+    channel: { id: string }
+    actor:
+      | ActorFields_ContentActorCurator_Fragment
+      | ActorFields_ContentActorLead_Fragment
+      | ActorFields_ContentActorMember_Fragment
+  }>
+  channelPayoutsUpdatedEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    commitment?: Types.Maybe<string>
+    minCashoutAllowed?: Types.Maybe<string>
+    maxCashoutAllowed?: Types.Maybe<string>
+    channelCashoutsEnabled?: Types.Maybe<boolean>
+    payloadDataObject?: Types.Maybe<{ id: string }>
+  }>
+  channelPaymentMadeEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    rationale?: Types.Maybe<string>
+    payer: { id: string }
+    payeeChannel?: Types.Maybe<{ id: string }>
+    paymentContext?: Types.Maybe<
+      | { __typename: 'PaymentContextChannel'; channel?: Types.Maybe<{ id: string }> }
+      | { __typename: 'PaymentContextVideo'; video?: Types.Maybe<{ id: string }> }
+    >
+  }>
   memberships: Array<{
     id: string
     createdAt: any
     handle: string
     controllerAccount: string
+    totalChannelsCreated: number
     metadata: {
       name?: Types.Maybe<string>
       about?: Types.Maybe<string>
@@ -1466,12 +1550,12 @@ export type StateQueryV1Query = {
     ownerMember?: Types.Maybe<{ id: string }>
     ownerCuratorGroup?: Types.Maybe<{ id: string }>
     transactionalStatus?: Types.Maybe<
-      | { __typename: 'TransactionalStatusBuyNow'; price: number }
+      | { __typename: 'TransactionalStatusBuyNow'; price: string }
       | { __typename: 'TransactionalStatusIdle' }
       | {
           __typename: 'TransactionalStatusInitiatedOfferToMember'
           memberId: number
-          offerPrice?: Types.Maybe<number>
+          offerPrice?: Types.Maybe<string>
         }
     >
     transactionalStatusAuction?: Types.Maybe<{ id: string }>
@@ -1537,6 +1621,7 @@ export type StateQueryV1Query = {
     type:
       | { __typename: 'DataObjectTypeChannelAvatar'; channel?: Types.Maybe<{ id: string }> }
       | { __typename: 'DataObjectTypeChannelCoverPhoto'; channel?: Types.Maybe<{ id: string }> }
+      | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
       | { __typename: 'DataObjectTypeUnknown' }
       | { __typename: 'DataObjectTypeVideoMedia'; video?: Types.Maybe<{ id: string }> }
       | {
@@ -3516,6 +3601,21 @@ export const ReportVideo = gql`
 `
 export const StateQueryV1 = gql`
   query StateQueryV1 {
+    apps(limit: 9999) {
+      id
+      name
+      websiteUrl
+      useUri
+      smallIcon
+      mediumIcon
+      bigIcon
+      oneLiner
+      description
+      termsOfService
+      platforms
+      category
+      authKey
+    }
     channels(limit: 9999) {
       id
       createdAt
@@ -3544,6 +3644,11 @@ export const StateQueryV1 = gql`
       bannedMembers {
         id
       }
+      cumulativeRewardClaimed
+      entryApp {
+        id
+      }
+      totalVideosCreated
     }
     commentCreatedEvents(limit: 9999) {
       id
@@ -3860,6 +3965,89 @@ export const StateQueryV1 = gql`
         }
       }
     }
+    channelRewardClaimedEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+    }
+    channelRewardClaimedAndWithdrawnEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...ActorFields
+      }
+    }
+    channelFundsWithdrawnEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...ActorFields
+      }
+    }
+    channelPayoutsUpdatedEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      commitment
+      payloadDataObject {
+        id
+      }
+      minCashoutAllowed
+      maxCashoutAllowed
+      channelCashoutsEnabled
+    }
+    channelPaymentMadeEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      payer {
+        id
+      }
+      amount
+      payeeChannel {
+        id
+      }
+      paymentContext {
+        __typename
+        ... on PaymentContextVideo {
+          video {
+            id
+          }
+        }
+        ... on PaymentContextChannel {
+          channel {
+            id
+          }
+        }
+      }
+      rationale
+    }
     memberships(limit: 9999) {
       id
       createdAt
@@ -3884,6 +4072,7 @@ export const StateQueryV1 = gql`
       memberBannedFromChannels {
         id
       }
+      totalChannelsCreated
     }
     ownedNfts(limit: 9999) {
       id
