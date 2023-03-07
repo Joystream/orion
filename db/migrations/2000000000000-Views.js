@@ -46,7 +46,8 @@ module.exports = class Views2000000000000 {
     // HIDDEN entities
     video_view_event: ['FALSE'],
     channel_follow: ['FALSE'],
-    report: ['FALSE']
+    report: ['FALSE'],
+    request: ['FALSE'],
   }
 
 
