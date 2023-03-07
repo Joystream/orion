@@ -204,6 +204,7 @@ export async function processNft(
     creatorRoyalty,
     owner,
     createdAt: new Date(block.timestamp),
+    isFeatured: false,
   })
 
   // update NFT transactional status
