@@ -1,4 +1,4 @@
-import { Args, Ctx, Query, Resolver } from 'type-graphql'
+import { Args, Ctx, Mutation, Resolver } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { RequestFeaturedNftArgs, NftFeaturedRequstInfo } from './types'
 import { ContextWithIP } from '../../check'
@@ -10,7 +10,7 @@ import { randomAsHex } from '@polkadot/util-crypto'
 export class NftResolver {
   constructor(private em: () => Promise<EntityManager>) {}
 
-  @Query(() => NftFeaturedRequstInfo)
+  @Mutation(() => NftFeaturedRequstInfo)
   async requestNftFeatured(
     @Args() { nftId, rationale }: RequestFeaturedNftArgs,
     @Ctx() ctx: ContextWithIP
@@ -23,7 +23,7 @@ export class NftResolver {
       })
 
       if (!nft) {
-        throw new Error(`Video by id ${nftId} not found!`)
+        throw new Error(`NFT with id ${nftId} not found!`)
       }
 
       const existingRequest = await em.findOne(Request, {
