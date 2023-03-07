@@ -58,7 +58,7 @@ type Channel @entity {
 
   "Number of videos ever created in this channel"
   totalVideosCreated: Int!
-  
+
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
 }

@@ -88,7 +88,9 @@ query StateQueryV1 {
       id
     }
     cumulativeRewardClaimed
-    entryApp { id }
+    entryApp {
+      id
+    }
     totalVideosCreated
   }
   commentCreatedEvents(limit: 9999) {
@@ -423,7 +425,9 @@ query StateQueryV1 {
     inExtrinsic
     indexInBlock
     createdAt
-    channel { id }
+    channel {
+      id
+    }
     amount
     account
     actor {
@@ -436,7 +440,9 @@ query StateQueryV1 {
     inExtrinsic
     indexInBlock
     createdAt
-    channel { id }
+    channel {
+      id
+    }
     amount
     account
     actor {
@@ -450,7 +456,9 @@ query StateQueryV1 {
     indexInBlock
     createdAt
     commitment
-    payloadDataObject { id }
+    payloadDataObject {
+      id
+    }
     minCashoutAllowed
     maxCashoutAllowed
     channelCashoutsEnabled
@@ -461,16 +469,24 @@ query StateQueryV1 {
     inExtrinsic
     indexInBlock
     createdAt
-    payer { id }
+    payer {
+      id
+    }
     amount
-    payeeChannel { id }
+    payeeChannel {
+      id
+    }
     paymentContext {
       __typename
-      ...on PaymentContextVideo {
-        video { id }
+      ... on PaymentContextVideo {
+        video {
+          id
+        }
       }
-      ...on PaymentContextChannel {
-        channel { id }
+      ... on PaymentContextChannel {
+        channel {
+          id
+        }
       }
     }
     rationale
@@ -481,8 +497,12 @@ query StateQueryV1 {
     inExtrinsic
     indexInBlock
     createdAt
-    channel { id }
-    member { id }
+    channel {
+      id
+    }
+    member {
+      id
+    }
     action
   }
   memberships(limit: 9999) {
