@@ -171,7 +171,7 @@ export async function processChannelOwnerRemarkedEvent({
   const decodedMessage = deserializeMetadata(ChannelOwnerRemarked, messageBytes)
 
   const result = decodedMessage
-    ? await processOwnerRemark(overlay, block.height, indexInBlock, channel, decodedMessage)
+    ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',
       })
