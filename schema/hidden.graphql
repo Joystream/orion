@@ -32,6 +32,23 @@ type Report @entity {
   rationale: String!
 }
 
+type Request @entity {
+  "Unique identifier of the request"
+  id: ID!
+
+  "IP address of the reporter"
+  ip: String! @index
+
+  "ID of the nft that is being requested to be featured by operator"
+  nftId: String! @index
+
+  "Time of the request"
+  timestamp: DateTime!
+
+  "Rationale behind the request"
+  rationale: String!
+}
+
 type ChannelFollow @entity {
   "Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)"
   id: ID!
