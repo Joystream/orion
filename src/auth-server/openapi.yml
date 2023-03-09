@@ -1,0 +1,379 @@
+openapi: 3.0.2
+info:
+  title: Orion authentication API
+  description: Orion API for handling authentication, account creation and related activites
+  contact:
+    email: info@joystream.org
+  license:
+    name: GPL-3.0-only
+    url: 'https://opensource.org/licenses/GPL-3.0'
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:4074/api/v1/'
+paths:
+  /anonymous-auth:
+    post:
+      operationId: anonymousAuth
+      description: Authenticate as an anonymous user, either using an existing user identifier or creating a new one.
+      requestBody:
+        $ref: '#/components/requestBodies/AnonymousUserAuthRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/AnonymousUserAuthOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAnonymousUserResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /login:
+    post:
+      operationId: login
+      description: Login to user's account, using e-mail and password.
+      requestBody:
+        $ref: '#/components/requestBodies/LoginRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/LoginUnauthorizedResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /register:
+    post:
+      operationId: register
+      description: Create an account.
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/RegisterBadRequestResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /confirm-email:
+    post:
+      operationId: confirmEmail
+      description: Confirm account's e-mail address provided during registration.
+      requestBody:
+        $ref: '#/components/requestBodies/ConfirmEmailRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/ConfirmEmailBadRequestResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+  /reset-password:
+    post:
+      operationId: resetPassword
+      description: Reset account's password using a password reset token.
+      requestBody:
+        $ref: '#/components/requestBodies/ResetPasswordRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/ResetPasswordBadRequestResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+  /request-password-reset-token:
+    post:
+      operationId: requestPasswordResetToken
+      description:
+        Request a token to be sent to account's e-mail address,
+        which will allow resetting the account's password
+      requestBody:
+        $ref: '#/components/requestBodies/RequestTokenRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/RequestTokenBadRequestResponse'
+        '429':
+          $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+  /request-email-confirmation-token:
+    post:
+      operationId: requestEmailConfirmationToken
+      description:
+        Request a token to be sent to account's e-mail address,
+        which will allow confirming the ownership of the e-mail by the user.
+      requestBody:
+        $ref: '#/components/requestBodies/RequestTokenRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/RequestTokenBadRequestResponse'
+        '429':
+          $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+  /prove-membership:
+    post:
+      operationId: proveMembership
+      description: Prove ownership of an on-chain membership by an account.
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProveMembershipRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/ProveMembershipNotFoundResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /logout:
+    post:
+      operationId: logout
+      description: Terminate the current session.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Session ID
+  requestBodies:
+    AnonymousUserAuthRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnonymousUserAuthRequestData'
+    LoginRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequestData'
+    RegisterRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterRequestData'
+    ConfirmEmailRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConfirmEmailRequestData'
+    ResetPasswordRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResetPasswordRequestData'
+    ProveMembershipRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProveMembershipRequestData'
+    RequestTokenRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestTokenRequestData'
+  responses:
+    AnonymousUserAuthOkResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AnonymousUserAuthResponseData'
+    GenericBadRequestResponse:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericInternalServerErrorResponse:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: string
+    UnauthorizedAnonymousUserResponse:
+      description: Anonymous user id not recognized
+      content:
+        application/json:
+          schema:
+            type: string
+    LoginOkResponse:
+      description: Logged in
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponseData'
+    LoginUnauthorizedResponse:
+      description: Invalid e-mail or password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RegisterBadRequestResponse:
+      description: Cannot create user account with the provided credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericOkResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericOkResponseData'
+    ConfirmEmailBadRequestResponse:
+      description: Missing token or provided token is invalid / already used.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    ResetPasswordBadRequestResponse:
+      description: Request is malformatted or provided e-mail address, token or new password is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    ProveMembershipNotFoundResponse:
+      description: Transaction not found by the provided id (may not have been processed yet).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericUnauthorizedResponse:
+      description: Access token (session id) is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestTokenBadRequestResponse:
+      description: Request is malformatted or provided e-mail address is not valid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestTokenTooManyRequestsResponse:
+      description: Too many requests for sent within a given timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+  schemas:
+    AnonymousUserAuthRequestData:
+      type: object
+      properties:
+        userId:
+          type: string
+    AnonymousUserAuthResponseData:
+      type: object
+      required:
+        - userId
+        - sessionId
+      properties:
+        userId:
+          type: string
+        sessionId:
+          type: string
+    LoginRequestData:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    LoginResponseData:
+      type: object
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: string
+    RegisterRequestData:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          pattern: ^\S+@\S+\.\S+$
+        password:
+          $ref: '#/components/schemas/Password'
+    ProveMembershipRequestData:
+      type: object
+      required:
+        - txId
+      properties:
+        txId:
+          type: string
+    ConfirmEmailRequestData:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Confirmation token recieved by the user via an e-mail.
+    ResetPasswordRequestData:
+      type: object
+      required:
+        - token
+        - email
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Password-reset token recieved by the user via an e-mail.
+        email:
+          type: string
+          description: User's e-mail address.
+        newPassword:
+          $ref: '#/components/schemas/Password'
+    RequestTokenRequestData:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's e-mail address.
+    GenericErrorResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    GenericOkResponseData:
+      type: string
+      enum: ['OK']
+    Password:
+      type: string
+      minLength: 8
+      maxLength: 70 # Bcrypt allows up to 72 bytes
+      pattern: ^[ -~]+/ # Only ascii characters allowed
+
+
