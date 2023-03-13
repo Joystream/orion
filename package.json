@@ -6,13 +6,16 @@
   },
   "scripts": {
     "generate:schema": "./scripts/generate-schema-file.sh",
-    "build": "npm run generate:schema; rm -rf lib && tsc",
+    "generate:types:auth-api": "npx openapi-typescript ./src/auth-server/openapi.yml -o ./src/auth-server/generated/api-types.ts -c ./prettierrc.js",
+    "generate:docs:auth-api": "npx openapi-generator-cli generate -i ./src/auth-server/openapi.yml -g markdown -o ./src/auth-server/docs",
+    "build": "npm run generate:schema; rm -rf lib && tsc && cp ./src/auth-server/openapi.yml ./lib/auth-server/openapi.yml",
     "lint": "eslint --ext .ts ./src",
     "format": "prettier --write .",
     "checks": "prettier --check . && npm run lint && make codegen && tsc --noEmit --pretty",
     "db:migrate": "npx squid-typeorm-migration apply",
     "processor-start": "node lib/processor.js",
     "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
+    "auth-server-start": "node lib/auth-server/index.js",
     "postinstall": "patch-package --patch-dir assets/patches",
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
@@ -28,6 +31,7 @@
   },
   "dependencies": {
     "@joystream/js": "^1.4.0",
+    "@openapitools/openapi-generator-cli": "^2.5.2",
     "@polkadot/util-crypto": "9.5.1",
     "@subsquid/archive-registry": "^2.1.0",
     "@subsquid/graphql-server": "^3.3.0",
@@ -37,18 +41,21 @@
     "@subsquid/typeorm-store": "^0.2.0",
     "@types/lodash": "^4.14.189",
     "@typescript/analyze-trace": "^0.9.1",
+    "ajv": "^6.11.0",
     "axios": "^1.2.1",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
+    "express-openapi-validator": "^5.0.3",
     "graphql-tools": "^8.3.11",
+    "haversine-distance": "^1.2.1",
     "lodash": "^4.17.21",
     "patch-package": "^6.5.0",
     "pg": "8.8.0",
     "type-graphql": "^1.2.0-rc.1",
     "typeorm": "^0.3.11",
-    "url-join": "^4",
-    "haversine-distance": "^1.2.1",
-    "ajv": "^6.11.0"
+    "ua-parser-js": "^1.0.34",
+    "url-join": "^4"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
@@ -59,7 +66,10 @@
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
     "@subsquid/typeorm-codegen": "^0.3.1",
+    "@types/bcryptjs": "^2.4.2",
     "@types/node": "16.11.56",
+    "@types/ua-parser-js": "^0.7.36",
+    "@types/url-join": "^4",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.43.0",
     "eslint": "^8.35.0",
@@ -71,8 +81,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
+    "openapi-typescript": "^6.1.1",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.2",
-    "@types/url-join": "^4"
+    "typescript": "^4.8.2"
   }
 }

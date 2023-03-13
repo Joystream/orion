@@ -8,7 +8,6 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { Context } from '@subsquid/openreader/lib/context'
 import { VideoViewEvent, Video, Report } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
@@ -32,7 +31,7 @@ import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
-import { ContextWithIP } from '../../check'
+import { Context } from '../../check'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
@@ -163,10 +162,12 @@ export class VideosResolver {
   @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<AddVideoViewResult> {
     const em = await this.em()
-    const { ip } = ctx
+    const {
+      session: { ip },
+    } = ctx
     return withHiddenEntities(em, async () => {
       // Check if the video actually exists & lock it for update
       const video = await em.findOne(Video, {
@@ -223,10 +224,12 @@ export class VideosResolver {
   @Mutation(() => VideoReportInfo)
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<VideoReportInfo> {
     const em = await this.em()
-    const { ip } = ctx
+    const {
+      session: { ip },
+    } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the video+channel first
       const video = await em.findOne(Video, {

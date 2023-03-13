@@ -18,6 +18,9 @@ build-images: build-processor-image build-query-node-image
 serve:
 	@npx squid-graphql-server --subscriptions
 
+serve-auth-api:
+	@npm run auth-server-start
+
 migrate:
 	@npx squid-typeorm-migration apply
 

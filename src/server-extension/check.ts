@@ -1,28 +1,49 @@
 import { RequestCheckFunction } from '@subsquid/graphql-server/lib/check'
-import { Context } from '@subsquid/openreader/lib/context'
+import { Context as OpenreaderContext } from '@subsquid/openreader/lib/context'
 import { TypeormOpenreaderContext } from '@subsquid/graphql-server/lib/typeorm'
-import { isOperatorRequest } from './resolvers/middleware'
+import { findActiveSession } from '../utils/http'
+import { Account, Session } from '../model'
+import { Request } from 'express'
+import { EntityManager } from 'typeorm'
 
-export type ContextWithIP = Context & { ip: string }
+type AuthContext = {
+  session: Session
+  account?: Account
+}
+
+export type Context = OpenreaderContext & AuthContext
+
+async function authenticate(req: Request, em: EntityManager): Promise<AuthContext | false> {
+  const [, sessionId] = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9+/=]+)$/) || []
+  if (!sessionId) {
+    return false
+  }
+
+  const session = await findActiveSession(req, em, { id: sessionId })
+  if (session) {
+    const account =
+      (await em.getRepository(Account).findOneBy({ userId: session.user.id })) || undefined
+    return { session, account }
+  }
+
+  return false
+}
 
 export const requestCheck: RequestCheckFunction = async (ctx) => {
   const context = ctx.context as Context
+  const em = await (context.openreader as unknown as TypeormOpenreaderContext).getEntityManager()
 
-  // Add client IP to the context
-  console.log(context.req.headers['x-forwarded-for'])
-  const forwardedFor = context.req.headers['x-forwarded-for'] as string | undefined
-  const trustedReverseProxies = parseInt(process.env.TRUSTED_REVERSE_PROXIES || '0')
-  ;(context as ContextWithIP).ip =
-    (trustedReverseProxies && forwardedFor?.split(',').splice(-trustedReverseProxies, 1)[0]) ||
-    context.req.ip
+  const authContext = await authenticate(context.req, em)
+  if (!authContext) {
+    return 'Unauthorized'
+  }
 
-  // Set search_path accordingly if it's an operator request
-  if (isOperatorRequest(context.req)) {
+  Object.assign(context, authContext)
+
+  if (authContext.session.user.isRoot) {
+    // Set search_path accordingly if it's an operator request
     const displayHiddenEntities = context.req.headers['x-display-hidden-entities']
     if (displayHiddenEntities === 'all') {
-      const em = await (
-        context.openreader as unknown as TypeormOpenreaderContext
-      ).getEntityManager()
       await em.query('SET LOCAL search_path TO processor,public')
     }
   }

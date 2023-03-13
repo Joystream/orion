@@ -1,0 +1,88 @@
+type User @entity {
+  # Unique identifier (32-byte string, securely random)
+  id: ID!
+
+  # Whether the user has root (gateway operator) privileges
+  isRoot: Boolean!
+
+  # The account associated with the user (if any)
+  account: Account @derivedFrom(field: "user")
+}
+
+type Session @entity {
+  # Unique identifier (32-byte string, securely random)
+  id: ID!
+
+  # Browser (as deterimned based on user-agent header)
+  browser: String!
+
+  # Operating system (as deterimned based on user-agent header)
+  os: String!
+
+  # Device (as deterimned based on user-agent header)
+  device: String!
+
+  # Device type (as deterimned based on user-agent header)
+  deviceType: String
+
+  # User associated with the session
+  user: User!
+
+  # IP address associated with the session
+  ip: String! @index
+
+  # Time when the session started
+  startedAt: DateTime!
+
+  # Time when the session expires or did expire
+  expiry: DateTime!
+}
+
+type Account @entity {
+  # Unique identifier (can be sequential)
+  id: ID!
+
+  # The user associated with the account (the account owner)
+  user: User! @unique
+
+  # Account's e-mail address
+  email: String! @unique
+
+  # Indicates whether the account's e-mail has been confirmed or not.
+  # The account is not accessible by the account owner until the e-mail is confirmed.
+  isEmailConfirmed: Boolean!
+
+  # Indicates whether the access to the user account is blocked
+  isBlocked: Boolean!
+
+  # User's password bcrypt hash
+  paswordHash: String!
+
+  # Time when the account was registered
+  registeredAt: DateTime!
+
+  # Membership associated with the account (if any)
+  membership: Membership
+}
+
+enum TokenType {
+  EMAIL_CONFIRMATION
+  PASSWORD_RESET
+}
+
+type Token @entity {
+  # The token itself (32-byte string, securely random)
+  id: ID!
+
+  # Type of the token (its intended purpose)
+  type: TokenType!
+
+  # When was the token issued
+  issuedAt: DateTime!
+
+  # When does the token expire or when has it expired
+  expiry: DateTime!
+
+  # The account the token was issued for
+  issuedFor: Account!
+}

@@ -58,6 +58,25 @@ services:
     ports:
       - '4350:4350'
 
+  orion_auth-api:
+    container_name: orion_auth-api
+    hostname: orion_auth-api
+    image: node:14
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker.env
+    depends_on:
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'serve-auth-api']
+    ports:
+      - '${AUTH_API_PORT}:${AUTH_API_PORT}'
+
 volumes:
   orion_db_data:
 

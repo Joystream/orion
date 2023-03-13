@@ -14,6 +14,7 @@ paths:
   /anonymous-auth:
     post:
       operationId: anonymousAuth
+      x-eov-operation-handler: anonymousAuth
       description: Authenticate as an anonymous user, either using an existing user identifier or creating a new one.
       requestBody:
         $ref: '#/components/requestBodies/AnonymousUserAuthRequestBody'
@@ -29,6 +30,7 @@ paths:
   /login:
     post:
       operationId: login
+      x-eov-operation-handler: login
       description: Login to user's account, using e-mail and password.
       requestBody:
         $ref: '#/components/requestBodies/LoginRequestBody'
@@ -44,6 +46,7 @@ paths:
   /register:
     post:
       operationId: register
+      x-eov-operation-handler: register
       description: Create an account.
       requestBody:
         $ref: '#/components/requestBodies/RegisterRequestBody'
@@ -57,6 +60,7 @@ paths:
   /confirm-email:
     post:
       operationId: confirmEmail
+      x-eov-operation-handler: confirmEmail
       description: Confirm account's e-mail address provided during registration.
       requestBody:
         $ref: '#/components/requestBodies/ConfirmEmailRequestBody'
@@ -71,6 +75,7 @@ paths:
   /reset-password:
     post:
       operationId: resetPassword
+      x-eov-operation-handler: resetPassword
       description: Reset account's password using a password reset token.
       requestBody:
         $ref: '#/components/requestBodies/ResetPasswordRequestBody'
@@ -85,8 +90,8 @@ paths:
   /request-password-reset-token:
     post:
       operationId: requestPasswordResetToken
-      description:
-        Request a token to be sent to account's e-mail address,
+      x-eov-operation-handler: requestPasswordResetToken
+      description: Request a token to be sent to account's e-mail address,
         which will allow resetting the account's password
       requestBody:
         $ref: '#/components/requestBodies/RequestTokenRequestBody'
@@ -103,8 +108,8 @@ paths:
   /request-email-confirmation-token:
     post:
       operationId: requestEmailConfirmationToken
-      description:
-        Request a token to be sent to account's e-mail address,
+      x-eov-operation-handler: requestEmailConfirmationToken
+      description: Request a token to be sent to account's e-mail address,
         which will allow confirming the ownership of the e-mail by the user.
       requestBody:
         $ref: '#/components/requestBodies/RequestTokenRequestBody'
@@ -121,6 +126,7 @@ paths:
   /prove-membership:
     post:
       operationId: proveMembership
+      x-eov-operation-handler: proveMembership
       description: Prove ownership of an on-chain membership by an account.
       security:
         - bearerAuth: []
@@ -140,6 +146,7 @@ paths:
   /logout:
     post:
       operationId: logout
+      x-eov-operation-handler: logout
       description: Terminate the current session.
       security:
         - bearerAuth: []
@@ -211,13 +218,13 @@ components:
       content:
         application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/GenericErrorResponseData'
     UnauthorizedAnonymousUserResponse:
       description: Anonymous user id not recognized
       content:
         application/json:
           schema:
-            type: string
+            $ref: '#/components/schemas/GenericErrorResponseData'
     LoginOkResponse:
       description: Logged in
       content:
@@ -273,7 +280,7 @@ components:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
     RequestTokenTooManyRequestsResponse:
-      description: Too many requests for sent within a given timeframe.
+      description: Too many requests for a new token sent within a given timeframe.
       content:
         application/json:
           schema:
@@ -375,5 +382,4 @@ components:
       minLength: 8
       maxLength: 70 # Bcrypt allows up to 72 bytes
       pattern: ^[ -~]+/ # Only ascii characters allowed
-
 
