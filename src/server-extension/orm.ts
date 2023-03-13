@@ -6,7 +6,7 @@ const source = new DataSource({
   ...createOrmConfig({ projectDir: path.resolve(__dirname, '../..') }),
 })
 
-export async function getEm() {
+export async function createEm() {
   await source.initialize()
   return source.createEntityManager()
 }

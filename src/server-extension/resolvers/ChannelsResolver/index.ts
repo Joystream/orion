@@ -16,7 +16,6 @@ import {
   ChannelNftCollectorsOrderByInput,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
-import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
@@ -25,7 +24,7 @@ import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
-import { ContextWithIP } from '../../check'
+import { Context } from '../../check'
 
 @Resolver()
 export class ChannelsResolver {
@@ -147,10 +146,12 @@ export class ChannelsResolver {
   @Mutation(() => ChannelFollowResult)
   async followChannel(
     @Args() { channelId }: FollowChannelArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<ChannelFollowResult> {
     const em = await this.em()
-    const { ip } = ctx
+    const {
+      session: { ip },
+    } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
@@ -228,10 +229,12 @@ export class ChannelsResolver {
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<ChannelReportInfo> {
     const em = await this.em()
-    const { ip } = ctx
+    const {
+      session: { ip },
+    } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel first
       const channel = await em.findOne(Channel, {

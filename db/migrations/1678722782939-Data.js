@@ -1,5 +1,5 @@
-module.exports = class Data1678212216053 {
-    name = 'Data1678212216053'
+module.exports = class Data1678722782939 {
+    name = 'Data1678722782939'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -37,7 +37,7 @@ module.exports = class Data1678212216053 {
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
-        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_25c85bc448b5e236a4c1a5f789" ON "channel" ("owner_member_id") `)
         await db.query(`CREATE INDEX "IDX_a77e12f3d8c6ced020e179a5e9" ON "channel" ("cover_photo_id") `)
         await db.query(`CREATE INDEX "IDX_6997e94413b3f2f25a84e4a96f" ON "channel" ("avatar_photo_id") `)
@@ -115,6 +115,16 @@ module.exports = class Data1678212216053 {
         await db.query(`CREATE TABLE "video_media_metadata" ("id" character varying NOT NULL, "encoding_id" character varying, "pixel_width" integer, "pixel_height" integer, "size" numeric, "video_id" character varying NOT NULL, "created_in_block" integer NOT NULL, CONSTRAINT "VideoMediaMetadata_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_4dc101240e8e1536b770aee202" UNIQUE ("video_id"), CONSTRAINT "PK_86a13815734e589cd86d0465e2d" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_5944dc5896cb16bd395414a0ce" ON "video_media_metadata" ("encoding_id") `)
         await db.query(`CREATE INDEX "IDX_4dc101240e8e1536b770aee202" ON "video_media_metadata" ("video_id") `)
+        await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "is_root" boolean NOT NULL, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "session" ("id" character varying NOT NULL, "browser" text NOT NULL, "os" text NOT NULL, "device" text NOT NULL, "device_type" text, "user_id" character varying, "ip" text NOT NULL, "started_at" TIMESTAMP WITH TIME ZONE NOT NULL, "expiry" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_f55da76ac1c3ac420f444d2ff11" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_30e98e8746699fb9af235410af" ON "session" ("user_id") `)
+        await db.query(`CREATE INDEX "IDX_213b5a19bfdbe0ab6e06b1dede" ON "session" ("ip") `)
+        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "user_id" character varying NOT NULL, "email" text NOT NULL, "is_email_confirmed" boolean NOT NULL, "is_blocked" boolean NOT NULL, "pasword_hash" text NOT NULL, "registered_at" TIMESTAMP WITH TIME ZONE NOT NULL, "membership_id" character varying, CONSTRAINT "Account_email" UNIQUE ("email") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_user" UNIQUE ("user_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_efef1e5fdbe318a379c06678c5" UNIQUE ("user_id"), CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_efef1e5fdbe318a379c06678c5" ON "account" ("user_id") `)
+        await db.query(`CREATE INDEX "IDX_4c8f96ccf523e9a3faefd5bdd4" ON "account" ("email") `)
+        await db.query(`CREATE INDEX "IDX_601b93655bcbe73cb58d8c80cd" ON "account" ("membership_id") `)
+        await db.query(`CREATE TABLE "token" ("id" character varying NOT NULL, "type" character varying(18) NOT NULL, "issued_at" TIMESTAMP WITH TIME ZONE NOT NULL, "expiry" TIMESTAMP WITH TIME ZONE NOT NULL, "issued_for_id" character varying, CONSTRAINT "PK_82fae97f905930df5d62a702fc9" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_a6fe18c105f85a63d761ccb078" ON "token" ("issued_for_id") `)
         await db.query(`CREATE TABLE "next_entity_id" ("entity_name" character varying NOT NULL, "next_id" bigint NOT NULL, CONSTRAINT "PK_09a3b40db622a65096e7344d7ae" PRIMARY KEY ("entity_name"))`)
         await db.query(`CREATE TABLE "gateway_config" ("id" character varying NOT NULL, "value" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_db1fa5a857fb6292eee4c493e6f" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -174,6 +184,10 @@ module.exports = class Data1678212216053 {
         await db.query(`ALTER TABLE "video_hero" ADD CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0" FOREIGN KEY ("encoding_id") REFERENCES "video_media_encoding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_4dc101240e8e1536b770aee202a" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "session" ADD CONSTRAINT "FK_30e98e8746699fb9af235410aff" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "account" ADD CONSTRAINT "FK_efef1e5fdbe318a379c06678c51" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "account" ADD CONSTRAINT "FK_601b93655bcbe73cb58d8c80cd3" FOREIGN KEY ("membership_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780" FOREIGN KEY ("issued_for_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
     }
 
     async down(db) {
@@ -290,6 +304,16 @@ module.exports = class Data1678212216053 {
         await db.query(`DROP TABLE "video_media_metadata"`)
         await db.query(`DROP INDEX "public"."IDX_5944dc5896cb16bd395414a0ce"`)
         await db.query(`DROP INDEX "public"."IDX_4dc101240e8e1536b770aee202"`)
+        await db.query(`DROP TABLE "user"`)
+        await db.query(`DROP TABLE "session"`)
+        await db.query(`DROP INDEX "public"."IDX_30e98e8746699fb9af235410af"`)
+        await db.query(`DROP INDEX "public"."IDX_213b5a19bfdbe0ab6e06b1dede"`)
+        await db.query(`DROP TABLE "account"`)
+        await db.query(`DROP INDEX "public"."IDX_efef1e5fdbe318a379c06678c5"`)
+        await db.query(`DROP INDEX "public"."IDX_4c8f96ccf523e9a3faefd5bdd4"`)
+        await db.query(`DROP INDEX "public"."IDX_601b93655bcbe73cb58d8c80cd"`)
+        await db.query(`DROP TABLE "token"`)
+        await db.query(`DROP INDEX "public"."IDX_a6fe18c105f85a63d761ccb078"`)
         await db.query(`DROP TABLE "next_entity_id"`)
         await db.query(`DROP TABLE "gateway_config"`)
         await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d"`)
@@ -349,5 +373,9 @@ module.exports = class Data1678212216053 {
         await db.query(`ALTER TABLE "video_hero" DROP CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_4dc101240e8e1536b770aee202a"`)
+        await db.query(`ALTER TABLE "session" DROP CONSTRAINT "FK_30e98e8746699fb9af235410aff"`)
+        await db.query(`ALTER TABLE "account" DROP CONSTRAINT "FK_efef1e5fdbe318a379c06678c51"`)
+        await db.query(`ALTER TABLE "account" DROP CONSTRAINT "FK_601b93655bcbe73cb58d8c80cd3"`)
+        await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780"`)
     }
 }

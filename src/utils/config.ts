@@ -7,6 +7,7 @@ export enum ConfigVariable {
   KillSwitch = 'KILL_SWITCH_ON',
   VideoViewPerIpTimeLimit = 'VIDEO_VIEW_PER_IP_TIME_LIMIT',
   AppPrivateKey = 'APP_PRIVATE_KEY',
+  SessionMaxDurationHours = 'SESSION_MAX_DURATION_HOURS',
 }
 
 const boolType = {
@@ -30,6 +31,7 @@ export const configVariables = {
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerIpTimeLimit]: numberType,
   [ConfigVariable.AppPrivateKey]: stringType,
+  [ConfigVariable.SessionMaxDurationHours]: numberType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
