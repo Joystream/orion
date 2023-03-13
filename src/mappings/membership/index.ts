@@ -12,15 +12,14 @@ import { processMembershipMetadata, processMemberRemark } from './metadata'
 export async function processNewMember({
   overlay,
   block,
-  event: {
-    asV2001: [memberId, params],
-  },
+  event,
 }: EventHandlerContext<
   | 'Members.MemberCreated'
   | 'Members.MemberInvited'
   | 'Members.MembershipBought'
   | 'Members.MembershipGifted'
 >) {
+  const [memberId, params] = 'isV2001' in event && event.isV2001 ? event.asV2001 : event.asV1000
   const { controllerAccount, handle, metadata: metadataBytes } = params
   const metadata = deserializeMetadata(MembershipMetadata, metadataBytes)
 
@@ -40,7 +39,7 @@ export async function processNewMember({
 export async function processMemberAccountsUpdatedEvent({
   overlay,
   event: {
-    asV2001: [memberId, , newControllerAccount],
+    asV1000: [memberId, , newControllerAccount],
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
@@ -52,7 +51,7 @@ export async function processMemberAccountsUpdatedEvent({
 export async function processMemberProfileUpdatedEvent({
   overlay,
   event: {
-    asV2001: [memberId, newHandle, newMetadata],
+    asV1000: [memberId, newHandle, newMetadata],
   },
 }: EventHandlerContext<'Members.MemberProfileUpdated'>) {
   const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
@@ -74,10 +73,9 @@ export async function processMemberRemarkedEvent({
   block,
   indexInBlock,
   extrinsicHash,
-  event: {
-    asV2001: [memberId, message, payment],
-  },
+  event,
 }: EventHandlerContext<'Members.MemberRemarked'>) {
+  const [memberId, message, payment] = event.isV2001 ? event.asV2001 : event.asV1000
   const metadata = deserializeMetadata(MemberRemarked, message)
   const result = metadata
     ? await processMemberRemark(

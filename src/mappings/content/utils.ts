@@ -53,7 +53,7 @@ import {
   NftIssuanceParametersRecord,
   OpenAuctionParamsRecord,
   StorageAssetsRecord,
-} from '../../types/v2001'
+} from '../../types/v1000'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import { ed25519Verify } from '@polkadot/util-crypto'

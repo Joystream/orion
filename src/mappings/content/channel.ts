@@ -31,7 +31,7 @@ export async function processChannelCreatedEvent({
   overlay,
   block,
   event: {
-    asV2001: [
+    asV1000: [
       channelId,
       { owner, dataObjects, channelStateBloatBond },
       channelCreationParameters,
@@ -107,7 +107,7 @@ export async function processChannelUpdatedEvent({
   overlay,
   block,
   event: {
-    asV2001: [, channelId, channelUpdateParameters, newDataObjects],
+    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
   },
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -139,7 +139,7 @@ export async function processChannelUpdatedEvent({
 export async function processChannelDeletedEvent({
   overlay,
   event: {
-    asV2001: [, channelId],
+    asV1000: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
   await deleteChannel(overlay, channelId)
@@ -148,7 +148,7 @@ export async function processChannelDeletedEvent({
 export async function processChannelDeletedByModeratorEvent({
   overlay,
   event: {
-    asV2001: [, channelId],
+    asV1000: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
@@ -157,7 +157,7 @@ export async function processChannelDeletedByModeratorEvent({
 export async function processChannelVisibilitySetByModeratorEvent({
   overlay,
   event: {
-    asV2001: [, channelId, isHidden],
+    asV1000: [, channelId, isHidden],
   },
 }: EventHandlerContext<'Content.ChannelVisibilitySetByModerator'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -170,7 +170,7 @@ export async function processChannelOwnerRemarkedEvent({
   extrinsicHash,
   overlay,
   event: {
-    asV2001: [channelId, messageBytes],
+    asV1000: [channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelOwnerRemarked'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -195,7 +195,7 @@ export async function processChannelAgentRemarkedEvent({
   indexInBlock,
   extrinsicHash,
   event: {
-    asV2001: [, channelId, messageBytes],
+    asV1000: [, channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelAgentRemarked'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -220,6 +220,7 @@ export async function processChannelPayoutsUpdatedEvent({
   indexInBlock,
   extrinsicHash,
   event: {
+    // Was impossible to emit before v2001
     asV2001: [updateChannelPayoutParameters, dataObjectId],
   },
 }: EventHandlerContext<'Content.ChannelPayoutsUpdated'>): Promise<void> {
@@ -253,6 +254,7 @@ export async function processChannelRewardUpdatedEvent({
   indexInBlock,
   extrinsicHash,
   event: {
+    // Was impossible to emit before v2001
     asV2001: [, claimedAmount, channelId],
   },
 }: EventHandlerContext<'Content.ChannelRewardUpdated'>): Promise<void> {
@@ -276,7 +278,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
   indexInBlock,
   extrinsicHash,
   event: {
-    asV2001: [actor, channelId, claimedAmount, destination],
+    asV1000: [actor, channelId, claimedAmount, destination],
   },
 }: EventHandlerContext<'Content.ChannelRewardClaimedAndWithdrawn'>): Promise<void> {
   // load channel
@@ -301,7 +303,7 @@ export async function processChannelFundsWithdrawnEvent({
   indexInBlock,
   extrinsicHash,
   event: {
-    asV2001: [actor, channelId, amount, destination],
+    asV1000: [actor, channelId, amount, destination],
   },
 }: EventHandlerContext<'Content.ChannelFundsWithdrawn'>): Promise<void> {
   // load channel

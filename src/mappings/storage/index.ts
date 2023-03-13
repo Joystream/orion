@@ -45,7 +45,7 @@ import {
 export async function processStorageBucketCreatedEvent({
   overlay,
   event: {
-    asV2001: [
+    asV1000: [
       bucketId,
       invitedWorkerId,
       acceptingNewBags,
@@ -74,7 +74,7 @@ export async function processStorageBucketCreatedEvent({
 export async function processStorageOperatorMetadataSetEvent({
   overlay,
   event: {
-    asV2001: [bucketId, , metadataBytes],
+    asV1000: [bucketId, , metadataBytes],
   },
 }: EventHandlerContext<'Storage.StorageOperatorMetadataSet'>): Promise<void> {
   const metadataUpdate = deserializeMetadata(StorageBucketOperatorMetadata, metadataBytes)
@@ -86,7 +86,7 @@ export async function processStorageOperatorMetadataSetEvent({
 export async function processStorageBucketStatusUpdatedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, acceptingNewBags],
+    asV1000: [bucketId, acceptingNewBags],
   },
 }: EventHandlerContext<'Storage.StorageBucketStatusUpdated'>): Promise<void> {
   const storageBucket = await overlay
@@ -98,7 +98,7 @@ export async function processStorageBucketStatusUpdatedEvent({
 export async function processStorageBucketInvitationAcceptedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, workerId, transactorAccountId],
+    asV1000: [bucketId, workerId, transactorAccountId],
   },
 }: EventHandlerContext<'Storage.StorageBucketInvitationAccepted'>): Promise<void> {
   const storageBucket = await overlay
@@ -112,7 +112,7 @@ export async function processStorageBucketInvitationAcceptedEvent({
 
 export async function processStorageBucketInvitationCancelledEvent({
   overlay,
-  event: { asV2001: bucketId },
+  event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketInvitationCancelled'>): Promise<void> {
   // Metadata should not exist, because the operator wasn't active
   const storageBucket = await overlay
@@ -124,7 +124,7 @@ export async function processStorageBucketInvitationCancelledEvent({
 export async function processStorageBucketOperatorInvitedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, workerId],
+    asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.StorageBucketOperatorInvited'>): Promise<void> {
   const storageBucket = await overlay
@@ -137,7 +137,7 @@ export async function processStorageBucketOperatorInvitedEvent({
 
 export async function processStorageBucketOperatorRemovedEvent({
   overlay,
-  event: { asV2001: bucketId },
+  event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketOperatorRemoved'>): Promise<void> {
   const storageBucket = await overlay
     .getRepository(StorageBucket)
@@ -149,7 +149,7 @@ export async function processStorageBucketOperatorRemovedEvent({
 export async function processStorageBucketsUpdatedForBagEvent({
   overlay,
   event: {
-    asV2001: [bagId, addedBuckets, removedBuckets],
+    asV1000: [bagId, addedBuckets, removedBuckets],
   },
 }: EventHandlerContext<'Storage.StorageBucketsUpdatedForBag'>): Promise<void> {
   await getOrCreateBag(overlay, bagId)
@@ -164,7 +164,7 @@ export async function processStorageBucketsUpdatedForBagEvent({
 export async function processVoucherChangedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, voucher],
+    asV1000: [bucketId, voucher],
   },
 }: EventHandlerContext<'Storage.VoucherChanged'>): Promise<void> {
   const bucket = await overlay.getRepository(StorageBucket).getByIdOrFail(bucketId.toString())
@@ -178,7 +178,7 @@ export async function processVoucherChangedEvent({
 export async function processStorageBucketVoucherLimitsSetEvent({
   overlay,
   event: {
-    asV2001: [bucketId, sizeLimit, countLimit],
+    asV1000: [bucketId, sizeLimit, countLimit],
   },
 }: EventHandlerContext<'Storage.StorageBucketVoucherLimitsSet'>): Promise<void> {
   const bucket = await overlay.getRepository(StorageBucket).getByIdOrFail(bucketId.toString())
@@ -188,7 +188,7 @@ export async function processStorageBucketVoucherLimitsSetEvent({
 
 export async function processStorageBucketDeletedEvent({
   overlay,
-  event: { asV2001: bucketId },
+  event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.StorageBucketDeleted'>): Promise<void> {
   // There should be already no bags assigned - enforced by the runtime
   overlay.getRepository(StorageBucketOperatorMetadataEntity).remove(bucketId.toString())
@@ -201,7 +201,7 @@ export async function processDynamicBagCreatedEvent({
   overlay,
   block,
   event: {
-    asV2001: [
+    asV1000: [
       {
         bagId,
         storageBuckets,
@@ -237,7 +237,7 @@ export async function processDynamicBagCreatedEvent({
 
 export async function processDynamicBagDeletedEvent({
   overlay,
-  event: { asV2001: bagId },
+  event: { asV1000: bagId },
 }: EventHandlerContext<'Storage.DynamicBagDeleted'>): Promise<void> {
   const dynBagId = getDynamicBagId(bagId)
   const bagStorageBucketRelations = await overlay
@@ -261,7 +261,7 @@ export async function processDataObjectsUploadedEvent({
   overlay,
   block,
   event: {
-    asV2001: [objectIds, { bagId, objectCreationList }, stateBloatBond],
+    asV1000: [objectIds, { bagId, objectCreationList }, stateBloatBond],
   },
 }: EventHandlerContext<'Storage.DataObjectsUploaded'>) {
   const bag = await getOrCreateBag(overlay, bagId)
@@ -280,7 +280,7 @@ export async function processDataObjectsUpdatedEvent({
   overlay,
   block,
   event: {
-    asV2001: [
+    asV1000: [
       { bagId, objectCreationList, expectedDataObjectStateBloatBond: stateBloatBond },
       uploadedObjectIds,
       objectsToRemoveIds,
@@ -303,7 +303,7 @@ export async function processDataObjectsUpdatedEvent({
 export async function processPendingDataObjectsAcceptedEvent({
   overlay,
   event: {
-    asV2001: [, , , dataObjectIds],
+    asV1000: [, , , dataObjectIds],
   },
 }: EventHandlerContext<'Storage.PendingDataObjectsAccepted'>): Promise<void> {
   const dataObjectRepository = overlay.getRepository(StorageDataObject)
@@ -316,7 +316,7 @@ export async function processPendingDataObjectsAcceptedEvent({
 export async function processDataObjectsMovedEvent({
   overlay,
   event: {
-    asV2001: [, destBagId, dataObjectIds],
+    asV1000: [, destBagId, dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsMoved'>): Promise<void> {
   const destBag = await getOrCreateBag(overlay, destBagId)
@@ -332,7 +332,7 @@ export async function processDataObjectsMovedEvent({
 export async function processDataObjectsDeletedEvent({
   overlay,
   event: {
-    asV2001: [, , dataObjectIds],
+    asV1000: [, , dataObjectIds],
   },
 }: EventHandlerContext<'Storage.DataObjectsDeleted'>): Promise<void> {
   await deleteDataObjectsByIds(overlay, dataObjectIds)
@@ -342,7 +342,7 @@ export async function processDataObjectsDeletedEvent({
 
 export async function processDistributionBucketFamilyCreatedEvent({
   overlay,
-  event: { asV2001: familyId },
+  event: { asV1000: familyId },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyCreated'>): Promise<void> {
   const familyRepository = overlay.getRepository(DistributionBucketFamily)
   familyRepository.new({ id: familyId.toString() })
@@ -351,7 +351,7 @@ export async function processDistributionBucketFamilyCreatedEvent({
 export async function processDistributionBucketFamilyMetadataSetEvent({
   overlay,
   event: {
-    asV2001: [familyId, metadataBytes],
+    asV1000: [familyId, metadataBytes],
   },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyMetadataSet'>): Promise<void> {
   const metadataUpdate = deserializeMetadata(DistributionBucketFamilyMetadata, metadataBytes)
@@ -362,7 +362,7 @@ export async function processDistributionBucketFamilyMetadataSetEvent({
 
 export async function processDistributionBucketFamilyDeletedEvent({
   overlay,
-  event: { asV2001: familyId },
+  event: { asV1000: familyId },
 }: EventHandlerContext<'Storage.DistributionBucketFamilyDeleted'>): Promise<void> {
   overlay.getRepository(DistributionBucketFamilyMetadataEntity).remove(familyId.toString())
   overlay.getRepository(DistributionBucketFamily).remove(familyId.toString())
@@ -373,7 +373,7 @@ export async function processDistributionBucketFamilyDeletedEvent({
 export async function processDistributionBucketCreatedEvent({
   overlay,
   event: {
-    asV2001: [familyId, acceptingNewBags, bucketId],
+    asV1000: [familyId, acceptingNewBags, bucketId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketCreated'>): Promise<void> {
   overlay.getRepository(DistributionBucket).new({
@@ -388,7 +388,7 @@ export async function processDistributionBucketCreatedEvent({
 export async function processDistributionBucketStatusUpdatedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, acceptingNewBags],
+    asV1000: [bucketId, acceptingNewBags],
   },
 }: EventHandlerContext<'Storage.DistributionBucketStatusUpdated'>): Promise<void> {
   const bucket = await overlay
@@ -399,7 +399,7 @@ export async function processDistributionBucketStatusUpdatedEvent({
 
 export async function processDistributionBucketDeletedEvent({
   overlay,
-  event: { asV2001: bucketId },
+  event: { asV1000: bucketId },
 }: EventHandlerContext<'Storage.DistributionBucketDeleted'>): Promise<void> {
   // Operators and bags need to be empty (enforced by runtime)
   overlay.getRepository(DistributionBucket).remove(distributionBucketId(bucketId))
@@ -408,7 +408,7 @@ export async function processDistributionBucketDeletedEvent({
 export async function processDistributionBucketsUpdatedForBagEvent({
   overlay,
   event: {
-    asV2001: [bagId, familyId, addedBucketsIndices, removedBucketsIndices],
+    asV1000: [bagId, familyId, addedBucketsIndices, removedBucketsIndices],
   },
 }: EventHandlerContext<'Storage.DistributionBucketsUpdatedForBag'>): Promise<void> {
   await getOrCreateBag(overlay, bagId)
@@ -439,7 +439,7 @@ export async function processDistributionBucketsUpdatedForBagEvent({
 export async function processDistributionBucketModeUpdatedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, distributing],
+    asV1000: [bucketId, distributing],
   },
 }: EventHandlerContext<'Storage.DistributionBucketModeUpdated'>): Promise<void> {
   const bucket = await overlay
@@ -451,7 +451,7 @@ export async function processDistributionBucketModeUpdatedEvent({
 export function processDistributionBucketOperatorInvitedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, workerId],
+    asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketOperatorInvited'>): void {
   const operatorRepository = overlay.getRepository(DistributionBucketOperator)
@@ -466,7 +466,7 @@ export function processDistributionBucketOperatorInvitedEvent({
 export async function processDistributionBucketInvitationCancelledEvent({
   overlay,
   event: {
-    asV2001: [bucketId, workerId],
+    asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketInvitationCancelled'>): Promise<void> {
   // Metadata should not exist, because the operator wasn't active
@@ -478,7 +478,7 @@ export async function processDistributionBucketInvitationCancelledEvent({
 export async function processDistributionBucketInvitationAcceptedEvent({
   overlay,
   event: {
-    asV2001: [workerId, bucketId],
+    asV1000: [workerId, bucketId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketInvitationAccepted'>): Promise<void> {
   const operator = await overlay
@@ -490,7 +490,7 @@ export async function processDistributionBucketInvitationAcceptedEvent({
 export async function processDistributionBucketMetadataSetEvent({
   overlay,
   event: {
-    asV2001: [workerId, bucketId, metadataBytes],
+    asV1000: [workerId, bucketId, metadataBytes],
   },
 }: EventHandlerContext<'Storage.DistributionBucketMetadataSet'>): Promise<void> {
   const metadataUpdate = deserializeMetadata(DistributionBucketOperatorMetadata, metadataBytes)
@@ -506,7 +506,7 @@ export async function processDistributionBucketMetadataSetEvent({
 export async function processDistributionBucketOperatorRemovedEvent({
   overlay,
   event: {
-    asV2001: [bucketId, workerId],
+    asV1000: [bucketId, workerId],
   },
 }: EventHandlerContext<'Storage.DistributionBucketOperatorRemoved'>): Promise<void> {
   await removeDistributionBucketOperator(overlay, distributionOperatorId(bucketId, workerId))
