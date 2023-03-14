@@ -14,11 +14,14 @@ type Token @entity {
   "symbol for the token"
   symbol: String! @index
 
+  "access status invite only vs anyone"
+  isInviteOnly: bool
+
   "creator annual revenue percent (minted)"
-  patronageRatePercent: BigDecimal!
+  patronageRatePercent: Int!
 
   "revenue share ratio between creator and holder"
-  revenueShareRatioPercent: BigDecimal!
+  revenueShareRatioPercent: Int!
 
   "current revenue share id if any"
   revenueShare: RevenueShare @derivedFrom(field: "token")
@@ -49,6 +52,19 @@ type Token @entity {
 
   "link for creator to member interested in joining the whitelist"
   whitelisteApplicantLink: String
+
+  "initial amount allocated to the creator"
+  creatorAllocation: BigInt!
+
+  "cliff blocks before allocation vesting starts"
+  alloactionCliff: Int!
+
+  "duration for the vesting period after the cliff"
+  allocationVestingDuration: Int!
+
+  "% of allocation released right after the cliff to the creator"
+  firstPayoutPercent: Int! 
+
 }
 
 type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique: true){
@@ -111,6 +127,9 @@ type Sale @entity @index(fields: ["token", "saleId"], unique: true) {
   "amount of tokens that has been sold"
   tokensSold: BigInt!
 
+  "creation block"
+  createdIn: Int!
+
   "sale start block"
   startBlock: Int!
 
@@ -119,6 +138,12 @@ type Sale @entity @index(fields: ["token", "saleId"], unique: true) {
   
   "vesting schedule configuration"
   vestingSchedule: VestingSchedule
+
+  "terms and conditions text"
+  termsAndConditions: String!
+
+  "max amount that member can purchase"
+  maxAmountPerMember: BigInt
 }
 
 type VestingSchedule @entity {
@@ -136,6 +161,26 @@ type VestingSchedule @entity {
 
   "cliff duration in blocks"
   cliffDurationBlocks: Int!
+
+  "transactions references"
+  transactions: [SaleTransaction!]! @derivedFrom(field: "sale")
+}
+
+type SaleTransaction @entity {
+  "primary key"
+  id: ID!
+
+  "amount of token bought"
+  quantity: BigInt!
+
+  "total $JOY paid for the quantity"
+  pricePaid: BigInt!
+
+  "sale"
+  sale: Sale!
+
+  "buyer account"
+  buyerAccount: TokenAccount!
 }
 
 type AmmCurve @entity {
@@ -153,6 +198,26 @@ type AmmCurve @entity {
 
   "the amm intercept parameter b in the formula a * x + b"
   ammInitPrice: BigInt!
+
+  "transaction for this amm"
+  transactions: [AmmeTransaction!]! @derivedFrom(field: "amm")
+}
+
+type AmmTransaction @entity {
+  "primary key"
+  id: ID!
+
+  "amount of token bought"
+  quantity: BigInt!
+
+  "total $JOY paid for the quantity"
+  pricePaid: BigInt!
+
+  "sale"
+  amm: AmmCurve!
+
+  "buyer account"
+  buyerAccount: TokenAccount!
 }
 
 type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {{
