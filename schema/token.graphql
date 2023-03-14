@@ -1,0 +1,199 @@
+type Token @entity {
+  "runtime token identifier"
+  id: ID!
+
+  "total supply"
+  totalSupply: BigInt!
+
+  "Whether a sale is ongoing"
+  sale: Sale @deriveFrom(field: "tokenSaleNumber")
+
+  "transfer policy"
+  transferPolicy: TransferPolicy!
+
+  "symbol for the token"
+  symbol: String! @index
+
+  "creator annual revenue percent (minted)"
+  patronageRatePercent: BigDecimal!
+
+  "revenue share ratio between creator and holder"
+  revenueShareRatioPercent: BigDecimal!
+
+  "current revenue share id if any"
+  revenueShare: RevenueShare @derivedFrom(field: "token")
+
+  "amm curve setup for token"
+  amCurve: AmmCurve
+
+  "block in which this token was created"
+  blockCreatedIn: Int!
+
+  "channel from which the token is issued"
+  channel: Channel! @index
+
+  "video for the token presentation page"
+  trailerVideo: Video 
+
+  "about information displayed under the presentation video"
+  description: String 
+
+  "list of benefits for the token"
+  benefits: [Benefit!]! @derivedFrom(field: "token")
+
+  "whitelisted members"
+  whitelistedAccounts: [TokenAccount!]!
+
+  "note from creator to member interested in joining the whitelist"
+  whitelistApplicantNote: String
+
+  "link for creator to member interested in joining the whitelist"
+  whitelisteApplicantLink: String
+}
+
+type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique: true){
+  "primary key"
+  id: ID!
+
+  "runtime nonce for the revenue share"
+  revenueShareNumber: Int!
+
+  "token for which the share is added"
+  token: Token!
+
+  "list of participating members"
+  stakers: [RevenueShareParticipation!]! @derivedFrom(field: "revenueShare")
+
+  "block at which the revenue share was issued"
+  issuedIn: Int!
+
+  "starting block"
+  startingAt: Int!
+
+  "duration"
+  duration: Int!
+}
+
+type Benefit @entity {
+  "primary key"
+  id: ID!
+
+  "token the benefit is for"
+  token: Token!
+
+  "emoji for the benefit"
+  emojiCode: Int
+
+  "title for the benefit"
+  title: String!
+
+  "description for the benefit"
+  description: String!
+
+  "order in which the benefits is displayed"
+  displayOrder: Int!
+
+}
+
+type Sale @entity @index(fields: ["token", "saleId"], unique: true) {
+  "primary key identifier"
+  id: ID!
+
+  "runtime sale nonce"
+  tokenSaleNumber: Int!
+
+  "constant price in $JOY for each token"
+  pricePerUnit: BigInt!
+
+  "total amount of token on sale"
+  tokenSaleallocation: BigInt!
+
+  "amount of tokens that has been sold"
+  tokensSold: BigInt!
+
+  "sale start block"
+  startBlock: Int!
+
+  "sale duration"
+  durationInBlocks: Int!
+  
+  "vesting schedule configuration"
+  vestingSchedule: VestingSchedule
+}
+
+type VestingSchedule @entity {
+  "primary key identifier"
+  id: ID!
+
+  "sale the schedule refers to"
+  sale: Sale! @derivedFrom(field: "id")
+
+  "% of amount vested immediately after cliff period"
+  cliffPercent: Int!
+
+  "vesting duration in blocks"
+  vestingDurationBlocks: Int!
+
+  "cliff duration in blocks"
+  cliffDurationBlocks: Int!
+}
+
+type AmmCurve @entity {
+  "primary key identifier"
+  id: ID!
+
+  "quantity bought on the market by the amm"
+  burnedByAmm: BigInt!
+
+  "quantity sold to the market"
+  mintedByAmm: BigInt!
+
+  "the amm slope parameter a in the formula a * x + b"
+  ammSlopeParameter: BigInt!
+
+  "the amm intercept parameter b in the formula a * x + b"
+  ammInitPrice: BigInt!
+}
+
+type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {{
+  "primary key identifier"
+  id: ID!
+
+  "member id"
+  member: Membership!
+
+  "token for which the account is created"
+  token: Token!
+
+  "information for token accounts participating in revenue share"
+  revenueShareParticipation: RevenueShareParticipation! @deriveFrom(field: "tokenAccount")
+
+  "bloat bond payed at account creation"
+  tokenAccountBloatBond: BigInt!
+
+  "total token amount (not necessarely liqud) for the account"
+  totalAmount: BigInt!
+
+  "total amount locked by vesting schedules"
+  amountLockedByVesting: BigInt!
+
+  "percentage of allocation owned by this account"
+  allocationPercent: BigDecimal!
+}
+
+type RevenueShareParticipation @entity {
+  "primary key"
+  id: ID!
+
+  "participating Account"
+  account: TokenAccount!
+
+  "revenue share the account is participating in"
+  revenueShare: RevenueShare!
+
+  "staked amount"
+  stakedAmount: BigInt!
+
+  "eearned joy amounts"
+  earnings: BigInt!
+}
