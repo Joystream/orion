@@ -59,6 +59,9 @@ type Channel @entity {
   "Number of videos ever created in this channel"
   totalVideosCreated: Int!
 
+  "creator token issued for the channel"
+  creatorToken: Token @derivedFrom(field: "channel")
+
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
 }
