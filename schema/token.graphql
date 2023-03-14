@@ -30,7 +30,7 @@ type Token @entity {
   amCurve: AmmCurve
 
   "block in which this token was created"
-  blockCreatedIn: Int!
+  createdIn: Int!
 
   "channel from which the token is issued"
   channel: Channel! @index
@@ -64,7 +64,6 @@ type Token @entity {
 
   "% of allocation released right after the cliff to the creator"
   firstPayoutPercent: Int! 
-
 }
 
 type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique: true){
@@ -81,7 +80,7 @@ type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique
   stakers: [RevenueShareParticipation!]! @derivedFrom(field: "revenueShare")
 
   "block at which the revenue share was issued"
-  issuedIn: Int!
+  createdIn: Int!
 
   "starting block"
   startingAt: Int!
@@ -220,7 +219,7 @@ type AmmTransaction @entity {
   buyerAccount: TokenAccount!
 }
 
-type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {{
+type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "primary key identifier"
   id: ID!
 
