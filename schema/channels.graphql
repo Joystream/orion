@@ -58,6 +58,9 @@ type Channel @entity {
 
   "Number of videos ever created in this channel"
   totalVideosCreated: Int!
+
+  "creator token issued for the channel"
+  creatorToken: Token @derivedFrom(field: "channel")
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
