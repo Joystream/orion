@@ -30,7 +30,7 @@ type Token @entity {
   revenueShareRatioPercent: Int!
 
   "current revenue share id if any"
-  revenueShare: [RevenueShare!]  @derivedFrom(field: "token")
+  revenueShare: [RevenueShare!] @derivedFrom(field: "token")
 
   "amm curve setup for token"
   ammCurve: [AmmCurve!] @derivedFrom(field: "token")
@@ -45,7 +45,7 @@ type Token @entity {
   trailerVideo: Video
 
   "about information displayed under the presentation video"
-  description: String 
+  description: String
 
   "list of benefits for the token"
   benefits: [Benefit!] @derivedFrom(field: "token")
@@ -69,13 +69,13 @@ type Token @entity {
   allocationVestingDuration: Int!
 
   "% of allocation released right after the cliff to the creator"
-  firstPayoutPercent: Int! 
+  firstPayoutPercent: Int!
 
   "holders having some amount of this token"
   accounts: [TokenAccount!] @derivedFrom(field: "token")
 }
 
-type RevenueShare @entity{
+type RevenueShare @entity {
   "tokenId ++ runtime id for revenue split"
   id: ID!
 
@@ -139,7 +139,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "sale duration"
   durationInBlocks: Int!
-  
+
   "vesting schedule configuration"
   vestingSchedule: VestingSchedule
 
@@ -153,7 +153,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   transactions: [SaleTransaction!] @derivedFrom(field: "sale")
 }
 
-type VestingSchedule{
+type VestingSchedule {
   "sale the schedule refers to"
   sale: Sale!
 
@@ -167,7 +167,7 @@ type VestingSchedule{
   cliffDurationBlocks: Int!
 }
 
-type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true){
+type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
   "counter"
   id: ID!
 
@@ -207,7 +207,7 @@ type AmmCurve @entity {
   transactions: [AmmTransaction!] @derivedFrom(field: "amm")
 }
 
-type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true){
+type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
   "counter"
   id: ID!
 
@@ -267,7 +267,7 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   revenueShareParticipation: [RevenueShareParticipation!] @derivedFrom(field: "account")
 }
 
-type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true){
+type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true) {
   "counter"
   id: ID!
 
