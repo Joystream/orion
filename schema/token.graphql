@@ -1,18 +1,27 @@
+enum TokenStatus {
+  SALE
+  MARKET
+  IDLE
+}
+
 type Token @entity {
   "runtime token identifier"
   id: ID!
+
+  "status sale / market / idle"
+  status: TokenStatus!
 
   "total supply"
   totalSupply: BigInt!
 
   "Whether a sale is ongoing"
-  sale: Sale @deriveFrom(field: "tokenSaleNumber")
+  sale: [Sale!] @derivedFrom(field: "token")
 
-  "symbol for the token"
-  symbol: String! @index
+  "symbol for the token uniqueness guaranteed by runtime"
+  symbol: String! @index @unique
 
   "access status invite only vs anyone"
-  isInviteOnly: bool!
+  isInviteOnly: Boolean!
 
   "creator annual revenue percent (minted)"
   patronageRatePercent: Int!
@@ -21,28 +30,28 @@ type Token @entity {
   revenueShareRatioPercent: Int!
 
   "current revenue share id if any"
-  revenueShare: RevenueShare @derivedFrom(field: "token")
+  revenueShare: [RevenueShare!]  @derivedFrom(field: "token")
 
   "amm curve setup for token"
-  amCurve: AmmCurve
+  ammCurve: [AmmCurve!] @derivedFrom(field: "token")
 
   "block in which this token was created"
   createdIn: Int!
 
-  "channel from which the token is issued"
-  channel: Channel! @index
+  "channel from which the token is issued uniqueness guaranteed by runtime"
+  channel: Channel! @index @unique
 
   "video for the token presentation page"
-  trailerVideo: Video 
+  trailerVideo: Video
 
   "about information displayed under the presentation video"
   description: String 
 
   "list of benefits for the token"
-  benefits: [Benefit!]! @derivedFrom(field: "token")
+  benefits: [Benefit!] @derivedFrom(field: "token")
 
   "whitelisted members"
-  whitelistedAccounts: [TokenAccount!]!
+  whitelistedAccounts: [TokenAccount!] @derivedFrom(field: "token")
 
   "note from creator to member interested in joining the whitelist"
   whitelistApplicantNote: String
@@ -62,27 +71,19 @@ type Token @entity {
   "% of allocation released right after the cliff to the creator"
   firstPayoutPercent: Int! 
 
-  "revenue shares history"
-  pastRevenueShares: [RevenueShare!]! @derivedFrom(field: "token")
-
   "holders having some amount of this token"
-  accounts: [TokenAccounts!]! @derivedFrom(field: "token")
-
-  "status:"
+  accounts: [TokenAccount!] @derivedFrom(field: "token")
 }
 
-type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique: true){
-  "primary key"
+type RevenueShare @entity{
+  "tokenId ++ runtime id for revenue split"
   id: ID!
 
-  "runtime nonce for the revenue share"
-  revenueShareNumber: Int!
-
-  "token for which the share is added"
+  "token which this revenue share is for"
   token: Token!
 
   "list of participating members"
-  stakers: [RevenueShareParticipation!]! @derivedFrom(field: "revenueShare")
+  stakers: [RevenueShareParticipation!] @derivedFrom(field: "revenueShare")
 
   "block at which the revenue share was issued"
   createdIn: Int!
@@ -95,7 +96,7 @@ type RevenueShare @entity @index(fields: ["revenueShareNumber", "token"], unique
 }
 
 type Benefit @entity {
-  "primary key"
+  "counter"
   id: ID!
 
   "token the benefit is for"
@@ -112,15 +113,14 @@ type Benefit @entity {
 
   "order in which the benefits is displayed"
   displayOrder: Int!
-
 }
 
-type Sale @entity @index(fields: ["token", "saleId"], unique: true) {
-  "primary key identifier"
+type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
+  "runtime TokenId ++ runtime sale nonce"
   id: ID!
 
-  "runtime sale nonce"
-  tokenSaleNumber: Int!
+  "token for which the sale is issued"
+  token: Token!
 
   "constant price in $JOY for each token"
   pricePerUnit: BigInt!
@@ -148,14 +148,14 @@ type Sale @entity @index(fields: ["token", "saleId"], unique: true) {
 
   "max amount that member can purchase"
   maxAmountPerMember: BigInt
+
+  "transactions references"
+  transactions: [SaleTransaction!] @derivedFrom(field: "sale")
 }
 
-type VestingSchedule @entity {
-  "primary key identifier"
-  id: ID!
-
+type VestingSchedule{
   "sale the schedule refers to"
-  sale: Sale! @derivedFrom(field: "id")
+  sale: Sale!
 
   "% of amount vested immediately after cliff period"
   cliffPercent: Int!
@@ -165,13 +165,10 @@ type VestingSchedule @entity {
 
   "cliff duration in blocks"
   cliffDurationBlocks: Int!
-
-  "transactions references"
-  transactions: [SaleTransaction!]! @derivedFrom(field: "sale")
 }
 
-type SaleTransaction @entity {
-  "primary key"
+type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true){
+  "counter"
   id: ID!
 
   "amount of token bought"
@@ -184,12 +181,15 @@ type SaleTransaction @entity {
   sale: Sale!
 
   "buyer account"
-  buyerAccount: TokenAccount!
+  account: TokenAccount!
 }
 
 type AmmCurve @entity {
-  "primary key identifier"
+  "counter"
   id: ID!
+
+  "token this Amm is for"
+  token: Token!
 
   "quantity bought on the market by the amm"
   burnedByAmm: BigInt!
@@ -204,11 +204,11 @@ type AmmCurve @entity {
   ammInitPrice: BigInt!
 
   "transaction for this amm"
-  transactions: [AmmeTransaction!]! @derivedFrom(field: "amm")
+  transactions: [AmmTransaction!] @derivedFrom(field: "amm")
 }
 
-type AmmTransaction @entity {
-  "primary key"
+type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true){
+  "counter"
   id: ID!
 
   "amount of token bought"
@@ -221,38 +221,29 @@ type AmmTransaction @entity {
   amm: AmmCurve!
 
   "buyer account"
-  buyerAccount: TokenAccount!
+  account: TokenAccount!
 
   "price per unit"
-  pricPerUnit: BigDecimal!
+  pricePerUnit: BigDecimal!
 
   "was it bought (or sold)"
-  wasBought: bool!
+  transactionType: AmmTransactionType!
 }
 
-type Holder @entity {
-  "primary key"
-  id: ID!
-
-  "membership info for the holder"
-  member: Membership! @index
-
-  "various token accounts"
-  tokenAccounts: [TokenAccount!]! @derivedFrom(field: "holder")
+enum AmmTransactionType {
+  BUY
+  SELL
 }
 
-type TokenAccount @entity @index(fields: ["token", "holder"], unique: true) {
-  "primary key identifier"
+type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
+  "runtime token id ++ runtime member id"
   id: ID!
 
   "member id"
-  holder: Holder!
+  member: Membership!
 
   "token for which the account is created"
   token: Token!
-
-  "information for token accounts participating in revenue share"
-  revenueShareParticipation: RevenueShareParticipation! @deriveFrom(field: "tokenAccount")
 
   "bloat bond payed at account creation"
   tokenAccountBloatBond: BigInt!
@@ -265,10 +256,19 @@ type TokenAccount @entity @index(fields: ["token", "holder"], unique: true) {
 
   "percentage of allocation owned by this account"
   allocationPercent: BigDecimal!
+
+  "sale transactions for this account"
+  saleTransactions: [SaleTransaction!] @derivedFrom(field: "account")
+
+  "amm transactions for this account"
+  ammTransactions: [AmmTransaction!] @derivedFrom(field: "account")
+
+  "information for token accounts participating in revenue share"
+  revenueShareParticipation: [RevenueShareParticipation!] @derivedFrom(field: "account")
 }
 
-type RevenueShareParticipation @entity {
-  "primary key"
+type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true){
+  "counter"
   id: ID!
 
   "participating Account"
