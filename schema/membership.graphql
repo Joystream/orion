@@ -51,4 +51,7 @@ type Membership @entity {
 
   "Number of channels ever created by this member"
   totalChannelsCreated: Int!
+
+  "token accounts"
+  tokenAccounts: [TokenAccount!] @derivedFrom(field: "member")
 }
