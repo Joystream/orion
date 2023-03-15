@@ -1,11 +1,13 @@
 import { Resolver, Root, Subscription } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import { ProcessorState } from './types'
-import axios from 'axios'
-import _ from 'lodash'
+import _, { isObject } from 'lodash'
+import { getEm } from '../../orm'
+import { has } from '../../../utils/misc'
 
 class ProcessorStateRetriever {
   public state: ProcessorState
+  private em: EntityManager
 
   public run(intervalMs: number) {
     this.updateLoop(intervalMs)
@@ -19,6 +21,7 @@ class ProcessorStateRetriever {
   }
 
   private async updateLoop(intervalMs: number) {
+    this.em = await getEm()
     while (true) {
       try {
         this.state = await this.getUpdatedState()
@@ -30,18 +33,16 @@ class ProcessorStateRetriever {
   }
 
   private async getUpdatedState() {
+    const dbResult: unknown = await this.em.query('SELECT "height" FROM "squid_processor"."status"')
     return {
-      lastProcessedBlock: await this.getMetric('sqd_processor_last_block'),
-      chainHead: await this.getMetric('sqd_processor_chain_height'),
+      lastProcessedBlock:
+        Array.isArray(dbResult) &&
+        isObject(dbResult[0]) &&
+        has(dbResult[0], 'height') &&
+        typeof dbResult[0].height === 'number'
+          ? dbResult[0].height
+          : -1,
     }
-  }
-
-  private async getMetric(metricName: string) {
-    const resp = await axios.get(
-      `http://${process.env.PROCESSOR_HOST}:${process.env.PROCESSOR_PROMETHEUS_PORT}/metrics/${metricName}`,
-      { headers: { 'Connection': 'keep-alive' } }
-    )
-    return parseInt(resp.data.match(new RegExp(`${metricName} ([0-9]+)`))[1])
   }
 }
 
