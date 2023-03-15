@@ -119,7 +119,10 @@ type Video @entity {
   entryApp: App
 
   "Video ID coming from YPP"
-  ytVideoId: String
+  trailerVideoytVideoId: String
+
+  "token for which this video is trailer"
+  trailerVideoForToken: Token 
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
