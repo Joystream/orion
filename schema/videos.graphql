@@ -122,7 +122,7 @@ type Video @entity {
   trailerVideoytVideoId: String
 
   "token for which this video is trailer"
-  trailerVideoForToken: Token 
+  trailerVideoForToken: Token
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
