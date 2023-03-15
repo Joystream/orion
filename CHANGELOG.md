@@ -98,7 +98,7 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - **New feature:** It is now possible to query the `resolvedUrl` property of any `StorageDataObject` (for example: `{ videoById(id: "1") { media { resolvedUrl } } }`). The Orion v2 GraphQL server will then resolve it to an asset url, based on its internal distributor nodes data cache. If you provide `x-client-loc` header, Orion v2 will additionally prioritize distributor nodes closest to the provided location when resolving the url. The value for `x-client-loc` should be provided in `lat,lon` format, where `lat` is the `latitude` (-90, 90) and `lon` is the `longitude` (-180, 180), for example: `x-client-loc: 42.557127,-103.886719`.
 
 ### Subscriptions
-- `stateSubscription` has been renamed to `processorState`, properties have been reduced to `lastProcessedBlock` and `chainHead`
+- `stateSubscription` has been renamed to `processorState`, properties have been reduced to just `lastProcessedBlock`
 
 ### Mutations
 
