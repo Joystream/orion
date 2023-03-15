@@ -7,6 +7,7 @@ module.exports = class Views2000000000000 {
 
   viewDefinitions = {
     channel: [`is_excluded='0'`, `is_censored='0'`],
+    banned_member: [`EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`],
     video: [
       `is_excluded='0'`,
       `is_censored='0'`,
@@ -31,6 +32,11 @@ module.exports = class Views2000000000000 {
     video_media_encoding: [`EXISTS(SELECT 1 FROM "video_media_metadata" WHERE "encoding_id"="this"."id")`],
     video_reaction: [`EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`],
     video_subtitle: [`EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`],
+    video_featured_in_category: [
+      `EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`,
+      `EXISTS(SELECT 1 FROM "video_category" WHERE "id"="category_id")`
+    ],
+    video_hero: [`EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`],
     // TODO: Consider all events having ref to a video they're related to - this will make filtering much easier
     event: [
       `("data"->>'channel' IS NULL OR EXISTS(SELECT 1 FROM "channel" WHERE "id"="data"->>'channel'))`,
@@ -39,6 +45,10 @@ module.exports = class Views2000000000000 {
       `("data"->>'auction' IS NULL OR EXISTS(SELECT 1 FROM "auction" WHERE "id"="data"->>'auction'))`,
       `("data"->>'bid' IS NULL OR EXISTS(SELECT 1 FROM "bid" WHERE "id"="data"->>'bid'))`,
       `("data"->>'comment' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->>'comment'))`
+    ],
+    storage_data_object: [
+      `("type"->>'channel' IS NULL OR EXISTS(SELECT 1 FROM "channel" WHERE "id"="type"->>'channel'))`,
+      `("type"->>'video' IS NULL OR EXISTS(SELECT 1 FROM "video" WHERE "id"="type"->>'video'))`
     ],
     notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
     nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
