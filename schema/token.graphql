@@ -122,7 +122,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   "token for which the sale is issued"
   token: Token!
 
-  "constant price in $JOY for each token"
+  "constant price in HAPI for each token"
   pricePerUnit: BigInt!
 
   "total amount of token on sale"
@@ -174,7 +174,7 @@ type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
   "amount of token bought"
   quantity: BigInt!
 
-  "total $JOY paid for the quantity"
+  "total HAPI paid for the quantity"
   pricePaid: BigInt!
 
   "sale"
@@ -214,7 +214,7 @@ type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
   "amount of token bought"
   quantity: BigInt!
 
-  "total $JOY paid for the quantity"
+  "total HAPI paid for the quantity"
   pricePaid: BigInt!
 
   "sale"
@@ -223,8 +223,8 @@ type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
   "buyer account"
   account: TokenAccount!
 
-  "price per unit"
-  pricePerUnit: BigDecimal!
+  "price per unit in HAPI"
+  pricePerUnit: BigInt!
 
   "was it bought (or sold)"
   transactionType: AmmTransactionType!
@@ -255,7 +255,7 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   amountLockedByVesting: BigInt!
 
   "percentage of allocation owned by this account"
-  allocationPercent: BigDecimal!
+  allocationPercent: BigInt!
 
   "sale transactions for this account"
   saleTransactions: [SaleTransaction!] @derivedFrom(field: "account")
