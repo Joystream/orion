@@ -254,7 +254,7 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "total amount locked by vesting schedules"
   amountLockedByVesting: BigInt!
 
-  "percentage of allocation owned by this account"
+  "percentage of allocation owned by this account TODO(move this to BigDecimal)"
   allocationPercent: BigInt!
 
   "sale transactions for this account"
