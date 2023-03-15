@@ -6,7 +6,9 @@ export async function processCommentsCensorshipStatusUpdate(
   ids: string[],
   censored: boolean
 ) {
-  const comments = await em.getRepository(Comment).find({ where: { id: In(ids) } })
+  const comments = await em
+    .getRepository(Comment)
+    .find({ where: { id: In(ids), isExcluded: !censored }, lock: { mode: 'pessimistic_write' } })
   const videoIdsAffected = comments.map((c) => c.videoId)
   const parentCommentIdsAffected = comments.map((c) => c.parentCommentId)
   const operation = censored ? '-' : '+'

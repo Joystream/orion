@@ -226,16 +226,18 @@ export class AdminResolver {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
+      // Has to be done before actually updating isExcluded to prevent it
+      // from being executed multiple times in a row for the same comment
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids, true)
+      }
+
       const result = await em
         .createQueryBuilder()
         .update(type)
         .set({ isExcluded: true })
         .where({ id: In(ids) })
         .execute()
-
-      if (type === ExcludableContentType.Comment) {
-        await processCommentsCensorshipStatusUpdate(em, ids, true)
-      }
 
       return {
         numberOfEntitiesAffected: result.affected || 0,
@@ -252,16 +254,18 @@ export class AdminResolver {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
+      // Has to be done before actually updating isExcluded to prevent it
+      // from being executed multiple times in a row for the same comment
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids, false)
+      }
+
       const result = await em
         .createQueryBuilder()
         .update(type)
         .set({ isExcluded: false })
         .where({ id: In(ids) })
         .execute()
-
-      if (type === ExcludableContentType.Comment) {
-        await processCommentsCensorshipStatusUpdate(em, ids, false)
-      }
 
       return {
         numberOfEntitiesAffected: result.affected || 0,
