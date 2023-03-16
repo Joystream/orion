@@ -14,6 +14,9 @@ import { EntityManagerOverlay } from '../utils/overlay'
 import { Bytes } from '@polkadot/types/primitive'
 import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
+import { CommentCountersManager } from '../utils/CommentsCountersManager'
+
+export const commentCountersManager = new CommentCountersManager()
 
 export const JOYSTREAM_SS58_PREFIX = 126
 
