@@ -59,8 +59,8 @@ type Token @entity {
   "link for creator to member interested in joining the whitelist"
   whitelisteApplicantLink: String
 
-  "initial amount allocated to the creator"
-  creatorAllocation: BigInt!
+  "initial allocation for users"
+  holdersAllocations: [Allocation!] @derivedFrom(field: "token")
 
   "cliff blocks before allocation vesting starts"
   alloactionCliff: Int!
@@ -73,6 +73,9 @@ type Token @entity {
 
   "holders having some amount of this token"
   accounts: [TokenAccount!] @derivedFrom(field: "token")
+
+  "creator account for faster lookup"
+  creatorAccount: TokenAccount!
 }
 
 type RevenueShare @entity {
@@ -141,7 +144,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   durationInBlocks: Int!
 
   "vesting schedule configuration"
-  vestingSchedule: VestingSchedule
+  vesting: VestedSale @derivedFrom(field: "sale")
 
   "terms and conditions text"
   termsAndConditions: String!
@@ -153,9 +156,53 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   transactions: [SaleTransaction!] @derivedFrom(field: "sale")
 }
 
-type VestingSchedule {
-  "sale the schedule refers to"
-  sale: Sale!
+type Allocation @entity @index(fields: ["token", "account"], unique: true) {
+  "counter"
+  id: ID!
+
+  "token issued"
+  token: Token! @unique
+
+  "creator token account"
+  account: TokenAccount! @unique
+
+  "allocation for the creator"
+  amount: BigInt!
+
+  "vesting schedule configuration"
+  vesting: VestedAllocation @derivedFrom(field: "allocation")
+}
+
+type VestedSale @entity @index(fields: ["vesting", "sale"], unique: true) {
+  "counter"
+  id: ID!
+
+  "vesting schedule reference"
+  vesting: VestingSchedule! @unique
+
+  "sale reference"
+  sale: Sale! @unique
+}
+
+type VestedAllocation @entity @index(fields: ["vesting", "allocation"], unique: true) {
+  "counter"
+  id: ID!
+
+  "vesting schedule reference"
+  vesting: VestingSchedule! @unique
+
+  "sale reference"
+  allocation: Allocation! @unique
+}
+type VestingSchedule @entity {
+  "counter "
+  id: ID!
+
+  "the schedule might refers to a sale"
+  sale: VestedSale @derivedFrom(field: "vesting")
+
+  "the schedule might refer to an initial allocation vesting"
+  allocation: VestedAllocation @derivedFrom(field: "vesting")
 
   "% of amount vested immediately after cliff period"
   cliffPercent: Int!
@@ -251,11 +298,11 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "total token amount (not necessarely liqud) for the account"
   totalAmount: BigInt!
 
-  "total amount locked by vesting schedules"
-  amountLockedByVesting: BigInt!
+  "amount allocated at token creation"
+  allocation: Allocation @derivedFrom(field: "account")
 
-  "percentage of allocation owned by this account TODO(move this to BigDecimal)"
-  allocationPercent: BigInt!
+  "percentage of supply owned by this account TODO(move this to BigDecimal)"
+  supplyPercent: BigInt!
 
   "sale transactions for this account"
   saleTransactions: [SaleTransaction!] @derivedFrom(field: "account")
