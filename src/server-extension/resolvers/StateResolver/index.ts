@@ -47,7 +47,7 @@ class ProcessorStateRetriever {
 }
 
 const processorStateRetriever = new ProcessorStateRetriever()
-processorStateRetriever.run(100)
+processorStateRetriever.run(1000)
 
 async function* processorStateGenerator(): AsyncGenerator<ProcessorState> {
   let lastState: ProcessorState | undefined
