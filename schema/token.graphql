@@ -295,6 +295,9 @@ type VestingSchedule @entity {
   "cliff block"
   cliffBlock: Int!
 
+  "total amount: cliff amount + amount to be vested"
+  totalAmount: BigInt!
+
   "accounts reference"
   accounts: [VestedAccount!] @derivedFrom(field: "vesting")
 }
