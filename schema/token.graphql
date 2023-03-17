@@ -24,7 +24,7 @@ type Token @entity {
   isInviteOnly: Boolean!
 
   "creator annual revenue percent (minted)"
-  patronageRatePercent: Int!
+  annualCreatorReward: Int!
 
   "revenue share ratio between creator and holder"
   revenueShareRatioPercent: Int!
@@ -59,23 +59,11 @@ type Token @entity {
   "link for creator to member interested in joining the whitelist"
   whitelisteApplicantLink: String
 
-  "initial allocation for users"
-  holdersAllocations: [Allocation!] @derivedFrom(field: "token")
-
-  "cliff blocks before allocation vesting starts"
-  alloactionCliff: Int!
-
-  "duration for the vesting period after the cliff"
-  allocationVestingDuration: Int!
-
-  "% of allocation released right after the cliff to the creator"
-  firstPayoutPercent: Int!
-
   "holders having some amount of this token"
   accounts: [TokenAccount!] @derivedFrom(field: "token")
 
-  "creator account for faster lookup"
-  creatorAccount: TokenAccount!
+  "number of accounts to avoid aggregate COUNT"
+  accountsNum: Int!
 }
 
 type RevenueShare @entity {
@@ -96,6 +84,18 @@ type RevenueShare @entity {
 
   "duration"
   duration: Int!
+
+  "Number of participant to aggregating COUNT on stackers"
+  participantsNum: Int!
+
+  "total number of HAPI allocated"
+  allocation: BigInt!
+
+  "amounts claimed so far in order to avoid SUM aggregations"
+  claimed: BigInt!
+
+  "finalized"
+  finalized: Boolean!
 }
 
 type Benefit @entity {
@@ -143,9 +143,6 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   "sale duration"
   durationInBlocks: Int!
 
-  "vesting schedule configuration"
-  vesting: VestedSale @derivedFrom(field: "sale")
-
   "terms and conditions text"
   termsAndConditions: String!
 
@@ -154,64 +151,9 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "transactions references"
   transactions: [SaleTransaction!] @derivedFrom(field: "sale")
-}
 
-type Allocation @entity @index(fields: ["token", "account"], unique: true) {
-  "counter"
-  id: ID!
-
-  "token issued"
-  token: Token! @unique
-
-  "creator token account"
-  account: TokenAccount! @unique
-
-  "allocation for the creator"
-  amount: BigInt!
-
-  "vesting schedule configuration"
-  vesting: VestedAllocation @derivedFrom(field: "allocation")
-}
-
-type VestedSale @entity @index(fields: ["vesting", "sale"], unique: true) {
-  "counter"
-  id: ID!
-
-  "vesting schedule reference"
-  vesting: VestingSchedule! @unique
-
-  "sale reference"
-  sale: Sale! @unique
-}
-
-type VestedAllocation @entity @index(fields: ["vesting", "allocation"], unique: true) {
-  "counter"
-  id: ID!
-
-  "vesting schedule reference"
-  vesting: VestingSchedule! @unique
-
-  "sale reference"
-  allocation: Allocation! @unique
-}
-type VestingSchedule @entity {
-  "counter "
-  id: ID!
-
-  "the schedule might refers to a sale"
-  sale: VestedSale @derivedFrom(field: "vesting")
-
-  "the schedule might refer to an initial allocation vesting"
-  allocation: VestedAllocation @derivedFrom(field: "vesting")
-
-  "% of amount vested immediately after cliff period"
-  cliffPercent: Int!
-
-  "vesting duration in blocks"
-  vestingDurationBlocks: Int!
-
-  "cliff duration in blocks"
-  cliffDurationBlocks: Int!
+  "finalized"
+  finalized: Boolean!
 }
 
 type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
@@ -229,6 +171,9 @@ type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
 
   "buyer account"
   account: TokenAccount!
+
+  "block"
+  createdIn: Int!
 }
 
 type AmmCurve @entity {
@@ -252,6 +197,9 @@ type AmmCurve @entity {
 
   "transaction for this amm"
   transactions: [AmmTransaction!] @derivedFrom(field: "amm")
+
+  "finalized (i.e. closed)"
+  finalized: Boolean!
 }
 
 type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
@@ -275,6 +223,9 @@ type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
 
   "was it bought (or sold)"
   transactionType: AmmTransactionType!
+
+  "block"
+  createdIn: Int!
 }
 
 enum AmmTransactionType {
@@ -292,17 +243,17 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "token for which the account is created"
   token: Token!
 
+  "flagging whether is creator account to avoid too many nested queries"
+  isCreator: Boolean!
+
   "bloat bond payed at account creation"
   tokenAccountBloatBond: BigInt!
 
+  "staked amount, to avoid walking to split participations"
+  stakedAmount: BigInt!
+
   "total token amount (not necessarely liqud) for the account"
   totalAmount: BigInt!
-
-  "amount allocated at token creation"
-  allocation: Allocation @derivedFrom(field: "account")
-
-  "percentage of supply owned by this account TODO(move this to BigDecimal)"
-  supplyPercent: BigInt!
 
   "sale transactions for this account"
   saleTransactions: [SaleTransaction!] @derivedFrom(field: "account")
@@ -312,6 +263,40 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
 
   "information for token accounts participating in revenue share"
   revenueShareParticipation: [RevenueShareParticipation!] @derivedFrom(field: "account")
+
+  "vesting schedule info, it can be empty if no vesting schedules are pending"
+  vestingSchedules: [VestedAccount!]! @derivedFrom(field: "account")
+}
+
+type VestedAccount @entity {
+  "counter"
+  id: ID!
+
+  "vesting schedule reference"
+  vesting: VestingSchedule!
+
+  "account reference"
+  account: TokenAccount!
+}
+
+type VestingSchedule @entity {
+  "cliffBlock++cliffDuration++cliffPercent is enough to identify a schedule"
+  id: ID!
+
+  "% of amount vested immediately after cliff period"
+  cliffPercent: Int!
+
+  "vesting duration in blocks"
+  vestingDurationBlocks: Int!
+
+  "cliff duration in blocks"
+  cliffDurationBlocks: Int!
+
+  "cliff block"
+  cliffBlock: Int!
+
+  "accounts reference"
+  accounts: [VestedAccount!] @derivedFrom(field: "vesting")
 }
 
 type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true) {
@@ -329,4 +314,7 @@ type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"
 
   "eearned joy amounts"
   earnings: BigInt!
+
+  "block"
+  createdIn: Int!
 }
