@@ -46,19 +46,43 @@ module.exports = class Views2000000000000 {
     // HIDDEN entities
     video_view_event: ['FALSE'],
     channel_follow: ['FALSE'],
-    report: ['FALSE']
+    report: ['FALSE'],
+    session: ['FALSE'],
+    user: ['FALSE'],
+    account: ['FALSE'],
+    token: ['FALSE']
   }
 
 
   async up(db) {
-    // Create new schema for the processor in order to be easily able to access "hidden" entities
-    await db.query(`CREATE SCHEMA "processor"`)
+    // Create a new "admin" schema through which the "hidden" entities can be accessed
+    await db.query(`CREATE SCHEMA "admin"`)
+    // Create admin user with "admin" schema in default "search_path"
+    await db.query(`CREATE USER "${process.env.DB_ADMIN_USER}" WITH PASSWORD '${process.env.DB_ADMIN_PASS}'`)
+    await db.query(`GRANT ALL PRIVILEGES ON DATABASE "${process.env.DB_NAME}" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT USAGE ON SCHEMA "public" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT USAGE ON SCHEMA "admin" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "public" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA "admin" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "public" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA "admin" TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(
+      `ALTER DEFAULT PRIVILEGES
+      IN SCHEMA "public"
+      GRANT ALL PRIVILEGES ON TABLES TO "${process.env.DB_ADMIN_USER}"`
+    )
+    await db.query(
+      `ALTER DEFAULT PRIVILEGES
+      IN SCHEMA "admin"
+      GRANT ALL PRIVILEGES ON TABLES TO "${process.env.DB_ADMIN_USER}"`
+    )
+    await db.query(`ALTER USER "${process.env.DB_ADMIN_USER}" SET search_path TO admin,public`) 
     for (const [tableName, viewConditions] of Object.entries(this.viewDefinitions)) {
-      await db.query(`ALTER TABLE "${tableName}" SET SCHEMA "processor"`)
+      await db.query(`ALTER TABLE "${tableName}" SET SCHEMA "admin"`)
       await db.query(`
         CREATE VIEW "${tableName}" AS
           SELECT *
-          FROM "processor"."${tableName}" AS "this"
+          FROM "admin"."${tableName}" AS "this"
           WHERE ${viewConditions.map(cond => `(${cond})`).join(" AND\n")}
       `)
     }
@@ -67,8 +91,8 @@ module.exports = class Views2000000000000 {
   async down(db) {
     for (const viewName of Object.keys(this.viewDefinitions)) {
       await db.query(`DROP VIEW "${viewName}"`)
-      await db.query(`ALTER TABLE "processor"."${viewName}" SET SCHEMA "public"`)
+      await db.query(`ALTER TABLE "admin"."${viewName}" SET SCHEMA "public"`)
     }
-    await db.query(`DROP SCHEMA "processor"`)
+    await db.query(`DROP SCHEMA "admin"`)
   }
 }

@@ -12,7 +12,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
 *DefaultApi* | [**login**](Apis/DefaultApi.md#login) | **POST** /login | Login to user's account, using e-mail and password. |
 *DefaultApi* | [**logout**](Apis/DefaultApi.md#logout) | **POST** /logout | Terminate the current session. |
 *DefaultApi* | [**proveMembership**](Apis/DefaultApi.md#provemembership) | **POST** /prove-membership | Prove ownership of an on-chain membership by an account. |
-*DefaultApi* | [**register**](Apis/DefaultApi.md#register) | **POST** /register | Create an account. |
+*DefaultApi* | [**register**](Apis/DefaultApi.md#register) | **POST** /register | Create an account. Requires anonymousAuth to be performed first. |
 *DefaultApi* | [**requestEmailConfirmationToken**](Apis/DefaultApi.md#requestemailconfirmationtoken) | **POST** /request-email-confirmation-token | Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. |
 *DefaultApi* | [**requestPasswordResetToken**](Apis/DefaultApi.md#requestpasswordresettoken) | **POST** /request-password-reset-token | Request a token to be sent to account's e-mail address, which will allow resetting the account's password |
 *DefaultApi* | [**resetPassword**](Apis/DefaultApi.md#resetpassword) | **POST** /reset-password | Reset account's password using a password reset token. |

@@ -1,7 +1,5 @@
 import { Request } from 'express'
-import { EntityManager, FindOptionsWhere, MoreThan } from 'typeorm'
 import { UAParser } from 'ua-parser-js'
-import { Session } from '../model'
 
 export function resolveIP(req: Request): string {
   const forwardedFor = req.headers['x-forwarded-for'] as string | undefined
@@ -27,26 +25,4 @@ export function getUserAgentData(req: Request) {
     os: `${uaParsed.getOS().name} ${uaParsed.getOS().version}`,
     deviceType: uaParsed.getDevice().type,
   }
-}
-
-export async function findActiveSession(
-  req: Request,
-  em: EntityManager,
-  where: FindOptionsWhere<Session>
-): Promise<Session | undefined> {
-  const ip = resolveIP(req)
-  const { browser, device, os } = getUserAgentData(req)
-  return (
-    (await em.getRepository(Session).findOne({
-      where: {
-        ...where,
-        ip,
-        os,
-        device,
-        browser,
-        expiry: MoreThan(new Date()),
-      },
-      relations: { user: true },
-    })) || undefined
-  )
 }

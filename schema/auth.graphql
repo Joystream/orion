@@ -28,6 +28,9 @@ type Session @entity {
   # User associated with the session
   user: User!
 
+  # Account associated with the session (if any)
+  account: Account
+
   # IP address associated with the session
   ip: String! @index
 

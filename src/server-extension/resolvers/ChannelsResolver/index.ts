@@ -149,9 +149,7 @@ export class ChannelsResolver {
     @Ctx() ctx: Context
   ): Promise<ChannelFollowResult> {
     const em = await this.em()
-    const {
-      session: { ip },
-    } = ctx
+    const { ip } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
@@ -232,9 +230,7 @@ export class ChannelsResolver {
     @Ctx() ctx: Context
   ): Promise<ChannelReportInfo> {
     const em = await this.em()
-    const {
-      session: { ip },
-    } = ctx
+    const { ip } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel first
       const channel = await em.findOne(Channel, {

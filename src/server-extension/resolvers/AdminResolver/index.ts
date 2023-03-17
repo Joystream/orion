@@ -188,13 +188,13 @@ export class AdminResolver {
     if (supportedCategoriesIds) {
       await em
         .createQueryBuilder()
-        .update(`processor.video_category`)
+        .update(`admin.video_category`)
         .set({ is_supported: false })
         .execute()
       if (supportedCategoriesIds.length) {
         const result = await em
           .createQueryBuilder()
-          .update(`processor.video_category`)
+          .update(`admin.video_category`)
           .set({ is_supported: true })
           .where({ id: In(supportedCategoriesIds) })
           .execute()
@@ -223,7 +223,7 @@ export class AdminResolver {
     const em = await this.em()
     const result = await em
       .createQueryBuilder()
-      .update(`processor.${type}`)
+      .update(`admin.${type}`)
       .set({ is_excluded: true })
       .where({ id: In(ids) })
       .execute()
@@ -242,7 +242,7 @@ export class AdminResolver {
     const em = await this.em()
     const result = await em
       .createQueryBuilder()
-      .update(`processor.${type}`)
+      .update(`admin.${type}`)
       .set({ is_excluded: false })
       .where({ id: In(ids) })
       .execute()

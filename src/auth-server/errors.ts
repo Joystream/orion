@@ -6,6 +6,12 @@ export class AuthApiError extends Error {
   }
 }
 
+export class BadRequestError extends AuthApiError {
+  constructor(message = 'Bad request') {
+    super(message, 400)
+  }
+}
+
 export class UnauthorizedError extends AuthApiError {
   constructor(message = 'Unauthorized') {
     super(message, 401)

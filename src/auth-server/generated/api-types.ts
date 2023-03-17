@@ -13,7 +13,7 @@ export interface paths {
     post: operations['login']
   }
   '/register': {
-    /** @description Create an account. */
+    /** @description Create an account. Requires anonymousAuth to be performed first. */
     post: operations['register']
   }
   '/confirm-email': {
@@ -242,11 +242,12 @@ export interface operations {
     }
   }
   register: {
-    /** @description Create an account. */
+    /** @description Create an account. Requires anonymousAuth to be performed first. */
     requestBody: components['requestBodies']['RegisterRequestBody']
     responses: {
       200: components['responses']['GenericOkResponse']
       400: components['responses']['RegisterBadRequestResponse']
+      401: components['responses']['GenericUnauthorizedResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
