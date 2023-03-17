@@ -1,8 +1,5 @@
 subscription GetQueryNodeState {
   stateSubscription {
-    chainHead
-    indexerHead
     lastCompleteBlock
-    lastProcessedEvent
   }
 }

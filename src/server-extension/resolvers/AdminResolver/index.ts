@@ -3,6 +3,7 @@ import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-
 import { EntityManager, In, Not } from 'typeorm'
 import {
   AppActionSignatureInput,
+  ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
   GeneratedSignature,
@@ -39,6 +40,8 @@ import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 import { AppAction } from '@joystream/metadata-protobuf'
+import { withHiddenEntities } from '../../../utils/sql'
+import { processCommentsCensorshipStatusUpdate } from './utils'
 
 @Resolver()
 export class AdminResolver {
@@ -221,16 +224,23 @@ export class AdminResolver {
     { ids, type }: ExcludeContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em
-      .createQueryBuilder()
-      .update(`admin.${type}`)
-      .set({ is_excluded: true })
-      .where({ id: In(ids) })
-      .execute()
 
-    return {
-      numberOfEntitiesAffected: result.affected || 0,
-    }
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update(type)
+        .set({ isExcluded: true })
+        .where({ id: In(ids) })
+        .execute()
+
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids)
+      }
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @UseMiddleware(OperatorOnly)
@@ -240,16 +250,23 @@ export class AdminResolver {
     { ids, type }: RestoreContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em
-      .createQueryBuilder()
-      .update(`admin.${type}`)
-      .set({ is_excluded: false })
-      .where({ id: In(ids) })
-      .execute()
 
-    return {
-      numberOfEntitiesAffected: result.affected || 0,
-    }
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update(type)
+        .set({ isExcluded: false })
+        .where({ id: In(ids) })
+        .execute()
+
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids)
+      }
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @Mutation(() => GeneratedSignature)

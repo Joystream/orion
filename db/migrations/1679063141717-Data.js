@@ -1,5 +1,5 @@
-module.exports = class Data1679061423546 {
-    name = 'Data1679061423546'
+module.exports = class Data1679063141717 {
+    name = 'Data1679063141717'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -102,7 +102,7 @@ module.exports = class Data1679061423546 {
         await db.query(`CREATE TABLE "video_view_event" ("id" character varying NOT NULL, "video_id" text NOT NULL, "ip" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_2efd85597a6a7a704fc4d0f7701" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2e29fba63e12a2b1818e0782d7" ON "video_view_event" ("video_id") `)
         await db.query(`CREATE INDEX "IDX_2529e6da5b4b7410d7245eef78" ON "video_view_event" ("ip") `)
-        await db.query(`CREATE TABLE "report" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text NOT NULL, "video_id" text, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_99e4d0bea58cba73c57f935a546" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "report" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text, "video_id" text, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_99e4d0bea58cba73c57f935a546" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8afe872a1f3227ba331f9e63eb" ON "report" ("ip") `)
         await db.query(`CREATE INDEX "IDX_893057921f4b5cc37a0ef36684" ON "report" ("channel_id") `)
         await db.query(`CREATE INDEX "IDX_f732b6f82095a935db68c9491f" ON "report" ("video_id") `)
