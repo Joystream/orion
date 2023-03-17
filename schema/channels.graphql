@@ -62,6 +62,9 @@ type Channel @entity {
   "creator token issued for the channel"
   creatorToken: Token @derivedFrom(field: "channel")
 
+  "% of channel balance that the creator devotes to revenue shares"
+  revenueShareRatioPercent: Int!
+
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
 }
