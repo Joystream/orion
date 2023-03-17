@@ -19,7 +19,8 @@
     "postinstall": "patch-package --patch-dir assets/patches",
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
-    "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts"
+    "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
+    "v1-migration:prepare": "./scripts/orion-v1-migration/export.sh && npx ts-node ./scripts/orion-v1-migration/prepareData.ts"
   },
   "overrides": {
     "@polkadot/api": "8.9.1",
@@ -44,6 +45,7 @@
     "ajv": "^6.11.0",
     "axios": "^1.2.1",
     "bcryptjs": "^2.4.3",
+    "csv-stringify": "^6.3.0",
     "dotenv": "^16.0.3",
     "dotenv-expand": "^10.0.0",
     "express-openapi-validator": "^5.0.3",
@@ -55,8 +57,8 @@
     "type-graphql": "^1.2.0-rc.1",
     "typeorm": "^0.3.11",
     "ua-parser-js": "^1.0.34",
-    "url-join": "^4",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "url-join": "^4"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
