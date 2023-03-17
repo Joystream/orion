@@ -48,11 +48,16 @@ paths:
       operationId: register
       x-eov-operation-handler: register
       description: Create an account.
+        Requires anonymousAuth to be performed first.
+      security:
+        - bearerAuth: []
       requestBody:
         $ref: '#/components/requestBodies/RegisterRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
         '400':
           $ref: '#/components/responses/RegisterBadRequestResponse'
         default:
@@ -381,5 +386,5 @@ components:
       type: string
       minLength: 8
       maxLength: 70 # Bcrypt allows up to 72 bytes
-      pattern: ^[ -~]+/ # Only ascii characters allowed
+      pattern: ^[ -~]+$ # Only ascii characters allowed
 

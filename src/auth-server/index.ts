@@ -3,8 +3,9 @@ import cors from 'cors'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { HttpError } from 'express-openapi-validator/dist/framework/types'
 import path from 'path'
-import { AuthApiError } from './errors'
+import { AuthApiError, UnauthorizedError } from './errors'
 import { createLogger } from '@subsquid/logger'
+import { authenticate } from '../utils/auth'
 
 export const logger = createLogger('auth-api')
 
@@ -16,6 +17,20 @@ app.use(
   OpenApiValidator.middleware({
     apiSpec: path.join(__dirname, 'openapi.yml'),
     operationHandlers: path.join(__dirname, 'handlers'),
+    validateSecurity: {
+      handlers: {
+        bearerAuth: async (req: express.Request) => {
+          const authContext = await authenticate(req)
+          if (!authContext) {
+            throw new UnauthorizedError()
+          }
+          if (req.res) {
+            req.res.locals.authContext = authContext
+          }
+          return true
+        },
+      },
+    },
   })
 )
 

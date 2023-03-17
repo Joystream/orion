@@ -7,7 +7,7 @@ import {
   DistributionBucketOperatorStatus,
 } from '../../../model'
 import _ from 'lodash'
-import { createEm } from '../../orm'
+import { globalEm } from '../../../utils/globalEm'
 import { performance } from 'perf_hooks'
 import urljoin from 'url-join'
 import { Context } from '@subsquid/openreader/lib/context'
@@ -63,7 +63,7 @@ class DistributionBucketsCache {
   }
 
   private async updateLoop(intervalMs: number): Promise<void> {
-    this.em = await createEm()
+    this.em = await globalEm
     while (true) {
       try {
         this.logger.debug('Reloading distribution buckets and bags cache data...')

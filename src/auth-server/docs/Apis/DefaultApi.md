@@ -153,7 +153,7 @@ This endpoint does not need any parameter.
 
 
 
-    Create an account.
+    Create an account. Requires anonymousAuth to be performed first.
 
 ### Parameters
 
@@ -167,7 +167,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

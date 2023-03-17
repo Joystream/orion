@@ -105,7 +105,7 @@ export class VideosResolver {
     idsQuerySql = extendClause(
       idsQuerySql,
       'FROM',
-      `LEFT JOIN "processor"."video_view_event" ` +
+      `LEFT JOIN "admin"."video_view_event" ` +
         `ON "video_view_event"."video_id" = "video"."id"` +
         (args.periodDays
           ? ` AND "video_view_event"."timestamp" > '${new Date(
@@ -165,9 +165,7 @@ export class VideosResolver {
     @Ctx() ctx: Context
   ): Promise<AddVideoViewResult> {
     const em = await this.em()
-    const {
-      session: { ip },
-    } = ctx
+    const { ip } = ctx
     return withHiddenEntities(em, async () => {
       // Check if the video actually exists & lock it for update
       const video = await em.findOne(Video, {
@@ -227,9 +225,7 @@ export class VideosResolver {
     @Ctx() ctx: Context
   ): Promise<VideoReportInfo> {
     const em = await this.em()
-    const {
-      session: { ip },
-    } = ctx
+    const { ip } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the video+channel first
       const video = await em.findOne(Video, {
