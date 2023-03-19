@@ -85,6 +85,9 @@ type RevenueShare @entity {
   "duration"
   duration: Int!
 
+  "ending block"
+  endsAt: Int!
+
   "Number of participant to aggregating COUNT on stackers"
   participantsNum: Int!
 
@@ -142,6 +145,9 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "sale duration"
   durationInBlocks: Int!
+
+  "ending block"
+  endsAt: Int!
 
   "terms and conditions text"
   termsAndConditions: String!
@@ -291,6 +297,9 @@ type VestingSchedule @entity {
 
   "cliff duration in blocks"
   cliffDurationBlocks: Int!
+
+  "vesting ending block"
+  endsAt: Int!
 
   "cliff block"
   cliffBlock: Int!
