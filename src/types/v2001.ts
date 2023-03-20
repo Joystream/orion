@@ -130,6 +130,61 @@ export interface GiftMembershipParameters {
     applyRootAccountInvitationLock: (bigint | undefined)
 }
 
+export type TransferPolicy = TransferPolicy_Permissionless | TransferPolicy_Permissioned
+
+export interface TransferPolicy_Permissionless {
+    __kind: 'Permissionless'
+}
+
+export interface TransferPolicy_Permissioned {
+    __kind: 'Permissioned'
+    value: Uint8Array
+}
+
+export interface AmmCurve {
+    slope: number
+    intercept: number
+    providedSupply: bigint
+}
+
+export type Validated = Validated_Existing | Validated_NonExisting
+
+export interface Validated_Existing {
+    __kind: 'Existing'
+    value: bigint
+}
+
+export interface Validated_NonExisting {
+    __kind: 'NonExisting'
+    value: bigint
+}
+
+export interface ValidatedPayment {
+    payment: PaymentWithVesting
+    vestingCleanupCandidate: (VestingSource | undefined)
+}
+
+export interface TokenIssuanceParameters {
+    initialAllocation: [bigint, TokenAllocation][]
+    symbol: Uint8Array
+    transferPolicy: TransferPolicyParams
+    patronageRate: number
+    revenueSplitRate: number
+}
+
+export interface TokenSale {
+    unitPrice: bigint
+    quantityLeft: bigint
+    fundsCollected: bigint
+    tokensSource: bigint
+    earningsDestination: (Uint8Array | undefined)
+    startBlock: number
+    duration: number
+    vestingScheduleParams: (VestingScheduleParams | undefined)
+    capPerMember: (bigint | undefined)
+    autoFinalize: boolean
+}
+
 export type BagIdType = BagIdType_Static | BagIdType_Dynamic
 
 export interface BagIdType_Static {
@@ -196,7 +251,7 @@ export interface ChannelOwner_CuratorGroup {
     value: bigint
 }
 
-export type ChannelActionPermission = ChannelActionPermission_UpdateChannelMetadata | ChannelActionPermission_ManageNonVideoChannelAssets | ChannelActionPermission_ManageChannelCollaborators | ChannelActionPermission_UpdateVideoMetadata | ChannelActionPermission_AddVideo | ChannelActionPermission_ManageVideoAssets | ChannelActionPermission_DeleteChannel | ChannelActionPermission_DeleteVideo | ChannelActionPermission_ManageVideoNfts | ChannelActionPermission_AgentRemark | ChannelActionPermission_TransferChannel | ChannelActionPermission_ClaimChannelReward | ChannelActionPermission_WithdrawFromChannelBalance | ChannelActionPermission_IssueCreatorToken | ChannelActionPermission_ClaimCreatorTokenPatronage | ChannelActionPermission_InitAndManageCreatorTokenSale | ChannelActionPermission_CreatorTokenIssuerTransfer | ChannelActionPermission_MakeCreatorTokenPermissionless | ChannelActionPermission_ReduceCreatorTokenPatronageRate | ChannelActionPermission_ManageRevenueSplits | ChannelActionPermission_DeissueCreatorToken
+export type ChannelActionPermission = ChannelActionPermission_UpdateChannelMetadata | ChannelActionPermission_ManageNonVideoChannelAssets | ChannelActionPermission_ManageChannelCollaborators | ChannelActionPermission_UpdateVideoMetadata | ChannelActionPermission_AddVideo | ChannelActionPermission_ManageVideoAssets | ChannelActionPermission_DeleteChannel | ChannelActionPermission_DeleteVideo | ChannelActionPermission_ManageVideoNfts | ChannelActionPermission_AgentRemark | ChannelActionPermission_TransferChannel | ChannelActionPermission_ClaimChannelReward | ChannelActionPermission_WithdrawFromChannelBalance | ChannelActionPermission_IssueCreatorToken | ChannelActionPermission_ClaimCreatorTokenPatronage | ChannelActionPermission_InitAndManageCreatorTokenSale | ChannelActionPermission_CreatorTokenIssuerTransfer | ChannelActionPermission_MakeCreatorTokenPermissionless | ChannelActionPermission_ReduceCreatorTokenPatronageRate | ChannelActionPermission_ManageRevenueSplits | ChannelActionPermission_DeissueCreatorToken | ChannelActionPermission_AmmControl
 
 export interface ChannelActionPermission_UpdateChannelMetadata {
     __kind: 'UpdateChannelMetadata'
@@ -280,6 +335,10 @@ export interface ChannelActionPermission_ManageRevenueSplits {
 
 export interface ChannelActionPermission_DeissueCreatorToken {
     __kind: 'DeissueCreatorToken'
+}
+
+export interface ChannelActionPermission_AmmControl {
+    __kind: 'AmmControl'
 }
 
 export type PausableChannelFeature = PausableChannelFeature_ChannelFundsTransfer | PausableChannelFeature_CreatorCashout | PausableChannelFeature_VideoNftIssuance | PausableChannelFeature_VideoCreation | PausableChannelFeature_VideoUpdate | PausableChannelFeature_ChannelUpdate | PausableChannelFeature_CreatorTokenIssuance
@@ -369,6 +428,49 @@ export interface InitTransactionalStatusRecord_OpenAuction {
     value: OpenAuctionParamsRecord
 }
 
+export interface PaymentWithVesting {
+    amount: bigint
+    vestingSchedule: (VestingScheduleParams | undefined)
+}
+
+export type VestingSource = VestingSource_InitialIssuance | VestingSource_Sale | VestingSource_IssuerTransfer
+
+export interface VestingSource_InitialIssuance {
+    __kind: 'InitialIssuance'
+}
+
+export interface VestingSource_Sale {
+    __kind: 'Sale'
+    value: number
+}
+
+export interface VestingSource_IssuerTransfer {
+    __kind: 'IssuerTransfer'
+    value: bigint
+}
+
+export interface TokenAllocation {
+    amount: bigint
+    vestingScheduleParams: (VestingScheduleParams | undefined)
+}
+
+export type TransferPolicyParams = TransferPolicyParams_Permissionless | TransferPolicyParams_Permissioned
+
+export interface TransferPolicyParams_Permissionless {
+    __kind: 'Permissionless'
+}
+
+export interface TransferPolicyParams_Permissioned {
+    __kind: 'Permissioned'
+    value: WhitelistParams
+}
+
+export interface VestingScheduleParams {
+    linearVestingDuration: number
+    blocksBeforeCliff: number
+    cliffAmountPercentage: number
+}
+
 export type StaticBagId = StaticBagId_Council | StaticBagId_WorkingGroup
 
 export interface StaticBagId_Council {
@@ -388,6 +490,11 @@ export interface DataObjectCreationParameters {
 export interface PendingTransfer {
     newOwner: ChannelOwner
     transferParams: TransferCommitmentParameters
+}
+
+export interface WhitelistParams {
+    commitment: Uint8Array
+    payload: (SingleDataObjectUploadParams | undefined)
 }
 
 export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_App | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
@@ -432,4 +539,10 @@ export interface TransferCommitmentParameters {
     newCollaborators: [bigint, ChannelActionPermission[]][]
     price: bigint
     transferId: bigint
+}
+
+export interface SingleDataObjectUploadParams {
+    objectCreationParams: DataObjectCreationParameters
+    expectedDataSizeFee: bigint
+    expectedDataObjectStateBloatBond: bigint
 }
