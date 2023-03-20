@@ -62,6 +62,7 @@ export const anonymousAuth: (
         )
         await em.save(existingSession)
         return res.status(200).json({
+          success: true,
           userId: user.id,
           sessionId: existingSession.id,
         })
@@ -80,6 +81,7 @@ export const anonymousAuth: (
       })
       await em.save(session)
       res.status(200).json({
+        success: true,
         userId: user.id,
         sessionId: session.id,
       })

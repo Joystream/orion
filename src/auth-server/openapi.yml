@@ -297,15 +297,17 @@ components:
         userId:
           type: string
     AnonymousUserAuthResponseData:
-      type: object
-      required:
-        - userId
-        - sessionId
-      properties:
-        userId:
-          type: string
-        sessionId:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/GenericOkResponseData'
+        - type: object
+          required:
+            - userId
+            - sessionId
+          properties:
+            userId:
+              type: string
+            sessionId:
+              type: string
     LoginRequestData:
       type: object
       required:
@@ -317,12 +319,14 @@ components:
         password:
           type: string
     LoginResponseData:
-      type: object
-      required:
-        - sessionId
-      properties:
-        sessionId:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/GenericOkResponseData'
+        - type: object
+          required:
+            - sessionId
+          properties:
+            sessionId:
+              type: string
     RegisterRequestData:
       type: object
       required:
@@ -380,8 +384,12 @@ components:
           items:
             type: string
     GenericOkResponseData:
-      type: string
-      enum: ['OK']
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
     Password:
       type: string
       minLength: 8
