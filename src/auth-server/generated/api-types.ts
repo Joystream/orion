@@ -49,7 +49,7 @@ export interface components {
     AnonymousUserAuthRequestData: {
       userId?: string
     }
-    AnonymousUserAuthResponseData: {
+    AnonymousUserAuthResponseData: components['schemas']['GenericOkResponseData'] & {
       userId: string
       sessionId: string
     }
@@ -57,7 +57,7 @@ export interface components {
       email: string
       password: string
     }
-    LoginResponseData: {
+    LoginResponseData: components['schemas']['GenericOkResponseData'] & {
       sessionId: string
     }
     RegisterRequestData: {
@@ -86,8 +86,9 @@ export interface components {
       message?: string
       errors?: string[]
     }
-    /** @enum {string} */
-    GenericOkResponseData: 'OK'
+    GenericOkResponseData: {
+      success: boolean
+    }
     Password: string
   }
   responses: {

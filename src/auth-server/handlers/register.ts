@@ -2,11 +2,16 @@ import express from 'express'
 import { BadRequestError } from '../errors'
 import { components } from '../generated/api-types'
 import { globalEm } from '../../utils/globalEm'
-import { Account, NextEntityId } from '../../model'
+import { Account, NextEntityId, Token, TokenType } from '../../model'
 import { config, ConfigVariable } from '../../utils/config'
 import { genSalt, hash } from 'bcryptjs'
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
+import { sendMail } from '../../utils/mail'
+import { registerEmailData } from '../emails'
+import { uniqueId } from '../../utils/crypto'
+import { EntityManager } from 'typeorm'
+import { formatDate } from '../../utils/date'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -14,6 +19,21 @@ type ResBody =
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['RegisterRequestData']
 type ResLocals = { authContext: AuthContext }
+
+async function issueEmailConfirmationToken(account: Account, em: EntityManager): Promise<Token> {
+  const issuedAt = new Date()
+  const lifetimeMs =
+    (await config.get(ConfigVariable.EmailConfirmationTokenExpiryTimeHours, em)) * 3_600_000
+  const expiry = new Date(issuedAt.getTime() + lifetimeMs)
+  const token = new Token({
+    id: uniqueId(),
+    type: TokenType.EMAIL_CONFIRMATION,
+    expiry,
+    issuedAt,
+    issuedForId: account.id,
+  })
+  return em.save(token)
+}
 
 export const register: (
   req: express.Request<ReqParams, ResBody, ReqBody>,
@@ -59,7 +79,21 @@ export const register: (
 
       await em.save(account)
       await em.save(new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }))
-      res.status(200).json('OK')
+
+      const emailConfirmationToken = await issueEmailConfirmationToken(account, em)
+      const appName = await config.get(ConfigVariable.AppName, em)
+      const confirmEmailRoute = await config.get(ConfigVariable.EmailConfirmationRoute, em)
+      const emailConfirmationLink = confirmEmailRoute.replace('{token}', emailConfirmationToken.id)
+      await sendMail({
+        from: await config.get(ConfigVariable.SendgridFromEmail, em),
+        to: email,
+        ...registerEmailData({
+          link: emailConfirmationLink,
+          linkExpiryDate: formatDate(emailConfirmationToken.expiry),
+          appName,
+        }),
+      })
+      res.status(200).json({ success: true })
     })
   } catch (e) {
     next(e)

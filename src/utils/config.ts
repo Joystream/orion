@@ -10,6 +10,11 @@ export enum ConfigVariable {
   SessionExpiryAfterInactivityMinutes = 'SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES',
   SessionMaxDurationHours = 'SESSION_MAX_DURATION_HOURS',
   BCryptSaltRounds = 'BCRYPT_SALT_ROUNDS',
+  SendgridApiKey = 'SENDGRID_API_KEY',
+  SendgridFromEmail = 'SENDGRID_FROM_EMAIL',
+  AppName = 'APP_NAME',
+  EmailConfirmationRoute = 'EMAIL_CONFIRMATION_ROUTE',
+  EmailConfirmationTokenExpiryTimeHours = 'EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS',
 }
 
 const boolType = {
@@ -17,7 +22,7 @@ const boolType = {
   deserialize: (v: string) => v === 'true' || v === '1',
 } as const
 
-const numberType = {
+const intType = {
   serialize: (v: number) => v.toString(),
   deserialize: (v: string) => parseInt(v),
 } as const
@@ -31,11 +36,16 @@ export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
   [ConfigVariable.KillSwitch]: boolType,
-  [ConfigVariable.VideoViewPerIpTimeLimit]: numberType,
+  [ConfigVariable.VideoViewPerIpTimeLimit]: intType,
   [ConfigVariable.AppPrivateKey]: stringType,
-  [ConfigVariable.SessionMaxDurationHours]: numberType,
-  [ConfigVariable.BCryptSaltRounds]: numberType,
-  [ConfigVariable.SessionExpiryAfterInactivityMinutes]: numberType,
+  [ConfigVariable.SessionMaxDurationHours]: intType,
+  [ConfigVariable.BCryptSaltRounds]: intType,
+  [ConfigVariable.SessionExpiryAfterInactivityMinutes]: intType,
+  [ConfigVariable.SendgridApiKey]: stringType,
+  [ConfigVariable.SendgridFromEmail]: stringType,
+  [ConfigVariable.AppName]: stringType,
+  [ConfigVariable.EmailConfirmationRoute]: stringType,
+  [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
