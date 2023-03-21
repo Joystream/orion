@@ -169,6 +169,7 @@ export type GetChannelPaymentEventsQuery = {
       | { __typename: 'CommentTextUpdatedEventData' }
       | { __typename: 'EnglishAuctionSettledEventData'; winningBid: { amount: string } }
       | { __typename: 'EnglishAuctionStartedEventData' }
+      | { __typename: 'MemberBannedFromChannelEventData' }
       | { __typename: 'MetaprotocolTransactionStatusEventData' }
       | { __typename: 'NftBoughtEventData'; price: string }
       | { __typename: 'NftIssuedEventData' }
@@ -941,9 +942,7 @@ export type GetNftActivitiesQuery = {
 
 export type GetQueryNodeStateSubscriptionVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetQueryNodeStateSubscription = {
-  processorState: { lastProcessedBlock: number; chainHead: number }
-}
+export type GetQueryNodeStateSubscription = { processorState: { lastProcessedBlock: number } }
 
 export type GetDistributionBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
 
@@ -1339,6 +1338,7 @@ export type StateQueryEventFieldsFragment = {
           | StateQueryNftOwnerFields_NftOwnerMember_Fragment
         auction: { id: string }
       }
+    | { action: boolean; channel: { id: string }; member: { id: string } }
     | {
         result:
           | StateQueryMetaprotocolTransactionResultFields_MetaprotocolTransactionResultChannelPaid_Fragment
@@ -1459,6 +1459,7 @@ export type StateQueryV2Query = {
   channelFundsWithdrawnEvents: Array<StateQueryEventFieldsFragment>
   channelPayoutsUpdatedEvents: Array<StateQueryEventFieldsFragment>
   channelPaymentMadeEvents: Array<StateQueryEventFieldsFragment>
+  memberBannedFromChannelEvents: Array<StateQueryEventFieldsFragment>
   memberships: Array<{
     id: string
     createdAt: any
@@ -2472,6 +2473,15 @@ export const StateQueryEventFields = gql`
         }
         rationale
       }
+      ... on MemberBannedFromChannelEventData {
+        channel {
+          id
+        }
+        member {
+          id
+        }
+        action
+      }
     }
   }
   ${StateQueryActorFields}
@@ -3448,7 +3458,6 @@ export const GetQueryNodeState = gql`
   subscription GetQueryNodeState {
     processorState {
       lastProcessedBlock
-      chainHead
     }
   }
 `
@@ -3848,6 +3857,12 @@ export const StateQueryV2 = gql`
     channelPaymentMadeEvents: events(
       limit: 9999
       where: { data: { isTypeOf_eq: "ChannelPaymentMadeEventData" } }
+    ) {
+      ...StateQueryEventFields
+    }
+    memberBannedFromChannelEvents: events(
+      limit: 9999
+      where: { data: { isTypeOf_eq: "MemberBannedFromChannelEventData" } }
     ) {
       ...StateQueryEventFields
     }

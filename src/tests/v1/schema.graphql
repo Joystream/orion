@@ -3738,7 +3738,6 @@ type Mutation {
 
     # Hex string from UInt8Array
     rawAction: String!
-    actionType: AppActionActionType!
   ): GeneratedSignature!
 }
 
@@ -3834,11 +3833,6 @@ type ChannelFollowsInfo {
 type GeneratedSignature {
   # App signature converted to hexadecimal string.
   signature: String!
-}
-
-enum AppActionActionType {
-  CREATE_VIDEO
-  CREATE_CHANNEL
 }
 
 type Subscription {

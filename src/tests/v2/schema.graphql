@@ -387,7 +387,6 @@ type ExtendedVideoCategory {
 
 type ProcessorState {
   lastProcessedBlock: Int!
-  chainHead: Int!
 }
 
 type VideosSearchResult {
@@ -6142,6 +6141,7 @@ union EventData =
   | ChannelFundsWithdrawnEventData
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
+  | MemberBannedFromChannelEventData
 
 type CommentCreatedEventData {
   # The comment that was added
@@ -6447,6 +6447,17 @@ type PaymentContextChannel {
   channel: Channel!
 }
 
+type MemberBannedFromChannelEventData {
+  # The chanel the member is being banned / unbanned from
+  channel: Channel!
+
+  # The member being banned / unbanned
+  member: Membership!
+
+  # The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned
+  action: Boolean!
+}
+
 input EventWhereInput {
   id_isNull: Boolean
   id_eq: String
@@ -6681,6 +6692,9 @@ input EventDataWhereInput {
   rationale_not_startsWith: String
   rationale_endsWith: String
   rationale_not_endsWith: String
+  action_isNull: Boolean
+  action_eq: Boolean
+  action_not_eq: Boolean
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -6868,6 +6882,8 @@ enum EventOrderByInput {
   data_channelCashoutsEnabled_DESC
   data_rationale_ASC
   data_rationale_DESC
+  data_action_ASC
+  data_action_DESC
   data_isTypeOf_ASC
   data_isTypeOf_DESC
 }
@@ -7363,10 +7379,10 @@ type Report {
   # IP address of the reporter
   ip: String!
 
-  # ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)
-  channelId: String!
+  # If it's a channel report: ID of the channel being reported (the channel may no longer exist)
+  channelId: String
 
-  # ID of the video being reported (the video may no longer exist)
+  # If it's a video report: ID of the video being reported (the video may no longer exist)
   videoId: String
 
   # Time of the report

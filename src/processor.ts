@@ -88,6 +88,8 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
+import { commentCountersManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
 
 const defaultEventOptions = {
   data: {
@@ -273,10 +275,15 @@ async function processEvent<EventName extends EventNames>(
   await eventHandler({ block, overlay, event, indexInBlock, extrinsicHash })
 }
 
+async function afterDbUpdate(em: EntityManager) {
+  await commentCountersManager.updateVideoCommentsCounters(em)
+  await commentCountersManager.updateParentRepliesCounters(em)
+}
+
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
 
-  const overlay = await EntityManagerOverlay.create(ctx.store)
+  const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
 
   for (const block of ctx.blocks) {
     for (const item of block.items) {

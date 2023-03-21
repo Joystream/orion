@@ -2596,6 +2596,7 @@ export type EventData =
   | CommentTextUpdatedEventData
   | EnglishAuctionSettledEventData
   | EnglishAuctionStartedEventData
+  | MemberBannedFromChannelEventData
   | MetaprotocolTransactionStatusEventData
   | NftBoughtEventData
   | NftIssuedEventData
@@ -2621,6 +2622,9 @@ export type EventDataWhereInput = {
   account_not_in?: Maybe<Array<Scalars['String']>>
   account_not_startsWith?: Maybe<Scalars['String']>
   account_startsWith?: Maybe<Scalars['String']>
+  action_eq?: Maybe<Scalars['Boolean']>
+  action_isNull?: Maybe<Scalars['Boolean']>
+  action_not_eq?: Maybe<Scalars['Boolean']>
   actor?: Maybe<ContentActorWhereInput>
   actor_isNull?: Maybe<Scalars['Boolean']>
   amount_eq?: Maybe<Scalars['BigInt']>
@@ -2796,6 +2800,8 @@ export type EventEdge = {
 export enum EventOrderByInput {
   DataAccountAsc = 'data_account_ASC',
   DataAccountDesc = 'data_account_DESC',
+  DataActionAsc = 'data_action_ASC',
+  DataActionDesc = 'data_action_DESC',
   DataAmountAsc = 'data_amount_ASC',
   DataAmountDesc = 'data_amount_DESC',
   DataChannelCashoutsEnabledAsc = 'data_channelCashoutsEnabled_ASC',
@@ -3077,6 +3083,12 @@ export type LicensesConnection = {
   edges: Array<LicenseEdge>
   pageInfo: PageInfo
   totalCount: Scalars['Int']
+}
+
+export type MemberBannedFromChannelEventData = {
+  action: Scalars['Boolean']
+  channel: Channel
+  member: Membership
 }
 
 export type MemberMetadata = {
@@ -4035,7 +4047,6 @@ export type PaymentContextWhereInput = {
 }
 
 export type ProcessorState = {
-  chainHead: Scalars['Int']
   lastProcessedBlock: Scalars['Int']
 }
 
@@ -5160,7 +5171,7 @@ export type QueryVideosConnectionArgs = {
 }
 
 export type Report = {
-  channelId: Scalars['String']
+  channelId?: Maybe<Scalars['String']>
   id: Scalars['String']
   ip: Scalars['String']
   rationale: Scalars['String']

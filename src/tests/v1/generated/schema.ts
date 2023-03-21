@@ -162,11 +162,6 @@ export type App = BaseGraphQlObject & {
   websiteUrl?: Maybe<Scalars['String']>
 }
 
-export enum AppActionActionType {
-  CreateChannel = 'CREATE_CHANNEL',
-  CreateVideo = 'CREATE_VIDEO',
-}
-
 export type AppConnection = {
   edges: Array<AppEdge>
   pageInfo: PageInfo
@@ -15749,7 +15744,6 @@ export type MutationSetVideoHeroArgs = {
 }
 
 export type MutationSignAppActionCommitmentArgs = {
-  actionType: AppActionActionType
   assets: Scalars['String']
   creatorId: Scalars['String']
   nonce: Scalars['Float']
