@@ -93,7 +93,8 @@
     "ProjectToken.TokensBurned",
     "ProjectToken.AmmActivated",
     "ProjectToken.TokensBoughtOnAmm",
-    "ProjectToken.TokensSoldOnAmm"
+    "ProjectToken.TokensSoldOnAmm",
+    "Content.CreatorTokenIssued"
   ],
   "calls": [],
   "storage": []
