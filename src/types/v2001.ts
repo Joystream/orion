@@ -1,21 +1,5 @@
 import type {Result, Option} from './support'
 
-export type ContentActor = ContentActor_Curator | ContentActor_Member | ContentActor_Lead
-
-export interface ContentActor_Curator {
-    __kind: 'Curator'
-    value: [bigint, bigint]
-}
-
-export interface ContentActor_Member {
-    __kind: 'Member'
-    value: bigint
-}
-
-export interface ContentActor_Lead {
-    __kind: 'Lead'
-}
-
 export interface ChannelRecord {
     owner: ChannelOwner
     numVideos: bigint
@@ -43,6 +27,22 @@ export interface ChannelCreationParametersRecord {
     expectedDataObjectStateBloatBond: bigint
 }
 
+export type ContentActor = ContentActor_Curator | ContentActor_Member | ContentActor_Lead
+
+export interface ContentActor_Curator {
+    __kind: 'Curator'
+    value: [bigint, bigint]
+}
+
+export interface ContentActor_Member {
+    __kind: 'Member'
+    value: bigint
+}
+
+export interface ContentActor_Lead {
+    __kind: 'Lead'
+}
+
 export interface ChannelUpdateParametersRecord {
     assetsToUpload: (StorageAssetsRecord | undefined)
     newMeta: (Uint8Array | undefined)
@@ -50,57 +50,6 @@ export interface ChannelUpdateParametersRecord {
     collaborators: ([bigint, ChannelActionPermission[]][] | undefined)
     expectedDataObjectStateBloatBond: bigint
     storageBucketsNumWitness: (number | undefined)
-}
-
-export interface EnglishAuctionParamsRecord {
-    startingPrice: bigint
-    buyNowPrice: (bigint | undefined)
-    whitelist: bigint[]
-    startsAt: (number | undefined)
-    duration: number
-    extensionPeriod: number
-    minBidStep: bigint
-}
-
-export interface NftIssuanceParametersRecord {
-    royalty: (number | undefined)
-    nftMetadata: Uint8Array
-    nonChannelOwner: (bigint | undefined)
-    initTransactionalStatus: InitTransactionalStatusRecord
-}
-
-export interface OpenAuctionParamsRecord {
-    startingPrice: bigint
-    buyNowPrice: (bigint | undefined)
-    startsAt: (number | undefined)
-    whitelist: bigint[]
-    bidLockDuration: number
-}
-
-export interface VideoCreationParametersRecord {
-    assets: (StorageAssetsRecord | undefined)
-    meta: (Uint8Array | undefined)
-    autoIssueNft: (NftIssuanceParametersRecord | undefined)
-    expectedVideoStateBloatBond: bigint
-    expectedDataObjectStateBloatBond: bigint
-    storageBucketsNumWitness: number
-}
-
-export interface VideoUpdateParametersRecord {
-    assetsToUpload: (StorageAssetsRecord | undefined)
-    newMeta: (Uint8Array | undefined)
-    assetsToRemove: bigint[]
-    autoIssueNft: (NftIssuanceParametersRecord | undefined)
-    expectedDataObjectStateBloatBond: bigint
-    storageBucketsNumWitness: (number | undefined)
-}
-
-export interface CreateMemberParameters {
-    rootAccount: Uint8Array
-    controllerAccount: Uint8Array
-    handle: Uint8Array
-    metadata: Uint8Array
-    isFoundingMember: boolean
 }
 
 export interface InviteMembershipParameters {
@@ -111,132 +60,10 @@ export interface InviteMembershipParameters {
     metadata: Uint8Array
 }
 
-export interface BuyMembershipParameters {
-    rootAccount: Uint8Array
-    controllerAccount: Uint8Array
-    handle: (Uint8Array | undefined)
-    metadata: Uint8Array
-    referrerId: (bigint | undefined)
-}
-
-export interface GiftMembershipParameters {
-    rootAccount: Uint8Array
-    controllerAccount: Uint8Array
-    handle: (Uint8Array | undefined)
-    metadata: Uint8Array
-    creditControllerAccount: bigint
-    applyControllerAccountInvitationLock: (bigint | undefined)
-    creditRootAccount: bigint
-    applyRootAccountInvitationLock: (bigint | undefined)
-}
-
-export type TransferPolicy = TransferPolicy_Permissionless | TransferPolicy_Permissioned
-
-export interface TransferPolicy_Permissionless {
-    __kind: 'Permissionless'
-}
-
-export interface TransferPolicy_Permissioned {
-    __kind: 'Permissioned'
-    value: Uint8Array
-}
-
 export interface AmmCurve {
     slope: number
     intercept: number
     providedSupply: bigint
-}
-
-export type Validated = Validated_Existing | Validated_NonExisting
-
-export interface Validated_Existing {
-    __kind: 'Existing'
-    value: bigint
-}
-
-export interface Validated_NonExisting {
-    __kind: 'NonExisting'
-    value: bigint
-}
-
-export interface ValidatedPayment {
-    payment: PaymentWithVesting
-    vestingCleanupCandidate: (VestingSource | undefined)
-}
-
-export interface TokenIssuanceParameters {
-    initialAllocation: [bigint, TokenAllocation][]
-    symbol: Uint8Array
-    transferPolicy: TransferPolicyParams
-    patronageRate: number
-    revenueSplitRate: number
-}
-
-export interface TokenSale {
-    unitPrice: bigint
-    quantityLeft: bigint
-    fundsCollected: bigint
-    tokensSource: bigint
-    earningsDestination: (Uint8Array | undefined)
-    startBlock: number
-    duration: number
-    vestingScheduleParams: (VestingScheduleParams | undefined)
-    capPerMember: (bigint | undefined)
-    autoFinalize: boolean
-}
-
-export type BagIdType = BagIdType_Static | BagIdType_Dynamic
-
-export interface BagIdType_Static {
-    __kind: 'Static'
-    value: StaticBagId
-}
-
-export interface BagIdType_Dynamic {
-    __kind: 'Dynamic'
-    value: DynamicBagIdType
-}
-
-export interface UploadParametersRecord {
-    bagId: BagIdType
-    objectCreationList: DataObjectCreationParameters[]
-    stateBloatBondSourceAccountId: Uint8Array
-    expectedDataSizeFee: bigint
-    expectedDataObjectStateBloatBond: bigint
-}
-
-export interface DistributionBucketIdRecord {
-    distributionBucketFamilyId: bigint
-    distributionBucketIndex: bigint
-}
-
-export interface DynBagCreationParametersRecord {
-    bagId: DynamicBagIdType
-    objectCreationList: DataObjectCreationParameters[]
-    stateBloatBondSourceAccountId: Uint8Array
-    expectedDataSizeFee: bigint
-    expectedDataObjectStateBloatBond: bigint
-    storageBuckets: bigint[]
-    distributionBuckets: DistributionBucketIdRecord[]
-}
-
-export type DynamicBagIdType = DynamicBagIdType_Member | DynamicBagIdType_Channel
-
-export interface DynamicBagIdType_Member {
-    __kind: 'Member'
-    value: bigint
-}
-
-export interface DynamicBagIdType_Channel {
-    __kind: 'Channel'
-    value: bigint
-}
-
-export interface Voucher {
-    sizeLimit: bigint
-    objectsLimit: bigint
-    sizeUsed: bigint
-    objectsUsed: bigint
 }
 
 export type ChannelOwner = ChannelOwner_Member | ChannelOwner_CuratorGroup
@@ -402,89 +229,9 @@ export interface StorageAssetsRecord {
     expectedDataSizeFee: bigint
 }
 
-export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
-
-export interface InitTransactionalStatusRecord_Idle {
-    __kind: 'Idle'
-}
-
-export interface InitTransactionalStatusRecord_BuyNow {
-    __kind: 'BuyNow'
-    value: bigint
-}
-
-export interface InitTransactionalStatusRecord_InitiatedOfferToMember {
-    __kind: 'InitiatedOfferToMember'
-    value: [bigint, (bigint | undefined)]
-}
-
-export interface InitTransactionalStatusRecord_EnglishAuction {
-    __kind: 'EnglishAuction'
-    value: EnglishAuctionParamsRecord
-}
-
-export interface InitTransactionalStatusRecord_OpenAuction {
-    __kind: 'OpenAuction'
-    value: OpenAuctionParamsRecord
-}
-
-export interface PaymentWithVesting {
-    amount: bigint
-    vestingSchedule: (VestingScheduleParams | undefined)
-}
-
-export type VestingSource = VestingSource_InitialIssuance | VestingSource_Sale | VestingSource_IssuerTransfer
-
-export interface VestingSource_InitialIssuance {
-    __kind: 'InitialIssuance'
-}
-
-export interface VestingSource_Sale {
-    __kind: 'Sale'
-    value: number
-}
-
-export interface VestingSource_IssuerTransfer {
-    __kind: 'IssuerTransfer'
-    value: bigint
-}
-
-export interface TokenAllocation {
-    amount: bigint
-    vestingScheduleParams: (VestingScheduleParams | undefined)
-}
-
-export type TransferPolicyParams = TransferPolicyParams_Permissionless | TransferPolicyParams_Permissioned
-
-export interface TransferPolicyParams_Permissionless {
-    __kind: 'Permissionless'
-}
-
-export interface TransferPolicyParams_Permissioned {
-    __kind: 'Permissioned'
-    value: WhitelistParams
-}
-
-export interface VestingScheduleParams {
-    linearVestingDuration: number
-    blocksBeforeCliff: number
-    cliffAmountPercentage: number
-}
-
-export type StaticBagId = StaticBagId_Council | StaticBagId_WorkingGroup
-
-export interface StaticBagId_Council {
-    __kind: 'Council'
-}
-
-export interface StaticBagId_WorkingGroup {
-    __kind: 'WorkingGroup'
-    value: WorkingGroup
-}
-
-export interface DataObjectCreationParameters {
-    size: bigint
-    ipfsContentId: Uint8Array
+export interface DistributionBucketIdRecord {
+    distributionBucketFamilyId: bigint
+    distributionBucketIndex: bigint
 }
 
 export interface PendingTransfer {
@@ -492,57 +239,13 @@ export interface PendingTransfer {
     transferParams: TransferCommitmentParameters
 }
 
-export interface WhitelistParams {
-    commitment: Uint8Array
-    payload: (SingleDataObjectUploadParams | undefined)
-}
-
-export type WorkingGroup = WorkingGroup_Forum | WorkingGroup_Storage | WorkingGroup_Content | WorkingGroup_OperationsAlpha | WorkingGroup_App | WorkingGroup_Distribution | WorkingGroup_OperationsBeta | WorkingGroup_OperationsGamma | WorkingGroup_Membership
-
-export interface WorkingGroup_Forum {
-    __kind: 'Forum'
-}
-
-export interface WorkingGroup_Storage {
-    __kind: 'Storage'
-}
-
-export interface WorkingGroup_Content {
-    __kind: 'Content'
-}
-
-export interface WorkingGroup_OperationsAlpha {
-    __kind: 'OperationsAlpha'
-}
-
-export interface WorkingGroup_App {
-    __kind: 'App'
-}
-
-export interface WorkingGroup_Distribution {
-    __kind: 'Distribution'
-}
-
-export interface WorkingGroup_OperationsBeta {
-    __kind: 'OperationsBeta'
-}
-
-export interface WorkingGroup_OperationsGamma {
-    __kind: 'OperationsGamma'
-}
-
-export interface WorkingGroup_Membership {
-    __kind: 'Membership'
+export interface DataObjectCreationParameters {
+    size: bigint
+    ipfsContentId: Uint8Array
 }
 
 export interface TransferCommitmentParameters {
     newCollaborators: [bigint, ChannelActionPermission[]][]
     price: bigint
     transferId: bigint
-}
-
-export interface SingleDataObjectUploadParams {
-    objectCreationParams: DataObjectCreationParameters
-    expectedDataSizeFee: bigint
-    expectedDataObjectStateBloatBond: bigint
 }
