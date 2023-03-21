@@ -36,10 +36,10 @@ type Token @entity {
   ammCurve: [AmmCurve!] @derivedFrom(field: "token")
 
   "block in which this token was created"
-  createdIn: Int!
+  createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
-  channel: Channel! @index @unique
+  channel: TokenChannel @derivedFrom(field: "token")
 
   "video for the token presentation page"
   trailerVideo: Video
@@ -57,13 +57,21 @@ type Token @entity {
   whitelistApplicantNote: String
 
   "link for creator to member interested in joining the whitelist"
-  whitelisteApplicantLink: String
+  whitelistApplicantLink: String
 
   "holders having some amount of this token"
   accounts: [TokenAccount!] @derivedFrom(field: "token")
 
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
+}
+
+type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
+  "token reference"
+  token: Token! @unique
+
+  "channel reference"
+  channel: Channel! @unique
 }
 
 type RevenueShare @entity {

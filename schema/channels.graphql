@@ -60,7 +60,7 @@ type Channel @entity {
   totalVideosCreated: Int!
 
   "creator token issued for the channel"
-  creatorToken: Token @derivedFrom(field: "channel")
+  creatorToken: TokenChannel @derivedFrom(field: "channel")
 
   "% of channel balance that the creator devotes to revenue shares"
   revenueShareRatioPercent: Int!
