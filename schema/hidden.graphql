@@ -32,7 +32,7 @@ type Report @entity {
   rationale: String!
 }
 
-type Request @entity {
+type NftFeaturingRequest @entity {
   "Unique identifier of the request"
   id: ID!
 
