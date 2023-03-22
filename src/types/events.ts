@@ -459,6 +459,29 @@ export class ContentChannelVisibilitySetByModeratorEvent {
     }
 }
 
+export class ContentCreatorTokenIssuedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.CreatorTokenIssued')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.CreatorTokenIssued') === 'a672a4ef0905fc0288a3489cc68b38efc29c7026390f5d28c3587695cb356d3d'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class ContentEnglishAuctionSettledEvent {
     private readonly _chain: Chain
     private readonly event: Event

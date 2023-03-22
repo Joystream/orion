@@ -251,17 +251,14 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "runtime token id ++ runtime member id"
   id: ID!
 
-  "member id"
+  "member id ref"
   member: Membership!
 
   "token for which the account is created"
   token: Token!
 
   "flagging whether is creator account to avoid too many nested queries"
-  isCreator: Boolean!
-
-  "bloat bond payed at account creation"
-  tokenAccountBloatBond: BigInt!
+  isCreator: Boolean
 
   "staked amount, to avoid walking to split participations"
   stakedAmount: BigInt!

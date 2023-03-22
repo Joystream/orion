@@ -88,6 +88,11 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
+import {
+  processCreatorTokenIssuedEvent,
+  processTokenIssuedEvent,
+  processTokenAmountTransferredEvent,
+} from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
@@ -182,6 +187,8 @@ processor.addEvent('Members.MemberInvited', defaultEventOptions)
 processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberRemarked', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -218,6 +225,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Content.ChannelPayoutsUpdated': processChannelPayoutsUpdatedEvent,
   'Content.ChannelRewardUpdated': processChannelRewardUpdatedEvent,
   'Content.ChannelFundsWithdrawn': processChannelFundsWithdrawnEvent,
@@ -261,6 +269,8 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
+  'ProjectToken.TokenIssued': processTokenIssuedEvent,
+  'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
 const offchainState = new OffchainState()
