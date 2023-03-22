@@ -84,6 +84,11 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
+import {
+  processCreatorTokenIssuedEvent,
+  processTokenIssuedEvent,
+  processTokenAmountTransferredEvent,
+} from './mappings/token/issuing'
 
 const defaultEventOptions = {
   data: {
@@ -169,6 +174,8 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
   .addEvent('Members.MemberProfileUpdated', defaultEventOptions)
   .addEvent('Members.MemberRemarked', defaultEventOptions)
+  .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+  .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -205,6 +212,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -244,6 +252,8 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
+  'ProjectToken.TokenIssued': processTokenIssuedEvent,
+  'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
 async function processEvent<EventName extends EventNames>(
