@@ -19,6 +19,8 @@ import {
   SubtitleMetadata,
   VideoMetadata,
   VideoReactionsPreference,
+  IBanOrUnbanMemberFromChannel,
+  BanOrUnbanMemberFromChannel,
 } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
@@ -29,6 +31,7 @@ import {
 } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
+  BannedMember,
   Channel,
   Comment,
   CommentStatus,
@@ -43,9 +46,17 @@ import {
   VideoMediaEncoding,
   VideoMediaMetadata,
   VideoSubtitle,
+  MemberBannedFromChannelEventData,
+  Membership,
+  Event,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { invalidMetadata, metaprotocolTransactionFailure } from '../utils'
+import {
+  commentCountersManager,
+  genericEventFields,
+  invalidMetadata,
+  metaprotocolTransactionFailure,
+} from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
@@ -343,13 +354,25 @@ function processLanguage(
 
 export async function processOwnerRemark(
   overlay: EntityManagerOverlay,
-  blockNumber: number,
+  block: SubstrateBlock,
   indexInBlock: number,
+  txHash: string | undefined,
   channel: Flat<Channel>,
   decodedMessage: DecodedMetadataObject<IChannelOwnerRemarked>
 ): Promise<MetaprotocolTransactionResult> {
   if (decodedMessage.pinOrUnpinComment) {
     return processPinOrUnpinCommentMessage(overlay, channel, decodedMessage.pinOrUnpinComment)
+  }
+
+  if (decodedMessage.banOrUnbanMemberFromChannel) {
+    return processBanOrUnbanMemberFromChannelMessage(
+      overlay,
+      block,
+      indexInBlock,
+      txHash,
+      channel,
+      decodedMessage.banOrUnbanMemberFromChannel
+    )
   }
 
   if (decodedMessage.videoReactionsPreference) {
@@ -438,6 +461,53 @@ export async function processPinOrUnpinCommentMessage(
   return new MetaprotocolTransactionResultOK()
 }
 
+export async function processBanOrUnbanMemberFromChannelMessage(
+  overlay: EntityManagerOverlay,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
+  channel: Flat<Channel>,
+  message: DecodedMetadataObject<IBanOrUnbanMemberFromChannel>
+): Promise<MetaprotocolTransactionResult> {
+  const { memberId, option } = message
+
+  const member = await overlay.getRepository(Membership).getById(memberId)
+
+  if (!member) {
+    return metaprotocolTransactionFailure(
+      BanOrUnbanMemberFromChannel,
+      `Member does not exist: ${memberId}`,
+      { decodedMessage: message }
+    )
+  }
+
+  // ban member from channel
+  if (option === BanOrUnbanMemberFromChannel.Option.BAN) {
+    overlay.getRepository(BannedMember).new({
+      channelId: channel.id,
+      memberId: member.id,
+      id: `${channel.id}-${member.id}`,
+    })
+  }
+
+  // unban member from channel
+  if (option === BanOrUnbanMemberFromChannel.Option.UNBAN) {
+    overlay.getRepository(BannedMember).remove(`${channel.id}-${member.id}`)
+  }
+
+  // event processing
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, txHash),
+    data: new MemberBannedFromChannelEventData({
+      channel: channel.id,
+      member: member.id,
+      action: option === BanOrUnbanMemberFromChannel.Option.BAN,
+    }),
+  })
+
+  return new MetaprotocolTransactionResultOK()
+}
+
 export async function processVideoReactionsPreferenceMessage(
   overlay: EntityManagerOverlay,
   channel: Flat<Channel>,
@@ -489,18 +559,11 @@ export async function processModerateCommentMessage(
     return commentOrFailure
   }
 
-  const { comment, video } = commentOrFailure
+  const { comment } = commentOrFailure
 
-  // decrement video's comment count
-  --video.commentsCount
-
-  // decrement parent comment's replies count
-  if (comment.parentCommentId) {
-    const commentRepository = overlay.getRepository(Comment)
-    const parentComment = await commentRepository.getByIdOrFail(comment.parentCommentId)
-    --parentComment.repliesCount
-    --parentComment.reactionsAndRepliesCount
-  }
+  // schedule comment counters updates
+  commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
+  commentCountersManager.scheduleRecalcForVideo(comment.videoId)
 
   comment.text = ''
   comment.status = CommentStatus.MODERATED
