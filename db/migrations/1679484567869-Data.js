@@ -1,5 +1,5 @@
-module.exports = class Data1678197932210 {
-    name = 'Data1678197932210'
+module.exports = class Data1679484567869 {
+    name = 'Data1679484567869'
 
     async up(db) {
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
@@ -97,13 +97,13 @@ module.exports = class Data1678197932210 {
         await db.query(`CREATE TABLE "video_view_event" ("id" character varying NOT NULL, "video_id" text NOT NULL, "ip" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_2efd85597a6a7a704fc4d0f7701" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2e29fba63e12a2b1818e0782d7" ON "video_view_event" ("video_id") `)
         await db.query(`CREATE INDEX "IDX_2529e6da5b4b7410d7245eef78" ON "video_view_event" ("ip") `)
-        await db.query(`CREATE TABLE "report" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text NOT NULL, "video_id" text, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_99e4d0bea58cba73c57f935a546" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "report" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text, "video_id" text, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_99e4d0bea58cba73c57f935a546" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8afe872a1f3227ba331f9e63eb" ON "report" ("ip") `)
         await db.query(`CREATE INDEX "IDX_893057921f4b5cc37a0ef36684" ON "report" ("channel_id") `)
         await db.query(`CREATE INDEX "IDX_f732b6f82095a935db68c9491f" ON "report" ("video_id") `)
-        await db.query(`CREATE TABLE "request" ("id" character varying NOT NULL, "ip" text NOT NULL, "nft_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_167d324701e6867f189aed52e18" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_01c5fd15daf21eeb4a23dbbf8f" ON "request" ("ip") `)
-        await db.query(`CREATE INDEX "IDX_1407f8a2c1a1c67dc69da42cd5" ON "request" ("nft_id") `)
+        await db.query(`CREATE TABLE "nft_featuring_request" ("id" character varying NOT NULL, "ip" text NOT NULL, "nft_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_d0b1ccb74336b30b9575387d328" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_4daf8ec7002b0752488c06113d" ON "nft_featuring_request" ("ip") `)
+        await db.query(`CREATE INDEX "IDX_76d87e26cce72ac2e7ffa28dfb" ON "nft_featuring_request" ("nft_id") `)
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9bba17db99b72836523ab6c16f" ON "channel_follow" ("ip") `)
         await db.query(`CREATE INDEX "IDX_9bc0651dda94437ec18764a260" ON "channel_follow" ("channel_id") `)
@@ -279,9 +279,9 @@ module.exports = class Data1678197932210 {
         await db.query(`DROP INDEX "public"."IDX_8afe872a1f3227ba331f9e63eb"`)
         await db.query(`DROP INDEX "public"."IDX_893057921f4b5cc37a0ef36684"`)
         await db.query(`DROP INDEX "public"."IDX_f732b6f82095a935db68c9491f"`)
-        await db.query(`DROP TABLE "request"`)
-        await db.query(`DROP INDEX "public"."IDX_01c5fd15daf21eeb4a23dbbf8f"`)
-        await db.query(`DROP INDEX "public"."IDX_1407f8a2c1a1c67dc69da42cd5"`)
+        await db.query(`DROP TABLE "nft_featuring_request"`)
+        await db.query(`DROP INDEX "public"."IDX_4daf8ec7002b0752488c06113d"`)
+        await db.query(`DROP INDEX "public"."IDX_76d87e26cce72ac2e7ffa28dfb"`)
         await db.query(`DROP TABLE "channel_follow"`)
         await db.query(`DROP INDEX "public"."IDX_9bba17db99b72836523ab6c16f"`)
         await db.query(`DROP INDEX "public"."IDX_9bc0651dda94437ec18764a260"`)

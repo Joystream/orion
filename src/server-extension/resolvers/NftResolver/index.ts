@@ -3,7 +3,7 @@ import { EntityManager } from 'typeorm'
 import { RequestFeaturedNftArgs, NftFeaturedRequstInfo } from './types'
 import { ContextWithIP } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { OwnedNft, Request } from '../../../model'
+import { NftFeaturingRequest, OwnedNft } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
 
 @Resolver()
@@ -26,7 +26,7 @@ export class NftResolver {
         throw new Error(`NFT with id ${nftId} not found!`)
       }
 
-      const existingRequest = await em.findOne(Request, {
+      const existingRequest = await em.findOne(NftFeaturingRequest, {
         where: { ip, nftId },
       })
 
@@ -41,7 +41,7 @@ export class NftResolver {
         }
       }
 
-      const newRequest = new Request({
+      const newRequest = new NftFeaturingRequest({
         id: randomAsHex(16).replace('0x', ''),
         nftId,
         ip,

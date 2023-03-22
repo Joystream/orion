@@ -231,6 +231,7 @@ export class AdminResolver {
       .createQueryBuilder()
       .update(`processor.owned_nft`)
       .set({ is_featured: false })
+      .where({ is_featured: true })
       .execute()
 
     if (featuredNftsIds.length) {

@@ -1,6 +1,6 @@
 import { ArgsType, Field, ObjectType } from 'type-graphql'
 import { MaxLength } from 'class-validator'
-import { EntityReportInfo } from '../commonTypes'
+import { DateTime } from '@subsquid/graphql-server'
 
 @ArgsType()
 export class RequestFeaturedNftArgs {
@@ -13,7 +13,22 @@ export class RequestFeaturedNftArgs {
 }
 
 @ObjectType()
-export class NftFeaturedRequstInfo extends EntityReportInfo {
+export class NftFeaturedRequstInfo {
   @Field(() => String, { nullable: false })
   nftId!: string
+
+  @Field(() => String, { nullable: false })
+  id!: string
+
+  @Field(() => String, { nullable: false })
+  rationale!: string
+
+  @Field(() => DateTime, { nullable: false })
+  createdAt!: Date
+
+  @Field(() => String, { nullable: false })
+  reporterIp!: string
+
+  @Field(() => Boolean, { nullable: false })
+  created!: boolean
 }
