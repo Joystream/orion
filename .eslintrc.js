@@ -10,7 +10,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2019,
     sourceType: 'module',
-    project: './tsconfig.json',
+    project: ['./tsconfig.json', './scripts/tsconfig.json'],
   },
   extends: [
     'standard',

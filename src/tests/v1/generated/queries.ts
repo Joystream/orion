@@ -451,7 +451,7 @@ export type BasicNftFieldsFragment = {
           __typename: 'AuctionTypeEnglish'
           duration: number
           extensionPeriod: number
-          minimalBidStep: number
+          minimalBidStep: string
           plannedEndAtBlock: number
         }
       | { __typename: 'AuctionTypeOpen'; bidLockDuration: number }
@@ -461,7 +461,7 @@ export type BasicNftFieldsFragment = {
     whitelistedMembers: Array<BasicMembershipFieldsFragment>
   }>
   transactionalStatus?: Types.Maybe<
-    | { __typename: 'TransactionalStatusBuyNow'; price: number }
+    | { __typename: 'TransactionalStatusBuyNow'; price: string }
     | { __typename: 'TransactionalStatusIdle'; dummy?: Types.Maybe<number> }
     | { __typename: 'TransactionalStatusInitiatedOfferToMember' }
   >
@@ -1004,14 +1004,7 @@ export type GetNftActivitiesQuery = {
 
 export type GetQueryNodeStateSubscriptionVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetQueryNodeStateSubscription = {
-  stateSubscription: {
-    chainHead: number
-    indexerHead: number
-    lastCompleteBlock: number
-    lastProcessedEvent: string
-  }
-}
+export type GetQueryNodeStateSubscription = { stateSubscription: { lastCompleteBlock: number } }
 
 export type GetDistributionBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
 
@@ -1185,7 +1178,7 @@ type AuctionTypeFields_AuctionTypeEnglish_Fragment = {
   duration: number
   extensionPeriod: number
   plannedEndAtBlock: number
-  minimalBidStep: number
+  minimalBidStep: string
 }
 
 type AuctionTypeFields_AuctionTypeOpen_Fragment = {
@@ -1209,9 +1202,31 @@ export type BidFieldsFragment = {
   bidder: { id: string }
 }
 
+export type VideoMediaEncodingFieldsFragment = {
+  id: string
+  codecName?: Types.Maybe<string>
+  container?: Types.Maybe<string>
+  mimeMediaType?: Types.Maybe<string>
+}
+
 export type StateQueryV1QueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type StateQueryV1Query = {
+  apps: Array<{
+    id: string
+    name: string
+    websiteUrl?: Types.Maybe<string>
+    useUri?: Types.Maybe<string>
+    smallIcon?: Types.Maybe<string>
+    mediumIcon?: Types.Maybe<string>
+    bigIcon?: Types.Maybe<string>
+    oneLiner?: Types.Maybe<string>
+    description?: Types.Maybe<string>
+    termsOfService?: Types.Maybe<string>
+    platforms?: Types.Maybe<Array<string>>
+    category?: Types.Maybe<string>
+    authKey?: Types.Maybe<string>
+  }>
   channels: Array<{
     id: string
     createdAt: any
@@ -1222,12 +1237,14 @@ export type StateQueryV1Query = {
     createdInBlock: number
     rewardAccount: string
     channelStateBloatBond: string
+    totalVideosCreated: number
     ownerMember?: Types.Maybe<{ id: string }>
     coverPhoto?: Types.Maybe<{ id: string }>
     avatarPhoto?: Types.Maybe<{ id: string }>
     language?: Types.Maybe<{ iso: string }>
     videos: Array<{ id: string }>
     bannedMembers: Array<{ id: string }>
+    entryApp?: Types.Maybe<{ id: string }>
   }>
   commentCreatedEvents: Array<{
     id: string
@@ -1444,6 +1461,7 @@ export type StateQueryV1Query = {
     createdAt: any
     handle: string
     controllerAccount: string
+    totalChannelsCreated: number
     metadata: {
       name?: Types.Maybe<string>
       about?: Types.Maybe<string>
@@ -1466,12 +1484,12 @@ export type StateQueryV1Query = {
     ownerMember?: Types.Maybe<{ id: string }>
     ownerCuratorGroup?: Types.Maybe<{ id: string }>
     transactionalStatus?: Types.Maybe<
-      | { __typename: 'TransactionalStatusBuyNow'; price: number }
+      | { __typename: 'TransactionalStatusBuyNow'; price: string }
       | { __typename: 'TransactionalStatusIdle' }
       | {
           __typename: 'TransactionalStatusInitiatedOfferToMember'
           memberId: number
-          offerPrice?: Types.Maybe<number>
+          offerPrice?: Types.Maybe<string>
         }
     >
     transactionalStatusAuction?: Types.Maybe<{ id: string }>
@@ -1648,12 +1666,7 @@ export type StateQueryV1Query = {
       pixelHeight?: Types.Maybe<number>
       size?: Types.Maybe<string>
       createdInBlock: number
-      encoding?: Types.Maybe<{
-        id: string
-        codecName?: Types.Maybe<string>
-        container?: Types.Maybe<string>
-        mimeMediaType?: Types.Maybe<string>
-      }>
+      encoding?: Types.Maybe<VideoMediaEncodingFieldsFragment>
     }>
     subtitles: Array<{ id: string }>
     comments: Array<{ id: string }>
@@ -2087,6 +2100,14 @@ export const BidFields = gql`
     isCanceled
     createdInBlock
     indexInBlock
+  }
+`
+export const VideoMediaEncodingFields = gql`
+  fragment VideoMediaEncodingFields on VideoMediaEncoding {
+    id
+    codecName
+    container
+    mimeMediaType
   }
 `
 export const GetKillSwitch = gql`
@@ -3286,10 +3307,7 @@ export const GetNftActivities = gql`
 export const GetQueryNodeState = gql`
   subscription GetQueryNodeState {
     stateSubscription {
-      chainHead
-      indexerHead
       lastCompleteBlock
-      lastProcessedEvent
     }
   }
 `
@@ -3516,6 +3534,21 @@ export const ReportVideo = gql`
 `
 export const StateQueryV1 = gql`
   query StateQueryV1 {
+    apps(limit: 9999) {
+      id
+      name
+      websiteUrl
+      useUri
+      smallIcon
+      mediumIcon
+      bigIcon
+      oneLiner
+      description
+      termsOfService
+      platforms
+      category
+      authKey
+    }
     channels(limit: 9999) {
       id
       createdAt
@@ -3544,6 +3577,10 @@ export const StateQueryV1 = gql`
       bannedMembers {
         id
       }
+      entryApp {
+        id
+      }
+      totalVideosCreated
     }
     commentCreatedEvents(limit: 9999) {
       id
@@ -3884,6 +3921,7 @@ export const StateQueryV1 = gql`
       memberBannedFromChannels {
         id
       }
+      totalChannelsCreated
     }
     ownedNfts(limit: 9999) {
       id
@@ -4195,10 +4233,7 @@ export const StateQueryV1 = gql`
       mediaMetadata {
         id
         encoding {
-          id
-          codecName
-          container
-          mimeMediaType
+          ...VideoMediaEncodingFields
         }
         pixelWidth
         pixelHeight
@@ -4253,4 +4288,5 @@ export const StateQueryV1 = gql`
   ${ActorFields}
   ${AuctionTypeFields}
   ${BidFields}
+  ${VideoMediaEncodingFields}
 `
