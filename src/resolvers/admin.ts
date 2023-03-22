@@ -1,16 +1,18 @@
-import { Args, ArgsType, Authorized, Field, Mutation, Query, Resolver } from 'type-graphql'
+import { Args, ArgsType, Authorized, Field, Mutation, Query, Resolver, registerEnumType } from 'type-graphql'
 import { Admin, GeneratedSignature, getAdminDoc } from '../models/Admin'
 import config, { ADMIN_ROLE } from '../config'
 import { ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { createType } from '@joystream/types'
+import { AppAction } from '@joystream/metadata-protobuf'
 
 @ArgsType()
 class AdminInput implements Admin {
   @Field()
   isKilled: boolean
 }
+
+registerEnumType(AppAction.ActionType, { name: 'AppActionActionType' })
 
 @ArgsType()
 class AppActionSignatureInput {
@@ -22,6 +24,8 @@ class AppActionSignatureInput {
   assets: string
   @Field({ description: 'Hex string from UInt8Array' })
   rawAction: string
+  @Field(() => AppAction.ActionType)
+  actionType: AppAction.ActionType
 }
 
 @Resolver()
@@ -42,8 +46,9 @@ export class AdminResolver {
 
   @Mutation(() => GeneratedSignature)
   async signAppActionCommitment(
-    // FIXME: In the initial implementation we don't verify the nonce, but this should be changed in the future
-    @Args() { nonce, rawAction, assets, creatorId }: AppActionSignatureInput
+    // FIXME: In the initial implementation we require the user to provide the nonce
+    // and don't verify it in any way, but this should be changed in the future
+    @Args() { nonce, rawAction, assets, creatorId, actionType }: AppActionSignatureInput
   ) {
     if (!isHex(assets) || !isHex(rawAction)) {
       throw new Error('One of input is not hex: assets, rawAction')
@@ -51,9 +56,13 @@ export class AdminResolver {
 
     const message = generateAppActionCommitment(
       nonce,
-      `m:${creatorId}`,
+      `${creatorId}`,
+      actionType,
+      actionType === AppAction.ActionType.CREATE_CHANNEL
+        ? AppAction.CreatorType.MEMBER // only members are supported as channel owners for now
+        : AppAction.CreatorType.CHANNEL,
       hexToU8a(assets),
-      createType('Bytes', rawAction)
+      hexToU8a(rawAction)
     )
     const signature = ed25519Sign(message, config.appKeypair)
     return { signature: u8aToHex(signature) }
