@@ -175,7 +175,7 @@ export const eventConstructors = {
   'ProjectToken.TokenDeissued': ProjectTokenTokenDeissuedEvent,
   'ProjectToken.AmmActivated': ProjectTokenAmmActivatedEvent,
   'ProjectToken.AccountDustedBy': ProjectTokenAccountDustedByEvent,
-  'ProjectToken.SaleInitialized': ProjectTokenTokenSaleInitializedEvent,
+  'ProjectToken.TokenSaleInitialized': ProjectTokenTokenSaleInitializedEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 

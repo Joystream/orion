@@ -7,6 +7,7 @@ import {
   VestingSchedule,
 } from '../../model'
 import { EntityManagerOverlay } from '../../utils/overlay'
+import { deserializeMetadata } from '../utils'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
