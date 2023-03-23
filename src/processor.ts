@@ -86,6 +86,8 @@ import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 import {
   processCreatorTokenIssuedEvent,
+  processTokenDeissuedEvent,
+  processTokenDustedByEvent,
   processTokenIssuedEvent,
   processTokenAmountTransferredEvent,
 } from './mappings/token/issuing'
@@ -176,6 +178,8 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberRemarked', defaultEventOptions)
   .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
   .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+  .addEvent('ProjectToken.TokenDeissuedEvent', defaultEventOptions)
+  .addEvent('ProjectToken.AmmActivatedEvent', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -253,6 +257,9 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
   'ProjectToken.TokenIssued': processTokenIssuedEvent,
+  'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
+  'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
+  'ProjectToken.AmmActivatedEvent': processTokenAmmActivatedEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
