@@ -7,7 +7,6 @@ import {
   VestingSchedule,
 } from '../../model'
 import { EntityManagerOverlay } from '../../utils/overlay'
-import { deserializeMetadata } from '../utils'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
@@ -16,14 +15,11 @@ export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
 export async function deleteTokenAccount(
   overlay: EntityManagerOverlay,
   tokenId: string,
-  memberId: string, 
+  memberId: string
 ) {
   // remove sales Txs
   const salesTxRepository = overlay.getRepository(SaleTransaction)
-  const salesTxForAccount = await salesTxRepository.getManyByRelation(
-    'accountId',
-    memberId
-  )
+  const salesTxForAccount = await salesTxRepository.getManyByRelation('accountId', memberId)
   salesTxRepository.remove(...salesTxForAccount)
 
   // remove Amm TXs
@@ -41,10 +37,13 @@ export async function deleteTokenAccount(
 
   // remove vesting schedules relation
   const vestedAccountRepository = overlay.getRepository(VestedAccount)
-  const vestingSchedulesForToken = await vestedAccountRepository.getManyByRelation('accountId', tokenId + memberId)
+  const vestingSchedulesForToken = await vestedAccountRepository.getManyByRelation(
+    'accountId',
+    tokenId + memberId
+  )
   vestedAccountRepository.remove(...vestingSchedulesForToken)
   // if any of the above schedules has zero accounts for it remove the schedule
-  for (const {id} of vestingSchedulesForToken) {
+  for (const { id } of vestingSchedulesForToken) {
     const isUsed = (await vestedAccountRepository.getById(id)) !== undefined
     if (!isUsed) {
       overlay.getRepository(VestingSchedule).remove(id)
@@ -52,5 +51,5 @@ export async function deleteTokenAccount(
   }
 
   // remove account
-  overlay.getRepository(TokenAccount).remove(tokenId+memberId)
+  overlay.getRepository(TokenAccount).remove(tokenId + memberId)
 }

@@ -93,8 +93,9 @@ import {
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processAccountDustedByEvent,
-  processTokenSaleInitialzedEvent,
+  processTokenSaleInitializedEvent,
   processTokenIssuedEvent,
+  processPatronageRateDecreasedToEvent,
   processTokenAmountTransferredEvent,
 } from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
@@ -130,6 +131,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
   .addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
   .addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+  .addEvent('Content.CreatorTokenIssued', defaultEventOptions)
   .addEvent('Content.OpenAuctionStarted', defaultEventOptions)
   .addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
   .addEvent('Content.NftIssued', defaultEventOptions)
@@ -187,7 +189,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberRemarked', defaultEventOptions)
   .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
   .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
-  .addEvent('ProjectToken.TokenSaleInitializedEvent', defaultEventOptions)
+  .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -207,6 +209,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -271,8 +274,9 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenIssued': processTokenIssuedEvent,
   'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
-  'ProjectToken.AmmActivatedEvent': processAmmActivatedEvent,
-  'ProjectToken.TokenSaleInitializedEvent': processTokenSaleInitialzedEvent,
+  'ProjectToken.AmmActivated': processAmmActivatedEvent,
+  'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
+  'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
