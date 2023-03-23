@@ -257,9 +257,6 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "token for which the account is created"
   token: Token!
 
-  "flagging whether is creator account to avoid too many nested queries"
-  isCreator: Boolean
-
   "staked amount, to avoid walking to split participations"
   stakedAmount: BigInt!
 
