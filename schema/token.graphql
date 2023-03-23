@@ -24,7 +24,7 @@ type Token @entity {
   isInviteOnly: Boolean!
 
   "creator annual revenue percent (minted)"
-  annualCreatorReward: Int!
+  annualCreatorReward: BigInt!
 
   "revenue share ratio between creator and holder"
   revenueShareRatioPercent: Int!
