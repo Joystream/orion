@@ -70,7 +70,7 @@ import {
   StorageStorageBucketInvitationCancelledEvent,
   // ProjectTokenTokenAmountTransferredEvent,
   // ProjectTokenTokenAmountTransferredByIssuerEvent,
-  // ProjectTokenPatronageRateDecreasedToEvent,
+  ProjectTokenPatronageRateDecreasedToEvent,
   // ProjectTokenPatronageCreditClaimedEvent,
   // ProjectTokenRevenueSplitFinalizedEvent,
   // ProjectTokenUserParticipatedInSplitEvent,
@@ -168,6 +168,7 @@ export const eventConstructors = {
   'ProjectToken.AmmActivated': ProjectTokenAmmActivatedEvent,
   'ProjectToken.AccountDustedBy': ProjectTokenAccountDustedByEvent,
   'ProjectToken.TokenSaleInitialized': ProjectTokenTokenSaleInitializedEvent,
+  'ProjectToken.PatronageRateDecreasedTo': ProjectTokenPatronageRateDecreasedToEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 

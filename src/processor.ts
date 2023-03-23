@@ -89,8 +89,9 @@ import {
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processAccountDustedByEvent,
-  processTokenSaleInitialzedEvent,
+  processTokenSaleInitializedEvent,
   processTokenIssuedEvent,
+  processPatronageRateDecreasedToEvent,
   processTokenAmountTransferredEvent,
 } from './mappings/token/issuing'
 
@@ -123,6 +124,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
   .addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
   .addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+  .addEvent('Content.CreatorTokenIssued', defaultEventOptions)
   .addEvent('Content.OpenAuctionStarted', defaultEventOptions)
   .addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
   .addEvent('Content.NftIssued', defaultEventOptions)
@@ -180,9 +182,10 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberRemarked', defaultEventOptions)
   .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
   .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
-  .addEvent('ProjectToken.TokenDeissuedEvent', defaultEventOptions)
-  .addEvent('ProjectToken.AmmActivatedEvent', defaultEventOptions)
-  .addEvent('ProjectToken.TokenSaleInitializedEvent', defaultEventOptions)
+  .addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+  .addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+  .addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+  .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -202,6 +205,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -219,7 +223,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
-  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -262,8 +265,9 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenIssued': processTokenIssuedEvent,
   'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
-  'ProjectToken.AmmActivatedEvent': processAmmActivatedEvent,
-  'ProjectToken.TokenSaleInitializedEvent': processTokenSaleInitialzedEvent,
+  'ProjectToken.AmmActivated': processAmmActivatedEvent,
+  'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
+  'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
