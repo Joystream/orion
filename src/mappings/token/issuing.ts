@@ -1,15 +1,16 @@
 import { EventHandlerContext } from '../../utils/events'
 import {
-  Channel,
   Token,
   TokenAccount,
   TokenStatus,
   VestedAccount,
   VestingSchedule,
   TokenChannel,
-  ContentActorMember,
+  AmmCurve,
+  Sale,
+  RevenueShare,
 } from '../../model'
-import { tokenAccountId } from '../utils'
+import { deleteTokenAccount, tokenAccountId } from './utils'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -22,7 +23,7 @@ export async function processTokenIssuedEvent({
   },
 }: EventHandlerContext<'ProjectToken.TokenIssued'>) {
   // create vesting schedules
-  const vestingSchedules = initialAllocation.map(([memberId, allocation]) => {
+  const vestingSchedules = initialAllocation.map(([, allocation]) => {
     var vestingSchedule
     if (allocation.vestingScheduleParams) {
       const { linearVestingDuration, blocksBeforeCliff, cliffAmountPercentage } =
@@ -54,20 +55,22 @@ export async function processTokenIssuedEvent({
     createdAt: new Date(block.timestamp),
     totalSupply,
     revenueShareRatioPercent: revenueSplitRate,
+    symbol: symbol.toString(),
+    annualCreatorReward: patronageRate,
+    isInviteOnly: (transferPolicy.__kind == 'Permissioned'),
     accountsNum,
   })
 
   //  create accounts
   initialAllocation.map(([memberId, allocation], i) => {
-    var vestedAccount
     if (vestingSchedules[i]) {
-      vestedAccount = overlay.getRepository(VestedAccount).new({
+      overlay.getRepository(VestedAccount).new({
         id: vestingSchedules[i]!.id.toString() + memberId.toString(),
         accountId: memberId.toString(),
         vestingId: vestingSchedules[i]!.id.toString(),
       })
     }
-    const account = overlay.getRepository(TokenAccount).new({
+    overlay.getRepository(TokenAccount).new({
       id: tokenId.toString() + memberId.toString(),
       memberId: memberId.toString(),
       stakedAmount: BigInt(0),
@@ -79,21 +82,13 @@ export async function processTokenIssuedEvent({
 export async function processCreatorTokenIssuedEvent({
   overlay,
   event: {
-    asV1000: [contentActor, channelId, tokenId],
+    asV1000: [, channelId, tokenId],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssued'>) {
   overlay.getRepository(TokenChannel).new({
     channelId: channelId.toString(),
     tokenId: tokenId.toString(),
   })
-
-  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
-  if (contentActor.__kind === 'Member') {
-    const tokenAccount = await overlay
-      .getRepository(TokenAccount)
-      .getByIdOrFail(tokenId.toString() + channel.ownerMemberId!.toString())
-    tokenAccount.isCreator = true
-  }
 }
 
 export async function processTokenAmountTransferredEvent({
@@ -130,119 +125,65 @@ export async function processTokenAmountTransferredEvent({
   token.accountsNum += accountsAdded
 }
 
-// export async function processTokenAmountTransferredByIssuerEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       sourceMemberId,
-//       validatedTransfers,
-//     ],
-//   },
-// }: EventHandlerContext<'ProjectToken.TokenAmountTransferredByIssuer'>) {
-//   // 1. edit accounts sourceMemberId and validatedTransfers
-//   // 2. Eventually create new account
-//   // 3. eventually update vesting schedules
-// }
+export async function processTokenDeissuedEvent(
+  {
+    overlay,
+    event: {
+      asV1000:
+      tokenId
+    }
+  }: EventHandlerContext<'ProjectToken.TokenDeissued'>) {
+  const saleRepository = overlay.getRepository(Sale)
+  const ammRepository = overlay.getRepository(AmmCurve)
+  const revenueShareRepository = overlay.getRepository(RevenueShare)
 
-// export async function processTokenDeissuedEvent(
-//   {
-//     overlay,
-//     block,
-//     event: {
-//       asV1001: [
-//         tokenId
-//       ]
-//     }
-//   }: EventHandlerContext<'ProjectToken.TokenAmountTransferredByIssuer'>) {
-//   // 1. remove token Id
-//   // 2. cascade remove
-// }
+  const salesForToken = await saleRepository.getManyByRelation('tokenId', tokenId.toString())
+  const ammsForToken = await ammRepository.getManyByRelation('tokenId', tokenId.toString())
+  const revenueSharesForToken = await revenueShareRepository.getManyByRelation('tokenId', tokenId.toString())
 
-// export async function processAccountDustedByEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       dustedAccountId,
-//       sender,
-//       policy,
-//     ]
-//   }
-// }: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
-//   // 1. remove account
-// }
+  saleRepository.remove(...salesForToken)
+  ammRepository.remove(...ammsForToken)
+  revenueShareRepository.remove(...revenueSharesForToken)
 
-// export async function processAmmActivatedEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       memberId,
-//       {
-//         slope,
-//         intercept,
-//       }
-//     ]
-//   }
-// }: EventHandlerContext<'ProjectToken.AmmActivated'>) {
-//   // 1. create new AMM Curve
-//   // 2. add it as a reference to token
-// }
+  overlay.getRepository(Token).remove(tokenId.toString())
+}
 
-// export async function processMemberJoinedWhitelistEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       memberId,
-//       policy,
-//     ]
-//   }
-// }: EventHandlerContext<'ProjectToken.MemberJoinedWhitelist'>) {
-//   // 1. create new account
-// }
+export async function processAccountDustedByEvent({
+  overlay,
+  event: {
+    asV1000: [
+      tokenId,
+      dustedAccountId,
+      ,
+      ,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
+  await deleteTokenAccount(overlay, tokenId.toString(), dustedAccountId.toString())
+}
 
-// export async function processPatronageCreditClaimedEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       creditAmount,
-//       memberId,
-//     ]
-//   }
-// }: EventHandlerContext<'ProjectToken.PatronageCreditClaimed'>) {
-//   // 1. create new account
-// }
+export async function processAmmActivatedEvent({
+  overlay,
+  event: {
+    asV2001: [
+      tokenId,
+      ,
+      {
+        slope,
+        intercept,
+      }
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.AmmActivated'>) {
+  const id = overlay.getRepository(AmmCurve).getNextIdNumber()
+  overlay.getRepository(AmmCurve).new({
+    burnedByAmm: BigInt(0),
+    mintedByAmm: BigInt(0),
+    tokenId: tokenId.toString(),
+    id: id.toString(),
+    ammSlopeParameter: BigInt(slope),
+    ammInitPrice: BigInt(intercept),
+    finalized: false,
+  })
+}
 
-// export async function processPatronageRateDecreasedEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       newRate,
-//     ]
-//   }
-// }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
-//   // 1. decrease Token.reward
-// }
-
-// export async function processRevenueSplitfinalizedEvent({
-//   overlay,
-//   block,
-//   event: {
-//     asV1001: [
-//       tokenId,
-//       _recoveryAccount,
-//       leftoverFunds,
-//     ]
-//   }
-
-// }: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) { }

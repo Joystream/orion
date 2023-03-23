@@ -80,11 +80,11 @@ import {
   // ProjectTokenUserParticipatedInSplitEvent,
   // ProjectTokenRevenueSplitLeftEvent,
   // ProjectTokenMemberJoinedWhitelistEvent,
-  // ProjectTokenAccountDustedByEvent,
-  // ProjectTokenTokenDeissuedEvent,
+  ProjectTokenAccountDustedByEvent,
+  ProjectTokenTokenDeissuedEvent,
   ProjectTokenTokenIssuedEvent,
   ProjectTokenTokenAmountTransferredEvent,
-  // ProjectTokenTokenSaleInitializedEvent,
+  ProjectTokenTokenSaleInitializedEvent,
   // ProjectTokenUpcomingTokenSaleUpdatedEvent,
   // ProjectTokenTokensPurchasedOnSaleEvent,
   // ProjectTokenTransferPolicyChangedToPermissionlessEvent,
@@ -92,7 +92,7 @@ import {
   // ProjectTokenTokenSaleFinalizedEvent,
   // ProjectTokenTokensBoughtOnAmmEvent,
   // ProjectTokenTokensBurnedEvent,
-  // ProjectTokenAmmActivatedEvent,
+  ProjectTokenAmmActivatedEvent,
   // ProjectTokenTokensSoldOnAmmEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
@@ -172,6 +172,10 @@ export const eventConstructors = {
   'Members.MemberProfileUpdated': MembersMemberProfileUpdatedEvent,
   'Members.MemberRemarked': MembersMemberRemarkedEvent,
   'ProjectToken.TokenIssued': ProjectTokenTokenIssuedEvent,
+  'ProjectToken.TokenDeissued': ProjectTokenTokenDeissuedEvent,
+  'ProjectToken.AmmActivated': ProjectTokenAmmActivatedEvent,
+  'ProjectToken.AccountDustedBy': ProjectTokenAccountDustedByEvent,
+  'ProjectToken.SaleInitialized': ProjectTokenTokenSaleInitializedEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 

@@ -136,7 +136,3 @@ export function backwardCompatibleMetaID(block: SubstrateBlock, indexInBlock: nu
 export function u8aToBytes(array?: Uint8Array | null): Bytes {
   return createType('Bytes', array ? u8aToHex(array) : '')
 }
-
-export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
-  return tokenId.toString() + memberId.toString()
-}
