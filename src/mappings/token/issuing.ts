@@ -185,5 +185,37 @@ export async function processAmmActivatedEvent({
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.MARKET
 }
 
+export async function processSaleInitializedEvent({
+  overlay,
+  block,
+  event: {
+    asV1000: [
+      tokenId,
+      saleId,
+      tokenSale,
+      ,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
+  overlay.getRepository(Sale).new({
+    id: tokenId.toString() + saleId.toString(),
+    tokenId: tokenId.toString(),
+    tokensSold: BigInt(0),
+    createdIn: block.height,
+    startBlock: tokenSale.startBlock,
+    durationInBlocks: tokenSale.duration,
+    endsAt: tokenSale.startBlock + tokenSale.duration,
+    maxAmountPerMember: tokenSale.capPerMember,
+    tokenSaleallocation: tokenSale.quantityLeft,
+    pricePerUnit: tokenSale.unitPrice,
+    finalized: false,
+    termsAndConditions: "", // TODO Sale metadata
+  })
+
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.SALE
+}

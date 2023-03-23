@@ -87,7 +87,9 @@ import { EventNames, EventHandler, eventConstructors, EventInstance } from './ut
 import {
   processCreatorTokenIssuedEvent,
   processTokenDeissuedEvent,
-  processTokenDustedByEvent,
+  processAmmActivatedEvent,
+  processAccountDustedByEvent,
+  processTokenSaleInitialzedEvent,
   processTokenIssuedEvent,
   processTokenAmountTransferredEvent,
 } from './mappings/token/issuing'
@@ -180,6 +182,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
   .addEvent('ProjectToken.TokenDeissuedEvent', defaultEventOptions)
   .addEvent('ProjectToken.AmmActivatedEvent', defaultEventOptions)
+  .addEvent('ProjectToken.TokenSaleInitializedEvent', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -259,7 +262,8 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenIssued': processTokenIssuedEvent,
   'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
-  'ProjectToken.AmmActivatedEvent': processTokenAmmActivatedEvent,
+  'ProjectToken.AmmActivatedEvent': processAmmActivatedEvent,
+  'ProjectToken.TokenSaleInitializedEvent': processTokenSaleInitialzedEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }
 
