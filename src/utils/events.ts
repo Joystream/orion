@@ -85,7 +85,7 @@ import {
   // ProjectTokenTransferPolicyChangedToPermissionlessEvent,
   // ProjectTokenRevenueSplitIssuedEvent,
   // ProjectTokenTokenSaleFinalizedEvent,
-  // ProjectTokenTokensBoughtOnAmmEvent,
+  ProjectTokenTokensBoughtOnAmmEvent,
   // ProjectTokenTokensBurnedEvent,
   ProjectTokenAmmActivatedEvent,
   // ProjectTokenTokensSoldOnAmmEvent,
@@ -169,6 +169,7 @@ export const eventConstructors = {
   'ProjectToken.TokenSaleInitialized': ProjectTokenTokenSaleInitializedEvent,
   'ProjectToken.PatronageRateDecreasedTo': ProjectTokenPatronageRateDecreasedToEvent,
   'ProjectToken.PatronageCreditClaimed': ProjectTokenPatronageCreditClaimedEvent,
+  'ProjectToken.TokensBoughtOnAmm': ProjectTokenTokensBoughtOnAmmEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 

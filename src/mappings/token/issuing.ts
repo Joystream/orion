@@ -9,6 +9,8 @@ import {
   AmmCurve,
   Sale,
   RevenueShare,
+  AmmTransaction,
+  AmmTransactionType,
 } from '../../model'
 import { deleteTokenAccount, tokenAccountId } from './utils'
 
@@ -227,4 +229,39 @@ export async function processPatronageCreditClaimedEvent({
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply += amount
+}
+
+export async function processTokensBoughtOnAmmEvent({
+  overlay,
+  block,
+  event: {
+    asV2001: [
+      tokenId,
+      memberId,
+      crtMinted,
+      joyDeposited,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.TokensBoughtOnAmm'>)
+{
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply += crtMinted
+
+  const buyerAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
+  buyerAccount.totalAmount += crtMinted
+
+  const ammId = overlay.getRepository(AmmCurve).getNextIdNumber() - 1
+  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId.toString())
+  amm.mintedByAmm += crtMinted
+
+  overlay.getRepository(AmmTransaction).new({
+    ammId: ammId.toString(),
+    accountId: tokenAccountId(tokenId, memberId),
+    id: ammId.toString() + tokenAccountId(tokenId, memberId),
+    transactionType: AmmTransactionType.BUY,
+    createdIn: block.height,
+    quantity: crtMinted,
+    pricePaid: crtMinted / joyDeposited, // FIX(verify)
+  })
+
 }
