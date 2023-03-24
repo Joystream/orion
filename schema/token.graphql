@@ -142,6 +142,9 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   "total amount of token on sale"
   tokenSaleallocation: BigInt!
 
+  "tally amount of tokens sold during the sale"
+  amountSold: BigInt!
+
   "amount of tokens that has been sold"
   tokensSold: BigInt!
 
@@ -168,6 +171,20 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "finalized"
   finalized: Boolean!
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "sale")
+}
+
+type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true){
+  "Sale.id ++ VestingSchedule.id"
+  id: ID!
+
+  "Sale reference"
+  sale: Sale! @unique
+
+  "vesting schedule reference"
+  vesting: VestingSchedule! @unique
 }
 
 type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
@@ -311,6 +328,9 @@ type VestingSchedule @entity {
 
   "accounts reference"
   accounts: [VestedAccount!] @derivedFrom(field: "vesting")
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "vesting")
 }
 
 type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true) {
