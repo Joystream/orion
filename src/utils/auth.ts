@@ -1,5 +1,5 @@
 import { Request } from 'express'
-import { EntityManager, FindOptionsWhere, MoreThan } from 'typeorm'
+import { EntityManager, FindOptionsWhere, IsNull, MoreThan } from 'typeorm'
 import { Account, Session } from '../model'
 import {
   CachedSessionData,
@@ -11,6 +11,7 @@ import { config, ConfigVariable } from './config'
 import { getUserAgentData, resolveIP } from './http'
 import { createLogger } from '@subsquid/logger'
 import { globalEm } from './globalEm'
+import { uniqueId } from './crypto'
 
 const authLogger = createLogger('authentication')
 
@@ -131,4 +132,50 @@ export async function authenticate(req: Request): Promise<AuthContext | false> {
   authLogger.warn(`Cannot authenticate user. Session not found or expired: ${sessionId}`)
 
   return false
+}
+
+export async function getOrCreateSession(
+  em: EntityManager,
+  req: Request,
+  userId: string,
+  accountId?: string
+): Promise<Session> {
+  const now = new Date()
+  const sessionExpiryAfterMinutes = await config.get(
+    ConfigVariable.SessionExpiryAfterInactivityMinutes,
+    em
+  )
+  const sessionExpiry = new Date(now.getTime() + sessionExpiryAfterMinutes * 60_000)
+
+  // Avoid duplicating sessions, just extend an existing one if found
+  const existingSession = await findActiveSession(req, em, {
+    userId,
+    accountId: accountId || IsNull(),
+  })
+  if (existingSession) {
+    const sessionMaxDurationHours = await config.get(ConfigVariable.SessionMaxDurationHours, em)
+    existingSession.expiry = new Date(
+      Math.min(
+        existingSession.startedAt.getTime() + sessionMaxDurationHours * 3_600_000,
+        sessionExpiry.getTime()
+      )
+    )
+    return em.save(existingSession)
+  }
+
+  const ip = resolveIP(req)
+  const { browser, device, deviceType, os } = getUserAgentData(req)
+  const session = new Session({
+    id: uniqueId(),
+    startedAt: now,
+    expiry: sessionExpiry,
+    browser,
+    device,
+    deviceType,
+    os,
+    ip,
+    userId,
+    accountId,
+  })
+  return em.save(session)
 }
