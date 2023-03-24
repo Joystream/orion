@@ -93,6 +93,7 @@ import {
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processTokensBoughtOnAmmEvent,
+  processTokensSoldOnAmmEvent,
   processAccountDustedByEvent,
   processTokenSaleInitializedEvent,
   processTokenIssuedEvent,
@@ -196,6 +197,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
   .addEvent('ProjectToken.AmmActivated', defaultEventOptions)
   .addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+  .addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
@@ -283,6 +285,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
   'ProjectToken.AmmActivated': processAmmActivatedEvent,
   'ProjectToken.TokensBoughtOnAmm': processTokensBoughtOnAmmEvent,
+  'ProjectToken.TokensSoldOnAmm': processTokensSoldOnAmmEvent,
   'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
   'ProjectToken.PatronageCreditClaimed': processPatronageCreditClaimedEvent,
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,

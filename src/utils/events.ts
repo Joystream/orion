@@ -92,7 +92,7 @@ import {
   ProjectTokenTokensBoughtOnAmmEvent,
   // ProjectTokenTokensBurnedEvent,
   ProjectTokenAmmActivatedEvent,
-  // ProjectTokenTokensSoldOnAmmEvent,
+  ProjectTokenTokensSoldOnAmmEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
 
@@ -178,6 +178,7 @@ export const eventConstructors = {
   'ProjectToken.PatronageRateDecreasedTo': ProjectTokenPatronageRateDecreasedToEvent,
   'ProjectToken.PatronageCreditClaimed': ProjectTokenPatronageCreditClaimedEvent,
   'ProjectToken.TokensBoughtOnAmm': ProjectTokenTokensBoughtOnAmmEvent,
+  'ProjectToken.TokensSoldOnAmm': ProjectTokenTokensSoldOnAmmEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 
