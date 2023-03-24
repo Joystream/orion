@@ -191,7 +191,7 @@ type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
 }
 
 type AmmCurve @entity {
-  "counter"
+  "token.ammNonce"
   id: ID!
 
   "token this Amm is for"
