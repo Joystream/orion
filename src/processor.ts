@@ -96,6 +96,7 @@ import {
   processTokenSaleInitializedEvent,
   processTokenIssuedEvent,
   processPatronageRateDecreasedToEvent,
+  processPatronageCreditClaimedEvent,
   processTokenAmountTransferredEvent,
 } from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
@@ -189,6 +190,10 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Members.MemberRemarked', defaultEventOptions)
   .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
   .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+  .addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+  .addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
+  .addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+  .addEvent('ProjectToken.AmmActivated', defaultEventOptions)
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
@@ -276,6 +281,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
   'ProjectToken.AmmActivated': processAmmActivatedEvent,
   'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
+  'ProjectToken.PatronageCreditClaimed': processPatronageCreditClaimedEvent,
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
 }

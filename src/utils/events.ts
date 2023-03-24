@@ -72,10 +72,9 @@ import {
   StorageDistributionBucketFamilyMetadataSetEvent,
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
-  // ProjectTokenTokenAmountTransferredEvent,
   // ProjectTokenTokenAmountTransferredByIssuerEvent,
   ProjectTokenPatronageRateDecreasedToEvent,
-  // ProjectTokenPatronageCreditClaimedEvent,
+  ProjectTokenPatronageCreditClaimedEvent,
   // ProjectTokenRevenueSplitFinalizedEvent,
   // ProjectTokenUserParticipatedInSplitEvent,
   // ProjectTokenRevenueSplitLeftEvent,
@@ -177,6 +176,7 @@ export const eventConstructors = {
   'ProjectToken.AccountDustedBy': ProjectTokenAccountDustedByEvent,
   'ProjectToken.TokenSaleInitialized': ProjectTokenTokenSaleInitializedEvent,
   'ProjectToken.PatronageRateDecreasedTo': ProjectTokenPatronageRateDecreasedToEvent,
+  'ProjectToken.PatronageCreditClaimed': ProjectTokenPatronageCreditClaimedEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
 } as const
 

@@ -211,3 +211,20 @@ export async function processPatronageRateDecreasedToEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.annualCreatorReward = newRate
 }
+
+export async function processPatronageCreditClaimedEvent({
+  overlay,
+  event: {
+    asV1000: [
+    tokenId,
+    amount,
+    memberId,
+  ]
+  }
+}: EventHandlerContext<'ProjectToken.PatronageCreditClaimed'>) {
+  const creator = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
+  creator.totalAmount += amount
+
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply += amount
+}
