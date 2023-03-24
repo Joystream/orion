@@ -27,7 +27,7 @@ export async function processTokenIssuedEvent({
   // create vesting schedules
   const vestingSchedules = initialAllocation.map(([, allocation]) => {
     var vestingSchedule
-    if (allocation.vestingScheduleParams) {
+    if (allocation.vestingScheduleParams != undefined) {
       const { linearVestingDuration, blocksBeforeCliff, cliffAmountPercentage } =
         allocation.vestingScheduleParams
       const cliffBlock = block.height + blocksBeforeCliff
@@ -59,13 +59,13 @@ export async function processTokenIssuedEvent({
     revenueShareRatioPercent: revenueSplitRate,
     symbol: symbol.toString(),
     annualCreatorReward: BigInt(patronageRate),
-    isInviteOnly: transferPolicy.__kind == 'Permissioned',
+    isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum,
   })
 
   //  create accounts
   initialAllocation.map(([memberId, allocation], i) => {
-    if (vestingSchedules[i]) {
+    if (vestingSchedules[i] != undefined) {
       overlay.getRepository(VestedAccount).new({
         id: vestingSchedules[i]!.id.toString() + memberId.toString(),
         accountId: memberId.toString(),
@@ -108,7 +108,7 @@ export async function processTokenAmountTransferredEvent({
   )
   var accountsAdded = 0
   for (const [validatedMemberId, validatedPayment] of validatedTransfers) {
-    if (validatedMemberId.__kind == 'Existing') {
+    if (validatedMemberId.__kind === 'Existing') {
       const destinationAccount = await overlay
         .getRepository(TokenAccount)
         .getByIdOrFail(tokenAccountId(tokenId, validatedMemberId.value))
@@ -218,10 +218,10 @@ export async function processPatronageCreditClaimedEvent({
   overlay,
   event: {
     asV1000: [
-    tokenId,
-    amount,
-    memberId,
-  ]
+      tokenId,
+      amount,
+      memberId,
+    ]
   }
 }: EventHandlerContext<'ProjectToken.PatronageCreditClaimed'>) {
   const creator = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
@@ -239,16 +239,25 @@ export async function processTokensBoughtOnAmmEvent({
       tokenId,
       memberId,
       crtMinted,
-      joyDeposited,
+      joysDeposited,
     ]
   }
-}: EventHandlerContext<'ProjectToken.TokensBoughtOnAmm'>)
-{
+}: EventHandlerContext<'ProjectToken.TokensBoughtOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply += crtMinted
 
-  const buyerAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
-  buyerAccount.totalAmount += crtMinted
+  const buyerAccount = await overlay.getRepository(TokenAccount).getById(tokenAccountId(tokenId, memberId))
+  if (buyerAccount == undefined) {
+    overlay.getRepository(TokenAccount).new({
+      totalAmount: crtMinted,
+      memberId: memberId.toString(),
+      stakedAmount: BigInt(0),
+      id: tokenAccountId(tokenId, memberId),
+      tokenId: tokenId.toString(), 
+    })
+  } else {
+    buyerAccount!.totalAmount += crtMinted
+  }
 
   const ammId = overlay.getRepository(AmmCurve).getNextIdNumber() - 1
   const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId.toString())
@@ -261,7 +270,40 @@ export async function processTokensBoughtOnAmmEvent({
     transactionType: AmmTransactionType.BUY,
     createdIn: block.height,
     quantity: crtMinted,
-    pricePaid: crtMinted / joyDeposited, // FIX(verify)
+    pricePaid: crtMinted / joysDeposited, // FIX(verify)
   })
+}
 
+export async function processTokensSoldOnAmmEvent({
+  overlay,
+  block,
+  event: {
+    asV2001: [
+      tokenId,
+      memberId,
+      crtBurned,
+      joysRecovered,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>)
+{
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply -= crtBurned
+
+  const sellerAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
+  sellerAccount.totalAmount += crtBurned 
+
+  const ammId = overlay.getRepository(AmmCurve).getNextIdNumber() - 1
+  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId.toString())
+  amm.burnedByAmm += crtBurned
+
+  overlay.getRepository(AmmTransaction).new({
+    ammId: ammId.toString(),
+    accountId: tokenAccountId(tokenId, memberId),
+    id: ammId.toString() + tokenAccountId(tokenId, memberId),
+    transactionType: AmmTransactionType.SELL,
+    createdIn: block.height,
+    quantity: crtBurned,
+    pricePaid: crtBurned / joysRecovered, // FIX(verify)
+  })
 }
