@@ -61,6 +61,9 @@ type Token @entity {
 
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
+
+  "number of completed Amm Sales"
+  ammNonce: Int!
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {

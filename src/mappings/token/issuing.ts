@@ -13,7 +13,7 @@ import {
   AmmTransactionType,
   VestedSale,
 } from '../../model'
-import { deleteTokenAccount, tokenAccountId, tokenSaleId, VestingScheduleData } from './utils'
+import { deleteTokenAccount, tokenAccountId, tokenAmmId, tokenSaleId, VestingScheduleData } from './utils'
 import { getRepository } from 'typeorm'
 
 export async function processTokenIssuedEvent({
@@ -62,6 +62,7 @@ export async function processTokenIssuedEvent({
     annualCreatorReward: BigInt(patronageRate),
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum,
+    ammNonce: 0,
   })
 
   //  create accounts
@@ -278,8 +279,8 @@ export async function processTokensBoughtOnAmmEvent({
     buyerAccount!.totalAmount += crtMinted
   }
 
-  const ammId = overlay.getRepository(AmmCurve).getNextIdNumber() - 1
-  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId.toString())
+  const ammId = tokenAmmId(tokenId, token.ammNonce)
+  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId)
   amm.mintedByAmm += crtMinted
 
   overlay.getRepository(AmmTransaction).new({
@@ -424,7 +425,7 @@ export async function processMemberJoinedWhitelistEvent({
     ]
   }
 
-}: EventHandlerContext<'ProjectToken.MemberJoinedWhitelist'>) { 
+}: EventHandlerContext<'ProjectToken.MemberJoinedWhitelist'>) {
   overlay.getRepository(TokenAccount).new({
     id: tokenAccountId(tokenId, memberId),
     stakedAmount: BigInt(0),
@@ -433,4 +434,22 @@ export async function processMemberJoinedWhitelistEvent({
     memberId: memberId.toString(),
     whitelisted: true,
   })
+}
+
+export async function processAmmDeactivatedEvent({
+  overlay,
+  event: {
+    asV2001: [
+      tokenId,
+      burnedAmount,
+    ]
+  }
+
+}: EventHandlerContext<'ProjectToken.AmmDeactivated'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply -= burnedAmount
+  token.status = TokenStatus.IDLE
+
+  const ammCurve = await overlay.getRepository(AmmCurve).getByIdOrFail(tokenAmmId(tokenId, token.ammNonce))
+  ammCurve.finalized = true
 }
