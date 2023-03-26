@@ -13,7 +13,7 @@ import {
   AmmTransactionType,
   VestedSale,
 } from '../../model'
-import { deleteTokenAccount, tokenAccountId, tokenAmmId, tokenSaleId, VestingScheduleData } from './utils'
+import { burnFromVesting, deleteTokenAccount, tokenAccountId, tokenAmmId, tokenSaleId, VestingScheduleData } from './utils'
 import { getRepository } from 'typeorm'
 
 export async function processTokenIssuedEvent({
@@ -452,4 +452,26 @@ export async function processAmmDeactivatedEvent({
 
   const ammCurve = await overlay.getRepository(AmmCurve).getByIdOrFail(tokenAmmId(tokenId, token.ammNonce))
   ammCurve.finalized = true
+}
+
+export async function processTokensBurnedEvent({
+  overlay,
+  event: {
+    asV1000: [
+      tokenId,
+      memberId,
+      amountBurned,
+    ]
+  }
+
+}: EventHandlerContext<'ProjectToken.TokensBurned'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply -= amountBurned
+
+  const account = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId,memberId))
+  if (account.stakedAmount > 0) {
+    account.stakedAmount = account.stakedAmount > amountBurned ? account.stakedAmount - amountBurned : BigInt(0)
+  }
+  account.totalAmount -= amountBurned
+  await burnFromVesting(overlay, tokenAccountId(tokenId, memberId), amountBurned)
 }

@@ -101,6 +101,7 @@ import {
   processRevenueSplitIssuedEvent,
   processAmmDeactivatedEvent,
   processMemberJoinedWhitelistEvent,
+  processTokensBurnedEvent,
 } from './mappings/token/issuing'
 
 const defaultEventOptions = {
@@ -202,6 +203,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
   .addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
   .addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
+  .addEvent('ProjectToken.TokensBurned', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -290,6 +292,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.TokensBurned': processTokensBurnedEvent,
   'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
   'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
