@@ -83,12 +83,13 @@ import {
   ProjectTokenUpcomingTokenSaleUpdatedEvent,
   ProjectTokenTokensPurchasedOnSaleEvent,
   // ProjectTokenTransferPolicyChangedToPermissionlessEvent,
-  // ProjectTokenRevenueSplitIssuedEvent,
+  ProjectTokenRevenueSplitIssuedEvent,
   // ProjectTokenTokenSaleFinalizedEvent,
   ProjectTokenTokensBoughtOnAmmEvent,
   // ProjectTokenTokensBurnedEvent,
   ProjectTokenAmmActivatedEvent,
   ProjectTokenTokensSoldOnAmmEvent,
+  ProjectTokenTokenAmountTransferredByIssuerEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
 
@@ -173,6 +174,7 @@ export const eventConstructors = {
   'ProjectToken.TokensBoughtOnAmm': ProjectTokenTokensBoughtOnAmmEvent,
   'ProjectToken.TokensSoldOnAmm': ProjectTokenTokensSoldOnAmmEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
+  'ProjectToken.RevenueSplitIssued': ProjectTokenRevenueSplitIssuedEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': ProjectTokenUpcomingTokenSaleUpdatedEvent,
 } as const
 

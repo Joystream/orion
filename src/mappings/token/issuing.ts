@@ -14,6 +14,7 @@ import {
   VestedSale,
 } from '../../model'
 import { deleteTokenAccount, tokenAccountId, tokenSaleId, VestingScheduleData } from './utils'
+import { getRepository } from 'typeorm'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -384,4 +385,32 @@ export async function processUpcomingTokenSaleUpdatedEvent({
   }
 
   sale.endsAt = sale.startBlock + sale.durationInBlocks
+}
+
+
+export async function processRevenueSplitIssuedEvent({
+  overlay,
+  block,
+  event: {
+    asV1000: [
+      tokenId,
+      startBlock,
+      duration,
+      joyAllocation,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.RevenueSplitIssued'>) {
+  const endsAt = startBlock + duration
+  const revenueShare = overlay.getRepository(RevenueShare).new({
+    id: overlay.getRepository(RevenueShare).getNextIdNumber().toString(),
+    duration: duration,
+    allocation: joyAllocation,
+    tokenId: tokenId.toString(),
+    createdIn: block.height,
+    participantsNum: 0,
+    finalized: false,
+    claimed: BigInt(0),
+    startingAt: startBlock,
+    endsAt,
+  })
 }
