@@ -102,6 +102,7 @@ import {
   processPatronageCreditClaimedEvent,
   processTokenAmountTransferredEvent,
   processUpcomingTokenSaleUpdatedEvent,
+  processRevenueSplitIssuedEvent,
 } from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
@@ -202,6 +203,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
   .addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+  .addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
   .addEvent('ProjectToken.UpcomingTokenSaleUpdatedEvent', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
@@ -295,6 +297,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
 }
 
