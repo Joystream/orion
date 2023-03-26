@@ -106,6 +106,7 @@ import {
   processAmmDeactivatedEvent,
   processMemberJoinedWhitelistEvent,
   processTokensBurnedEvent,
+  processTransferPolicyChangedToPermissionlessEvent,
 } from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
@@ -211,6 +212,8 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
   .addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
   .addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+  .addEvent('ProjectToken.TransferPolicyChangedToPermissionlessEvent', defaultEventOptions)
+  
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -308,6 +311,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
   'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless': processTransferPolicyChangedToPermissionlessEvent)
 }
 
 const offchainState = new OffchainState()

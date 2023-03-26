@@ -86,7 +86,7 @@ import {
   ProjectTokenTokenSaleInitializedEvent,
   ProjectTokenUpcomingTokenSaleUpdatedEvent,
   ProjectTokenTokensPurchasedOnSaleEvent,
-  // ProjectTokenTransferPolicyChangedToPermissionlessEvent,
+  ProjectTokenTransferPolicyChangedToPermissionlessEvent,
   ProjectTokenRevenueSplitIssuedEvent,
   // ProjectTokenTokenSaleFinalizedEvent,
   ProjectTokenTokensBoughtOnAmmEvent,
@@ -188,6 +188,7 @@ export const eventConstructors = {
   'ProjectToken.UpcomingTokenSaleUpdated': ProjectTokenUpcomingTokenSaleUpdatedEvent,
   'ProjectToken.MemberJoinedWhitelist': ProjectTokenMemberJoinedWhitelistEvent,
   'ProjectToken.TokensBurned': ProjectTokenTokensBurnedEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless': ProjectTokenTransferPolicyChangedToPermissionlessEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors
