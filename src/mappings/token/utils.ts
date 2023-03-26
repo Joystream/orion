@@ -7,7 +7,7 @@ import {
   VestingSchedule,
 } from '../../model'
 import { VestingScheduleParams } from '../../types/v1000'
-import { EntityManagerOverlay } from '../../utils/overlay'
+import { EntityManagerOverlay, RepositoryOverlay } from '../../utils/overlay'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
@@ -37,10 +37,18 @@ export async function deleteTokenAccount(
   shareParticipationsRepository.remove(...sharesParticipationsForAccount)
 
   // remove vesting schedules relation
+  await removeVesting(overlay, tokenId + memberId)
+ 
+  // remove account
+  overlay.getRepository(TokenAccount).remove(tokenId + memberId)
+}
+
+export async function removeVesting(overlay: EntityManagerOverlay, accountId: string) {
+  // remove vesting schedules relation
   const vestedAccountRepository = overlay.getRepository(VestedAccount)
   const vestingSchedulesForToken = await vestedAccountRepository.getManyByRelation(
     'accountId',
-    tokenId + memberId
+    accountId,
   )
   vestedAccountRepository.remove(...vestingSchedulesForToken)
   // if any of the above schedules has zero accounts for it remove the schedule
@@ -50,9 +58,6 @@ export async function deleteTokenAccount(
       overlay.getRepository(VestingSchedule).remove(id)
     }
   }
-
-  // remove account
-  overlay.getRepository(TokenAccount).remove(tokenId + memberId)
 }
 
 export function tokenSaleId(tokenId: bigint, saleId: number): string {
@@ -94,3 +99,16 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
   return tokenId.toString() + ammNonce.toString();
 }
 
+export async function burnFromVesting(overlay: EntityManagerOverlay, accountId: string, burnedAmount: bigint) {
+  const vestedAccounts = await overlay.getRepository(VestedAccount).getManyByRelation('accountId', accountId)
+  var tallyBurnedAmount = burnedAmount
+  for (const vesting of vestedAccounts) {
+    if (tallyBurnedAmount === BigInt(0)) {
+      return
+    }
+    if (vesting.amount <= tallyBurnedAmount) {
+      await removeVesting(overlay, accountId)
+      tallyBurnedAmount -= vesting.amount
+    }
+  }
+}
