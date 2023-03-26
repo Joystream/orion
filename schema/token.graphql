@@ -306,6 +306,9 @@ type VestedAccount @entity {
 
   "account reference"
   account: TokenAccount!
+
+  "amount vested"
+  amount: BigInt!
 }
 
 type VestingSchedule @entity {

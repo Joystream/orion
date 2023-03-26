@@ -90,11 +90,11 @@ import {
   ProjectTokenRevenueSplitIssuedEvent,
   // ProjectTokenTokenSaleFinalizedEvent,
   ProjectTokenTokensBoughtOnAmmEvent,
-  // ProjectTokenTokensBurnedEvent,
+  ProjectTokenTokensBurnedEvent,
   ProjectTokenAmmDeactivatedEvent,
   ProjectTokenAmmActivatedEvent,
   ProjectTokenTokensSoldOnAmmEvent,
-  ProjectTokenTokenAmountTransferredByIssuerEvent,
+  // ProjectTokenTokenAmountTransferredByIssuerEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
 
@@ -187,6 +187,7 @@ export const eventConstructors = {
   'ProjectToken.RevenueSplitIssued': ProjectTokenRevenueSplitIssuedEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': ProjectTokenUpcomingTokenSaleUpdatedEvent,
   'ProjectToken.MemberJoinedWhitelist': ProjectTokenMemberJoinedWhitelistEvent,
+  'ProjectToken.TokensBurned': ProjectTokenTokensBurnedEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors
