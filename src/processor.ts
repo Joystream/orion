@@ -97,6 +97,7 @@ import {
   processPatronageRateDecreasedToEvent,
   processPatronageCreditClaimedEvent,
   processTokenAmountTransferredEvent,
+  processUpcomingTokenSaleUpdatedEvent,
 } from './mappings/token/issuing'
 
 const defaultEventOptions = {
@@ -194,6 +195,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
   .addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+  .addEvent('ProjectToken.UpcomingTokenSaleUpdatedEvent', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -281,6 +283,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
 }
 
 async function processEvent<EventName extends EventNames>(
