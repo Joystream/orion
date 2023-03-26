@@ -90,3 +90,7 @@ export class VestingScheduleData {
   }
 }
 
+export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
+  return tokenId.toString() + ammNonce.toString();
+}
+

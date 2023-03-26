@@ -99,6 +99,7 @@ import {
   processTokenAmountTransferredEvent,
   processUpcomingTokenSaleUpdatedEvent,
   processRevenueSplitIssuedEvent,
+  processAmmDeactivatedEvent,
   processMemberJoinedWhitelistEvent,
 } from './mappings/token/issuing'
 
@@ -193,6 +194,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
   .addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
   .addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+  .addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
   .addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
   .addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
@@ -280,6 +282,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
   'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
   'ProjectToken.AmmActivated': processAmmActivatedEvent,
+  'ProjectToken.AmmDeactivated': processAmmDeactivatedEvent,
   'ProjectToken.TokensBoughtOnAmm': processTokensBoughtOnAmmEvent,
   'ProjectToken.TokensSoldOnAmm': processTokensSoldOnAmmEvent,
   'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,

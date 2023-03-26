@@ -972,6 +972,43 @@ export class ProjectTokenAmmActivatedEvent {
     }
 }
 
+export class ProjectTokenAmmDeactivatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.AmmDeactivated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * AMM deactivated
+     * Params:
+     * - token id
+     * - member id
+     * - amm treasury amount burned upon deactivation
+     */
+    get isV2001(): boolean {
+        return this._chain.getEventHash('ProjectToken.AmmDeactivated') === '33de85887d3f9a3233944dd2ceb85209223f0c5a4fffc561bf8206aa91f86e34'
+    }
+
+    /**
+     * AMM deactivated
+     * Params:
+     * - token id
+     * - member id
+     * - amm treasury amount burned upon deactivation
+     */
+    get asV2001(): [bigint, bigint, bigint] {
+        assert(this.isV2001)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class ProjectTokenMemberJoinedWhitelistEvent {
     private readonly _chain: Chain
     private readonly event: Event
