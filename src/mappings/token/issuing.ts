@@ -468,10 +468,21 @@ export async function processTokensBurnedEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= amountBurned
 
-  const account = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId,memberId))
+  const account = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
   if (account.stakedAmount > 0) {
     account.stakedAmount = account.stakedAmount > amountBurned ? account.stakedAmount - amountBurned : BigInt(0)
   }
   account.totalAmount -= amountBurned
   await burnFromVesting(overlay, tokenAccountId(tokenId, memberId), amountBurned)
+}
+
+export async function processTransferPolicyChangedToPermissionlessEvent({
+  overlay,
+  event: {
+    asV1000:
+    tokenId
+  }
+}: EventHandlerContext<'ProjectToken.TransferPolicyChangedToPermissionless'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.isInviteOnly = false
 }
