@@ -11,8 +11,9 @@ import {
   RevenueShare,
   AmmTransaction,
   AmmTransactionType,
+  VestedSale,
 } from '../../model'
-import { deleteTokenAccount, tokenAccountId } from './utils'
+import { deleteTokenAccount, tokenAccountId, tokenSaleId, VestingScheduleData } from './utils'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -40,7 +41,6 @@ export async function processTokenIssuedEvent({
         cliffDurationBlocks: blocksBeforeCliff,
         endsAt: cliffBlock + linearVestingDuration,
         cliffBlock,
-        totalAmount: allocation.amount,
       })
     }
     return vestingSchedule
@@ -185,6 +185,24 @@ export async function processTokenSaleInitializedEvent({
     asV1000: [tokenId, saleId, tokenSale, ,],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
+  if (tokenSale.vestingScheduleParams != null) {
+    const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
+
+    overlay.getRepository(VestingSchedule).new({
+      id: vestingData.id(),
+      endsAt: vestingData.endsAt(),
+      cliffBlock: vestingData.cliffBlock(),
+      vestingDurationBlocks: vestingData.duration(),
+      cliffPercent: vestingData.cliffPercent()
+    })
+
+    overlay.getRepository(VestedSale).new({
+      id: overlay.getRepository(VestedSale).getNextIdNumber().toString(),
+      saleId: tokenId.toString() + saleId.toString(),
+      vestingId: vestingData.id(),
+    })
+  }
+
   overlay.getRepository(Sale).new({
     id: tokenId.toString() + saleId.toString(),
     tokenId: tokenId.toString(),
@@ -253,7 +271,7 @@ export async function processTokensBoughtOnAmmEvent({
       memberId: memberId.toString(),
       stakedAmount: BigInt(0),
       id: tokenAccountId(tokenId, memberId),
-      tokenId: tokenId.toString(), 
+      tokenId: tokenId.toString(),
     })
   } else {
     buyerAccount!.totalAmount += crtMinted
@@ -285,13 +303,12 @@ export async function processTokensSoldOnAmmEvent({
       joysRecovered,
     ]
   }
-}: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>)
-{
+}: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= crtBurned
 
   const sellerAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, memberId))
-  sellerAccount.totalAmount += crtBurned 
+  sellerAccount.totalAmount += crtBurned
 
   const ammId = overlay.getRepository(AmmCurve).getNextIdNumber() - 1
   const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId.toString())
@@ -306,4 +323,42 @@ export async function processTokensSoldOnAmmEvent({
     quantity: crtBurned,
     pricePaid: crtBurned / joysRecovered, // FIX(verify)
   })
+}
+
+export async function processTokensPurchasedOnSaleEvent({
+  overlay,
+  event: {
+    asV1000: [
+      tokenId,
+      saleId,
+      amountPurchased,
+      memberId,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
+
+  const buyerAccount = await overlay.getRepository(TokenAccount).getById(tokenAccountId(tokenId, memberId))
+  if (buyerAccount == undefined) { // FIXME(check whether there is a more appropriate comparison for null / undefined types)
+    overlay.getRepository(TokenAccount).new({
+      tokenId: tokenId.toString(),
+      memberId: memberId.toString(),
+      id: tokenAccountId(tokenId, memberId),
+      stakedAmount: BigInt(0),
+      totalAmount: amountPurchased,
+    })
+  } else {
+    buyerAccount!.totalAmount += amountPurchased
+  }
+
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  sale.tokensSold += amountPurchased
+
+  const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', tokenSaleId(tokenId, saleId))
+  if (!vestingForSale) {
+    overlay.getRepository(VestedAccount).new({
+      id: overlay.getRepository(VestedAccount).getNextIdNumber().toString(),
+      accountId: tokenAccountId(tokenId, memberId),
+      vestingId: vestingForSale!.vestingId,
+    })
+  }
 }

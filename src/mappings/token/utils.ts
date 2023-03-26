@@ -6,6 +6,7 @@ import {
   VestedAccount,
   VestingSchedule,
 } from '../../model'
+import { VestingScheduleParams } from '../../types/v1000'
 import { EntityManagerOverlay } from '../../utils/overlay'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
@@ -53,3 +54,39 @@ export async function deleteTokenAccount(
   // remove account
   overlay.getRepository(TokenAccount).remove(tokenId + memberId)
 }
+
+export function tokenSaleId(tokenId: bigint, saleId: number): string {
+  return tokenId.toString() + saleId.toString();
+}
+
+export class VestingScheduleData {
+  private _params: VestingScheduleParams;
+  private _block: number;
+
+  public constructor(params: VestingScheduleParams, block: number) {
+    this._params = params
+    this._block = block
+  }
+
+  public cliffBlock(): number {
+    return this._params.blocksBeforeCliff + this._block;
+  }
+
+
+  public duration(): number {
+    return this._params.linearVestingDuration;
+  }
+
+  public endsAt(): number {
+    return this.cliffBlock() + this.duration();
+  }
+
+  public cliffPercent(): number {
+    return this._params.cliffAmountPercentage
+  }
+
+  public id(): string {
+    return this.cliffBlock().toString() + this.duration().toString() + this.cliffPercent().toString();
+  }
+}
+
