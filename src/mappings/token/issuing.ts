@@ -414,3 +414,23 @@ export async function processRevenueSplitIssuedEvent({
     endsAt,
   })
 }
+
+export async function processMemberJoinedWhitelistEvent({
+  overlay,
+  event: {
+    asV1000: [
+      tokenId,
+      memberId,
+    ]
+  }
+
+}: EventHandlerContext<'ProjectToken.MemberJoinedWhitelist'>) { 
+  overlay.getRepository(TokenAccount).new({
+    id: tokenAccountId(tokenId, memberId),
+    stakedAmount: BigInt(0),
+    totalAmount: BigInt(0),
+    tokenId: tokenId.toString(),
+    memberId: memberId.toString(),
+    whitelisted: true,
+  })
+}

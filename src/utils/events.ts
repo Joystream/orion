@@ -78,7 +78,7 @@ import {
   // ProjectTokenRevenueSplitFinalizedEvent,
   // ProjectTokenUserParticipatedInSplitEvent,
   // ProjectTokenRevenueSplitLeftEvent,
-  // ProjectTokenMemberJoinedWhitelistEvent,
+  ProjectTokenMemberJoinedWhitelistEvent,
   ProjectTokenAccountDustedByEvent,
   ProjectTokenTokenDeissuedEvent,
   ProjectTokenTokenIssuedEvent,
@@ -184,6 +184,7 @@ export const eventConstructors = {
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
   'ProjectToken.RevenueSplitIssued': ProjectTokenRevenueSplitIssuedEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': ProjectTokenUpcomingTokenSaleUpdatedEvent,
+  'ProjectToken.MemberJoinedWhitelist': ProjectTokenMemberJoinedWhitelistEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors

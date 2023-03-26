@@ -103,6 +103,7 @@ import {
   processTokenAmountTransferredEvent,
   processUpcomingTokenSaleUpdatedEvent,
   processRevenueSplitIssuedEvent,
+  processMemberJoinedWhitelistEvent,
 } from './mappings/token/issuing'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
@@ -204,7 +205,8 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
   .addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
   .addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
-  .addEvent('ProjectToken.UpcomingTokenSaleUpdatedEvent', defaultEventOptions)
+  .addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
+  .addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -298,6 +300,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
   'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
+  'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
 }
 

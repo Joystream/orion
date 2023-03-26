@@ -50,9 +50,6 @@ type Token @entity {
   "list of benefits for the token"
   benefits: [Benefit!] @derivedFrom(field: "token")
 
-  "whitelisted members"
-  whitelistedAccounts: [TokenAccount!] @derivedFrom(field: "token")
-
   "note from creator to member interested in joining the whitelist"
   whitelistApplicantNote: String
 
@@ -291,6 +288,10 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
 
   "vesting schedule info, it can be empty if no vesting schedules are pending"
   vestingSchedules: [VestedAccount!]! @derivedFrom(field: "account")
+
+  "whether the account belongs to the account whitelist (if mode is invite only)"
+  whitelisted: Boolean
+
 }
 
 type VestedAccount @entity {
