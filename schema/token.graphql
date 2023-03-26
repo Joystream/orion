@@ -305,7 +305,7 @@ type VestedAccount @entity {
 }
 
 type VestingSchedule @entity {
-  "cliffBlock++cliffDuration++cliffPercent is enough to identify a schedule"
+  "cliffBlock++vestingduration++cliffPercent is enough to identify a schedule"
   id: ID!
 
   "% of amount vested immediately after cliff period"
@@ -322,9 +322,6 @@ type VestingSchedule @entity {
 
   "cliff block"
   cliffBlock: Int!
-
-  "total amount: cliff amount + amount to be vested"
-  totalAmount: BigInt!
 
   "accounts reference"
   accounts: [VestedAccount!] @derivedFrom(field: "vesting")
