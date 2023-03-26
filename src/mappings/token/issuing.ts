@@ -362,3 +362,26 @@ export async function processTokensPurchasedOnSaleEvent({
     })
   }
 }
+
+export async function processUpcomingTokenSaleUpdatedEvent({
+  overlay,
+  event: {
+    asV1000: [
+      tokenId,
+      saleId,
+      newStart,
+      newDuration,
+    ]
+  }
+}: EventHandlerContext<'ProjectToken.UpcomingTokenSaleUpdated'>) {
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+
+  if (newDuration) {
+    sale.durationInBlocks = newDuration
+  }
+  if (newStart) {
+    sale.startBlock = newStart
+  }
+
+  sale.endsAt = sale.startBlock + sale.durationInBlocks
+}
