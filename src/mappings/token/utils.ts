@@ -99,6 +99,10 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
   return tokenId.toString() + ammNonce.toString();
 }
 
+export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
+  return tokenId.toString() + revenueNonce.toString()
+}
+
 export async function burnFromVesting(overlay: EntityManagerOverlay, accountId: string, burnedAmount: bigint) {
   const vestedAccounts = await overlay.getRepository(VestedAccount).getManyByRelation('accountId', accountId)
   var tallyBurnedAmount = burnedAmount
