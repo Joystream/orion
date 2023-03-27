@@ -97,13 +97,17 @@ import {
   processPatronageRateDecreasedToEvent,
   processPatronageCreditClaimedEvent,
   processTokenAmountTransferredEvent,
+  processTokenAmountTransferredByIssuerEvent,
   processUpcomingTokenSaleUpdatedEvent,
   processRevenueSplitIssuedEvent,
+  processRevenueSplitLeftEvent,
   processAmmDeactivatedEvent,
   processMemberJoinedWhitelistEvent,
   processTokensBurnedEvent,
   processTransferPolicyChangedToPermissionlessEvent,
   processTokenSaleFinalizedEvent,
+  processUserParticipatedInSplitEvent,
+  processRevenueSplitFinalizedEvent,
 } from './mappings/token/issuing'
 
 const defaultEventOptions = {
@@ -121,94 +125,99 @@ const defaultEventOptions = {
 const archiveUrl = process.env.ARCHIVE_GATEWAY_URL || 'http://localhost:8888/graphql'
 const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
 
-const processor = new SubstrateBatchProcessor()
+let processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
-  .addEvent('Content.VideoCreated', defaultEventOptions)
-  .addEvent('Content.VideoUpdated', defaultEventOptions)
-  .addEvent('Content.VideoDeleted', defaultEventOptions)
-  .addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
-  .addEvent('Content.VideoVisibilitySetByModerator', defaultEventOptions)
-  .addEvent('Content.ChannelCreated', defaultEventOptions)
-  .addEvent('Content.ChannelUpdated', defaultEventOptions)
-  .addEvent('Content.ChannelDeleted', defaultEventOptions)
-  .addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
-  .addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
-  .addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
-  .addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
-  .addEvent('Content.CreatorTokenIssued', defaultEventOptions)
-  .addEvent('Content.OpenAuctionStarted', defaultEventOptions)
-  .addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
-  .addEvent('Content.NftIssued', defaultEventOptions)
-  .addEvent('Content.AuctionBidMade', defaultEventOptions)
-  .addEvent('Content.AuctionBidCanceled', defaultEventOptions)
-  .addEvent('Content.AuctionCanceled', defaultEventOptions)
-  .addEvent('Content.EnglishAuctionSettled', defaultEventOptions)
-  .addEvent('Content.BidMadeCompletingAuction', defaultEventOptions)
-  .addEvent('Content.OpenAuctionBidAccepted', defaultEventOptions)
-  .addEvent('Content.OfferStarted', defaultEventOptions)
-  .addEvent('Content.OfferAccepted', defaultEventOptions)
-  .addEvent('Content.OfferCanceled', defaultEventOptions)
-  .addEvent('Content.NftSellOrderMade', defaultEventOptions)
-  .addEvent('Content.NftBought', defaultEventOptions)
-  .addEvent('Content.BuyNowCanceled', defaultEventOptions)
-  .addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
-  .addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
-  .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
-  .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
-  .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
-  .addEvent('Storage.StorageOperatorMetadataSet', defaultEventOptions)
-  .addEvent('Storage.StorageBucketVoucherLimitsSet', defaultEventOptions)
-  .addEvent('Storage.PendingDataObjectsAccepted', defaultEventOptions)
-  .addEvent('Storage.StorageBucketInvitationCancelled', defaultEventOptions)
-  .addEvent('Storage.StorageBucketOperatorInvited', defaultEventOptions)
-  .addEvent('Storage.StorageBucketOperatorRemoved', defaultEventOptions)
-  .addEvent('Storage.StorageBucketStatusUpdated', defaultEventOptions)
-  .addEvent('Storage.StorageBucketDeleted', defaultEventOptions)
-  .addEvent('Storage.VoucherChanged', defaultEventOptions)
-  .addEvent('Storage.DynamicBagCreated', defaultEventOptions)
-  .addEvent('Storage.DynamicBagDeleted', defaultEventOptions)
-  .addEvent('Storage.DataObjectsUploaded', defaultEventOptions)
-  .addEvent('Storage.DataObjectsUpdated', defaultEventOptions)
-  .addEvent('Storage.DataObjectsMoved', defaultEventOptions)
-  .addEvent('Storage.DataObjectsDeleted', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketCreated', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketStatusUpdated', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketDeleted', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketsUpdatedForBag', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketModeUpdated', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketOperatorInvited', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketInvitationCancelled', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketInvitationAccepted', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketMetadataSet', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketOperatorRemoved', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketFamilyCreated', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketFamilyMetadataSet', defaultEventOptions)
-  .addEvent('Storage.DistributionBucketFamilyDeleted', defaultEventOptions)
-  .addEvent('Members.MemberCreated', defaultEventOptions)
-  .addEvent('Members.MembershipBought', defaultEventOptions)
-  .addEvent('Members.MembershipGifted', defaultEventOptions)
-  .addEvent('Members.MemberInvited', defaultEventOptions)
-  .addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
-  .addEvent('Members.MemberProfileUpdated', defaultEventOptions)
-  .addEvent('Members.MemberRemarked', defaultEventOptions)
-  .addEvent('ProjectToken.TokenIssued', defaultEventOptions)
-  .addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
-  .addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
-  .addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
-  .addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
-  .addEvent('ProjectToken.AmmActivated', defaultEventOptions)
-  .addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
-  .addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
-  .addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
-  .addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
-  .addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
-  .addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
-  .addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
-  .addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
-  .addEvent('ProjectToken.TokensBurned', defaultEventOptions)
-  .addEvent('ProjectToken.TokenSaleFinalizedEvent', defaultEventOptions)
-  .addEvent('ProjectToken.TransferPolicyChangedToPermissionlessEvent', defaultEventOptions)
-  
+  .addEvent('Content.VideoCreated', defaultEventOptions);
+
+processor.addEvent('Content.VideoUpdated', defaultEventOptions);
+processor.addEvent('Content.VideoDeleted', defaultEventOptions);
+processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions);
+processor.addEvent('Content.VideoVisibilitySetByModerator', defaultEventOptions);
+processor.addEvent('Content.ChannelCreated', defaultEventOptions);
+processor.addEvent('Content.ChannelUpdated', defaultEventOptions);
+processor.addEvent('Content.ChannelDeleted', defaultEventOptions);
+processor.addEvent('Content.ChannelDeletedByModerator', defaultEventOptions);
+processor.addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions);
+processor.addEvent('Content.ChannelOwnerRemarked', defaultEventOptions);
+processor.addEvent('Content.ChannelAgentRemarked', defaultEventOptions);
+processor.addEvent('Content.CreatorTokenIssued', defaultEventOptions);
+processor.addEvent('Content.OpenAuctionStarted', defaultEventOptions);
+processor.addEvent('Content.EnglishAuctionStarted', defaultEventOptions);
+processor.addEvent('Content.NftIssued', defaultEventOptions);
+processor.addEvent('Content.AuctionBidMade', defaultEventOptions);
+processor.addEvent('Content.AuctionBidCanceled', defaultEventOptions);
+processor.addEvent('Content.AuctionCanceled', defaultEventOptions);
+processor.addEvent('Content.EnglishAuctionSettled', defaultEventOptions);
+processor.addEvent('Content.BidMadeCompletingAuction', defaultEventOptions);
+processor.addEvent('Content.OpenAuctionBidAccepted', defaultEventOptions);
+processor.addEvent('Content.OfferStarted', defaultEventOptions);
+processor.addEvent('Content.OfferAccepted', defaultEventOptions);
+processor.addEvent('Content.OfferCanceled', defaultEventOptions);
+processor.addEvent('Content.NftSellOrderMade', defaultEventOptions);
+processor.addEvent('Content.NftBought', defaultEventOptions);
+processor.addEvent('Content.BuyNowCanceled', defaultEventOptions);
+processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions);
+processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions);
+processor.addEvent('Storage.StorageOperatorMetadataSet', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketVoucherLimitsSet', defaultEventOptions);
+processor.addEvent('Storage.PendingDataObjectsAccepted', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketInvitationCancelled', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketOperatorInvited', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketOperatorRemoved', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketStatusUpdated', defaultEventOptions);
+processor.addEvent('Storage.StorageBucketDeleted', defaultEventOptions);
+processor.addEvent('Storage.VoucherChanged', defaultEventOptions);
+processor.addEvent('Storage.DynamicBagCreated', defaultEventOptions);
+processor.addEvent('Storage.DynamicBagDeleted', defaultEventOptions);
+processor.addEvent('Storage.DataObjectsUploaded', defaultEventOptions);
+processor.addEvent('Storage.DataObjectsUpdated', defaultEventOptions);
+processor.addEvent('Storage.DataObjectsMoved', defaultEventOptions);
+processor.addEvent('Storage.DataObjectsDeleted', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketCreated', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketStatusUpdated', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketDeleted', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketsUpdatedForBag', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketModeUpdated', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketOperatorInvited', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketInvitationCancelled', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketInvitationAccepted', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketMetadataSet', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketOperatorRemoved', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketFamilyCreated', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketFamilyMetadataSet', defaultEventOptions);
+processor.addEvent('Storage.DistributionBucketFamilyDeleted', defaultEventOptions);
+processor.addEvent('Members.MemberCreated', defaultEventOptions);
+processor.addEvent('Members.MembershipBought', defaultEventOptions);
+processor.addEvent('Members.MembershipGifted', defaultEventOptions);
+processor.addEvent('Members.MemberInvited', defaultEventOptions);
+processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions);
+processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions);
+processor.addEvent('Members.MemberRemarked', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenAmountTransferredByIssuer', defaultEventOptions);
+processor.addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions);
+processor.addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions);
+processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions);
+processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions);
+processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions);
+processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions);
+processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions);
+processor.addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions);
+processor.addEvent('ProjectToken.RevenueSplitLeft', defaultEventOptions);
+processor.addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions);
+processor.addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions);
+processor.addEvent('ProjectToken.TokensBurned', defaultEventOptions);
+processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions);
+processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions);
+processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions);
+processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions);
+
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -297,12 +306,16 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.TokenAmountTransferredByIssuer': processTokenAmountTransferredByIssuerEvent,
   'ProjectToken.TokensBurned': processTokensBurnedEvent,
   'ProjectToken.TokenSaleFinalized': processTokenSaleFinalizedEvent,
   'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
   'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
-  'ProjectToken.TransferPolicyChangedToPermissionless': processTransferPolicyChangedToPermissionlessEvent)
+  'ProjectToken.RevenueSplitLeft': processRevenueSplitLeftEvent,
+  'ProjectToken.RevenueSplitFinalized': processRevenueSplitFinalizedEvent,
+  'ProjectToken.UserParticipatedInSplit': processUserParticipatedInSplitEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless': processTransferPolicyChangedToPermissionlessEvent,
 }
 
 async function processEvent<EventName extends EventNames>(

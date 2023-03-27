@@ -64,6 +64,9 @@ type Token @entity {
 
   "number of completed Amm Sales"
   ammNonce: Int!
+
+  "number of revenue shares issued"
+  revenueShareNonce: Int!
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
