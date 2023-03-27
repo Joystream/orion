@@ -68,12 +68,12 @@ import {
   StorageDistributionBucketFamilyMetadataSetEvent,
   StorageDistributionBucketFamilyDeletedEvent,
   StorageStorageBucketInvitationCancelledEvent,
-  // ProjectTokenTokenAmountTransferredByIssuerEvent,
+  ProjectTokenTokenAmountTransferredByIssuerEvent,
   ProjectTokenPatronageRateDecreasedToEvent,
   ProjectTokenPatronageCreditClaimedEvent,
-  // ProjectTokenRevenueSplitFinalizedEvent,
-  // ProjectTokenUserParticipatedInSplitEvent,
-  // ProjectTokenRevenueSplitLeftEvent,
+  ProjectTokenRevenueSplitFinalizedEvent,
+  ProjectTokenUserParticipatedInSplitEvent,
+  ProjectTokenRevenueSplitLeftEvent,
   ProjectTokenMemberJoinedWhitelistEvent,
   ProjectTokenAccountDustedByEvent,
   ProjectTokenTokenDeissuedEvent,
@@ -90,7 +90,6 @@ import {
   ProjectTokenAmmDeactivatedEvent,
   ProjectTokenAmmActivatedEvent,
   ProjectTokenTokensSoldOnAmmEvent,
-  // ProjectTokenTokenAmountTransferredByIssuerEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'
 
@@ -177,10 +176,14 @@ export const eventConstructors = {
   'ProjectToken.TokensBoughtOnAmm': ProjectTokenTokensBoughtOnAmmEvent,
   'ProjectToken.TokensSoldOnAmm': ProjectTokenTokensSoldOnAmmEvent,
   'ProjectToken.TokenAmountTransferred': ProjectTokenTokenAmountTransferredEvent,
+  'ProjectToken.TokenAmountTransferredByIssuer': ProjectTokenTokenAmountTransferredByIssuerEvent,
   'ProjectToken.RevenueSplitIssued': ProjectTokenRevenueSplitIssuedEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': ProjectTokenUpcomingTokenSaleUpdatedEvent,
   'ProjectToken.MemberJoinedWhitelist': ProjectTokenMemberJoinedWhitelistEvent,
   'ProjectToken.TokensBurned': ProjectTokenTokensBurnedEvent,
+  'ProjectToken.RevenueSplitLeft': ProjectTokenRevenueSplitLeftEvent,
+  'ProjectToken.RevenueSplitFinalized': ProjectTokenRevenueSplitFinalizedEvent,
+  'ProjectToken.UserParticipatedInSplit': ProjectTokenUserParticipatedInSplitEvent,
   'ProjectToken.TransferPolicyChangedToPermissionless': ProjectTokenTransferPolicyChangedToPermissionlessEvent,
 } as const
 
