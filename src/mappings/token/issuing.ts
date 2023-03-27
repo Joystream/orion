@@ -486,3 +486,18 @@ export async function processTransferPolicyChangedToPermissionlessEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.isInviteOnly = false
 }
+
+export async function processTokenSaleFinalizedEvent({
+  overlay,
+  event: {
+    asV1000: [
+    tokenId,
+    saleId,
+    unsoldJoy,
+    joyCollected,
+  ]
+  }
+}: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  sale.finalized = true
+}
