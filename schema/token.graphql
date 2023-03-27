@@ -142,9 +142,6 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   "total amount of token on sale"
   tokenSaleallocation: BigInt!
 
-  "tally amount of tokens sold during the sale"
-  amountSold: BigInt!
-
   "amount of tokens that has been sold"
   tokensSold: BigInt!
 
