@@ -103,6 +103,7 @@ import {
   processMemberJoinedWhitelistEvent,
   processTokensBurnedEvent,
   processTransferPolicyChangedToPermissionlessEvent,
+  processTokenSaleFinalizedEvent,
 } from './mappings/token/issuing'
 
 const defaultEventOptions = {
@@ -205,6 +206,7 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
   .addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
   .addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+  .addEvent('ProjectToken.TokenSaleFinalizedEvent', defaultEventOptions)
   .addEvent('ProjectToken.TransferPolicyChangedToPermissionlessEvent', defaultEventOptions)
   
 
@@ -296,6 +298,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
   'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
   'ProjectToken.TokensBurned': processTokensBurnedEvent,
+  'ProjectToken.TokenSaleFinalized': processTokenSaleFinalizedEvent,
   'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
   'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
   'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
