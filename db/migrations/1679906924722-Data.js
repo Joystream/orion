@@ -1,5 +1,5 @@
-module.exports = class Data1679400650851 {
-    name = 'Data1679400650851'
+module.exports = class Data1679906924722 {
+    name = 'Data1679906924722'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -32,7 +32,7 @@ module.exports = class Data1679400650851 {
         await db.query(`CREATE INDEX "IDX_a9810100aee7584680f197c8ff" ON "distribution_bucket_bag" ("bag_id") `)
         await db.query(`CREATE INDEX "IDX_32e552d352848d64ab82d38e9a" ON "distribution_bucket_bag" ("distribution_bucket_id", "bag_id") `)
         await db.query(`CREATE TABLE "storage_bag" ("id" character varying NOT NULL, "owner" jsonb NOT NULL, CONSTRAINT "PK_242aecdc788d9b22bcbb9ade19a" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "storage_data_object" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "is_accepted" boolean NOT NULL, "size" numeric NOT NULL, "storage_bag_id" character varying, "ipfs_hash" text NOT NULL, "type" jsonb, "state_bloat_bond" numeric NOT NULL, "unset_at" TIMESTAMP WITH TIME ZONE, "resolved_url" text, CONSTRAINT "PK_61f224a4aef08f580a5ab4aadf0" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "storage_data_object" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "is_accepted" boolean NOT NULL, "size" numeric NOT NULL, "storage_bag_id" character varying, "ipfs_hash" text NOT NULL, "type" jsonb, "state_bloat_bond" numeric NOT NULL, "unset_at" TIMESTAMP WITH TIME ZONE, "resolved_urls" text array NOT NULL, CONSTRAINT "PK_61f224a4aef08f580a5ab4aadf0" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_ff8014300b8039dbaed764f51b" ON "storage_data_object" ("storage_bag_id") `)
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
@@ -75,7 +75,7 @@ module.exports = class Data1679400650851 {
         await db.query(`CREATE INDEX "IDX_2db879ed42e3308fe65e679672" ON "video" ("media_id") `)
         await db.query(`CREATE INDEX "IDX_54f88a7decf7d22fd9bd9fa439" ON "video" ("pinned_comment_id") `)
         await db.query(`CREATE INDEX "IDX_6c49ad08c44d36d11f77c426e4" ON "video" ("entry_app_id") `)
-        await db.query(`CREATE TABLE "owned_nft" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "video_id" character varying NOT NULL, "owner" jsonb NOT NULL, "transactional_status" jsonb, "creator_royalty" numeric, "last_sale_price" numeric, "last_sale_date" TIMESTAMP WITH TIME ZONE, CONSTRAINT "OwnedNft_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_466896e39b9ec953f4f2545622" UNIQUE ("video_id"), CONSTRAINT "PK_5e0c289b350e863668fff44bb56" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "owned_nft" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "video_id" character varying NOT NULL, "owner" jsonb NOT NULL, "transactional_status" jsonb, "creator_royalty" numeric, "last_sale_price" numeric, "last_sale_date" TIMESTAMP WITH TIME ZONE, "is_featured" boolean NOT NULL, CONSTRAINT "OwnedNft_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_466896e39b9ec953f4f2545622" UNIQUE ("video_id"), CONSTRAINT "PK_5e0c289b350e863668fff44bb56" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_466896e39b9ec953f4f2545622" ON "owned_nft" ("video_id") `)
         await db.query(`CREATE TABLE "storage_bucket_operator_metadata" ("id" character varying NOT NULL, "storage_bucket_id" character varying NOT NULL, "node_endpoint" text, "node_location" jsonb, "extra" text, CONSTRAINT "StorageBucketOperatorMetadata_storageBucket" UNIQUE ("storage_bucket_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_7beffc9530b3f307bc1169cb52" UNIQUE ("storage_bucket_id"), CONSTRAINT "PK_9846a397400ae1a39b21fbd02d4" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7beffc9530b3f307bc1169cb52" ON "storage_bucket_operator_metadata" ("storage_bucket_id") `)
@@ -106,6 +106,9 @@ module.exports = class Data1679400650851 {
         await db.query(`CREATE INDEX "IDX_8afe872a1f3227ba331f9e63eb" ON "report" ("ip") `)
         await db.query(`CREATE INDEX "IDX_893057921f4b5cc37a0ef36684" ON "report" ("channel_id") `)
         await db.query(`CREATE INDEX "IDX_f732b6f82095a935db68c9491f" ON "report" ("video_id") `)
+        await db.query(`CREATE TABLE "nft_featuring_request" ("id" character varying NOT NULL, "ip" text NOT NULL, "nft_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_d0b1ccb74336b30b9575387d328" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_4daf8ec7002b0752488c06113d" ON "nft_featuring_request" ("ip") `)
+        await db.query(`CREATE INDEX "IDX_76d87e26cce72ac2e7ffa28dfb" ON "nft_featuring_request" ("nft_id") `)
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9bba17db99b72836523ab6c16f" ON "channel_follow" ("ip") `)
         await db.query(`CREATE INDEX "IDX_9bc0651dda94437ec18764a260" ON "channel_follow" ("channel_id") `)
@@ -281,6 +284,9 @@ module.exports = class Data1679400650851 {
         await db.query(`DROP INDEX "public"."IDX_8afe872a1f3227ba331f9e63eb"`)
         await db.query(`DROP INDEX "public"."IDX_893057921f4b5cc37a0ef36684"`)
         await db.query(`DROP INDEX "public"."IDX_f732b6f82095a935db68c9491f"`)
+        await db.query(`DROP TABLE "nft_featuring_request"`)
+        await db.query(`DROP INDEX "public"."IDX_4daf8ec7002b0752488c06113d"`)
+        await db.query(`DROP INDEX "public"."IDX_76d87e26cce72ac2e7ffa28dfb"`)
         await db.query(`DROP TABLE "channel_follow"`)
         await db.query(`DROP INDEX "public"."IDX_9bba17db99b72836523ab6c16f"`)
         await db.query(`DROP INDEX "public"."IDX_9bc0651dda94437ec18764a260"`)

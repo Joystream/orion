@@ -134,7 +134,7 @@ export function createDataObjects(
       // Note: It may be a little confusing to populate this with objectId,
       // but this is required for the Orion's GraphQL server to be able to resolve
       // this field to an actual asset url via the AssetsResolver
-      resolvedUrl: objectId.toString(),
+      resolvedUrls: [objectId.toString()],
     })
     return object
   })

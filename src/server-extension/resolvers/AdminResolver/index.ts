@@ -12,6 +12,8 @@ import {
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
+  SetFeaturedNftsInput,
+  SetFeaturedNftsResult,
   SetKillSwitchInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -214,6 +216,36 @@ export class AdminResolver {
       newNumberOfCategoriesSupported,
       newlyCreatedCategoriesSupported: await config.get(ConfigVariable.SupportNewCategories, em),
       noCategoryVideosSupported: await config.get(ConfigVariable.SupportNoCategoryVideo, em),
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetFeaturedNftsResult)
+  async setFeaturedNfts(
+    @Args() { featuredNftsIds }: SetFeaturedNftsInput
+  ): Promise<SetFeaturedNftsResult> {
+    const em = await this.em()
+    let newNumberOfNftsFeatured = 0
+
+    await em
+      .createQueryBuilder()
+      .update(`processor.owned_nft`)
+      .set({ is_featured: false })
+      .where({ is_featured: true })
+      .execute()
+
+    if (featuredNftsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update(`processor.owned_nft`)
+        .set({ is_featured: true })
+        .where({ id: In(featuredNftsIds) })
+        .execute()
+      newNumberOfNftsFeatured = result.affected || 0
+    }
+
+    return {
+      newNumberOfNftsFeatured,
     }
   }
 
