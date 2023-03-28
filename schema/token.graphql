@@ -67,6 +67,9 @@ type Token @entity {
 
   "number of revenue shares issued"
   revenueShareNonce: Int!
+
+  "whether it has been deissued or not"
+  archived: Boolean!
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
@@ -176,7 +179,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   vestedSale: VestedSale @derivedFrom(field: "sale")
 }
 
-type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true){
+type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {
   "Sale.id ++ VestingSchedule.id"
   id: ID!
 
@@ -294,7 +297,6 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
 
   "whether the account belongs to the account whitelist (if mode is invite only)"
   whitelisted: Boolean
-
 }
 
 type VestedAccount @entity {
