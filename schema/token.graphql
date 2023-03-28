@@ -39,7 +39,7 @@ type Token @entity {
   createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
-  channel: TokenChannel @derivedFrom(field: "token")
+  channel: TokenChannel 
 
   "video for the token presentation page"
   trailerVideo: Video
