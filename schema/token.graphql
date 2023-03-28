@@ -39,7 +39,7 @@ type Token @entity {
   createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
-  channel: TokenChannel 
+  channel: TokenChannel @derivedFrom(field: "token")
 
   "video for the token presentation page"
   trailerVideo: Video
@@ -298,7 +298,7 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "whether the account belongs to the account whitelist (if mode is invite only)"
   whitelisted: Boolean
 
-  "whether an account is deleted"
+  "has been deleted or not"
   deleted: Boolean!
 }
 
