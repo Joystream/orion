@@ -184,7 +184,8 @@ export const eventConstructors = {
   'ProjectToken.RevenueSplitLeft': ProjectTokenRevenueSplitLeftEvent,
   'ProjectToken.RevenueSplitFinalized': ProjectTokenRevenueSplitFinalizedEvent,
   'ProjectToken.UserParticipatedInSplit': ProjectTokenUserParticipatedInSplitEvent,
-  'ProjectToken.TransferPolicyChangedToPermissionless': ProjectTokenTransferPolicyChangedToPermissionlessEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless':
+    ProjectTokenTransferPolicyChangedToPermissionlessEvent,
 } as const
 
 export type EventNames = keyof typeof eventConstructors
