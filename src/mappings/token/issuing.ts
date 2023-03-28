@@ -16,7 +16,6 @@ import {
 } from '../../model'
 import {
   burnFromVesting,
-  deleteTokenAccount,
   revenueShareId,
   tokenAccountId,
   tokenAmmId,
@@ -72,7 +71,7 @@ export async function processTokenIssuedEvent({
     accountsNum,
     ammNonce: 0,
     revenueShareNonce: 0,
-    archived: false,
+    deissued: false,
   })
 
   //  create accounts
@@ -201,7 +200,7 @@ export async function processTokenDeissuedEvent({
   event: { asV1000: tokenId },
 }: EventHandlerContext<'ProjectToken.TokenDeissued'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  token.archived = true
+  token.deissued = true
 }
 
 export async function processAccountDustedByEvent({
@@ -210,7 +209,8 @@ export async function processAccountDustedByEvent({
     asV1000: [tokenId, dustedAccountId, , ,],
   },
 }: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
-  await deleteTokenAccount(overlay, tokenId.toString(), dustedAccountId.toString())
+  const account = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, dustedAccountId))
+  account.deleted = true
 }
 
 export async function processAmmActivatedEvent({
