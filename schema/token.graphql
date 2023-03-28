@@ -24,7 +24,7 @@ type Token @entity {
   isInviteOnly: Boolean!
 
   "creator annual revenue percent (minted)"
-  annualCreatorReward: Int!
+  annualCreatorReward: BigInt!
 
   "revenue share ratio between creator and holder"
   revenueShareRatioPercent: Int!
@@ -36,10 +36,10 @@ type Token @entity {
   ammCurve: [AmmCurve!] @derivedFrom(field: "token")
 
   "block in which this token was created"
-  createdIn: Int!
+  createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
-  channel: Channel! @index @unique
+  channel: TokenChannel @derivedFrom(field: "token")
 
   "video for the token presentation page"
   trailerVideo: Video
@@ -50,20 +50,34 @@ type Token @entity {
   "list of benefits for the token"
   benefits: [Benefit!] @derivedFrom(field: "token")
 
-  "whitelisted members"
-  whitelistedAccounts: [TokenAccount!] @derivedFrom(field: "token")
-
   "note from creator to member interested in joining the whitelist"
   whitelistApplicantNote: String
 
   "link for creator to member interested in joining the whitelist"
-  whitelisteApplicantLink: String
+  whitelistApplicantLink: String
 
   "holders having some amount of this token"
   accounts: [TokenAccount!] @derivedFrom(field: "token")
 
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
+
+  "number of completed Amm Sales"
+  ammNonce: Int!
+
+  "number of revenue shares issued"
+  revenueShareNonce: Int!
+
+  "whether it has been deissued or not"
+  deissued: Boolean!
+}
+
+type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
+  "token reference"
+  token: Token! @unique
+
+  "channel reference"
+  channel: Channel! @unique
 }
 
 type RevenueShare @entity {
@@ -160,6 +174,20 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "finalized"
   finalized: Boolean!
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "sale")
+}
+
+type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {
+  "Sale.id ++ VestingSchedule.id"
+  id: ID!
+
+  "Sale reference"
+  sale: Sale! @unique
+
+  "vesting schedule reference"
+  vesting: VestingSchedule! @unique
 }
 
 type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
@@ -183,7 +211,7 @@ type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
 }
 
 type AmmCurve @entity {
-  "counter"
+  "token.ammNonce"
   id: ID!
 
   "token this Amm is for"
@@ -243,17 +271,11 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "runtime token id ++ runtime member id"
   id: ID!
 
-  "member id"
+  "member id ref"
   member: Membership!
 
   "token for which the account is created"
   token: Token!
-
-  "flagging whether is creator account to avoid too many nested queries"
-  isCreator: Boolean!
-
-  "bloat bond payed at account creation"
-  tokenAccountBloatBond: BigInt!
 
   "staked amount, to avoid walking to split participations"
   stakedAmount: BigInt!
@@ -272,6 +294,12 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
 
   "vesting schedule info, it can be empty if no vesting schedules are pending"
   vestingSchedules: [VestedAccount!]! @derivedFrom(field: "account")
+
+  "whether the account belongs to the account whitelist (if mode is invite only)"
+  whitelisted: Boolean
+
+  "whether an account is deleted"
+  deleted: Boolean!
 }
 
 type VestedAccount @entity {
@@ -283,10 +311,13 @@ type VestedAccount @entity {
 
   "account reference"
   account: TokenAccount!
+
+  "amount vested"
+  amount: BigInt!
 }
 
 type VestingSchedule @entity {
-  "cliffBlock++cliffDuration++cliffPercent is enough to identify a schedule"
+  "cliffBlock++vestingduration++cliffPercent is enough to identify a schedule"
   id: ID!
 
   "% of amount vested immediately after cliff period"
@@ -304,11 +335,11 @@ type VestingSchedule @entity {
   "cliff block"
   cliffBlock: Int!
 
-  "total amount: cliff amount + amount to be vested"
-  totalAmount: BigInt!
-
   "accounts reference"
   accounts: [VestedAccount!] @derivedFrom(field: "vesting")
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "vesting")
 }
 
 type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true) {
