@@ -1,47 +1,11 @@
 import {
-  TokenAccount,
-  SaleTransaction,
-  AmmTransaction,
-  RevenueShareParticipation,
   VestedAccount,
-  VestingSchedule,
-  VestedSale,
 } from '../../model'
 import { VestingScheduleParams } from '../../types/v1000'
 import { EntityManagerOverlay } from '../../utils/overlay'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
-}
-
-export async function deleteTokenAccount(
-  overlay: EntityManagerOverlay,
-  tokenId: string,
-  memberId: string
-) {
-  // remove sales Txs
-  const salesTxRepository = overlay.getRepository(SaleTransaction)
-  const salesTxForAccount = await salesTxRepository.getManyByRelation('accountId', memberId)
-  salesTxRepository.remove(...salesTxForAccount)
-
-  // remove Amm TXs
-  const ammTxRepository = overlay.getRepository(AmmTransaction)
-  const ammTxForAccount = await ammTxRepository.getManyByRelation('accountId', memberId)
-  ammTxRepository.remove(...ammTxForAccount)
-
-  // remove shares participations
-  const shareParticipationsRepository = overlay.getRepository(RevenueShareParticipation)
-  const sharesParticipationsForAccount = await shareParticipationsRepository.getManyByRelation(
-    'accountId',
-    memberId
-  )
-  shareParticipationsRepository.remove(...sharesParticipationsForAccount)
-
-  // remove vesting schedules relation
-  await removeVesting(overlay, tokenId + memberId)
-
-  // remove account
-  overlay.getRepository(TokenAccount).remove(tokenId + memberId)
 }
 
 export async function removeVesting(overlay: EntityManagerOverlay, accountId: string) {
@@ -52,15 +16,6 @@ export async function removeVesting(overlay: EntityManagerOverlay, accountId: st
     accountId
   )
   vestedAccountRepository.remove(...vestingSchedulesForToken)
-
-  for (const { id } of vestingSchedulesForToken) {
-    const notUsedByAccount = (await vestedAccountRepository.getById(id)) === undefined
-    const notUsedBySale =
-      (await overlay.getRepository(VestedSale).getManyByRelation('vestingId', id)).length === 0
-    if (notUsedByAccount && notUsedBySale) {
-      overlay.getRepository(VestingSchedule).remove(id)
-    }
-  }
 }
 
 export function tokenSaleId(tokenId: bigint, saleId: number): string {
