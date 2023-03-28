@@ -2,12 +2,13 @@ const fs = require('fs')
 const path = require('path')
 module.exports = class PersistedData2200000000000 {
     name = 'PersistedData2200000000000'
-  
+
     tablesToImport = [
       'video_view_event',
       'report',
       'channel_follow',
-      'gateway_config'
+      'gateway_config',
+      'nft_featuring_request'
     ]
 
     async up(db) {
@@ -24,9 +25,8 @@ module.exports = class PersistedData2200000000000 {
       }
       await db.query('SET LOCAL search_path TO DEFAULT')
     }
-  
+
     async down() {
         // Do nothing
     }
   }
-  

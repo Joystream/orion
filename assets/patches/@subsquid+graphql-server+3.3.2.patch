@@ -1,3 +1,15 @@
+diff --git a/node_modules/@subsquid/graphql-server/lib/resolvers.js b/node_modules/@subsquid/graphql-server/lib/resolvers.js
+index ea605c2..2564ebd 100644
+--- a/node_modules/@subsquid/graphql-server/lib/resolvers.js
++++ b/node_modules/@subsquid/graphql-server/lib/resolvers.js
+@@ -19,6 +19,7 @@ async function loadCustomResolvers(mod) {
+     return (0, type_graphql_1.buildSchema)({
+         resolvers: [mod],
+         scalarsMap,
++        validate: { forbidUnknownValues: false },
+         container: resolverData => new CustomResolversContainer(resolverData)
+     });
+ }
 diff --git a/node_modules/@subsquid/graphql-server/lib/server.js b/node_modules/@subsquid/graphql-server/lib/server.js
 index 04e74c3..e95a07b 100644
 --- a/node_modules/@subsquid/graphql-server/lib/server.js
