@@ -23032,7 +23032,7 @@ index 0000000..f4f8d2e
 +
 +module.exports = $root;
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
-index c95539d..dccaf98 100755
+index c95539d..843fa32 100755
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 @@ -1,4 +1,3 @@
@@ -23281,91 +23281,91 @@ index c95539d..dccaf98 100755
 +    public toJSON(): { [k: string]: any };
 +}
 +
-+/** Properties of a Sale. */
-+export interface ISale {
++/** Properties of a SaleMetadata. */
++export interface ISaleMetadata {
 +
-+    /** Sale termsAndConditions */
++    /** SaleMetadata termsAndConditions */
 +    termsAndConditions?: (string|null);
 +}
 +
-+/** Represents a Sale. */
-+export class Sale implements ISale {
++/** Represents a SaleMetadata. */
++export class SaleMetadata implements ISaleMetadata {
 +
 +    /**
-+     * Constructs a new Sale.
++     * Constructs a new SaleMetadata.
 +     * @param [properties] Properties to set
 +     */
-+    constructor(properties?: ISale);
++    constructor(properties?: ISaleMetadata);
 +
-+    /** Sale termsAndConditions. */
++    /** SaleMetadata termsAndConditions. */
 +    public termsAndConditions: string;
 +
 +    /**
-+     * Creates a new Sale instance using the specified properties.
++     * Creates a new SaleMetadata instance using the specified properties.
 +     * @param [properties] Properties to set
-+     * @returns Sale instance
++     * @returns SaleMetadata instance
 +     */
-+    public static create(properties?: ISale): Sale;
++    public static create(properties?: ISaleMetadata): SaleMetadata;
 +
 +    /**
-+     * Encodes the specified Sale message. Does not implicitly {@link Sale.verify|verify} messages.
-+     * @param message Sale message or plain object to encode
++     * Encodes the specified SaleMetadata message. Does not implicitly {@link SaleMetadata.verify|verify} messages.
++     * @param message SaleMetadata message or plain object to encode
 +     * @param [writer] Writer to encode to
 +     * @returns Writer
 +     */
-+    public static encode(message: ISale, writer?: $protobuf.Writer): $protobuf.Writer;
++    public static encode(message: ISaleMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
 +
 +    /**
-+     * Encodes the specified Sale message, length delimited. Does not implicitly {@link Sale.verify|verify} messages.
-+     * @param message Sale message or plain object to encode
++     * Encodes the specified SaleMetadata message, length delimited. Does not implicitly {@link SaleMetadata.verify|verify} messages.
++     * @param message SaleMetadata message or plain object to encode
 +     * @param [writer] Writer to encode to
 +     * @returns Writer
 +     */
-+    public static encodeDelimited(message: ISale, writer?: $protobuf.Writer): $protobuf.Writer;
++    public static encodeDelimited(message: ISaleMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
 +
 +    /**
-+     * Decodes a Sale message from the specified reader or buffer.
++     * Decodes a SaleMetadata message from the specified reader or buffer.
 +     * @param reader Reader or buffer to decode from
 +     * @param [length] Message length if known beforehand
-+     * @returns Sale
++     * @returns SaleMetadata
 +     * @throws {Error} If the payload is not a reader or valid buffer
 +     * @throws {$protobuf.util.ProtocolError} If required fields are missing
 +     */
-+    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Sale;
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): SaleMetadata;
 +
 +    /**
-+     * Decodes a Sale message from the specified reader or buffer, length delimited.
++     * Decodes a SaleMetadata message from the specified reader or buffer, length delimited.
 +     * @param reader Reader or buffer to decode from
-+     * @returns Sale
++     * @returns SaleMetadata
 +     * @throws {Error} If the payload is not a reader or valid buffer
 +     * @throws {$protobuf.util.ProtocolError} If required fields are missing
 +     */
-+    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Sale;
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): SaleMetadata;
 +
 +    /**
-+     * Verifies a Sale message.
++     * Verifies a SaleMetadata message.
 +     * @param message Plain object to verify
 +     * @returns `null` if valid, otherwise the reason why it is not
 +     */
 +    public static verify(message: { [k: string]: any }): (string|null);
 +
 +    /**
-+     * Creates a Sale message from a plain object. Also converts values to their respective internal types.
++     * Creates a SaleMetadata message from a plain object. Also converts values to their respective internal types.
 +     * @param object Plain object
-+     * @returns Sale
++     * @returns SaleMetadata
 +     */
-+    public static fromObject(object: { [k: string]: any }): Sale;
++    public static fromObject(object: { [k: string]: any }): SaleMetadata;
 +
 +    /**
-+     * Creates a plain object from a Sale message. Also converts values to other types if specified.
-+     * @param message Sale
++     * Creates a plain object from a SaleMetadata message. Also converts values to other types if specified.
++     * @param message SaleMetadata
 +     * @param [options] Conversion options
 +     * @returns Plain object
 +     */
-+    public static toObject(message: Sale, options?: $protobuf.IConversionOptions): { [k: string]: any };
++    public static toObject(message: SaleMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
 +
 +    /**
-+     * Converts this Sale to JSON.
++     * Converts this SaleMetadata to JSON.
 +     * @returns JSON object
 +     */
 +    public toJSON(): { [k: string]: any };
@@ -23375,7 +23375,7 @@ index c95539d..dccaf98 100755
  export interface IPublishedBeforeJoystream {
  
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
-index 2e7a59c..f4f8d2e 100755
+index 2e7a59c..5e93e98 100755
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.js
 @@ -11132,6 +11132,814 @@ $root.DistributionBucketFamilyMetadata = (function() {
@@ -24003,24 +24003,24 @@ index 2e7a59c..f4f8d2e 100755
 +    return Benefit;
 +})();
 +
-+$root.Sale = (function() {
++$root.SaleMetadata = (function() {
 +
 +    /**
-+     * Properties of a Sale.
-+     * @exports ISale
-+     * @interface ISale
-+     * @property {string|null} [termsAndConditions] Sale termsAndConditions
++     * Properties of a SaleMetadata.
++     * @exports ISaleMetadata
++     * @interface ISaleMetadata
++     * @property {string|null} [termsAndConditions] SaleMetadata termsAndConditions
 +     */
 +
 +    /**
-+     * Constructs a new Sale.
-+     * @exports Sale
-+     * @classdesc Represents a Sale.
-+     * @implements ISale
++     * Constructs a new SaleMetadata.
++     * @exports SaleMetadata
++     * @classdesc Represents a SaleMetadata.
++     * @implements ISaleMetadata
 +     * @constructor
-+     * @param {ISale=} [properties] Properties to set
++     * @param {ISaleMetadata=} [properties] Properties to set
 +     */
-+    function Sale(properties) {
++    function SaleMetadata(properties) {
 +        if (properties)
 +            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
 +                if (properties[keys[i]] != null)
@@ -24028,35 +24028,35 @@ index 2e7a59c..f4f8d2e 100755
 +    }
 +
 +    /**
-+     * Sale termsAndConditions.
++     * SaleMetadata termsAndConditions.
 +     * @member {string} termsAndConditions
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @instance
 +     */
-+    Sale.prototype.termsAndConditions = "";
++    SaleMetadata.prototype.termsAndConditions = "";
 +
 +    /**
-+     * Creates a new Sale instance using the specified properties.
++     * Creates a new SaleMetadata instance using the specified properties.
 +     * @function create
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
-+     * @param {ISale=} [properties] Properties to set
-+     * @returns {Sale} Sale instance
++     * @param {ISaleMetadata=} [properties] Properties to set
++     * @returns {SaleMetadata} SaleMetadata instance
 +     */
-+    Sale.create = function create(properties) {
-+        return new Sale(properties);
++    SaleMetadata.create = function create(properties) {
++        return new SaleMetadata(properties);
 +    };
 +
 +    /**
-+     * Encodes the specified Sale message. Does not implicitly {@link Sale.verify|verify} messages.
++     * Encodes the specified SaleMetadata message. Does not implicitly {@link SaleMetadata.verify|verify} messages.
 +     * @function encode
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
-+     * @param {ISale} message Sale message or plain object to encode
++     * @param {ISaleMetadata} message SaleMetadata message or plain object to encode
 +     * @param {$protobuf.Writer} [writer] Writer to encode to
 +     * @returns {$protobuf.Writer} Writer
 +     */
-+    Sale.encode = function encode(message, writer) {
++    SaleMetadata.encode = function encode(message, writer) {
 +        if (!writer)
 +            writer = $Writer.create();
 +        if (message.termsAndConditions != null && Object.hasOwnProperty.call(message, "termsAndConditions"))
@@ -24065,33 +24065,33 @@ index 2e7a59c..f4f8d2e 100755
 +    };
 +
 +    /**
-+     * Encodes the specified Sale message, length delimited. Does not implicitly {@link Sale.verify|verify} messages.
++     * Encodes the specified SaleMetadata message, length delimited. Does not implicitly {@link SaleMetadata.verify|verify} messages.
 +     * @function encodeDelimited
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
-+     * @param {ISale} message Sale message or plain object to encode
++     * @param {ISaleMetadata} message SaleMetadata message or plain object to encode
 +     * @param {$protobuf.Writer} [writer] Writer to encode to
 +     * @returns {$protobuf.Writer} Writer
 +     */
-+    Sale.encodeDelimited = function encodeDelimited(message, writer) {
++    SaleMetadata.encodeDelimited = function encodeDelimited(message, writer) {
 +        return this.encode(message, writer).ldelim();
 +    };
 +
 +    /**
-+     * Decodes a Sale message from the specified reader or buffer.
++     * Decodes a SaleMetadata message from the specified reader or buffer.
 +     * @function decode
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
 +     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
 +     * @param {number} [length] Message length if known beforehand
-+     * @returns {Sale} Sale
++     * @returns {SaleMetadata} SaleMetadata
 +     * @throws {Error} If the payload is not a reader or valid buffer
 +     * @throws {$protobuf.util.ProtocolError} If required fields are missing
 +     */
-+    Sale.decode = function decode(reader, length) {
++    SaleMetadata.decode = function decode(reader, length) {
 +        if (!(reader instanceof $Reader))
 +            reader = $Reader.create(reader);
-+        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Sale();
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.SaleMetadata();
 +        while (reader.pos < end) {
 +            var tag = reader.uint32();
 +            switch (tag >>> 3) {
@@ -24107,30 +24107,30 @@ index 2e7a59c..f4f8d2e 100755
 +    };
 +
 +    /**
-+     * Decodes a Sale message from the specified reader or buffer, length delimited.
++     * Decodes a SaleMetadata message from the specified reader or buffer, length delimited.
 +     * @function decodeDelimited
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
 +     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-+     * @returns {Sale} Sale
++     * @returns {SaleMetadata} SaleMetadata
 +     * @throws {Error} If the payload is not a reader or valid buffer
 +     * @throws {$protobuf.util.ProtocolError} If required fields are missing
 +     */
-+    Sale.decodeDelimited = function decodeDelimited(reader) {
++    SaleMetadata.decodeDelimited = function decodeDelimited(reader) {
 +        if (!(reader instanceof $Reader))
 +            reader = new $Reader(reader);
 +        return this.decode(reader, reader.uint32());
 +    };
 +
 +    /**
-+     * Verifies a Sale message.
++     * Verifies a SaleMetadata message.
 +     * @function verify
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
 +     * @param {Object.<string,*>} message Plain object to verify
 +     * @returns {string|null} `null` if valid, otherwise the reason why it is not
 +     */
-+    Sale.verify = function verify(message) {
++    SaleMetadata.verify = function verify(message) {
 +        if (typeof message !== "object" || message === null)
 +            return "object expected";
 +        if (message.termsAndConditions != null && message.hasOwnProperty("termsAndConditions"))
@@ -24140,32 +24140,32 @@ index 2e7a59c..f4f8d2e 100755
 +    };
 +
 +    /**
-+     * Creates a Sale message from a plain object. Also converts values to their respective internal types.
++     * Creates a SaleMetadata message from a plain object. Also converts values to their respective internal types.
 +     * @function fromObject
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
 +     * @param {Object.<string,*>} object Plain object
-+     * @returns {Sale} Sale
++     * @returns {SaleMetadata} SaleMetadata
 +     */
-+    Sale.fromObject = function fromObject(object) {
-+        if (object instanceof $root.Sale)
++    SaleMetadata.fromObject = function fromObject(object) {
++        if (object instanceof $root.SaleMetadata)
 +            return object;
-+        var message = new $root.Sale();
++        var message = new $root.SaleMetadata();
 +        if (object.termsAndConditions != null)
 +            message.termsAndConditions = String(object.termsAndConditions);
 +        return message;
 +    };
 +
 +    /**
-+     * Creates a plain object from a Sale message. Also converts values to other types if specified.
++     * Creates a plain object from a SaleMetadata message. Also converts values to other types if specified.
 +     * @function toObject
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @static
-+     * @param {Sale} message Sale
++     * @param {SaleMetadata} message SaleMetadata
 +     * @param {$protobuf.IConversionOptions} [options] Conversion options
 +     * @returns {Object.<string,*>} Plain object
 +     */
-+    Sale.toObject = function toObject(message, options) {
++    SaleMetadata.toObject = function toObject(message, options) {
 +        if (!options)
 +            options = {};
 +        var object = {};
@@ -24177,17 +24177,17 @@ index 2e7a59c..f4f8d2e 100755
 +    };
 +
 +    /**
-+     * Converts this Sale to JSON.
++     * Converts this SaleMetadata to JSON.
 +     * @function toJSON
-+     * @memberof Sale
++     * @memberof SaleMetadata
 +     * @instance
 +     * @returns {Object.<string,*>} JSON object
 +     */
-+    Sale.prototype.toJSON = function toJSON() {
++    SaleMetadata.prototype.toJSON = function toJSON() {
 +        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
 +    };
 +
-+    return Sale;
++    return SaleMetadata;
 +})();
 +
  $root.PublishedBeforeJoystream = (function() {
