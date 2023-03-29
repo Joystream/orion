@@ -112,10 +112,7 @@ import {
   processTokenSaleFinalizedEvent,
   processUserParticipatedInSplitEvent,
   processRevenueSplitFinalizedEvent,
-} from './mappings/token/issuing'
-import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
-import { EntityManager } from 'typeorm'
-import { OffchainState } from './utils/offchainState'
+} from './mappings/token'
 
 const defaultEventOptions = {
   data: {
