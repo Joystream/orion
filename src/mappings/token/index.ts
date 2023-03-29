@@ -538,6 +538,9 @@ export async function processTokenSaleFinalizedEvent({
 }: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
   const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
   sale.finalized = true
+  
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.IDLE
 }
 
 export async function processRevenueSplitLeftEvent({
