@@ -68,7 +68,7 @@ export async function burnFromVesting(
   const vestedAccounts = await overlay
     .getRepository(VestedAccount)
     .getManyByRelation('accountId', accountId)
-  var tallyBurnedAmount = burnedAmount
+  let tallyBurnedAmount = burnedAmount
   for (const vesting of vestedAccounts) {
     if (tallyBurnedAmount === BigInt(0)) {
       return

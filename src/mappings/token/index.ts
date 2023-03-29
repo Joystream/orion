@@ -35,8 +35,8 @@ export async function processTokenIssuedEvent({
 }: EventHandlerContext<'ProjectToken.TokenIssued'>) {
   // create vesting schedules
   const vestingSchedules = initialAllocation.map(([, allocation]) => {
-    var vestingSchedule
-    if (allocation.vestingScheduleParams != undefined) {
+    let vestingSchedule
+    if (allocation.vestingScheduleParams !== undefined) {
       const { linearVestingDuration, blocksBeforeCliff, cliffAmountPercentage } =
         allocation.vestingScheduleParams
       const cliffBlock = block.height + blocksBeforeCliff
@@ -75,8 +75,8 @@ export async function processTokenIssuedEvent({
   })
 
   //  create accounts
-  initialAllocation.map(([memberId, allocation], i) => {
-    if (vestingSchedules[i] != undefined) {
+  initialAllocation.forEach(([memberId, allocation], i) => {
+    if (vestingSchedules[i] !== undefined) {
       overlay.getRepository(VestedAccount).new({
         id: vestingSchedules[i]!.id.toString() + memberId.toString(),
         accountId: memberId.toString(),
@@ -117,7 +117,7 @@ export async function processTokenAmountTransferredEvent({
     (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
     BigInt(0)
   )
-  var accountsAdded = 0
+  let accountsAdded = 0
   for (const [validatedMemberId, validatedPayment] of validatedTransfers) {
     if (validatedMemberId.__kind === 'Existing') {
       const destinationAccount = await overlay
@@ -152,7 +152,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
     (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
     BigInt(0)
   )
-  var accountsAdded = 0
+  let accountsAdded = 0
   for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
     if (validatedMemberId.__kind === 'Existing') {
       const destinationAccount = await overlay
@@ -242,7 +242,7 @@ export async function processTokenSaleInitializedEvent({
     asV1000: [tokenId, saleId, tokenSale, ,],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
-  if (tokenSale.vestingScheduleParams != null) {
+  if (tokenSale.vestingScheduleParams !== undefined) {
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
 
     overlay.getRepository(VestingSchedule).new({
@@ -317,7 +317,7 @@ export async function processTokensBoughtOnAmmEvent({
   const buyerAccount = await overlay
     .getRepository(TokenAccount)
     .getById(tokenAccountId(tokenId, memberId))
-  if (buyerAccount == undefined) {
+  if (buyerAccount === undefined) {
     overlay.getRepository(TokenAccount).new({
       totalAmount: crtMinted,
       memberId: memberId.toString(),
@@ -383,7 +383,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const buyerAccount = await overlay
     .getRepository(TokenAccount)
     .getById(tokenAccountId(tokenId, memberId))
-  if (buyerAccount == undefined) {
+  if (buyerAccount === undefined) {
     // FIXME(check whether there is a more appropriate comparison for null / undefined types)
     overlay.getRepository(TokenAccount).new({
       tokenId: tokenId.toString(),
@@ -443,7 +443,7 @@ export async function processRevenueSplitIssuedEvent({
 
   overlay.getRepository(RevenueShare).new({
     id: revenueShareId(tokenId, token.revenueShareNonce),
-    duration: duration,
+    duration,
     allocation: joyAllocation,
     tokenId: tokenId.toString(),
     createdIn: block.height,
