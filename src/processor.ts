@@ -129,7 +129,7 @@ const defaultEventOptions = {
 const archiveUrl = process.env.ARCHIVE_GATEWAY_URL || 'http://localhost:8888/graphql'
 const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
 
-var processor = new SubstrateBatchProcessor()
+const processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
   .addEvent('Content.VideoCreated', defaultEventOptions)
 
