@@ -26,7 +26,7 @@ import {
   VestingScheduleData,
 } from './utils'
 import { deserializeMetadata } from '../utils'
-import { TokenMetadata } from '@joystream/metadata-protobuf'
+import { TokenMetadata, SaleMetadata } from '@joystream/metadata-protobuf'
 import { isSet } from 'lodash'
 
 export async function processTokenIssuedEvent({
@@ -245,7 +245,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, saleId, tokenSale, ,],
+    asV1000: [tokenId, saleId, tokenSale, metadataBytes],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   if (tokenSale.vestingScheduleParams !== undefined) {
@@ -266,7 +266,7 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
-  overlay.getRepository(Sale).new({
+  const sale = overlay.getRepository(Sale).new({
     id: tokenId.toString() + saleId.toString(),
     tokenId: tokenId.toString(),
     tokensSold: BigInt(0),
@@ -283,6 +283,15 @@ export async function processTokenSaleInitializedEvent({
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.SALE
+
+  if (metadataBytes) {
+    const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
+    if (metadata) {
+      if (isSet(metadata!.termsAndConditions)) {
+        sale.termsAndConditions = metadata!.termsAndConditions.toString()
+      }
+    }
+  }
 }
 
 export async function processPatronageRateDecreasedToEvent({
@@ -581,7 +590,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   event: {
     asV2001: [
       tokenId,
-      metadataBytes 
+      metadataBytes
     ]
   }
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
@@ -600,10 +609,10 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (metadata!.benefits) {
     for (const benefit of metadata!.benefits!) {
       overlay.getRepository(Benefit).new({
-        title: benefit.title? benefit.title! : undefined,
-        description: benefit.description? benefit.description! : undefined,
-        emojiCode: benefit.emoji? benefit.emoji! : undefined, // TODO (how do I codify emoji)
-        displayOrder: benefit.displayOrder? benefit.displayOrder! : undefined,
+        title: benefit.title ? benefit.title! : undefined,
+        description: benefit.description ? benefit.description! : undefined,
+        emojiCode: benefit.emoji ? benefit.emoji! : undefined, // TODO (how do I codify emoji)
+        displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
       })
     }
   }
