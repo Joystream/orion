@@ -90,6 +90,7 @@ import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 import {
   processCreatorTokenIssuedEvent,
+  processCreatorTokenIssuerRemarkedEvent,
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processTokensBoughtOnAmmEvent,
@@ -221,6 +222,7 @@ processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions)
 processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions)
 processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions)
 processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssuerRemarked', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -241,6 +243,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
   'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
+  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,

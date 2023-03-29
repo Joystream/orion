@@ -569,3 +569,15 @@ export async function processUserParticipatedInSplitEvent({
     .getByIdOrFail(tokenAccountId(tokenId, memberId))
   account.stakedAmount += stakedAmount
 }
+
+export async function processCreatorTokenIssuerRemarkedEvent({
+  overlay,
+  event: {
+    asV2001: [
+      tokenId,
+      message
+    ]
+  }
+}: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
+
+}

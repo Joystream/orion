@@ -95,7 +95,8 @@
     "ProjectToken.AmmDeactivated",
     "ProjectToken.TokensBoughtOnAmm",
     "ProjectToken.TokensSoldOnAmm",
-    "Content.CreatorTokenIssued"
+    "Content.CreatorTokenIssued",
+    "Content.CreatorTokenIssuerRemarked"
   ],
   "calls": [],
   "storage": []
