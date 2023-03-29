@@ -4,12 +4,27 @@ enum TokenStatus {
   IDLE
 }
 
+type TokenAvatarObject @variant {
+  "The avatar data object"
+  avatarObject: StorageDataObject!
+}
+
+type TokenAvatarUri @variant {
+  "The avatar URL"
+  avatarUri: String!
+}
+
+union TokenAvatar = TokenAvatarObject | TokenAvatarUri
+
 type Token @entity {
   "runtime token identifier"
   id: ID!
 
   "status sale / market / idle"
   status: TokenStatus!
+
+  "avatar object (profile picture)"
+  avatar: TokenAvatar
 
   "total supply"
   totalSupply: BigInt!
@@ -123,7 +138,7 @@ type Benefit @entity {
   token: Token!
 
   "emoji for the benefit"
-  emojiCode: Int
+  emojiCode: String 
 
   "title for the benefit"
   title: String!

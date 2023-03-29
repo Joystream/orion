@@ -13,6 +13,9 @@ import {
   AmmTransactionType,
   VestedSale,
   RevenueShareParticipation,
+  Benefit,
+  TokenAvatarUri,
+  TokenAvatarObject,
 } from '../../model'
 import {
   burnFromVesting,
@@ -22,6 +25,9 @@ import {
   tokenSaleId,
   VestingScheduleData,
 } from './utils'
+import { deserializeMetadata } from '../utils'
+import { TokenMetadata } from '@joystream/metadata-protobuf'
+import { isSet } from 'lodash'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -575,9 +581,45 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   event: {
     asV2001: [
       tokenId,
-      message
+      metadataBytes 
     ]
   }
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
+  const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
+  // TODO (should I review an error)
+  if (!metadata) {
+    return;
+  }
+
+  if (metadata!.description) {
+    token.description = metadata!.description!
+  }
+
+  if (metadata!.benefits) {
+    for (const benefit of metadata!.benefits!) {
+      overlay.getRepository(Benefit).new({
+        title: benefit.title? benefit.title! : undefined,
+        description: benefit.description? benefit.description! : undefined,
+        emojiCode: benefit.emoji? benefit.emoji! : undefined, // TODO (how do I codify emoji)
+        displayOrder: benefit.displayOrder? benefit.displayOrder! : undefined,
+      })
+    }
+  }
+
+  if (isSet(metadata!.whitelistApplicationNote)) {
+    token.whitelistApplicantNote = metadata!.whitelistApplicationNote || null
+  }
+
+  if (isSet(metadata!.whitelistApplicationApplyLink)) {
+    token.whitelistApplicantLink = metadata!.whitelistApplicationApplyLink || null
+  }
+
+  if (isSet(metadata!.avatarUri)) {
+    token.avatar = metadata!.avatarUri
+      ? new TokenAvatarUri({ avatarUri: metadata!.avatarUri })
+      : null
+  }
 }
+
