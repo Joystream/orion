@@ -108,7 +108,7 @@ import {
   processTokenSaleFinalizedEvent,
   processUserParticipatedInSplitEvent,
   processRevenueSplitFinalizedEvent,
-} from './mappings/token/issuing'
+} from './mappings/token'
 
 const defaultEventOptions = {
   data: {

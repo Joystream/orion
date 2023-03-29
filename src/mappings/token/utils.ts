@@ -1,6 +1,4 @@
-import {
-  VestedAccount,
-} from '../../model'
+import { VestedAccount } from '../../model'
 import { VestingScheduleParams } from '../../types/v1000'
 import { EntityManagerOverlay } from '../../utils/overlay'
 
