@@ -278,7 +278,7 @@ export async function processTokenSaleInitializedEvent({
     tokenSaleallocation: tokenSale.quantityLeft,
     pricePerUnit: tokenSale.unitPrice,
     finalized: false,
-    termsAndConditions: '', // TODO Sale metadata
+    termsAndConditions: '', // TODO Sale metadata (next PR)
   })
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -355,7 +355,8 @@ export async function processTokensBoughtOnAmmEvent({
     transactionType: AmmTransactionType.BUY,
     createdIn: block.height,
     quantity: crtMinted,
-    pricePaid: crtMinted / joysDeposited, // FIX(verify)
+    pricePaid: joysDeposited,
+    pricePerUnit: crtMinted / joysDeposited, // truncates decimal values
   })
 }
 
@@ -385,7 +386,8 @@ export async function processTokensSoldOnAmmEvent({
     transactionType: AmmTransactionType.SELL,
     createdIn: block.height,
     quantity: crtBurned,
-    pricePaid: crtBurned / joysRecovered, // FIX(verify)
+    pricePaid: joysRecovered, 
+    pricePerUnit: crtBurned / joysRecovered, // truncates decimal values
   })
 }
 
