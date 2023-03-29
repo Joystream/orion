@@ -23031,3 +23031,1165 @@ index 0000000..f4f8d2e
 +})();
 +
 +module.exports = $root;
+diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
+index c95539d..dccaf98 100755
+--- a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
++++ b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
+@@ -1,4 +1,3 @@
+-import { Long } from 'long'
+ import * as $protobuf from "protobufjs";
+ /** Properties of an AppActionMetadata. */
+ export interface IAppActionMetadata {
+@@ -4545,6 +4544,333 @@ export class DistributionBucketFamilyMetadata implements IDistributionBucketFami
+     public toJSON(): { [k: string]: any };
+ }
+ 
++/** Properties of a TokenMetadata. */
++export interface ITokenMetadata {
++
++    /** TokenMetadata name */
++    name?: (string|null);
++
++    /** TokenMetadata description */
++    description?: (string|null);
++
++    /** TokenMetadata avatarObject */
++    avatarObject?: (number|null);
++
++    /** TokenMetadata avatarUri */
++    avatarUri?: (string|null);
++
++    /** TokenMetadata benefits */
++    benefits?: (IBenefit[]|null);
++
++    /** TokenMetadata whitelistApplicationNote */
++    whitelistApplicationNote?: (string|null);
++
++    /** TokenMetadata whitelistApplicationApplyLink */
++    whitelistApplicationApplyLink?: (string|null);
++}
++
++/** Represents a TokenMetadata. */
++export class TokenMetadata implements ITokenMetadata {
++
++    /**
++     * Constructs a new TokenMetadata.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: ITokenMetadata);
++
++    /** TokenMetadata name. */
++    public name: string;
++
++    /** TokenMetadata description. */
++    public description: string;
++
++    /** TokenMetadata avatarObject. */
++    public avatarObject?: (number|null);
++
++    /** TokenMetadata avatarUri. */
++    public avatarUri?: (string|null);
++
++    /** TokenMetadata benefits. */
++    public benefits: IBenefit[];
++
++    /** TokenMetadata whitelistApplicationNote. */
++    public whitelistApplicationNote: string;
++
++    /** TokenMetadata whitelistApplicationApplyLink. */
++    public whitelistApplicationApplyLink: string;
++
++    /** TokenMetadata avatar. */
++    public avatar?: ("avatarObject"|"avatarUri");
++
++    /**
++     * Creates a new TokenMetadata instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns TokenMetadata instance
++     */
++    public static create(properties?: ITokenMetadata): TokenMetadata;
++
++    /**
++     * Encodes the specified TokenMetadata message. Does not implicitly {@link TokenMetadata.verify|verify} messages.
++     * @param message TokenMetadata message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: ITokenMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified TokenMetadata message, length delimited. Does not implicitly {@link TokenMetadata.verify|verify} messages.
++     * @param message TokenMetadata message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: ITokenMetadata, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes a TokenMetadata message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns TokenMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): TokenMetadata;
++
++    /**
++     * Decodes a TokenMetadata message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns TokenMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): TokenMetadata;
++
++    /**
++     * Verifies a TokenMetadata message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates a TokenMetadata message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns TokenMetadata
++     */
++    public static fromObject(object: { [k: string]: any }): TokenMetadata;
++
++    /**
++     * Creates a plain object from a TokenMetadata message. Also converts values to other types if specified.
++     * @param message TokenMetadata
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: TokenMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this TokenMetadata to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
++/** Properties of a Benefit. */
++export interface IBenefit {
++
++    /** Benefit title */
++    title?: (string|null);
++
++    /** Benefit description */
++    description?: (string|null);
++
++    /** Benefit emoji */
++    emoji?: (string|null);
++
++    /** Benefit displayOrder */
++    displayOrder?: (number|null);
++}
++
++/** Represents a Benefit. */
++export class Benefit implements IBenefit {
++
++    /**
++     * Constructs a new Benefit.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: IBenefit);
++
++    /** Benefit title. */
++    public title: string;
++
++    /** Benefit description. */
++    public description: string;
++
++    /** Benefit emoji. */
++    public emoji: string;
++
++    /** Benefit displayOrder. */
++    public displayOrder: number;
++
++    /**
++     * Creates a new Benefit instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns Benefit instance
++     */
++    public static create(properties?: IBenefit): Benefit;
++
++    /**
++     * Encodes the specified Benefit message. Does not implicitly {@link Benefit.verify|verify} messages.
++     * @param message Benefit message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: IBenefit, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified Benefit message, length delimited. Does not implicitly {@link Benefit.verify|verify} messages.
++     * @param message Benefit message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: IBenefit, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes a Benefit message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns Benefit
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Benefit;
++
++    /**
++     * Decodes a Benefit message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns Benefit
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Benefit;
++
++    /**
++     * Verifies a Benefit message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates a Benefit message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns Benefit
++     */
++    public static fromObject(object: { [k: string]: any }): Benefit;
++
++    /**
++     * Creates a plain object from a Benefit message. Also converts values to other types if specified.
++     * @param message Benefit
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: Benefit, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this Benefit to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
++/** Properties of a Sale. */
++export interface ISale {
++
++    /** Sale termsAndConditions */
++    termsAndConditions?: (string|null);
++}
++
++/** Represents a Sale. */
++export class Sale implements ISale {
++
++    /**
++     * Constructs a new Sale.
++     * @param [properties] Properties to set
++     */
++    constructor(properties?: ISale);
++
++    /** Sale termsAndConditions. */
++    public termsAndConditions: string;
++
++    /**
++     * Creates a new Sale instance using the specified properties.
++     * @param [properties] Properties to set
++     * @returns Sale instance
++     */
++    public static create(properties?: ISale): Sale;
++
++    /**
++     * Encodes the specified Sale message. Does not implicitly {@link Sale.verify|verify} messages.
++     * @param message Sale message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encode(message: ISale, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Encodes the specified Sale message, length delimited. Does not implicitly {@link Sale.verify|verify} messages.
++     * @param message Sale message or plain object to encode
++     * @param [writer] Writer to encode to
++     * @returns Writer
++     */
++    public static encodeDelimited(message: ISale, writer?: $protobuf.Writer): $protobuf.Writer;
++
++    /**
++     * Decodes a Sale message from the specified reader or buffer.
++     * @param reader Reader or buffer to decode from
++     * @param [length] Message length if known beforehand
++     * @returns Sale
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): Sale;
++
++    /**
++     * Decodes a Sale message from the specified reader or buffer, length delimited.
++     * @param reader Reader or buffer to decode from
++     * @returns Sale
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): Sale;
++
++    /**
++     * Verifies a Sale message.
++     * @param message Plain object to verify
++     * @returns `null` if valid, otherwise the reason why it is not
++     */
++    public static verify(message: { [k: string]: any }): (string|null);
++
++    /**
++     * Creates a Sale message from a plain object. Also converts values to their respective internal types.
++     * @param object Plain object
++     * @returns Sale
++     */
++    public static fromObject(object: { [k: string]: any }): Sale;
++
++    /**
++     * Creates a plain object from a Sale message. Also converts values to other types if specified.
++     * @param message Sale
++     * @param [options] Conversion options
++     * @returns Plain object
++     */
++    public static toObject(message: Sale, options?: $protobuf.IConversionOptions): { [k: string]: any };
++
++    /**
++     * Converts this Sale to JSON.
++     * @returns JSON object
++     */
++    public toJSON(): { [k: string]: any };
++}
++
+ /** Properties of a PublishedBeforeJoystream. */
+ export interface IPublishedBeforeJoystream {
+ 
+diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
+index 2e7a59c..f4f8d2e 100755
+--- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
++++ b/node_modules/@joystream/metadata-protobuf/compiled/index.js
+@@ -11132,6 +11132,814 @@ $root.DistributionBucketFamilyMetadata = (function() {
+     return DistributionBucketFamilyMetadata;
+ })();
+ 
++$root.TokenMetadata = (function() {
++
++    /**
++     * Properties of a TokenMetadata.
++     * @exports ITokenMetadata
++     * @interface ITokenMetadata
++     * @property {string|null} [name] TokenMetadata name
++     * @property {string|null} [description] TokenMetadata description
++     * @property {number|null} [avatarObject] TokenMetadata avatarObject
++     * @property {string|null} [avatarUri] TokenMetadata avatarUri
++     * @property {Array.<IBenefit>|null} [benefits] TokenMetadata benefits
++     * @property {string|null} [whitelistApplicationNote] TokenMetadata whitelistApplicationNote
++     * @property {string|null} [whitelistApplicationApplyLink] TokenMetadata whitelistApplicationApplyLink
++     */
++
++    /**
++     * Constructs a new TokenMetadata.
++     * @exports TokenMetadata
++     * @classdesc Represents a TokenMetadata.
++     * @implements ITokenMetadata
++     * @constructor
++     * @param {ITokenMetadata=} [properties] Properties to set
++     */
++    function TokenMetadata(properties) {
++        this.benefits = [];
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * TokenMetadata name.
++     * @member {string} name
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.name = "";
++
++    /**
++     * TokenMetadata description.
++     * @member {string} description
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.description = "";
++
++    /**
++     * TokenMetadata avatarObject.
++     * @member {number|null|undefined} avatarObject
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.avatarObject = null;
++
++    /**
++     * TokenMetadata avatarUri.
++     * @member {string|null|undefined} avatarUri
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.avatarUri = null;
++
++    /**
++     * TokenMetadata benefits.
++     * @member {Array.<IBenefit>} benefits
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.benefits = $util.emptyArray;
++
++    /**
++     * TokenMetadata whitelistApplicationNote.
++     * @member {string} whitelistApplicationNote
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.whitelistApplicationNote = "";
++
++    /**
++     * TokenMetadata whitelistApplicationApplyLink.
++     * @member {string} whitelistApplicationApplyLink
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.whitelistApplicationApplyLink = "";
++
++    // OneOf field names bound to virtual getters and setters
++    var $oneOfFields;
++
++    /**
++     * TokenMetadata avatar.
++     * @member {"avatarObject"|"avatarUri"|undefined} avatar
++     * @memberof TokenMetadata
++     * @instance
++     */
++    Object.defineProperty(TokenMetadata.prototype, "avatar", {
++        get: $util.oneOfGetter($oneOfFields = ["avatarObject", "avatarUri"]),
++        set: $util.oneOfSetter($oneOfFields)
++    });
++
++    /**
++     * Creates a new TokenMetadata instance using the specified properties.
++     * @function create
++     * @memberof TokenMetadata
++     * @static
++     * @param {ITokenMetadata=} [properties] Properties to set
++     * @returns {TokenMetadata} TokenMetadata instance
++     */
++    TokenMetadata.create = function create(properties) {
++        return new TokenMetadata(properties);
++    };
++
++    /**
++     * Encodes the specified TokenMetadata message. Does not implicitly {@link TokenMetadata.verify|verify} messages.
++     * @function encode
++     * @memberof TokenMetadata
++     * @static
++     * @param {ITokenMetadata} message TokenMetadata message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    TokenMetadata.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        if (message.name != null && Object.hasOwnProperty.call(message, "name"))
++            writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
++        if (message.description != null && Object.hasOwnProperty.call(message, "description"))
++            writer.uint32(/* id 2, wireType 2 =*/18).string(message.description);
++        if (message.avatarObject != null && Object.hasOwnProperty.call(message, "avatarObject"))
++            writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.avatarObject);
++        if (message.avatarUri != null && Object.hasOwnProperty.call(message, "avatarUri"))
++            writer.uint32(/* id 4, wireType 2 =*/34).string(message.avatarUri);
++        if (message.benefits != null && message.benefits.length)
++            for (var i = 0; i < message.benefits.length; ++i)
++                $root.Benefit.encode(message.benefits[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
++        if (message.whitelistApplicationNote != null && Object.hasOwnProperty.call(message, "whitelistApplicationNote"))
++            writer.uint32(/* id 6, wireType 2 =*/50).string(message.whitelistApplicationNote);
++        if (message.whitelistApplicationApplyLink != null && Object.hasOwnProperty.call(message, "whitelistApplicationApplyLink"))
++            writer.uint32(/* id 7, wireType 2 =*/58).string(message.whitelistApplicationApplyLink);
++        return writer;
++    };
++
++    /**
++     * Encodes the specified TokenMetadata message, length delimited. Does not implicitly {@link TokenMetadata.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof TokenMetadata
++     * @static
++     * @param {ITokenMetadata} message TokenMetadata message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    TokenMetadata.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes a TokenMetadata message from the specified reader or buffer.
++     * @function decode
++     * @memberof TokenMetadata
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {TokenMetadata} TokenMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    TokenMetadata.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.TokenMetadata();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.name = reader.string();
++                break;
++            case 2:
++                message.description = reader.string();
++                break;
++            case 3:
++                message.avatarObject = reader.uint32();
++                break;
++            case 4:
++                message.avatarUri = reader.string();
++                break;
++            case 5:
++                if (!(message.benefits && message.benefits.length))
++                    message.benefits = [];
++                message.benefits.push($root.Benefit.decode(reader, reader.uint32()));
++                break;
++            case 6:
++                message.whitelistApplicationNote = reader.string();
++                break;
++            case 7:
++                message.whitelistApplicationApplyLink = reader.string();
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        return message;
++    };
++
++    /**
++     * Decodes a TokenMetadata message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof TokenMetadata
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {TokenMetadata} TokenMetadata
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    TokenMetadata.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies a TokenMetadata message.
++     * @function verify
++     * @memberof TokenMetadata
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    TokenMetadata.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        var properties = {};
++        if (message.name != null && message.hasOwnProperty("name"))
++            if (!$util.isString(message.name))
++                return "name: string expected";
++        if (message.description != null && message.hasOwnProperty("description"))
++            if (!$util.isString(message.description))
++                return "description: string expected";
++        if (message.avatarObject != null && message.hasOwnProperty("avatarObject")) {
++            properties.avatar = 1;
++            if (!$util.isInteger(message.avatarObject))
++                return "avatarObject: integer expected";
++        }
++        if (message.avatarUri != null && message.hasOwnProperty("avatarUri")) {
++            if (properties.avatar === 1)
++                return "avatar: multiple values";
++            properties.avatar = 1;
++            if (!$util.isString(message.avatarUri))
++                return "avatarUri: string expected";
++        }
++        if (message.benefits != null && message.hasOwnProperty("benefits")) {
++            if (!Array.isArray(message.benefits))
++                return "benefits: array expected";
++            for (var i = 0; i < message.benefits.length; ++i) {
++                var error = $root.Benefit.verify(message.benefits[i]);
++                if (error)
++                    return "benefits." + error;
++            }
++        }
++        if (message.whitelistApplicationNote != null && message.hasOwnProperty("whitelistApplicationNote"))
++            if (!$util.isString(message.whitelistApplicationNote))
++                return "whitelistApplicationNote: string expected";
++        if (message.whitelistApplicationApplyLink != null && message.hasOwnProperty("whitelistApplicationApplyLink"))
++            if (!$util.isString(message.whitelistApplicationApplyLink))
++                return "whitelistApplicationApplyLink: string expected";
++        return null;
++    };
++
++    /**
++     * Creates a TokenMetadata message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof TokenMetadata
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {TokenMetadata} TokenMetadata
++     */
++    TokenMetadata.fromObject = function fromObject(object) {
++        if (object instanceof $root.TokenMetadata)
++            return object;
++        var message = new $root.TokenMetadata();
++        if (object.name != null)
++            message.name = String(object.name);
++        if (object.description != null)
++            message.description = String(object.description);
++        if (object.avatarObject != null)
++            message.avatarObject = object.avatarObject >>> 0;
++        if (object.avatarUri != null)
++            message.avatarUri = String(object.avatarUri);
++        if (object.benefits) {
++            if (!Array.isArray(object.benefits))
++                throw TypeError(".TokenMetadata.benefits: array expected");
++            message.benefits = [];
++            for (var i = 0; i < object.benefits.length; ++i) {
++                if (typeof object.benefits[i] !== "object")
++                    throw TypeError(".TokenMetadata.benefits: object expected");
++                message.benefits[i] = $root.Benefit.fromObject(object.benefits[i]);
++            }
++        }
++        if (object.whitelistApplicationNote != null)
++            message.whitelistApplicationNote = String(object.whitelistApplicationNote);
++        if (object.whitelistApplicationApplyLink != null)
++            message.whitelistApplicationApplyLink = String(object.whitelistApplicationApplyLink);
++        return message;
++    };
++
++    /**
++     * Creates a plain object from a TokenMetadata message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof TokenMetadata
++     * @static
++     * @param {TokenMetadata} message TokenMetadata
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    TokenMetadata.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.arrays || options.defaults)
++            object.benefits = [];
++        if (options.defaults) {
++            object.name = "";
++            object.description = "";
++            object.whitelistApplicationNote = "";
++            object.whitelistApplicationApplyLink = "";
++        }
++        if (message.name != null && message.hasOwnProperty("name"))
++            object.name = message.name;
++        if (message.description != null && message.hasOwnProperty("description"))
++            object.description = message.description;
++        if (message.avatarObject != null && message.hasOwnProperty("avatarObject")) {
++            object.avatarObject = message.avatarObject;
++            if (options.oneofs)
++                object.avatar = "avatarObject";
++        }
++        if (message.avatarUri != null && message.hasOwnProperty("avatarUri")) {
++            object.avatarUri = message.avatarUri;
++            if (options.oneofs)
++                object.avatar = "avatarUri";
++        }
++        if (message.benefits && message.benefits.length) {
++            object.benefits = [];
++            for (var j = 0; j < message.benefits.length; ++j)
++                object.benefits[j] = $root.Benefit.toObject(message.benefits[j], options);
++        }
++        if (message.whitelistApplicationNote != null && message.hasOwnProperty("whitelistApplicationNote"))
++            object.whitelistApplicationNote = message.whitelistApplicationNote;
++        if (message.whitelistApplicationApplyLink != null && message.hasOwnProperty("whitelistApplicationApplyLink"))
++            object.whitelistApplicationApplyLink = message.whitelistApplicationApplyLink;
++        return object;
++    };
++
++    /**
++     * Converts this TokenMetadata to JSON.
++     * @function toJSON
++     * @memberof TokenMetadata
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    TokenMetadata.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return TokenMetadata;
++})();
++
++$root.Benefit = (function() {
++
++    /**
++     * Properties of a Benefit.
++     * @exports IBenefit
++     * @interface IBenefit
++     * @property {string|null} [title] Benefit title
++     * @property {string|null} [description] Benefit description
++     * @property {string|null} [emoji] Benefit emoji
++     * @property {number|null} [displayOrder] Benefit displayOrder
++     */
++
++    /**
++     * Constructs a new Benefit.
++     * @exports Benefit
++     * @classdesc Represents a Benefit.
++     * @implements IBenefit
++     * @constructor
++     * @param {IBenefit=} [properties] Properties to set
++     */
++    function Benefit(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * Benefit title.
++     * @member {string} title
++     * @memberof Benefit
++     * @instance
++     */
++    Benefit.prototype.title = "";
++
++    /**
++     * Benefit description.
++     * @member {string} description
++     * @memberof Benefit
++     * @instance
++     */
++    Benefit.prototype.description = "";
++
++    /**
++     * Benefit emoji.
++     * @member {string} emoji
++     * @memberof Benefit
++     * @instance
++     */
++    Benefit.prototype.emoji = "";
++
++    /**
++     * Benefit displayOrder.
++     * @member {number} displayOrder
++     * @memberof Benefit
++     * @instance
++     */
++    Benefit.prototype.displayOrder = 0;
++
++    /**
++     * Creates a new Benefit instance using the specified properties.
++     * @function create
++     * @memberof Benefit
++     * @static
++     * @param {IBenefit=} [properties] Properties to set
++     * @returns {Benefit} Benefit instance
++     */
++    Benefit.create = function create(properties) {
++        return new Benefit(properties);
++    };
++
++    /**
++     * Encodes the specified Benefit message. Does not implicitly {@link Benefit.verify|verify} messages.
++     * @function encode
++     * @memberof Benefit
++     * @static
++     * @param {IBenefit} message Benefit message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    Benefit.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        if (message.title != null && Object.hasOwnProperty.call(message, "title"))
++            writer.uint32(/* id 1, wireType 2 =*/10).string(message.title);
++        if (message.description != null && Object.hasOwnProperty.call(message, "description"))
++            writer.uint32(/* id 2, wireType 2 =*/18).string(message.description);
++        if (message.emoji != null && Object.hasOwnProperty.call(message, "emoji"))
++            writer.uint32(/* id 3, wireType 2 =*/26).string(message.emoji);
++        if (message.displayOrder != null && Object.hasOwnProperty.call(message, "displayOrder"))
++            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.displayOrder);
++        return writer;
++    };
++
++    /**
++     * Encodes the specified Benefit message, length delimited. Does not implicitly {@link Benefit.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof Benefit
++     * @static
++     * @param {IBenefit} message Benefit message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    Benefit.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes a Benefit message from the specified reader or buffer.
++     * @function decode
++     * @memberof Benefit
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {Benefit} Benefit
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    Benefit.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Benefit();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.title = reader.string();
++                break;
++            case 2:
++                message.description = reader.string();
++                break;
++            case 3:
++                message.emoji = reader.string();
++                break;
++            case 4:
++                message.displayOrder = reader.uint32();
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        return message;
++    };
++
++    /**
++     * Decodes a Benefit message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof Benefit
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {Benefit} Benefit
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    Benefit.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies a Benefit message.
++     * @function verify
++     * @memberof Benefit
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    Benefit.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        if (message.title != null && message.hasOwnProperty("title"))
++            if (!$util.isString(message.title))
++                return "title: string expected";
++        if (message.description != null && message.hasOwnProperty("description"))
++            if (!$util.isString(message.description))
++                return "description: string expected";
++        if (message.emoji != null && message.hasOwnProperty("emoji"))
++            if (!$util.isString(message.emoji))
++                return "emoji: string expected";
++        if (message.displayOrder != null && message.hasOwnProperty("displayOrder"))
++            if (!$util.isInteger(message.displayOrder))
++                return "displayOrder: integer expected";
++        return null;
++    };
++
++    /**
++     * Creates a Benefit message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof Benefit
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {Benefit} Benefit
++     */
++    Benefit.fromObject = function fromObject(object) {
++        if (object instanceof $root.Benefit)
++            return object;
++        var message = new $root.Benefit();
++        if (object.title != null)
++            message.title = String(object.title);
++        if (object.description != null)
++            message.description = String(object.description);
++        if (object.emoji != null)
++            message.emoji = String(object.emoji);
++        if (object.displayOrder != null)
++            message.displayOrder = object.displayOrder >>> 0;
++        return message;
++    };
++
++    /**
++     * Creates a plain object from a Benefit message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof Benefit
++     * @static
++     * @param {Benefit} message Benefit
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    Benefit.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.defaults) {
++            object.title = "";
++            object.description = "";
++            object.emoji = "";
++            object.displayOrder = 0;
++        }
++        if (message.title != null && message.hasOwnProperty("title"))
++            object.title = message.title;
++        if (message.description != null && message.hasOwnProperty("description"))
++            object.description = message.description;
++        if (message.emoji != null && message.hasOwnProperty("emoji"))
++            object.emoji = message.emoji;
++        if (message.displayOrder != null && message.hasOwnProperty("displayOrder"))
++            object.displayOrder = message.displayOrder;
++        return object;
++    };
++
++    /**
++     * Converts this Benefit to JSON.
++     * @function toJSON
++     * @memberof Benefit
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    Benefit.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return Benefit;
++})();
++
++$root.Sale = (function() {
++
++    /**
++     * Properties of a Sale.
++     * @exports ISale
++     * @interface ISale
++     * @property {string|null} [termsAndConditions] Sale termsAndConditions
++     */
++
++    /**
++     * Constructs a new Sale.
++     * @exports Sale
++     * @classdesc Represents a Sale.
++     * @implements ISale
++     * @constructor
++     * @param {ISale=} [properties] Properties to set
++     */
++    function Sale(properties) {
++        if (properties)
++            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                if (properties[keys[i]] != null)
++                    this[keys[i]] = properties[keys[i]];
++    }
++
++    /**
++     * Sale termsAndConditions.
++     * @member {string} termsAndConditions
++     * @memberof Sale
++     * @instance
++     */
++    Sale.prototype.termsAndConditions = "";
++
++    /**
++     * Creates a new Sale instance using the specified properties.
++     * @function create
++     * @memberof Sale
++     * @static
++     * @param {ISale=} [properties] Properties to set
++     * @returns {Sale} Sale instance
++     */
++    Sale.create = function create(properties) {
++        return new Sale(properties);
++    };
++
++    /**
++     * Encodes the specified Sale message. Does not implicitly {@link Sale.verify|verify} messages.
++     * @function encode
++     * @memberof Sale
++     * @static
++     * @param {ISale} message Sale message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    Sale.encode = function encode(message, writer) {
++        if (!writer)
++            writer = $Writer.create();
++        if (message.termsAndConditions != null && Object.hasOwnProperty.call(message, "termsAndConditions"))
++            writer.uint32(/* id 1, wireType 2 =*/10).string(message.termsAndConditions);
++        return writer;
++    };
++
++    /**
++     * Encodes the specified Sale message, length delimited. Does not implicitly {@link Sale.verify|verify} messages.
++     * @function encodeDelimited
++     * @memberof Sale
++     * @static
++     * @param {ISale} message Sale message or plain object to encode
++     * @param {$protobuf.Writer} [writer] Writer to encode to
++     * @returns {$protobuf.Writer} Writer
++     */
++    Sale.encodeDelimited = function encodeDelimited(message, writer) {
++        return this.encode(message, writer).ldelim();
++    };
++
++    /**
++     * Decodes a Sale message from the specified reader or buffer.
++     * @function decode
++     * @memberof Sale
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @param {number} [length] Message length if known beforehand
++     * @returns {Sale} Sale
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    Sale.decode = function decode(reader, length) {
++        if (!(reader instanceof $Reader))
++            reader = $Reader.create(reader);
++        var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Sale();
++        while (reader.pos < end) {
++            var tag = reader.uint32();
++            switch (tag >>> 3) {
++            case 1:
++                message.termsAndConditions = reader.string();
++                break;
++            default:
++                reader.skipType(tag & 7);
++                break;
++            }
++        }
++        return message;
++    };
++
++    /**
++     * Decodes a Sale message from the specified reader or buffer, length delimited.
++     * @function decodeDelimited
++     * @memberof Sale
++     * @static
++     * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
++     * @returns {Sale} Sale
++     * @throws {Error} If the payload is not a reader or valid buffer
++     * @throws {$protobuf.util.ProtocolError} If required fields are missing
++     */
++    Sale.decodeDelimited = function decodeDelimited(reader) {
++        if (!(reader instanceof $Reader))
++            reader = new $Reader(reader);
++        return this.decode(reader, reader.uint32());
++    };
++
++    /**
++     * Verifies a Sale message.
++     * @function verify
++     * @memberof Sale
++     * @static
++     * @param {Object.<string,*>} message Plain object to verify
++     * @returns {string|null} `null` if valid, otherwise the reason why it is not
++     */
++    Sale.verify = function verify(message) {
++        if (typeof message !== "object" || message === null)
++            return "object expected";
++        if (message.termsAndConditions != null && message.hasOwnProperty("termsAndConditions"))
++            if (!$util.isString(message.termsAndConditions))
++                return "termsAndConditions: string expected";
++        return null;
++    };
++
++    /**
++     * Creates a Sale message from a plain object. Also converts values to their respective internal types.
++     * @function fromObject
++     * @memberof Sale
++     * @static
++     * @param {Object.<string,*>} object Plain object
++     * @returns {Sale} Sale
++     */
++    Sale.fromObject = function fromObject(object) {
++        if (object instanceof $root.Sale)
++            return object;
++        var message = new $root.Sale();
++        if (object.termsAndConditions != null)
++            message.termsAndConditions = String(object.termsAndConditions);
++        return message;
++    };
++
++    /**
++     * Creates a plain object from a Sale message. Also converts values to other types if specified.
++     * @function toObject
++     * @memberof Sale
++     * @static
++     * @param {Sale} message Sale
++     * @param {$protobuf.IConversionOptions} [options] Conversion options
++     * @returns {Object.<string,*>} Plain object
++     */
++    Sale.toObject = function toObject(message, options) {
++        if (!options)
++            options = {};
++        var object = {};
++        if (options.defaults)
++            object.termsAndConditions = "";
++        if (message.termsAndConditions != null && message.hasOwnProperty("termsAndConditions"))
++            object.termsAndConditions = message.termsAndConditions;
++        return object;
++    };
++
++    /**
++     * Converts this Sale to JSON.
++     * @function toJSON
++     * @memberof Sale
++     * @instance
++     * @returns {Object.<string,*>} JSON object
++     */
++    Sale.prototype.toJSON = function toJSON() {
++        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
++    };
++
++    return Sale;
++})();
++
+ $root.PublishedBeforeJoystream = (function() {
+ 
+     /**
