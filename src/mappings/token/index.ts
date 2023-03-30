@@ -597,7 +597,6 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
-  // TODO (should I review an error)
   if (!metadata) {
     return;
   }
@@ -611,7 +610,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
       overlay.getRepository(Benefit).new({
         title: benefit.title ? benefit.title! : undefined,
         description: benefit.description ? benefit.description! : undefined,
-        emojiCode: benefit.emoji ? benefit.emoji! : undefined, // TODO (how do I codify emoji)
+        emojiCode: benefit.emoji ? benefit.emoji! : undefined, 
         displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
       })
     }
