@@ -1,0 +1,9 @@
+# CHANGE: Dropped because there is no `membershipByUniqueInput` in subsquid
+# In order to ge membership by handle, either use `GetMemberships` or a custom query needs to be added
+# query GetMembership(...) { ... }
+
+query GetMemberships($where: MembershipWhereInput!, $limit: Int) {
+  memberships(where: $where, orderBy: [createdAt_ASC], limit: $limit) {
+    ...FullMembershipFields
+  }
+}

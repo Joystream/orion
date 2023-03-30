@@ -1,18 +1,67 @@
-version: '3.3'
+version: '3'
+
 services:
-  orion:
-    image: joystream/orion:latest
+  orion_db:
+    container_name: orion_db
+    hostname: orion_db
+    image: postgres:14
+    restart: unless-stopped
     environment:
-      - ORION_PORT=6116
-      - ORION_MONGO_HOSTNAME=mongo
-      - ORION_FEATURED_CONTENT_SECRET=change_me_please
-      - ORION_ADMIN_SECRET=change_me_please
-      - ORION_QUERY_NODE_URL=https://query.joystream.org/graphql
+      POSTGRES_DB: squid
+      POSTGRES_PASSWORD: squid
     ports:
-      - '127.0.0.1:6116:6116'
-    restart: always
-  mongo:
-    restart: always
-    image: library/mongo:4.4
+      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+      - '[::1]:${DB_PORT}:${DB_PORT}'
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
+    shm_size: 1g
     volumes:
-      - ./db:/data/db
+      - orion_db_data:/var/lib/postgresql/data
+      - ./db/persisted:/persisted_data
+      - ./db/postgres.conf:/etc/postgresql/postgresql.conf
+
+  orion_processor:
+    container_name: orion_processor
+    hostname: orion_processor
+    image: node:14
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker.env
+    ports:
+      - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
+      - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
+    depends_on:
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'process']
+
+  orion_graphql-server:
+    container_name: orion_graphql-server
+    hostname: orion_graphql-server
+    image: node:14
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker.env
+    depends_on:
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'serve']
+    ports:
+      - '4350:4350'
+
+volumes:
+  orion_db_data:
+
+networks:
+  default:
+    external:
+      name: joystream_default

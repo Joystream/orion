@@ -1,0 +1,45 @@
+manifestVersion: subsquid.io/v0.1
+name: orion
+version: 2
+description: |-
+  Joystream Orion v2 backend
+
+build:
+
+deploy:
+  addons:
+    postgres:
+  secrets:
+    - OPERATOR_SECRET
+    - APP_PRIVATE_KEY
+  migrate:
+    env:
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
+      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      MAX_CACHED_ENTITIES: 1000
+      SKIP_IMPORT: true
+    cmd: ['npx', 'squid-typeorm-migration', 'apply']
+  processor:
+    env:
+      ARCHIVE_GATEWAY_URL: https://joystream.archive.subsquid.io/graphql
+      PROCESSOR_PROMETHEUS_PORT: 3000
+      SQD_DEBUG: sqd:processor:mapping
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
+      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      MAX_CACHED_ENTITIES: 1000
+    cmd: ['npm', 'run', 'processor-start']
+  api:
+    env:
+      PROCESSOR_HOST: processor
+      PROCESSOR_PROMETHEUS_PORT: 3000
+      SQD_DEBUG: api:*
+      SUPPORT_NO_CATEGORY_VIDEOS: true
+      SUPPORT_NEW_CATEGORIES: true
+      KILL_SWITCH_ON: false
+      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      MAX_CACHED_ENTITIES: 1000
+    cmd: ['npm', 'run', 'query-node-start']

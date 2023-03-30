@@ -1,0 +1,76 @@
+type CommentReaction @entity {
+  "{memberId}-{commentId}-{reactionId}"
+  id: ID!
+
+  "The Reaction id"
+  reactionId: Int!
+
+  "The member that reacted"
+  member: Membership!
+
+  "The comment that has been reacted to"
+  comment: Comment!
+
+  # Added to efficiently delete all reactions of all
+  # (deleted) comments once video has been deleted.
+  "The video the comment (that has been reacted) exists"
+  video: Video!
+}
+
+enum CommentStatus {
+  VISIBLE
+  DELETED
+  MODERATED
+}
+
+type CommentReactionsCountByReactionId {
+  "The reaction id"
+  reactionId: Int!
+
+  "No of times the comment has been reacted with given reaction Id"
+  count: Int!
+}
+
+type Comment @entity {
+  "METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}"
+  id: ID!
+
+  "Timestamp of the block the comment was created at"
+  createdAt: DateTime!
+
+  "Author of the video comment"
+  author: Membership!
+
+  "Comment text"
+  text: String!
+
+  "Video the comment was added to"
+  video: Video!
+
+  "Status of the comment; either it is visible, deleted, or moderated (deleted by moderator)"
+  status: CommentStatus! @index
+
+  "List of all reactions to the comment"
+  reactions: [CommentReaction!] @derivedFrom(field: "comment")
+
+  "Reactions count by reaction Id"
+  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
+
+  "A (parent) comment that this comment replies to (if any)"
+  parentComment: Comment
+
+  "How many comments has replied to this comment"
+  repliesCount: Int!
+
+  "Total number of reactions to this comment"
+  reactionsCount: Int!
+
+  "Sum of replies and reactions"
+  reactionsAndRepliesCount: Int!
+
+  "Whether comment has been edited or not"
+  isEdited: Boolean!
+
+  "Whether a comment has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+}

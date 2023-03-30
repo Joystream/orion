@@ -1,0 +1,816 @@
+fragment ActorFields on ContentActor {
+  __typename
+  ... on ContentActorCurator {
+    curator {
+      id
+    }
+  }
+  ... on ContentActorMember {
+    member {
+      id
+    }
+  }
+}
+
+fragment AuctionTypeFields on AuctionType {
+  __typename
+  ... on AuctionTypeEnglish {
+    duration
+    extensionPeriod
+    plannedEndAtBlock
+    minimalBidStep
+  }
+  ... on AuctionTypeOpen {
+    bidLockDuration
+  }
+}
+
+fragment BidFields on Bid {
+  id
+  createdAt
+  auction {
+    id
+  }
+  nft {
+    id
+  }
+  bidder {
+    id
+  }
+  amount
+  isCanceled
+  createdInBlock
+  indexInBlock
+}
+
+fragment VideoMediaEncodingFields on VideoMediaEncoding {
+  id
+  codecName
+  container
+  mimeMediaType
+}
+
+query StateQueryV1 {
+  apps(limit: 9999) {
+    id
+    name
+    websiteUrl
+    useUri
+    smallIcon
+    mediumIcon
+    bigIcon
+    oneLiner
+    description
+    termsOfService
+    platforms
+    category
+    authKey
+  }
+  channels(limit: 9999) {
+    id
+    createdAt
+    ownerMember {
+      id
+    }
+    title
+    description
+    coverPhoto {
+      id
+    }
+    avatarPhoto {
+      id
+    }
+    isPublic
+    isCensored
+    language {
+      iso
+    }
+    videos {
+      id
+    }
+    createdInBlock
+    rewardAccount
+    channelStateBloatBond
+    bannedMembers {
+      id
+    }
+    entryApp {
+      id
+    }
+    totalVideosCreated
+  }
+  commentCreatedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    comment {
+      id
+    }
+    text
+  }
+  commentTextUpdatedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    comment {
+      id
+    }
+    newText
+  }
+  openAuctionStartedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    actor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    auction {
+      id
+    }
+  }
+  englishAuctionStartedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    actor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    auction {
+      id
+    }
+  }
+  nftIssuedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+  }
+  auctionBidMadeEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    bidAmount
+    previousTopBid {
+      id
+    }
+    previousTopBidder {
+      id
+    }
+  }
+  auctionBidCanceledEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    member {
+      id
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+  }
+  auctionCanceledEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+  }
+  englishAuctionSettledEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    winner {
+      id
+    }
+    video {
+      id
+    }
+  }
+  bidMadeCompletingAuctionEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    video {
+      id
+    }
+  }
+  openAuctionBidAcceptedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    winningBid {
+      id
+    }
+    video {
+      id
+    }
+  }
+  nftSellOrderMadeEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+    price
+  }
+  nftBoughtEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    member {
+      id
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+    price
+  }
+  buyNowCanceledEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+  }
+  buyNowPriceUpdatedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    contentActor {
+      ...ActorFields
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    video {
+      id
+    }
+    newPrice
+  }
+  metaprotocolTransactionStatusEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    status {
+      __typename
+      ... on MetaprotocolTransactionSuccessful {
+        commentCreated {
+          id
+        }
+        commentEdited {
+          id
+        }
+        commentDeleted {
+          id
+        }
+        commentModerated {
+          id
+        }
+        videoCategoryCreated {
+          id
+        }
+        videoCategoryUpdated {
+          id
+        }
+        videoCategoryDeleted {
+          id
+        }
+      }
+      ... on MetaprotocolTransactionErrored {
+        message
+      }
+    }
+  }
+  memberships(limit: 9999) {
+    id
+    createdAt
+    handle
+    metadata {
+      name
+      avatar {
+        __typename
+        ... on AvatarUri {
+          avatarUri
+        }
+      }
+      about
+    }
+    controllerAccount
+    whitelistedInAuctions {
+      id
+    }
+    channels {
+      id
+    }
+    memberBannedFromChannels {
+      id
+    }
+    totalChannelsCreated
+  }
+  ownedNfts(limit: 9999) {
+    id
+    createdAt
+    video {
+      id
+      channel {
+        id
+      }
+    }
+    auctions {
+      id
+    }
+    ownerMember {
+      id
+    }
+    ownerCuratorGroup {
+      id
+    }
+    transactionalStatus {
+      __typename
+      ... on TransactionalStatusInitiatedOfferToMember {
+        memberId
+        offerPrice: price
+      }
+      ... on TransactionalStatusBuyNow {
+        price
+      }
+    }
+    transactionalStatusAuction {
+      id
+    }
+    creatorRoyalty
+    lastSalePrice
+    lastSaleDate
+    bids {
+      id
+    }
+  }
+  auctions(limit: 9999) {
+    id
+    nft {
+      id
+    }
+    winningMember {
+      id
+    }
+    startingPrice
+    buyNowPrice
+    auctionType {
+      ...AuctionTypeFields
+    }
+    topBid {
+      id
+      isCanceled
+    }
+    bids {
+      id
+    }
+    startsAtBlock
+    endedAtBlock
+    isCanceled
+    isCompleted
+    whitelistedMembers {
+      id
+    }
+  }
+  bids(limit: 9999) {
+    ...BidFields
+  }
+  storageBuckets(limit: 9999) {
+    id
+    operatorStatus {
+      __typename
+      ... on StorageBucketOperatorStatusInvited {
+        workerId
+      }
+      ... on StorageBucketOperatorStatusActive {
+        workerId
+      }
+    }
+    operatorMetadata {
+      nodeEndpoint
+      nodeLocation {
+        countryCode
+        city
+      }
+      extra
+    }
+    acceptingNewBags
+    bags {
+      id
+    }
+    dataObjectsSizeLimit
+    dataObjectCountLimit
+    dataObjectsCount
+    dataObjectsSize
+  }
+  storageBags(limit: 9999) {
+    id
+    objects {
+      id
+    }
+    storageBuckets {
+      id
+    }
+    distributionBuckets {
+      id
+    }
+    owner {
+      __typename
+      ... on StorageBagOwnerWorkingGroup {
+        workingGroupId
+      }
+      ... on StorageBagOwnerMember {
+        memberId
+      }
+      ... on StorageBagOwnerChannel {
+        channelId
+      }
+      ... on StorageBagOwnerDAO {
+        daoId
+      }
+    }
+  }
+  storageDataObjects(limit: 9999) {
+    id
+    createdAt
+    isAccepted
+    size
+    storageBag {
+      id
+    }
+    ipfsHash
+    type {
+      __typename
+      ... on DataObjectTypeChannelAvatar {
+        channel {
+          id
+        }
+      }
+      ... on DataObjectTypeChannelCoverPhoto {
+        channel {
+          id
+        }
+      }
+      ... on DataObjectTypeVideoMedia {
+        video {
+          id
+        }
+      }
+      ... on DataObjectTypeVideoThumbnail {
+        video {
+          id
+        }
+      }
+      ... on DataObjectTypeVideoSubtitle {
+        subtitle {
+          id
+        }
+        video {
+          id
+        }
+      }
+    }
+    stateBloatBond
+    unsetAt
+  }
+  distributionBucketFamilies(limit: 9999) {
+    id
+    metadata {
+      region
+      description
+      areas {
+        area {
+          __typename
+          ... on GeographicalAreaContinent {
+            continentCode: code
+          }
+          ... on GeographicalAreaCountry {
+            countryCode: code
+          }
+          ... on GeographicalAreaSubdivistion {
+            subdivisionCode: code
+          }
+        }
+      }
+      latencyTestTargets
+    }
+    buckets {
+      id
+    }
+  }
+  distributionBuckets(limit: 9999) {
+    id
+    family {
+      id
+    }
+    bucketIndex
+    operators {
+      id
+    }
+    acceptingNewBags
+    distributing
+    bags {
+      id
+    }
+  }
+  distributionBucketOperators(limit: 9999) {
+    id
+    distributionBucket {
+      id
+    }
+    workerId
+    status
+    metadata {
+      nodeEndpoint
+      nodeLocation {
+        countryCode
+        city
+      }
+      extra
+    }
+  }
+  commentReactions(limit: 9999) {
+    id
+    reactionId
+    member {
+      id
+    }
+    comment {
+      id
+    }
+    video {
+      id
+    }
+  }
+  comments(limit: 9999) {
+    id
+    createdAt
+    author {
+      id
+    }
+    text
+    video {
+      id
+    }
+    status
+    reactions {
+      id
+    }
+    reactionsCountByReactionId {
+      reactionId
+      count
+    }
+    parentComment {
+      id
+    }
+    repliesCount
+    reactionsCount
+    reactionsAndRepliesCount
+    isEdited
+  }
+  videoCategories(
+    limit: 9999
+    # Filter out "empty" categories, as they are not created in Orion v2
+    where: { name_contains: "" }
+  ) {
+    id
+    name
+    description
+    parentCategory {
+      id
+    }
+    videos {
+      id
+    }
+    createdInBlock
+  }
+  videos(limit: 9999) {
+    id
+    createdAt
+    channel {
+      id
+    }
+    # Will be different in Orion v2 as "empty" categories are no longer supported
+    # category {
+    #   id
+    # }
+    title
+    description
+    duration
+    thumbnailPhoto {
+      id
+    }
+    language {
+      iso
+    }
+    hasMarketing
+    publishedBeforeJoystream
+    isPublic
+    isCensored
+    nft {
+      id
+    }
+    isExplicit
+    license {
+      id
+      code
+      attribution
+      customText
+    }
+    media {
+      id
+    }
+    videoStateBloatBond
+    mediaMetadata {
+      id
+      encoding {
+        ...VideoMediaEncodingFields
+      }
+      pixelWidth
+      pixelHeight
+      size
+      createdInBlock
+    }
+    createdInBlock
+    subtitles {
+      id
+    }
+    isCommentSectionEnabled
+    # Remove as it wasn't working correctly in Orion v1
+    # pinnedComment {
+    #   id
+    # }
+    comments {
+      id
+    }
+    commentsCount
+    isReactionFeatureEnabled
+    reactions {
+      id
+    }
+    reactionsCountByReactionId {
+      reaction
+      count
+    }
+    reactionsCount
+  }
+  videoSubtitles(limit: 9999) {
+    id
+    video {
+      id
+    }
+    type
+    language {
+      iso
+    }
+    mimeType
+    asset {
+      id
+    }
+  }
+  videoReactions(limit: 9999) {
+    id
+    createdAt
+    reaction
+    member {
+      id
+    }
+    video {
+      id
+    }
+  }
+}

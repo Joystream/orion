@@ -1,0 +1,5 @@
+subscription GetQueryNodeState {
+  stateSubscription {
+    lastCompleteBlock
+  }
+}
