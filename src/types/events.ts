@@ -187,7 +187,7 @@ export class ContentChannelCreatedEvent {
     }
 
     get isV2001(): boolean {
-        return this._chain.getEventHash('Content.ChannelCreated') === 'ed1e79f9c18a9412cdef1dd5be6aead961dde1060f899bc16de8d92cae07904f'
+        return this._chain.getEventHash('Content.ChannelCreated') === 'ed351930d72aa24b919921257fbdfbd245dfe2d7ceb5661947c33aad92fa0c6a'
     }
 
     get asV2001(): [bigint, v2001.ChannelRecord, v2001.ChannelCreationParametersRecord, Uint8Array] {
@@ -294,7 +294,7 @@ export class ContentChannelUpdatedEvent {
     }
 
     get isV2001(): boolean {
-        return this._chain.getEventHash('Content.ChannelUpdated') === '04b387c7526087dd7cecb3b544af3518f7ba802843793c1552ad4a949508c56b'
+        return this._chain.getEventHash('Content.ChannelUpdated') === '1cdb63f013cbfd13d8b9de0a9b55c81a84b707ceba6a94c2e2a665281048a619'
     }
 
     get asV2001(): [v2001.ContentActor, bigint, v2001.ChannelUpdateParametersRecord, bigint[]] {
@@ -1455,6 +1455,33 @@ export class ProjectTokenTokenSaleInitializedEvent {
      */
     get asV1000(): [bigint, number, v1000.TokenSale, (Uint8Array | undefined)] {
         assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get isV2001(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenSaleInitialized') === '67bdd3b5a8607e0a3478ca1e5e8997e2e8dc15f6bd04822216fdfcd252ab84a0'
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get asV2001(): [bigint, number, bigint, v2001.TokenSale, (Uint8Array | undefined)] {
+        assert(this.isV2001)
         return this._chain.decodeEvent(this.event)
     }
 }
