@@ -6,14 +6,11 @@ export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
 }
 
-export async function removeVesting(overlay: EntityManagerOverlay, accountId: string) {
-  // remove vesting schedules relation
+export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
+  // remove information that a particular vesting schedule is pending on an account
   const vestedAccountRepository = overlay.getRepository(VestedAccount)
-  const vestingSchedulesForToken = await vestedAccountRepository.getManyByRelation(
-    'accountId',
-    accountId
-  )
-  vestedAccountRepository.remove(...vestingSchedulesForToken)
+  const vestedAccountToRemove = await vestedAccountRepository.getByIdOrFail(vestedAccountId)
+  vestedAccountRepository.remove(vestedAccountToRemove)
 }
 
 export function tokenSaleId(tokenId: bigint, saleId: number): string {
@@ -74,7 +71,7 @@ export async function burnFromVesting(
       return
     }
     if (vesting.amount <= tallyBurnedAmount) {
-      await removeVesting(overlay, accountId)
+      await removeVesting(overlay, vesting.id)
       tallyBurnedAmount -= vesting.amount
     }
   }

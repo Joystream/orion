@@ -239,7 +239,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, saleId, tokenSale, ,],
+    asV2001: [tokenId, saleId, fundsSourceMemberId, tokenSale],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   if (tokenSale.vestingScheduleParams !== undefined) {
@@ -260,6 +260,11 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
+  const sourceAccount = await overlay
+    .getRepository(TokenAccount)
+    .getByIdOrFail(tokenAccountId(tokenId, fundsSourceMemberId))
+  sourceAccount.totalAmount -= tokenSale.quantityLeft
+
   overlay.getRepository(Sale).new({
     id: tokenId.toString() + saleId.toString(),
     tokenId: tokenId.toString(),
@@ -269,10 +274,11 @@ export async function processTokenSaleInitializedEvent({
     durationInBlocks: tokenSale.duration,
     endsAt: tokenSale.startBlock + tokenSale.duration,
     maxAmountPerMember: tokenSale.capPerMember,
-    tokenSaleallocation: tokenSale.quantityLeft,
+    tokenSaleAllocation: tokenSale.quantityLeft,
     pricePerUnit: tokenSale.unitPrice,
     finalized: false,
     termsAndConditions: '', // TODO Sale metadata (next PR)
+    fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
   })
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -325,6 +331,7 @@ export async function processTokensBoughtOnAmmEvent({
       id: tokenAccountId(tokenId, memberId),
       tokenId: tokenId.toString(),
     })
+    token.accountsNum += 1
   } else {
     buyerAccount!.totalAmount += crtMinted
   }
@@ -386,7 +393,6 @@ export async function processTokensPurchasedOnSaleEvent({
     .getRepository(TokenAccount)
     .getById(tokenAccountId(tokenId, memberId))
   if (buyerAccount === undefined) {
-    // FIXME(check whether there is a more appropriate comparison for null / undefined types)
     overlay.getRepository(TokenAccount).new({
       tokenId: tokenId.toString(),
       memberId: memberId.toString(),
@@ -394,6 +400,8 @@ export async function processTokensPurchasedOnSaleEvent({
       stakedAmount: BigInt(0),
       totalAmount: amountPurchased,
     })
+    const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+    token.accountsNum += 1
   } else {
     buyerAccount!.totalAmount += amountPurchased
   }
@@ -471,6 +479,9 @@ export async function processMemberJoinedWhitelistEvent({
     memberId: memberId.toString(),
     whitelisted: true,
   })
+
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.accountsNum += 1
 }
 
 export async function processAmmDeactivatedEvent({
@@ -525,6 +536,12 @@ export async function processTokenSaleFinalizedEvent({
 }: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
   const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
   sale.finalized = true
+
+  // TODO try to remove !
+  const sourceAccount = await overlay
+    .getRepository(TokenAccount)
+    .getByIdOrFail(sale.fundsSourceAccountId!)
+  sourceAccount.totalAmount += sale.tokenSaleAllocation - sale.tokensSold
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.IDLE
