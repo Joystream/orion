@@ -386,7 +386,7 @@ export async function processTokensSoldOnAmmEvent({
     transactionType: AmmTransactionType.SELL,
     createdIn: block.height,
     quantity: crtBurned,
-    pricePaid: joysRecovered, 
+    pricePaid: joysRecovered,
     pricePerUnit: crtBurned / joysRecovered, // truncates decimal values
   })
 }
@@ -540,7 +540,7 @@ export async function processTokenSaleFinalizedEvent({
 }: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
   const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
   sale.finalized = true
-  
+
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.IDLE
 }
