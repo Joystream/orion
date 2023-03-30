@@ -588,17 +588,14 @@ export async function processUserParticipatedInSplitEvent({
 export async function processCreatorTokenIssuerRemarkedEvent({
   overlay,
   event: {
-    asV2001: [
-      tokenId,
-      metadataBytes
-    ]
-  }
+    asV2001: [tokenId, metadataBytes],
+  },
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
   const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
   if (!metadata) {
-    return;
+    return
   }
 
   if (metadata!.description) {
@@ -610,7 +607,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
       overlay.getRepository(Benefit).new({
         title: benefit.title ? benefit.title! : undefined,
         description: benefit.description ? benefit.description! : undefined,
-        emojiCode: benefit.emoji ? benefit.emoji! : undefined, 
+        emojiCode: benefit.emoji ? benefit.emoji! : undefined,
         displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
       })
     }
@@ -630,4 +627,3 @@ export async function processCreatorTokenIssuerRemarkedEvent({
       : null
   }
 }
-

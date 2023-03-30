@@ -138,7 +138,7 @@ type Benefit @entity {
   token: Token!
 
   "emoji for the benefit"
-  emojiCode: String 
+  emojiCode: String
 
   "title for the benefit"
   title: String!
