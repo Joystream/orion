@@ -1,0 +1,20 @@
+query GetMetaprotocolTransactionStatusEvents($transactionHash: String!) {
+  # CHANGE: Now using `events` query instead of `metaprotocolTransactionStatusEvents`
+  events(
+    where: {
+      data: { isTypeOf_eq: "MetaprotocolTransactionStatusEventData" }
+      inExtrinsic_eq: $transactionHash
+    }
+  ) {
+    inExtrinsic
+    inBlock
+    data {
+      ... on MetaprotocolTransactionStatusEventData {
+        # CHANGE: Replacement for `status` field
+        result {
+          ...MetaprotocolTransactionResultFields
+        }
+      }
+    }
+  }
+}

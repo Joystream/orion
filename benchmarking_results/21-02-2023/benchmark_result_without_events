@@ -1,0 +1,1584 @@
+Orion V1 endpoint: https://143.42.109.82.nip.io/orion/graphql
+Orion V2 endpoint: https://143.42.109.35.nip.io/orion/graphql
+{
+  v1Query: 'GetBids',
+  v2Query: 'GetBids',
+  v1Input: { where: { nft: [Object] } },
+  v2Input: { where: { auction: [Object] } },
+  v1Rows: 11,
+  v2Rows: 11,
+  v1Results: [
+    351.02572298049927,
+    144.37370491027832,
+    114.2889461517334,
+    99.33062028884888,
+    111.39957427978516
+  ],
+  v2Results: [
+    256.1857099533081,
+    73.308021068573,
+    67.76437997817993,
+    71.22424077987671,
+    70.45703315734863
+  ],
+  v1Avg: 164.083713722229,
+  v2Avg: 107.78787698745728
+}
+{
+  v1Query: 'GetBids',
+  v2Query: 'GetBids',
+  v1Input: { where: { bidder: [Object] } },
+  v2Input: { where: { bidder: [Object] } },
+  v1Rows: 5,
+  v2Rows: 5,
+  v1Results: [
+    90.72837686538696,
+    86.81660032272339,
+    83.32580709457397,
+    80.82108688354492,
+    79.33098030090332
+  ],
+  v2Results: [
+    65.52863597869873,
+    65.38411617279053,
+    64.07430124282837,
+    66.65355920791626,
+    66.97036504745483
+  ],
+  v1Avg: 84.20457029342651,
+  v2Avg: 65.72219552993775
+}
+{
+  v1Query: 'GetBids',
+  v2Query: 'GetBids',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 53,
+  v2Rows: 53,
+  v1Results: [
+    291.56118297576904,
+    271.3921489715576,
+    318.485634803772,
+    276.305832862854,
+    249.57571029663086
+  ],
+  v2Results: [
+    135.63745975494385,
+    136.04301595687866,
+    122.84854412078857,
+    131.01009893417358,
+    126.48750591278076
+  ],
+  v1Avg: 281.4641019821167,
+  v2Avg: 130.4053249359131
+}
+{
+  v1Query: 'GetVideoCategories',
+  v2Query: 'GetExtendedVideoCategories',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 29,
+  v2Rows: 29,
+  v1Results: [
+    64.07827997207642,
+    61.663715839385986,
+    56.17241191864014,
+    61.84263372421265,
+    64.47818899154663
+  ],
+  v2Results: [
+    76.97072887420654,
+    67.68674516677856,
+    59.853971004486084,
+    59.00072908401489,
+    62.8611741065979
+  ],
+  v1Avg: 61.64704608917236,
+  v2Avg: 65.2746696472168
+}
+{
+  v1Query: 'GetFullChannel',
+  v2Query: 'GetFullChannel',
+  v1Input: { where: { id: '7757' } },
+  v2Input: { id: '7757' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    78.6821231842041,
+    67.4102578163147,
+    65.54518222808838,
+    73.16770267486572,
+    71.42301797866821
+  ],
+  v2Results: [
+    63.20758819580078,
+    55.80344772338867,
+    58.91524600982666,
+    60.20719003677368,
+    62.53057813644409
+  ],
+  v1Avg: 71.24565677642822,
+  v2Avg: 60.132810020446776
+}
+{
+  v1Query: 'GetVideoCount',
+  v2Query: 'GetVideoCount',
+  v1Input: { where: { category: [Object] } },
+  v2Input: { where: { category: [Object] } },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    76.57626628875732,
+    69.95659112930298,
+    67.14319515228271,
+    74.0327959060669,
+    62.68935489654541
+  ],
+  v2Results: [
+    66.42495203018188,
+    63.51208972930908,
+    63.843608379364014,
+    60.161314964294434,
+    60.84304666519165
+  ],
+  v1Avg: 70.07964067459106,
+  v2Avg: 62.957002353668216
+}
+{
+  v1Query: 'GetVideoCount',
+  v2Query: 'GetVideoCount',
+  v1Input: { where: {} },
+  v2Input: { where: {} },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    59.42924880981445,
+    61.186224937438965,
+    68.07916116714478,
+    62.48158884048462,
+    62.887285232543945
+  ],
+  v2Results: [
+    59.52981185913086,
+    59.4633731842041,
+    56.996686935424805,
+    60.65805530548096,
+    59.71352291107178
+  ],
+  v1Avg: 62.81270179748535,
+  v2Avg: 59.2722900390625
+}
+{
+  v1Query: 'GetBasicChannels',
+  v2Query: 'GetExtendedBasicChannels',
+  v1Input: {
+    where: { activeVideosCounter_gt: 1, language: [Object] },
+    limit: 100,
+    orderBy: 'createdAt_ASC'
+  },
+  v2Input: {
+    where: { activeVideosCount_gt: 1, channel: [Object] },
+    limit: 100,
+    orderBy: 'createdAt_ASC'
+  },
+  v1Rows: 44,
+  v2Rows: 44,
+  v1Results: [
+    161.2904977798462,
+    140.99450397491455,
+    130.2878041267395,
+    129.56940031051636,
+    136.74770975112915
+  ],
+  v2Results: [
+    72.40646409988403,
+    79.6157751083374,
+    73.38055276870728,
+    71.08998489379883,
+    73.57665014266968
+  ],
+  v1Avg: 139.77798318862915,
+  v2Avg: 74.01388540267945
+}
+{
+  v1Query: 'GetBasicChannels',
+  v2Query: 'GetExtendedBasicChannels',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    171.06009769439697,
+    204.85531616210938,
+    216.27013492584229,
+    217.25743579864502,
+    215.53982400894165
+  ],
+  v2Results: [
+    210.8510389328003,
+    179.29413318634033,
+    187.0370101928711,
+    182.00229740142822,
+    187.68624687194824
+  ],
+  v1Avg: 204.99656171798705,
+  v2Avg: 189.37414531707765
+}
+{
+  v1Query: 'GetBasicChannels',
+  v2Query: 'GetExtendedBasicChannels',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 1000,
+  v2Rows: 1000,
+  v1Results: [
+    1184.7927551269531,
+    1057.7540402412415,
+    1054.7816181182861,
+    1074.3552598953247,
+    1013.4511742591858
+  ],
+  v2Results: [
+    473.5260920524597,
+    481.73468017578125,
+    472.5509309768677,
+    466.19573879241943,
+    460.4130778312683
+  ],
+  v1Avg: 1077.0269695281982,
+  v2Avg: 470.88410396575927
+}
+{
+  v1Query: 'GetFullChannels',
+  v2Query: 'GetExtendedFullChannels',
+  v1Input: { where: { activeVideosCounter_gt: 5 } },
+  v2Input: { where: { activeVideosCount_gt: 5 } },
+  v1Rows: 17,
+  v2Rows: 17,
+  v1Results: [
+    207.08776473999023,
+    190.1620111465454,
+    198.29216814041138,
+    196.66253900527954,
+    197.91717290878296
+  ],
+  v2Results: [
+    137.15320587158203,
+    130.24438619613647,
+    143.06694793701172,
+    129.45653820037842,
+    129.90967798233032
+  ],
+  v1Avg: 198.0243311882019,
+  v2Avg: 133.9661512374878
+}
+{
+  v1Query: 'GetFullChannels',
+  v2Query: 'GetExtendedFullChannels',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    479.3956027030945,
+    474.2727789878845,
+    503.69446420669556,
+    487.54080533981323,
+    485.7384366989136
+  ],
+  v2Results: [
+    321.03546380996704,
+    301.72580003738403,
+    300.6019039154053,
+    306.901074886322,
+    313.21841287612915
+  ],
+  v1Avg: 486.1284175872803,
+  v2Avg: 308.6965311050415
+}
+{
+  v1Query: 'GetFullChannels',
+  v2Query: 'GetExtendedFullChannels',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 1000,
+  v2Rows: 1000,
+  v1Results: [
+    3703.879601955414,
+    3625.786853790283,
+    3549.6904430389404,
+    3761.639130115509,
+    3533.107913017273
+  ],
+  v2Results: [
+    727.8321404457092,
+    737.2137570381165,
+    679.8065857887268,
+    689.4157419204712,
+    740.1408367156982
+  ],
+  v1Avg: 3634.820788383484,
+  v2Avg: 714.8818123817443
+}
+{
+  v1Query: 'GetBasicChannelsConnection',
+  v2Query: 'GetBasicChannelsConnection',
+  v1Input: {
+    where: { title_contains: 'a', avatarPhoto: [Object], isPublic_eq: true },
+    first: 50
+  },
+  v2Input: {
+    where: { title_contains: 'a', avatarPhoto: [Object], isPublic_eq: true },
+    first: 50
+  },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    222.8079390525818,
+    165.16188669204712,
+    172.60509395599365,
+    163.67632293701172,
+    164.14750719070435
+  ],
+  v2Results: [
+    83.96283292770386,
+    80.49282264709473,
+    86.18280601501465,
+    77.42142486572266,
+    75.00189018249512
+  ],
+  v1Avg: 177.67974996566772,
+  v2Avg: 80.6123553276062
+}
+{
+  v1Query: 'GetTop10Channels',
+  v2Query: 'GetTop10Channels',
+  v1Input: { where: { activeVideosCounter_gt: 0, isPublic_eq: true } },
+  v2Input: { where: { activeVideosCount_gt: 0, channel: [Object] } },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    60.209189891815186,
+    68.78154993057251,
+    63.43837213516235,
+    56.839077949523926,
+    63.86671686172485
+  ],
+  v2Results: [
+    63.91867113113403,
+    68.12056970596313,
+    61.683133125305176,
+    62.352580070495605,
+    67.7284049987793
+  ],
+  v1Avg: 62.62698135375977,
+  v2Avg: 64.76067180633545
+}
+{
+  v1Query: 'GetPromisingChannels',
+  v2Query: 'GetPromisingChannels',
+  v1Input: { where: { activeVideosCounter_gt: 4, isPublic_eq: true } },
+  v2Input: { where: { activeVideosCount_gt: 4, channel: [Object] } },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    115.12865495681763,
+    124.91708183288574,
+    115.0407133102417,
+    113.2903470993042,
+    115.83485221862793
+  ],
+  v2Results: [
+    64.88032913208008,
+    66.88290309906006,
+    66.79583215713501,
+    72.32754755020142,
+    66.61921834945679
+  ],
+  v1Avg: 116.84232988357545,
+  v2Avg: 67.50116605758667
+}
+{
+  v1Query: 'GetDiscoverChannels',
+  v2Query: 'GetDiscoverChannels',
+  v1Input: { where: { activeVideosCounter_gt: 4, isPublic_eq: true } },
+  v2Input: { where: { activeVideosCount_gt: 4, channel: [Object] } },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    107.86486339569092,
+    117.13844203948975,
+    117.69694375991821,
+    122.36654615402222,
+    115.51811408996582
+  ],
+  v2Results: [
+    71.5183572769165,
+    67.6355357170105,
+    66.71591567993164,
+    66.3922610282898,
+    70.23603439331055
+  ],
+  v1Avg: 116.11698188781739,
+  v2Avg: 68.4996208190918
+}
+{
+  v1Query: 'GetPopularChannels',
+  v2Query: 'GetPopularChannels',
+  v1Input: { where: { activeVideosCounter_gt: 4, isPublic_eq: true } },
+  v2Input: { where: { activeVideosCount_gt: 4, channel: [Object] } },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    60.22153329849243,
+    61.00160217285156,
+    62.18603515625,
+    65.1305022239685,
+    60.20593881607056
+  ],
+  v2Results: [
+    64.07989692687988,
+    65.53806591033936,
+    70.62896966934204,
+    65.83584213256836,
+    63.14526987075806
+  ],
+  v1Avg: 61.749122333526614,
+  v2Avg: 65.84560890197754
+}
+{
+  v1Query: 'GetChannelNftCollectors',
+  v2Query: 'GetChannelNftCollectors',
+  v1Input: { where: { channel: [Object] } },
+  v2Input: { channelId: '7693' },
+  v1Rows: 8,
+  v2Rows: 8,
+  v1Results: [
+    84.721999168396,
+    84.92406034469604,
+    73.64917755126953,
+    77.56458187103271,
+    73.21150493621826
+  ],
+  v2Results: [
+    71.46470785140991,
+    68.61239719390869,
+    61.16129684448242,
+    60.24693298339844,
+    62.460777282714844
+  ],
+  v1Avg: 78.81426477432251,
+  v2Avg: 64.78922243118286
+}
+{
+  v1Query: 'GetComment',
+  v2Query: 'GetComment',
+  v1Input: { commentId: 'METAPROTOCOL-OLYMPIA-769463-2' },
+  v2Input: { commentId: 'METAPROTOCOL-OLYMPIA-769463-2' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    67.84387969970703,
+    63.071584701538086,
+    62.56364679336548,
+    57.57170867919922,
+    62.76511573791504
+  ],
+  v2Results: [
+    65.34497594833374,
+    58.24398183822632,
+    60.57919502258301,
+    57.718688011169434,
+    67.62197971343994
+  ],
+  v1Avg: 62.76318712234497,
+  v2Avg: 61.90176410675049
+}
+{
+  v1Query: 'GetCommentRepliesConnection',
+  v2Query: 'GetCommentRepliesConnection',
+  v1Input: {
+    parentCommentId: 'METAPROTOCOL-OLYMPIA-874662-2',
+    first: 10,
+    orderBy: 'createdAt_DESC'
+  },
+  v2Input: {
+    parentCommentId: 'METAPROTOCOL-OLYMPIA-874662-2',
+    first: 10,
+    orderBy: 'createdAt_DESC'
+  },
+  v1Rows: 2,
+  v2Rows: 2,
+  v1Results: [
+    72.73540163040161,
+    68.1835708618164,
+    69.02516984939575,
+    74.44636821746826,
+    67.76200008392334
+  ],
+  v2Results: [
+    64.69666004180908,
+    61.359211921691895,
+    61.207284927368164,
+    56.96854114532471,
+    56.10349798202515
+  ],
+  v1Avg: 70.43050212860108,
+  v2Avg: 60.0670392036438
+}
+{
+  v1Query: 'GetUserCommentsAndVideoCommentsConnection',
+  v2Query: 'GetUserCommentsAndVideoCommentsConnection',
+  v1Input: {
+    videoId: '5',
+    memberId: '4680',
+    first: 10,
+    orderBy: 'createdAt_DESC'
+  },
+  v2Input: {
+    videoId: '5',
+    memberId: '4680',
+    first: 10,
+    orderBy: 'createdAt_DESC'
+  },
+  v1Rows: 11,
+  v2Rows: 11,
+  v1Results: [
+    101.10666704177856,
+    99.75271797180176,
+    97.94096612930298,
+    97.9159369468689,
+    102.24518013000488
+  ],
+  v2Results: [
+    78.03773307800293,
+    80.50903797149658,
+    74.89095067977905,
+    89.05176115036011,
+    74.12760162353516
+  ],
+  v1Avg: 99.79229364395141,
+  v2Avg: 79.32341690063477
+}
+{
+  v1Query: 'GetUserCommentsReactions',
+  v2Query: 'GetUserCommentsReactions',
+  v1Input: { memberId: '3233', videoId: '193' },
+  v2Input: { memberId: '3233', videoId: '193' },
+  v1Rows: 5,
+  v2Rows: 5,
+  v1Results: [
+    69.01059103012085,
+    60.79531908035278,
+    62.57866716384888,
+    64.36368608474731,
+    61.62317514419556
+  ],
+  v2Results: [
+    60.38915300369263,
+    61.218173027038574,
+    57.35211515426636,
+    54.18977403640747,
+    57.046114921569824
+  ],
+  v1Avg: 63.674287700653075,
+  v2Avg: 58.03906602859497
+}
+{
+  v1Query: 'GetCommentEdits',
+  v2Query: 'GetCommentEdits',
+  v1Input: { commentId: 'METAPROTOCOL-OLYMPIA-1049713-2' },
+  v2Input: { commentId: 'METAPROTOCOL-OLYMPIA-1049713-2' },
+  v1Rows: 2,
+  v2Rows: 2,
+  v1Results: [
+    74.94028902053833,
+    64.4493670463562,
+    61.975950717926025,
+    71.22682285308838,
+    77.15701866149902
+  ],
+  v2Results: [
+    63.545719146728516,
+    67.16982984542847,
+    66.6722583770752,
+    67.7824273109436,
+    70.37388181686401
+  ],
+  v1Avg: 69.94988965988159,
+  v2Avg: 67.10882329940796
+}
+{
+  v1Query: 'GetDataObjectAvailability',
+  v2Query: 'GetDataObjectAvailability',
+  v1Input: {
+    id_in: [
+      '0', '1', '2', '3',
+      '4', '5', '6', '7',
+      '8', '9'
+    ],
+    limit: 10
+  },
+  v2Input: {
+    id_in: [
+      '0', '1', '2', '3',
+      '4', '5', '6', '7',
+      '8', '9'
+    ],
+    limit: 10
+  },
+  v1Rows: 10,
+  v2Rows: 10,
+  v1Results: [
+    73.47532320022583,
+    64.83420991897583,
+    64.44350290298462,
+    71.51928424835205,
+    63.933963775634766
+  ],
+  v2Results: [
+    66.49474000930786,
+    55.089118003845215,
+    55.08620309829712,
+    54.01557207107544,
+    55.725101947784424
+  ],
+  v1Avg: 67.64125680923462,
+  v2Avg: 57.28214702606201
+}
+{
+  v1Query: 'GetDataObjectAvailability',
+  v2Query: 'GetDataObjectAvailability',
+  v1Input: {
+    id_in: [
+      '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',
+      '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+      '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+      '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+      '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+      '50', '51', '52', '53', '54', '55', '56', '57', '58', '59',
+      '60', '61', '62', '63', '64', '65', '66', '67', '68', '69',
+      '70', '71', '72', '73', '74', '75', '76', '77', '78', '79',
+      '80', '81', '82', '83', '84', '85', '86', '87', '88', '89',
+      '90', '91', '92', '93', '94', '95', '96', '97', '98', '99'
+    ],
+    limit: 100
+  },
+  v2Input: {
+    id_in: [
+      '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',
+      '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+      '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+      '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+      '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+      '50', '51', '52', '53', '54', '55', '56', '57', '58', '59',
+      '60', '61', '62', '63', '64', '65', '66', '67', '68', '69',
+      '70', '71', '72', '73', '74', '75', '76', '77', '78', '79',
+      '80', '81', '82', '83', '84', '85', '86', '87', '88', '89',
+      '90', '91', '92', '93', '94', '95', '96', '97', '98', '99'
+    ],
+    limit: 100
+  },
+  v1Rows: 99,
+  v2Rows: 99,
+  v1Results: [
+    75.24080801010132,
+    69.42366790771484,
+    71.78870296478271,
+    73.58966827392578,
+    70.84509086608887
+  ],
+  v2Results: [
+    64.64723205566406,
+    62.55567407608032,
+    55.5822548866272,
+    59.06649971008301,
+    60.49521780014038
+  ],
+  v1Avg: 72.1775876045227,
+  v2Avg: 60.469375705718996
+}
+{
+  v1Query: 'GetDataObjectAvailability',
+  v2Query: 'GetDataObjectAvailability',
+  v1Input: {
+    id_in: [
+      '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',
+      '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+      '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+      '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+      '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+      '50', '51', '52', '53', '54', '55', '56', '57', '58', '59',
+      '60', '61', '62', '63', '64', '65', '66', '67', '68', '69',
+      '70', '71', '72', '73', '74', '75', '76', '77', '78', '79',
+      '80', '81', '82', '83', '84', '85', '86', '87', '88', '89',
+      '90', '91', '92', '93', '94', '95', '96', '97', '98', '99',
+      ... 900 more items
+    ],
+    limit: 1000
+  },
+  v2Input: {
+    id_in: [
+      '0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',
+      '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+      '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+      '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+      '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+      '50', '51', '52', '53', '54', '55', '56', '57', '58', '59',
+      '60', '61', '62', '63', '64', '65', '66', '67', '68', '69',
+      '70', '71', '72', '73', '74', '75', '76', '77', '78', '79',
+      '80', '81', '82', '83', '84', '85', '86', '87', '88', '89',
+      '90', '91', '92', '93', '94', '95', '96', '97', '98', '99',
+      ... 900 more items
+    ],
+    limit: 1000
+  },
+  v1Rows: 954,
+  v2Rows: 954,
+  v1Results: [
+    129.9235978126526,
+    126.7927598953247,
+    118.37580299377441,
+    125.27902221679688,
+    136.18229484558105
+  ],
+  v2Results: [
+    81.64089584350586,
+    68.00131559371948,
+    113.7443299293518,
+    68.08289098739624,
+    70.67308521270752
+  ],
+  v1Avg: 127.31069555282593,
+  v2Avg: 80.42850351333618
+}
+{
+  v1Query: 'GetAllCategoriesFeaturedVideos',
+  v2Query: 'GetAllCategoriesFeaturedVideos',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    69.29430913925171,
+    57.667731285095215,
+    57.642905712127686,
+    56.32417678833008,
+    60.51044178009033
+  ],
+  v2Results: [
+    87.38526105880737,
+    82.61059713363647,
+    91.014732837677,
+    81.35418796539307,
+    83.27819108963013
+  ],
+  v1Avg: 60.287912940979005,
+  v2Avg: 85.1285940170288
+}
+{
+  v1Query: 'GetMemberships',
+  v2Query: 'GetMemberships',
+  v1Input: { where: { controllerAccount_in: [Array] } },
+  v2Input: { where: { controllerAccount_in: [Array] } },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    192.48236513137817,
+    173.80783700942993,
+    181.8291220664978,
+    180.28931283950806,
+    181.42369174957275
+  ],
+  v2Results: [
+    67.34213590621948,
+    66.56249284744263,
+    66.09216594696045,
+    64.94986724853516,
+    73.94656705856323
+  ],
+  v1Avg: 181.96646575927736,
+  v2Avg: 67.77864580154419
+}
+{
+  v1Query: 'GetMemberships',
+  v2Query: 'GetMemberships',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    345.690495967865,
+    314.55832529067993,
+    320.7412452697754,
+    325.7995090484619,
+    316.1946539878845
+  ],
+  v2Results: [
+    127.85859060287476,
+    121.17460203170776,
+    132.59450387954712,
+    130.5676770210266,
+    135.50622701644897
+  ],
+  v1Avg: 324.59684591293336,
+  v2Avg: 129.54032011032103
+}
+{
+  v1Query: 'GetMemberships',
+  v2Query: 'GetMemberships',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 1000,
+  v2Rows: 1000,
+  v1Results: [
+    31217.29212999344,
+    31195.989154815674,
+    31005.00260591507,
+    31196.03697490692,
+    31175.859553337097
+  ],
+  v2Results: [
+    3316.195736885071,
+    3648.7722063064575,
+    3655.7634172439575,
+    3413.6556582450867,
+    3371.402070045471
+  ],
+  v1Avg: 31158.03608379364,
+  v2Avg: 3481.157817745209
+}
+{
+  v1Query: 'GetNft',
+  v2Query: 'GetNft',
+  v1Input: { id: '5' },
+  v2Input: { id: '5' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    92.38447523117065,
+    80.11186408996582,
+    78.84967994689941,
+    85.38935804367065,
+    87.2223629951477
+  ],
+  v2Results: [
+    120.59908199310303,
+    98.16303014755249,
+    95.06198167800903,
+    97.07886791229248,
+    99.6321153640747
+  ],
+  v1Avg: 84.79154806137085,
+  v2Avg: 102.10701541900634
+}
+{
+  v1Query: 'GetNft',
+  v2Query: 'GetNft',
+  v1Input: { id: '9' },
+  v2Input: { id: '9' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    84.61159420013428,
+    84.14678287506104,
+    74.11174583435059,
+    81.91703128814697,
+    82.16833686828613
+  ],
+  v2Results: [
+    93.37670469284058,
+    93.64284086227417,
+    108.13537120819092,
+    98.7408390045166,
+    91.6027340888977
+  ],
+  v1Avg: 81.3910982131958,
+  v2Avg: 97.099697971344
+}
+{
+  v1Query: 'GetNfts',
+  v2Query: 'GetNfts',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    1537.781542301178,
+    1454.5448899269104,
+    1418.5338640213013,
+    1393.5445580482483,
+    1416.2222032546997
+  ],
+  v2Results: [
+    464.40286779403687,
+    460.86845111846924,
+    437.1583843231201,
+    430.3762011528015,
+    448.22832202911377
+  ],
+  v1Avg: 1444.1254115104675,
+  v2Avg: 448.2068452835083
+}
+{
+  v1Query: 'GetNfts',
+  v2Query: 'GetNfts',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 631,
+  v2Rows: 631,
+  v1Results: [
+    8648.370851039886,
+    8032.49658203125,
+    8294.345482349396,
+    8178.65115070343,
+    8034.094361782074
+  ],
+  v2Results: [
+    1209.1400990486145,
+    1073.0909543037415,
+    1054.402156829834,
+    1021.5400218963623,
+    1042.990526676178
+  ],
+  v1Avg: 8237.591685581207,
+  v2Avg: 1080.2327517509461
+}
+{
+  v1Query: 'GetNftsConnection',
+  v2Query: 'GetNftsConnection',
+  v1Input: { where: { OR: [Array] }, first: 10, orderBy: 'createdAt_DESC' },
+  v2Input: {
+    where: { transactionalStatus: [Object] },
+    first: 10,
+    orderBy: 'createdAt_DESC'
+  },
+  v1Rows: 10,
+  v2Rows: 10,
+  v1Results: [
+    224.2797532081604,
+    188.783203125,
+    188.66390466690063,
+    198.7700653076172,
+    200.44619178771973
+  ],
+  v2Results: [
+    194.62058401107788,
+    182.8341908454895,
+    190.04347276687622,
+    202.23474502563477,
+    238.03395175933838
+  ],
+  v1Avg: 200.18862361907958,
+  v2Avg: 201.55338888168336
+}
+{
+  v1Query: 'GetNftsConnection',
+  v2Query: 'GetNftsConnection',
+  v1Input: {
+    where: { creatorChannel: [Object], video: [Object] },
+    orderBy: 'createdAt_DESC',
+    first: 50
+  },
+  v2Input: { where: { video: [Object] }, orderBy: 'createdAt_DESC', first: 50 },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    839.4913139343262,
+    858.2606058120728,
+    826.8806748390198,
+    891.1690502166748,
+    830.2530360221863
+  ],
+  v2Results: [
+    323.97558784484863,
+    316.07275199890137,
+    372.93453311920166,
+    350.01811504364014,
+    323.0510182380676
+  ],
+  v1Avg: 849.210936164856,
+  v2Avg: 337.2104012489319
+}
+{
+  v1Query: 'GetNftsConnection',
+  v2Query: 'GetNftsConnection',
+  v1Input: { where: { ownerMember: [Object], video: [Object] }, first: 50 },
+  v2Input: { where: { OR: [Array] }, first: 50 },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    811.175449848175,
+    848.1425633430481,
+    802.7815489768982,
+    815.3897981643677,
+    787.5873188972473
+  ],
+  v2Results: [
+    459.72402906417847,
+    431.54463624954224,
+    420.48580598831177,
+    428.74516105651855,
+    433.21308994293213
+  ],
+  v1Avg: 813.0153358459472,
+  v2Avg: 434.74254446029664
+}
+{
+  v1Query: 'GetDistributionBucketsWithBags',
+  v2Query: 'GetDistributionBucketsWithBags',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 16,
+  v2Rows: 16,
+  v1Results: [
+    5883.147616863251,
+    6437.796696186066,
+    5931.157866001129,
+    6185.892535209656,
+    6127.641261577606
+  ],
+  v2Results: [
+    2414.379853248596,
+    2340.5169496536255,
+    2282.6629910469055,
+    2437.533754825592,
+    2545.099416255951
+  ],
+  v1Avg: 6113.127195167542,
+  v2Avg: 2404.038593006134
+}
+{
+  v1Query: 'GetStorageBucketsWithBags',
+  v2Query: 'GetStorageBucketsWithBags',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 5,
+  v2Rows: 5,
+  v1Results: [
+    5038.884709358215,
+    5607.376286029816,
+    4975.983366012573,
+    5149.292353630066,
+    5210.415150165558
+  ],
+  v2Results: [
+    1680.396508693695,
+    1732.5695571899414,
+    1726.2483820915222,
+    1809.3679809570312,
+    1745.495244026184
+  ],
+  v1Avg: 5196.390373039246,
+  v2Avg: 1738.8155345916748
+}
+{
+  v1Query: 'GetBasicDistributionBuckets',
+  v2Query: 'GetBasicDistributionBuckets',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 6,
+  v2Rows: 6,
+  v1Results: [
+    74.92073488235474,
+    70.62652254104614,
+    63.20944309234619,
+    65.37120485305786,
+    65.35340213775635
+  ],
+  v2Results: [
+    52.08699178695679,
+    49.34480857849121,
+    53.62740993499756,
+    56.36330604553223,
+    58.073333740234375
+  ],
+  v1Avg: 67.89626150131225,
+  v2Avg: 53.89917001724243
+}
+{
+  v1Query: 'GetBasicStorageBuckets',
+  v2Query: 'GetBasicStorageBuckets',
+  v1Input: undefined,
+  v2Input: undefined,
+  v1Rows: 5,
+  v2Rows: 5,
+  v1Results: [
+    55.010536670684814,
+    63.92977285385132,
+    58.74574518203735,
+    61.03099536895752,
+    61.72537803649902
+  ],
+  v2Results: [
+    58.75134611129761,
+    56.61147117614746,
+    56.69510316848755,
+    55.04124689102173,
+    55.93437910079956
+  ],
+  v1Avg: 60.088485622406004,
+  v2Avg: 56.60670928955078
+}
+{
+  v1Query: 'GetBasicVideosConnection',
+  v2Query: 'GetBasicVideosConnection',
+  v1Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      title_contains: 'a'
+    },
+    first: 50,
+    orderBy: [ 'reactionsCount_DESC', 'commentsCount_DESC', 'createdAt_DESC' ]
+  },
+  v2Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      title_contains: 'a'
+    },
+    first: 50,
+    orderBy: [ 'reactionsCount_DESC', 'commentsCount_DESC', 'createdAt_DESC' ]
+  },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    572.0018677711487,
+    482.29221057891846,
+    514.3223552703857,
+    504.5605368614197,
+    535.0036463737488
+  ],
+  v2Results: [
+    133.4855670928955,
+    132.24152898788452,
+    193.72595596313477,
+    183.37153577804565,
+    212.65218687057495
+  ],
+  v1Avg: 521.6361233711243,
+  v2Avg: 171.09535493850709
+}
+{
+  v1Query: 'GetBasicVideosConnection',
+  v2Query: 'GetBasicVideosConnection',
+  v1Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      channel: [Object]
+    },
+    first: 50,
+    orderBy: 'createdAt_DESC'
+  },
+  v2Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      channel: [Object]
+    },
+    first: 50,
+    orderBy: 'createdAt_DESC'
+  },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    516.7374062538147,
+    493.71704721450806,
+    472.7464499473572,
+    487.26635789871216,
+    516.6283240318298
+  ],
+  v2Results: [
+    237.61371326446533,
+    239.8506259918213,
+    236.74835586547852,
+    240.24665117263794,
+    236.99432182312012
+  ],
+  v1Avg: 497.4191170692444,
+  v2Avg: 238.29073362350465
+}
+{
+  v1Query: 'GetBasicVideos',
+  v2Query: 'GetBasicVideos',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    819.8700528144836,
+    775.5232028961182,
+    795.8243880271912,
+    829.5806188583374,
+    813.335364818573
+  ],
+  v2Results: [
+    305.6489977836609,
+    292.4465560913086,
+    319.4423804283142,
+    278.46905994415283,
+    304.03416681289673
+  ],
+  v1Avg: 806.8267254829407,
+  v2Avg: 300.0082322120667
+}
+{
+  v1Query: 'GetBasicVideos',
+  v2Query: 'GetBasicVideos',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 778,
+  v2Rows: 778,
+  v1Results: [
+    5388.0146317481995,
+    5546.750940799713,
+    5421.953876018524,
+    5200.1736850738525,
+    5526.722643852234
+  ],
+  v2Results: [
+    787.4114141464233,
+    839.0167841911316,
+    879.9918007850647,
+    843.1927008628845,
+    792.5112299919128
+  ],
+  v1Avg: 5416.723155498505,
+  v2Avg: 828.4247859954834
+}
+{
+  v1Query: 'GetFullVideo',
+  v2Query: 'GetFullVideo',
+  v1Input: { where: { id: '5' } },
+  v2Input: { id: '5' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    92.01959896087646,
+    82.05976486206055,
+    84.47138786315918,
+    73.0777940750122,
+    78.35286712646484
+  ],
+  v2Results: [
+    94.91889429092407,
+    93.26108932495117,
+    85.57831907272339,
+    85.97363090515137,
+    86.60453271865845
+  ],
+  v1Avg: 81.99628257751465,
+  v2Avg: 89.26729326248169
+}
+{
+  v1Query: 'GetFullVideo',
+  v2Query: 'GetFullVideo',
+  v1Input: { where: { id: '338' } },
+  v2Input: { id: '338' },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    84.5684289932251,
+    85.39738082885742,
+    83.32421064376831,
+    85.44851398468018,
+    84.29686880111694
+  ],
+  v2Results: [
+    99.19255018234253,
+    84.94116306304932,
+    78.35830593109131,
+    89.33116674423218,
+    94.41657495498657
+  ],
+  v1Avg: 84.60708065032959,
+  v2Avg: 89.24795217514038
+}
+{
+  v1Query: 'GetFullVideosConnection',
+  v2Query: 'GetFullVideosConnection',
+  v1Input: {
+    first: 50,
+    orderBy: 'createdAt_DESC',
+    where: { channel: [Object] }
+  },
+  v2Input: {
+    first: 50,
+    orderBy: 'createdAt_DESC',
+    where: { channel: [Object] }
+  },
+  v1Rows: 50,
+  v2Rows: 50,
+  v1Results: [
+    1084.4443321228027,
+    1038.4766573905945,
+    1016.0386118888855,
+    1019.0978503227234,
+    1147.4668412208557
+  ],
+  v2Results: [
+    352.9328670501709,
+    419.7729182243347,
+    408.9530391693115,
+    395.9355549812317,
+    396.96132707595825
+  ],
+  v1Avg: 1061.1048585891724,
+  v2Avg: 394.9111413002014
+}
+{
+  v1Query: 'GetFullVideos',
+  v2Query: 'GetFullVideos',
+  v1Input: { where: {}, limit: 100 },
+  v2Input: { where: {}, limit: 100 },
+  v1Rows: 100,
+  v2Rows: 100,
+  v1Results: [
+    1573.3234586715698,
+    1593.4580950737,
+    1499.2919759750366,
+    1575.9014353752136,
+    1568.499349117279
+  ],
+  v2Results: [
+    520.0619840621948,
+    521.4182653427124,
+    522.97691822052,
+    528.3123297691345,
+    514.3947477340698
+  ],
+  v1Avg: 1562.09486284256,
+  v2Avg: 521.4328490257263
+}
+{
+  v1Query: 'GetFullVideos',
+  v2Query: 'GetFullVideos',
+  v1Input: { where: {}, limit: 1000 },
+  v2Input: { where: {}, limit: 1000 },
+  v1Rows: 778,
+  v2Rows: 778,
+  v1Results: [
+    11669.284381866455,
+    11160.417222976685,
+    11350.557770729065,
+    11605.046117782593,
+    11425.330091953278
+  ],
+  v2Results: [
+    1907.529704093933,
+    1944.6552982330322,
+    1932.0102367401123,
+    1958.9019808769226,
+    1994.9127740859985
+  ],
+  v1Avg: 11442.127117061615,
+  v2Avg: 1947.6019988059998
+}
+{
+  v1Query: 'GetMetaprotocolTransactionStatusEvents',
+  v2Query: 'GetMetaprotocolTransactionStatusEvents',
+  v1Input: {
+    transactionHash: '0x536d93a5e19c48d6f5983c8de3b9622fe44d096f13698aa2c13e8ae0f8a62780'
+  },
+  v2Input: {
+    transactionHash: '0x536d93a5e19c48d6f5983c8de3b9622fe44d096f13698aa2c13e8ae0f8a62780'
+  },
+  v1Rows: 1,
+  v2Rows: 1,
+  v1Results: [
+    85.6957688331604,
+    64.56345510482788,
+    61.467331886291504,
+    75.40327310562134,
+    62.78186321258545
+  ],
+  v2Results: [
+    633.5990433692932,
+    625.4406132698059,
+    613.8682188987732,
+    644.7749752998352,
+    629.5833640098572
+  ],
+  v1Avg: 69.98233842849731,
+  v2Avg: 629.453242969513
+}
+{
+  v1Query: 'GetMostViewedVideosConnection',
+  v2Query: 'GetMostViewedVideosConnection',
+  v1Input: {
+    periodDays: 30,
+    orderBy: 'createdAt_DESC',
+    where: { isPublic_eq: true, thumbnailPhoto: [Object], media: [Object] }
+  },
+  v2Input: {
+    periodDays: 30,
+    orderBy: 'createdAt_DESC',
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      viewsNum_gt: 0
+    }
+  },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    76.2688422203064,
+    74.14687538146973,
+    69.02205419540405,
+    68.34701442718506,
+    66.85932207107544
+  ],
+  v2Results: [
+    114.99944591522217,
+    107.10354280471802,
+    104.1666431427002,
+    96.21369075775146,
+    98.52290534973145
+  ],
+  v1Avg: 70.92882165908813,
+  v2Avg: 104.20124559402466
+}
+{
+  v1Query: 'GetMostViewedVideosConnection',
+  v2Query: 'GetMostViewedVideosConnection',
+  v1Input: {
+    periodDays: 7,
+    orderBy: 'createdAt_DESC',
+    where: { isPublic_eq: true, thumbnailPhoto: [Object], media: [Object] }
+  },
+  v2Input: {
+    periodDays: 7,
+    orderBy: 'createdAt_DESC',
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      viewsNum_gt: 0
+    }
+  },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    74.28222703933716,
+    67.32513999938965,
+    72.52995491027832,
+    62.718424797058105,
+    68.46848821640015
+  ],
+  v2Results: [
+    98.96771430969238,
+    98.3171501159668,
+    95.49901390075684,
+    107.23607587814331,
+    92.00734186172485
+  ],
+  v1Avg: 69.06484699249268,
+  v2Avg: 98.40545921325683
+}
+{
+  v1Query: 'GetTop10VideosThisMonth',
+  v2Query: 'GetTop10VideosThisMonth',
+  v1Input: {
+    where: { isPublic_eq: true, thumbnailPhoto: [Object], media: [Object] }
+  },
+  v2Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      viewsNum_gt: 0
+    }
+  },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    65.34620904922485,
+    65.79404592514038,
+    67.71387100219727,
+    67.69756174087524,
+    55.415831089019775
+  ],
+  v2Results: [
+    94.46654272079468,
+    86.30305910110474,
+    88.43129587173462,
+    95.22284030914307,
+    83.87975120544434
+  ],
+  v1Avg: 64.3935037612915,
+  v2Avg: 89.66069784164429
+}
+{
+  v1Query: 'GetTop10VideosThisWeek',
+  v2Query: 'GetTop10VideosThisWeek',
+  v1Input: {
+    where: { isPublic_eq: true, thumbnailPhoto: [Object], media: [Object] }
+  },
+  v2Input: {
+    where: {
+      isPublic_eq: true,
+      thumbnailPhoto: [Object],
+      media: [Object],
+      viewsNum_gt: 0
+    }
+  },
+  v1Rows: 0,
+  v2Rows: 0,
+  v1Results: [
+    62.04579496383667,
+    67.56130504608154,
+    75.61498928070068,
+    57.82266092300415,
+    65.20413017272949
+  ],
+  v2Results: [
+    85.8071141242981,
+    91.32144403457642,
+    107.3624529838562,
+    82.71107578277588,
+    83.85615825653076
+  ],
+  v1Avg: 65.6497760772705,
+  v2Avg: 90.21164903640747
+}
+========= QUERIES IN 0ms - Infinity RANGE =========
+Tested queries in this range: 56
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [32m86.57%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [32m27.05%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [32m85.59%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [32m27.49%[39m
+
+========= QUERIES IN 0ms - 100ms RANGE =========
+Tested queries in this range: 27
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-31.97%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [33m1.39%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [31m-34.06%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [33m3.61%[39m
+
+========= QUERIES IN 101ms - 500ms RANGE =========
+Tested queries in this range: 14
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [32m79.92%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [32m71.31%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [32m81.53%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [32m76.30%[39m
+
+========= QUERIES IN 501ms - 2000ms RANGE =========
+Tested queries in this range: 8
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [92m166.48%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [92m168.81%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [92m162.34%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [92m164.56%[39m
+
+========= QUERIES IN 2000ms - Infinity RANGE =========
+Tested queries in this range: 7
+On average, the average improvement in query execution time in Orion v2 vs Orion v1 is:  [92m465.79%[39m
+The median of average improvement in query execution time in Orion v2 vs Orion v1 is:  [92m487.50%[39m
+On average, the median improvement in query execution time in Orion v2 vs Orion v1 is:  [92m467.49%[39m
+The median of median improvement in query execution time in Orion v2 vs Orion v1 is: [92m487.52%[39m

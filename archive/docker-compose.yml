@@ -1,0 +1,77 @@
+services:
+  archive_db:
+    container_name: orion_archive_db
+    hostname: orion_archive_db
+    image: postgres:14 # CockroachDB cluster might be a better fit for production deployment
+    restart: unless-stopped
+    volumes:
+      - orion_archive_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: squid-archive
+    ports:
+      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+      - '[::1]:${DB_PORT}:${DB_PORT}'
+    command: ['postgres', '-c', 'log_statement=all', '-p', '${DB_PORT}']
+
+  ingest:
+    container_name: orion_archive_ingest
+    depends_on:
+      - archive_db
+    restart: unless-stopped
+    image: subsquid/substrate-ingest:firesquid
+    command: [
+        '-e',
+        '${WS_SOURCE}',
+        '-c',
+        '20', # allow up to 20 pending requests for the above endpoint (default is 5)
+        #  "--start-block", "1000000", # uncomment to specify a non-zero start block
+        '--out',
+        'postgres://postgres:postgres@orion_archive_db:${DB_PORT}/squid-archive',
+      ]
+
+  gateway:
+    container_name: orion_archive_gateway
+    hostname: orion_archive_gateway
+    depends_on:
+      - archive_db
+    restart: unless-stopped
+    image: subsquid/substrate-gateway:firesquid
+    environment:
+      DATABASE_MAX_CONNECTIONS: 5
+      RUST_LOG: 'actix_web=info,actix_server=info'
+    command: [
+        '--database-url',
+        'postgres://postgres:postgres@orion_archive_db:${DB_PORT}/squid-archive',
+        # "--evm-support" # uncomment for chains with Frontier EVM pallet
+        # (e.g. Moonbeam/Moonriver or Astar/Shiden)
+      ]
+    ports:
+      - '127.0.0.1:${GATEWAY_PORT}:8000'
+      - '[::1]:${GATEWAY_PORT}:8000'
+
+  # Explorer service is optional.
+  # It provides rich GraphQL API for querying archived data.
+  # Many developers find it very useful for exploration and debugging.
+  explorer:
+    container_name: orion_archive_explorer
+    hostname: orion_archive_explorer
+    restart: unless-stopped
+    image: subsquid/substrate-explorer:firesquid
+    environment:
+      DB_TYPE: postgres # set to `cockroach` for Cockroach DB
+      DB_HOST: archive_db
+      DB_NAME: 'squid-archive'
+      DB_USER: 'postgres'
+      DB_PASS: 'postgres'
+    ports:
+      - '${EXPLORER_PORT}:3000'
+
+networks:
+  default:
+    external:
+      name: joystream_default
+
+volumes:
+  orion_archive_db_data:

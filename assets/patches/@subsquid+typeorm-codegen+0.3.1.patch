@@ -1,0 +1,69 @@
+diff --git a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
+index e40f9bc..648e5e8 100644
+--- a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
++++ b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
+@@ -62,9 +62,17 @@ function generateOrmModels(model, dir) {
+         out.line();
+         printComment(entity, out);
+         entity.indexes?.forEach(index => {
++            if (index.unique) {
++                imports.useTypeorm('Unique')
++                out.line(
++                    `@Unique_('${name}_${index.fields.map(f => f.name).join('_')}', `+
++                    `[${index.fields.map(f => `"${f.name}"`).join(', ')}], `+
++                    `{  deferrable: 'INITIALLY DEFERRED' })`
++                )
++            }
+             if (index.fields.length < 2)
+                 return;
+-            out.line(`@Index_([${index.fields.map(f => `"${f.name}"`).join(', ')}], {unique: ${!!index.unique}})`);
++            out.line(`@Index_([${index.fields.map(f => `"${f.name}"`).join(', ')}])`);
+         });
+         out.line('@Entity_()');
+         out.block(`export class ${name}`, () => {
+@@ -109,8 +117,8 @@ function generateOrmModels(model, dir) {
+                     case 'fk':
+                         if (getFieldIndex(entity, key)?.unique) {
+                             imports.useTypeorm('OneToOne', 'Index', 'JoinColumn');
+-                            out.line(`@Index_({unique: true})`);
+-                            out.line(`@OneToOne_(() => ${prop.type.entity}, {nullable: false})`);
++                            out.line(`@Index_()`);
++                            out.line(`@OneToOne_(() => ${prop.type.entity}, {nullable: false, deferrable: 'INITIALLY DEFERRED'})`);
+                             out.line(`@JoinColumn_()`);
+                         }
+                         else {
+@@ -119,7 +127,7 @@ function generateOrmModels(model, dir) {
+                                 out.line(`@Index_()`);
+                             }
+                             // Make foreign entity references always nullable
+-                            out.line(`@ManyToOne_(() => ${prop.type.entity}, {nullable: true})`);
++                            out.line(`@ManyToOne_(() => ${prop.type.entity}, {nullable: true, deferrable: 'INITIALLY DEFERRED'})`);
+                         }
+                         break;
+                     case 'lookup':
+@@ -161,6 +169,11 @@ function generateOrmModels(model, dir) {
+                 }
+                 if (prop.type.kind != 'lookup') {
+                     out.line(`${key}!: ${getPropJsType(imports, 'entity', prop)}`);
++                    if (prop.type.kind === 'fk') {
++                        out.line()
++                        out.line(`@Column_(${!getFieldIndex(entity, key)?.unique ? '{ nullable: true }' : ''})`)
++                        out.line(`${key}Id!: string` + (!getFieldIndex(entity, key)?.unique ? ' | null | undefined' : ''))
++                    }
+                 }
+             }
+         });
+@@ -456,12 +469,7 @@ function addIndexAnnotation(entity, field, imports, out) {
+     if (index == null)
+         return;
+     imports.useTypeorm('Index');
+-    if (index.unique) {
+-        out.line(`@Index_({unique: true})`);
+-    }
+-    else {
+-        out.line(`@Index_()`);
+-    }
++    out.line(`@Index_()`);
+ }
+ function getFieldIndex(entity, field) {
+     if (entity.properties[field]?.unique)

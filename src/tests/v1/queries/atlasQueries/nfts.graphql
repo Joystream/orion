@@ -1,0 +1,36 @@
+query GetNft($id: ID!) {
+  ownedNftByUniqueInput(where: { id: $id }) {
+    ...FullNftFields
+  }
+}
+
+query GetNfts(
+  $where: OwnedNftWhereInput
+  $orderBy: [OwnedNftOrderByInput!] = [createdAt_DESC]
+  $limit: Int
+) {
+  ownedNfts(where: $where, limit: $limit, orderBy: $orderBy) {
+    ...FullNftFields
+  }
+}
+
+query GetNftsConnection(
+  $where: OwnedNftWhereInput
+  $orderBy: [OwnedNftOrderByInput!] = [createdAt_DESC]
+  $first: Int
+  $after: String
+) {
+  ownedNftsConnection(where: $where, orderBy: $orderBy, first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        ...FullNftFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}

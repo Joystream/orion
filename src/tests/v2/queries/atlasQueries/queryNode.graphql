@@ -1,0 +1,6 @@
+subscription GetQueryNodeState {
+  # CHANGE: Custom `processorState` subscription now used instead of `stateSubscription`
+  processorState {
+    lastProcessedBlock
+  }
+}

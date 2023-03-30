@@ -1,0 +1,170 @@
+"NFT transactional state"
+union TransactionalStatus =
+    TransactionalStatusIdle
+  | TransactionalStatusInitiatedOfferToMember
+  | TransactionalStatusBuyNow
+  | TransactionalStatusAuction
+
+"Represents TransactionalStatus Idle"
+type TransactionalStatusIdle {
+  phantom: Int
+}
+
+"Represents TransactionalStatus InitiatedOfferToMember"
+type TransactionalStatusInitiatedOfferToMember {
+  "Member that recieved the offer"
+  member: Membership!
+
+  "The price that the member should pay to accept offer (optional)"
+  price: BigInt
+}
+
+"Represents TransactionalStatus BuyNow"
+type TransactionalStatusBuyNow {
+  price: BigInt!
+}
+
+"Represents TransactionalStatus Auction"
+type TransactionalStatusAuction {
+  auction: Auction!
+}
+
+"Represents NFT details"
+type OwnedNft @entity {
+  "Timestamp of the block the NFT was created at"
+  createdAt: DateTime!
+
+  "NFT's video"
+  video: Video! @unique
+
+  "Auctions done for this NFT"
+  auctions: [Auction!]! @derivedFrom(field: "nft")
+
+  "Current owner of the NFT."
+  owner: NftOwner!
+
+  "NFT's transactional status"
+  transactionalStatus: TransactionalStatus
+
+  "Creator royalty (if any)"
+  creatorRoyalty: Float
+
+  "NFT's last sale price (if any)"
+  lastSalePrice: BigInt
+
+  "NFT's last sale date (if any)"
+  lastSaleDate: DateTime
+
+  "All NFT auction bids"
+  bids: [Bid!]! @derivedFrom(field: "nft")
+
+  "Flag to indicate whether the NFT is featured or not"
+  isFeatured: Boolean!
+}
+
+"Represents various action types"
+union AuctionType = AuctionTypeEnglish | AuctionTypeOpen
+
+"Represents English auction details"
+type AuctionTypeEnglish {
+  "English auction duration in blocks"
+  duration: Int!
+
+  "Auction extension period in blocks"
+  extensionPeriod: Int!
+
+  "Block when auction is supposed to end"
+  plannedEndAtBlock: Int!
+
+  "Minimal step between auction bids"
+  minimalBidStep: BigInt!
+}
+
+"Represents Open auction details"
+type AuctionTypeOpen @variant {
+  "Auction bid lock duration"
+  bidLockDuration: Int!
+}
+
+"Represents NFT auction"
+type Auction @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Auctioned NFT"
+  nft: OwnedNft!
+
+  "Member that won this auction"
+  winningMember: Membership
+
+  "Auction starting price"
+  startingPrice: BigInt!
+
+  "Price at which the auction gets completed instantly (if any)"
+  buyNowPrice: BigInt
+
+  "The type of auction"
+  auctionType: AuctionType!
+
+  "Auction last bid (if exists)"
+  # TODO: Is it really needed? (bids(orderBy: amount_DESC, limit: 1).?[0])
+  topBid: Bid
+
+  "All bids made during this auction"
+  bids: [Bid!]! @derivedFrom(field: "auction")
+
+  "Block when auction starts"
+  startsAtBlock: Int!
+
+  "Block when auction ended"
+  endedAtBlock: Int
+
+  "Is auction canceled"
+  isCanceled: Boolean!
+
+  "Is auction completed"
+  isCompleted: Boolean!
+
+  "Auction participants whitelist"
+  whitelistedMembers: [AuctionWhitelistedMember!] @derivedFrom(field: "auction")
+}
+
+type AuctionWhitelistedMember @entity @index(fields: ["auction", "member"], unique: true) {
+  "{auctionId}-{memberId}"
+  id: ID!
+  auction: Auction!
+  member: Membership!
+}
+
+"Represents bid in NFT auction"
+type Bid @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Timestamp of the block the bid was created at"
+  createdAt: DateTime!
+
+  "NFT's auction"
+  auction: Auction!
+
+  "Bid's NFT"
+  nft: OwnedNft!
+
+  "Bidder membership"
+  bidder: Membership!
+
+  "Amount bidded"
+  amount: BigInt!
+
+  "Sign for canceled bid"
+  isCanceled: Boolean!
+
+  "Block in which the bid was placed"
+  createdInBlock: Int!
+
+  "Index in block of the related AuctionBidMade event"
+  indexInBlock: Int!
+
+  "Bid that was displaced by this bid in the English auction (if any)"
+  previousTopBid: Bid
+}

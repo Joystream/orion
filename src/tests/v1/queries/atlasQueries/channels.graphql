@@ -1,0 +1,202 @@
+query GetBasicChannel($where: ChannelWhereUniqueInput!) {
+  channelByUniqueInput(where: $where) {
+    ...BasicChannelFields
+  }
+}
+
+query GetFullChannel($where: ChannelWhereUniqueInput!) {
+  channelByUniqueInput(where: $where) {
+    ...FullChannelFields
+  }
+}
+
+query GetVideoCount($where: VideoWhereInput) {
+  videosConnection(first: 0, where: $where) {
+    totalCount
+  }
+}
+
+query GetBasicChannels(
+  $where: ChannelWhereInput
+  $limit: Int = 50
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  channels(where: $where, orderBy: $orderBy, limit: $limit) {
+    ...BasicChannelFields
+  }
+}
+
+query GetFullChannels(
+  $where: ChannelWhereInput
+  $limit: Int = 50
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  channels(where: $where, orderBy: $orderBy, limit: $limit) {
+    ...FullChannelFields
+  }
+}
+
+query GetBasicChannelsConnection(
+  $first: Int
+  $after: String
+  $where: ChannelWhereInput
+  $orderBy: [ChannelOrderByInput!] = [createdAt_DESC]
+) {
+  channelsConnection(first: $first, after: $after, where: $where, orderBy: $orderBy) {
+    edges {
+      cursor
+      node {
+        ...BasicChannelFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+mutation FollowChannel($channelId: ID!) {
+  followChannel(channelId: $channelId) {
+    id
+    follows
+  }
+}
+
+mutation UnfollowChannel($channelId: ID!) {
+  unfollowChannel(channelId: $channelId) {
+    id
+    follows
+  }
+}
+
+query GetMostViewedChannelsConnection(
+  $limit: Int = 50
+  $periodDays: Int
+  $first: Int
+  $after: String
+  $where: ChannelWhereInput
+) {
+  mostViewedChannelsConnection(
+    limit: $limit
+    first: $first
+    after: $after
+    periodDays: $periodDays
+    where: $where
+  ) {
+    edges {
+      cursor
+      node {
+        ...BasicChannelFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+query GetMostFollowedChannelsConnection(
+  $limit: Int!
+  $periodDays: Int
+  $first: Int
+  $after: String
+  $where: ChannelWhereInput
+) {
+  mostFollowedChannelsConnection(
+    limit: $limit
+    first: $first
+    after: $after
+    periodDays: $periodDays
+    where: $where
+  ) {
+    edges {
+      cursor
+      node {
+        ...BasicChannelFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+query GetTop10Channels($where: ChannelWhereInput) {
+  top10Channels(where: $where) {
+    ...BasicChannelFields
+  }
+}
+
+query GetPromisingChannels($where: ChannelWhereInput) {
+  promisingChannels(where: $where) {
+    ...BasicChannelFields
+  }
+}
+
+query GetDiscoverChannels($where: ChannelWhereInput) {
+  discoverChannels(where: $where) {
+    ...BasicChannelFields
+  }
+}
+
+query GetPopularChannels($where: ChannelWhereInput) {
+  popularChannels(where: $where) {
+    ...BasicChannelFields
+  }
+}
+
+query GetChannelNftCollectors(
+  $where: ChannelNftCollectorsWhereInput
+  $orderBy: [ChannelNftCollectorsOrderByInput!] = [amount_DESC]
+) {
+  channelNftCollectors(where: $where, orderBy: $orderBy) {
+    id
+    member {
+      ...BasicMembershipFields
+    }
+    amount
+  }
+}
+
+mutation ReportChannel($channelId: ID!, $rationale: String!) {
+  reportChannel(channelId: $channelId, rationale: $rationale) {
+    id
+    channelId
+  }
+}
+
+query GetChannelPaymentEvents($ownerMemberId: ID!, $channelId: ID!) {
+  nftBoughtEvents(where: { ownerMember: { id_eq: $ownerMemberId } }) {
+    inBlock
+    createdAt
+    price
+  }
+
+  bidMadeCompletingAuctionEvents(where: { ownerMember: { id_eq: $ownerMemberId } }) {
+    inBlock
+    createdAt
+    price
+  }
+
+  englishAuctionSettledEvents(where: { ownerMember: { id_eq: $ownerMemberId } }) {
+    createdAt
+    inBlock
+    winningBid {
+      amount
+    }
+  }
+
+  openAuctionBidAcceptedEvents(where: { ownerMember: { id_eq: $ownerMemberId } }) {
+    inBlock
+    createdAt
+    winningBid {
+      amount
+    }
+  }
+}
