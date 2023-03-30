@@ -1,0 +1,7751 @@
+type KillSwitch {
+  isKilled: Boolean!
+}
+
+type VideoViewPerIpTimeLimit {
+  limitInSeconds: Int!
+}
+
+type SetVideoHeroResult {
+  id: String!
+}
+
+type SetSupportedCategoriesResult {
+  # The updated number of categories that are now explicitly supported by the Gateway
+  newNumberOfCategoriesSupported: Int
+
+  # Whether or not newly created video categories will be automatically supported
+  newlyCreatedCategoriesSupported: Boolean!
+
+  # Whether or not vidoes w/o any category assigned will be supported
+  noCategoryVideosSupported: Boolean!
+}
+
+type SetCategoryFeaturedVideosResult {
+  categoryId: String!
+  numberOfFeaturedVideosUnset: Int!
+  numberOfFeaturedVideosSet: Int!
+}
+
+type ExcludeContentResult {
+  numberOfEntitiesAffected: Int!
+}
+
+type RestoreContentResult {
+  numberOfEntitiesAffected: Int!
+}
+
+type GeneratedSignature {
+  # App signature converted to hexadecimal string.
+  signature: String!
+}
+
+type Channel {
+  # Runtime entity identifier (EntityId)
+  id: String!
+
+  # Timestamp of the block the channel was created at
+  createdAt: DateTime!
+
+  # Current member-owner of the channel (if owned by a member)
+  ownerMember: Membership
+
+  # The title of the Channel
+  title: String
+
+  # The description of a Channel
+  description: String
+
+  # Channel's cover (background) photo asset. Recommended ratio: 16:9.
+  coverPhoto: StorageDataObject
+
+  # Channel's avatar photo asset.
+  avatarPhoto: StorageDataObject
+
+  # Flag signaling whether a channel is public.
+  isPublic: Boolean
+
+  # Flag signaling whether a channel is censored.
+  isCensored: Boolean!
+
+  # Whether a channel has been excluded/hidden (by the gateway operator)
+  isExcluded: Boolean!
+
+  # The primary langauge of the channel's content
+  language: String
+
+  # List of videos that belong to the channel
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+
+  # Number of the block the channel was created in
+  createdInBlock: Int!
+
+  # Channel's reward account, storing the income from the nft sales and channel payouts.
+  rewardAccount: String!
+
+  # Value of channel state bloat bond fee paid by channel creator
+  channelStateBloatBond: BigInt!
+
+  # Number of active follows (to speed up orderBy queries by avoiding COUNT aggregation)
+  followsNum: Int!
+
+  # Number of total video views (to speed up orderBy queries by avoiding COUNT aggregation)
+  videoViewsNum: Int!
+
+  # List of members blocked from commenting/reacting on any video of the channel.
+  bannedMembers(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+
+  # Application used for channel creation
+  entryApp: App
+
+  # Number of videos ever created in this channel
+  totalVideosCreated: Int!
+}
+
+type Video {
+  # Runtime identifier
+  id: String!
+
+  # Timestamp of the block the video was created at
+  createdAt: DateTime!
+
+  # Reference to videos's channel
+  channel: Channel!
+
+  # Reference to a video category
+  category: VideoCategory
+
+  # The title of the video
+  title: String
+
+  # The description of the Video
+  description: String
+
+  # Video duration in seconds
+  duration: Int
+
+  # Video thumbnail asset (recommended ratio: 16:9)
+  thumbnailPhoto: StorageDataObject
+
+  # Video's main langauge
+  language: String
+
+  # Whether or not Video contains marketing
+  hasMarketing: Boolean
+
+  # If the Video was published on other platform before beeing published on Joystream - the original publication date
+  publishedBeforeJoystream: DateTime
+
+  # Whether the Video is supposed to be publically displayed
+  isPublic: Boolean
+
+  # Flag signaling whether a video is censored.
+  isCensored: Boolean!
+
+  # Whether a video has been excluded/hidden (by the gateway operator)
+  isExcluded: Boolean!
+
+  # Video NFT details
+  nft: OwnedNft
+
+  # Whether the Video contains explicit material.
+  isExplicit: Boolean
+
+  # License under the video is published
+  license: License
+
+  # Video media asset
+  media: StorageDataObject
+
+  # Value of video state bloat bond fee paid by channel owner
+  videoStateBloatBond: BigInt!
+
+  # Video file metadata
+  mediaMetadata: VideoMediaMetadata
+
+  # Block the video was created in
+  createdInBlock: Int!
+
+  # List of video subtitles
+  subtitles(
+    where: VideoSubtitleWhereInput
+    orderBy: [VideoSubtitleOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoSubtitle!]!
+
+  # Is comment section enabled (true if enabled)
+  isCommentSectionEnabled: Boolean!
+
+  # channel owner pinned comment
+  pinnedComment: Comment
+
+  # List of all video comments
+  comments(
+    where: CommentWhereInput
+    orderBy: [CommentOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Comment!]!
+
+  # Comments count
+  commentsCount: Int!
+
+  # Is reactions feature enabled on video (true if enabled i.e. video can be reacted)
+  isReactionFeatureEnabled: Boolean!
+
+  # List of all video reactions
+  reactions(
+    where: VideoReactionWhereInput
+    orderBy: [VideoReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoReaction!]!
+
+  # Reactions count by reaction Id
+  reactionsCountByReactionId: [VideoReactionsCountByReactionType!]
+
+  # Reactions count
+  reactionsCount: Int!
+
+  # Number of video views (to speed up orderBy queries by avoiding COUNT aggregation)
+  viewsNum: Int!
+
+  # Application used for video creation
+  entryApp: App
+
+  # Video ID coming from YPP
+  ytVideoId: String
+}
+
+type VideoCategory {
+  # Runtime identifier
+  id: String!
+
+  # The name of the category
+  name: String
+
+  # The description of the category
+  description: String
+
+  # Parent category if defined
+  parentCategory: VideoCategory
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  featuredVideos(
+    where: VideoFeaturedInCategoryWhereInput
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoFeaturedInCategory!]!
+
+  # Indicates whether the category is supported by the Gateway
+  isSupported: Boolean!
+  createdInBlock: Int!
+}
+
+type VideoHero {
+  # Unique ID
+  id: String!
+
+  # Video being featured in the Hero section
+  video: Video!
+
+  # Title of the Hero section
+  heroTitle: String!
+
+  # Url to video fragment to be displayed in the Hero section
+  heroVideoCutUrl: String!
+
+  # Url to the poster to be displayed in the Hero section
+  heroPosterUrl: String!
+
+  # Time at which this VideoHero was created/activated
+  activatedAt: DateTime
+}
+
+# Stored information about a registered user
+type Membership {
+  # MemberId: runtime identifier for a user
+  id: String!
+
+  # Timestamp of the block the membership was created at
+  createdAt: DateTime!
+
+  # The unique handle chosen by member
+  handle: String!
+
+  # Member's metadata
+  metadata: MemberMetadata
+
+  # Member's controller account id
+  controllerAccount: String!
+
+  # Auctions in which is this user whitelisted to participate
+  whitelistedInAuctions(
+    where: AuctionWhitelistedMemberWhereInput
+    orderBy: [AuctionWhitelistedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [AuctionWhitelistedMember!]!
+
+  # Channels owned by this member
+  channels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+
+  # Channels the member is banned from (in terms of commenting/reacting)
+  bannedFromChannels(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+
+  # Number of channels ever created by this member
+  totalChannelsCreated: Int!
+}
+
+type VideosConnection {
+  totalCount: Int!
+  edges: [VideoEdge!]!
+  pageInfo: PageInfo!
+}
+
+type EntityReportInfo {
+  id: String!
+  rationale: String!
+  createdAt: DateTime!
+  reporterIp: String!
+  created: Boolean!
+}
+
+# A date-time string in simplified extended ISO 8601 format (YYYY-MM-DDTHH:mm:ss.sssZ)
+scalar DateTime
+
+type ExtendedChannel {
+  channel: Channel!
+  activeVideosCount: Int!
+}
+
+type ChannelNftCollector {
+  member: Membership!
+  amount: Int!
+}
+
+type ChannelFollowResult {
+  channelId: String!
+  follows: Int!
+  cancelToken: String!
+  added: Boolean!
+}
+
+type ChannelUnfollowResult {
+  channelId: String!
+  follows: Int!
+  removed: Boolean!
+}
+
+type ChannelReportInfo {
+  id: String!
+  rationale: String!
+  createdAt: DateTime!
+  reporterIp: String!
+  created: Boolean!
+  channelId: String!
+}
+
+type ChannelsSearchResult {
+  channel: Channel!
+  relevance: Int!
+}
+
+type ExtendedVideoCategory {
+  category: VideoCategory!
+  activeVideosCount: Int!
+}
+
+type ProcessorState {
+  lastProcessedBlock: Int!
+}
+
+type VideosSearchResult {
+  video: Video!
+  relevance: Int!
+}
+
+type VideoReportInfo {
+  id: String!
+  rationale: String!
+  createdAt: DateTime!
+  reporterIp: String!
+  created: Boolean!
+  videoId: String!
+}
+
+type AddVideoViewResult {
+  videoId: String!
+  viewId: String!
+  viewsNum: Int!
+  added: Boolean!
+}
+
+type StorageDataObject {
+  # Data object runtime id
+  id: String!
+
+  # Resolved asset url
+  resolvedUrl: String
+
+  # Timestamp of the block the data object was created at
+  createdAt: DateTime!
+
+  # Whether the data object was uploaded and accepted by the storage provider
+  isAccepted: Boolean!
+
+  # Data object size in bytes
+  size: BigInt!
+
+  # Storage bag the data object is part of
+  storageBag: StorageBag!
+
+  # IPFS content hash
+  ipfsHash: String!
+
+  # The type of the asset that the data object represents (if known)
+  type: DataObjectType
+
+  # State Bloat Bond for removing the data object
+  stateBloatBond: BigInt!
+
+  # If the object is no longer used as an asset - the time at which it was unset (if known)
+  unsetAt: DateTime
+}
+
+input FeaturedVideoInput {
+  videoId: String!
+  videoCutUrl: String
+}
+
+input ExtendedChannelWhereInput {
+  channel: ChannelWhereInput
+  activeVideosCount_gt: Int
+}
+
+input ChannelWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  ownerMember_isNull: Boolean
+  ownerMember: MembershipWhereInput
+  title_isNull: Boolean
+  title_eq: String
+  title_not_eq: String
+  title_gt: String
+  title_gte: String
+  title_lt: String
+  title_lte: String
+  title_in: [String!]
+  title_not_in: [String!]
+  title_contains: String
+  title_not_contains: String
+  title_containsInsensitive: String
+  title_not_containsInsensitive: String
+  title_startsWith: String
+  title_not_startsWith: String
+  title_endsWith: String
+  title_not_endsWith: String
+  description_isNull: Boolean
+  description_eq: String
+  description_not_eq: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_not_contains: String
+  description_containsInsensitive: String
+  description_not_containsInsensitive: String
+  description_startsWith: String
+  description_not_startsWith: String
+  description_endsWith: String
+  description_not_endsWith: String
+  coverPhoto_isNull: Boolean
+  coverPhoto: StorageDataObjectWhereInput
+  avatarPhoto_isNull: Boolean
+  avatarPhoto: StorageDataObjectWhereInput
+  isPublic_isNull: Boolean
+  isPublic_eq: Boolean
+  isPublic_not_eq: Boolean
+  isCensored_isNull: Boolean
+  isCensored_eq: Boolean
+  isCensored_not_eq: Boolean
+  isExcluded_isNull: Boolean
+  isExcluded_eq: Boolean
+  isExcluded_not_eq: Boolean
+  language_isNull: Boolean
+  language_eq: String
+  language_not_eq: String
+  language_gt: String
+  language_gte: String
+  language_lt: String
+  language_lte: String
+  language_in: [String!]
+  language_not_in: [String!]
+  language_contains: String
+  language_not_contains: String
+  language_containsInsensitive: String
+  language_not_containsInsensitive: String
+  language_startsWith: String
+  language_not_startsWith: String
+  language_endsWith: String
+  language_not_endsWith: String
+  videos_every: VideoWhereInput
+  videos_some: VideoWhereInput
+  videos_none: VideoWhereInput
+  createdInBlock_isNull: Boolean
+  createdInBlock_eq: Int
+  createdInBlock_not_eq: Int
+  createdInBlock_gt: Int
+  createdInBlock_gte: Int
+  createdInBlock_lt: Int
+  createdInBlock_lte: Int
+  createdInBlock_in: [Int!]
+  createdInBlock_not_in: [Int!]
+  rewardAccount_isNull: Boolean
+  rewardAccount_eq: String
+  rewardAccount_not_eq: String
+  rewardAccount_gt: String
+  rewardAccount_gte: String
+  rewardAccount_lt: String
+  rewardAccount_lte: String
+  rewardAccount_in: [String!]
+  rewardAccount_not_in: [String!]
+  rewardAccount_contains: String
+  rewardAccount_not_contains: String
+  rewardAccount_containsInsensitive: String
+  rewardAccount_not_containsInsensitive: String
+  rewardAccount_startsWith: String
+  rewardAccount_not_startsWith: String
+  rewardAccount_endsWith: String
+  rewardAccount_not_endsWith: String
+  channelStateBloatBond_isNull: Boolean
+  channelStateBloatBond_eq: BigInt
+  channelStateBloatBond_not_eq: BigInt
+  channelStateBloatBond_gt: BigInt
+  channelStateBloatBond_gte: BigInt
+  channelStateBloatBond_lt: BigInt
+  channelStateBloatBond_lte: BigInt
+  channelStateBloatBond_in: [BigInt!]
+  channelStateBloatBond_not_in: [BigInt!]
+  followsNum_isNull: Boolean
+  followsNum_eq: Int
+  followsNum_not_eq: Int
+  followsNum_gt: Int
+  followsNum_gte: Int
+  followsNum_lt: Int
+  followsNum_lte: Int
+  followsNum_in: [Int!]
+  followsNum_not_in: [Int!]
+  videoViewsNum_isNull: Boolean
+  videoViewsNum_eq: Int
+  videoViewsNum_not_eq: Int
+  videoViewsNum_gt: Int
+  videoViewsNum_gte: Int
+  videoViewsNum_lt: Int
+  videoViewsNum_lte: Int
+  videoViewsNum_in: [Int!]
+  videoViewsNum_not_in: [Int!]
+  bannedMembers_every: BannedMemberWhereInput
+  bannedMembers_some: BannedMemberWhereInput
+  bannedMembers_none: BannedMemberWhereInput
+  entryApp_isNull: Boolean
+  entryApp: AppWhereInput
+  totalVideosCreated_isNull: Boolean
+  totalVideosCreated_eq: Int
+  totalVideosCreated_not_eq: Int
+  totalVideosCreated_gt: Int
+  totalVideosCreated_gte: Int
+  totalVideosCreated_lt: Int
+  totalVideosCreated_lte: Int
+  totalVideosCreated_in: [Int!]
+  totalVideosCreated_not_in: [Int!]
+  AND: [ChannelWhereInput!]
+  OR: [ChannelWhereInput!]
+}
+
+type Query {
+  getKillSwitch: KillSwitch!
+  getVideoViewPerIpTimeLimit: VideoViewPerIpTimeLimit!
+  videoHero: VideoHero
+  extendedChannels(
+    where: ExtendedChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    limit: Int
+  ): [ExtendedChannel!]!
+  mostRecentChannels(
+    where: ExtendedChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    mostRecentLimit: Int!
+    resultsLimit: Int
+  ): [ExtendedChannel!]!
+  channelNftCollectors(
+    channelId: String!
+    orderBy: ChannelNftCollectorsOrderByInput
+    limit: Int
+  ): [ChannelNftCollector!]!
+  extendedVideoCategories: [ExtendedVideoCategory!]!
+  mostViewedVideosConnection(
+    after: String
+    first: Int
+    orderBy: [VideoOrderByInput!]!
+    where: VideoWhereInput
+    periodDays: Int
+    limit: Int!
+  ): VideosConnection!
+  events(
+    where: EventWhereInput
+    orderBy: [EventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Event!]!
+  eventById(id: String!): Event
+  eventByUniqueInput(where: WhereIdInput!): Event
+    @deprecated(reason: "Use eventById")
+  eventsConnection(
+    orderBy: [EventOrderByInput!]!
+    after: String
+    first: Int
+    where: EventWhereInput
+  ): EventsConnection!
+  notifications(
+    where: NotificationWhereInput
+    orderBy: [NotificationOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Notification!]!
+  notificationById(id: String!): Notification
+  notificationByUniqueInput(where: WhereIdInput!): Notification
+    @deprecated(reason: "Use notificationById")
+  notificationsConnection(
+    orderBy: [NotificationOrderByInput!]!
+    after: String
+    first: Int
+    where: NotificationWhereInput
+  ): NotificationsConnection!
+  nftHistoryEntries(
+    where: NftHistoryEntryWhereInput
+    orderBy: [NftHistoryEntryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftHistoryEntry!]!
+  nftHistoryEntryById(id: String!): NftHistoryEntry
+  nftHistoryEntryByUniqueInput(where: WhereIdInput!): NftHistoryEntry
+    @deprecated(reason: "Use nftHistoryEntryById")
+  nftHistoryEntriesConnection(
+    orderBy: [NftHistoryEntryOrderByInput!]!
+    after: String
+    first: Int
+    where: NftHistoryEntryWhereInput
+  ): NftHistoryEntriesConnection!
+  nftActivities(
+    where: NftActivityWhereInput
+    orderBy: [NftActivityOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftActivity!]!
+  nftActivityById(id: String!): NftActivity
+  nftActivityByUniqueInput(where: WhereIdInput!): NftActivity
+    @deprecated(reason: "Use nftActivityById")
+  nftActivitiesConnection(
+    orderBy: [NftActivityOrderByInput!]!
+    after: String
+    first: Int
+    where: NftActivityWhereInput
+  ): NftActivitiesConnection!
+  channels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+  channelById(id: String!): Channel
+  channelByUniqueInput(where: WhereIdInput!): Channel
+    @deprecated(reason: "Use channelById")
+  channelsConnection(
+    orderBy: [ChannelOrderByInput!]!
+    after: String
+    first: Int
+    where: ChannelWhereInput
+  ): ChannelsConnection!
+  bannedMembers(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+  bannedMemberById(id: String!): BannedMember
+  bannedMemberByUniqueInput(where: WhereIdInput!): BannedMember
+    @deprecated(reason: "Use bannedMemberById")
+  bannedMembersConnection(
+    orderBy: [BannedMemberOrderByInput!]!
+    after: String
+    first: Int
+    where: BannedMemberWhereInput
+  ): BannedMembersConnection!
+  memberMetadata(
+    where: MemberMetadataWhereInput
+    orderBy: [MemberMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [MemberMetadata!]!
+  memberMetadataById(id: String!): MemberMetadata
+  memberMetadataByUniqueInput(where: WhereIdInput!): MemberMetadata
+    @deprecated(reason: "Use memberMetadataById")
+  memberMetadataConnection(
+    orderBy: [MemberMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: MemberMetadataWhereInput
+  ): MemberMetadataConnection!
+  memberships(
+    where: MembershipWhereInput
+    orderBy: [MembershipOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Membership!]!
+  membershipById(id: String!): Membership
+  membershipByUniqueInput(where: WhereIdInput!): Membership
+    @deprecated(reason: "Use membershipById")
+  membershipsConnection(
+    orderBy: [MembershipOrderByInput!]!
+    after: String
+    first: Int
+    where: MembershipWhereInput
+  ): MembershipsConnection!
+  ownedNfts(
+    where: OwnedNftWhereInput
+    orderBy: [OwnedNftOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [OwnedNft!]!
+  ownedNftById(id: String!): OwnedNft
+  ownedNftByUniqueInput(where: WhereIdInput!): OwnedNft
+    @deprecated(reason: "Use ownedNftById")
+  ownedNftsConnection(
+    orderBy: [OwnedNftOrderByInput!]!
+    after: String
+    first: Int
+    where: OwnedNftWhereInput
+  ): OwnedNftsConnection!
+  auctions(
+    where: AuctionWhereInput
+    orderBy: [AuctionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Auction!]!
+  auctionById(id: String!): Auction
+  auctionByUniqueInput(where: WhereIdInput!): Auction
+    @deprecated(reason: "Use auctionById")
+  auctionsConnection(
+    orderBy: [AuctionOrderByInput!]!
+    after: String
+    first: Int
+    where: AuctionWhereInput
+  ): AuctionsConnection!
+  auctionWhitelistedMembers(
+    where: AuctionWhitelistedMemberWhereInput
+    orderBy: [AuctionWhitelistedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [AuctionWhitelistedMember!]!
+  auctionWhitelistedMemberById(id: String!): AuctionWhitelistedMember
+  auctionWhitelistedMemberByUniqueInput(
+    where: WhereIdInput!
+  ): AuctionWhitelistedMember
+    @deprecated(reason: "Use auctionWhitelistedMemberById")
+  auctionWhitelistedMembersConnection(
+    orderBy: [AuctionWhitelistedMemberOrderByInput!]!
+    after: String
+    first: Int
+    where: AuctionWhitelistedMemberWhereInput
+  ): AuctionWhitelistedMembersConnection!
+  bids(
+    where: BidWhereInput
+    orderBy: [BidOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Bid!]!
+  bidById(id: String!): Bid
+  bidByUniqueInput(where: WhereIdInput!): Bid @deprecated(reason: "Use bidById")
+  bidsConnection(
+    orderBy: [BidOrderByInput!]!
+    after: String
+    first: Int
+    where: BidWhereInput
+  ): BidsConnection!
+  apps(
+    where: AppWhereInput
+    orderBy: [AppOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [App!]!
+  appById(id: String!): App
+  appByUniqueInput(where: WhereIdInput!): App @deprecated(reason: "Use appById")
+  appsConnection(
+    orderBy: [AppOrderByInput!]!
+    after: String
+    first: Int
+    where: AppWhereInput
+  ): AppsConnection!
+  commentReactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+  commentReactionById(id: String!): CommentReaction
+  commentReactionByUniqueInput(where: WhereIdInput!): CommentReaction
+    @deprecated(reason: "Use commentReactionById")
+  commentReactionsConnection(
+    orderBy: [CommentReactionOrderByInput!]!
+    after: String
+    first: Int
+    where: CommentReactionWhereInput
+  ): CommentReactionsConnection!
+  comments(
+    where: CommentWhereInput
+    orderBy: [CommentOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Comment!]!
+  commentById(id: String!): Comment
+  commentByUniqueInput(where: WhereIdInput!): Comment
+    @deprecated(reason: "Use commentById")
+  commentsConnection(
+    orderBy: [CommentOrderByInput!]!
+    after: String
+    first: Int
+    where: CommentWhereInput
+  ): CommentsConnection!
+  videoCategories(
+    where: VideoCategoryWhereInput
+    orderBy: [VideoCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoCategory!]!
+  videoCategoryById(id: String!): VideoCategory
+  videoCategoryByUniqueInput(where: WhereIdInput!): VideoCategory
+    @deprecated(reason: "Use videoCategoryById")
+  videoCategoriesConnection(
+    orderBy: [VideoCategoryOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoCategoryWhereInput
+  ): VideoCategoriesConnection!
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  videoById(id: String!): Video
+  videoByUniqueInput(where: WhereIdInput!): Video
+    @deprecated(reason: "Use videoById")
+  videosConnection(
+    orderBy: [VideoOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoWhereInput
+  ): VideosConnection!
+  videoFeaturedInCategories(
+    where: VideoFeaturedInCategoryWhereInput
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoFeaturedInCategory!]!
+  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
+  videoFeaturedInCategoryByUniqueInput(
+    where: WhereIdInput!
+  ): VideoFeaturedInCategory
+    @deprecated(reason: "Use videoFeaturedInCategoryById")
+  videoFeaturedInCategoriesConnection(
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoFeaturedInCategoryWhereInput
+  ): VideoFeaturedInCategoriesConnection!
+  videoHeros(
+    where: VideoHeroWhereInput
+    orderBy: [VideoHeroOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoHero!]!
+  videoHeroById(id: String!): VideoHero
+  videoHeroByUniqueInput(where: WhereIdInput!): VideoHero
+    @deprecated(reason: "Use videoHeroById")
+  videoHerosConnection(
+    orderBy: [VideoHeroOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoHeroWhereInput
+  ): VideoHerosConnection!
+  videoMediaMetadata(
+    where: VideoMediaMetadataWhereInput
+    orderBy: [VideoMediaMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaMetadata!]!
+  videoMediaMetadataById(id: String!): VideoMediaMetadata
+  videoMediaMetadataByUniqueInput(where: WhereIdInput!): VideoMediaMetadata
+    @deprecated(reason: "Use videoMediaMetadataById")
+  videoMediaMetadataConnection(
+    orderBy: [VideoMediaMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoMediaMetadataWhereInput
+  ): VideoMediaMetadataConnection!
+  videoMediaEncodings(
+    where: VideoMediaEncodingWhereInput
+    orderBy: [VideoMediaEncodingOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaEncoding!]!
+  videoMediaEncodingById(id: String!): VideoMediaEncoding
+  videoMediaEncodingByUniqueInput(where: WhereIdInput!): VideoMediaEncoding
+    @deprecated(reason: "Use videoMediaEncodingById")
+  videoMediaEncodingsConnection(
+    orderBy: [VideoMediaEncodingOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoMediaEncodingWhereInput
+  ): VideoMediaEncodingsConnection!
+  licenses(
+    where: LicenseWhereInput
+    orderBy: [LicenseOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [License!]!
+  licenseById(id: String!): License
+  licenseByUniqueInput(where: WhereIdInput!): License
+    @deprecated(reason: "Use licenseById")
+  licensesConnection(
+    orderBy: [LicenseOrderByInput!]!
+    after: String
+    first: Int
+    where: LicenseWhereInput
+  ): LicensesConnection!
+  videoSubtitles(
+    where: VideoSubtitleWhereInput
+    orderBy: [VideoSubtitleOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoSubtitle!]!
+  videoSubtitleById(id: String!): VideoSubtitle
+  videoSubtitleByUniqueInput(where: WhereIdInput!): VideoSubtitle
+    @deprecated(reason: "Use videoSubtitleById")
+  videoSubtitlesConnection(
+    orderBy: [VideoSubtitleOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoSubtitleWhereInput
+  ): VideoSubtitlesConnection!
+  videoReactions(
+    where: VideoReactionWhereInput
+    orderBy: [VideoReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoReaction!]!
+  videoReactionById(id: String!): VideoReaction
+  videoReactionByUniqueInput(where: WhereIdInput!): VideoReaction
+    @deprecated(reason: "Use videoReactionById")
+  videoReactionsConnection(
+    orderBy: [VideoReactionOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoReactionWhereInput
+  ): VideoReactionsConnection!
+  curatorGroups(
+    where: CuratorGroupWhereInput
+    orderBy: [CuratorGroupOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CuratorGroup!]!
+  curatorGroupById(id: String!): CuratorGroup
+  curatorGroupByUniqueInput(where: WhereIdInput!): CuratorGroup
+    @deprecated(reason: "Use curatorGroupById")
+  curatorGroupsConnection(
+    orderBy: [CuratorGroupOrderByInput!]!
+    after: String
+    first: Int
+    where: CuratorGroupWhereInput
+  ): CuratorGroupsConnection!
+  curators(
+    where: CuratorWhereInput
+    orderBy: [CuratorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Curator!]!
+  curatorById(id: String!): Curator
+  curatorByUniqueInput(where: WhereIdInput!): Curator
+    @deprecated(reason: "Use curatorById")
+  curatorsConnection(
+    orderBy: [CuratorOrderByInput!]!
+    after: String
+    first: Int
+    where: CuratorWhereInput
+  ): CuratorsConnection!
+  storageBucketOperatorMetadata(
+    where: StorageBucketOperatorMetadataWhereInput
+    orderBy: [StorageBucketOperatorMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketOperatorMetadata!]!
+  storageBucketOperatorMetadataById(id: String!): StorageBucketOperatorMetadata
+  storageBucketOperatorMetadataByUniqueInput(
+    where: WhereIdInput!
+  ): StorageBucketOperatorMetadata
+    @deprecated(reason: "Use storageBucketOperatorMetadataById")
+  storageBucketOperatorMetadataConnection(
+    orderBy: [StorageBucketOperatorMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: StorageBucketOperatorMetadataWhereInput
+  ): StorageBucketOperatorMetadataConnection!
+  storageBuckets(
+    where: StorageBucketWhereInput
+    orderBy: [StorageBucketOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucket!]!
+  storageBucketById(id: String!): StorageBucket
+  storageBucketByUniqueInput(where: WhereIdInput!): StorageBucket
+    @deprecated(reason: "Use storageBucketById")
+  storageBucketsConnection(
+    orderBy: [StorageBucketOrderByInput!]!
+    after: String
+    first: Int
+    where: StorageBucketWhereInput
+  ): StorageBucketsConnection!
+  storageBags(
+    where: StorageBagWhereInput
+    orderBy: [StorageBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBag!]!
+  storageBagById(id: String!): StorageBag
+  storageBagByUniqueInput(where: WhereIdInput!): StorageBag
+    @deprecated(reason: "Use storageBagById")
+  storageBagsConnection(
+    orderBy: [StorageBagOrderByInput!]!
+    after: String
+    first: Int
+    where: StorageBagWhereInput
+  ): StorageBagsConnection!
+  storageBucketBags(
+    where: StorageBucketBagWhereInput
+    orderBy: [StorageBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketBag!]!
+  storageBucketBagById(id: String!): StorageBucketBag
+  storageBucketBagByUniqueInput(where: WhereIdInput!): StorageBucketBag
+    @deprecated(reason: "Use storageBucketBagById")
+  storageBucketBagsConnection(
+    orderBy: [StorageBucketBagOrderByInput!]!
+    after: String
+    first: Int
+    where: StorageBucketBagWhereInput
+  ): StorageBucketBagsConnection!
+  distributionBucketBags(
+    where: DistributionBucketBagWhereInput
+    orderBy: [DistributionBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketBag!]!
+  distributionBucketBagById(id: String!): DistributionBucketBag
+  distributionBucketBagByUniqueInput(
+    where: WhereIdInput!
+  ): DistributionBucketBag @deprecated(reason: "Use distributionBucketBagById")
+  distributionBucketBagsConnection(
+    orderBy: [DistributionBucketBagOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketBagWhereInput
+  ): DistributionBucketBagsConnection!
+  storageDataObjects(
+    where: StorageDataObjectWhereInput
+    orderBy: [StorageDataObjectOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageDataObject!]!
+  storageDataObjectById(id: String!): StorageDataObject
+  storageDataObjectByUniqueInput(where: WhereIdInput!): StorageDataObject
+    @deprecated(reason: "Use storageDataObjectById")
+  storageDataObjectsConnection(
+    orderBy: [StorageDataObjectOrderByInput!]!
+    after: String
+    first: Int
+    where: StorageDataObjectWhereInput
+  ): StorageDataObjectsConnection!
+  distributionBucketFamilyMetadata(
+    where: DistributionBucketFamilyMetadataWhereInput
+    orderBy: [DistributionBucketFamilyMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketFamilyMetadata!]!
+  distributionBucketFamilyMetadataById(
+    id: String!
+  ): DistributionBucketFamilyMetadata
+  distributionBucketFamilyMetadataByUniqueInput(
+    where: WhereIdInput!
+  ): DistributionBucketFamilyMetadata
+    @deprecated(reason: "Use distributionBucketFamilyMetadataById")
+  distributionBucketFamilyMetadataConnection(
+    orderBy: [DistributionBucketFamilyMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketFamilyMetadataWhereInput
+  ): DistributionBucketFamilyMetadataConnection!
+  distributionBucketOperatorMetadata(
+    where: DistributionBucketOperatorMetadataWhereInput
+    orderBy: [DistributionBucketOperatorMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketOperatorMetadata!]!
+  distributionBucketOperatorMetadataById(
+    id: String!
+  ): DistributionBucketOperatorMetadata
+  distributionBucketOperatorMetadataByUniqueInput(
+    where: WhereIdInput!
+  ): DistributionBucketOperatorMetadata
+    @deprecated(reason: "Use distributionBucketOperatorMetadataById")
+  distributionBucketOperatorMetadataConnection(
+    orderBy: [DistributionBucketOperatorMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketOperatorMetadataWhereInput
+  ): DistributionBucketOperatorMetadataConnection!
+  distributionBucketOperators(
+    where: DistributionBucketOperatorWhereInput
+    orderBy: [DistributionBucketOperatorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketOperator!]!
+  distributionBucketOperatorById(id: String!): DistributionBucketOperator
+  distributionBucketOperatorByUniqueInput(
+    where: WhereIdInput!
+  ): DistributionBucketOperator
+    @deprecated(reason: "Use distributionBucketOperatorById")
+  distributionBucketOperatorsConnection(
+    orderBy: [DistributionBucketOperatorOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketOperatorWhereInput
+  ): DistributionBucketOperatorsConnection!
+  distributionBuckets(
+    where: DistributionBucketWhereInput
+    orderBy: [DistributionBucketOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucket!]!
+  distributionBucketById(id: String!): DistributionBucket
+  distributionBucketByUniqueInput(where: WhereIdInput!): DistributionBucket
+    @deprecated(reason: "Use distributionBucketById")
+  distributionBucketsConnection(
+    orderBy: [DistributionBucketOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketWhereInput
+  ): DistributionBucketsConnection!
+  distributionBucketFamilies(
+    where: DistributionBucketFamilyWhereInput
+    orderBy: [DistributionBucketFamilyOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketFamily!]!
+  distributionBucketFamilyById(id: String!): DistributionBucketFamily
+  distributionBucketFamilyByUniqueInput(
+    where: WhereIdInput!
+  ): DistributionBucketFamily
+    @deprecated(reason: "Use distributionBucketFamilyById")
+  distributionBucketFamiliesConnection(
+    orderBy: [DistributionBucketFamilyOrderByInput!]!
+    after: String
+    first: Int
+    where: DistributionBucketFamilyWhereInput
+  ): DistributionBucketFamiliesConnection!
+  videoViewEvents(
+    where: VideoViewEventWhereInput
+    orderBy: [VideoViewEventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoViewEvent!]!
+  videoViewEventById(id: String!): VideoViewEvent
+  videoViewEventByUniqueInput(where: WhereIdInput!): VideoViewEvent
+    @deprecated(reason: "Use videoViewEventById")
+  videoViewEventsConnection(
+    orderBy: [VideoViewEventOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoViewEventWhereInput
+  ): VideoViewEventsConnection!
+  reports(
+    where: ReportWhereInput
+    orderBy: [ReportOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Report!]!
+  reportById(id: String!): Report
+  reportByUniqueInput(where: WhereIdInput!): Report
+    @deprecated(reason: "Use reportById")
+  reportsConnection(
+    orderBy: [ReportOrderByInput!]!
+    after: String
+    first: Int
+    where: ReportWhereInput
+  ): ReportsConnection!
+  channelFollows(
+    where: ChannelFollowWhereInput
+    orderBy: [ChannelFollowOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [ChannelFollow!]!
+  channelFollowById(id: String!): ChannelFollow
+  channelFollowByUniqueInput(where: WhereIdInput!): ChannelFollow
+    @deprecated(reason: "Use channelFollowById")
+  channelFollowsConnection(
+    orderBy: [ChannelFollowOrderByInput!]!
+    after: String
+    first: Int
+    where: ChannelFollowWhereInput
+  ): ChannelFollowsConnection!
+  squidStatus: SquidStatus
+}
+
+enum ChannelOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  ownerMember_id_ASC
+  ownerMember_id_DESC
+  ownerMember_createdAt_ASC
+  ownerMember_createdAt_DESC
+  ownerMember_handle_ASC
+  ownerMember_handle_DESC
+  ownerMember_controllerAccount_ASC
+  ownerMember_controllerAccount_DESC
+  ownerMember_totalChannelsCreated_ASC
+  ownerMember_totalChannelsCreated_DESC
+  title_ASC
+  title_DESC
+  description_ASC
+  description_DESC
+  coverPhoto_id_ASC
+  coverPhoto_id_DESC
+  coverPhoto_createdAt_ASC
+  coverPhoto_createdAt_DESC
+  coverPhoto_isAccepted_ASC
+  coverPhoto_isAccepted_DESC
+  coverPhoto_size_ASC
+  coverPhoto_size_DESC
+  coverPhoto_ipfsHash_ASC
+  coverPhoto_ipfsHash_DESC
+  coverPhoto_stateBloatBond_ASC
+  coverPhoto_stateBloatBond_DESC
+  coverPhoto_unsetAt_ASC
+  coverPhoto_unsetAt_DESC
+  coverPhoto_resolvedUrl_ASC
+  coverPhoto_resolvedUrl_DESC
+  avatarPhoto_id_ASC
+  avatarPhoto_id_DESC
+  avatarPhoto_createdAt_ASC
+  avatarPhoto_createdAt_DESC
+  avatarPhoto_isAccepted_ASC
+  avatarPhoto_isAccepted_DESC
+  avatarPhoto_size_ASC
+  avatarPhoto_size_DESC
+  avatarPhoto_ipfsHash_ASC
+  avatarPhoto_ipfsHash_DESC
+  avatarPhoto_stateBloatBond_ASC
+  avatarPhoto_stateBloatBond_DESC
+  avatarPhoto_unsetAt_ASC
+  avatarPhoto_unsetAt_DESC
+  avatarPhoto_resolvedUrl_ASC
+  avatarPhoto_resolvedUrl_DESC
+  isPublic_ASC
+  isPublic_DESC
+  isCensored_ASC
+  isCensored_DESC
+  isExcluded_ASC
+  isExcluded_DESC
+  language_ASC
+  language_DESC
+  createdInBlock_ASC
+  createdInBlock_DESC
+  rewardAccount_ASC
+  rewardAccount_DESC
+  channelStateBloatBond_ASC
+  channelStateBloatBond_DESC
+  followsNum_ASC
+  followsNum_DESC
+  videoViewsNum_ASC
+  videoViewsNum_DESC
+  entryApp_id_ASC
+  entryApp_id_DESC
+  entryApp_name_ASC
+  entryApp_name_DESC
+  entryApp_websiteUrl_ASC
+  entryApp_websiteUrl_DESC
+  entryApp_useUri_ASC
+  entryApp_useUri_DESC
+  entryApp_smallIcon_ASC
+  entryApp_smallIcon_DESC
+  entryApp_mediumIcon_ASC
+  entryApp_mediumIcon_DESC
+  entryApp_bigIcon_ASC
+  entryApp_bigIcon_DESC
+  entryApp_oneLiner_ASC
+  entryApp_oneLiner_DESC
+  entryApp_description_ASC
+  entryApp_description_DESC
+  entryApp_termsOfService_ASC
+  entryApp_termsOfService_DESC
+  entryApp_category_ASC
+  entryApp_category_DESC
+  entryApp_authKey_ASC
+  entryApp_authKey_DESC
+  totalVideosCreated_ASC
+  totalVideosCreated_DESC
+}
+
+enum ChannelNftCollectorsOrderByInput {
+  amount_ASC
+  amount_DESC
+}
+
+enum VideoOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  channel_id_ASC
+  channel_id_DESC
+  channel_createdAt_ASC
+  channel_createdAt_DESC
+  channel_title_ASC
+  channel_title_DESC
+  channel_description_ASC
+  channel_description_DESC
+  channel_isPublic_ASC
+  channel_isPublic_DESC
+  channel_isCensored_ASC
+  channel_isCensored_DESC
+  channel_isExcluded_ASC
+  channel_isExcluded_DESC
+  channel_language_ASC
+  channel_language_DESC
+  channel_createdInBlock_ASC
+  channel_createdInBlock_DESC
+  channel_rewardAccount_ASC
+  channel_rewardAccount_DESC
+  channel_channelStateBloatBond_ASC
+  channel_channelStateBloatBond_DESC
+  channel_followsNum_ASC
+  channel_followsNum_DESC
+  channel_videoViewsNum_ASC
+  channel_videoViewsNum_DESC
+  channel_totalVideosCreated_ASC
+  channel_totalVideosCreated_DESC
+  category_id_ASC
+  category_id_DESC
+  category_name_ASC
+  category_name_DESC
+  category_description_ASC
+  category_description_DESC
+  category_isSupported_ASC
+  category_isSupported_DESC
+  category_createdInBlock_ASC
+  category_createdInBlock_DESC
+  title_ASC
+  title_DESC
+  description_ASC
+  description_DESC
+  duration_ASC
+  duration_DESC
+  thumbnailPhoto_id_ASC
+  thumbnailPhoto_id_DESC
+  thumbnailPhoto_createdAt_ASC
+  thumbnailPhoto_createdAt_DESC
+  thumbnailPhoto_isAccepted_ASC
+  thumbnailPhoto_isAccepted_DESC
+  thumbnailPhoto_size_ASC
+  thumbnailPhoto_size_DESC
+  thumbnailPhoto_ipfsHash_ASC
+  thumbnailPhoto_ipfsHash_DESC
+  thumbnailPhoto_stateBloatBond_ASC
+  thumbnailPhoto_stateBloatBond_DESC
+  thumbnailPhoto_unsetAt_ASC
+  thumbnailPhoto_unsetAt_DESC
+  thumbnailPhoto_resolvedUrl_ASC
+  thumbnailPhoto_resolvedUrl_DESC
+  language_ASC
+  language_DESC
+  hasMarketing_ASC
+  hasMarketing_DESC
+  publishedBeforeJoystream_ASC
+  publishedBeforeJoystream_DESC
+  isPublic_ASC
+  isPublic_DESC
+  isCensored_ASC
+  isCensored_DESC
+  isExcluded_ASC
+  isExcluded_DESC
+  nft_id_ASC
+  nft_id_DESC
+  nft_createdAt_ASC
+  nft_createdAt_DESC
+  nft_creatorRoyalty_ASC
+  nft_creatorRoyalty_DESC
+  nft_lastSalePrice_ASC
+  nft_lastSalePrice_DESC
+  nft_lastSaleDate_ASC
+  nft_lastSaleDate_DESC
+  isExplicit_ASC
+  isExplicit_DESC
+  license_id_ASC
+  license_id_DESC
+  license_code_ASC
+  license_code_DESC
+  license_attribution_ASC
+  license_attribution_DESC
+  license_customText_ASC
+  license_customText_DESC
+  media_id_ASC
+  media_id_DESC
+  media_createdAt_ASC
+  media_createdAt_DESC
+  media_isAccepted_ASC
+  media_isAccepted_DESC
+  media_size_ASC
+  media_size_DESC
+  media_ipfsHash_ASC
+  media_ipfsHash_DESC
+  media_stateBloatBond_ASC
+  media_stateBloatBond_DESC
+  media_unsetAt_ASC
+  media_unsetAt_DESC
+  media_resolvedUrl_ASC
+  media_resolvedUrl_DESC
+  videoStateBloatBond_ASC
+  videoStateBloatBond_DESC
+  mediaMetadata_id_ASC
+  mediaMetadata_id_DESC
+  mediaMetadata_pixelWidth_ASC
+  mediaMetadata_pixelWidth_DESC
+  mediaMetadata_pixelHeight_ASC
+  mediaMetadata_pixelHeight_DESC
+  mediaMetadata_size_ASC
+  mediaMetadata_size_DESC
+  mediaMetadata_createdInBlock_ASC
+  mediaMetadata_createdInBlock_DESC
+  createdInBlock_ASC
+  createdInBlock_DESC
+  isCommentSectionEnabled_ASC
+  isCommentSectionEnabled_DESC
+  pinnedComment_id_ASC
+  pinnedComment_id_DESC
+  pinnedComment_createdAt_ASC
+  pinnedComment_createdAt_DESC
+  pinnedComment_text_ASC
+  pinnedComment_text_DESC
+  pinnedComment_status_ASC
+  pinnedComment_status_DESC
+  pinnedComment_repliesCount_ASC
+  pinnedComment_repliesCount_DESC
+  pinnedComment_reactionsCount_ASC
+  pinnedComment_reactionsCount_DESC
+  pinnedComment_reactionsAndRepliesCount_ASC
+  pinnedComment_reactionsAndRepliesCount_DESC
+  pinnedComment_isEdited_ASC
+  pinnedComment_isEdited_DESC
+  pinnedComment_isExcluded_ASC
+  pinnedComment_isExcluded_DESC
+  commentsCount_ASC
+  commentsCount_DESC
+  isReactionFeatureEnabled_ASC
+  isReactionFeatureEnabled_DESC
+  reactionsCount_ASC
+  reactionsCount_DESC
+  viewsNum_ASC
+  viewsNum_DESC
+  entryApp_id_ASC
+  entryApp_id_DESC
+  entryApp_name_ASC
+  entryApp_name_DESC
+  entryApp_websiteUrl_ASC
+  entryApp_websiteUrl_DESC
+  entryApp_useUri_ASC
+  entryApp_useUri_DESC
+  entryApp_smallIcon_ASC
+  entryApp_smallIcon_DESC
+  entryApp_mediumIcon_ASC
+  entryApp_mediumIcon_DESC
+  entryApp_bigIcon_ASC
+  entryApp_bigIcon_DESC
+  entryApp_oneLiner_ASC
+  entryApp_oneLiner_DESC
+  entryApp_description_ASC
+  entryApp_description_DESC
+  entryApp_termsOfService_ASC
+  entryApp_termsOfService_DESC
+  entryApp_category_ASC
+  entryApp_category_DESC
+  entryApp_authKey_ASC
+  entryApp_authKey_DESC
+  ytVideoId_ASC
+  ytVideoId_DESC
+}
+
+input VideoWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  category_isNull: Boolean
+  category: VideoCategoryWhereInput
+  title_isNull: Boolean
+  title_eq: String
+  title_not_eq: String
+  title_gt: String
+  title_gte: String
+  title_lt: String
+  title_lte: String
+  title_in: [String!]
+  title_not_in: [String!]
+  title_contains: String
+  title_not_contains: String
+  title_containsInsensitive: String
+  title_not_containsInsensitive: String
+  title_startsWith: String
+  title_not_startsWith: String
+  title_endsWith: String
+  title_not_endsWith: String
+  description_isNull: Boolean
+  description_eq: String
+  description_not_eq: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_not_contains: String
+  description_containsInsensitive: String
+  description_not_containsInsensitive: String
+  description_startsWith: String
+  description_not_startsWith: String
+  description_endsWith: String
+  description_not_endsWith: String
+  duration_isNull: Boolean
+  duration_eq: Int
+  duration_not_eq: Int
+  duration_gt: Int
+  duration_gte: Int
+  duration_lt: Int
+  duration_lte: Int
+  duration_in: [Int!]
+  duration_not_in: [Int!]
+  thumbnailPhoto_isNull: Boolean
+  thumbnailPhoto: StorageDataObjectWhereInput
+  language_isNull: Boolean
+  language_eq: String
+  language_not_eq: String
+  language_gt: String
+  language_gte: String
+  language_lt: String
+  language_lte: String
+  language_in: [String!]
+  language_not_in: [String!]
+  language_contains: String
+  language_not_contains: String
+  language_containsInsensitive: String
+  language_not_containsInsensitive: String
+  language_startsWith: String
+  language_not_startsWith: String
+  language_endsWith: String
+  language_not_endsWith: String
+  hasMarketing_isNull: Boolean
+  hasMarketing_eq: Boolean
+  hasMarketing_not_eq: Boolean
+  publishedBeforeJoystream_isNull: Boolean
+  publishedBeforeJoystream_eq: DateTime
+  publishedBeforeJoystream_not_eq: DateTime
+  publishedBeforeJoystream_gt: DateTime
+  publishedBeforeJoystream_gte: DateTime
+  publishedBeforeJoystream_lt: DateTime
+  publishedBeforeJoystream_lte: DateTime
+  publishedBeforeJoystream_in: [DateTime!]
+  publishedBeforeJoystream_not_in: [DateTime!]
+  isPublic_isNull: Boolean
+  isPublic_eq: Boolean
+  isPublic_not_eq: Boolean
+  isCensored_isNull: Boolean
+  isCensored_eq: Boolean
+  isCensored_not_eq: Boolean
+  isExcluded_isNull: Boolean
+  isExcluded_eq: Boolean
+  isExcluded_not_eq: Boolean
+  nft_isNull: Boolean
+  nft: OwnedNftWhereInput
+  isExplicit_isNull: Boolean
+  isExplicit_eq: Boolean
+  isExplicit_not_eq: Boolean
+  license_isNull: Boolean
+  license: LicenseWhereInput
+  media_isNull: Boolean
+  media: StorageDataObjectWhereInput
+  videoStateBloatBond_isNull: Boolean
+  videoStateBloatBond_eq: BigInt
+  videoStateBloatBond_not_eq: BigInt
+  videoStateBloatBond_gt: BigInt
+  videoStateBloatBond_gte: BigInt
+  videoStateBloatBond_lt: BigInt
+  videoStateBloatBond_lte: BigInt
+  videoStateBloatBond_in: [BigInt!]
+  videoStateBloatBond_not_in: [BigInt!]
+  mediaMetadata_isNull: Boolean
+  mediaMetadata: VideoMediaMetadataWhereInput
+  createdInBlock_isNull: Boolean
+  createdInBlock_eq: Int
+  createdInBlock_not_eq: Int
+  createdInBlock_gt: Int
+  createdInBlock_gte: Int
+  createdInBlock_lt: Int
+  createdInBlock_lte: Int
+  createdInBlock_in: [Int!]
+  createdInBlock_not_in: [Int!]
+  subtitles_every: VideoSubtitleWhereInput
+  subtitles_some: VideoSubtitleWhereInput
+  subtitles_none: VideoSubtitleWhereInput
+  isCommentSectionEnabled_isNull: Boolean
+  isCommentSectionEnabled_eq: Boolean
+  isCommentSectionEnabled_not_eq: Boolean
+  pinnedComment_isNull: Boolean
+  pinnedComment: CommentWhereInput
+  comments_every: CommentWhereInput
+  comments_some: CommentWhereInput
+  comments_none: CommentWhereInput
+  commentsCount_isNull: Boolean
+  commentsCount_eq: Int
+  commentsCount_not_eq: Int
+  commentsCount_gt: Int
+  commentsCount_gte: Int
+  commentsCount_lt: Int
+  commentsCount_lte: Int
+  commentsCount_in: [Int!]
+  commentsCount_not_in: [Int!]
+  isReactionFeatureEnabled_isNull: Boolean
+  isReactionFeatureEnabled_eq: Boolean
+  isReactionFeatureEnabled_not_eq: Boolean
+  reactions_every: VideoReactionWhereInput
+  reactions_some: VideoReactionWhereInput
+  reactions_none: VideoReactionWhereInput
+  reactionsCountByReactionId_isNull: Boolean
+  reactionsCount_isNull: Boolean
+  reactionsCount_eq: Int
+  reactionsCount_not_eq: Int
+  reactionsCount_gt: Int
+  reactionsCount_gte: Int
+  reactionsCount_lt: Int
+  reactionsCount_lte: Int
+  reactionsCount_in: [Int!]
+  reactionsCount_not_in: [Int!]
+  viewsNum_isNull: Boolean
+  viewsNum_eq: Int
+  viewsNum_not_eq: Int
+  viewsNum_gt: Int
+  viewsNum_gte: Int
+  viewsNum_lt: Int
+  viewsNum_lte: Int
+  viewsNum_in: [Int!]
+  viewsNum_not_in: [Int!]
+  entryApp_isNull: Boolean
+  entryApp: AppWhereInput
+  ytVideoId_isNull: Boolean
+  ytVideoId_eq: String
+  ytVideoId_not_eq: String
+  ytVideoId_gt: String
+  ytVideoId_gte: String
+  ytVideoId_lt: String
+  ytVideoId_lte: String
+  ytVideoId_in: [String!]
+  ytVideoId_not_in: [String!]
+  ytVideoId_contains: String
+  ytVideoId_not_contains: String
+  ytVideoId_containsInsensitive: String
+  ytVideoId_not_containsInsensitive: String
+  ytVideoId_startsWith: String
+  ytVideoId_not_startsWith: String
+  ytVideoId_endsWith: String
+  ytVideoId_not_endsWith: String
+  AND: [VideoWhereInput!]
+  OR: [VideoWhereInput!]
+}
+
+type Mutation {
+  setKillSwitch(isKilled: Boolean!): KillSwitch!
+  setVideoViewPerIpTimeLimit(limitInSeconds: Int!): VideoViewPerIpTimeLimit!
+  setVideoHero(
+    videoId: String!
+    heroTitle: String!
+    videoCutUrl: String!
+    heroPosterUrl: String!
+  ): SetVideoHeroResult!
+  setCategoryFeaturedVideos(
+    categoryId: String!
+    videos: [FeaturedVideoInput!]!
+  ): SetCategoryFeaturedVideosResult!
+  setSupportedCategories(
+    # IDs of the video categories that should be supported by the Gateway
+    supportedCategoriesIds: [String!]
+
+    # Whether the newly created video categories should be supported by default
+    supportNewCategories: Boolean
+
+    # Whether the Gateway should support videos that have no category assigned
+    supportNoCategoryVideos: Boolean
+  ): SetSupportedCategoriesResult!
+  excludeContent(
+    # Type of the content to exclude/hide
+    type: ExcludableContentType!
+
+    # IDs of the entities to be excluded (hidden)
+    ids: [String!]!
+  ): ExcludeContentResult!
+  restoreContent(
+    # Type of the content to restore
+    type: ExcludableContentType!
+
+    # IDs of the entities to be restored
+    ids: [String!]!
+  ): RestoreContentResult!
+  signAppActionCommitment(
+    nonce: Float!
+    creatorId: String!
+
+    # Hex string from UInt8Array
+    assets: String!
+
+    # Hex string from UInt8Array
+    rawAction: String!
+    actionType: AppActionActionType!
+  ): GeneratedSignature!
+  followChannel(channelId: String!): ChannelFollowResult!
+  unfollowChannel(channelId: String!, token: String!): ChannelUnfollowResult!
+  reportChannel(channelId: String!, rationale: String!): ChannelReportInfo!
+  addVideoView(videoId: String!): AddVideoViewResult!
+  reportVideo(videoId: String!, rationale: String!): VideoReportInfo!
+}
+
+enum ExcludableContentType {
+  Channel
+  Video
+  Comment
+}
+
+enum AppActionActionType {
+  CREATE_VIDEO
+  CREATE_CHANNEL
+}
+
+type Subscription {
+  processorState: ProcessorState!
+  events(
+    where: EventWhereInput
+    orderBy: [EventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Event!]!
+  eventById(id: String!): Event
+  notifications(
+    where: NotificationWhereInput
+    orderBy: [NotificationOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Notification!]!
+  notificationById(id: String!): Notification
+  nftHistoryEntries(
+    where: NftHistoryEntryWhereInput
+    orderBy: [NftHistoryEntryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftHistoryEntry!]!
+  nftHistoryEntryById(id: String!): NftHistoryEntry
+  nftActivities(
+    where: NftActivityWhereInput
+    orderBy: [NftActivityOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftActivity!]!
+  nftActivityById(id: String!): NftActivity
+  channels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+  channelById(id: String!): Channel
+  bannedMembers(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+  bannedMemberById(id: String!): BannedMember
+  memberMetadata(
+    where: MemberMetadataWhereInput
+    orderBy: [MemberMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [MemberMetadata!]!
+  memberMetadataById(id: String!): MemberMetadata
+  memberships(
+    where: MembershipWhereInput
+    orderBy: [MembershipOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Membership!]!
+  membershipById(id: String!): Membership
+  ownedNfts(
+    where: OwnedNftWhereInput
+    orderBy: [OwnedNftOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [OwnedNft!]!
+  ownedNftById(id: String!): OwnedNft
+  auctions(
+    where: AuctionWhereInput
+    orderBy: [AuctionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Auction!]!
+  auctionById(id: String!): Auction
+  auctionWhitelistedMembers(
+    where: AuctionWhitelistedMemberWhereInput
+    orderBy: [AuctionWhitelistedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [AuctionWhitelistedMember!]!
+  auctionWhitelistedMemberById(id: String!): AuctionWhitelistedMember
+  bids(
+    where: BidWhereInput
+    orderBy: [BidOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Bid!]!
+  bidById(id: String!): Bid
+  apps(
+    where: AppWhereInput
+    orderBy: [AppOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [App!]!
+  appById(id: String!): App
+  commentReactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+  commentReactionById(id: String!): CommentReaction
+  comments(
+    where: CommentWhereInput
+    orderBy: [CommentOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Comment!]!
+  commentById(id: String!): Comment
+  videoCategories(
+    where: VideoCategoryWhereInput
+    orderBy: [VideoCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoCategory!]!
+  videoCategoryById(id: String!): VideoCategory
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  videoById(id: String!): Video
+  videoFeaturedInCategories(
+    where: VideoFeaturedInCategoryWhereInput
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoFeaturedInCategory!]!
+  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
+  videoHeros(
+    where: VideoHeroWhereInput
+    orderBy: [VideoHeroOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoHero!]!
+  videoHeroById(id: String!): VideoHero
+  videoMediaMetadata(
+    where: VideoMediaMetadataWhereInput
+    orderBy: [VideoMediaMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaMetadata!]!
+  videoMediaMetadataById(id: String!): VideoMediaMetadata
+  videoMediaEncodings(
+    where: VideoMediaEncodingWhereInput
+    orderBy: [VideoMediaEncodingOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaEncoding!]!
+  videoMediaEncodingById(id: String!): VideoMediaEncoding
+  licenses(
+    where: LicenseWhereInput
+    orderBy: [LicenseOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [License!]!
+  licenseById(id: String!): License
+  videoSubtitles(
+    where: VideoSubtitleWhereInput
+    orderBy: [VideoSubtitleOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoSubtitle!]!
+  videoSubtitleById(id: String!): VideoSubtitle
+  videoReactions(
+    where: VideoReactionWhereInput
+    orderBy: [VideoReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoReaction!]!
+  videoReactionById(id: String!): VideoReaction
+  curatorGroups(
+    where: CuratorGroupWhereInput
+    orderBy: [CuratorGroupOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CuratorGroup!]!
+  curatorGroupById(id: String!): CuratorGroup
+  curators(
+    where: CuratorWhereInput
+    orderBy: [CuratorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Curator!]!
+  curatorById(id: String!): Curator
+  storageBucketOperatorMetadata(
+    where: StorageBucketOperatorMetadataWhereInput
+    orderBy: [StorageBucketOperatorMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketOperatorMetadata!]!
+  storageBucketOperatorMetadataById(id: String!): StorageBucketOperatorMetadata
+  storageBuckets(
+    where: StorageBucketWhereInput
+    orderBy: [StorageBucketOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucket!]!
+  storageBucketById(id: String!): StorageBucket
+  storageBags(
+    where: StorageBagWhereInput
+    orderBy: [StorageBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBag!]!
+  storageBagById(id: String!): StorageBag
+  storageBucketBags(
+    where: StorageBucketBagWhereInput
+    orderBy: [StorageBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketBag!]!
+  storageBucketBagById(id: String!): StorageBucketBag
+  distributionBucketBags(
+    where: DistributionBucketBagWhereInput
+    orderBy: [DistributionBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketBag!]!
+  distributionBucketBagById(id: String!): DistributionBucketBag
+  storageDataObjects(
+    where: StorageDataObjectWhereInput
+    orderBy: [StorageDataObjectOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageDataObject!]!
+  storageDataObjectById(id: String!): StorageDataObject
+  distributionBucketFamilyMetadata(
+    where: DistributionBucketFamilyMetadataWhereInput
+    orderBy: [DistributionBucketFamilyMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketFamilyMetadata!]!
+  distributionBucketFamilyMetadataById(
+    id: String!
+  ): DistributionBucketFamilyMetadata
+  distributionBucketOperatorMetadata(
+    where: DistributionBucketOperatorMetadataWhereInput
+    orderBy: [DistributionBucketOperatorMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketOperatorMetadata!]!
+  distributionBucketOperatorMetadataById(
+    id: String!
+  ): DistributionBucketOperatorMetadata
+  distributionBucketOperators(
+    where: DistributionBucketOperatorWhereInput
+    orderBy: [DistributionBucketOperatorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketOperator!]!
+  distributionBucketOperatorById(id: String!): DistributionBucketOperator
+  distributionBuckets(
+    where: DistributionBucketWhereInput
+    orderBy: [DistributionBucketOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucket!]!
+  distributionBucketById(id: String!): DistributionBucket
+  distributionBucketFamilies(
+    where: DistributionBucketFamilyWhereInput
+    orderBy: [DistributionBucketFamilyOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketFamily!]!
+  distributionBucketFamilyById(id: String!): DistributionBucketFamily
+  videoViewEvents(
+    where: VideoViewEventWhereInput
+    orderBy: [VideoViewEventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoViewEvent!]!
+  videoViewEventById(id: String!): VideoViewEvent
+  reports(
+    where: ReportWhereInput
+    orderBy: [ReportOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Report!]!
+  reportById(id: String!): Report
+  channelFollows(
+    where: ChannelFollowWhereInput
+    orderBy: [ChannelFollowOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [ChannelFollow!]!
+  channelFollowById(id: String!): ChannelFollow
+}
+
+type Event {
+  # {blockNumber}-{indexInBlock}
+  id: String!
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Hash of the extrinsic the event was emitted in
+  inExtrinsic: String
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Timestamp of the block the event was emitted in
+  timestamp: DateTime!
+
+  # More specific event data, which depends on event type
+  data: EventData!
+}
+
+union EventData =
+    CommentCreatedEventData
+  | CommentTextUpdatedEventData
+  | OpenAuctionStartedEventData
+  | EnglishAuctionStartedEventData
+  | NftIssuedEventData
+  | AuctionBidMadeEventData
+  | AuctionBidCanceledEventData
+  | AuctionCanceledEventData
+  | EnglishAuctionSettledEventData
+  | BidMadeCompletingAuctionEventData
+  | OpenAuctionBidAcceptedEventData
+  | NftSellOrderMadeEventData
+  | NftBoughtEventData
+  | BuyNowCanceledEventData
+  | BuyNowPriceUpdatedEventData
+  | MetaprotocolTransactionStatusEventData
+  | MemberBannedFromChannelEventData
+
+type CommentCreatedEventData {
+  # The comment that was added
+  comment: Comment!
+
+  # Comment's original text
+  text: String!
+}
+
+type Comment {
+  # METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}
+  id: String!
+
+  # Timestamp of the block the comment was created at
+  createdAt: DateTime!
+
+  # Author of the video comment
+  author: Membership!
+
+  # Comment text
+  text: String!
+
+  # Video the comment was added to
+  video: Video!
+
+  # Status of the comment; either it is visible, deleted, or moderated (deleted by moderator)
+  status: CommentStatus!
+
+  # List of all reactions to the comment
+  reactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+
+  # Reactions count by reaction Id
+  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
+
+  # A (parent) comment that this comment replies to (if any)
+  parentComment: Comment
+
+  # How many comments has replied to this comment
+  repliesCount: Int!
+
+  # Total number of reactions to this comment
+  reactionsCount: Int!
+
+  # Sum of replies and reactions
+  reactionsAndRepliesCount: Int!
+
+  # Whether comment has been edited or not
+  isEdited: Boolean!
+
+  # Whether a comment has been excluded/hidden (by the gateway operator)
+  isExcluded: Boolean!
+}
+
+type MemberMetadata {
+  id: String!
+
+  # Member's name
+  name: String
+
+  # Avatar data object
+  avatar: Avatar
+
+  # Short text chosen by member to share information about themselves
+  about: String
+  member: Membership!
+}
+
+union Avatar = AvatarObject | AvatarUri
+
+type AvatarObject {
+  # The avatar data object
+  avatarObject: StorageDataObject!
+}
+
+# Big number integer
+scalar BigInt
+
+type StorageBag {
+  # Storage bag id
+  id: String!
+
+  # Data objects in the bag
+  objects(
+    where: StorageDataObjectWhereInput
+    orderBy: [StorageDataObjectOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageDataObject!]!
+
+  # Storage buckets assigned to the bag
+  storageBuckets(
+    where: StorageBucketBagWhereInput
+    orderBy: [StorageBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketBag!]!
+
+  # Distribution buckets assigned to the bag
+  distributionBuckets(
+    where: DistributionBucketBagWhereInput
+    orderBy: [DistributionBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketBag!]!
+
+  # Owner of the storage bag
+  owner: StorageBagOwner!
+}
+
+input StorageDataObjectWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  isAccepted_isNull: Boolean
+  isAccepted_eq: Boolean
+  isAccepted_not_eq: Boolean
+  size_isNull: Boolean
+  size_eq: BigInt
+  size_not_eq: BigInt
+  size_gt: BigInt
+  size_gte: BigInt
+  size_lt: BigInt
+  size_lte: BigInt
+  size_in: [BigInt!]
+  size_not_in: [BigInt!]
+  storageBag_isNull: Boolean
+  storageBag: StorageBagWhereInput
+  ipfsHash_isNull: Boolean
+  ipfsHash_eq: String
+  ipfsHash_not_eq: String
+  ipfsHash_gt: String
+  ipfsHash_gte: String
+  ipfsHash_lt: String
+  ipfsHash_lte: String
+  ipfsHash_in: [String!]
+  ipfsHash_not_in: [String!]
+  ipfsHash_contains: String
+  ipfsHash_not_contains: String
+  ipfsHash_containsInsensitive: String
+  ipfsHash_not_containsInsensitive: String
+  ipfsHash_startsWith: String
+  ipfsHash_not_startsWith: String
+  ipfsHash_endsWith: String
+  ipfsHash_not_endsWith: String
+  type_isNull: Boolean
+  type: DataObjectTypeWhereInput
+  stateBloatBond_isNull: Boolean
+  stateBloatBond_eq: BigInt
+  stateBloatBond_not_eq: BigInt
+  stateBloatBond_gt: BigInt
+  stateBloatBond_gte: BigInt
+  stateBloatBond_lt: BigInt
+  stateBloatBond_lte: BigInt
+  stateBloatBond_in: [BigInt!]
+  stateBloatBond_not_in: [BigInt!]
+  unsetAt_isNull: Boolean
+  unsetAt_eq: DateTime
+  unsetAt_not_eq: DateTime
+  unsetAt_gt: DateTime
+  unsetAt_gte: DateTime
+  unsetAt_lt: DateTime
+  unsetAt_lte: DateTime
+  unsetAt_in: [DateTime!]
+  unsetAt_not_in: [DateTime!]
+  resolvedUrl_isNull: Boolean
+  resolvedUrl_eq: String
+  resolvedUrl_not_eq: String
+  resolvedUrl_gt: String
+  resolvedUrl_gte: String
+  resolvedUrl_lt: String
+  resolvedUrl_lte: String
+  resolvedUrl_in: [String!]
+  resolvedUrl_not_in: [String!]
+  resolvedUrl_contains: String
+  resolvedUrl_not_contains: String
+  resolvedUrl_containsInsensitive: String
+  resolvedUrl_not_containsInsensitive: String
+  resolvedUrl_startsWith: String
+  resolvedUrl_not_startsWith: String
+  resolvedUrl_endsWith: String
+  resolvedUrl_not_endsWith: String
+  AND: [StorageDataObjectWhereInput!]
+  OR: [StorageDataObjectWhereInput!]
+}
+
+input StorageBagWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  objects_every: StorageDataObjectWhereInput
+  objects_some: StorageDataObjectWhereInput
+  objects_none: StorageDataObjectWhereInput
+  storageBuckets_every: StorageBucketBagWhereInput
+  storageBuckets_some: StorageBucketBagWhereInput
+  storageBuckets_none: StorageBucketBagWhereInput
+  distributionBuckets_every: DistributionBucketBagWhereInput
+  distributionBuckets_some: DistributionBucketBagWhereInput
+  distributionBuckets_none: DistributionBucketBagWhereInput
+  owner_isNull: Boolean
+  owner: StorageBagOwnerWhereInput
+  AND: [StorageBagWhereInput!]
+  OR: [StorageBagWhereInput!]
+}
+
+input StorageBucketBagWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  storageBucket_isNull: Boolean
+  storageBucket: StorageBucketWhereInput
+  bag_isNull: Boolean
+  bag: StorageBagWhereInput
+  AND: [StorageBucketBagWhereInput!]
+  OR: [StorageBucketBagWhereInput!]
+}
+
+input StorageBucketWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  operatorStatus_isNull: Boolean
+  operatorStatus: StorageBucketOperatorStatusWhereInput
+  operatorMetadata_isNull: Boolean
+  operatorMetadata: StorageBucketOperatorMetadataWhereInput
+  acceptingNewBags_isNull: Boolean
+  acceptingNewBags_eq: Boolean
+  acceptingNewBags_not_eq: Boolean
+  bags_every: StorageBucketBagWhereInput
+  bags_some: StorageBucketBagWhereInput
+  bags_none: StorageBucketBagWhereInput
+  dataObjectsSizeLimit_isNull: Boolean
+  dataObjectsSizeLimit_eq: BigInt
+  dataObjectsSizeLimit_not_eq: BigInt
+  dataObjectsSizeLimit_gt: BigInt
+  dataObjectsSizeLimit_gte: BigInt
+  dataObjectsSizeLimit_lt: BigInt
+  dataObjectsSizeLimit_lte: BigInt
+  dataObjectsSizeLimit_in: [BigInt!]
+  dataObjectsSizeLimit_not_in: [BigInt!]
+  dataObjectCountLimit_isNull: Boolean
+  dataObjectCountLimit_eq: BigInt
+  dataObjectCountLimit_not_eq: BigInt
+  dataObjectCountLimit_gt: BigInt
+  dataObjectCountLimit_gte: BigInt
+  dataObjectCountLimit_lt: BigInt
+  dataObjectCountLimit_lte: BigInt
+  dataObjectCountLimit_in: [BigInt!]
+  dataObjectCountLimit_not_in: [BigInt!]
+  dataObjectsCount_isNull: Boolean
+  dataObjectsCount_eq: BigInt
+  dataObjectsCount_not_eq: BigInt
+  dataObjectsCount_gt: BigInt
+  dataObjectsCount_gte: BigInt
+  dataObjectsCount_lt: BigInt
+  dataObjectsCount_lte: BigInt
+  dataObjectsCount_in: [BigInt!]
+  dataObjectsCount_not_in: [BigInt!]
+  dataObjectsSize_isNull: Boolean
+  dataObjectsSize_eq: BigInt
+  dataObjectsSize_not_eq: BigInt
+  dataObjectsSize_gt: BigInt
+  dataObjectsSize_gte: BigInt
+  dataObjectsSize_lt: BigInt
+  dataObjectsSize_lte: BigInt
+  dataObjectsSize_in: [BigInt!]
+  dataObjectsSize_not_in: [BigInt!]
+  AND: [StorageBucketWhereInput!]
+  OR: [StorageBucketWhereInput!]
+}
+
+input StorageBucketOperatorStatusWhereInput {
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
+  workerId_isNull: Boolean
+  workerId_eq: Int
+  workerId_not_eq: Int
+  workerId_gt: Int
+  workerId_gte: Int
+  workerId_lt: Int
+  workerId_lte: Int
+  workerId_in: [Int!]
+  workerId_not_in: [Int!]
+  transactorAccountId_isNull: Boolean
+  transactorAccountId_eq: String
+  transactorAccountId_not_eq: String
+  transactorAccountId_gt: String
+  transactorAccountId_gte: String
+  transactorAccountId_lt: String
+  transactorAccountId_lte: String
+  transactorAccountId_in: [String!]
+  transactorAccountId_not_in: [String!]
+  transactorAccountId_contains: String
+  transactorAccountId_not_contains: String
+  transactorAccountId_containsInsensitive: String
+  transactorAccountId_not_containsInsensitive: String
+  transactorAccountId_startsWith: String
+  transactorAccountId_not_startsWith: String
+  transactorAccountId_endsWith: String
+  transactorAccountId_not_endsWith: String
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input StorageBucketOperatorMetadataWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  storageBucket_isNull: Boolean
+  storageBucket: StorageBucketWhereInput
+  nodeEndpoint_isNull: Boolean
+  nodeEndpoint_eq: String
+  nodeEndpoint_not_eq: String
+  nodeEndpoint_gt: String
+  nodeEndpoint_gte: String
+  nodeEndpoint_lt: String
+  nodeEndpoint_lte: String
+  nodeEndpoint_in: [String!]
+  nodeEndpoint_not_in: [String!]
+  nodeEndpoint_contains: String
+  nodeEndpoint_not_contains: String
+  nodeEndpoint_containsInsensitive: String
+  nodeEndpoint_not_containsInsensitive: String
+  nodeEndpoint_startsWith: String
+  nodeEndpoint_not_startsWith: String
+  nodeEndpoint_endsWith: String
+  nodeEndpoint_not_endsWith: String
+  nodeLocation_isNull: Boolean
+  nodeLocation: NodeLocationMetadataWhereInput
+  extra_isNull: Boolean
+  extra_eq: String
+  extra_not_eq: String
+  extra_gt: String
+  extra_gte: String
+  extra_lt: String
+  extra_lte: String
+  extra_in: [String!]
+  extra_not_in: [String!]
+  extra_contains: String
+  extra_not_contains: String
+  extra_containsInsensitive: String
+  extra_not_containsInsensitive: String
+  extra_startsWith: String
+  extra_not_startsWith: String
+  extra_endsWith: String
+  extra_not_endsWith: String
+  AND: [StorageBucketOperatorMetadataWhereInput!]
+  OR: [StorageBucketOperatorMetadataWhereInput!]
+}
+
+input NodeLocationMetadataWhereInput {
+  countryCode_isNull: Boolean
+  countryCode_eq: String
+  countryCode_not_eq: String
+  countryCode_gt: String
+  countryCode_gte: String
+  countryCode_lt: String
+  countryCode_lte: String
+  countryCode_in: [String!]
+  countryCode_not_in: [String!]
+  countryCode_contains: String
+  countryCode_not_contains: String
+  countryCode_containsInsensitive: String
+  countryCode_not_containsInsensitive: String
+  countryCode_startsWith: String
+  countryCode_not_startsWith: String
+  countryCode_endsWith: String
+  countryCode_not_endsWith: String
+  city_isNull: Boolean
+  city_eq: String
+  city_not_eq: String
+  city_gt: String
+  city_gte: String
+  city_lt: String
+  city_lte: String
+  city_in: [String!]
+  city_not_in: [String!]
+  city_contains: String
+  city_not_contains: String
+  city_containsInsensitive: String
+  city_not_containsInsensitive: String
+  city_startsWith: String
+  city_not_startsWith: String
+  city_endsWith: String
+  city_not_endsWith: String
+  coordinates_isNull: Boolean
+  coordinates: GeoCoordinatesWhereInput
+}
+
+input GeoCoordinatesWhereInput {
+  latitude_isNull: Boolean
+  latitude_eq: Float
+  latitude_not_eq: Float
+  latitude_gt: Float
+  latitude_gte: Float
+  latitude_lt: Float
+  latitude_lte: Float
+  latitude_in: [Float!]
+  latitude_not_in: [Float!]
+  longitude_isNull: Boolean
+  longitude_eq: Float
+  longitude_not_eq: Float
+  longitude_gt: Float
+  longitude_gte: Float
+  longitude_lt: Float
+  longitude_lte: Float
+  longitude_in: [Float!]
+  longitude_not_in: [Float!]
+}
+
+input DistributionBucketBagWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  distributionBucket_isNull: Boolean
+  distributionBucket: DistributionBucketWhereInput
+  bag_isNull: Boolean
+  bag: StorageBagWhereInput
+  AND: [DistributionBucketBagWhereInput!]
+  OR: [DistributionBucketBagWhereInput!]
+}
+
+input DistributionBucketWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  family_isNull: Boolean
+  family: DistributionBucketFamilyWhereInput
+  bucketIndex_isNull: Boolean
+  bucketIndex_eq: Int
+  bucketIndex_not_eq: Int
+  bucketIndex_gt: Int
+  bucketIndex_gte: Int
+  bucketIndex_lt: Int
+  bucketIndex_lte: Int
+  bucketIndex_in: [Int!]
+  bucketIndex_not_in: [Int!]
+  operators_every: DistributionBucketOperatorWhereInput
+  operators_some: DistributionBucketOperatorWhereInput
+  operators_none: DistributionBucketOperatorWhereInput
+  acceptingNewBags_isNull: Boolean
+  acceptingNewBags_eq: Boolean
+  acceptingNewBags_not_eq: Boolean
+  distributing_isNull: Boolean
+  distributing_eq: Boolean
+  distributing_not_eq: Boolean
+  bags_every: DistributionBucketBagWhereInput
+  bags_some: DistributionBucketBagWhereInput
+  bags_none: DistributionBucketBagWhereInput
+  AND: [DistributionBucketWhereInput!]
+  OR: [DistributionBucketWhereInput!]
+}
+
+input DistributionBucketFamilyWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  metadata_isNull: Boolean
+  metadata: DistributionBucketFamilyMetadataWhereInput
+  buckets_every: DistributionBucketWhereInput
+  buckets_some: DistributionBucketWhereInput
+  buckets_none: DistributionBucketWhereInput
+  AND: [DistributionBucketFamilyWhereInput!]
+  OR: [DistributionBucketFamilyWhereInput!]
+}
+
+input DistributionBucketFamilyMetadataWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  family_isNull: Boolean
+  family: DistributionBucketFamilyWhereInput
+  region_isNull: Boolean
+  region_eq: String
+  region_not_eq: String
+  region_gt: String
+  region_gte: String
+  region_lt: String
+  region_lte: String
+  region_in: [String!]
+  region_not_in: [String!]
+  region_contains: String
+  region_not_contains: String
+  region_containsInsensitive: String
+  region_not_containsInsensitive: String
+  region_startsWith: String
+  region_not_startsWith: String
+  region_endsWith: String
+  region_not_endsWith: String
+  description_isNull: Boolean
+  description_eq: String
+  description_not_eq: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_not_contains: String
+  description_containsInsensitive: String
+  description_not_containsInsensitive: String
+  description_startsWith: String
+  description_not_startsWith: String
+  description_endsWith: String
+  description_not_endsWith: String
+  areas_isNull: Boolean
+  latencyTestTargets_isNull: Boolean
+  latencyTestTargets_containsAll: [String]
+  latencyTestTargets_containsAny: [String]
+  latencyTestTargets_containsNone: [String]
+  AND: [DistributionBucketFamilyMetadataWhereInput!]
+  OR: [DistributionBucketFamilyMetadataWhereInput!]
+}
+
+input DistributionBucketOperatorWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  distributionBucket_isNull: Boolean
+  distributionBucket: DistributionBucketWhereInput
+  workerId_isNull: Boolean
+  workerId_eq: Int
+  workerId_not_eq: Int
+  workerId_gt: Int
+  workerId_gte: Int
+  workerId_lt: Int
+  workerId_lte: Int
+  workerId_in: [Int!]
+  workerId_not_in: [Int!]
+  status_isNull: Boolean
+  status_eq: DistributionBucketOperatorStatus
+  status_not_eq: DistributionBucketOperatorStatus
+  status_in: [DistributionBucketOperatorStatus!]
+  status_not_in: [DistributionBucketOperatorStatus!]
+  metadata_isNull: Boolean
+  metadata: DistributionBucketOperatorMetadataWhereInput
+  AND: [DistributionBucketOperatorWhereInput!]
+  OR: [DistributionBucketOperatorWhereInput!]
+}
+
+enum DistributionBucketOperatorStatus {
+  INVITED
+  ACTIVE
+}
+
+input DistributionBucketOperatorMetadataWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  distirbutionBucketOperator_isNull: Boolean
+  distirbutionBucketOperator: DistributionBucketOperatorWhereInput
+  nodeEndpoint_isNull: Boolean
+  nodeEndpoint_eq: String
+  nodeEndpoint_not_eq: String
+  nodeEndpoint_gt: String
+  nodeEndpoint_gte: String
+  nodeEndpoint_lt: String
+  nodeEndpoint_lte: String
+  nodeEndpoint_in: [String!]
+  nodeEndpoint_not_in: [String!]
+  nodeEndpoint_contains: String
+  nodeEndpoint_not_contains: String
+  nodeEndpoint_containsInsensitive: String
+  nodeEndpoint_not_containsInsensitive: String
+  nodeEndpoint_startsWith: String
+  nodeEndpoint_not_startsWith: String
+  nodeEndpoint_endsWith: String
+  nodeEndpoint_not_endsWith: String
+  nodeLocation_isNull: Boolean
+  nodeLocation: NodeLocationMetadataWhereInput
+  extra_isNull: Boolean
+  extra_eq: String
+  extra_not_eq: String
+  extra_gt: String
+  extra_gte: String
+  extra_lt: String
+  extra_lte: String
+  extra_in: [String!]
+  extra_not_in: [String!]
+  extra_contains: String
+  extra_not_contains: String
+  extra_containsInsensitive: String
+  extra_not_containsInsensitive: String
+  extra_startsWith: String
+  extra_not_startsWith: String
+  extra_endsWith: String
+  extra_not_endsWith: String
+  AND: [DistributionBucketOperatorMetadataWhereInput!]
+  OR: [DistributionBucketOperatorMetadataWhereInput!]
+}
+
+input StorageBagOwnerWhereInput {
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
+  workingGroupId_isNull: Boolean
+  workingGroupId_eq: String
+  workingGroupId_not_eq: String
+  workingGroupId_gt: String
+  workingGroupId_gte: String
+  workingGroupId_lt: String
+  workingGroupId_lte: String
+  workingGroupId_in: [String!]
+  workingGroupId_not_in: [String!]
+  workingGroupId_contains: String
+  workingGroupId_not_contains: String
+  workingGroupId_containsInsensitive: String
+  workingGroupId_not_containsInsensitive: String
+  workingGroupId_startsWith: String
+  workingGroupId_not_startsWith: String
+  workingGroupId_endsWith: String
+  workingGroupId_not_endsWith: String
+  memberId_isNull: Boolean
+  memberId_eq: String
+  memberId_not_eq: String
+  memberId_gt: String
+  memberId_gte: String
+  memberId_lt: String
+  memberId_lte: String
+  memberId_in: [String!]
+  memberId_not_in: [String!]
+  memberId_contains: String
+  memberId_not_contains: String
+  memberId_containsInsensitive: String
+  memberId_not_containsInsensitive: String
+  memberId_startsWith: String
+  memberId_not_startsWith: String
+  memberId_endsWith: String
+  memberId_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  daoId_isNull: Boolean
+  daoId_eq: Int
+  daoId_not_eq: Int
+  daoId_gt: Int
+  daoId_gte: Int
+  daoId_lt: Int
+  daoId_lte: Int
+  daoId_in: [Int!]
+  daoId_not_in: [Int!]
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input DataObjectTypeWhereInput {
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  video_isNull: Boolean
+  video: VideoWhereInput
+  subtitle_isNull: Boolean
+  subtitle: VideoSubtitleWhereInput
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input MembershipWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  handle_isNull: Boolean
+  handle_eq: String
+  handle_not_eq: String
+  handle_gt: String
+  handle_gte: String
+  handle_lt: String
+  handle_lte: String
+  handle_in: [String!]
+  handle_not_in: [String!]
+  handle_contains: String
+  handle_not_contains: String
+  handle_containsInsensitive: String
+  handle_not_containsInsensitive: String
+  handle_startsWith: String
+  handle_not_startsWith: String
+  handle_endsWith: String
+  handle_not_endsWith: String
+  metadata_isNull: Boolean
+  metadata: MemberMetadataWhereInput
+  controllerAccount_isNull: Boolean
+  controllerAccount_eq: String
+  controllerAccount_not_eq: String
+  controllerAccount_gt: String
+  controllerAccount_gte: String
+  controllerAccount_lt: String
+  controllerAccount_lte: String
+  controllerAccount_in: [String!]
+  controllerAccount_not_in: [String!]
+  controllerAccount_contains: String
+  controllerAccount_not_contains: String
+  controllerAccount_containsInsensitive: String
+  controllerAccount_not_containsInsensitive: String
+  controllerAccount_startsWith: String
+  controllerAccount_not_startsWith: String
+  controllerAccount_endsWith: String
+  controllerAccount_not_endsWith: String
+  whitelistedInAuctions_every: AuctionWhitelistedMemberWhereInput
+  whitelistedInAuctions_some: AuctionWhitelistedMemberWhereInput
+  whitelistedInAuctions_none: AuctionWhitelistedMemberWhereInput
+  channels_every: ChannelWhereInput
+  channels_some: ChannelWhereInput
+  channels_none: ChannelWhereInput
+  bannedFromChannels_every: BannedMemberWhereInput
+  bannedFromChannels_some: BannedMemberWhereInput
+  bannedFromChannels_none: BannedMemberWhereInput
+  totalChannelsCreated_isNull: Boolean
+  totalChannelsCreated_eq: Int
+  totalChannelsCreated_not_eq: Int
+  totalChannelsCreated_gt: Int
+  totalChannelsCreated_gte: Int
+  totalChannelsCreated_lt: Int
+  totalChannelsCreated_lte: Int
+  totalChannelsCreated_in: [Int!]
+  totalChannelsCreated_not_in: [Int!]
+  AND: [MembershipWhereInput!]
+  OR: [MembershipWhereInput!]
+}
+
+input MemberMetadataWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  name_isNull: Boolean
+  name_eq: String
+  name_not_eq: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_in: [String!]
+  name_not_in: [String!]
+  name_contains: String
+  name_not_contains: String
+  name_containsInsensitive: String
+  name_not_containsInsensitive: String
+  name_startsWith: String
+  name_not_startsWith: String
+  name_endsWith: String
+  name_not_endsWith: String
+  avatar_isNull: Boolean
+  avatar: AvatarWhereInput
+  about_isNull: Boolean
+  about_eq: String
+  about_not_eq: String
+  about_gt: String
+  about_gte: String
+  about_lt: String
+  about_lte: String
+  about_in: [String!]
+  about_not_in: [String!]
+  about_contains: String
+  about_not_contains: String
+  about_containsInsensitive: String
+  about_not_containsInsensitive: String
+  about_startsWith: String
+  about_not_startsWith: String
+  about_endsWith: String
+  about_not_endsWith: String
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  AND: [MemberMetadataWhereInput!]
+  OR: [MemberMetadataWhereInput!]
+}
+
+input AvatarWhereInput {
+  avatarObject_isNull: Boolean
+  avatarObject: StorageDataObjectWhereInput
+  avatarUri_isNull: Boolean
+  avatarUri_eq: String
+  avatarUri_not_eq: String
+  avatarUri_gt: String
+  avatarUri_gte: String
+  avatarUri_lt: String
+  avatarUri_lte: String
+  avatarUri_in: [String!]
+  avatarUri_not_in: [String!]
+  avatarUri_contains: String
+  avatarUri_not_contains: String
+  avatarUri_containsInsensitive: String
+  avatarUri_not_containsInsensitive: String
+  avatarUri_startsWith: String
+  avatarUri_not_startsWith: String
+  avatarUri_endsWith: String
+  avatarUri_not_endsWith: String
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input AuctionWhitelistedMemberWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  auction_isNull: Boolean
+  auction: AuctionWhereInput
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  AND: [AuctionWhitelistedMemberWhereInput!]
+  OR: [AuctionWhitelistedMemberWhereInput!]
+}
+
+input AuctionWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  nft_isNull: Boolean
+  nft: OwnedNftWhereInput
+  winningMember_isNull: Boolean
+  winningMember: MembershipWhereInput
+  startingPrice_isNull: Boolean
+  startingPrice_eq: BigInt
+  startingPrice_not_eq: BigInt
+  startingPrice_gt: BigInt
+  startingPrice_gte: BigInt
+  startingPrice_lt: BigInt
+  startingPrice_lte: BigInt
+  startingPrice_in: [BigInt!]
+  startingPrice_not_in: [BigInt!]
+  buyNowPrice_isNull: Boolean
+  buyNowPrice_eq: BigInt
+  buyNowPrice_not_eq: BigInt
+  buyNowPrice_gt: BigInt
+  buyNowPrice_gte: BigInt
+  buyNowPrice_lt: BigInt
+  buyNowPrice_lte: BigInt
+  buyNowPrice_in: [BigInt!]
+  buyNowPrice_not_in: [BigInt!]
+  auctionType_isNull: Boolean
+  auctionType: AuctionTypeWhereInput
+  topBid_isNull: Boolean
+  topBid: BidWhereInput
+  bids_every: BidWhereInput
+  bids_some: BidWhereInput
+  bids_none: BidWhereInput
+  startsAtBlock_isNull: Boolean
+  startsAtBlock_eq: Int
+  startsAtBlock_not_eq: Int
+  startsAtBlock_gt: Int
+  startsAtBlock_gte: Int
+  startsAtBlock_lt: Int
+  startsAtBlock_lte: Int
+  startsAtBlock_in: [Int!]
+  startsAtBlock_not_in: [Int!]
+  endedAtBlock_isNull: Boolean
+  endedAtBlock_eq: Int
+  endedAtBlock_not_eq: Int
+  endedAtBlock_gt: Int
+  endedAtBlock_gte: Int
+  endedAtBlock_lt: Int
+  endedAtBlock_lte: Int
+  endedAtBlock_in: [Int!]
+  endedAtBlock_not_in: [Int!]
+  isCanceled_isNull: Boolean
+  isCanceled_eq: Boolean
+  isCanceled_not_eq: Boolean
+  isCompleted_isNull: Boolean
+  isCompleted_eq: Boolean
+  isCompleted_not_eq: Boolean
+  whitelistedMembers_every: AuctionWhitelistedMemberWhereInput
+  whitelistedMembers_some: AuctionWhitelistedMemberWhereInput
+  whitelistedMembers_none: AuctionWhitelistedMemberWhereInput
+  AND: [AuctionWhereInput!]
+  OR: [AuctionWhereInput!]
+}
+
+input OwnedNftWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  video_isNull: Boolean
+  video: VideoWhereInput
+  auctions_every: AuctionWhereInput
+  auctions_some: AuctionWhereInput
+  auctions_none: AuctionWhereInput
+  owner_isNull: Boolean
+  owner: NftOwnerWhereInput
+  transactionalStatus_isNull: Boolean
+  transactionalStatus: TransactionalStatusWhereInput
+  creatorRoyalty_isNull: Boolean
+  creatorRoyalty_eq: Float
+  creatorRoyalty_not_eq: Float
+  creatorRoyalty_gt: Float
+  creatorRoyalty_gte: Float
+  creatorRoyalty_lt: Float
+  creatorRoyalty_lte: Float
+  creatorRoyalty_in: [Float!]
+  creatorRoyalty_not_in: [Float!]
+  lastSalePrice_isNull: Boolean
+  lastSalePrice_eq: BigInt
+  lastSalePrice_not_eq: BigInt
+  lastSalePrice_gt: BigInt
+  lastSalePrice_gte: BigInt
+  lastSalePrice_lt: BigInt
+  lastSalePrice_lte: BigInt
+  lastSalePrice_in: [BigInt!]
+  lastSalePrice_not_in: [BigInt!]
+  lastSaleDate_isNull: Boolean
+  lastSaleDate_eq: DateTime
+  lastSaleDate_not_eq: DateTime
+  lastSaleDate_gt: DateTime
+  lastSaleDate_gte: DateTime
+  lastSaleDate_lt: DateTime
+  lastSaleDate_lte: DateTime
+  lastSaleDate_in: [DateTime!]
+  lastSaleDate_not_in: [DateTime!]
+  bids_every: BidWhereInput
+  bids_some: BidWhereInput
+  bids_none: BidWhereInput
+  AND: [OwnedNftWhereInput!]
+  OR: [OwnedNftWhereInput!]
+}
+
+input VideoCategoryWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  name_isNull: Boolean
+  name_eq: String
+  name_not_eq: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_in: [String!]
+  name_not_in: [String!]
+  name_contains: String
+  name_not_contains: String
+  name_containsInsensitive: String
+  name_not_containsInsensitive: String
+  name_startsWith: String
+  name_not_startsWith: String
+  name_endsWith: String
+  name_not_endsWith: String
+  description_isNull: Boolean
+  description_eq: String
+  description_not_eq: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_not_contains: String
+  description_containsInsensitive: String
+  description_not_containsInsensitive: String
+  description_startsWith: String
+  description_not_startsWith: String
+  description_endsWith: String
+  description_not_endsWith: String
+  parentCategory_isNull: Boolean
+  parentCategory: VideoCategoryWhereInput
+  videos_every: VideoWhereInput
+  videos_some: VideoWhereInput
+  videos_none: VideoWhereInput
+  featuredVideos_every: VideoFeaturedInCategoryWhereInput
+  featuredVideos_some: VideoFeaturedInCategoryWhereInput
+  featuredVideos_none: VideoFeaturedInCategoryWhereInput
+  isSupported_isNull: Boolean
+  isSupported_eq: Boolean
+  isSupported_not_eq: Boolean
+  createdInBlock_isNull: Boolean
+  createdInBlock_eq: Int
+  createdInBlock_not_eq: Int
+  createdInBlock_gt: Int
+  createdInBlock_gte: Int
+  createdInBlock_lt: Int
+  createdInBlock_lte: Int
+  createdInBlock_in: [Int!]
+  createdInBlock_not_in: [Int!]
+  AND: [VideoCategoryWhereInput!]
+  OR: [VideoCategoryWhereInput!]
+}
+
+input VideoFeaturedInCategoryWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  video_isNull: Boolean
+  video: VideoWhereInput
+  category_isNull: Boolean
+  category: VideoCategoryWhereInput
+  videoCutUrl_isNull: Boolean
+  videoCutUrl_eq: String
+  videoCutUrl_not_eq: String
+  videoCutUrl_gt: String
+  videoCutUrl_gte: String
+  videoCutUrl_lt: String
+  videoCutUrl_lte: String
+  videoCutUrl_in: [String!]
+  videoCutUrl_not_in: [String!]
+  videoCutUrl_contains: String
+  videoCutUrl_not_contains: String
+  videoCutUrl_containsInsensitive: String
+  videoCutUrl_not_containsInsensitive: String
+  videoCutUrl_startsWith: String
+  videoCutUrl_not_startsWith: String
+  videoCutUrl_endsWith: String
+  videoCutUrl_not_endsWith: String
+  AND: [VideoFeaturedInCategoryWhereInput!]
+  OR: [VideoFeaturedInCategoryWhereInput!]
+}
+
+input LicenseWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  code_isNull: Boolean
+  code_eq: Int
+  code_not_eq: Int
+  code_gt: Int
+  code_gte: Int
+  code_lt: Int
+  code_lte: Int
+  code_in: [Int!]
+  code_not_in: [Int!]
+  attribution_isNull: Boolean
+  attribution_eq: String
+  attribution_not_eq: String
+  attribution_gt: String
+  attribution_gte: String
+  attribution_lt: String
+  attribution_lte: String
+  attribution_in: [String!]
+  attribution_not_in: [String!]
+  attribution_contains: String
+  attribution_not_contains: String
+  attribution_containsInsensitive: String
+  attribution_not_containsInsensitive: String
+  attribution_startsWith: String
+  attribution_not_startsWith: String
+  attribution_endsWith: String
+  attribution_not_endsWith: String
+  customText_isNull: Boolean
+  customText_eq: String
+  customText_not_eq: String
+  customText_gt: String
+  customText_gte: String
+  customText_lt: String
+  customText_lte: String
+  customText_in: [String!]
+  customText_not_in: [String!]
+  customText_contains: String
+  customText_not_contains: String
+  customText_containsInsensitive: String
+  customText_not_containsInsensitive: String
+  customText_startsWith: String
+  customText_not_startsWith: String
+  customText_endsWith: String
+  customText_not_endsWith: String
+  AND: [LicenseWhereInput!]
+  OR: [LicenseWhereInput!]
+}
+
+input VideoMediaMetadataWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  encoding_isNull: Boolean
+  encoding: VideoMediaEncodingWhereInput
+  pixelWidth_isNull: Boolean
+  pixelWidth_eq: Int
+  pixelWidth_not_eq: Int
+  pixelWidth_gt: Int
+  pixelWidth_gte: Int
+  pixelWidth_lt: Int
+  pixelWidth_lte: Int
+  pixelWidth_in: [Int!]
+  pixelWidth_not_in: [Int!]
+  pixelHeight_isNull: Boolean
+  pixelHeight_eq: Int
+  pixelHeight_not_eq: Int
+  pixelHeight_gt: Int
+  pixelHeight_gte: Int
+  pixelHeight_lt: Int
+  pixelHeight_lte: Int
+  pixelHeight_in: [Int!]
+  pixelHeight_not_in: [Int!]
+  size_isNull: Boolean
+  size_eq: BigInt
+  size_not_eq: BigInt
+  size_gt: BigInt
+  size_gte: BigInt
+  size_lt: BigInt
+  size_lte: BigInt
+  size_in: [BigInt!]
+  size_not_in: [BigInt!]
+  video_isNull: Boolean
+  video: VideoWhereInput
+  createdInBlock_isNull: Boolean
+  createdInBlock_eq: Int
+  createdInBlock_not_eq: Int
+  createdInBlock_gt: Int
+  createdInBlock_gte: Int
+  createdInBlock_lt: Int
+  createdInBlock_lte: Int
+  createdInBlock_in: [Int!]
+  createdInBlock_not_in: [Int!]
+  AND: [VideoMediaMetadataWhereInput!]
+  OR: [VideoMediaMetadataWhereInput!]
+}
+
+input VideoMediaEncodingWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  codecName_isNull: Boolean
+  codecName_eq: String
+  codecName_not_eq: String
+  codecName_gt: String
+  codecName_gte: String
+  codecName_lt: String
+  codecName_lte: String
+  codecName_in: [String!]
+  codecName_not_in: [String!]
+  codecName_contains: String
+  codecName_not_contains: String
+  codecName_containsInsensitive: String
+  codecName_not_containsInsensitive: String
+  codecName_startsWith: String
+  codecName_not_startsWith: String
+  codecName_endsWith: String
+  codecName_not_endsWith: String
+  container_isNull: Boolean
+  container_eq: String
+  container_not_eq: String
+  container_gt: String
+  container_gte: String
+  container_lt: String
+  container_lte: String
+  container_in: [String!]
+  container_not_in: [String!]
+  container_contains: String
+  container_not_contains: String
+  container_containsInsensitive: String
+  container_not_containsInsensitive: String
+  container_startsWith: String
+  container_not_startsWith: String
+  container_endsWith: String
+  container_not_endsWith: String
+  mimeMediaType_isNull: Boolean
+  mimeMediaType_eq: String
+  mimeMediaType_not_eq: String
+  mimeMediaType_gt: String
+  mimeMediaType_gte: String
+  mimeMediaType_lt: String
+  mimeMediaType_lte: String
+  mimeMediaType_in: [String!]
+  mimeMediaType_not_in: [String!]
+  mimeMediaType_contains: String
+  mimeMediaType_not_contains: String
+  mimeMediaType_containsInsensitive: String
+  mimeMediaType_not_containsInsensitive: String
+  mimeMediaType_startsWith: String
+  mimeMediaType_not_startsWith: String
+  mimeMediaType_endsWith: String
+  mimeMediaType_not_endsWith: String
+  AND: [VideoMediaEncodingWhereInput!]
+  OR: [VideoMediaEncodingWhereInput!]
+}
+
+input VideoSubtitleWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  video_isNull: Boolean
+  video: VideoWhereInput
+  type_isNull: Boolean
+  type_eq: String
+  type_not_eq: String
+  type_gt: String
+  type_gte: String
+  type_lt: String
+  type_lte: String
+  type_in: [String!]
+  type_not_in: [String!]
+  type_contains: String
+  type_not_contains: String
+  type_containsInsensitive: String
+  type_not_containsInsensitive: String
+  type_startsWith: String
+  type_not_startsWith: String
+  type_endsWith: String
+  type_not_endsWith: String
+  language_isNull: Boolean
+  language_eq: String
+  language_not_eq: String
+  language_gt: String
+  language_gte: String
+  language_lt: String
+  language_lte: String
+  language_in: [String!]
+  language_not_in: [String!]
+  language_contains: String
+  language_not_contains: String
+  language_containsInsensitive: String
+  language_not_containsInsensitive: String
+  language_startsWith: String
+  language_not_startsWith: String
+  language_endsWith: String
+  language_not_endsWith: String
+  mimeType_isNull: Boolean
+  mimeType_eq: String
+  mimeType_not_eq: String
+  mimeType_gt: String
+  mimeType_gte: String
+  mimeType_lt: String
+  mimeType_lte: String
+  mimeType_in: [String!]
+  mimeType_not_in: [String!]
+  mimeType_contains: String
+  mimeType_not_contains: String
+  mimeType_containsInsensitive: String
+  mimeType_not_containsInsensitive: String
+  mimeType_startsWith: String
+  mimeType_not_startsWith: String
+  mimeType_endsWith: String
+  mimeType_not_endsWith: String
+  asset_isNull: Boolean
+  asset: StorageDataObjectWhereInput
+  AND: [VideoSubtitleWhereInput!]
+  OR: [VideoSubtitleWhereInput!]
+}
+
+input CommentWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  author_isNull: Boolean
+  author: MembershipWhereInput
+  text_isNull: Boolean
+  text_eq: String
+  text_not_eq: String
+  text_gt: String
+  text_gte: String
+  text_lt: String
+  text_lte: String
+  text_in: [String!]
+  text_not_in: [String!]
+  text_contains: String
+  text_not_contains: String
+  text_containsInsensitive: String
+  text_not_containsInsensitive: String
+  text_startsWith: String
+  text_not_startsWith: String
+  text_endsWith: String
+  text_not_endsWith: String
+  video_isNull: Boolean
+  video: VideoWhereInput
+  status_isNull: Boolean
+  status_eq: CommentStatus
+  status_not_eq: CommentStatus
+  status_in: [CommentStatus!]
+  status_not_in: [CommentStatus!]
+  reactions_every: CommentReactionWhereInput
+  reactions_some: CommentReactionWhereInput
+  reactions_none: CommentReactionWhereInput
+  reactionsCountByReactionId_isNull: Boolean
+  parentComment_isNull: Boolean
+  parentComment: CommentWhereInput
+  repliesCount_isNull: Boolean
+  repliesCount_eq: Int
+  repliesCount_not_eq: Int
+  repliesCount_gt: Int
+  repliesCount_gte: Int
+  repliesCount_lt: Int
+  repliesCount_lte: Int
+  repliesCount_in: [Int!]
+  repliesCount_not_in: [Int!]
+  reactionsCount_isNull: Boolean
+  reactionsCount_eq: Int
+  reactionsCount_not_eq: Int
+  reactionsCount_gt: Int
+  reactionsCount_gte: Int
+  reactionsCount_lt: Int
+  reactionsCount_lte: Int
+  reactionsCount_in: [Int!]
+  reactionsCount_not_in: [Int!]
+  reactionsAndRepliesCount_isNull: Boolean
+  reactionsAndRepliesCount_eq: Int
+  reactionsAndRepliesCount_not_eq: Int
+  reactionsAndRepliesCount_gt: Int
+  reactionsAndRepliesCount_gte: Int
+  reactionsAndRepliesCount_lt: Int
+  reactionsAndRepliesCount_lte: Int
+  reactionsAndRepliesCount_in: [Int!]
+  reactionsAndRepliesCount_not_in: [Int!]
+  isEdited_isNull: Boolean
+  isEdited_eq: Boolean
+  isEdited_not_eq: Boolean
+  isExcluded_isNull: Boolean
+  isExcluded_eq: Boolean
+  isExcluded_not_eq: Boolean
+  AND: [CommentWhereInput!]
+  OR: [CommentWhereInput!]
+}
+
+enum CommentStatus {
+  VISIBLE
+  DELETED
+  MODERATED
+}
+
+input CommentReactionWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  reactionId_isNull: Boolean
+  reactionId_eq: Int
+  reactionId_not_eq: Int
+  reactionId_gt: Int
+  reactionId_gte: Int
+  reactionId_lt: Int
+  reactionId_lte: Int
+  reactionId_in: [Int!]
+  reactionId_not_in: [Int!]
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  comment_isNull: Boolean
+  comment: CommentWhereInput
+  video_isNull: Boolean
+  video: VideoWhereInput
+  AND: [CommentReactionWhereInput!]
+  OR: [CommentReactionWhereInput!]
+}
+
+input VideoReactionWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  reaction_isNull: Boolean
+  reaction_eq: VideoReactionOptions
+  reaction_not_eq: VideoReactionOptions
+  reaction_in: [VideoReactionOptions!]
+  reaction_not_in: [VideoReactionOptions!]
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  video_isNull: Boolean
+  video: VideoWhereInput
+  AND: [VideoReactionWhereInput!]
+  OR: [VideoReactionWhereInput!]
+}
+
+enum VideoReactionOptions {
+  LIKE
+  UNLIKE
+}
+
+input AppWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  name_isNull: Boolean
+  name_eq: String
+  name_not_eq: String
+  name_gt: String
+  name_gte: String
+  name_lt: String
+  name_lte: String
+  name_in: [String!]
+  name_not_in: [String!]
+  name_contains: String
+  name_not_contains: String
+  name_containsInsensitive: String
+  name_not_containsInsensitive: String
+  name_startsWith: String
+  name_not_startsWith: String
+  name_endsWith: String
+  name_not_endsWith: String
+  ownerMember_isNull: Boolean
+  ownerMember: MembershipWhereInput
+  websiteUrl_isNull: Boolean
+  websiteUrl_eq: String
+  websiteUrl_not_eq: String
+  websiteUrl_gt: String
+  websiteUrl_gte: String
+  websiteUrl_lt: String
+  websiteUrl_lte: String
+  websiteUrl_in: [String!]
+  websiteUrl_not_in: [String!]
+  websiteUrl_contains: String
+  websiteUrl_not_contains: String
+  websiteUrl_containsInsensitive: String
+  websiteUrl_not_containsInsensitive: String
+  websiteUrl_startsWith: String
+  websiteUrl_not_startsWith: String
+  websiteUrl_endsWith: String
+  websiteUrl_not_endsWith: String
+  useUri_isNull: Boolean
+  useUri_eq: String
+  useUri_not_eq: String
+  useUri_gt: String
+  useUri_gte: String
+  useUri_lt: String
+  useUri_lte: String
+  useUri_in: [String!]
+  useUri_not_in: [String!]
+  useUri_contains: String
+  useUri_not_contains: String
+  useUri_containsInsensitive: String
+  useUri_not_containsInsensitive: String
+  useUri_startsWith: String
+  useUri_not_startsWith: String
+  useUri_endsWith: String
+  useUri_not_endsWith: String
+  smallIcon_isNull: Boolean
+  smallIcon_eq: String
+  smallIcon_not_eq: String
+  smallIcon_gt: String
+  smallIcon_gte: String
+  smallIcon_lt: String
+  smallIcon_lte: String
+  smallIcon_in: [String!]
+  smallIcon_not_in: [String!]
+  smallIcon_contains: String
+  smallIcon_not_contains: String
+  smallIcon_containsInsensitive: String
+  smallIcon_not_containsInsensitive: String
+  smallIcon_startsWith: String
+  smallIcon_not_startsWith: String
+  smallIcon_endsWith: String
+  smallIcon_not_endsWith: String
+  mediumIcon_isNull: Boolean
+  mediumIcon_eq: String
+  mediumIcon_not_eq: String
+  mediumIcon_gt: String
+  mediumIcon_gte: String
+  mediumIcon_lt: String
+  mediumIcon_lte: String
+  mediumIcon_in: [String!]
+  mediumIcon_not_in: [String!]
+  mediumIcon_contains: String
+  mediumIcon_not_contains: String
+  mediumIcon_containsInsensitive: String
+  mediumIcon_not_containsInsensitive: String
+  mediumIcon_startsWith: String
+  mediumIcon_not_startsWith: String
+  mediumIcon_endsWith: String
+  mediumIcon_not_endsWith: String
+  bigIcon_isNull: Boolean
+  bigIcon_eq: String
+  bigIcon_not_eq: String
+  bigIcon_gt: String
+  bigIcon_gte: String
+  bigIcon_lt: String
+  bigIcon_lte: String
+  bigIcon_in: [String!]
+  bigIcon_not_in: [String!]
+  bigIcon_contains: String
+  bigIcon_not_contains: String
+  bigIcon_containsInsensitive: String
+  bigIcon_not_containsInsensitive: String
+  bigIcon_startsWith: String
+  bigIcon_not_startsWith: String
+  bigIcon_endsWith: String
+  bigIcon_not_endsWith: String
+  oneLiner_isNull: Boolean
+  oneLiner_eq: String
+  oneLiner_not_eq: String
+  oneLiner_gt: String
+  oneLiner_gte: String
+  oneLiner_lt: String
+  oneLiner_lte: String
+  oneLiner_in: [String!]
+  oneLiner_not_in: [String!]
+  oneLiner_contains: String
+  oneLiner_not_contains: String
+  oneLiner_containsInsensitive: String
+  oneLiner_not_containsInsensitive: String
+  oneLiner_startsWith: String
+  oneLiner_not_startsWith: String
+  oneLiner_endsWith: String
+  oneLiner_not_endsWith: String
+  description_isNull: Boolean
+  description_eq: String
+  description_not_eq: String
+  description_gt: String
+  description_gte: String
+  description_lt: String
+  description_lte: String
+  description_in: [String!]
+  description_not_in: [String!]
+  description_contains: String
+  description_not_contains: String
+  description_containsInsensitive: String
+  description_not_containsInsensitive: String
+  description_startsWith: String
+  description_not_startsWith: String
+  description_endsWith: String
+  description_not_endsWith: String
+  termsOfService_isNull: Boolean
+  termsOfService_eq: String
+  termsOfService_not_eq: String
+  termsOfService_gt: String
+  termsOfService_gte: String
+  termsOfService_lt: String
+  termsOfService_lte: String
+  termsOfService_in: [String!]
+  termsOfService_not_in: [String!]
+  termsOfService_contains: String
+  termsOfService_not_contains: String
+  termsOfService_containsInsensitive: String
+  termsOfService_not_containsInsensitive: String
+  termsOfService_startsWith: String
+  termsOfService_not_startsWith: String
+  termsOfService_endsWith: String
+  termsOfService_not_endsWith: String
+  platforms_isNull: Boolean
+  platforms_containsAll: [String]
+  platforms_containsAny: [String]
+  platforms_containsNone: [String]
+  category_isNull: Boolean
+  category_eq: String
+  category_not_eq: String
+  category_gt: String
+  category_gte: String
+  category_lt: String
+  category_lte: String
+  category_in: [String!]
+  category_not_in: [String!]
+  category_contains: String
+  category_not_contains: String
+  category_containsInsensitive: String
+  category_not_containsInsensitive: String
+  category_startsWith: String
+  category_not_startsWith: String
+  category_endsWith: String
+  category_not_endsWith: String
+  authKey_isNull: Boolean
+  authKey_eq: String
+  authKey_not_eq: String
+  authKey_gt: String
+  authKey_gte: String
+  authKey_lt: String
+  authKey_lte: String
+  authKey_in: [String!]
+  authKey_not_in: [String!]
+  authKey_contains: String
+  authKey_not_contains: String
+  authKey_containsInsensitive: String
+  authKey_not_containsInsensitive: String
+  authKey_startsWith: String
+  authKey_not_startsWith: String
+  authKey_endsWith: String
+  authKey_not_endsWith: String
+  appVideos_every: VideoWhereInput
+  appVideos_some: VideoWhereInput
+  appVideos_none: VideoWhereInput
+  appChannels_every: ChannelWhereInput
+  appChannels_some: ChannelWhereInput
+  appChannels_none: ChannelWhereInput
+  AND: [AppWhereInput!]
+  OR: [AppWhereInput!]
+}
+
+input NftOwnerWhereInput {
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input TransactionalStatusWhereInput {
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  price_isNull: Boolean
+  price_eq: BigInt
+  price_not_eq: BigInt
+  price_gt: BigInt
+  price_gte: BigInt
+  price_lt: BigInt
+  price_lte: BigInt
+  price_in: [BigInt!]
+  price_not_in: [BigInt!]
+  auction_isNull: Boolean
+  auction: AuctionWhereInput
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input BidWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  createdAt_isNull: Boolean
+  createdAt_eq: DateTime
+  createdAt_not_eq: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_in: [DateTime!]
+  createdAt_not_in: [DateTime!]
+  auction_isNull: Boolean
+  auction: AuctionWhereInput
+  nft_isNull: Boolean
+  nft: OwnedNftWhereInput
+  bidder_isNull: Boolean
+  bidder: MembershipWhereInput
+  amount_isNull: Boolean
+  amount_eq: BigInt
+  amount_not_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  amount_not_in: [BigInt!]
+  isCanceled_isNull: Boolean
+  isCanceled_eq: Boolean
+  isCanceled_not_eq: Boolean
+  createdInBlock_isNull: Boolean
+  createdInBlock_eq: Int
+  createdInBlock_not_eq: Int
+  createdInBlock_gt: Int
+  createdInBlock_gte: Int
+  createdInBlock_lt: Int
+  createdInBlock_lte: Int
+  createdInBlock_in: [Int!]
+  createdInBlock_not_in: [Int!]
+  indexInBlock_isNull: Boolean
+  indexInBlock_eq: Int
+  indexInBlock_not_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  indexInBlock_not_in: [Int!]
+  previousTopBid_isNull: Boolean
+  previousTopBid: BidWhereInput
+  AND: [BidWhereInput!]
+  OR: [BidWhereInput!]
+}
+
+input AuctionTypeWhereInput {
+  duration_isNull: Boolean
+  duration_eq: Int
+  duration_not_eq: Int
+  duration_gt: Int
+  duration_gte: Int
+  duration_lt: Int
+  duration_lte: Int
+  duration_in: [Int!]
+  duration_not_in: [Int!]
+  extensionPeriod_isNull: Boolean
+  extensionPeriod_eq: Int
+  extensionPeriod_not_eq: Int
+  extensionPeriod_gt: Int
+  extensionPeriod_gte: Int
+  extensionPeriod_lt: Int
+  extensionPeriod_lte: Int
+  extensionPeriod_in: [Int!]
+  extensionPeriod_not_in: [Int!]
+  plannedEndAtBlock_isNull: Boolean
+  plannedEndAtBlock_eq: Int
+  plannedEndAtBlock_not_eq: Int
+  plannedEndAtBlock_gt: Int
+  plannedEndAtBlock_gte: Int
+  plannedEndAtBlock_lt: Int
+  plannedEndAtBlock_lte: Int
+  plannedEndAtBlock_in: [Int!]
+  plannedEndAtBlock_not_in: [Int!]
+  minimalBidStep_isNull: Boolean
+  minimalBidStep_eq: BigInt
+  minimalBidStep_not_eq: BigInt
+  minimalBidStep_gt: BigInt
+  minimalBidStep_gte: BigInt
+  minimalBidStep_lt: BigInt
+  minimalBidStep_lte: BigInt
+  minimalBidStep_in: [BigInt!]
+  minimalBidStep_not_in: [BigInt!]
+  bidLockDuration_isNull: Boolean
+  bidLockDuration_eq: Int
+  bidLockDuration_not_eq: Int
+  bidLockDuration_gt: Int
+  bidLockDuration_gte: Int
+  bidLockDuration_lt: Int
+  bidLockDuration_lte: Int
+  bidLockDuration_in: [Int!]
+  bidLockDuration_not_in: [Int!]
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input BannedMemberWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  AND: [BannedMemberWhereInput!]
+  OR: [BannedMemberWhereInput!]
+}
+
+enum StorageDataObjectOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  isAccepted_ASC
+  isAccepted_DESC
+  size_ASC
+  size_DESC
+  storageBag_id_ASC
+  storageBag_id_DESC
+  ipfsHash_ASC
+  ipfsHash_DESC
+  type_isTypeOf_ASC
+  type_isTypeOf_DESC
+  stateBloatBond_ASC
+  stateBloatBond_DESC
+  unsetAt_ASC
+  unsetAt_DESC
+  resolvedUrl_ASC
+  resolvedUrl_DESC
+}
+
+type StorageBucketBag {
+  # {storageBucketId}-{storageBagId}
+  id: String!
+  storageBucket: StorageBucket!
+  bag: StorageBag!
+}
+
+type StorageBucket {
+  # Runtime bucket id
+  id: String!
+
+  # Current bucket operator status
+  operatorStatus: StorageBucketOperatorStatus!
+
+  # Storage bucket operator metadata
+  operatorMetadata: StorageBucketOperatorMetadata
+
+  # Whether the bucket is accepting any new storage bags
+  acceptingNewBags: Boolean!
+
+  # Storage bags assigned to the bucket
+  bags(
+    where: StorageBucketBagWhereInput
+    orderBy: [StorageBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [StorageBucketBag!]!
+
+  # Bucket's data object size limit in bytes
+  dataObjectsSizeLimit: BigInt!
+
+  # Bucket's data object count limit
+  dataObjectCountLimit: BigInt!
+
+  # Number of assigned data objects
+  dataObjectsCount: BigInt!
+
+  # Total size of assigned data objects
+  dataObjectsSize: BigInt!
+}
+
+union StorageBucketOperatorStatus =
+    StorageBucketOperatorStatusMissing
+  | StorageBucketOperatorStatusInvited
+  | StorageBucketOperatorStatusActive
+
+type StorageBucketOperatorStatusMissing {
+  phantom: Int
+}
+
+type StorageBucketOperatorStatusInvited {
+  workerId: Int!
+}
+
+type StorageBucketOperatorStatusActive {
+  workerId: Int!
+  transactorAccountId: String!
+}
+
+type StorageBucketOperatorMetadata {
+  id: String!
+
+  # Storage bucket to which the metadata is assigned
+  storageBucket: StorageBucket!
+
+  # Root node endpoint
+  nodeEndpoint: String
+
+  # Optional node location metadata
+  nodeLocation: NodeLocationMetadata
+
+  # Additional information about the node/operator
+  extra: String
+}
+
+type NodeLocationMetadata {
+  # ISO 3166-1 alpha-2 country code (2 letters)
+  countryCode: String
+
+  # City name
+  city: String
+
+  # Geographic coordinates
+  coordinates: GeoCoordinates
+}
+
+type GeoCoordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
+enum StorageBucketBagOrderByInput {
+  id_ASC
+  id_DESC
+  storageBucket_id_ASC
+  storageBucket_id_DESC
+  storageBucket_acceptingNewBags_ASC
+  storageBucket_acceptingNewBags_DESC
+  storageBucket_dataObjectsSizeLimit_ASC
+  storageBucket_dataObjectsSizeLimit_DESC
+  storageBucket_dataObjectCountLimit_ASC
+  storageBucket_dataObjectCountLimit_DESC
+  storageBucket_dataObjectsCount_ASC
+  storageBucket_dataObjectsCount_DESC
+  storageBucket_dataObjectsSize_ASC
+  storageBucket_dataObjectsSize_DESC
+  bag_id_ASC
+  bag_id_DESC
+}
+
+type DistributionBucketBag {
+  # {distributionBucketId}-{storageBagId}
+  id: String!
+  distributionBucket: DistributionBucket!
+  bag: StorageBag!
+}
+
+type DistributionBucket {
+  # Runtime bucket id in {familyId}:{bucketIndex} format
+  id: String!
+
+  # Distribution family the bucket is part of
+  family: DistributionBucketFamily!
+
+  # Bucket index within the family
+  bucketIndex: Int!
+
+  # Distribution bucket operators (either active or invited)
+  operators(
+    where: DistributionBucketOperatorWhereInput
+    orderBy: [DistributionBucketOperatorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketOperator!]!
+
+  # Whether the bucket is accepting any new bags
+  acceptingNewBags: Boolean!
+
+  # Whether the bucket is currently distributing content
+  distributing: Boolean!
+
+  # Storage bags assigned to the bucket
+  bags(
+    where: DistributionBucketBagWhereInput
+    orderBy: [DistributionBucketBagOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucketBag!]!
+}
+
+type DistributionBucketFamily {
+  # Runtime bucket family id
+  id: String!
+
+  # Current bucket family metadata
+  metadata: DistributionBucketFamilyMetadata
+
+  # Distribution buckets belonging to the family
+  buckets(
+    where: DistributionBucketWhereInput
+    orderBy: [DistributionBucketOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [DistributionBucket!]!
+}
+
+type DistributionBucketFamilyMetadata {
+  id: String!
+
+  # Distribution bucket family
+  family: DistributionBucketFamily!
+
+  # Name of the geographical region covered by the family (ie.: us-east-1)
+  region: String
+
+  # Optional, more specific description of the region covered by the family
+  description: String
+
+  # Geographical areas covered by the family
+  areas: [GeographicalArea!]
+
+  # List of targets (hosts/ips) best suited latency measurements for the family
+  latencyTestTargets: [String]
+}
+
+union GeographicalArea =
+    GeographicalAreaContinent
+  | GeographicalAreaCountry
+  | GeographicalAreaSubdivistion
+
+type GeographicalAreaContinent {
+  continentCode: Continent
+}
+
+enum Continent {
+  AF
+  NA
+  OC
+  AN
+  AS
+  EU
+  SA
+}
+
+type GeographicalAreaCountry {
+  # ISO 3166-1 alpha-2 country code
+  countryCode: String
+}
+
+type GeographicalAreaSubdivistion {
+  # ISO 3166-2 subdivision code
+  subdivisionCode: String
+}
+
+enum DistributionBucketOrderByInput {
+  id_ASC
+  id_DESC
+  family_id_ASC
+  family_id_DESC
+  bucketIndex_ASC
+  bucketIndex_DESC
+  acceptingNewBags_ASC
+  acceptingNewBags_DESC
+  distributing_ASC
+  distributing_DESC
+}
+
+type DistributionBucketOperator {
+  # {bucketId}-{workerId}
+  id: String!
+
+  # Related distirbution bucket
+  distributionBucket: DistributionBucket!
+
+  # ID of the distribution group worker
+  workerId: Int!
+
+  # Current operator status
+  status: DistributionBucketOperatorStatus!
+
+  # Operator metadata
+  metadata: DistributionBucketOperatorMetadata
+}
+
+type DistributionBucketOperatorMetadata {
+  id: String!
+
+  # Distribution bucket operator
+  distirbutionBucketOperator: DistributionBucketOperator!
+
+  # Root distributor node api endpoint
+  nodeEndpoint: String
+
+  # Optional node location metadata
+  nodeLocation: NodeLocationMetadata
+
+  # Additional information about the node/operator
+  extra: String
+}
+
+enum DistributionBucketOperatorOrderByInput {
+  id_ASC
+  id_DESC
+  distributionBucket_id_ASC
+  distributionBucket_id_DESC
+  distributionBucket_bucketIndex_ASC
+  distributionBucket_bucketIndex_DESC
+  distributionBucket_acceptingNewBags_ASC
+  distributionBucket_acceptingNewBags_DESC
+  distributionBucket_distributing_ASC
+  distributionBucket_distributing_DESC
+  workerId_ASC
+  workerId_DESC
+  status_ASC
+  status_DESC
+  metadata_id_ASC
+  metadata_id_DESC
+  metadata_nodeEndpoint_ASC
+  metadata_nodeEndpoint_DESC
+  metadata_extra_ASC
+  metadata_extra_DESC
+}
+
+enum DistributionBucketBagOrderByInput {
+  id_ASC
+  id_DESC
+  distributionBucket_id_ASC
+  distributionBucket_id_DESC
+  distributionBucket_bucketIndex_ASC
+  distributionBucket_bucketIndex_DESC
+  distributionBucket_acceptingNewBags_ASC
+  distributionBucket_acceptingNewBags_DESC
+  distributionBucket_distributing_ASC
+  distributionBucket_distributing_DESC
+  bag_id_ASC
+  bag_id_DESC
+}
+
+union StorageBagOwner =
+    StorageBagOwnerCouncil
+  | StorageBagOwnerWorkingGroup
+  | StorageBagOwnerMember
+  | StorageBagOwnerChannel
+  | StorageBagOwnerDAO
+
+type StorageBagOwnerCouncil {
+  phantom: Int
+}
+
+type StorageBagOwnerWorkingGroup {
+  workingGroupId: String
+}
+
+type StorageBagOwnerMember {
+  memberId: String!
+}
+
+type StorageBagOwnerChannel {
+  channelId: String!
+}
+
+type StorageBagOwnerDAO {
+  daoId: Int
+}
+
+union DataObjectType =
+    DataObjectTypeChannelAvatar
+  | DataObjectTypeChannelCoverPhoto
+  | DataObjectTypeVideoMedia
+  | DataObjectTypeVideoThumbnail
+  | DataObjectTypeVideoSubtitle
+
+type DataObjectTypeChannelAvatar {
+  # Related channel entity
+  channel: Channel!
+}
+
+type VideoFeaturedInCategory {
+  # {categoryId-videoId}
+  id: String!
+
+  # Video being featured
+  video: Video!
+
+  # Category the video is featured in
+  category: VideoCategory!
+
+  # Url to video fragment to be displayed in the UI
+  videoCutUrl: String
+}
+
+enum VideoFeaturedInCategoryOrderByInput {
+  id_ASC
+  id_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  category_id_ASC
+  category_id_DESC
+  category_name_ASC
+  category_name_DESC
+  category_description_ASC
+  category_description_DESC
+  category_isSupported_ASC
+  category_isSupported_DESC
+  category_createdInBlock_ASC
+  category_createdInBlock_DESC
+  videoCutUrl_ASC
+  videoCutUrl_DESC
+}
+
+# Represents NFT details
+type OwnedNft {
+  id: String!
+
+  # Timestamp of the block the NFT was created at
+  createdAt: DateTime!
+
+  # NFT's video
+  video: Video!
+
+  # Auctions done for this NFT
+  auctions(
+    where: AuctionWhereInput
+    orderBy: [AuctionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Auction!]!
+
+  # Current owner of the NFT.
+  owner: NftOwner!
+
+  # NFT's transactional status
+  transactionalStatus: TransactionalStatus
+
+  # Creator royalty (if any)
+  creatorRoyalty: Float
+
+  # NFT's last sale price (if any)
+  lastSalePrice: BigInt
+
+  # NFT's last sale date (if any)
+  lastSaleDate: DateTime
+
+  # All NFT auction bids
+  bids(
+    where: BidWhereInput
+    orderBy: [BidOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Bid!]!
+}
+
+# Represents NFT auction
+type Auction {
+  # Unique identifier
+  id: String!
+
+  # Auctioned NFT
+  nft: OwnedNft!
+
+  # Member that won this auction
+  winningMember: Membership
+
+  # Auction starting price
+  startingPrice: BigInt!
+
+  # Price at which the auction gets completed instantly (if any)
+  buyNowPrice: BigInt
+
+  # The type of auction
+  auctionType: AuctionType!
+
+  # Auction last bid (if exists)
+  topBid: Bid
+
+  # All bids made during this auction
+  bids(
+    where: BidWhereInput
+    orderBy: [BidOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Bid!]!
+
+  # Block when auction starts
+  startsAtBlock: Int!
+
+  # Block when auction ended
+  endedAtBlock: Int
+
+  # Is auction canceled
+  isCanceled: Boolean!
+
+  # Is auction completed
+  isCompleted: Boolean!
+
+  # Auction participants whitelist
+  whitelistedMembers(
+    where: AuctionWhitelistedMemberWhereInput
+    orderBy: [AuctionWhitelistedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [AuctionWhitelistedMember!]!
+}
+
+# Represents various action types
+union AuctionType = AuctionTypeEnglish | AuctionTypeOpen
+
+# Represents English auction details
+type AuctionTypeEnglish {
+  # English auction duration in blocks
+  duration: Int!
+
+  # Auction extension period in blocks
+  extensionPeriod: Int!
+
+  # Block when auction is supposed to end
+  plannedEndAtBlock: Int!
+
+  # Minimal step between auction bids
+  minimalBidStep: BigInt!
+}
+
+# Represents Open auction details
+type AuctionTypeOpen {
+  # Auction bid lock duration
+  bidLockDuration: Int!
+}
+
+# Represents bid in NFT auction
+type Bid {
+  # Unique identifier
+  id: String!
+
+  # Timestamp of the block the bid was created at
+  createdAt: DateTime!
+
+  # NFT's auction
+  auction: Auction!
+
+  # Bid's NFT
+  nft: OwnedNft!
+
+  # Bidder membership
+  bidder: Membership!
+
+  # Amount bidded
+  amount: BigInt!
+
+  # Sign for canceled bid
+  isCanceled: Boolean!
+
+  # Block in which the bid was placed
+  createdInBlock: Int!
+
+  # Index in block of the related AuctionBidMade event
+  indexInBlock: Int!
+
+  # Bid that was displaced by this bid in the English auction (if any)
+  previousTopBid: Bid
+}
+
+enum BidOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  auction_id_ASC
+  auction_id_DESC
+  auction_startingPrice_ASC
+  auction_startingPrice_DESC
+  auction_buyNowPrice_ASC
+  auction_buyNowPrice_DESC
+  auction_startsAtBlock_ASC
+  auction_startsAtBlock_DESC
+  auction_endedAtBlock_ASC
+  auction_endedAtBlock_DESC
+  auction_isCanceled_ASC
+  auction_isCanceled_DESC
+  auction_isCompleted_ASC
+  auction_isCompleted_DESC
+  nft_id_ASC
+  nft_id_DESC
+  nft_createdAt_ASC
+  nft_createdAt_DESC
+  nft_creatorRoyalty_ASC
+  nft_creatorRoyalty_DESC
+  nft_lastSalePrice_ASC
+  nft_lastSalePrice_DESC
+  nft_lastSaleDate_ASC
+  nft_lastSaleDate_DESC
+  bidder_id_ASC
+  bidder_id_DESC
+  bidder_createdAt_ASC
+  bidder_createdAt_DESC
+  bidder_handle_ASC
+  bidder_handle_DESC
+  bidder_controllerAccount_ASC
+  bidder_controllerAccount_DESC
+  bidder_totalChannelsCreated_ASC
+  bidder_totalChannelsCreated_DESC
+  amount_ASC
+  amount_DESC
+  isCanceled_ASC
+  isCanceled_DESC
+  createdInBlock_ASC
+  createdInBlock_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  previousTopBid_id_ASC
+  previousTopBid_id_DESC
+  previousTopBid_createdAt_ASC
+  previousTopBid_createdAt_DESC
+  previousTopBid_amount_ASC
+  previousTopBid_amount_DESC
+  previousTopBid_isCanceled_ASC
+  previousTopBid_isCanceled_DESC
+  previousTopBid_createdInBlock_ASC
+  previousTopBid_createdInBlock_DESC
+  previousTopBid_indexInBlock_ASC
+  previousTopBid_indexInBlock_DESC
+}
+
+type AuctionWhitelistedMember {
+  # {auctionId}-{memberId}
+  id: String!
+  auction: Auction!
+  member: Membership!
+}
+
+enum AuctionWhitelistedMemberOrderByInput {
+  id_ASC
+  id_DESC
+  auction_id_ASC
+  auction_id_DESC
+  auction_startingPrice_ASC
+  auction_startingPrice_DESC
+  auction_buyNowPrice_ASC
+  auction_buyNowPrice_DESC
+  auction_startsAtBlock_ASC
+  auction_startsAtBlock_DESC
+  auction_endedAtBlock_ASC
+  auction_endedAtBlock_DESC
+  auction_isCanceled_ASC
+  auction_isCanceled_DESC
+  auction_isCompleted_ASC
+  auction_isCompleted_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+}
+
+enum AuctionOrderByInput {
+  id_ASC
+  id_DESC
+  nft_id_ASC
+  nft_id_DESC
+  nft_createdAt_ASC
+  nft_createdAt_DESC
+  nft_creatorRoyalty_ASC
+  nft_creatorRoyalty_DESC
+  nft_lastSalePrice_ASC
+  nft_lastSalePrice_DESC
+  nft_lastSaleDate_ASC
+  nft_lastSaleDate_DESC
+  winningMember_id_ASC
+  winningMember_id_DESC
+  winningMember_createdAt_ASC
+  winningMember_createdAt_DESC
+  winningMember_handle_ASC
+  winningMember_handle_DESC
+  winningMember_controllerAccount_ASC
+  winningMember_controllerAccount_DESC
+  winningMember_totalChannelsCreated_ASC
+  winningMember_totalChannelsCreated_DESC
+  startingPrice_ASC
+  startingPrice_DESC
+  buyNowPrice_ASC
+  buyNowPrice_DESC
+  auctionType_duration_ASC
+  auctionType_duration_DESC
+  auctionType_extensionPeriod_ASC
+  auctionType_extensionPeriod_DESC
+  auctionType_plannedEndAtBlock_ASC
+  auctionType_plannedEndAtBlock_DESC
+  auctionType_minimalBidStep_ASC
+  auctionType_minimalBidStep_DESC
+  auctionType_bidLockDuration_ASC
+  auctionType_bidLockDuration_DESC
+  auctionType_isTypeOf_ASC
+  auctionType_isTypeOf_DESC
+  topBid_id_ASC
+  topBid_id_DESC
+  topBid_createdAt_ASC
+  topBid_createdAt_DESC
+  topBid_amount_ASC
+  topBid_amount_DESC
+  topBid_isCanceled_ASC
+  topBid_isCanceled_DESC
+  topBid_createdInBlock_ASC
+  topBid_createdInBlock_DESC
+  topBid_indexInBlock_ASC
+  topBid_indexInBlock_DESC
+  startsAtBlock_ASC
+  startsAtBlock_DESC
+  endedAtBlock_ASC
+  endedAtBlock_DESC
+  isCanceled_ASC
+  isCanceled_DESC
+  isCompleted_ASC
+  isCompleted_DESC
+}
+
+union NftOwner = NftOwnerChannel | NftOwnerMember
+
+type NftOwnerChannel {
+  channel: Channel!
+}
+
+type NftOwnerMember {
+  member: Membership!
+}
+
+# NFT transactional state
+union TransactionalStatus =
+    TransactionalStatusIdle
+  | TransactionalStatusInitiatedOfferToMember
+  | TransactionalStatusBuyNow
+  | TransactionalStatusAuction
+
+# Represents TransactionalStatus Idle
+type TransactionalStatusIdle {
+  phantom: Int
+}
+
+# Represents TransactionalStatus InitiatedOfferToMember
+type TransactionalStatusInitiatedOfferToMember {
+  # Member that recieved the offer
+  member: Membership!
+
+  # The price that the member should pay to accept offer (optional)
+  price: BigInt
+}
+
+# Represents TransactionalStatus BuyNow
+type TransactionalStatusBuyNow {
+  price: BigInt!
+}
+
+# Represents TransactionalStatus Auction
+type TransactionalStatusAuction {
+  auction: Auction!
+}
+
+type License {
+  # Unique identifier
+  id: String!
+
+  # License code defined by Joystream
+  code: Int
+
+  # Attribution (if required by the license)
+  attribution: String
+
+  # Custom license content
+  customText: String
+}
+
+type VideoMediaMetadata {
+  # Unique identifier
+  id: String!
+
+  # Encoding of the video media object
+  encoding: VideoMediaEncoding
+
+  # Video media width in pixels
+  pixelWidth: Int
+
+  # Video media height in pixels
+  pixelHeight: Int
+
+  # Video media size in bytes
+  size: BigInt
+  video: Video!
+  createdInBlock: Int!
+}
+
+type VideoMediaEncoding {
+  id: String!
+
+  # Encoding of the video media object
+  codecName: String
+
+  # Media container format
+  container: String
+
+  # Content MIME type
+  mimeMediaType: String
+}
+
+type VideoSubtitle {
+  # {type}-{language}
+  id: String!
+
+  # Subtitle's video
+  video: Video!
+
+  # Subtitle's type
+  type: String!
+
+  # Subtitle's language
+  language: String
+
+  # MIME type description of format used for this subtitle
+  mimeType: String!
+
+  # Storage object representing the subtitle file
+  asset: StorageDataObject
+}
+
+enum VideoSubtitleOrderByInput {
+  id_ASC
+  id_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  type_ASC
+  type_DESC
+  language_ASC
+  language_DESC
+  mimeType_ASC
+  mimeType_DESC
+  asset_id_ASC
+  asset_id_DESC
+  asset_createdAt_ASC
+  asset_createdAt_DESC
+  asset_isAccepted_ASC
+  asset_isAccepted_DESC
+  asset_size_ASC
+  asset_size_DESC
+  asset_ipfsHash_ASC
+  asset_ipfsHash_DESC
+  asset_stateBloatBond_ASC
+  asset_stateBloatBond_DESC
+  asset_unsetAt_ASC
+  asset_unsetAt_DESC
+  asset_resolvedUrl_ASC
+  asset_resolvedUrl_DESC
+}
+
+enum CommentOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  author_id_ASC
+  author_id_DESC
+  author_createdAt_ASC
+  author_createdAt_DESC
+  author_handle_ASC
+  author_handle_DESC
+  author_controllerAccount_ASC
+  author_controllerAccount_DESC
+  author_totalChannelsCreated_ASC
+  author_totalChannelsCreated_DESC
+  text_ASC
+  text_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  status_ASC
+  status_DESC
+  parentComment_id_ASC
+  parentComment_id_DESC
+  parentComment_createdAt_ASC
+  parentComment_createdAt_DESC
+  parentComment_text_ASC
+  parentComment_text_DESC
+  parentComment_status_ASC
+  parentComment_status_DESC
+  parentComment_repliesCount_ASC
+  parentComment_repliesCount_DESC
+  parentComment_reactionsCount_ASC
+  parentComment_reactionsCount_DESC
+  parentComment_reactionsAndRepliesCount_ASC
+  parentComment_reactionsAndRepliesCount_DESC
+  parentComment_isEdited_ASC
+  parentComment_isEdited_DESC
+  parentComment_isExcluded_ASC
+  parentComment_isExcluded_DESC
+  repliesCount_ASC
+  repliesCount_DESC
+  reactionsCount_ASC
+  reactionsCount_DESC
+  reactionsAndRepliesCount_ASC
+  reactionsAndRepliesCount_DESC
+  isEdited_ASC
+  isEdited_DESC
+  isExcluded_ASC
+  isExcluded_DESC
+}
+
+type VideoReaction {
+  # {memberId}-{videoId}
+  id: String!
+
+  # Timestamp of the block the reaction was created at
+  createdAt: DateTime!
+
+  # The Reaction
+  reaction: VideoReactionOptions!
+
+  # The member that reacted
+  member: Membership!
+
+  # The video that has been reacted to
+  video: Video!
+}
+
+enum VideoReactionOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  reaction_ASC
+  reaction_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+}
+
+type VideoReactionsCountByReactionType {
+  # The reaction option
+  reaction: VideoReactionOptions!
+
+  # No of times the video has been reacted with given reaction
+  count: Int!
+}
+
+type App {
+  # Runtime entity identifier (EntityId)
+  id: String!
+
+  # The name of the App
+  name: String!
+
+  # Member owning the App
+  ownerMember: Membership!
+
+  # Url where user can read more about the project or company for this app
+  websiteUrl: String
+
+  # Url to the app
+  useUri: String
+  smallIcon: String
+  mediumIcon: String
+  bigIcon: String
+
+  # Tagline of the app
+  oneLiner: String
+  description: String
+  termsOfService: String
+
+  # List of platforms on which the app will be available, e.g. [mobile, web, native]
+  platforms: [String]
+  category: String
+  authKey: String
+  appVideos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  appChannels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+}
+
+type BannedMember {
+  # {memberId}-{channelId}
+  id: String!
+  member: Membership!
+  channel: Channel!
+}
+
+enum BannedMemberOrderByInput {
+  id_ASC
+  id_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  channel_id_ASC
+  channel_id_DESC
+  channel_createdAt_ASC
+  channel_createdAt_DESC
+  channel_title_ASC
+  channel_title_DESC
+  channel_description_ASC
+  channel_description_DESC
+  channel_isPublic_ASC
+  channel_isPublic_DESC
+  channel_isCensored_ASC
+  channel_isCensored_DESC
+  channel_isExcluded_ASC
+  channel_isExcluded_DESC
+  channel_language_ASC
+  channel_language_DESC
+  channel_createdInBlock_ASC
+  channel_createdInBlock_DESC
+  channel_rewardAccount_ASC
+  channel_rewardAccount_DESC
+  channel_channelStateBloatBond_ASC
+  channel_channelStateBloatBond_DESC
+  channel_followsNum_ASC
+  channel_followsNum_DESC
+  channel_videoViewsNum_ASC
+  channel_videoViewsNum_DESC
+  channel_totalVideosCreated_ASC
+  channel_totalVideosCreated_DESC
+}
+
+type DataObjectTypeChannelCoverPhoto {
+  # Related channel entity
+  channel: Channel!
+}
+
+type DataObjectTypeVideoMedia {
+  # Related video entity
+  video: Video!
+}
+
+type DataObjectTypeVideoThumbnail {
+  # Related video entity
+  video: Video!
+}
+
+type DataObjectTypeVideoSubtitle {
+  # Related subtitle entity
+  subtitle: VideoSubtitle!
+
+  # Related video entity
+  video: Video!
+}
+
+type AvatarUri {
+  # The avatar URL
+  avatarUri: String!
+}
+
+type CommentReaction {
+  # {memberId}-{commentId}-{reactionId}
+  id: String!
+
+  # The Reaction id
+  reactionId: Int!
+
+  # The member that reacted
+  member: Membership!
+
+  # The comment that has been reacted to
+  comment: Comment!
+
+  # The video the comment (that has been reacted) exists
+  video: Video!
+}
+
+enum CommentReactionOrderByInput {
+  id_ASC
+  id_DESC
+  reactionId_ASC
+  reactionId_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  comment_id_ASC
+  comment_id_DESC
+  comment_createdAt_ASC
+  comment_createdAt_DESC
+  comment_text_ASC
+  comment_text_DESC
+  comment_status_ASC
+  comment_status_DESC
+  comment_repliesCount_ASC
+  comment_repliesCount_DESC
+  comment_reactionsCount_ASC
+  comment_reactionsCount_DESC
+  comment_reactionsAndRepliesCount_ASC
+  comment_reactionsAndRepliesCount_DESC
+  comment_isEdited_ASC
+  comment_isEdited_DESC
+  comment_isExcluded_ASC
+  comment_isExcluded_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+}
+
+type CommentReactionsCountByReactionId {
+  # The reaction id
+  reactionId: Int!
+
+  # No of times the comment has been reacted with given reaction Id
+  count: Int!
+}
+
+type CommentTextUpdatedEventData {
+  # The comment being updated
+  comment: Comment!
+
+  # New comment text
+  newText: String!
+}
+
+type OpenAuctionStartedEventData {
+  # Actor that started this auction.
+  actor: ContentActor!
+
+  # Nft owner at the time it was put on an auction.
+  nftOwner: NftOwner!
+
+  # Auction started.
+  auction: Auction!
+}
+
+union ContentActor = ContentActorCurator | ContentActorMember | ContentActorLead
+
+type ContentActorCurator {
+  curator: Curator!
+}
+
+type Curator {
+  # Runtime identifier
+  id: String!
+}
+
+type ContentActorMember {
+  member: Membership!
+}
+
+type ContentActorLead {
+  phantom: Int
+}
+
+type EnglishAuctionStartedEventData {
+  # Actor that started this auction.
+  actor: ContentActor!
+
+  # Nft owner at the time it was put on an auction.
+  nftOwner: NftOwner!
+
+  # Auction started.
+  auction: Auction!
+}
+
+type NftIssuedEventData {
+  # Actor that issued the NFT.
+  actor: ContentActor!
+
+  # NFT that was issued.
+  nft: OwnedNft!
+
+  # NFT's initial owner.
+  nftOwner: NftOwner!
+}
+
+type AuctionBidMadeEventData {
+  # The bid that was submitted
+  bid: Bid!
+
+  # Nft owner at the time it was being auctioned.
+  nftOwner: NftOwner!
+}
+
+type AuctionBidCanceledEventData {
+  # Member that canceled the bid.
+  member: Membership!
+
+  # Nft owner at the time it was being auctioned.
+  nftOwner: NftOwner!
+
+  # The bid that got canceled.
+  bid: Bid!
+}
+
+type AuctionCanceledEventData {
+  # Content actor canceling the auction.
+  actor: ContentActor!
+
+  # Nft owner at the time the auction was being auctioned.
+  nftOwner: NftOwner!
+
+  # Auction that was canceled.
+  auction: Auction!
+}
+
+type EnglishAuctionSettledEventData {
+  # English auction winning bid
+  winningBid: Bid!
+
+  # NFT owner before the english auction was settled
+  previousNftOwner: NftOwner!
+}
+
+type BidMadeCompletingAuctionEventData {
+  # Bid that completed the auction
+  winningBid: Bid!
+
+  # NFT owner before the auction was completed
+  previousNftOwner: NftOwner!
+}
+
+type OpenAuctionBidAcceptedEventData {
+  # Content actor that accepted the bid.
+  actor: ContentActor!
+
+  # Accepted/winning bid
+  winningBid: Bid!
+
+  # NFT owner before the auction was completed
+  previousNftOwner: NftOwner!
+}
+
+type NftSellOrderMadeEventData {
+  # NFT being sold
+  nft: OwnedNft!
+
+  # Content actor acting as NFT owner.
+  actor: ContentActor!
+
+  # NFT owner at the time it was put on sale
+  nftOwner: NftOwner!
+
+  # Offer's price.
+  price: BigInt!
+}
+
+type NftBoughtEventData {
+  # The NFT that was bought
+  nft: OwnedNft!
+
+  # Member that bought the NFT.
+  buyer: Membership!
+
+  # NFT owner before it was bought
+  previousNftOwner: NftOwner!
+
+  # Price for which the NFT was bought
+  price: BigInt!
+}
+
+type BuyNowCanceledEventData {
+  # The NFT for which the buy now offer was canceled
+  nft: OwnedNft!
+
+  # Content actor acting as NFT owner.
+  actor: ContentActor!
+
+  # Owner of the NFT at the time the buy now offer was canceled.
+  nftOwner: NftOwner!
+}
+
+type BuyNowPriceUpdatedEventData {
+  # NFT being sold
+  nft: OwnedNft!
+
+  # Content actor acting as NFT owner.
+  actor: ContentActor!
+
+  # NFT owner at the time it was on sale
+  nftOwner: NftOwner!
+
+  # New sell order price.
+  newPrice: BigInt!
+}
+
+type MetaprotocolTransactionStatusEventData {
+  # The result of metaprotocol action
+  result: MetaprotocolTransactionResult!
+}
+
+union MetaprotocolTransactionResult =
+    MetaprotocolTransactionResultOK
+  | MetaprotocolTransactionResultCommentCreated
+  | MetaprotocolTransactionResultCommentEdited
+  | MetaprotocolTransactionResultCommentDeleted
+  | MetaprotocolTransactionResultCommentModerated
+  | MetaprotocolTransactionResultFailed
+
+type MetaprotocolTransactionResultOK {
+  phantom: Int
+}
+
+type MetaprotocolTransactionResultCommentCreated {
+  commentCreated: Comment
+}
+
+type MetaprotocolTransactionResultCommentEdited {
+  commentEdited: Comment
+}
+
+type MetaprotocolTransactionResultCommentDeleted {
+  commentDeleted: Comment
+}
+
+type MetaprotocolTransactionResultCommentModerated {
+  commentModerated: Comment
+}
+
+type MetaprotocolTransactionResultFailed {
+  errorMessage: String!
+}
+
+type MemberBannedFromChannelEventData {
+  # The chanel the member is being banned / unbanned from
+  channel: Channel!
+
+  # The member being banned / unbanned
+  member: Membership!
+
+  # The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned
+  action: Boolean!
+}
+
+input EventWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  inBlock_isNull: Boolean
+  inBlock_eq: Int
+  inBlock_not_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  inBlock_not_in: [Int!]
+  inExtrinsic_isNull: Boolean
+  inExtrinsic_eq: String
+  inExtrinsic_not_eq: String
+  inExtrinsic_gt: String
+  inExtrinsic_gte: String
+  inExtrinsic_lt: String
+  inExtrinsic_lte: String
+  inExtrinsic_in: [String!]
+  inExtrinsic_not_in: [String!]
+  inExtrinsic_contains: String
+  inExtrinsic_not_contains: String
+  inExtrinsic_containsInsensitive: String
+  inExtrinsic_not_containsInsensitive: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_not_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_not_endsWith: String
+  indexInBlock_isNull: Boolean
+  indexInBlock_eq: Int
+  indexInBlock_not_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  indexInBlock_not_in: [Int!]
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  data_isNull: Boolean
+  data: EventDataWhereInput
+  AND: [EventWhereInput!]
+  OR: [EventWhereInput!]
+}
+
+input EventDataWhereInput {
+  comment_isNull: Boolean
+  comment: CommentWhereInput
+  text_isNull: Boolean
+  text_eq: String
+  text_not_eq: String
+  text_gt: String
+  text_gte: String
+  text_lt: String
+  text_lte: String
+  text_in: [String!]
+  text_not_in: [String!]
+  text_contains: String
+  text_not_contains: String
+  text_containsInsensitive: String
+  text_not_containsInsensitive: String
+  text_startsWith: String
+  text_not_startsWith: String
+  text_endsWith: String
+  text_not_endsWith: String
+  newText_isNull: Boolean
+  newText_eq: String
+  newText_not_eq: String
+  newText_gt: String
+  newText_gte: String
+  newText_lt: String
+  newText_lte: String
+  newText_in: [String!]
+  newText_not_in: [String!]
+  newText_contains: String
+  newText_not_contains: String
+  newText_containsInsensitive: String
+  newText_not_containsInsensitive: String
+  newText_startsWith: String
+  newText_not_startsWith: String
+  newText_endsWith: String
+  newText_not_endsWith: String
+  actor_isNull: Boolean
+  actor: ContentActorWhereInput
+  nftOwner_isNull: Boolean
+  nftOwner: NftOwnerWhereInput
+  auction_isNull: Boolean
+  auction: AuctionWhereInput
+  nft_isNull: Boolean
+  nft: OwnedNftWhereInput
+  bid_isNull: Boolean
+  bid: BidWhereInput
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  winningBid_isNull: Boolean
+  winningBid: BidWhereInput
+  previousNftOwner_isNull: Boolean
+  previousNftOwner: NftOwnerWhereInput
+  price_isNull: Boolean
+  price_eq: BigInt
+  price_not_eq: BigInt
+  price_gt: BigInt
+  price_gte: BigInt
+  price_lt: BigInt
+  price_lte: BigInt
+  price_in: [BigInt!]
+  price_not_in: [BigInt!]
+  buyer_isNull: Boolean
+  buyer: MembershipWhereInput
+  newPrice_isNull: Boolean
+  newPrice_eq: BigInt
+  newPrice_not_eq: BigInt
+  newPrice_gt: BigInt
+  newPrice_gte: BigInt
+  newPrice_lt: BigInt
+  newPrice_lte: BigInt
+  newPrice_in: [BigInt!]
+  newPrice_not_in: [BigInt!]
+  result_isNull: Boolean
+  result: MetaprotocolTransactionResultWhereInput
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
+  action_isNull: Boolean
+  action_eq: Boolean
+  action_not_eq: Boolean
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input ContentActorWhereInput {
+  curator_isNull: Boolean
+  curator: CuratorWhereInput
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input CuratorWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  AND: [CuratorWhereInput!]
+  OR: [CuratorWhereInput!]
+}
+
+input MetaprotocolTransactionResultWhereInput {
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
+  commentCreated_isNull: Boolean
+  commentCreated: CommentWhereInput
+  commentEdited_isNull: Boolean
+  commentEdited: CommentWhereInput
+  commentDeleted_isNull: Boolean
+  commentDeleted: CommentWhereInput
+  commentModerated_isNull: Boolean
+  commentModerated: CommentWhereInput
+  errorMessage_isNull: Boolean
+  errorMessage_eq: String
+  errorMessage_not_eq: String
+  errorMessage_gt: String
+  errorMessage_gte: String
+  errorMessage_lt: String
+  errorMessage_lte: String
+  errorMessage_in: [String!]
+  errorMessage_not_in: [String!]
+  errorMessage_contains: String
+  errorMessage_not_contains: String
+  errorMessage_containsInsensitive: String
+  errorMessage_not_containsInsensitive: String
+  errorMessage_startsWith: String
+  errorMessage_not_startsWith: String
+  errorMessage_endsWith: String
+  errorMessage_not_endsWith: String
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+enum EventOrderByInput {
+  id_ASC
+  id_DESC
+  inBlock_ASC
+  inBlock_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  timestamp_ASC
+  timestamp_DESC
+  data_text_ASC
+  data_text_DESC
+  data_newText_ASC
+  data_newText_DESC
+  data_price_ASC
+  data_price_DESC
+  data_newPrice_ASC
+  data_newPrice_DESC
+  data_action_ASC
+  data_action_DESC
+  data_isTypeOf_ASC
+  data_isTypeOf_DESC
+}
+
+input WhereIdInput {
+  id: String!
+}
+
+type EventsConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type EventEdge {
+  node: Event!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+type Notification {
+  # Autoincremented
+  id: String!
+
+  # Member that should recieve the notification
+  member: Membership!
+
+  # The notification event
+  event: Event!
+}
+
+input NotificationWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  event_isNull: Boolean
+  event: EventWhereInput
+  AND: [NotificationWhereInput!]
+  OR: [NotificationWhereInput!]
+}
+
+enum NotificationOrderByInput {
+  id_ASC
+  id_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  event_id_ASC
+  event_id_DESC
+  event_inBlock_ASC
+  event_inBlock_DESC
+  event_inExtrinsic_ASC
+  event_inExtrinsic_DESC
+  event_indexInBlock_ASC
+  event_indexInBlock_DESC
+  event_timestamp_ASC
+  event_timestamp_DESC
+}
+
+type NotificationsConnection {
+  edges: [NotificationEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NotificationEdge {
+  node: Notification!
+  cursor: String!
+}
+
+type NftHistoryEntry {
+  # Autoincremented
+  id: String!
+
+  # The NFT the event relates to
+  nft: OwnedNft!
+
+  # Nft-related event
+  event: Event!
+}
+
+input NftHistoryEntryWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  nft_isNull: Boolean
+  nft: OwnedNftWhereInput
+  event_isNull: Boolean
+  event: EventWhereInput
+  AND: [NftHistoryEntryWhereInput!]
+  OR: [NftHistoryEntryWhereInput!]
+}
+
+enum NftHistoryEntryOrderByInput {
+  id_ASC
+  id_DESC
+  nft_id_ASC
+  nft_id_DESC
+  nft_createdAt_ASC
+  nft_createdAt_DESC
+  nft_creatorRoyalty_ASC
+  nft_creatorRoyalty_DESC
+  nft_lastSalePrice_ASC
+  nft_lastSalePrice_DESC
+  nft_lastSaleDate_ASC
+  nft_lastSaleDate_DESC
+  event_id_ASC
+  event_id_DESC
+  event_inBlock_ASC
+  event_inBlock_DESC
+  event_inExtrinsic_ASC
+  event_inExtrinsic_DESC
+  event_indexInBlock_ASC
+  event_indexInBlock_DESC
+  event_timestamp_ASC
+  event_timestamp_DESC
+}
+
+type NftHistoryEntriesConnection {
+  edges: [NftHistoryEntryEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NftHistoryEntryEdge {
+  node: NftHistoryEntry!
+  cursor: String!
+}
+
+type NftActivity {
+  # Autoincremented
+  id: String!
+
+  # The member the activity relates to
+  member: Membership!
+
+  # Nft-related activity
+  event: Event!
+}
+
+input NftActivityWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  member_isNull: Boolean
+  member: MembershipWhereInput
+  event_isNull: Boolean
+  event: EventWhereInput
+  AND: [NftActivityWhereInput!]
+  OR: [NftActivityWhereInput!]
+}
+
+enum NftActivityOrderByInput {
+  id_ASC
+  id_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  event_id_ASC
+  event_id_DESC
+  event_inBlock_ASC
+  event_inBlock_DESC
+  event_inExtrinsic_ASC
+  event_inExtrinsic_DESC
+  event_indexInBlock_ASC
+  event_indexInBlock_DESC
+  event_timestamp_ASC
+  event_timestamp_DESC
+}
+
+type NftActivitiesConnection {
+  edges: [NftActivityEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NftActivityEdge {
+  node: NftActivity!
+  cursor: String!
+}
+
+type ChannelsConnection {
+  edges: [ChannelEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChannelEdge {
+  node: Channel!
+  cursor: String!
+}
+
+type BannedMembersConnection {
+  edges: [BannedMemberEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BannedMemberEdge {
+  node: BannedMember!
+  cursor: String!
+}
+
+enum MemberMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  avatar_avatarUri_ASC
+  avatar_avatarUri_DESC
+  avatar_isTypeOf_ASC
+  avatar_isTypeOf_DESC
+  about_ASC
+  about_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+}
+
+type MemberMetadataConnection {
+  edges: [MemberMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type MemberMetadataEdge {
+  node: MemberMetadata!
+  cursor: String!
+}
+
+enum MembershipOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  handle_ASC
+  handle_DESC
+  metadata_id_ASC
+  metadata_id_DESC
+  metadata_name_ASC
+  metadata_name_DESC
+  metadata_about_ASC
+  metadata_about_DESC
+  controllerAccount_ASC
+  controllerAccount_DESC
+  totalChannelsCreated_ASC
+  totalChannelsCreated_DESC
+}
+
+type MembershipsConnection {
+  edges: [MembershipEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type MembershipEdge {
+  node: Membership!
+  cursor: String!
+}
+
+enum OwnedNftOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  owner_isTypeOf_ASC
+  owner_isTypeOf_DESC
+  transactionalStatus_phantom_ASC
+  transactionalStatus_phantom_DESC
+  transactionalStatus_price_ASC
+  transactionalStatus_price_DESC
+  transactionalStatus_isTypeOf_ASC
+  transactionalStatus_isTypeOf_DESC
+  creatorRoyalty_ASC
+  creatorRoyalty_DESC
+  lastSalePrice_ASC
+  lastSalePrice_DESC
+  lastSaleDate_ASC
+  lastSaleDate_DESC
+}
+
+type OwnedNftsConnection {
+  edges: [OwnedNftEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type OwnedNftEdge {
+  node: OwnedNft!
+  cursor: String!
+}
+
+type AuctionsConnection {
+  edges: [AuctionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuctionEdge {
+  node: Auction!
+  cursor: String!
+}
+
+type AuctionWhitelistedMembersConnection {
+  edges: [AuctionWhitelistedMemberEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuctionWhitelistedMemberEdge {
+  node: AuctionWhitelistedMember!
+  cursor: String!
+}
+
+type BidsConnection {
+  edges: [BidEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BidEdge {
+  node: Bid!
+  cursor: String!
+}
+
+enum AppOrderByInput {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  ownerMember_id_ASC
+  ownerMember_id_DESC
+  ownerMember_createdAt_ASC
+  ownerMember_createdAt_DESC
+  ownerMember_handle_ASC
+  ownerMember_handle_DESC
+  ownerMember_controllerAccount_ASC
+  ownerMember_controllerAccount_DESC
+  ownerMember_totalChannelsCreated_ASC
+  ownerMember_totalChannelsCreated_DESC
+  websiteUrl_ASC
+  websiteUrl_DESC
+  useUri_ASC
+  useUri_DESC
+  smallIcon_ASC
+  smallIcon_DESC
+  mediumIcon_ASC
+  mediumIcon_DESC
+  bigIcon_ASC
+  bigIcon_DESC
+  oneLiner_ASC
+  oneLiner_DESC
+  description_ASC
+  description_DESC
+  termsOfService_ASC
+  termsOfService_DESC
+  category_ASC
+  category_DESC
+  authKey_ASC
+  authKey_DESC
+}
+
+type AppsConnection {
+  edges: [AppEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AppEdge {
+  node: App!
+  cursor: String!
+}
+
+type CommentReactionsConnection {
+  edges: [CommentReactionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CommentReactionEdge {
+  node: CommentReaction!
+  cursor: String!
+}
+
+type CommentsConnection {
+  edges: [CommentEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CommentEdge {
+  node: Comment!
+  cursor: String!
+}
+
+enum VideoCategoryOrderByInput {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  description_ASC
+  description_DESC
+  parentCategory_id_ASC
+  parentCategory_id_DESC
+  parentCategory_name_ASC
+  parentCategory_name_DESC
+  parentCategory_description_ASC
+  parentCategory_description_DESC
+  parentCategory_isSupported_ASC
+  parentCategory_isSupported_DESC
+  parentCategory_createdInBlock_ASC
+  parentCategory_createdInBlock_DESC
+  isSupported_ASC
+  isSupported_DESC
+  createdInBlock_ASC
+  createdInBlock_DESC
+}
+
+type VideoCategoriesConnection {
+  edges: [VideoCategoryEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoCategoryEdge {
+  node: VideoCategory!
+  cursor: String!
+}
+
+type VideoEdge {
+  node: Video!
+  cursor: String!
+}
+
+type VideoFeaturedInCategoriesConnection {
+  edges: [VideoFeaturedInCategoryEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoFeaturedInCategoryEdge {
+  node: VideoFeaturedInCategory!
+  cursor: String!
+}
+
+input VideoHeroWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  video_isNull: Boolean
+  video: VideoWhereInput
+  heroTitle_isNull: Boolean
+  heroTitle_eq: String
+  heroTitle_not_eq: String
+  heroTitle_gt: String
+  heroTitle_gte: String
+  heroTitle_lt: String
+  heroTitle_lte: String
+  heroTitle_in: [String!]
+  heroTitle_not_in: [String!]
+  heroTitle_contains: String
+  heroTitle_not_contains: String
+  heroTitle_containsInsensitive: String
+  heroTitle_not_containsInsensitive: String
+  heroTitle_startsWith: String
+  heroTitle_not_startsWith: String
+  heroTitle_endsWith: String
+  heroTitle_not_endsWith: String
+  heroVideoCutUrl_isNull: Boolean
+  heroVideoCutUrl_eq: String
+  heroVideoCutUrl_not_eq: String
+  heroVideoCutUrl_gt: String
+  heroVideoCutUrl_gte: String
+  heroVideoCutUrl_lt: String
+  heroVideoCutUrl_lte: String
+  heroVideoCutUrl_in: [String!]
+  heroVideoCutUrl_not_in: [String!]
+  heroVideoCutUrl_contains: String
+  heroVideoCutUrl_not_contains: String
+  heroVideoCutUrl_containsInsensitive: String
+  heroVideoCutUrl_not_containsInsensitive: String
+  heroVideoCutUrl_startsWith: String
+  heroVideoCutUrl_not_startsWith: String
+  heroVideoCutUrl_endsWith: String
+  heroVideoCutUrl_not_endsWith: String
+  heroPosterUrl_isNull: Boolean
+  heroPosterUrl_eq: String
+  heroPosterUrl_not_eq: String
+  heroPosterUrl_gt: String
+  heroPosterUrl_gte: String
+  heroPosterUrl_lt: String
+  heroPosterUrl_lte: String
+  heroPosterUrl_in: [String!]
+  heroPosterUrl_not_in: [String!]
+  heroPosterUrl_contains: String
+  heroPosterUrl_not_contains: String
+  heroPosterUrl_containsInsensitive: String
+  heroPosterUrl_not_containsInsensitive: String
+  heroPosterUrl_startsWith: String
+  heroPosterUrl_not_startsWith: String
+  heroPosterUrl_endsWith: String
+  heroPosterUrl_not_endsWith: String
+  activatedAt_isNull: Boolean
+  activatedAt_eq: DateTime
+  activatedAt_not_eq: DateTime
+  activatedAt_gt: DateTime
+  activatedAt_gte: DateTime
+  activatedAt_lt: DateTime
+  activatedAt_lte: DateTime
+  activatedAt_in: [DateTime!]
+  activatedAt_not_in: [DateTime!]
+  AND: [VideoHeroWhereInput!]
+  OR: [VideoHeroWhereInput!]
+}
+
+enum VideoHeroOrderByInput {
+  id_ASC
+  id_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  heroTitle_ASC
+  heroTitle_DESC
+  heroVideoCutUrl_ASC
+  heroVideoCutUrl_DESC
+  heroPosterUrl_ASC
+  heroPosterUrl_DESC
+  activatedAt_ASC
+  activatedAt_DESC
+}
+
+type VideoHerosConnection {
+  edges: [VideoHeroEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoHeroEdge {
+  node: VideoHero!
+  cursor: String!
+}
+
+enum VideoMediaMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  encoding_id_ASC
+  encoding_id_DESC
+  encoding_codecName_ASC
+  encoding_codecName_DESC
+  encoding_container_ASC
+  encoding_container_DESC
+  encoding_mimeMediaType_ASC
+  encoding_mimeMediaType_DESC
+  pixelWidth_ASC
+  pixelWidth_DESC
+  pixelHeight_ASC
+  pixelHeight_DESC
+  size_ASC
+  size_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  createdInBlock_ASC
+  createdInBlock_DESC
+}
+
+type VideoMediaMetadataConnection {
+  edges: [VideoMediaMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoMediaMetadataEdge {
+  node: VideoMediaMetadata!
+  cursor: String!
+}
+
+enum VideoMediaEncodingOrderByInput {
+  id_ASC
+  id_DESC
+  codecName_ASC
+  codecName_DESC
+  container_ASC
+  container_DESC
+  mimeMediaType_ASC
+  mimeMediaType_DESC
+}
+
+type VideoMediaEncodingsConnection {
+  edges: [VideoMediaEncodingEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoMediaEncodingEdge {
+  node: VideoMediaEncoding!
+  cursor: String!
+}
+
+enum LicenseOrderByInput {
+  id_ASC
+  id_DESC
+  code_ASC
+  code_DESC
+  attribution_ASC
+  attribution_DESC
+  customText_ASC
+  customText_DESC
+}
+
+type LicensesConnection {
+  edges: [LicenseEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type LicenseEdge {
+  node: License!
+  cursor: String!
+}
+
+type VideoSubtitlesConnection {
+  edges: [VideoSubtitleEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoSubtitleEdge {
+  node: VideoSubtitle!
+  cursor: String!
+}
+
+type VideoReactionsConnection {
+  edges: [VideoReactionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoReactionEdge {
+  node: VideoReaction!
+  cursor: String!
+}
+
+type CuratorGroup {
+  # Runtime identifier
+  id: String!
+
+  # Is group active or not
+  isActive: Boolean!
+}
+
+input CuratorGroupWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  isActive_isNull: Boolean
+  isActive_eq: Boolean
+  isActive_not_eq: Boolean
+  AND: [CuratorGroupWhereInput!]
+  OR: [CuratorGroupWhereInput!]
+}
+
+enum CuratorGroupOrderByInput {
+  id_ASC
+  id_DESC
+  isActive_ASC
+  isActive_DESC
+}
+
+type CuratorGroupsConnection {
+  edges: [CuratorGroupEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CuratorGroupEdge {
+  node: CuratorGroup!
+  cursor: String!
+}
+
+enum CuratorOrderByInput {
+  id_ASC
+  id_DESC
+}
+
+type CuratorsConnection {
+  edges: [CuratorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CuratorEdge {
+  node: Curator!
+  cursor: String!
+}
+
+enum StorageBucketOperatorMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  storageBucket_id_ASC
+  storageBucket_id_DESC
+  storageBucket_acceptingNewBags_ASC
+  storageBucket_acceptingNewBags_DESC
+  storageBucket_dataObjectsSizeLimit_ASC
+  storageBucket_dataObjectsSizeLimit_DESC
+  storageBucket_dataObjectCountLimit_ASC
+  storageBucket_dataObjectCountLimit_DESC
+  storageBucket_dataObjectsCount_ASC
+  storageBucket_dataObjectsCount_DESC
+  storageBucket_dataObjectsSize_ASC
+  storageBucket_dataObjectsSize_DESC
+  nodeEndpoint_ASC
+  nodeEndpoint_DESC
+  nodeLocation_countryCode_ASC
+  nodeLocation_countryCode_DESC
+  nodeLocation_city_ASC
+  nodeLocation_city_DESC
+  extra_ASC
+  extra_DESC
+}
+
+type StorageBucketOperatorMetadataConnection {
+  edges: [StorageBucketOperatorMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketOperatorMetadataEdge {
+  node: StorageBucketOperatorMetadata!
+  cursor: String!
+}
+
+enum StorageBucketOrderByInput {
+  id_ASC
+  id_DESC
+  operatorStatus_phantom_ASC
+  operatorStatus_phantom_DESC
+  operatorStatus_workerId_ASC
+  operatorStatus_workerId_DESC
+  operatorStatus_transactorAccountId_ASC
+  operatorStatus_transactorAccountId_DESC
+  operatorStatus_isTypeOf_ASC
+  operatorStatus_isTypeOf_DESC
+  operatorMetadata_id_ASC
+  operatorMetadata_id_DESC
+  operatorMetadata_nodeEndpoint_ASC
+  operatorMetadata_nodeEndpoint_DESC
+  operatorMetadata_extra_ASC
+  operatorMetadata_extra_DESC
+  acceptingNewBags_ASC
+  acceptingNewBags_DESC
+  dataObjectsSizeLimit_ASC
+  dataObjectsSizeLimit_DESC
+  dataObjectCountLimit_ASC
+  dataObjectCountLimit_DESC
+  dataObjectsCount_ASC
+  dataObjectsCount_DESC
+  dataObjectsSize_ASC
+  dataObjectsSize_DESC
+}
+
+type StorageBucketsConnection {
+  edges: [StorageBucketEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketEdge {
+  node: StorageBucket!
+  cursor: String!
+}
+
+enum StorageBagOrderByInput {
+  id_ASC
+  id_DESC
+  owner_phantom_ASC
+  owner_phantom_DESC
+  owner_workingGroupId_ASC
+  owner_workingGroupId_DESC
+  owner_memberId_ASC
+  owner_memberId_DESC
+  owner_channelId_ASC
+  owner_channelId_DESC
+  owner_daoId_ASC
+  owner_daoId_DESC
+  owner_isTypeOf_ASC
+  owner_isTypeOf_DESC
+}
+
+type StorageBagsConnection {
+  edges: [StorageBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBagEdge {
+  node: StorageBag!
+  cursor: String!
+}
+
+type StorageBucketBagsConnection {
+  edges: [StorageBucketBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketBagEdge {
+  node: StorageBucketBag!
+  cursor: String!
+}
+
+type DistributionBucketBagsConnection {
+  edges: [DistributionBucketBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketBagEdge {
+  node: DistributionBucketBag!
+  cursor: String!
+}
+
+type StorageDataObjectsConnection {
+  edges: [StorageDataObjectEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageDataObjectEdge {
+  node: StorageDataObject!
+  cursor: String!
+}
+
+enum DistributionBucketFamilyMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  family_id_ASC
+  family_id_DESC
+  region_ASC
+  region_DESC
+  description_ASC
+  description_DESC
+}
+
+type DistributionBucketFamilyMetadataConnection {
+  edges: [DistributionBucketFamilyMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketFamilyMetadataEdge {
+  node: DistributionBucketFamilyMetadata!
+  cursor: String!
+}
+
+enum DistributionBucketOperatorMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  distirbutionBucketOperator_id_ASC
+  distirbutionBucketOperator_id_DESC
+  distirbutionBucketOperator_workerId_ASC
+  distirbutionBucketOperator_workerId_DESC
+  distirbutionBucketOperator_status_ASC
+  distirbutionBucketOperator_status_DESC
+  nodeEndpoint_ASC
+  nodeEndpoint_DESC
+  nodeLocation_countryCode_ASC
+  nodeLocation_countryCode_DESC
+  nodeLocation_city_ASC
+  nodeLocation_city_DESC
+  extra_ASC
+  extra_DESC
+}
+
+type DistributionBucketOperatorMetadataConnection {
+  edges: [DistributionBucketOperatorMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketOperatorMetadataEdge {
+  node: DistributionBucketOperatorMetadata!
+  cursor: String!
+}
+
+type DistributionBucketOperatorsConnection {
+  edges: [DistributionBucketOperatorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketOperatorEdge {
+  node: DistributionBucketOperator!
+  cursor: String!
+}
+
+type DistributionBucketsConnection {
+  edges: [DistributionBucketEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketEdge {
+  node: DistributionBucket!
+  cursor: String!
+}
+
+enum DistributionBucketFamilyOrderByInput {
+  id_ASC
+  id_DESC
+  metadata_id_ASC
+  metadata_id_DESC
+  metadata_region_ASC
+  metadata_region_DESC
+  metadata_description_ASC
+  metadata_description_DESC
+}
+
+type DistributionBucketFamiliesConnection {
+  edges: [DistributionBucketFamilyEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketFamilyEdge {
+  node: DistributionBucketFamily!
+  cursor: String!
+}
+
+type VideoViewEvent {
+  # Unique identifier of the video view event
+  id: String!
+
+  # ID of the video that was viewed (the video may no longer exist)
+  videoId: String!
+
+  # IP address of the viewer
+  ip: String!
+
+  # Video view event timestamp
+  timestamp: DateTime!
+}
+
+input VideoViewEventWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [VideoViewEventWhereInput!]
+  OR: [VideoViewEventWhereInput!]
+}
+
+enum VideoViewEventOrderByInput {
+  id_ASC
+  id_DESC
+  videoId_ASC
+  videoId_DESC
+  ip_ASC
+  ip_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type VideoViewEventsConnection {
+  edges: [VideoViewEventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoViewEventEdge {
+  node: VideoViewEvent!
+  cursor: String!
+}
+
+type Report {
+  # Unique identifier of the report
+  id: String!
+
+  # IP address of the reporter
+  ip: String!
+
+  # ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)
+  channelId: String!
+
+  # ID of the video being reported (the video may no longer exist)
+  videoId: String
+
+  # Time of the report
+  timestamp: DateTime!
+
+  # Rationale behind the report
+  rationale: String!
+}
+
+input ReportWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
+  AND: [ReportWhereInput!]
+  OR: [ReportWhereInput!]
+}
+
+enum ReportOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  videoId_ASC
+  videoId_DESC
+  timestamp_ASC
+  timestamp_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+type ReportsConnection {
+  edges: [ReportEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReportEdge {
+  node: Report!
+  cursor: String!
+}
+
+type ChannelFollow {
+  # Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)
+  id: String!
+
+  # IP address of the follower
+  ip: String!
+
+  # ID of the channel being followed (the channel may no longer exist)
+  channelId: String!
+
+  # Time when user started following the channel
+  timestamp: DateTime!
+}
+
+input ChannelFollowWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [ChannelFollowWhereInput!]
+  OR: [ChannelFollowWhereInput!]
+}
+
+enum ChannelFollowOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type ChannelFollowsConnection {
+  edges: [ChannelFollowEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChannelFollowEdge {
+  node: ChannelFollow!
+  cursor: String!
+}
+
+type SquidStatus {
+  # The height of the processed part of the chain
+  height: Int
+}

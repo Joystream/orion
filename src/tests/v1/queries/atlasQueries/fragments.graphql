@@ -1,0 +1,319 @@
+fragment VideoCategoryFields on VideoCategory {
+  id
+  name
+  activeVideosCounter
+}
+fragment BasicChannelFields on Channel {
+  id
+  title
+  description
+  createdAt
+  follows
+  rewardAccount
+  channelStateBloatBond
+
+  avatarPhoto {
+    ...StorageDataObjectFields
+  }
+}
+
+fragment FullChannelFields on Channel {
+  ...BasicChannelFields
+  views
+  activeVideosCounter
+  description
+  isPublic
+  isCensored
+  language {
+    id
+    iso
+  }
+  ownerMember {
+    ...BasicMembershipFields
+  }
+  coverPhoto {
+    ...StorageDataObjectFields
+  }
+}
+
+fragment BasicMembershipFields on Membership {
+  id
+  handle
+  metadata {
+    avatar {
+      ... on AvatarObject {
+        avatarObject {
+          ...StorageDataObjectFields
+        }
+      }
+      ... on AvatarUri {
+        avatarUri
+      }
+    }
+    about
+  }
+}
+
+fragment FullMembershipFields on Membership {
+  ...BasicMembershipFields
+  controllerAccount
+  createdAt
+  channels {
+    ...BasicChannelFields
+
+    description
+    coverPhoto {
+      ...StorageDataObjectFields
+    }
+  }
+}
+
+fragment StorageDataObjectFields on StorageDataObject {
+  id
+  createdAt
+  size
+  isAccepted
+  ipfsHash
+  storageBag {
+    id
+  }
+  type {
+    __typename
+  }
+}
+
+fragment DistributionBucketOperatorField on DistributionBucketOperator {
+  id
+  metadata {
+    nodeEndpoint
+    nodeLocation {
+      coordinates {
+        latitude
+        longitude
+      }
+    }
+  }
+  status
+}
+fragment VideoMediaMetadataFields on VideoMediaMetadata {
+  id
+  pixelHeight
+  pixelWidth
+}
+
+fragment LicenseFields on License {
+  id
+  code
+  attribution
+  customText
+}
+
+fragment SubtitlesFields on VideoSubtitle {
+  id
+  language {
+    id
+    iso
+  }
+  asset {
+    ...StorageDataObjectFields
+  }
+  mimeType
+  type
+  assetId
+}
+
+fragment BasicVideoFields on Video {
+  id
+  title
+  views
+  createdAt
+  duration
+  reactionsCount
+  commentsCount
+  channel {
+    ...BasicChannelFields
+  }
+  thumbnailPhoto {
+    ...StorageDataObjectFields
+  }
+  nft {
+    ...BasicNftFields
+  }
+}
+
+fragment FullVideoFields on Video {
+  id
+  title
+  description
+  reactionsCount
+  reactions {
+    id
+    createdAt
+    reaction
+    memberId
+  }
+  category {
+    id
+    name
+  }
+  views
+  duration
+  createdAt
+  isPublic
+  isExplicit
+  hasMarketing
+  isCensored
+  isCommentSectionEnabled
+  commentsCount
+  language {
+    iso
+  }
+  publishedBeforeJoystream
+  mediaMetadata {
+    ...VideoMediaMetadataFields
+  }
+  media {
+    ...StorageDataObjectFields
+  }
+  thumbnailPhoto {
+    ...StorageDataObjectFields
+  }
+  channel {
+    ...FullChannelFields
+  }
+  license {
+    ...LicenseFields
+  }
+  nft {
+    ...BasicNftFields
+  }
+  subtitles {
+    ...SubtitlesFields
+  }
+}
+
+fragment BasicNftFields on OwnedNft {
+  id
+  createdAt
+  creatorRoyalty
+  lastSaleDate
+  lastSalePrice
+  isOwnedByChannel
+  ownerMember {
+    ...BasicMembershipFields
+  }
+  transactionalStatusAuction {
+    id
+    auctionType {
+      __typename
+      ... on AuctionTypeEnglish {
+        duration
+        extensionPeriod
+        minimalBidStep
+        plannedEndAtBlock
+      }
+      ... on AuctionTypeOpen {
+        bidLockDuration
+      }
+    }
+    isCompleted
+    initialOwner {
+      ...BasicMembershipFields
+    }
+    buyNowPrice
+    startingPrice
+
+    startsAtBlock
+    endedAtBlock
+
+    topBid {
+      ...BasicBidFields
+    }
+    bids {
+      ...BasicBidFields
+    }
+
+    whitelistedMembers {
+      ...BasicMembershipFields
+    }
+  }
+  transactionalStatus {
+    __typename
+    ... on TransactionalStatusIdle {
+      dummy
+    }
+    ... on TransactionalStatusBuyNow {
+      price
+    }
+  }
+}
+
+fragment FullNftFields on OwnedNft {
+  ...BasicNftFields
+  creatorChannel {
+    ...BasicChannelFields
+  }
+  video {
+    ...BasicVideoFields
+  }
+}
+
+fragment BasicBidFields on Bid {
+  bidder {
+    ...BasicMembershipFields
+  }
+  amount
+  createdAt
+  isCanceled
+  createdInBlock
+  id
+}
+
+fragment FullBidFields on Bid {
+  ...BasicBidFields
+  auction {
+    auctionType {
+      __typename
+    }
+    isCompleted
+    winningMemberId
+    id
+  }
+}
+
+fragment CommentReactionsCountByReactionIdFields on CommentReactionsCountByReactionId {
+  id
+  count
+  reactionId
+}
+
+fragment CommentFields on Comment {
+  id
+  author {
+    ...BasicMembershipFields
+  }
+  createdAt
+  isEdited
+  reactionsCountByReactionId {
+    ...CommentReactionsCountByReactionIdFields
+  }
+  parentCommentId
+  repliesCount
+  text
+  status
+}
+
+fragment MetaprotocolTransactionSuccessFields on MetaprotocolTransactionSuccessful {
+  commentCreated {
+    ...CommentFields
+  }
+  commentEdited {
+    ...CommentFields
+  }
+  commentDeleted {
+    ...CommentFields
+  }
+  commentModerated {
+    ...CommentFields
+  }
+}

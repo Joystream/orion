@@ -1,0 +1,6 @@
+# CHANGE: `videoCategories` replaced with `extendedVideoCategories` (which include `activeVideosCount`)
+query GetExtendedVideoCategories {
+  extendedVideoCategories {
+    ...ExtendedVideoCategoryFields
+  }
+}

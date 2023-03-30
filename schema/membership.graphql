@@ -1,0 +1,54 @@
+type AvatarObject @variant {
+  "The avatar data object"
+  avatarObject: StorageDataObject!
+}
+
+type AvatarUri @variant {
+  "The avatar URL"
+  avatarUri: String!
+}
+
+union Avatar = AvatarObject | AvatarUri
+
+type MemberMetadata @entity {
+  "Member's name"
+  name: String
+
+  "Avatar data object"
+  avatar: Avatar
+
+  "Short text chosen by member to share information about themselves"
+  about: String
+
+  member: Membership! @unique
+}
+
+"Stored information about a registered user"
+type Membership @entity {
+  "MemberId: runtime identifier for a user"
+  id: ID!
+
+  "Timestamp of the block the membership was created at"
+  createdAt: DateTime!
+
+  "The unique handle chosen by member"
+  handle: String! @unique
+
+  "Member's metadata"
+  metadata: MemberMetadata @derivedFrom(field: "member")
+
+  "Member's controller account id"
+  controllerAccount: String!
+
+  "Auctions in which is this user whitelisted to participate"
+  whitelistedInAuctions: [AuctionWhitelistedMember!] @derivedFrom(field: "member")
+
+  "Channels owned by this member"
+  channels: [Channel!] @derivedFrom(field: "ownerMember")
+
+  "Channels the member is banned from (in terms of commenting/reacting)"
+  bannedFromChannels: [BannedMember!] @derivedFrom(field: "member")
+
+  "Number of channels ever created by this member"
+  totalChannelsCreated: Int!
+}

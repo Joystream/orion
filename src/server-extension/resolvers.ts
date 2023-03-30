@@ -1,0 +1,7 @@
+export { AdminResolver } from './resolvers/AdminResolver'
+export { ChannelsResolver } from './resolvers/ChannelsResolver'
+export { VideoCategoriesResolver } from './resolvers/VideoCategoriesResolver'
+export { StateResolver } from './resolvers/StateResolver'
+export { VideosResolver } from './resolvers/VideosResolver'
+export { AssetsResolver } from './resolvers/AssetsResolver'
+export { NftResolver } from './resolvers/NftResolver'

@@ -1,0 +1,120 @@
+# CHANGE: ID is now `String`
+query GetComment($commentId: String!) {
+  # CHANGE: `commentByUniqueInput` no longer exists, replaced w/ `commentById`
+  commentById(id: $commentId) {
+    ...CommentFields
+  }
+}
+
+query GetCommentRepliesConnection(
+  $first: Int
+  $after: String
+  $parentCommentId: String! # CHANGE: ID is now `String`
+  $orderBy: [CommentOrderByInput!] = [createdAt_ASC]
+) {
+  commentsConnection(
+    first: $first
+    after: $after
+    where: { parentComment: { id_eq: $parentCommentId }, status_eq: VISIBLE }
+    orderBy: $orderBy
+  ) {
+    edges {
+      cursor
+      node {
+        ...CommentFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+query GetUserCommentsAndVideoCommentsConnection(
+  $first: Int
+  $after: String
+  $memberId: String # CHANGE: ID is now `String`
+  $videoId: String # CHANGE: ID is now `String`
+  $orderBy: [CommentOrderByInput!] = [createdAt_DESC]
+) {
+  userComments: comments(
+    where: {
+      AND: [
+        # get comments which are not a reply to a comment
+        { parentComment: { id_isNull: true } }
+        { video: { id_eq: $videoId } }
+        { author: { id_eq: $memberId } }
+        # if comment is deleted(has status Deleted or Moderated) and has no replies don't show the comment
+        { OR: [{ status_eq: VISIBLE }, { repliesCount_gt: 0 }] }
+      ]
+    }
+    orderBy: [createdAt_DESC]
+  ) {
+    ...CommentFields
+  }
+
+  videoCommentsConnection: commentsConnection(
+    first: $first
+    after: $after
+    where: {
+      AND: [
+        { video: { id_eq: $videoId } }
+        { parentComment: { id_isNull: true } }
+        { OR: [{ status_eq: VISIBLE }, { repliesCount_gt: 0 }] }
+      ]
+    }
+    orderBy: $orderBy
+  ) {
+    edges {
+      cursor
+      node {
+        ...CommentFields
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+# CHANGE: ID is now `String`
+query GetUserCommentsReactions($memberId: String!, $videoId: String!) {
+  commentReactions(
+    where: { member: { id_eq: $memberId }, video: { id_eq: $videoId } }
+    limit: 1000
+  ) {
+    reactionId
+    comment {
+      # CHANGE: `commentId` no longer exists, use `comment.id`
+      id
+    }
+  }
+}
+
+# CHANGE: ID is now `String`
+query GetCommentEdits($commentId: String!) {
+  # CHANGE: Use a single `events` query instead of separately querying `commentTextUpdatedEvents` and `commentCreatedEvents`
+  events(
+    where: {
+      data: {
+        isTypeOf_in: ["CommentCreatedEventData", "CommentTextUpdatedEventData"]
+        comment: { id_eq: $commentId }
+      }
+    }
+  ) {
+    id
+    timestamp # CHANGE: `timestamp` instead of `createdAt`, which no longer exists
+    data {
+      ... on CommentCreatedEventData {
+        text
+      }
+      ... on CommentTextUpdatedEventData {
+        newText
+      }
+    }
+  }
+}
