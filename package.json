@@ -1,84 +1,80 @@
 {
   "name": "orion",
-  "version": "1.0.0",
-  "description": "Video view count service for Joystream",
-  "license": "ISC",
-  "directories": {
-    "src": "src"
-  },
-  "files": [
-    "src"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Joystream/joystream.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Joystream/joystream/issues"
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=16"
   },
   "scripts": {
-    "clean": "rm -rf dist",
-    "dev": "NODE_ENV=development ts-node-dev --respawn src/main.ts",
-    "build": "yarn clean && yarn tsc -p tsconfig.build.json",
-    "start": "node dist/main.js",
-    "lint": "yarn lint:ts && yarn lint:prettier",
-    "lint:ts": "eslint --ext .ts --max-warnings 0 ./src",
-    "lint:prettier": "prettier --check ./src",
-    "test": "jest"
+    "generate:schema": "./scripts/generate-schema-file.sh",
+    "build": "npm run generate:schema; rm -rf lib && tsc",
+    "lint": "eslint --ext .ts ./src",
+    "format": "prettier --write .",
+    "checks": "prettier --check . && npm run lint && make codegen && tsc --noEmit --pretty",
+    "db:migrate": "npx squid-typeorm-migration apply",
+    "processor-start": "node lib/processor.js",
+    "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
+    "postinstall": "patch-package --patch-dir assets/patches",
+    "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
+    "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
+    "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
+    "v1-migration:prepare": "./scripts/orion-v1-migration/export.sh && npx ts-node ./scripts/orion-v1-migration/prepareData.ts"
   },
-  "lint-staged": {
-    "*.{ts,json}": [
-      "prettier --write"
-    ]
+  "overrides": {
+    "@polkadot/api": "8.9.1",
+    "@polkadot/keyring": "9.5.1",
+    "@polkadot/types": "8.9.1",
+    "@polkadot/util": "9.5.1",
+    "@polkadot/util-crypto": "9.5.1",
+    "@joystream/types": "0.20.5"
   },
   "dependencies": {
-    "@graphql-tools/graphql-file-loader": "^7.3.3",
-    "@graphql-tools/load": "^7.4.1",
-    "@graphql-tools/schema": "^8.3.1",
-    "@graphql-tools/stitch": "^8.4.1",
-    "@graphql-tools/url-loader": "^7.5.2",
-    "@typegoose/auto-increment": "^1.3.0",
-    "@typegoose/typegoose": "^9.8.1",
-    "apollo-server-core": "^3.8.1",
-    "apollo-server-express": "^3.8.1",
-    "class-validator": "^0.13.2",
-    "date-fns": "^2.28.0",
-    "dotenv": "^16.0.1",
-    "express": "^4.18.1",
-    "graphql": "^15.8.0",
+    "@joystream/js": "^1.4.0",
+    "@polkadot/util-crypto": "9.5.1",
+    "@subsquid/archive-registry": "^2.1.0",
+    "@subsquid/graphql-server": "^3.3.2",
+    "@subsquid/ss58": "^0.1.3",
+    "@subsquid/substrate-processor": "^2.2.0",
+    "@subsquid/typeorm-migration": "^0.1.4",
+    "@subsquid/typeorm-store": "^0.2.0",
+    "@types/lodash": "^4.14.189",
+    "@typescript/analyze-trace": "^0.9.1",
+    "ajv": "^6.11.0",
+    "axios": "^1.2.1",
+    "csv-stringify": "^6.3.0",
+    "dotenv": "^16.0.3",
+    "dotenv-expand": "^10.0.0",
+    "graphql-tools": "^8.3.11",
+    "haversine-distance": "^1.2.1",
     "lodash": "^4.17.21",
-    "mongodb": "^4.6.0",
-    "mongoose": "^6.3.4",
-    "reflect-metadata": "^0.1.13",
-    "type-graphql": "^1.1.1"
+    "patch-package": "^6.5.0",
+    "pg": "8.8.0",
+    "type-graphql": "^1.2.0-rc.1",
+    "typeorm": "^0.3.11",
+    "url-join": "^4"
   },
   "devDependencies": {
-    "@joystream/prettier-config": "^1.0.0",
-    "@shelf/jest-mongodb": "^3.0.0",
-    "@types/express": "^4.17.13",
-    "@types/jest": "^27.5.1",
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^16.11.36",
-    "@types/validator": "^13.7.2",
-    "@typescript-eslint/eslint-plugin": "^5.27.0",
-    "@typescript-eslint/parser": "^5.27.0",
-    "eslint": "^8.16.0",
+    "@graphql-codegen/cli": "^3.0.0",
+    "@graphql-codegen/import-types-preset": "^1.18.1",
+    "@graphql-codegen/typescript": "^1.22.0",
+    "@graphql-codegen/typescript-document-nodes": "^2.2.11",
+    "@graphql-codegen/typescript-operations": "^1.17.16",
+    "@subsquid/substrate-metadata-explorer": "^1.0.9",
+    "@subsquid/substrate-typegen": "^2.1.0",
+    "@subsquid/typeorm-codegen": "^0.3.1",
+    "@types/node": "16.11.56",
+    "@types/url-join": "^4",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.43.0",
+    "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-jest": "^26.4.5",
-    "husky": "^4.3.0",
-    "jest": "^28.1.0",
-    "lint-staged": "^12.4.3",
-    "prettier": "^2.6.2",
-    "ts-jest": "^28.0.3",
-    "ts-node": "^10.8.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^4.7.2"
-  },
-  "resolutions": {
-    "cross-undici-fetch": "0.4.3"
-  },
-  "engines": {
-    "node": "^16.13.1"
-  },
-  "packageManager": "yarn@3.2.1"
+    "eslint-config-standard": "^17.0.0",
+    "eslint-config-standard-with-typescript": "^34.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.6.1",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-standard": "^5.0.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.2"
+  }
 }

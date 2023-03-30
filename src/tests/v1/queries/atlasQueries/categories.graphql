@@ -1,0 +1,5 @@
+query GetVideoCategories {
+  videoCategories(where: { name_startsWith: "" }) {
+    ...VideoCategoryFields
+  }
+}

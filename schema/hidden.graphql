@@ -1,0 +1,64 @@
+type VideoViewEvent @entity {
+  "Unique identifier of the video view event"
+  id: ID!
+
+  "ID of the video that was viewed (the video may no longer exist)"
+  videoId: String! @index
+
+  "IP address of the viewer"
+  ip: String! @index
+
+  "Video view event timestamp"
+  timestamp: DateTime!
+}
+
+type Report @entity {
+  "Unique identifier of the report"
+  id: ID!
+
+  "IP address of the reporter"
+  ip: String! @index
+
+  "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
+  channelId: String @index
+
+  "If it's a video report: ID of the video being reported (the video may no longer exist)"
+  videoId: String @index
+
+  "Time of the report"
+  timestamp: DateTime!
+
+  "Rationale behind the report"
+  rationale: String!
+}
+
+type NftFeaturingRequest @entity {
+  "Unique identifier of the request"
+  id: ID!
+
+  "IP address of the reporter"
+  ip: String! @index
+
+  "ID of the nft that is being requested to be featured by operator"
+  nftId: String! @index
+
+  "Time of the request"
+  timestamp: DateTime!
+
+  "Rationale behind the request"
+  rationale: String!
+}
+
+type ChannelFollow @entity {
+  "Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)"
+  id: ID!
+
+  "IP address of the follower"
+  ip: String! @index
+
+  "ID of the channel being followed (the channel may no longer exist)"
+  channelId: String! @index
+
+  "Time when user started following the channel"
+  timestamp: DateTime!
+}

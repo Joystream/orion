@@ -1,0 +1,7 @@
+# CHANGE: ID is now `String`
+query GetDataObjectAvailability($id_eq: String, $id_in: [String!], $limit: Int) {
+  storageDataObjects(where: { id_eq: $id_eq, id_in: $id_in }, limit: $limit) {
+    id
+    isAccepted
+  }
+}

@@ -1,20 +1,12 @@
-yarn-debug.log*
-yarn-error.log*
+/node_modules
+/lib
 
-node_modules/
-dist/
+/**Versions.json
+/**Versions.jsonl
 
-globalConfig.json
-
-.idea
-db/
-db.zip
-.env
-
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# IDE files
+/.idea
+src/model/generated
+/schema.graphql
+/db/persisted
+/scripts/orion-v1-migration/data

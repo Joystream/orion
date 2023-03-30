@@ -1,5 +1,4 @@
-*.log
-node_modules/
-dist/
-Dockerfile
-docker-compose.yml
+/.git
+/node_modules
+/lib
+/*Versions.jsonl

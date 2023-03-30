@@ -1,0 +1,255 @@
+type VideoCategory @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "The name of the category"
+  name: String @index
+
+  "The description of the category"
+  description: String
+
+  "Parent category if defined"
+  parentCategory: VideoCategory
+
+  videos: [Video!]! @derivedFrom(field: "category")
+
+  featuredVideos: [VideoFeaturedInCategory!] @derivedFrom(field: "category")
+
+  "Indicates whether the category is supported by the Gateway"
+  isSupported: Boolean!
+
+  createdInBlock: Int!
+}
+
+type Video @entity {
+  "Runtime identifier"
+  id: ID!
+
+  "Timestamp of the block the video was created at"
+  createdAt: DateTime!
+
+  "Reference to videos's channel"
+  channel: Channel!
+
+  "Reference to a video category"
+  category: VideoCategory
+
+  "The title of the video"
+  title: String
+
+  "The description of the Video"
+  description: String
+
+  "Video duration in seconds"
+  duration: Int
+
+  "Video thumbnail asset (recommended ratio: 16:9)"
+  thumbnailPhoto: StorageDataObject
+
+  "Video's main langauge"
+  language: String @index
+
+  "Whether or not Video contains marketing"
+  hasMarketing: Boolean
+
+  "If the Video was published on other platform before beeing published on Joystream - the original publication date"
+  publishedBeforeJoystream: DateTime
+
+  "Whether the Video is supposed to be publically displayed"
+  isPublic: Boolean
+
+  "Flag signaling whether a video is censored."
+  isCensored: Boolean!
+
+  "Whether a video has been excluded/hidden (by the gateway operator)"
+  isExcluded: Boolean!
+
+  "Video NFT details"
+  nft: OwnedNft @derivedFrom(field: "video")
+
+  "Whether the Video contains explicit material."
+  isExplicit: Boolean
+
+  "License under the video is published"
+  license: License
+
+  "Video media asset"
+  media: StorageDataObject
+
+  "Value of video state bloat bond fee paid by channel owner"
+  videoStateBloatBond: BigInt!
+
+  "Video file metadata"
+  mediaMetadata: VideoMediaMetadata @derivedFrom(field: "video")
+
+  "Block the video was created in"
+  createdInBlock: Int!
+
+  "List of video subtitles"
+  subtitles: [VideoSubtitle!] @derivedFrom(field: "video")
+
+  "Is comment section enabled (true if enabled)"
+  isCommentSectionEnabled: Boolean!
+
+  "channel owner pinned comment"
+  pinnedComment: Comment
+
+  "List of all video comments"
+  comments: [Comment!] @derivedFrom(field: "video")
+
+  "Comments count"
+  commentsCount: Int!
+
+  "Is reactions feature enabled on video (true if enabled i.e. video can be reacted)"
+  isReactionFeatureEnabled: Boolean!
+
+  "List of all video reactions"
+  reactions: [VideoReaction!] @derivedFrom(field: "video")
+
+  "Reactions count by reaction Id"
+  reactionsCountByReactionId: [VideoReactionsCountByReactionType!]
+
+  "Reactions count"
+  reactionsCount: Int!
+
+  "Number of video views (to speed up orderBy queries by avoiding COUNT aggregation)"
+  viewsNum: Int!
+
+  "Application used for video creation"
+  entryApp: App
+
+  "Video ID coming from YPP"
+  ytVideoId: String
+}
+
+type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
+  "{categoryId-videoId}"
+  id: ID!
+
+  "Video being featured"
+  video: Video!
+
+  "Category the video is featured in"
+  category: VideoCategory!
+
+  "Url to video fragment to be displayed in the UI"
+  videoCutUrl: String
+}
+
+type VideoHero @entity {
+  "Unique ID"
+  id: ID!
+
+  "Video being featured in the Hero section"
+  video: Video!
+
+  "Title of the Hero section"
+  heroTitle: String!
+
+  "Url to video fragment to be displayed in the Hero section"
+  heroVideoCutUrl: String!
+
+  "Url to the poster to be displayed in the Hero section"
+  heroPosterUrl: String!
+
+  "Time at which this VideoHero was created/activated"
+  activatedAt: DateTime
+}
+
+type VideoMediaMetadata @entity {
+  "Unique identifier"
+  id: ID!
+
+  "Encoding of the video media object"
+  encoding: VideoMediaEncoding
+
+  "Video media width in pixels"
+  pixelWidth: Int
+
+  "Video media height in pixels"
+  pixelHeight: Int
+
+  "Video media size in bytes"
+  size: BigInt
+
+  video: Video! @unique
+
+  createdInBlock: Int!
+}
+
+type VideoMediaEncoding @entity {
+  "Encoding of the video media object"
+  codecName: String
+
+  "Media container format"
+  container: String
+
+  "Content MIME type"
+  mimeMediaType: String
+}
+
+type License @entity {
+  "Unique identifier"
+  id: ID!
+
+  "License code defined by Joystream"
+  code: Int
+
+  "Attribution (if required by the license)"
+  attribution: String
+
+  "Custom license content"
+  customText: String
+}
+
+type VideoSubtitle @entity {
+  "{type}-{language}"
+  id: ID!
+
+  "Subtitle's video"
+  video: Video!
+
+  # Atlas will use 'subtitles' | 'closed-captions' for now and possible other types in the future.
+  "Subtitle's type"
+  type: String!
+
+  "Subtitle's language"
+  language: String @index
+
+  "MIME type description of format used for this subtitle"
+  mimeType: String!
+
+  "Storage object representing the subtitle file"
+  asset: StorageDataObject
+}
+
+type VideoReactionsCountByReactionType {
+  "The reaction option"
+  reaction: VideoReactionOptions!
+
+  "No of times the video has been reacted with given reaction"
+  count: Int!
+}
+
+enum VideoReactionOptions {
+  "Reacting again with the same option will cancel the previous reaction"
+  LIKE
+  UNLIKE
+}
+
+type VideoReaction @entity {
+  "{memberId}-{videoId}"
+  id: ID!
+
+  "Timestamp of the block the reaction was created at"
+  createdAt: DateTime!
+
+  "The Reaction"
+  reaction: VideoReactionOptions!
+
+  "The member that reacted"
+  member: Membership!
+
+  "The video that has been reacted to"
+  video: Video!
+}

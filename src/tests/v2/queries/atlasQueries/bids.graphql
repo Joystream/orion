@@ -1,0 +1,6 @@
+# No changes
+query GetBids($where: BidWhereInput!, $limit: Int) {
+  bids(where: $where, limit: $limit, orderBy: [createdAt_ASC]) {
+    ...FullBidFields
+  }
+}
