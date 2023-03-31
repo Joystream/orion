@@ -3,6 +3,7 @@ import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-
 import { EntityManager, In, Not } from 'typeorm'
 import {
   AppActionSignatureInput,
+  ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
   GeneratedSignature,
@@ -11,6 +12,8 @@ import {
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
+  SetFeaturedNftsInput,
+  SetFeaturedNftsResult,
   SetKillSwitchInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -39,6 +42,8 @@ import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 import { AppAction } from '@joystream/metadata-protobuf'
+import { withHiddenEntities } from '../../../utils/sql'
+import { processCommentsCensorshipStatusUpdate } from './utils'
 
 @Resolver()
 export class AdminResolver {
@@ -215,22 +220,59 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetFeaturedNftsResult)
+  async setFeaturedNfts(
+    @Args() { featuredNftsIds }: SetFeaturedNftsInput
+  ): Promise<SetFeaturedNftsResult> {
+    const em = await this.em()
+    let newNumberOfNftsFeatured = 0
+
+    await em
+      .createQueryBuilder()
+      .update(`processor.owned_nft`)
+      .set({ is_featured: false })
+      .where({ is_featured: true })
+      .execute()
+
+    if (featuredNftsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update(`processor.owned_nft`)
+        .set({ is_featured: true })
+        .where({ id: In(featuredNftsIds) })
+        .execute()
+      newNumberOfNftsFeatured = result.affected || 0
+    }
+
+    return {
+      newNumberOfNftsFeatured,
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => ExcludeContentResult)
   async excludeContent(
     @Args()
     { ids, type }: ExcludeContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em
-      .createQueryBuilder()
-      .update(`processor.${type}`)
-      .set({ is_excluded: true })
-      .where({ id: In(ids) })
-      .execute()
 
-    return {
-      numberOfEntitiesAffected: result.affected || 0,
-    }
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update(type)
+        .set({ isExcluded: true })
+        .where({ id: In(ids) })
+        .execute()
+
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids)
+      }
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @UseMiddleware(OperatorOnly)
@@ -240,16 +282,23 @@ export class AdminResolver {
     { ids, type }: RestoreContentArgs
   ): Promise<ExcludeContentResult> {
     const em = await this.em()
-    const result = await em
-      .createQueryBuilder()
-      .update(`processor.${type}`)
-      .set({ is_excluded: false })
-      .where({ id: In(ids) })
-      .execute()
 
-    return {
-      numberOfEntitiesAffected: result.affected || 0,
-    }
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update(type)
+        .set({ isExcluded: false })
+        .where({ id: In(ids) })
+        .execute()
+
+      if (type === ExcludableContentType.Comment) {
+        await processCommentsCensorshipStatusUpdate(em, ids)
+      }
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @Mutation(() => GeneratedSignature)

@@ -4,7 +4,4 @@ import { Field, Int, ObjectType } from 'type-graphql'
 export class ProcessorState {
   @Field(() => Int, { nullable: false })
   lastProcessedBlock!: number
-
-  @Field(() => Int, { nullable: false })
-  chainHead!: number
 }

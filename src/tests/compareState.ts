@@ -4,6 +4,8 @@ import {
   ApolloClientOptions,
   NormalizedCacheObject,
   HttpLink,
+  ApolloLink,
+  from,
 } from '@apollo/client/core'
 import _ from 'lodash'
 import { has, isObject } from '../utils/misc'
@@ -12,6 +14,7 @@ import {
   StateQueryV1,
   StateQueryV1Query,
   StateQueryV1QueryVariables,
+  VideoMediaEncodingFieldsFragment,
 } from './v1/generated/queries'
 import {
   StateQueryAuctionRefFieldsFragment,
@@ -123,6 +126,16 @@ function prepareV1Data(data: StateQueryV1Query) {
       }
       ;(auction.topBid as { id: string }) = { id: (parent as BidFieldsFragment).id }
       return { isCanceled: false }
+    }
+    if (path.endsWith('.encoding') && isObject(val) && has(val, 'codecName')) {
+      const encoding = val as VideoMediaEncodingFieldsFragment
+      if (
+        encoding.codecName === null &&
+        encoding.container === null &&
+        encoding.mimeMediaType === null
+      ) {
+        return { encoding: null }
+      }
     }
   })
   return deepSort(prepared)
@@ -301,10 +314,23 @@ export async function compareState() {
   const v1Data = prepareV1Data(v1Result.data)
   fs.writeFileSync('./resultV1.json', JSON.stringify(v1Data, null, 4))
 
+  const operatorMiddleware = new ApolloLink((operation, forward) => {
+    operation.setContext(({ headers = {} }) => ({
+      headers: {
+        ...headers,
+        'x-operator-secret': process.env.OPERATOR_SECRET,
+      },
+    }))
+
+    return forward(operation)
+  })
   const orionV2Client = new ApolloClient({
-    link: new HttpLink({
-      uri: orionV2Url,
-    }),
+    link: from([
+      operatorMiddleware,
+      new HttpLink({
+        uri: orionV2Url,
+      }),
+    ]),
     ...config,
   })
 
