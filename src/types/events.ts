@@ -1480,6 +1480,33 @@ export class ProjectTokenTokenSaleInitializedEvent {
         assert(this.isV1000)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get isV2001(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenSaleInitialized') === '67bdd3b5a8607e0a3478ca1e5e8997e2e8dc15f6bd04822216fdfcd252ab84a0'
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get asV2001(): [bigint, number, bigint, v2001.TokenSale, (Uint8Array | undefined)] {
+        assert(this.isV2001)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class ProjectTokenTokensBoughtOnAmmEvent {

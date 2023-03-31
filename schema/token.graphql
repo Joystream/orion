@@ -161,7 +161,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   pricePerUnit: BigInt!
 
   "total amount of token on sale"
-  tokenSaleallocation: BigInt!
+  tokenSaleAllocation: BigInt!
 
   "amount of tokens that has been sold"
   tokensSold: BigInt!
@@ -192,6 +192,9 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "vesting schedule for sale"
   vestedSale: VestedSale @derivedFrom(field: "sale")
+
+  "sale funds source"
+  fundsSourceAccount: TokenAccount!
 }
 
 type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {

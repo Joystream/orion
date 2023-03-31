@@ -51,7 +51,12 @@ import {
   Event,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { genericEventFields, invalidMetadata, metaprotocolTransactionFailure } from '../utils'
+import {
+  commentCountersManager,
+  genericEventFields,
+  invalidMetadata,
+  metaprotocolTransactionFailure,
+} from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
@@ -554,18 +559,11 @@ export async function processModerateCommentMessage(
     return commentOrFailure
   }
 
-  const { comment, video } = commentOrFailure
+  const { comment } = commentOrFailure
 
-  // decrement video's comment count
-  --video.commentsCount
-
-  // decrement parent comment's replies count
-  if (comment.parentCommentId) {
-    const commentRepository = overlay.getRepository(Comment)
-    const parentComment = await commentRepository.getByIdOrFail(comment.parentCommentId)
-    --parentComment.repliesCount
-    --parentComment.reactionsAndRepliesCount
-  }
+  // schedule comment counters updates
+  commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
+  commentCountersManager.scheduleRecalcForVideo(comment.videoId)
 
   comment.text = ''
   comment.status = CommentStatus.MODERATED

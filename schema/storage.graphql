@@ -231,10 +231,10 @@ type StorageDataObject @entity {
   "If the object is no longer used as an asset - the time at which it was unset (if known)"
   unsetAt: DateTime
 
-  "Resolved asset url"
-  # This field should be populated with data object ID and will be then resolved by Orion's GraphQL
+  "Resolved asset urls"
+  # This field should be populated with [dataObjectId] and will be then resolved by Orion's GraphQL
   # server during query resolution
-  resolvedUrl: String
+  resolvedUrls: [String!]!
 }
 
 type DistributionBucketFamilyMetadata @entity {
