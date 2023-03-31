@@ -1,4 +1,4 @@
-import { VestedAccount } from '../../model'
+import { Token, TokenAccount, VestedAccount, VestingSchedule } from '../../model'
 import { VestingScheduleParams } from '../../types/v1000'
 import { EntityManagerOverlay } from '../../utils/overlay'
 
@@ -28,6 +28,10 @@ export class VestingScheduleData {
 
   public cliffBlock(): number {
     return this._params.blocksBeforeCliff + this._block
+  }
+
+  public cliffDuration(): number {
+    return this._params.blocksBeforeCliff
   }
 
   public duration(): number {
@@ -62,11 +66,11 @@ export async function burnFromVesting(
   accountId: string,
   burnedAmount: bigint
 ) {
-  const vestedAccounts = await overlay
+  const vestingSchedulesForAccount = await overlay
     .getRepository(VestedAccount)
     .getManyByRelation('accountId', accountId)
   let tallyBurnedAmount = burnedAmount
-  for (const vesting of vestedAccounts) {
+  for (const vesting of vestingSchedulesForAccount) {
     if (tallyBurnedAmount === BigInt(0)) {
       return
     }
@@ -75,4 +79,47 @@ export async function burnFromVesting(
       tallyBurnedAmount -= vesting.amount
     }
   }
+}
+
+export function addVestingSchedule(
+  overlay: EntityManagerOverlay,
+  vestingParams: VestingScheduleParams,
+  blockHeight: number,
+  tokenId: bigint,
+  memberId: bigint
+) {
+  const vestingData = new VestingScheduleData(vestingParams, blockHeight)
+
+  overlay.getRepository(VestingSchedule).new({
+    id: vestingData.id(),
+    endsAt: vestingData.endsAt(),
+    cliffBlock: vestingData.cliffBlock(),
+    vestingDurationBlocks: vestingData.duration(),
+    cliffPercent: vestingData.cliffPercent(),
+  })
+
+  overlay.getRepository(VestedAccount).new({
+    id: tokenAccountId(tokenId, memberId) + vestingData.id(),
+    accountId: tokenAccountId(tokenId, memberId),
+    vestingId: vestingData.id(),
+  })
+}
+
+export async function createAccount(
+  overlay: EntityManagerOverlay,
+  tokenId: bigint,
+  memberId: bigint,
+  allocationAmount: bigint,
+  whitelisted?: boolean
+) {
+  overlay.getRepository(TokenAccount).new({
+    tokenId: tokenId.toString(),
+    memberId: memberId.toString(),
+    id: tokenAccountId(tokenId, memberId),
+    stakedAmount: BigInt(0),
+    totalAmount: allocationAmount,
+    whitelisted,
+  })
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.accountsNum += 1
 }
