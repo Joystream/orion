@@ -92,6 +92,7 @@
     "ProjectToken.TokensBoughtOnAmm",
     "ProjectToken.TokensSoldOnAmm",
     "Content.CreatorTokenIssued"
+    "Members.MemberRemarked"
   ],
   "calls": [],
   "storage": []
