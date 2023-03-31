@@ -244,14 +244,10 @@ export async function processAmmActivatedEvent({
 export async function processTokenSaleInitializedEvent({
   overlay,
   block,
-  event,
+  event: {
+    asV2001: [tokenId, saleId, fundsSourceMemberId, tokenSale],
+  },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
-  const fundsSourceMemberId = event.isV2001 ? event.asV2001.fundsSourceMemberId : undefined
-  const metadataBytes = event.isV1000 ? event.asV1000.metadata : undefined
-  const tokenId = event.isV1000 ? event.asV1000.tokenId : event.asV2001.tokenId
-  const saleId = event.isV1000 ? event.asV1000.saleId : event.asV2001.saleId
-  const tokenSale = event.isV1000 ? event.asV1000.tokenSale : event.asV2001.tokenSale
-
   if (tokenSale.vestingScheduleParams !== undefined) {
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
 
@@ -270,12 +266,10 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
-  if (fundsSourceMemberId) {
-    const sourceAccount = await overlay
-      .getRepository(TokenAccount)
-      .getByIdOrFail(tokenAccountId(tokenId, fundsSourceMemberId))
-    sourceAccount.totalAmount -= tokenSale.quantityLeft
-  }
+  const sourceAccount = await overlay
+    .getRepository(TokenAccount)
+    .getByIdOrFail(tokenAccountId(tokenId, fundsSourceMemberId))
+  sourceAccount.totalAmount -= tokenSale.quantityLeft
 
   const sale = overlay.getRepository(Sale).new({
     id: tokenId.toString() + saleId.toString(),
