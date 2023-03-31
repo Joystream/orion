@@ -2,8 +2,8 @@
 
 Orion v2 is a major architecture change compared to Orion v1:
 
-- **No proxying to external Query Node:** Event processing is now part of Orion, the state is unified in a single database (PostgreSQL) instead of being spread between Joystream Query Node and Orion
-- **[Subsquid](https://docs.subsquid.io/)** framework is now used for event processing and GraphQL api generation
+- **No proxying to external Query Node:** Event processing is now part of Orion, the state is unified in a single database (PostgreSQL) instead of being spread between Joystream Query Node and Orion.
+- **[Subsquid](https://docs.subsquid.io/)** framework is now used for event processing and GraphQL api generation.
 
 For detailed overview of the new architecture, see the [developer guide](docs/developer-guide.md)
 
@@ -105,6 +105,7 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - `Video.pinnedComment` relation was incorrectly declared in Orion v1 (Query Node) input schema, which resulted in some comments, which were never actually pinned, being returned as `Video.pinnedComment`. This should no longer happen in Orion v2.
 - In Orion v1 (Query Node) sometimes the `createdAt` field of an entity (like `Memberships`) would be incorrectly modified on update. This will no longer happen in Orion v2, as fields like `createdAt` need to be added explicitly in Subsquid and are no longer automatically managed.
 - Using property aliases was not working in Orion v1 (for example: `channels { channelId: id }`), this is no longer an issue in Orion v2. 
+- `OwnedNft.creatorRoyalty` was incorrectly calculated in Orion v1 (rounded down to nearest integer), this has been fixed in Orion v2, so that now `creatorRoyalty` can have non-integer value (like `0.5`).
 
 ### Operator queries
 
@@ -158,4 +159,3 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - `setVideoViewPerIpTimeLimit` - allows specifying the time after which a video view triggered from the same ip address will be counted again (see: `addVideoView`)
 - `excludeContent` - allows excluding specified channels/videos/comments from all query results. Can be used as a gateway-level mechanism to censor some of the content. Comments are the only entities that don't get completely filtered-out from query results when excluded. Instead, their `text` becomes hidden and `isExcluded` property is set to `true`.
 - `restoreContent` - effectively the opposite of `excludeContent`, can be used to make content appear in the query results again (if previously excluded).
-- `setFeaturedNfts` - allows the operator to provide the list of nfts (ids) that are currently featured by the Gateway. This will affect the `isFeatured` propety of the `OwnedNft` entity.
