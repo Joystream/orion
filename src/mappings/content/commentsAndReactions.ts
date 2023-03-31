@@ -42,6 +42,7 @@ import {
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
+  commentCountersManager,
 } from '../utils'
 import { getChannelOwnerMemberByChannelId } from './utils'
 
@@ -300,7 +301,6 @@ export async function processReactCommentMessage(
   if (existingReaction) {
     // decrement counters
     --reactionsCountByReactionId.count
-    --comment.reactionsAndRepliesCount
     --comment.reactionsCount
     // remove reaction
     commentReactionRepository.remove(existingReaction)
@@ -316,9 +316,11 @@ export async function processReactCommentMessage(
 
     // increment counters
     ++reactionsCountByReactionId.count
-    ++comment.reactionsAndRepliesCount
     ++comment.reactionsCount
   }
+
+  // schedule comment counters update
+  commentCountersManager.scheduleRecalcForComment(comment.id)
 
   return new MetaprotocolTransactionResultOK()
 }
@@ -378,15 +380,6 @@ export async function processCreateCommentMessage(
     )
   }
 
-  // increment video's comment count
-  ++video.commentsCount
-
-  // increment parent comment's replies count
-  if (parentComment) {
-    ++parentComment.repliesCount
-    ++parentComment.reactionsAndRepliesCount
-  }
-
   // add new comment
   const comment = overlay.getRepository(Comment).new({
     // TODO: Re-think backward compatibility
@@ -403,6 +396,10 @@ export async function processCreateCommentMessage(
     isEdited: false,
     isExcluded: false,
   })
+
+  // schedule comment counters update
+  commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
+  commentCountersManager.scheduleRecalcForVideo(comment.videoId)
 
   // add CommentCreated event
   const event = overlay.getRepository(Event).new({
@@ -533,15 +530,9 @@ export async function processDeleteCommentMessage(
     unexpectedCommentStatusError(DeleteComment, message, comment.status)
   }
 
-  // decrement video's comment count
-  --video.commentsCount
-
-  // decrement parent comment's replies count
-  if (comment.parentCommentId) {
-    const parentComment = await commentRepository.getByIdOrFail(comment.parentCommentId)
-    --parentComment.repliesCount
-    --parentComment.reactionsAndRepliesCount
-  }
+  // schedule comment counters update
+  commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
+  commentCountersManager.scheduleRecalcForVideo(comment.videoId)
 
   // update the comment
   comment.text = ''
