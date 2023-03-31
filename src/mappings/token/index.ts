@@ -239,7 +239,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, saleId, fundsSourceMemberId, tokenSale,],
+    asV2001: [tokenId, saleId, fundsSourceMemberId, tokenSale],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   if (tokenSale.vestingScheduleParams !== undefined) {
@@ -260,7 +260,9 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
-  const sourceAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(tokenAccountId(tokenId, fundsSourceMemberId))
+  const sourceAccount = await overlay
+    .getRepository(TokenAccount)
+    .getByIdOrFail(tokenAccountId(tokenId, fundsSourceMemberId))
   sourceAccount.totalAmount -= tokenSale.quantityLeft
 
   overlay.getRepository(Sale).new({
@@ -478,10 +480,9 @@ export async function processMemberJoinedWhitelistEvent({
     whitelisted: true,
   })
 
-  const token = await  overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.accountsNum += 1
 }
-
 
 export async function processAmmDeactivatedEvent({
   overlay,
@@ -537,8 +538,10 @@ export async function processTokenSaleFinalizedEvent({
   sale.finalized = true
 
   // TODO try to remove !
-  const sourceAccount = await overlay.getRepository(TokenAccount).getByIdOrFail(sale.fundsSourceAccountId!)
-  sourceAccount.totalAmount += (sale.tokenSaleAllocation - sale.tokensSold)
+  const sourceAccount = await overlay
+    .getRepository(TokenAccount)
+    .getByIdOrFail(sale.fundsSourceAccountId!)
+  sourceAccount.totalAmount += sale.tokenSaleAllocation - sale.tokensSold
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.IDLE
