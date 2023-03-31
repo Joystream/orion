@@ -193,3 +193,20 @@ export class GeneratedSignature {
 }
 
 registerEnumType(AppAction.ActionType, { name: 'AppActionActionType' })
+
+@ArgsType()
+export class SetFeaturedNftsInput {
+  @Field(() => [String], {
+    description: 'IDs of the NFTs that should be featured by the Gateway',
+  })
+  featuredNftsIds: string[]
+}
+
+@ObjectType()
+export class SetFeaturedNftsResult {
+  @Field(() => Int, {
+    nullable: true,
+    description: 'The updated number of nft that are now explicitly featured by the Gateway',
+  })
+  newNumberOfNftsFeatured?: number
+}

@@ -1005,14 +1005,7 @@ export type GetNftActivitiesQuery = {
 
 export type GetQueryNodeStateSubscriptionVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetQueryNodeStateSubscription = {
-  stateSubscription: {
-    chainHead: number
-    indexerHead: number
-    lastCompleteBlock: number
-    lastProcessedEvent: string
-  }
-}
+export type GetQueryNodeStateSubscription = { stateSubscription: { lastCompleteBlock: number } }
 
 export type GetDistributionBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
 
@@ -1208,6 +1201,13 @@ export type BidFieldsFragment = {
   auction: { id: string }
   nft: { id: string }
   bidder: { id: string }
+}
+
+export type VideoMediaEncodingFieldsFragment = {
+  id: string
+  codecName?: Types.Maybe<string>
+  container?: Types.Maybe<string>
+  mimeMediaType?: Types.Maybe<string>
 }
 
 export type StateQueryV1QueryVariables = Types.Exact<{ [key: string]: never }>
@@ -1522,6 +1522,16 @@ export type StateQueryV1Query = {
       | { __typename: 'PaymentContextVideo'; video?: Types.Maybe<{ id: string }> }
     >
   }>
+  memberBannedFromChannelEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    action: boolean
+    channel: { id: string }
+    member: { id: string }
+  }>
   memberships: Array<{
     id: string
     createdAt: any
@@ -1733,12 +1743,7 @@ export type StateQueryV1Query = {
       pixelHeight?: Types.Maybe<number>
       size?: Types.Maybe<string>
       createdInBlock: number
-      encoding?: Types.Maybe<{
-        id: string
-        codecName?: Types.Maybe<string>
-        container?: Types.Maybe<string>
-        mimeMediaType?: Types.Maybe<string>
-      }>
+      encoding?: Types.Maybe<VideoMediaEncodingFieldsFragment>
     }>
     subtitles: Array<{ id: string }>
     comments: Array<{ id: string }>
@@ -2172,6 +2177,14 @@ export const BidFields = gql`
     isCanceled
     createdInBlock
     indexInBlock
+  }
+`
+export const VideoMediaEncodingFields = gql`
+  fragment VideoMediaEncodingFields on VideoMediaEncoding {
+    id
+    codecName
+    container
+    mimeMediaType
   }
 `
 export const GetKillSwitch = gql`
@@ -3371,10 +3384,7 @@ export const GetNftActivities = gql`
 export const GetQueryNodeState = gql`
   subscription GetQueryNodeState {
     stateSubscription {
-      chainHead
-      indexerHead
       lastCompleteBlock
-      lastProcessedEvent
     }
   }
 `
@@ -4048,6 +4058,20 @@ export const StateQueryV1 = gql`
       }
       rationale
     }
+    memberBannedFromChannelEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      member {
+        id
+      }
+      action
+    }
     memberships(limit: 9999) {
       id
       createdAt
@@ -4384,10 +4408,7 @@ export const StateQueryV1 = gql`
       mediaMetadata {
         id
         encoding {
-          id
-          codecName
-          container
-          mimeMediaType
+          ...VideoMediaEncodingFields
         }
         pixelWidth
         pixelHeight
@@ -4442,4 +4463,5 @@ export const StateQueryV1 = gql`
   ${ActorFields}
   ${AuctionTypeFields}
   ${BidFields}
+  ${VideoMediaEncodingFields}
 `

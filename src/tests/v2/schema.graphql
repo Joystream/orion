@@ -40,6 +40,11 @@ type GeneratedSignature {
   signature: String!
 }
 
+type SetFeaturedNftsResult {
+  # The updated number of nft that are now explicitly featured by the Gateway
+  newNumberOfNftsFeatured: Int
+}
+
 type Channel {
   # Runtime entity identifier (EntityId)
   id: String!
@@ -387,7 +392,6 @@ type ExtendedVideoCategory {
 
 type ProcessorState {
   lastProcessedBlock: Int!
-  chainHead: Int!
 }
 
 type VideosSearchResult {
@@ -415,8 +419,8 @@ type StorageDataObject {
   # Data object runtime id
   id: String!
 
-  # Resolved asset url
-  resolvedUrl: String
+  # Resolved asset urls
+  resolvedUrls: [String!]!
 
   # Timestamp of the block the data object was created at
   createdAt: DateTime!
@@ -441,6 +445,15 @@ type StorageDataObject {
 
   # If the object is no longer used as an asset - the time at which it was unset (if known)
   unsetAt: DateTime
+}
+
+type NftFeaturedRequstInfo {
+  nftId: String!
+  id: String!
+  rationale: String!
+  createdAt: DateTime!
+  reporterIp: String!
+  created: Boolean!
 }
 
 input FeaturedVideoInput {
@@ -1109,6 +1122,21 @@ type Query {
     first: Int
     where: ReportWhereInput
   ): ReportsConnection!
+  nftFeaturingRequests(
+    where: NftFeaturingRequestWhereInput
+    orderBy: [NftFeaturingRequestOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftFeaturingRequest!]!
+  nftFeaturingRequestById(id: String!): NftFeaturingRequest
+  nftFeaturingRequestByUniqueInput(where: WhereIdInput!): NftFeaturingRequest
+    @deprecated(reason: "Use nftFeaturingRequestById")
+  nftFeaturingRequestsConnection(
+    orderBy: [NftFeaturingRequestOrderByInput!]!
+    after: String
+    first: Int
+    where: NftFeaturingRequestWhereInput
+  ): NftFeaturingRequestsConnection!
   channelFollows(
     where: ChannelFollowWhereInput
     orderBy: [ChannelFollowOrderByInput!]
@@ -1311,8 +1339,6 @@ enum ChannelOrderByInput {
   coverPhoto_stateBloatBond_DESC
   coverPhoto_unsetAt_ASC
   coverPhoto_unsetAt_DESC
-  coverPhoto_resolvedUrl_ASC
-  coverPhoto_resolvedUrl_DESC
   avatarPhoto_id_ASC
   avatarPhoto_id_DESC
   avatarPhoto_createdAt_ASC
@@ -1327,8 +1353,6 @@ enum ChannelOrderByInput {
   avatarPhoto_stateBloatBond_DESC
   avatarPhoto_unsetAt_ASC
   avatarPhoto_unsetAt_DESC
-  avatarPhoto_resolvedUrl_ASC
-  avatarPhoto_resolvedUrl_DESC
   isPublic_ASC
   isPublic_DESC
   isCensored_ASC
@@ -1447,8 +1471,6 @@ enum VideoOrderByInput {
   thumbnailPhoto_stateBloatBond_DESC
   thumbnailPhoto_unsetAt_ASC
   thumbnailPhoto_unsetAt_DESC
-  thumbnailPhoto_resolvedUrl_ASC
-  thumbnailPhoto_resolvedUrl_DESC
   language_ASC
   language_DESC
   hasMarketing_ASC
@@ -1471,6 +1493,8 @@ enum VideoOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   isExplicit_ASC
   isExplicit_DESC
   license_id_ASC
@@ -1495,8 +1519,6 @@ enum VideoOrderByInput {
   media_stateBloatBond_DESC
   media_unsetAt_ASC
   media_unsetAt_DESC
-  media_resolvedUrl_ASC
-  media_resolvedUrl_DESC
   videoStateBloatBond_ASC
   videoStateBloatBond_DESC
   mediaMetadata_id_ASC
@@ -1801,6 +1823,10 @@ type Mutation {
     # Whether the Gateway should support videos that have no category assigned
     supportNoCategoryVideos: Boolean
   ): SetSupportedCategoriesResult!
+  setFeaturedNfts(
+    # IDs of the NFTs that should be featured by the Gateway
+    featuredNftsIds: [String!]!
+  ): SetFeaturedNftsResult!
   excludeContent(
     # Type of the content to exclude/hide
     type: ExcludableContentType!
@@ -1831,6 +1857,7 @@ type Mutation {
   reportChannel(channelId: String!, rationale: String!): ChannelReportInfo!
   addVideoView(videoId: String!): AddVideoViewResult!
   reportVideo(videoId: String!, rationale: String!): VideoReportInfo!
+  requestNftFeatured(nftId: String!, rationale: String!): NftFeaturedRequstInfo!
 }
 
 enum ExcludableContentType {
@@ -2053,6 +2080,13 @@ type Subscription {
     limit: Int
   ): [Report!]!
   reportById(id: String!): Report
+  nftFeaturingRequests(
+    where: NftFeaturingRequestWhereInput
+    orderBy: [NftFeaturingRequestOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftFeaturingRequest!]!
+  nftFeaturingRequestById(id: String!): NftFeaturingRequest
   channelFollows(
     where: ChannelFollowWhereInput
     orderBy: [ChannelFollowOrderByInput!]
@@ -2172,6 +2206,9 @@ type OwnedNft {
     offset: Int
     limit: Int
   ): [Bid!]!
+
+  # Flag to indicate whether the NFT is featured or not
+  isFeatured: Boolean!
 }
 
 type MemberMetadata {
@@ -2308,23 +2345,10 @@ input StorageDataObjectWhereInput {
   unsetAt_lte: DateTime
   unsetAt_in: [DateTime!]
   unsetAt_not_in: [DateTime!]
-  resolvedUrl_isNull: Boolean
-  resolvedUrl_eq: String
-  resolvedUrl_not_eq: String
-  resolvedUrl_gt: String
-  resolvedUrl_gte: String
-  resolvedUrl_lt: String
-  resolvedUrl_lte: String
-  resolvedUrl_in: [String!]
-  resolvedUrl_not_in: [String!]
-  resolvedUrl_contains: String
-  resolvedUrl_not_contains: String
-  resolvedUrl_containsInsensitive: String
-  resolvedUrl_not_containsInsensitive: String
-  resolvedUrl_startsWith: String
-  resolvedUrl_not_startsWith: String
-  resolvedUrl_endsWith: String
-  resolvedUrl_not_endsWith: String
+  resolvedUrls_isNull: Boolean
+  resolvedUrls_containsAll: [String!]
+  resolvedUrls_containsAny: [String!]
+  resolvedUrls_containsNone: [String!]
   AND: [StorageDataObjectWhereInput!]
   OR: [StorageDataObjectWhereInput!]
 }
@@ -3375,6 +3399,9 @@ input OwnedNftWhereInput {
   bids_every: BidWhereInput
   bids_some: BidWhereInput
   bids_none: BidWhereInput
+  isFeatured_isNull: Boolean
+  isFeatured_eq: Boolean
+  isFeatured_not_eq: Boolean
   AND: [OwnedNftWhereInput!]
   OR: [OwnedNftWhereInput!]
 }
@@ -4427,8 +4454,6 @@ enum StorageDataObjectOrderByInput {
   stateBloatBond_DESC
   unsetAt_ASC
   unsetAt_DESC
-  resolvedUrl_ASC
-  resolvedUrl_DESC
 }
 
 type StorageBucketBag {
@@ -4966,6 +4991,8 @@ enum BidOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   bidder_id_ASC
   bidder_id_DESC
   bidder_createdAt_ASC
@@ -5301,8 +5328,6 @@ enum VideoSubtitleOrderByInput {
   asset_stateBloatBond_DESC
   asset_unsetAt_ASC
   asset_unsetAt_DESC
-  asset_resolvedUrl_ASC
-  asset_resolvedUrl_DESC
 }
 
 type Comment {
@@ -5640,6 +5665,8 @@ enum AuctionOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   winningMember_id_ASC
   winningMember_id_DESC
   winningMember_createdAt_ASC
@@ -5788,6 +5815,8 @@ enum OwnedNftOrderByInput {
   lastSalePrice_DESC
   lastSaleDate_ASC
   lastSaleDate_DESC
+  isFeatured_ASC
+  isFeatured_DESC
 }
 
 input WhereIdInput {
@@ -6142,6 +6171,7 @@ union EventData =
   | ChannelFundsWithdrawnEventData
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
+  | MemberBannedFromChannelEventData
 
 type CommentCreatedEventData {
   # The comment that was added
@@ -6447,6 +6477,17 @@ type PaymentContextChannel {
   channel: Channel!
 }
 
+type MemberBannedFromChannelEventData {
+  # The chanel the member is being banned / unbanned from
+  channel: Channel!
+
+  # The member being banned / unbanned
+  member: Membership!
+
+  # The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned
+  action: Boolean!
+}
+
 input EventWhereInput {
   id_isNull: Boolean
   id_eq: String
@@ -6681,6 +6722,9 @@ input EventDataWhereInput {
   rationale_not_startsWith: String
   rationale_endsWith: String
   rationale_not_endsWith: String
+  action_isNull: Boolean
+  action_eq: Boolean
+  action_not_eq: Boolean
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -6868,6 +6912,8 @@ enum EventOrderByInput {
   data_channelCashoutsEnabled_DESC
   data_rationale_ASC
   data_rationale_DESC
+  data_action_ASC
+  data_action_DESC
   data_isTypeOf_ASC
   data_isTypeOf_DESC
 }
@@ -7006,6 +7052,8 @@ enum NftHistoryEntryOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   event_id_ASC
   event_id_DESC
   event_inBlock_ASC
@@ -7363,10 +7411,10 @@ type Report {
   # IP address of the reporter
   ip: String!
 
-  # ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)
-  channelId: String!
+  # If it's a channel report: ID of the channel being reported (the channel may no longer exist)
+  channelId: String
 
-  # ID of the video being reported (the video may no longer exist)
+  # If it's a video report: ID of the video being reported (the video may no longer exist)
   videoId: String
 
   # Time of the report
@@ -7498,6 +7546,129 @@ type ReportsConnection {
 
 type ReportEdge {
   node: Report!
+  cursor: String!
+}
+
+type NftFeaturingRequest {
+  # Unique identifier of the request
+  id: String!
+
+  # IP address of the reporter
+  ip: String!
+
+  # ID of the nft that is being requested to be featured by operator
+  nftId: String!
+
+  # Time of the request
+  timestamp: DateTime!
+
+  # Rationale behind the request
+  rationale: String!
+}
+
+input NftFeaturingRequestWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  nftId_isNull: Boolean
+  nftId_eq: String
+  nftId_not_eq: String
+  nftId_gt: String
+  nftId_gte: String
+  nftId_lt: String
+  nftId_lte: String
+  nftId_in: [String!]
+  nftId_not_in: [String!]
+  nftId_contains: String
+  nftId_not_contains: String
+  nftId_containsInsensitive: String
+  nftId_not_containsInsensitive: String
+  nftId_startsWith: String
+  nftId_not_startsWith: String
+  nftId_endsWith: String
+  nftId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
+  AND: [NftFeaturingRequestWhereInput!]
+  OR: [NftFeaturingRequestWhereInput!]
+}
+
+enum NftFeaturingRequestOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  nftId_ASC
+  nftId_DESC
+  timestamp_ASC
+  timestamp_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+type NftFeaturingRequestsConnection {
+  edges: [NftFeaturingRequestEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NftFeaturingRequestEdge {
+  node: NftFeaturingRequest!
   cursor: String!
 }
 
