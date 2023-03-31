@@ -1,6 +1,6 @@
+import { Flat, EntityManagerOverlay } from '../../utils/overlay'
 import { Token, TokenAccount, VestedAccount, VestingSchedule } from '../../model'
 import { VestingScheduleParams } from '../../types/v1000'
-import { EntityManagerOverlay } from '../../utils/overlay'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
@@ -105,21 +105,24 @@ export function addVestingSchedule(
   })
 }
 
-export async function createAccount(
+export function createAccount(
   overlay: EntityManagerOverlay,
-  tokenId: bigint,
+  token: Flat<Token>,
   memberId: bigint,
   allocationAmount: bigint,
   whitelisted?: boolean
 ) {
   overlay.getRepository(TokenAccount).new({
-    tokenId: tokenId.toString(),
+    tokenId: token.id,
     memberId: memberId.toString(),
-    id: tokenAccountId(tokenId, memberId),
+    id: token.id + memberId.toString(),
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
     whitelisted,
   })
-  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.accountsNum += 1
+}
+
+export function ammId(token: Flat<Token>): string {
+  return token.id + token.ammNonce.toString()
 }
