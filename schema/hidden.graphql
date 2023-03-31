@@ -19,16 +19,33 @@ type Report @entity {
   "IP address of the reporter"
   ip: String! @index
 
-  "ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)"
-  channelId: String! @index
+  "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
+  channelId: String @index
 
-  "ID of the video being reported (the video may no longer exist)"
+  "If it's a video report: ID of the video being reported (the video may no longer exist)"
   videoId: String @index
 
   "Time of the report"
   timestamp: DateTime!
 
   "Rationale behind the report"
+  rationale: String!
+}
+
+type NftFeaturingRequest @entity {
+  "Unique identifier of the request"
+  id: ID!
+
+  "IP address of the reporter"
+  ip: String! @index
+
+  "ID of the nft that is being requested to be featured by operator"
+  nftId: String! @index
+
+  "Time of the request"
+  timestamp: DateTime!
+
+  "Rationale behind the request"
   rationale: String!
 }
 

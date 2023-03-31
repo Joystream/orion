@@ -132,7 +132,7 @@ export type ReportChannelMutationVariables = Types.Exact<{
   rationale: Types.Scalars['String']
 }>
 
-export type ReportChannelMutation = { reportChannel: { id: number; channelId: string } }
+export type ReportChannelMutation = { reportChannel: { id: string; channelId: string } }
 
 export type GetCommentQueryVariables = Types.Exact<{
   commentId: Types.Scalars['String']
@@ -890,9 +890,7 @@ export type GetNftActivitiesQuery = {
 
 export type GetQueryNodeStateSubscriptionVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetQueryNodeStateSubscription = {
-  processorState: { lastProcessedBlock: number; chainHead: number }
-}
+export type GetQueryNodeStateSubscription = { processorState: { lastProcessedBlock: number } }
 
 export type GetDistributionBucketsWithBagsQueryVariables = Types.Exact<{ [key: string]: never }>
 
@@ -1042,7 +1040,7 @@ export type ReportVideoMutationVariables = Types.Exact<{
   rationale: Types.Scalars['String']
 }>
 
-export type ReportVideoMutation = { reportVideo: { id: number; videoId: string } }
+export type ReportVideoMutation = { reportVideo: { id: string; videoId: string } }
 
 type StateQueryActorFields_ContentActorCurator_Fragment = {
   __typename: 'ContentActorCurator'
@@ -1307,6 +1305,21 @@ export type StateQueryEventFieldsFragment = {
 export type StateQueryV2QueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type StateQueryV2Query = {
+  apps: Array<{
+    id: string
+    name: string
+    websiteUrl?: Types.Maybe<string>
+    useUri?: Types.Maybe<string>
+    smallIcon?: Types.Maybe<string>
+    mediumIcon?: Types.Maybe<string>
+    bigIcon?: Types.Maybe<string>
+    oneLiner?: Types.Maybe<string>
+    description?: Types.Maybe<string>
+    termsOfService?: Types.Maybe<string>
+    platforms?: Types.Maybe<Array<Types.Maybe<string>>>
+    category?: Types.Maybe<string>
+    authKey?: Types.Maybe<string>
+  }>
   channels: Array<{
     id: string
     createdAt: any
@@ -1318,11 +1331,13 @@ export type StateQueryV2Query = {
     createdInBlock: number
     rewardAccount: string
     channelStateBloatBond: string
+    totalVideosCreated: number
     ownerMember?: Types.Maybe<{ id: string }>
     coverPhoto?: Types.Maybe<{ id: string }>
     avatarPhoto?: Types.Maybe<{ id: string }>
     videos: Array<{ id: string }>
     bannedMembers: Array<{ member: { id: string } }>
+    entryApp?: Types.Maybe<{ id: string }>
   }>
   commentCreatedEvents: Array<StateQueryEventFieldsFragment>
   commentTextUpdatedEvents: Array<StateQueryEventFieldsFragment>
@@ -1345,6 +1360,7 @@ export type StateQueryV2Query = {
     createdAt: any
     handle: string
     controllerAccount: string
+    totalChannelsCreated: number
     metadata?: Types.Maybe<{
       name?: Types.Maybe<string>
       about?: Types.Maybe<string>
@@ -3180,7 +3196,6 @@ export const GetQueryNodeState = gql`
   subscription GetQueryNodeState {
     processorState {
       lastProcessedBlock
-      chainHead
     }
   }
 `
@@ -3414,6 +3429,21 @@ export const ReportVideo = gql`
 `
 export const StateQueryV2 = gql`
   query StateQueryV2 {
+    apps(limit: 9999) {
+      id
+      name
+      websiteUrl
+      useUri
+      smallIcon
+      mediumIcon
+      bigIcon
+      oneLiner
+      description
+      termsOfService
+      platforms
+      category
+      authKey
+    }
     channels(limit: 9999) {
       id
       createdAt
@@ -3442,6 +3472,10 @@ export const StateQueryV2 = gql`
           id
         }
       }
+      entryApp {
+        id
+      }
+      totalVideosCreated
     }
     commentCreatedEvents: events(
       limit: 9999
@@ -3561,6 +3595,7 @@ export const StateQueryV2 = gql`
           id
         }
       }
+      totalChannelsCreated
     }
     ownedNfts(limit: 9999) {
       id
