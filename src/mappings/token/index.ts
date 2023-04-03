@@ -210,7 +210,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, saleNonce, fundsSourceMemberId, tokenSale],
+    asV2001: [tokenId, saleNonce, fundsSourceMemberId, tokenSale, metadataBytes],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   if (tokenSale.vestingScheduleParams !== undefined) {
@@ -234,7 +234,7 @@ export async function processTokenSaleInitializedEvent({
   const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
   sourceAccount.totalAmount -= tokenSale.quantityLeft
 
-  overlay.getRepository(Sale).new({
+  const sale = overlay.getRepository(Sale).new({
     id: tokenId.toString() + saleNonce.toString(),
     tokenId: tokenId.toString(),
     tokensSold: BigInt(0),
