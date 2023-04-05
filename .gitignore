@@ -11,3 +11,5 @@ src/model/generated
 /db/persisted
 /scripts/orion-v1-migration/data
 /network-tests/node_modules
+/network-tests/types
+/network-tests/lib
