@@ -1,16 +1,17 @@
 import { Keyring } from "@polkadot/api"
-import { SubmittableExtrinsic } from "@polkadot/api/types"
+import { AddressOrPair, SubmittableExtrinsic } from "@polkadot/api/types"
+import BN from "bn.js"
 
 export class Sender {
-  private readonly _keyPair: KeyringPair
+  private readonly _addressOrPair: AddressOrPair
 
-  constructor(keyPair: KeyringPair) {
-    this._keyPair = keyPair 
+  constructor(addressOrPair: AddressOrPair) {
+    this._addressOrPair = addressOrPair
   }
-
   public async signAndSend(tx: SubmittableExtrinsic<'promise'>) {
     // provide enough balance 
-    const dispatchResult = await tx.signAndSend(this._keyPair)
+    // await this.prepareAccountsForFeeExpenses(tx, this._addressOrPair)
+    const dispatchResult = await tx.signAndSend(this._addressOrPair)
   }
 }
 
@@ -28,7 +29,7 @@ export class ExtrinsicResult {
 
   public isError(): Boolean {
     return true;
-  } 
+  }
 }
 
 
