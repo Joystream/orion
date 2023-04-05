@@ -12,7 +12,7 @@
     "checks": "prettier --check . && npm run lint && make codegen && tsc --noEmit --pretty",
     "db:migrate": "npx squid-typeorm-migration apply",
     "processor-start": "node lib/processor.js",
-    "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions --max-response-size 10000 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
+    "query-node-start": "NODE_ENV=production patch-package --patch-dir assets/patches && squid-graphql-server --subscriptions",
     "postinstall": "patch-package --patch-dir assets/patches",
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
