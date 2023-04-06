@@ -13,3 +13,4 @@ src/model/generated
 /network-tests/node_modules
 /network-tests/types
 /network-tests/lib
+/network-tests/graphql/generated
