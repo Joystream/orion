@@ -1,0 +1,3 @@
+query lastSalesForToken($id_eq: String = "") {
+  salesConnection(orderBy: token_createdAt_DESC, where: {token: {id_eq: $id_eq}})
+}
