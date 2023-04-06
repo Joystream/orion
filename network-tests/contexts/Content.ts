@@ -1,5 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { Sender } from "../Sender";
+import "@polkadot/api/augment";
 
 export class ContentContext {
   _api: ApiPromise
