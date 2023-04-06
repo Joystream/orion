@@ -8,11 +8,14 @@
   "scripts": {
     "test": "jest",
     "start:node": "./scripts/run_joystream_node.sh",
-    "start:orion": "./scripts/run_orion.sh"
-    "stop:orion": "./scripts/stop_orion.sh"
+    "start:orion": "make -f ../Makefile up",
+    "stop:orion": "make -f ../Makefile down",
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
+    "@graphql-codegen/cli": "^3.3.0",
+    "@graphql-codegen/typescript": "^3.0.3",
+    "@graphql-codegen/typescript-operations": "^3.0.3",
     "@jest/globals": "^29.5.0",
     "@joystream/types": "^1.0.0",
     "@polkadot/api": "8.9.1",
