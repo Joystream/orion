@@ -6,7 +6,10 @@
     "node": ">=16"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start:node": "./scripts/run_joystream_node.sh",
+    "start:orion": "./scripts/run_orion.sh"
+    "stop:orion": "./scripts/stop_orion.sh"
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
