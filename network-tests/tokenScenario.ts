@@ -2,7 +2,7 @@ import { describe, test, beforeAll } from '@jest/globals';
 import { ApiPromise, Keyring } from '@polkadot/api';
 import { ContentContext } from './contexts/Content';
 import { CouncilContext } from './contexts/Council';
-import { AccountFactory, Sender } from './Sender';
+import { AccountFactory } from './Sender';
 
 const factory = new AccountFactory(
   new Keyring({ type: 'sr25519' })
@@ -14,7 +14,6 @@ describe('channel + token scenario', async () => {
   beforeAll(async () => {
     describe('setting up council context', async () => {
       const councilPallet = new CouncilContext(api)
-      const alice = factory.createSenderFromSuri("\\Alice")
       await councilPallet.setupCouncilFromAccounts(factory, ["//Alice","//Bob","//Carl"])
 
       describe('setting up content context', async () => {

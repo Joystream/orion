@@ -6,18 +6,12 @@
     "node": ">=16"
   },
   "scripts": {
-    "update-chain-metadata": "./scripts/fetch_metadata.sh > chain-metadata.json",
-    "test": "jest",
-    "types:compile": "tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json",
-    "types:generate:interfaces": "yarn ts-node node_modules/.bin/polkadot-types-from-defs --package . --input ./types/augment --endpoint ./chain-metadata.json && rm ./types/augment/index.ts ./types/augment/types.ts",
-    "types:generate:meta": "yarn ts-node node_modules/.bin/polkadot-types-from-chain --package . --endpoint ./chain-metadata.json --output ./types/augment --strict",
-    "types:build": "mkdir -p types/augment && yarn types:generate:all && yarn types:compile",
-    "types:generate:all": "yarn types:generate:interfaces && yarn types:generate:meta"
+    "test": "jest"
   },
   "devDependencies": {
-    "@polkadot/typegen": "8.9.1",
     "@apollo/client": "^3.2.5",
     "@jest/globals": "^29.5.0",
+    "@joystream/types": "^1.0.0",
     "@polkadot/api": "8.9.1",
     "@polkadot/keyring": "9.5.1",
     "bn.js": "^5.2.1",
