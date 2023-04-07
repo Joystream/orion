@@ -6,6 +6,7 @@ import {
   IChannelModeratorRemarked,
   IChannelOwnerRemarked,
   ILicense,
+  IMakeChannelPayment,
   IMediaType,
   IModerateComment,
   IPinOrUnpinComment,
@@ -13,6 +14,7 @@ import {
   ISubtitleMetadata,
   IVideoMetadata,
   IVideoReactionsPreference,
+  MakeChannelPayment,
   ModerateComment,
   PinOrUnpinComment,
   PublishedBeforeJoystream,
@@ -33,13 +35,18 @@ import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
   Channel,
+  ChannelPaymentMadeEventData,
   Comment,
   CommentStatus,
   License,
   MetaprotocolTransactionResult,
+  MetaprotocolTransactionResultChannelPaid,
   MetaprotocolTransactionResultCommentModerated,
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionResultOK,
+  PaymentContext,
+  PaymentContextChannel,
+  PaymentContextVideo,
   StorageDataObject,
   Video,
   VideoCategory,
@@ -585,4 +592,60 @@ export async function processModeratorRemark(
     'Unsupported channel moderator remark action',
     { decodedMessage }
   )
+}
+
+export async function processChannelPaymentFromMember(
+  overlay: EntityManagerOverlay,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
+  message: DecodedMetadataObject<IMakeChannelPayment>,
+  memberId: string,
+  [payeeAccount, amount]: [string, bigint]
+): Promise<MetaprotocolTransactionResult> {
+  const member = await overlay.getRepository(Membership).getByIdOrFail(memberId)
+
+  // Only channel reward accounts are being checked right now as payment destination.
+  // Transfers to any other destination will be ignored by the query node.
+  const channel = await overlay.getRepository(Channel).getOneBy({ rewardAccount: payeeAccount })
+
+  if (!channel) {
+    return metaprotocolTransactionFailure(
+      MakeChannelPayment,
+      `Payment made to unknown channel reward account: ${payeeAccount}`,
+      { payeeAccount }
+    )
+  }
+
+  let paymentContext: PaymentContext | undefined
+  if (message.videoId) {
+    const video = await overlay.getRepository(Video).getById(message.videoId.toString())
+    if (video && video.channelId === channel.id) {
+      paymentContext = new PaymentContextVideo({ video: video.id })
+    } else {
+      invalidMetadata(
+        MakeChannelPayment,
+        `payment context video not found in channel that was queried based on reward (or payee) account.`,
+        { channelId: channel.id, videoChannelId: video?.channelId }
+      )
+    }
+  } else {
+    paymentContext = new PaymentContextChannel()
+    paymentContext.channel = channel.id
+  }
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, txHash),
+    data: new ChannelPaymentMadeEventData({
+      payer: member.id,
+      payeeChannel: channel.id,
+      paymentContext,
+      rationale: message.rationale || undefined,
+      amount,
+    }),
+  })
+
+  return new MetaprotocolTransactionResultChannelPaid({
+    channelPaid: channel.id,
+  })
 }
