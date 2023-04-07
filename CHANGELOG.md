@@ -1,3 +1,30 @@
+# 2.1.0 (Ephesus release)
+
+### Schema/Query changes:
+- `cumulativeRewardClaimed` field has been added to `Channel`
+- new `event.data` types are now supported:
+    - `ChannelRewardClaimedEventData`
+    - `ChannelRewardClaimedAndWithdrawnEventData`
+    - `ChannelFundsWithdrawnEventData`
+    - `ChannelPayoutsUpdatedEventData`
+    - `ChannelPaymentMadeEventData`
+- New `MetaprotocolTransactionResult` variant: `MetaprotocolTransactionResultChannelPaid`
+- New `DataObjectType` variant: `DataObjectTypeChannelPayoutsPayload`
+
+### Mappings:
+- Added support for handling both pre and post-Ephesus version of the following events updated in Ephesus:
+    - `Members.MemberInvited`
+    - `Members.MemberRemarked`
+- New mappings for the following events:
+    - `Content.ChannelPayoutsUpdated`
+    - `Content.ChannelRewardUpdated`
+    - `Content.ChannelRewardClaimedAndWithdrawn`
+    - `Content.ChannelFundsWithdrawn`
+- Support for new `MemberRemark` metaprotocol transaction type: `makeChannelPayment` (direct channel payment) 
+
+### Bug fixes:
+- Fixed: Events that had a relationship to an auction bid through `data->>'winningBid'` were not properly hidden when the bid was excluded from the visible data thorugh `excludeContent` functionality. This was causing errors such as `Cannot return null for non-nullable field OpenAuctionBidAcceptedEventData.winningBid` when querying for `OpenAuctionBidAcceptedEventData` events.
+
 # 2.0.0
 
 Orion v2 is a major architecture change compared to Orion v1:
