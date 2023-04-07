@@ -94,6 +94,7 @@ query StateQueryV1 {
     bannedMembers {
       id
     }
+    cumulativeRewardClaimed
     entryApp {
       id
     }
@@ -413,6 +414,103 @@ query StateQueryV1 {
         message
       }
     }
+  }
+  channelRewardClaimedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel {
+      id
+    }
+    amount
+  }
+  channelRewardClaimedAndWithdrawnEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel {
+      id
+    }
+    amount
+    account
+    actor {
+      ...ActorFields
+    }
+  }
+  channelFundsWithdrawnEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel {
+      id
+    }
+    amount
+    account
+    actor {
+      ...ActorFields
+    }
+  }
+  channelPayoutsUpdatedEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    commitment
+    payloadDataObject {
+      id
+    }
+    minCashoutAllowed
+    maxCashoutAllowed
+    channelCashoutsEnabled
+  }
+  channelPaymentMadeEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    payer {
+      id
+    }
+    amount
+    payeeChannel {
+      id
+    }
+    paymentContext {
+      __typename
+      ... on PaymentContextVideo {
+        video {
+          id
+        }
+      }
+      ... on PaymentContextChannel {
+        channel {
+          id
+        }
+      }
+    }
+    rationale
+  }
+  memberBannedFromChannelEvents(limit: 9999) {
+    id
+    inBlock
+    inExtrinsic
+    indexInBlock
+    createdAt
+    channel {
+      id
+    }
+    member {
+      id
+    }
+    action
   }
   memberships(limit: 9999) {
     id
