@@ -13,7 +13,6 @@
     "skipLibCheck": true,
     "types": ["node"],
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "."
     "baseUrl": ".",
     "paths": {
       "sample-polkadotjs-typegen/*": ["node_modules/@joystream/types/src/*"],
