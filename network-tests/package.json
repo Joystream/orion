@@ -8,8 +8,7 @@
   "scripts": {
     "test": "jest",
     "start:node": "./scripts/run_joystream_node.sh",
-    "start:orion": "make -f ../Makefile up",
-    "stop:orion": "make -f ../Makefile down",
+    "node-ts-strict": "node -r ts-node/register --unhandled-rejections=strict"
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
@@ -22,6 +21,7 @@
     "@polkadot/keyring": "9.5.1",
     "bn.js": "^5.2.1",
     "jest": "^29.5.0",
+    "prettier": "^2.8.7",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.3"
