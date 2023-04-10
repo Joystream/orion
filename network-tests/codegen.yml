@@ -2,14 +2,14 @@ overwrite: true
 
 schema: http://localhost:4350/graphql
 
-documents: graphql/queries/*.graphql
+documents: 
+  - ./graphql/queries/*.graphql
 
 generates:
   graphql/generated/schema.ts:
     hooks:
       afterOneFileWrite:
         - prettier --write
-        - eslint --fix
     plugins:
       - typescript
   graphql/generated/queries.ts:
@@ -19,7 +19,6 @@ generates:
     hooks:
       afterOneFileWrite:
         - prettier --write
-        - eslint --fix
     plugins:
       - "typescript"
       - "typescript-operations"
