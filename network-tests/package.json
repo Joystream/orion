@@ -7,7 +7,6 @@
   },
   "scripts": {
     "test": "jest",
-    "start:node": "./scripts/run_joystream_node.sh",
     "node-ts-strict": "node -r ts-node/register --unhandled-rejections=strict",
     "lint": "eslint . --quiet --ext .ts"
   },
