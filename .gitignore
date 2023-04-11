@@ -14,3 +14,4 @@ src/model/generated
 /network-tests/types
 /network-tests/lib
 /network-tests/graphql/generated
+/network-tests/scripts/data
