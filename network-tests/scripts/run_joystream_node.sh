@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-source ../.env
-
 SCRIPT_PATH="$(dirname "${BASH_SOURCE[0]}")"
 cd $SCRIPT_PATH
+
+source ../.env
 
 # Log only to stderr
 # Only output from this script should be the container id of the node at the very end
