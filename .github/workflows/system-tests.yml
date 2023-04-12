@@ -14,9 +14,7 @@ jobs:
           node-version: '16.x'
 
       - name: Install dependencies
-        run: |
-          cd network-tests 
-          npm install
+        run: npm install
 
       - name: Start Joystream Node
         run: ./scripts/run_joystream_node.sh
