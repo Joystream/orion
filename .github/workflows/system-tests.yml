@@ -6,26 +6,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16.x'
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
 
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
-    - name: Start Joystream Node
-      run: ./scripts/run_joystream_node.sh
+      - name: Start Joystream Node
+        run: ./scripts/run_joystream_node.sh
 
-    - name: Run tests
-      run: yarn test
+      - name: Run tests
+        run: yarn test
 
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: success() || failure()    # run this step even if previous step failed
-      with:
-        name: Jest test            # Name of the check run which will be created
-        path: network-test/jest-*.xml    # Path to test results
-        reporter: jest-junit     
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() # run this step even if previous step failed
+        with:
+          name: Jest test # Name of the check run which will be created
+          path: network-test/jest-*.xml # Path to test results
+          reporter: jest-junit

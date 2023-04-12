@@ -2,7 +2,7 @@ overwrite: true
 
 schema: http://localhost:4350/graphql
 
-documents: 
+documents:
   - ./graphql/queries/*.graphql
 
 generates:
@@ -20,5 +20,5 @@ generates:
       afterOneFileWrite:
         - prettier --write
     plugins:
-      - "typescript"
-      - "typescript-operations"
+      - 'typescript'
+      - 'typescript-operations'

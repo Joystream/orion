@@ -1,9 +1,8 @@
-import { ApiPromise, Keyring, SubmittableResult } from "@polkadot/api";
-import { SubmittableExtrinsic, SubmittableExtrinsics, QueryableStorage } from "@polkadot/api/types";
-import AsyncLock from "async-lock";
-import BN from "bn.js";
+import { ApiPromise, Keyring, SubmittableResult } from '@polkadot/api'
+import { SubmittableExtrinsic, SubmittableExtrinsics, QueryableStorage } from '@polkadot/api/types'
+import AsyncLock from 'async-lock'
+import BN from 'bn.js'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-
 
 export class JsNodeApi {
   private _minisecret: string | undefined
@@ -22,15 +21,15 @@ export class JsNodeApi {
   }
 
   public createTransaction(): TransactionBuilder {
-    return new TransactionBuilder(this._sender, this._treasuryAccount, this._api);
+    return new TransactionBuilder(this._sender, this._treasuryAccount, this._api)
   }
 
   get tx(): SubmittableExtrinsics<'promise'> {
-    return this._api.tx;
+    return this._api.tx
   }
 
   get query(): QueryableStorage<'promise'> {
-    return this._api.query;
+    return this._api.query
   }
 }
 
@@ -63,17 +62,16 @@ export class TransactionBuilder {
 
   private async _execute(): Promise<SubmittableResult | undefined> {
     await this.fundFees()
-    return await this._sender.signAndSend(this._address!, this._tx!);
+    return await this._sender.signAndSend(this._address!, this._tx!)
   }
 
   public async execute(): Promise<SubmittableResult | undefined> {
     if (this._address !== undefined && this._tx !== undefined) {
-      return this._execute();
+      return this._execute()
     } else {
-      return undefined;
+      return undefined
     }
   }
-
 }
 
 export class Sender {
@@ -89,8 +87,12 @@ export class Sender {
     this._keyring = keyring
   }
 
-  public async signAndSend(address: string, tx: SubmittableExtrinsic<'promise'>, tip?: BN): Promise<SubmittableResult | undefined> {
-    let txResult: SubmittableResult | undefined;
+  public async signAndSend(
+    address: string,
+    tx: SubmittableExtrinsic<'promise'>,
+    tip?: BN
+  ): Promise<SubmittableResult | undefined> {
+    let txResult: SubmittableResult | undefined
     let unsubscribe: () => void
     let finalized: { (result: SubmittableResult): void }
     const pair = this._keyring.getPair(address)
@@ -123,7 +125,6 @@ export class Sender {
         const success = result.findRecord('system', 'ExtrinsicSuccess')
         const failed = result.findRecord('system', 'ExtrinsicFailed')
 
-
         if (success || failed) {
           if (unsubscribe) {
             unsubscribe()
@@ -136,6 +137,6 @@ export class Sender {
       this._nonceCache.set(address, nonce.toNumber() + 1)
     })
 
-    return txResult;
+    return txResult
   }
 }

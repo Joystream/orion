@@ -30,10 +30,7 @@ export default class SquidClientApi {
   public async runQueryWithVariables<
     QueryT extends { [k: string]: Maybe<Record<string, unknown>> | undefined },
     VariablesT extends Record<string, unknown>
-  >(
-    query: DocumentNode,
-    variables: VariablesT,
-  ): Promise<QueryT | null> {
+  >(query: DocumentNode, variables: VariablesT): Promise<QueryT | null> {
     return (await this._gqlClient.query<QueryT, VariablesT>({ query, variables })).data || null
   }
 }
@@ -41,14 +38,16 @@ export default class SquidClientApi {
 // Define your GraphQL query
 const GET_MEMBERS = gql`
   query MyQuery($id_in: [String!] = ["1"], $handle_in: [String!] = "") {
-    memberships(where: {id_in: $id_in, OR: {handle_in: $handle_in}}) {
-        id
-        handle
+    memberships(where: { id_in: $id_in, OR: { handle_in: $handle_in } }) {
+      id
+      handle
     }
   }
 `
 
-const squidApi = new SquidClientApi("http://localhost:4350/graphql")
-squidApi.runQueryWithVariables(GET_MEMBERS, { id_in: ["1"], handle_in: ["test"] }).then(result => {
-  console.log(result)
-})
+const squidApi = new SquidClientApi('http://localhost:4350/graphql')
+squidApi
+  .runQueryWithVariables(GET_MEMBERS, { id_in: ['1'], handle_in: ['test'] })
+  .then((result) => {
+    console.log(result)
+  })

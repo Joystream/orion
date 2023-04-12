@@ -1,4 +1,3 @@
-
 services:
   joystream-node:
     image: joystream/node:$JOYSTREAM_NODE_TAG
@@ -11,7 +10,7 @@ services:
       - 9944:9944
       - 9933:9933
     # networks:
-      # - joystream_default
+    # - joystream_default
 
 volumes:
   chain-data:

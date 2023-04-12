@@ -13,10 +13,16 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-      "reporters": [
-        "default",
-        ["jest-junit", { "outputDirectory": "./", "outputName": "jest-report.json" }]
-      ],
+    "reporters": [
+      "default",
+      [
+        "jest-junit",
+        {
+          "outputDirectory": "./",
+          "outputName": "jest-report.json"
+        }
+      ]
+    ],
     "testTimeout": 300000
   },
   "dependencies": {
