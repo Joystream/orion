@@ -23,11 +23,8 @@ afterAll(async () => {
 })
 
 describe("testing jsApi", () => {
-  const jsQueryApi = ctx.jsNodeApi.query
-  // const jsTxApi = ctx.jsNodeApi.tx
-
   it("initial council is empty", async () => {
-    const councilMembers = await jsQueryApi.council.councilMembers()
+    const councilMembers = await ctx.jsNodeApi.query.council.councilMembers()
     expect(councilMembers.toArray()).toEqual([])
   })
 })
