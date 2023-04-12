@@ -42,7 +42,7 @@ jobs:
         run: network-tests/scripts/run_joystream_node.sh
 
       - name: Run tests
-        run: npm test
+        run: npm run test --workspace=network-tests
 
       - name: Test Report
         uses: dorny/test-reporter@v1
