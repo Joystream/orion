@@ -23,13 +23,13 @@ afterAll(async () => {
   ctx.disconnectJsNode()
 })
 
-describe('testing jsApi', () => {
-  it('initial council is empty', async () => {
+describe('test the setup', () => {
+  it('querying joystream node works', async () => {
     const councilMembers = await ctx.jsNodeApi.query.council.councilMembers()
     expect(councilMembers.toArray()).toHaveLength(0)
   })
 
-  it('get members is empty at js node start', async () => {
+  it('querying orion node works', async () => {
     const GET_MEMBERS = gql`
       query($id_in: [String!], $handle_in: [String!]) {
         memberships(where: {id_in: $id_in, OR: {handle_in: $handle_in}}) {
