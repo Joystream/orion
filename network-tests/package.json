@@ -6,7 +6,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "test": "jest --outputFile test-reports/jest-report.json",
+    "test": "jest --outputFile test-reports/jest-report.xml",
     "node-ts-strict": "node -r ts-node/register --unhandled-rejections=strict",
     "lint": "eslint . --quiet --ext .ts"
   },
