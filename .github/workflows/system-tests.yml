@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: Joystream/joystream
-          ref: ephesus
+          ref: ephesus 
 
       - id: compute_shasum
         env:
@@ -37,9 +37,9 @@ jobs:
         run: npm install
 
       - name: Start Joystream Node
-        run: |
-          RUNTIME=needs.build_master_testing.outputs.shasum
-          network-tests/scripts/run_joystream_node.sh
+        env:
+          RUNTIME: echo ${{ needs.build_master_testing.outputs.shasum }}
+        run: network-tests/scripts/run_joystream_node.sh
 
       - name: Run tests
         run: npm test
