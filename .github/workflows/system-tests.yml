@@ -39,7 +39,9 @@ jobs:
       - name: Start Joystream Node
         env:
           RUNTIME: ${{ needs.get_shasum.outputs.shasum }}
-        run: network-tests/scripts/run_joystream_node.sh
+        run: |
+          network-tests/scripts/run_joystream_node.sh
+          sleep 30
 
       - name: Run tests
         run: npm run test --workspace=network-tests
