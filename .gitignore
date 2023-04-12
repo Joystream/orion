@@ -15,3 +15,4 @@ src/model/generated
 /network-tests/lib
 /network-tests/graphql/generated
 /network-tests/scripts/data
+/network-tests/jest-report.json
