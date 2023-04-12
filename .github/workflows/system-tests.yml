@@ -16,13 +16,13 @@ jobs:
       - name: Install dependencies
         run: |
           cd network-tests 
-          yarn install --frozen-lockfile
+          npm install
 
       - name: Start Joystream Node
         run: ./scripts/run_joystream_node.sh
 
       - name: Run tests
-        run: yarn test
+        run: npm test
 
       - name: Test Report
         uses: dorny/test-reporter@v1
