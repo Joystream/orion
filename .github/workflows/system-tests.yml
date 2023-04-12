@@ -63,4 +63,3 @@ jobs:
           rm -rf network-tests/scripts/data
           docker-compose -f network-tests/docker-compose.node.yml down -v
           make down
-
