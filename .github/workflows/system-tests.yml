@@ -51,15 +51,16 @@ jobs:
       - name: Run tests
         run: npm run test --workspace=network-tests
 
-      - name: Upload test report
-        uses: actions/upload-artifact@v2 # upload test results
-        if: success() || failure() # run this step even if previous step failed
-        with:
-          name: test-results
-          path: network-tests/jest-report.xml
+      # - name: Upload test report
+      #   uses: actions/upload-artifact@v2 # upload test results
+      #   if: success() || failure() # run this step even if previous step failed
+      #   with:
+      #     name: test-results
+      #     path: network-tests/jest-report.xml
 
       - name: Cleanup
         run: |
           rm -rf network-tests/scripts/data
           docker-compose -f network-tests/docker-compose.node.yml down -v
-          make down
+          docker-compose down -v
+          docker-compose -f archive/docker-compose.yml down -v
