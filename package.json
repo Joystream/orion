@@ -79,5 +79,13 @@
   },
   "workspaces": [
     "network-tests"
-  ]
+  ],
+  "resolutions": {
+    "@types/lodash": "^4.14.189",
+    "ajv": "^6.11.0",
+    "axios": "^1.2.1",
+    "graphql-tools": "^8.3.11",
+    "pg": "8.8.0",
+    "typeorm": "^0.3.11"
+  }
 }
