@@ -69,7 +69,7 @@ jobs:
         with:
           name: test-results
       - name: Display test report
-        uses: dorny/test-reporter-action@v1
+        uses: dorny/test-reporter@v1
         with:
           reporter: junit
           files: test-results/**/*.xml
