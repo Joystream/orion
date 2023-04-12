@@ -47,8 +47,8 @@ jobs:
         run: npm run test --workspace=network-tests
 
       - name: Upload test report
-        uses: actions/upload-artifact@v2  # upload test results
-        if: success() || failure()        # run this step even if previous step failed
+        uses: actions/upload-artifact@v2 # upload test results
+        if: success() || failure() # run this step even if previous step failed
         with:
           name: test-results
           path: network-tests/jest-report.xml
