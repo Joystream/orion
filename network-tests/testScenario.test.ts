@@ -31,15 +31,15 @@ describe('testing jsApi', () => {
 
   it('get members is empty at js node start', async () => {
     const GET_MEMBERS = gql`
-      query MyQuery($id_in: [String!] = ["1"], $handle_in: [String!] = "") {
+      query($id_in: [String!], $handle_in: [String!]) {
         memberships(where: {id_in: $id_in, OR: {handle_in: $handle_in}}) {
             id
             handle
         }
       }
     `
+    // we can add an api wrapper around orionClient in order for mapping res.data to a desired format as we did in QueryNodeApi
     const res = await ctx.orionClient.query({ query: GET_MEMBERS, variables: {id_in: ["1"], handle_in: ["test_handle1", "test_handle2"]} })
-    expect(res.data).toBeTruthy()
     expect(res.data.memberships).toHaveLength(0)
   })
 })
