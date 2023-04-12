@@ -1,49 +1,34 @@
-import { ApiPromise, WsProvider } from '@polkadot/api'
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals"
-import { waitMilliSec } from "./testUtils"
-import { JsNodeApi } from './joystreamNodeApi'
-import {
-  ApolloClient,
-  InMemoryCache,
-  NormalizedCacheObject,
-} from '@apollo/client/core'
+import { TestContext } from "./testUtils"
 
 import dotenv from 'dotenv';
 dotenv.config();
 
 const env = process.env
-let jsNode: JsNodeApi;
-let provider: WsProvider;
-let client: ApolloClient<NormalizedCacheObject>
+const ctx = new TestContext()
 
 beforeAll(async () => {
   if (env.TREASURY_ACCOUNT_URI === undefined) {
+    console.log("treasury account uri not set aborting..")
     process.exit(-1)
   }
+  ctx.setTreasuryUri(env.TREASURY_ACCOUNT_URI)
+  await ctx.connectToJsNodeEndpoint("ws://127.0.0.1:9944")
 
-  // connect Joystream Node
-  provider = new WsProvider("ws://127.0.0.1:9944")
-  const api = await ApiPromise.create({ provider })
-  await api.isReadyOrError
-  jsNode = new JsNodeApi(env.TREASURY_ACCOUNT_URI!, api)
-  await waitMilliSec(5000) // in order for the node to start producing blocks
-
-  // connect to Apollo Client
-  client = new ApolloClient({
-    cache: new InMemoryCache({ addTypename: false }),
-    defaultOptions: { query: { fetchPolicy: 'no-cache', errorPolicy: 'all' } },
-  })
-
-})
-
-describe("testing jsApi", () => {
-  it("initial council is empty", async () => {
-    const councilMembers = (await jsNode.query.council.councilMembers()).toArray()
-    expect(councilMembers).toEqual([])
-  })
+  ctx.connectToGraphqlEndpoint("http://127.0.0.1:4350/graphql")
 })
 
 afterAll(async () => {
-  provider.disconnect().catch(() => { })
-  client.stop()
+  ctx.disconnectJsNode()
 })
+
+describe("testing jsApi", () => {
+  const jsQueryApi = ctx.jsNodeApi.query
+  // const jsTxApi = ctx.jsNodeApi.tx
+
+  it("initial council is empty", async () => {
+    const councilMembers = await jsQueryApi.council.councilMembers()
+    expect(councilMembers.toArray()).toEqual([])
+  })
+})
+
