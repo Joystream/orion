@@ -51,7 +51,7 @@ jobs:
         if: success() || failure() # run this step even if previous step failed
         with:
           name: Jest test # Name of the check run which will be created
-          path: network-test/jest-*.xml # Path to test results
+          path: network-tests/jest-*.xml # Path to test results
           reporter: jest-junit
 
       - name: Cleanup
