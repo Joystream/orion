@@ -1,25 +1,20 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
-import { JsNodeApi } from "./joystreamNodeApi";
-import {
-  HttpLink,
-  ApolloClient,
-  InMemoryCache,
-  NormalizedCacheObject,
-} from '@apollo/client/core'
+import { ApiPromise, WsProvider } from '@polkadot/api'
+import { JsNodeApi } from './joystreamNodeApi'
+import { HttpLink, ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client/core'
 import fetch from 'cross-fetch'
 
 export function waitMilliSec(milliseconds: number): Promise<void> {
   return new Promise<void>((resolve) => {
     setTimeout(() => {
-      resolve();
-    }, milliseconds); // 5000 milliseconds = 5 seconds
-  });
+      resolve()
+    }, milliseconds) // 5000 milliseconds = 5 seconds
+  })
 }
 
 export class TestContext {
   private _waitTimeForBlockProductionMs = 5000
   private _jsNode: JsNodeApi | undefined
-  private _treasuryUri = ""
+  private _treasuryUri = ''
   private _provider: WsProvider | undefined
   private _apolloClient: ApolloClient<NormalizedCacheObject> | undefined
 
@@ -32,8 +27,8 @@ export class TestContext {
   }
 
   public async connectToJsNodeEndpoint(url: string): Promise<void> {
-    if (this._treasuryUri === "") {
-      console.error("treasury uri not set, impossible to continue testing")
+    if (this._treasuryUri === '') {
+      console.error('treasury uri not set, impossible to continue testing')
       process.exit(-1)
     }
     this._provider = new WsProvider(url)
@@ -66,8 +61,7 @@ export class TestContext {
 
   public disconnectJsNode() {
     if (this._provider !== undefined) {
-      this._provider!.disconnect().catch(() => { })
+      this._provider!.disconnect().catch(() => {})
     }
   }
-
 }
