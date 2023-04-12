@@ -13,7 +13,7 @@ beforeAll(async () => {
     process.exit(-1)
   }
   ctx.setTreasuryUri(env.TREASURY_ACCOUNT_URI)
-  await ctx.connectToJsNodeEndpoint('ws://localhost:9944')
+  await ctx.connectToJsNodeEndpoint('ws://127.0.0.1:9944')
 
   ctx.connectToGraphqlEndpoint('http://127.0.0.1:4350/graphql')
 })
