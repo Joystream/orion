@@ -19,7 +19,7 @@
         "jest-junit",
         {
           "outputDirectory": "./",
-          "outputName": "jest-report.json"
+          "outputName": "jest-report.xml"
         }
       ]
     ],
