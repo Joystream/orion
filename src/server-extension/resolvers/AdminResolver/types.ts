@@ -1,5 +1,26 @@
-import { ArgsType, Field, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
+import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { AppAction } from '@joystream/metadata-protobuf'
+
+@ArgsType()
+export class SetVideoWeightsInput {
+  @Field(() => Float, { nullable: false })
+  newnessWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  viewsWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  commentsWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  reactionsWeight!: number
+}
+
+@ObjectType()
+export class VideoWeights {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
+}
 
 @ArgsType()
 export class SetKillSwitchInput {
