@@ -9,14 +9,14 @@ import {
 } from './types'
 import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
-import { VideoViewEvent, Video, Report } from '../../../model'
+import { Report, Video, VideoViewEvent } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
 import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
 import {
-  RelayConnectionRequest,
   decodeRelayConnectionCursor,
+  RelayConnectionRequest,
 } from '@subsquid/openreader/lib/ir/connection'
 import { AnyFields } from '@subsquid/openreader/lib/ir/fields'
 import {
@@ -36,6 +36,7 @@ import { ContextWithIP } from '../../check'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
+import { videoRelevanceManager } from '../../../mappings/utils'
 
 @Resolver()
 export class VideosResolver {
@@ -210,6 +211,11 @@ export class VideosResolver {
         timestamp: new Date(),
         videoId,
       })
+
+      const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
+      if (video.viewsNum % tick === 0) {
+        videoRelevanceManager.scheduleRecalcForVideo(videoId)
+      }
       await em.save([video, video.channel, newView])
       return {
         videoId,
