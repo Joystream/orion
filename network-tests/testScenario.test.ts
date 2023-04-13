@@ -59,15 +59,20 @@ describe('test the setup', () => {
 
   describe("sending transactions works", () => {
     it("test basic transaction", async () => {
+      let finalized: { (result: SubmittableResult): void }
       const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
       const sender = keyring.addFromUri(env.TREASURY_ACCOUNT_URI!)
       const receiver = keyring.addFromUri("//test")
-      const treasuryBalance = await jsApi.query().balances.account(jsApi.treasuryAccount())
-      console.log(sender.address)
-      expect(treasuryBalance.free.toBn().gtn(0))
-      console.log(treasuryBalance.toString())
-      await txs.balances.transfer(receiver.address, 10)
-        .signAndSend(sender)
+      const test = await txs.balances
+        .transfer(receiver.address, 10)
+        .signAndSend(sender, (res: SubmittableResult) => {
+          if (!res.status.isFinalized) {
+            result = res
+            console.log(res)
+            finalized(res)
+          }
+        })
+      expect(result).toBeTruthy()
     })
   })
 })
