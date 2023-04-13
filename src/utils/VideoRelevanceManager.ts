@@ -13,8 +13,8 @@ export class VideoRelevanceManager {
       await em.query(`
         UPDATE "video"
         SET
-          "video_relevance" = (
-          ((extract(epoch from created_at) / (60 * 60 * 24)) * 0.4) +
+          "video_relevance" = ROUND(
+          ((30 - (extract(epoch from now() - created_at) / (60 * 60 * 24))) * 0.4) +
           (views_num * 0.3) +
           (
             SELECT COUNT(*) * 0.2 FROM "comment"
@@ -27,7 +27,7 @@ export class VideoRelevanceManager {
             SELECT COUNT(*) * 0.1 FROM "video_reaction"
             WHERE
               "video_reaction"."video_id" = "video"."id"
-          ))
+          ), 2)
         WHERE "id" IN (${[...this.videosToUpdate.values()].map((id) => `'${id}'`).join(', ')})`)
       this.videosToUpdate.clear()
     }

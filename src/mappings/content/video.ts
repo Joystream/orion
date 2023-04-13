@@ -40,7 +40,10 @@ export async function processVideoCreatedEvent({
     reactionsCount: 0,
     viewsNum,
     // First we need to dic by 1k to match postgres epoch (in seconds) then apply the further dividers
-    videoRelevance: Math.round((new Date(block.timestamp).getTime() / (1000 * 60 * 60 * 24)) * 0.4),
+    videoRelevance: +(
+      (30 - (Date.now() - new Date(block.timestamp).getTime()) / (1000 * 60 * 60 * 24)) *
+      0.4
+    ).toFixed(2),
   })
 
   // fetch related channel and owner

@@ -1,10 +1,15 @@
 <<<<<<<< HEAD:db/migrations/1680280600588-Data.js
+<<<<<<<< HEAD:db/migrations/1680280600588-Data.js
 module.exports = class Data1680280600588 {
     name = 'Data1680280600588'
 ========
 module.exports = class Data1681294948952 {
     name = 'Data1681294948952'
 >>>>>>>> 06d904b (Introduce new video property and scheduler to update it):db/migrations/1681294948952-Data.js
+========
+module.exports = class Data1681380812653 {
+    name = 'Data1681380812653'
+>>>>>>>> 225fbc9 (Adjust equation and change score to float):db/migrations/1681380812653-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
@@ -59,7 +64,7 @@ module.exports = class Data1681294948952 {
         await db.query(`CREATE TABLE "video_reaction" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "reaction" character varying(6) NOT NULL, "member_id" character varying, "video_id" character varying, CONSTRAINT "PK_504876585c394f4ab33665dd44b" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_73dda64f53bbc7ec7035d5e7f0" ON "video_reaction" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_436a3836eb47acb5e1e3c88dde" ON "video_reaction" ("video_id") `)
-        await db.query(`CREATE TABLE "video" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "channel_id" character varying, "category_id" character varying, "title" text, "description" text, "duration" integer, "thumbnail_photo_id" character varying, "language" text, "has_marketing" boolean, "published_before_joystream" TIMESTAMP WITH TIME ZONE, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "is_explicit" boolean, "license_id" character varying, "media_id" character varying, "video_state_bloat_bond" numeric NOT NULL, "created_in_block" integer NOT NULL, "is_comment_section_enabled" boolean NOT NULL, "pinned_comment_id" character varying, "comments_count" integer NOT NULL, "is_reaction_feature_enabled" boolean NOT NULL, "reactions_count_by_reaction_id" jsonb, "reactions_count" integer NOT NULL, "views_num" integer NOT NULL, "entry_app_id" character varying, "yt_video_id" text, "video_relevance" integer NOT NULL, CONSTRAINT "PK_1a2f3856250765d72e7e1636c8e" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "video" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "channel_id" character varying, "category_id" character varying, "title" text, "description" text, "duration" integer, "thumbnail_photo_id" character varying, "language" text, "has_marketing" boolean, "published_before_joystream" TIMESTAMP WITH TIME ZONE, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "is_explicit" boolean, "license_id" character varying, "media_id" character varying, "video_state_bloat_bond" numeric NOT NULL, "created_in_block" integer NOT NULL, "is_comment_section_enabled" boolean NOT NULL, "pinned_comment_id" character varying, "comments_count" integer NOT NULL, "is_reaction_feature_enabled" boolean NOT NULL, "reactions_count_by_reaction_id" jsonb, "reactions_count" integer NOT NULL, "views_num" integer NOT NULL, "entry_app_id" character varying, "yt_video_id" text, "video_relevance" numeric NOT NULL, CONSTRAINT "PK_1a2f3856250765d72e7e1636c8e" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_81b11ef99a9db9ef1aed040d75" ON "video" ("channel_id") `)
         await db.query(`CREATE INDEX "IDX_2a5c61f32e9636ee10821e9a58" ON "video" ("category_id") `)
         await db.query(`CREATE INDEX "IDX_8530d052cc79b420f7ce2b4e09" ON "video" ("thumbnail_photo_id") `)

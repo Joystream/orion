@@ -122,7 +122,7 @@ type Video @entity {
   ytVideoId: String
 
   "Video relevance score based on the views, reactions, comments and update date"
-  videoRelevance: Int!
+  videoRelevance: Float!
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
