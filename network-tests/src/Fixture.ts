@@ -1,7 +1,6 @@
 import { Api } from './Api'
 import { assert } from 'chai'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { DispatchResult } from '@polkadot/types/interfaces/system'
 import { QueryNodeApi } from './QueryNodeApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { extendDebug, Debugger } from './Debugger'

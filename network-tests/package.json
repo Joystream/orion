@@ -11,7 +11,7 @@
     "checks": "tsc --noEmit --pretty && prettier ./ --check && yarn lint",
     "format": "prettier ./ --write",
     "generate:types:graphql": "graphql-codegen",
-    "generate:all": "yarn generate:types:graphql"
+    "generate:all": "npm run generate:types:graphql"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
@@ -39,6 +39,7 @@
     "@graphql-codegen/typescript-document-nodes": "^1.17.11",
     "@graphql-codegen/typescript-operations": "^1.17.16",
     "@types/chai": "^4.2.11",
+    "@types/debug": "^4.1.7",
     "@types/uuid": "^7.0.2",
     "chai": "^4.2.0",
     "prettier": "^2.2.1",
