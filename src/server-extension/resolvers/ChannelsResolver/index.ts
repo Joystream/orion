@@ -14,14 +14,16 @@ import {
   ChannelFollowResult,
   ChannelUnfollowResult,
   ChannelNftCollectorsOrderByInput,
+  TopSellingChannelsArgs,
+  TopSellingChannelsResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
-import { extendClause, withHiddenEntities } from '../../../utils/sql'
+import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery } from './utils'
-import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
@@ -71,6 +73,137 @@ export class ChannelsResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
+    console.log('Result', result)
+
+    return result
+  }
+
+  @Query(() => [TopSellingChannelsResult])
+  async topSellingChannels(
+    @Args() args: TopSellingChannelsArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<TopSellingChannelsResult[]> {
+    const roundedDate = new Date().setMinutes(0, 0, 0)
+
+    const tree = getResolveTree(info)
+
+    // Extract subsquid-supported Channel sql args
+    const sqlArgs = parseSqlArguments(model, 'Channel', {
+      ...args,
+      where: args.where?.channel, // only supported WHERE part
+    })
+
+    // Extract subsquid-supported Channel fields
+    const channelSubTree = tree.fieldsByTypeName.ExtendedChannel.channel
+    const channelFields = parseAnyTree(model, 'Channel', info.schema, channelSubTree)
+
+    // Generate query using subsquid's ListQuery
+    const listQuery = new ListQuery(
+      model,
+      ctx.openreader.dialect,
+      'Channel',
+      channelFields,
+      sqlArgs
+    )
+    let listQuerySql = listQuery.sql
+
+    listQuerySql = extendClause(listQuerySql, 'SELECT', '"top_selling_channels"."amount"')
+    listQuerySql = extendClause(
+      listQuerySql,
+      'FROM',
+      `
+    INNER JOIN (
+        SELECT 
+          previous_owner_id, SUM (price) AS amount
+        FROM (
+         SELECT
+          data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+          (data#>>'{price}')::bigint AS price,
+          "timestamp"
+        FROM 
+          event
+        WHERE 
+          data#>>'{isTypeOf}' = 'NftBoughtEventData'
+          AND "timestamp" > '${new Date(
+            roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+          ).toISOString()}'
+          AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel'
+        UNION ALL
+        SELECT
+          data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+          bid.amount::bigint AS price,
+          "timestamp"
+        FROM
+          event
+        LEFT JOIN bid ON data#>>'{winningBid}' = bid.id
+        WHERE
+          data#>>'{isTypeOf}' in ('EnglishAuctionSettledEventData', 'BidMadeCompletingAuctionEventData', 'OpenAuctionBidAcceptedEventData')
+          AND "timestamp" > '${new Date(
+            roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+          ).toISOString()}'
+          AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel'
+          ) s
+          GROUP BY previous_owner_id
+          ORDER BY amount DESC  
+    ) AS top_selling_channels ON top_selling_channels.previous_owner_id = channel.id`,
+      ''
+    )
+    listQuerySql = overrideClause(listQuerySql, 'LIMIT', `${args.limit}`)
+
+    // const topSellingChannelsSql = `
+    //     WITH nftBoughtEvents AS (SELECT
+    //       (data#>>'{price}')::bigint AS price,
+    //       data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+    //       "timestamp"
+    //     FROM
+    //       processor.event
+    //     WHERE
+    //       data#>>'{isTypeOf}' = 'NftBoughtEventData'
+    //       AND "timestamp" > '${new Date(
+    //         roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+    //       ).toISOString()}'
+    //       AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel'),
+    //     auctionSettledEvents AS (SELECT
+    //       data#>>'{winningBid}' AS bid_id,
+    //       data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+    //       bid.amount AS price,
+    //       "timestamp"
+    //     FROM
+    //       processor.event
+    //     LEFT JOIN bid ON data#>>'{winningBid}' = bid.id
+    //     WHERE
+    //       data#>>'{isTypeOf}' in ('EnglishAuctionSettledEventData', 'BidMadeCompletingAuctionEventData', 'OpenAuctionBidAcceptedEventData')
+    //       AND "timestamp" > '${new Date(
+    //         roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+    //       ).toISOString()}'
+    //       AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel')
+    //     SELECT
+    //       previous_owner_id, sum(price::bigint)
+    //     FROM (
+    //       SELECT price, previous_owner_id FROM nftBoughtEvents
+    //       UNION ALL
+    //       SELECT price, previous_owner_id FROM auctionSettledEvents
+    //       ) s
+    //       GROUP BY previous_owner_id
+    //       ORDER BY sum DESC
+    // `
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    console.log('look', listQuerySql)
+
+    // const oldListQMap = listQuery.map.bind(listQuery)
+    // listQuery.map = (rows: unknown[][]) => {
+    //   const sellAmounts: unknown[] = []
+    //   for (const row of rows) {
+    //     sellAmounts.push(row.pop())
+    //   }
+    //   const channelsMapped = oldListQMap(rows)
+    //   return channelsMapped.map((channel, i) => ({ channel, amount: sellAmounts[i] }))
+    // }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
     console.log('Result', result)
 
     return result

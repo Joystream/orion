@@ -4361,6 +4361,7 @@ export type Query = {
   storageDataObjectByUniqueInput?: Maybe<StorageDataObject>
   storageDataObjects: Array<StorageDataObject>
   storageDataObjectsConnection: StorageDataObjectsConnection
+  topSellingChannels?: Maybe<Array<Maybe<TopSellingChannelsResult>>>
   videoById?: Maybe<Video>
   /** @deprecated Use videoById */
   videoByUniqueInput?: Maybe<Video>
@@ -5139,6 +5140,12 @@ export type QueryStorageDataObjectsConnectionArgs = {
   first?: Maybe<Scalars['Int']>
   orderBy: Array<StorageDataObjectOrderByInput>
   where?: Maybe<StorageDataObjectWhereInput>
+}
+
+export type QueryTopSellingChannelsArgs = {
+  limit: Scalars['Int']
+  periodDays: Scalars['Int']
+  where?: Maybe<ExtendedChannelWhereInput>
 }
 
 export type QueryVideoByIdArgs = {
@@ -6741,6 +6748,11 @@ export type SubscriptionVideosArgs = {
   offset?: Maybe<Scalars['Int']>
   orderBy?: Maybe<Array<VideoOrderByInput>>
   where?: Maybe<VideoWhereInput>
+}
+
+export type TopSellingChannelsResult = {
+  amount: Scalars['Int']
+  channel: Channel
 }
 
 export type TransactionalStatus =

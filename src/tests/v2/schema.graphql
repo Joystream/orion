@@ -353,6 +353,11 @@ type ExtendedChannel {
   activeVideosCount: Int!
 }
 
+type TopSellingChannelsResult {
+  channel: Channel!
+  amount: Int!
+}
+
 type ChannelNftCollector {
   member: Membership!
   amount: Int!
@@ -657,6 +662,11 @@ type Query {
     mostRecentLimit: Int!
     resultsLimit: Int
   ): [ExtendedChannel!]!
+  topSellingChannels(
+    where: ExtendedChannelWhereInput
+    limit: Int!
+    periodDays: Int!
+  ): [TopSellingChannelsResult]
   channelNftCollectors(
     channelId: String!
     orderBy: ChannelNftCollectorsOrderByInput
