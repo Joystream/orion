@@ -1,22 +1,14 @@
 {
   "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDirs": ["src"],
     "strict": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
-    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
-    "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "types": ["node"],
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "sample-polkadotjs-typegen/*": ["node_modules/@joystream/types/src/*"],
-      "@polkadot/types/augment": ["node_modules/@joystream/types/src/augment/augment-types.ts"],
-      "@polkadot/api/augment": ["node_modules/@joystream/types/src/augment/augment-api.ts"]
-    }
+    "resolveJsonModule": true
   }
 }

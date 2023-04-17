@@ -6,141 +6,13 @@ import fs from 'fs'
 import { decodeAddress } from '@polkadot/keyring'
 import { Bytes } from '@polkadot/types'
 import { createType } from '@joystream/types'
+import { extendDebug, Debugger } from './Debugger'
+import { BLOCKTIME } from './consts'
+import { MetadataInput } from './types'
 import { encodeDecode, metaToObject } from '@joystream/metadata-protobuf/utils'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { ApiPromise, WsProvider } from '@polkadot/api'
-import { JsNodeApi } from './joystreamNodeApi'
-import { HttpLink, ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client/core'
-import fetch from 'cross-fetch'
-
-export function waitMilliSec(milliseconds: number): Promise<void> {
-  return new Promise<void>((resolve) => {
-    setTimeout(() => {
-      resolve()
-    }, milliseconds) // 5000 milliseconds = 5 seconds
-  })
-}
-
-export function pollCondition(condition: () => boolean, maxRetries = 10, retryInterval = 6000): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
-    let retries = 0
-    const intervalId = setInterval(() => {
-      retries++
-      if (condition()) {
-        clearInterval(intervalId)
-        resolve(true)
-      } else if (retries >= maxRetries) {
-        clearInterval(intervalId)
-        resolve(false)
-      }
-    }, retryInterval)
-  })
-}
-
-export class TestContext {
-  private _waitTimeForBlockProductionMs = 5000
-  private _jsNode: JsNodeApi | undefined
-  private _treasuryUri = ''
-  private _provider: WsProvider | undefined
-  private _apolloClient: ApolloClient<NormalizedCacheObject> | undefined
-
-  public setWaitTimeForBlockProduction(milliSec: number) {
-    this._waitTimeForBlockProductionMs = milliSec
-  }
-
-  public setTreasuryUri(uri: string) {
-    this._treasuryUri = uri
-  }
-
-  public async connectToJsNodeEndpoint(url: string): Promise<void> {
-    if (this._treasuryUri === '') {
-      console.error('treasury uri not set, impossible to continue testing')
-      process.exit(-1)
-    }
-    this._provider = new WsProvider(url)
-    const api = await ApiPromise.create({ provider: this._provider! })
-    try {
-      await api.isReadyOrError
-    } catch (error) {
-      console.error(error)
-      process.exit(-1)
-    }
-    this._jsNode = new JsNodeApi(this._treasuryUri, api)
-    await waitMilliSec(this._waitTimeForBlockProductionMs)
-  }
-
-  public jsNodeApi(): JsNodeApi {
-    return this._jsNode!
-  }
-
-  public orionClient(): ApolloClient<NormalizedCacheObject> {
-    return this._apolloClient!
-  }
-
-  public connectToGraphqlEndpoint(orionUrl: string) {
-    this._apolloClient = new ApolloClient({
-      link: new HttpLink({ uri: orionUrl, fetch }),
-      cache: new InMemoryCache({ addTypename: false }),
-      defaultOptions: { query: { fetchPolicy: 'no-cache', errorPolicy: 'all' } },
-    })
-  }
-
-  public disconnectJsNode() {
-    if (this._provider !== undefined) {
-      this._provider!.disconnect().catch(() => {})
-    }
-  }
-}
-
-export class StateBuilderHelper {
-  private _jsNodeApi: JsNodeApi
-
-  constructor(jsNodeApi: JsNodeApi) {
-    this._jsNodeApi = jsNodeApi
-  }
-
-  public async addAccounts(n: number): Promise<string[]> {
-    let addresses = []
-      for (let i = 1; i <= n; i++) {
-        const addr = await this._jsNodeApi!.addAccountFromUri(i.toString())
-        addresses.push(addr)
-      }
-    return addresses
-  }
-}
-
-
-type MemberCreationParams = {
-  root_account: string
-  controller_account: string
-  handle: string
-  name?: string
-  about?: string
-  avatarUri?: string | null
-  externalResources?: "string" | null
-  metadata: Bytes
-  is_founding_member: boolean
-}
-
-export function membershipParamsFromAccount(accountId: string, isFoundingMember = false): MemberCreationParams {
-  const affix = accountId.substring(0, 14)
-  const name = `name${affix}`
-  const about = `about${affix}`
-  const avatarUri = `https://example.com/${affix}.jpg`
-  const externalResources = 'test'
-  const metadataBytes = createType('Bytes', "test")
-  return {
-    root_account: accountId,
-    controller_account: accountId,
-    handle: `handle${accountId.substring(0, 14)}`,
-    name,
-    about,
-    avatarUri,
-    externalResources: null,
-    metadata: metadataBytes,
-    is_founding_member: isFoundingMember,
-  }
-}
+import { createHash } from 'blake3-wasm'
+import * as multihash from 'multihashes'
 
 export class Utils {
   private static LENGTH_ADDRESS = 32 + 1 // publicKey + prefix
@@ -196,6 +68,19 @@ export class Utils {
     return metaToObject(metaClass, metaClass.decode(bytes.toU8a(true)))
   }
 
+  public static async calculateFileHash(filePath: string): Promise<string> {
+    const fileStream = fs.createReadStream(filePath)
+
+    let blake3Hash: Uint8Array
+    return new Promise<string>((resolve, reject) => {
+      fileStream
+        .pipe(createHash())
+        .on('data', (data) => (blake3Hash = data))
+        .on('end', () => resolve(multihash.toB58String(multihash.encode(blake3Hash, 'blake3'))))
+        .on('error', (err) => reject(err))
+    })
+  }
+
   public static getDeserializedMetadataFormInput<T>(
     metadataClass: AnyMetadataClass<T>,
     input: MetadataInput<T>
@@ -248,10 +133,29 @@ export class Utils {
     return new BN(amount).mul(oneJoy)
   }
 
+  public static async until(
+    name: string,
+    conditionFunc: (props: { debug: Debugger.Debugger }) => Promise<boolean>,
+    intervalMs = BLOCKTIME,
+    timeoutMs = 10 * 60 * 1000
+  ): Promise<void> {
+    const debug = extendDebug(`awaiting:${name}`)
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error(`Awaiting ${name} - timeout reached`)), timeoutMs)
+      const check = async () => {
+        if (await conditionFunc({ debug })) {
+          clearInterval(interval)
+          clearTimeout(timeout)
+          debug('Condition satisfied!')
+          resolve()
+          return
+        }
+        debug('Condition not satisfied, waiting...')
+      }
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      const interval = setInterval(check, intervalMs)
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      check()
+    })
+  }
 }
-
-export type MetadataInput<T> = {
-  value: T | string
-  expectFailure?: boolean
-}
-
