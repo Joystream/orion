@@ -16,7 +16,9 @@ scenario('Proposals', async ({ job, env }) => {
     ? job('runtime upgrade proposal', runtimeUpgradeProposal).requires(councilJob)
     : undefined
 
-  const channelPayoutsProposalJob = job('channel payouts proposal', channelPayouts).requires(councilJob)
+  const channelPayoutsProposalJob = job('channel payouts proposal', channelPayouts).requires(
+    councilJob
+  )
 
   const coreJob = job('proposals & proposal discussion', [
     proposals,

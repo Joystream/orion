@@ -18,7 +18,9 @@ export class ExpireProposalsFixture extends BaseQueryNodeFixture {
 
   public async execute(): Promise<void> {
     const { api } = this
-    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(this.proposalIds)
+    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(
+      this.proposalIds
+    )
     await Promise.all(
       this.proposals.map(async (p) => {
         const activatedAt = p.activatedAt.toNumber()
@@ -36,8 +38,14 @@ export class ExpireProposalsFixture extends BaseQueryNodeFixture {
         qProposal.status.__typename === 'ProposalStatusExpired',
         `Unexpected proposal status: ${qProposal.status.__typename}`
       )
-      Utils.assert(qProposal.status.proposalDecisionMadeEvent, 'Missing proposalDecisionMadeEvent relation')
-      assert.equal(qProposal.status.proposalDecisionMadeEvent.decisionStatus.__typename, 'ProposalStatusExpired')
+      Utils.assert(
+        qProposal.status.proposalDecisionMadeEvent,
+        'Missing proposalDecisionMadeEvent relation'
+      )
+      assert.equal(
+        qProposal.status.proposalDecisionMadeEvent.decisionStatus.__typename,
+        'ProposalStatusExpired'
+      )
       assert.equal(qProposal.isFinalized, true)
     })
   }

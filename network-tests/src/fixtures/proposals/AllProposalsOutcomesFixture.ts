@@ -15,7 +15,10 @@ import _ from 'lodash'
 import { Resource, ResourceLocker } from '../../Resources'
 import { CreateInterface, createType } from '@joystream/types'
 
-export type TestedProposal = { details: CreateInterface<ProposalDetails>; expectExecutionFailure?: boolean }
+export type TestedProposal = {
+  details: CreateInterface<ProposalDetails>
+  expectExecutionFailure?: boolean
+}
 export type ProposalTestCase = {
   type: ProposalType
   details: ProposalDetailsJsonByType
@@ -28,7 +31,12 @@ export class AllProposalsOutcomesFixture extends BaseFixture {
   protected query: QueryNodeApi
   protected lock: ResourceLocker
 
-  public constructor(api: Api, query: QueryNodeApi, lock: ResourceLocker, testedProposals: TestedProposal[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    lock: ResourceLocker,
+    testedProposals: TestedProposal[]
+  ) {
     super(api)
     this.query = query
     this.lock = lock
@@ -88,10 +96,17 @@ export class AllProposalsOutcomesFixture extends BaseFixture {
           expectExecutionFailure,
         })
       )
-      const decideOnProposalsStatusFixture = new DecideOnProposalStatusFixture(api, query, decideOnProposalStatusBatch)
+      const decideOnProposalsStatusFixture = new DecideOnProposalStatusFixture(
+        api,
+        query,
+        decideOnProposalStatusBatch
+      )
       this.debug(
         'Deciding on proposals:',
-        decideOnProposalStatusBatch.map((p) => ({ porposalId: p.proposalId.toString(), status: p.status }))
+        decideOnProposalStatusBatch.map((p) => ({
+          porposalId: p.proposalId.toString(),
+          status: p.status,
+        }))
       )
       await new FixtureRunner(decideOnProposalsStatusFixture).runWithQueryNodeChecks()
 
@@ -113,7 +128,10 @@ export class AllProposalsOutcomesFixture extends BaseFixture {
         )
         this.debug(
           'Deciding on proposals:',
-          dormantProposals.map((proposalId) => ({ porposalId: proposalId.toString(), status: 'Approved' }))
+          dormantProposals.map((proposalId) => ({
+            porposalId: proposalId.toString(),
+            status: 'Approved',
+          }))
         )
         await new FixtureRunner(approveProposalsFixture).runWithQueryNodeChecks()
         dormantProposals = approveProposalsFixture.getDormantProposalsIds()

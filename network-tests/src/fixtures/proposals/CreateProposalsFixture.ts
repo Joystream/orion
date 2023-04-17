@@ -4,7 +4,10 @@ import { EventType, ProposalDetailsJsonByType, ProposalType } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { ProposalCreatedEventFieldsFragment, ProposalFieldsFragment } from '../../graphql/generated/queries'
+import {
+  ProposalCreatedEventFieldsFragment,
+  ProposalFieldsFragment,
+} from '../../graphql/generated/queries'
 import { assert } from 'chai'
 import { PalletProposalsEngineProposalParameters as ProposalParameters } from '@polkadot/types/lookup'
 import { MemberId, ProposalId } from '@joystream/types/primitives'
@@ -56,7 +59,9 @@ export class CreateProposalsFixture extends StandardizedFixture {
 
   protected async initStakingAccounts(): Promise<void> {
     const { api, query } = this
-    const stakingAccounts = (await this.api.createKeyPairs(this.proposalsParams.length)).map(({ key }) => key.address)
+    const stakingAccounts = (await this.api.createKeyPairs(this.proposalsParams.length)).map(
+      ({ key }) => key.address
+    )
     const addStakingAccountsFixture = new AddStakingAccountsHappyCaseFixture(
       api,
       query,
@@ -77,22 +82,28 @@ export class CreateProposalsFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return this.proposalsParams.map(({ asMember, description, title, exactExecutionBlock, details, type }, i) => {
-      const proposalDetails = { [type]: details } as { [K in ProposalType]: ProposalDetailsJsonByType<K> }
-      return this.api.tx.proposalsCodex.createProposal(
-        {
-          memberId: asMember,
-          description: description,
-          title: title,
-          exactExecutionBlock: exactExecutionBlock,
-          stakingAccountId: this.stakingAccounts[i],
-        },
-        proposalDetails
-      )
-    })
+    return this.proposalsParams.map(
+      ({ asMember, description, title, exactExecutionBlock, details, type }, i) => {
+        const proposalDetails = { [type]: details } as {
+          [K in ProposalType]: ProposalDetailsJsonByType<K>
+        }
+        return this.api.tx.proposalsCodex.createProposal(
+          {
+            memberId: asMember,
+            description: description,
+            title: title,
+            exactExecutionBlock: exactExecutionBlock,
+            stakingAccountId: this.stakingAccounts[i],
+          },
+          proposalDetails
+        )
+      }
+    )
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<ProposalCreatedEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<ProposalCreatedEventDetails> {
     return this.api.getEventDetails(result, 'proposalsCodex', 'ProposalCreated')
   }
 
@@ -111,7 +122,9 @@ export class CreateProposalsFixture extends StandardizedFixture {
         break
       }
       case 'CancelWorkingGroupLeadOpening': {
-        Utils.assert(qProposal.details.__typename === 'CancelWorkingGroupLeadOpeningProposalDetails')
+        Utils.assert(
+          qProposal.details.__typename === 'CancelWorkingGroupLeadOpeningProposalDetails'
+        )
         const details = proposalDetails.asCancelWorkingGroupLeadOpening
         const [openingId, workingGroup] = details
         const expectedId = `${getWorkingGroupModuleName(workingGroup)}-${openingId.toString()}`
@@ -119,12 +132,20 @@ export class CreateProposalsFixture extends StandardizedFixture {
         break
       }
       case 'CreateWorkingGroupLeadOpening': {
-        Utils.assert(qProposal.details.__typename === 'CreateWorkingGroupLeadOpeningProposalDetails')
+        Utils.assert(
+          qProposal.details.__typename === 'CreateWorkingGroupLeadOpeningProposalDetails'
+        )
         const details = proposalDetails.asCreateWorkingGroupLeadOpening
         assert.equal(qProposal.details.group?.id, getWorkingGroupModuleName(details.group))
         assert.equal(qProposal.details.rewardPerBlock.toString(), details.rewardPerBlock.toString())
-        assert.equal(qProposal.details.stakeAmount.toString(), details.stakePolicy.stakeAmount.toString())
-        assert.equal(qProposal.details.unstakingPeriod, details.stakePolicy.leavingUnstakingPeriod.toNumber())
+        assert.equal(
+          qProposal.details.stakeAmount.toString(),
+          details.stakePolicy.stakeAmount.toString()
+        )
+        assert.equal(
+          qProposal.details.unstakingPeriod,
+          details.stakePolicy.leavingUnstakingPeriod.toNumber()
+        )
         Utils.assert(qProposal.details.metadata)
         assertQueriedOpeningMetadataIsValid(
           qProposal.details.metadata,
@@ -133,7 +154,9 @@ export class CreateProposalsFixture extends StandardizedFixture {
         break
       }
       case 'DecreaseWorkingGroupLeadStake': {
-        Utils.assert(qProposal.details.__typename === 'DecreaseWorkingGroupLeadStakeProposalDetails')
+        Utils.assert(
+          qProposal.details.__typename === 'DecreaseWorkingGroupLeadStakeProposalDetails'
+        )
         const details = proposalDetails.asDecreaseWorkingGroupLeadStake
         const [workerId, amount, group] = details
         const expectedId = `${getWorkingGroupModuleName(group)}-${workerId.toString()}`
@@ -144,7 +167,9 @@ export class CreateProposalsFixture extends StandardizedFixture {
       case 'FillWorkingGroupLeadOpening': {
         Utils.assert(qProposal.details.__typename === 'FillWorkingGroupLeadOpeningProposalDetails')
         const details = proposalDetails.asFillWorkingGroupLeadOpening
-        const expectedOpeningId = `${getWorkingGroupModuleName(details.workingGroup)}-${details.openingId.toString()}`
+        const expectedOpeningId = `${getWorkingGroupModuleName(
+          details.workingGroup
+        )}-${details.openingId.toString()}`
         const expectedApplicationId = `${getWorkingGroupModuleName(
           details.workingGroup
         )}-${details.applicationId.toString()}`
@@ -156,7 +181,10 @@ export class CreateProposalsFixture extends StandardizedFixture {
         Utils.assert(qProposal.details.__typename === 'FundingRequestProposalDetails')
         const details = proposalDetails.asFundingRequest
         assert.sameDeepMembers(
-          qProposal.details.destinationsList?.destinations.map(({ amount, account }) => ({ amount, account })) || [],
+          qProposal.details.destinationsList?.destinations.map(({ amount, account }) => ({
+            amount,
+            account,
+          })) || [],
           details.map((d) => ({ amount: d.amount.toString(), account: d.account.toString() }))
         )
         break
@@ -164,12 +192,17 @@ export class CreateProposalsFixture extends StandardizedFixture {
       case 'RuntimeUpgrade': {
         Utils.assert(qProposal.details.__typename === 'RuntimeUpgradeProposalDetails')
         const details = proposalDetails.asRuntimeUpgrade
-        Utils.assert(qProposal.details.newRuntimeBytecode, 'Missing newRuntimeBytecode relationship')
+        Utils.assert(
+          qProposal.details.newRuntimeBytecode,
+          'Missing newRuntimeBytecode relationship'
+        )
         assert.equal(qProposal.details.newRuntimeBytecode.id, blake2AsHex(details.toU8a(true)))
         const expectedBytecode = '0x' + Buffer.from(details.toU8a(true)).toString('hex')
         const actualBytecode = qProposal.details.newRuntimeBytecode.bytecode
         if (actualBytecode !== expectedBytecode) {
-          const diffStartPos = expectedBytecode.split('').findIndex((c, i) => actualBytecode[i] !== c)
+          const diffStartPos = expectedBytecode
+            .split('')
+            .findIndex((c, i) => actualBytecode[i] !== c)
           const diffSubExpected = expectedBytecode.slice(diffStartPos, diffStartPos + 10)
           const diffSubActual = actualBytecode.slice(diffStartPos, diffStartPos + 10)
           throw new Error(
@@ -210,7 +243,9 @@ export class CreateProposalsFixture extends StandardizedFixture {
         break
       }
       case 'SetMembershipLeadInvitationQuota': {
-        Utils.assert(qProposal.details.__typename === 'SetMembershipLeadInvitationQuotaProposalDetails')
+        Utils.assert(
+          qProposal.details.__typename === 'SetMembershipLeadInvitationQuotaProposalDetails'
+        )
         const details = proposalDetails.asSetMembershipLeadInvitationQuota
         assert.equal(qProposal.details.newLeadInvitationQuota, details.toNumber())
         break
@@ -254,16 +289,24 @@ export class CreateProposalsFixture extends StandardizedFixture {
       case 'TerminateWorkingGroupLead': {
         Utils.assert(qProposal.details.__typename === 'TerminateWorkingGroupLeadProposalDetails')
         const details = proposalDetails.asTerminateWorkingGroupLead
-        const expectedId = `${getWorkingGroupModuleName(details.group)}-${details.workerId.toString()}`
+        const expectedId = `${getWorkingGroupModuleName(
+          details.group
+        )}-${details.workerId.toString()}`
         assert.equal(qProposal.details.lead?.id, expectedId)
-        assert.equal(qProposal.details.slashingAmount!.toString(), details.slashingAmount.toString())
+        assert.equal(
+          qProposal.details.slashingAmount!.toString(),
+          details.slashingAmount.toString()
+        )
         break
       }
       case 'UpdateWorkingGroupBudget': {
         Utils.assert(qProposal.details.__typename === 'UpdateWorkingGroupBudgetProposalDetails')
         const details = proposalDetails.asUpdateWorkingGroupBudget
         const [balance, group, balanceKind] = details
-        assert.equal(qProposal.details.amount.toString(), (balanceKind.isNegative ? '-' : '') + balance.toString())
+        assert.equal(
+          qProposal.details.amount.toString(),
+          (balanceKind.isNegative ? '-' : '') + balance.toString()
+        )
         assert.equal(qProposal.details.group?.id, getWorkingGroupModuleName(group))
         break
       }
@@ -298,7 +341,10 @@ export class CreateProposalsFixture extends StandardizedFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ProposalCreatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ProposalCreatedEventFieldsFragment,
+    i: number
+  ): void {
     // TODO: https://github.com/Joystream/joystream/issues/2457
   }
 

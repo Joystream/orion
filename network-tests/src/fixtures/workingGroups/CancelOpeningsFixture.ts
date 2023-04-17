@@ -16,7 +16,12 @@ import {
 export class CancelOpeningsFixture extends BaseWorkingGroupFixture {
   protected openingIds: OpeningId[]
 
-  public constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, openingIds: OpeningId[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    group: WorkingGroupModuleName,
+    openingIds: OpeningId[]
+  ) {
     super(api, query, group)
     this.openingIds = openingIds
   }
@@ -42,8 +47,14 @@ export class CancelOpeningsFixture extends BaseWorkingGroupFixture {
       const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
       const qOpening = qOpenings.find((o) => o.runtimeId === openingId.toNumber())
       Utils.assert(qOpening)
-      Utils.assert(qOpening.status.__typename === 'OpeningStatusCancelled', 'Query node: Invalid opening status')
-      Utils.assert(qOpening.status.openingCanceledEvent, 'Query node: Missing openingCanceledEvent relation')
+      Utils.assert(
+        qOpening.status.__typename === 'OpeningStatusCancelled',
+        'Query node: Invalid opening status'
+      )
+      Utils.assert(
+        qOpening.status.openingCanceledEvent,
+        'Query node: Missing openingCanceledEvent relation'
+      )
       assert.equal(qOpening.status.openingCanceledEvent.id, qEvent.id)
       qOpening.applications.forEach((a) => this.assertApplicationStatusIsValid(qEvent, a))
     })
@@ -54,7 +65,10 @@ export class CancelOpeningsFixture extends BaseWorkingGroupFixture {
     qApplication: ApplicationBasicFieldsFragment
   ): void {
     // It's possible that some of the applications have been withdrawn
-    assert.oneOf(qApplication.status.__typename, ['ApplicationStatusWithdrawn', 'ApplicationStatusCancelled'])
+    assert.oneOf(qApplication.status.__typename, [
+      'ApplicationStatusWithdrawn',
+      'ApplicationStatusCancelled',
+    ])
     if (qApplication.status.__typename === 'ApplicationStatusCancelled') {
       // FIXME: Missing due to Hydra bug now
       // Utils.assert(qApplication.status.openingCanceledEvent, 'Query node: Missing openingCanceledEvent relation')
@@ -62,7 +76,10 @@ export class CancelOpeningsFixture extends BaseWorkingGroupFixture {
     }
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: OpeningCanceledEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: OpeningCanceledEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.opening.runtimeId, this.openingIds[i].toNumber())
   }

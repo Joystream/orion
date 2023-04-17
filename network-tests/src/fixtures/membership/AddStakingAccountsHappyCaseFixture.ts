@@ -35,7 +35,9 @@ export class AddStakingAccountsHappyCaseFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[][]> {
-    const addExtrinsics = this.inputs.map(({ asMember }) => this.api.tx.members.addStakingAccountCandidate(asMember))
+    const addExtrinsics = this.inputs.map(({ asMember }) =>
+      this.api.tx.members.addStakingAccountCandidate(asMember)
+    )
     const confirmExtrinsics = this.inputs.map(({ asMember, account }) =>
       this.api.tx.members.confirmStakingAccount(asMember, account)
     )
@@ -76,7 +78,10 @@ export class AddStakingAccountsHappyCaseFixture extends StandardizedFixture {
   async execute(): Promise<void> {
     await Promise.all(
       this.inputs.map(({ account, stakeAmount }) =>
-        this.api.treasuryTransferBalance(account, stakeAmount || this.api.consts.members.candidateStake)
+        this.api.treasuryTransferBalance(
+          account,
+          stakeAmount || this.api.consts.members.candidateStake
+        )
       )
     )
     await super.execute()

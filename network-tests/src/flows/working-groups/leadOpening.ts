@@ -7,7 +7,10 @@ import {
 import { WorkingGroupModuleName } from '../../types'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
+import {
+  AddStakingAccountsHappyCaseFixture,
+  BuyMembershipHappyCaseFixture,
+} from '../../fixtures/membership'
 import { workingGroupNameByModuleName, workingGroups } from '../../consts'
 import { createType } from '@joystream/types'
 import { CreateProposalsFixture, DecideOnProposalStatusFixture } from '../../fixtures/proposals'
@@ -32,7 +35,9 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
 
         const unlock = await lock(Resource.Proposals)
         // CANDIDATE buys membership
-        const [roleAccount, stakingAccount, rewardAccount] = (await api.createKeyPairs(3)).map(({ key }) => key.address)
+        const [roleAccount, stakingAccount, rewardAccount] = (await api.createKeyPairs(3)).map(
+          ({ key }) => key.address
+        )
         const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, [roleAccount])
         await new FixtureRunner(buyMembershipFixture).run()
         const [memberId] = buyMembershipFixture.getCreatedMembers()
@@ -60,9 +65,11 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
         const [leadOpeningProposalId] = createLeadOpeningProposalsFixture.getCreatedProposalsIds()
 
         // COUNCIL approves and the proosal gets executed
-        const decideOnLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(api, query, [
-          { proposalId: leadOpeningProposalId, status: 'Approved', expectExecutionFailure: false },
-        ])
+        const decideOnLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(
+          api,
+          query,
+          [{ proposalId: leadOpeningProposalId, status: 'Approved', expectExecutionFailure: false }]
+        )
         await new FixtureRunner(decideOnLeadOpeningProposalStatusFixture).run()
         unlock()
 
@@ -121,12 +128,21 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
           },
         ])
         await new FixtureRunner(createFillOpeningProposalsFixture).run()
-        const [fillLeadOpeningProposalId] = createFillOpeningProposalsFixture.getCreatedProposalsIds()
+        const [fillLeadOpeningProposalId] =
+          createFillOpeningProposalsFixture.getCreatedProposalsIds()
 
         // COUNCIL approves and the proosal gets executed
-        const decideOnFillLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(api, query, [
-          { proposalId: fillLeadOpeningProposalId, status: 'Approved', expectExecutionFailure: false },
-        ])
+        const decideOnFillLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(
+          api,
+          query,
+          [
+            {
+              proposalId: fillLeadOpeningProposalId,
+              status: 'Approved',
+              expectExecutionFailure: false,
+            },
+          ]
+        )
         await new FixtureRunner(decideOnFillLeadOpeningProposalStatusFixture).run()
         unlockFillPosition()
 

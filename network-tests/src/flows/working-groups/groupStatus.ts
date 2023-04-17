@@ -11,7 +11,10 @@ export default async function groupStatus({ api, query, env }: FlowProps): Promi
   await Promise.all(
     workingGroups.map(async (group) => {
       const updates: IWorkingGroupMetadata[] = [
-        { description: `${_.startCase(group)} Test Description`, about: `${_.startCase(group)} Test About Text` },
+        {
+          description: `${_.startCase(group)} Test Description`,
+          about: `${_.startCase(group)} Test About Text`,
+        },
         {
           status: 'Testing',
           statusMessage: `${_.startCase(group)} is beeing tested`,

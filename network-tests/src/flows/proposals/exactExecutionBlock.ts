@@ -33,7 +33,9 @@ export default async function exactExecutionBlock({ api, query, lock }: FlowProp
   await new FixtureRunner(createProposalFixture).run()
   const [proposalId] = createProposalFixture.getCreatedProposalsIds()
 
-  const approveProposalFixture = new DecideOnProposalStatusFixture(api, query, [{ proposalId, status: 'Approved' }])
+  const approveProposalFixture = new DecideOnProposalStatusFixture(api, query, [
+    { proposalId, status: 'Approved' },
+  ])
   await new FixtureRunner(approveProposalFixture).runWithQueryNodeChecks()
 
   unlock()

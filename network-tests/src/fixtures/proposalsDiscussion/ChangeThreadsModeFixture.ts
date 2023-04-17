@@ -23,7 +23,11 @@ export type ThreadModeChangeParams = {
 export class ChangeThreadsModeFixture extends StandardizedFixture {
   protected threadsModeChangeParams: ThreadModeChangeParams[]
 
-  public constructor(api: Api, query: QueryNodeApi, threadsModeChangeParams: ThreadModeChangeParams[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    threadsModeChangeParams: ThreadModeChangeParams[]
+  ) {
     super(api, query)
     this.threadsModeChangeParams = threadsModeChangeParams
   }
@@ -34,7 +38,11 @@ export class ChangeThreadsModeFixture extends StandardizedFixture {
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     return this.threadsModeChangeParams.map((params) =>
-      this.api.tx.proposalsDiscussion.changeThreadMode(params.asMember, params.threadId, params.newMode)
+      this.api.tx.proposalsDiscussion.changeThreadMode(
+        params.asMember,
+        params.threadId,
+        params.newMode
+      )
     )
   }
 

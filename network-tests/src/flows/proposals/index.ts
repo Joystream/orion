@@ -1,9 +1,15 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
+import {
+  AddStakingAccountsHappyCaseFixture,
+  BuyMembershipHappyCaseFixture,
+} from '../../fixtures/membership'
 import { Utils } from '../../utils'
-import { ApplyOnOpeningsHappyCaseFixture, createDefaultOpeningParams } from '../../fixtures/workingGroups'
+import {
+  ApplyOnOpeningsHappyCaseFixture,
+  createDefaultOpeningParams,
+} from '../../fixtures/workingGroups'
 import { OpeningMetadata } from '@joystream/metadata-protobuf'
 import {
   AllProposalsOutcomesFixture,
@@ -22,8 +28,12 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
 
   debug('Creating test lead openings and applications...')
 
-  const [applicantControllerAcc, applicantStakingAcc] = (await api.createKeyPairs(2)).map(({ key }) => key.address)
-  const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, [applicantControllerAcc])
+  const [applicantControllerAcc, applicantStakingAcc] = (await api.createKeyPairs(2)).map(
+    ({ key }) => key.address
+  )
+  const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, [
+    applicantControllerAcc,
+  ])
   await new FixtureRunner(buyMembershipFixture).run()
   const [applicantMemberId] = buyMembershipFixture.getCreatedMembers()
 
@@ -66,7 +76,11 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
     createLeadOpeningProposalsFixture.getCreatedProposalsIds()
 
   const approveProposalsFixture = new DecideOnProposalStatusFixture(api, query, [
-    { proposalId: proposalWithOpeningToBeCancelled, status: 'Approved', expectExecutionFailure: false },
+    {
+      proposalId: proposalWithOpeningToBeCancelled,
+      status: 'Approved',
+      expectExecutionFailure: false,
+    },
     { proposalId: proposalWithOpeningToBeKept, status: 'Approved', expectExecutionFailure: false },
   ])
   await new FixtureRunner(approveProposalsFixture).run()
@@ -84,24 +98,33 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
 
   // stake to apply
   const addStakingAccountsFixture = new AddStakingAccountsHappyCaseFixture(api, query, [
-    { asMember: applicantMemberId, account: applicantStakingAcc, stakeAmount: createDefaultOpeningParams(api).stake },
+    {
+      asMember: applicantMemberId,
+      account: applicantStakingAcc,
+      stakeAmount: createDefaultOpeningParams(api).stake,
+    },
   ])
   await new FixtureRunner(addStakingAccountsFixture).run()
 
-  const applyOnOpeningFixture = new ApplyOnOpeningsHappyCaseFixture(api, query, 'membershipWorkingGroup', [
-    {
-      openingId: openingToFillId,
-      applicants: [
-        {
-          memberId: applicantMemberId,
-          stakingAccount: applicantStakingAcc,
-          roleAccount: applicantControllerAcc,
-          rewardAccount: applicantControllerAcc,
-        },
-      ],
-      openingMetadata: createDefaultOpeningParams(api).metadata,
-    },
-  ])
+  const applyOnOpeningFixture = new ApplyOnOpeningsHappyCaseFixture(
+    api,
+    query,
+    'membershipWorkingGroup',
+    [
+      {
+        openingId: openingToFillId,
+        applicants: [
+          {
+            memberId: applicantMemberId,
+            stakingAccount: applicantStakingAcc,
+            roleAccount: applicantControllerAcc,
+            rewardAccount: applicantControllerAcc,
+          },
+        ],
+        openingMetadata: createDefaultOpeningParams(api).metadata,
+      },
+    ]
+  )
 
   await new FixtureRunner(applyOnOpeningFixture).run()
   const [applicationId] = applyOnOpeningFixture.getCreatedApplicationsByOpeningId(openingToFillId)
@@ -109,7 +132,11 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
 
   const accountsToFund = (await api.createKeyPairs(5)).map(({ key }) => key.address)
   const proposalsToTest: TestedProposal[] = [
-    { details: createType('PalletProposalsCodexProposalDetails', { AmendConstitution: 'New constitution' }) },
+    {
+      details: createType('PalletProposalsCodexProposalDetails', {
+        AmendConstitution: 'New constitution',
+      }),
+    },
     // {
     //   details: createType('PalletProposalsCodexProposalDetails', {
     //     FundingRequest: accountsToFund.map((a, i) => ({ account: a, amount: (i + 1) * 1000 })),
@@ -117,10 +144,20 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
     //   expectExecutionFailure: true, // InsufficientFunds
     // },
     { details: createType('PalletProposalsCodexProposalDetails', { Signal: 'Text' }) },
-    { details: createType('PalletProposalsCodexProposalDetails', { SetCouncilBudgetIncrement: 1_000_000 }) },
+    {
+      details: createType('PalletProposalsCodexProposalDetails', {
+        SetCouncilBudgetIncrement: 1_000_000,
+      }),
+    },
     { details: createType('PalletProposalsCodexProposalDetails', { SetCouncilorReward: 100 }) },
-    { details: createType('PalletProposalsCodexProposalDetails', { SetInitialInvitationBalance: 10 }) },
-    { details: createType('PalletProposalsCodexProposalDetails', { SetInitialInvitationCount: 5 }) },
+    {
+      details: createType('PalletProposalsCodexProposalDetails', {
+        SetInitialInvitationBalance: 10,
+      }),
+    },
+    {
+      details: createType('PalletProposalsCodexProposalDetails', { SetInitialInvitationCount: 5 }),
+    },
     { details: createType('PalletProposalsCodexProposalDetails', { SetMaxValidatorCount: 100 }) },
     { details: createType('PalletProposalsCodexProposalDetails', { SetMembershipPrice: 500 }) },
     { details: createType('PalletProposalsCodexProposalDetails', { SetReferralCut: 25 }) },
@@ -133,7 +170,10 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
     {
       details: createType('PalletProposalsCodexProposalDetails', {
         CreateWorkingGroupLeadOpening: {
-          description: Utils.metadataToBytes(OpeningMetadata, createDefaultOpeningParams(api).metadata),
+          description: Utils.metadataToBytes(
+            OpeningMetadata,
+            createDefaultOpeningParams(api).metadata
+          ),
           rewardPerBlock: createDefaultOpeningParams(api).reward,
           stakePolicy: {
             leavingUnstakingPeriod: createDefaultOpeningParams(api).unstakingPeriod,
@@ -166,7 +206,11 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
 
   const leadId = (await api.query.membershipWorkingGroup.currentLead()).unwrap()
   const leadProposalsToTest: TestedProposal[] = [
-    { details: createType('PalletProposalsCodexProposalDetails', { SetMembershipLeadInvitationQuota: 50 }) },
+    {
+      details: createType('PalletProposalsCodexProposalDetails', {
+        SetMembershipLeadInvitationQuota: 50,
+      }),
+    },
     {
       details: createType('PalletProposalsCodexProposalDetails', {
         DecreaseWorkingGroupLeadStake: [leadId, 100, 'Membership'],
@@ -183,7 +227,12 @@ export default async function creatingProposals({ api, query, lock }: FlowProps)
       }),
     },
   ]
-  const leadProposalsOutcomesFixture = new AllProposalsOutcomesFixture(api, query, lock, leadProposalsToTest)
+  const leadProposalsOutcomesFixture = new AllProposalsOutcomesFixture(
+    api,
+    query,
+    lock,
+    leadProposalsToTest
+  )
   await new FixtureRunner(leadProposalsOutcomesFixture).run()
 
   const terminateLeadProposalOutcomesFixture = new AllProposalsOutcomesFixture(api, query, lock, [

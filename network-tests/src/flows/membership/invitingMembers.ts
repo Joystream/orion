@@ -1,5 +1,8 @@
 import { FlowProps } from '../../Flow'
-import { BuyMembershipHappyCaseFixture, InviteMembersHappyCaseFixture } from '../../fixtures/membership'
+import {
+  BuyMembershipHappyCaseFixture,
+  InviteMembersHappyCaseFixture,
+} from '../../fixtures/membership'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { assert } from 'chai'

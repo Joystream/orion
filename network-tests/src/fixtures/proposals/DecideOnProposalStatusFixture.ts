@@ -76,13 +76,16 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     } else if (targetStatus === 'Slashed') {
       const minVotesN = Math.ceil((councilSize * slashingQuorumPercentage.toNumber()) / 100)
       const minSlashVotesN = Math.ceil((minVotesN * slashingThresholdPercentage.toNumber()) / 100)
-      return Array.from({ length: minVotesN }, (v, i) => (i < minSlashVotesN ? vote('Slash', i) : vote('Abstain', i)))
+      return Array.from({ length: minVotesN }, (v, i) =>
+        i < minSlashVotesN ? vote('Slash', i) : vote('Abstain', i)
+      )
     } else {
       const otherResultMinThreshold = Math.min(
         approvalThresholdPercentage.toNumber(),
         slashingThresholdPercentage.toNumber()
       )
-      const minRejectOrAbstainVotesN = Math.floor((councilSize * (100 - otherResultMinThreshold)) / 100) + 1
+      const minRejectOrAbstainVotesN =
+        Math.floor((councilSize * (100 - otherResultMinThreshold)) / 100) + 1
       return Array.from({ length: minRejectOrAbstainVotesN }, (v, i) => vote('Reject', i))
     }
   }
@@ -91,7 +94,10 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     const { details } = qProposal
     if (details.__typename === 'VetoProposalDetails') {
       const [qVetoedProposal] = await this.query.getProposalsByIds([details.proposal!.id])
-      Utils.assert(qVetoedProposal.status.__typename === 'ProposalStatusVetoed', 'Invalid proposal status')
+      Utils.assert(
+        qVetoedProposal.status.__typename === 'ProposalStatusVetoed',
+        'Invalid proposal status'
+      )
     }
     // TODO: Other proposal types
   }
@@ -100,12 +106,20 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     const params = this.params[i]
     const proposal = this.proposals[i]
     if (params.status === 'Approved') {
-      if (proposal.parameters.constitutionality.toNumber() > proposal.nrOfCouncilConfirmations.toNumber() + 1) {
+      if (
+        proposal.parameters.constitutionality.toNumber() >
+        proposal.nrOfCouncilConfirmations.toNumber() + 1
+      ) {
         return 'ProposalStatusDormant'
-      } else if (proposal.parameters.gracePeriod.toNumber() || proposal.exactExecutionBlock.isSome) {
+      } else if (
+        proposal.parameters.gracePeriod.toNumber() ||
+        proposal.exactExecutionBlock.isSome
+      ) {
         return 'ProposalStatusGracing'
       } else {
-        return params.expectExecutionFailure ? 'ProposalStatusExecutionFailed' : 'ProposalStatusExecuted'
+        return params.expectExecutionFailure
+          ? 'ProposalStatusExecutionFailed'
+          : 'ProposalStatusExecuted'
       }
     } else if (params.status === 'Slashed') {
       return 'ProposalStatusSlashed'
@@ -126,23 +140,41 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
         qProposal.status.__typename === 'ProposalStatusExecuted' ||
         qProposal.status.__typename === 'ProposalStatusExecutionFailed'
       ) {
-        Utils.assert(qProposal.status.proposalExecutedEvent?.id, 'Missing proposalExecutedEvent reference')
-        assert.equal(qProposal.status.proposalExecutedEvent?.executionStatus.__typename, qProposal.status.__typename)
+        Utils.assert(
+          qProposal.status.proposalExecutedEvent?.id,
+          'Missing proposalExecutedEvent reference'
+        )
+        assert.equal(
+          qProposal.status.proposalExecutedEvent?.executionStatus.__typename,
+          qProposal.status.__typename
+        )
         assert.equal(qProposal.isFinalized, true)
       } else if (
         qProposal.status.__typename === 'ProposalStatusDormant' ||
         qProposal.status.__typename === 'ProposalStatusGracing'
       ) {
-        Utils.assert(qProposal.status.proposalStatusUpdatedEvent?.id, 'Missing proposalStatusUpdatedEvent reference')
-        assert.equal(qProposal.status.proposalStatusUpdatedEvent?.newStatus.__typename, qProposal.status.__typename)
+        Utils.assert(
+          qProposal.status.proposalStatusUpdatedEvent?.id,
+          'Missing proposalStatusUpdatedEvent reference'
+        )
+        assert.equal(
+          qProposal.status.proposalStatusUpdatedEvent?.newStatus.__typename,
+          qProposal.status.__typename
+        )
         assert.equal(qProposal.isFinalized, false)
         assert.include(
           qProposal.proposalStatusUpdates.map((u) => u.id),
           qProposal.status.proposalStatusUpdatedEvent?.id
         )
       } else {
-        Utils.assert(qProposal.status.proposalDecisionMadeEvent?.id, 'Missing proposalDecisionMadeEvent reference')
-        assert.equal(qProposal.status.proposalDecisionMadeEvent?.decisionStatus.__typename, qProposal.status.__typename)
+        Utils.assert(
+          qProposal.status.proposalDecisionMadeEvent?.id,
+          'Missing proposalDecisionMadeEvent reference'
+        )
+        assert.equal(
+          qProposal.status.proposalDecisionMadeEvent?.decisionStatus.__typename,
+          qProposal.status.__typename
+        )
         assert.equal(qProposal.isFinalized, true)
       }
     })
@@ -163,7 +195,10 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
       const gracePriodStartedAt = qProposal.proposalStatusUpdates.find(
         (u) => u.newStatus.__typename === 'ProposalStatusGracing'
       )?.inBlock
-      assert.equal(qProposal.statusSetAtBlock, (gracePriodStartedAt || 0) + proposal.parameters.gracePeriod.toNumber())
+      assert.equal(
+        qProposal.statusSetAtBlock,
+        (gracePriodStartedAt || 0) + proposal.parameters.gracePeriod.toNumber()
+      )
     }
   }
 

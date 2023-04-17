@@ -4,7 +4,10 @@ import { EventDetails, WorkingGroupModuleName } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { StatusTextChangedEventFieldsFragment, UpcomingOpeningFieldsFragment } from '../../graphql/generated/queries'
+import {
+  StatusTextChangedEventFieldsFragment,
+  UpcomingOpeningFieldsFragment,
+} from '../../graphql/generated/queries'
 import { assert } from 'chai'
 import {
   IUpcomingOpeningMetadata,
@@ -39,7 +42,12 @@ export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
   protected upcomingOpeningsParams: UpcomingOpeningParams[]
   protected createdUpcomingOpeningIds: string[] = []
 
-  public constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, params?: UpcomingOpeningParams[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    group: WorkingGroupModuleName,
+    params?: UpcomingOpeningParams[]
+  ) {
     super(api, query, group)
     this.upcomingOpeningsParams = params || [{ meta: createDefaultUpcomingMeta(api) }]
   }
@@ -131,7 +139,10 @@ export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: StatusTextChangedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: StatusTextChangedEventFieldsFragment,
+    i: number
+  ): void {
     const params = this.upcomingOpeningsParams[i]
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.metadata, this.getActionMetadataBytes(params).toString())
@@ -149,7 +160,9 @@ export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
       (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
     )
     // Query the opening
-    const qUpcomingOpenings = await this.query.getUpcomingOpeningsByCreatedInEventIds(qEvents.map((e) => e.id))
+    const qUpcomingOpenings = await this.query.getUpcomingOpeningsByCreatedInEventIds(
+      qEvents.map((e) => e.id)
+    )
     this.assertQueriedUpcomingOpeningsAreValid(qUpcomingOpenings, qEvents)
 
     this.createdUpcomingOpeningIds = qUpcomingOpenings.map((o) => o.id)

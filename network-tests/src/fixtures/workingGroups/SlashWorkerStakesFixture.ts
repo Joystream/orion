@@ -10,7 +10,10 @@ import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Option } from '@polkadot/types/'
 import { Utils } from '../../utils'
-import { StakeSlashedEventFieldsFragment, WorkerFieldsFragment } from '../../graphql/generated/queries'
+import {
+  StakeSlashedEventFieldsFragment,
+  WorkerFieldsFragment,
+} from '../../graphql/generated/queries'
 
 export class SlashWorkerStakesFixture extends BaseWorkingGroupFixture {
   protected workerIds: WorkerId[]
@@ -31,11 +34,13 @@ export class SlashWorkerStakesFixture extends BaseWorkingGroupFixture {
   }
 
   protected async loadWorkersData(): Promise<void> {
-    this.workers = (await this.api.query[this.group].workerById.multi<Option<Worker>>(this.workerIds)).map(
-      (optionalWorker) => optionalWorker.unwrap()
-    )
+    this.workers = (
+      await this.api.query[this.group].workerById.multi<Option<Worker>>(this.workerIds)
+    ).map((optionalWorker) => optionalWorker.unwrap())
     this.workerStakes = await Promise.all(
-      this.workers.map((w) => this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group)))
+      this.workers.map((w) =>
+        this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group))
+      )
     )
   }
 
@@ -80,7 +85,10 @@ export class SlashWorkerStakesFixture extends BaseWorkingGroupFixture {
       const workerId = this.workerIds[i]
       const worker = qWorkers.find((w) => w.runtimeId === workerId.toNumber())
       Utils.assert(worker, 'Query node: Worker not found!')
-      assert.equal(worker.stake, BN.max(this.workerStakes[i].sub(this.penalties[i]), new BN(0)).toString())
+      assert.equal(
+        worker.stake,
+        BN.max(this.workerStakes[i].sub(this.penalties[i]), new BN(0)).toString()
+      )
       assert.include(
         worker.slashes.map((e) => e.id),
         qEvent.id

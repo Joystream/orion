@@ -7,7 +7,10 @@ import { PalletMembershipMembershipObject as Membership } from '@polkadot/types/
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
 import { EventDetails, EventType } from '../../types'
-import { MembershipBoughtEventFieldsFragment, MembershipFieldsFragment } from '../../graphql/generated/queries'
+import {
+  MembershipBoughtEventFieldsFragment,
+  MembershipFieldsFragment,
+} from '../../graphql/generated/queries'
 import { Utils } from '../../utils'
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableResult } from '@polkadot/api'
@@ -31,10 +34,14 @@ export class BuyMembershipHappyCaseFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return this.accounts.map((a) => this.api.tx.members.buyMembership(generateParamsFromAccountId(a)))
+    return this.accounts.map((a) =>
+      this.api.tx.members.buyMembership(generateParamsFromAccountId(a))
+    )
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<MembershipBoughtEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<MembershipBoughtEventDetails> {
     return this.api.getEventDetails(result, 'members', 'MembershipBought')
   }
 
@@ -76,13 +83,19 @@ export class BuyMembershipHappyCaseFixture extends StandardizedFixture {
       )
       assert.equal(isVerified, false)
       assert.equal(isFoundingMember, false)
-      Utils.assert(entry.__typename === 'MembershipEntryPaid', 'Query node: Invalid membership entry method')
+      Utils.assert(
+        entry.__typename === 'MembershipEntryPaid',
+        'Query node: Invalid membership entry method'
+      )
       Utils.assert(entry.membershipBoughtEvent)
       assert.equal(entry.membershipBoughtEvent.id, qEvent.id)
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: MembershipBoughtEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: MembershipBoughtEventFieldsFragment,
+    i: number
+  ): void {
     const account = this.accounts[i]
     const eventDetails = this.events[i]
     const txParams = generateParamsFromAccountId(account)

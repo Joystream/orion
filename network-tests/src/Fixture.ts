@@ -51,7 +51,10 @@ export abstract class BaseFixture {
     return this._err
   }
 
-  protected expectDispatchError(result: ISubmittableResult, errMessage: string): ISubmittableResult {
+  protected expectDispatchError(
+    result: ISubmittableResult,
+    errMessage: string
+  ): ISubmittableResult {
     const success = result.findRecord('system', 'ExtrinsicSuccess')
 
     if (success) {
@@ -61,7 +64,10 @@ export abstract class BaseFixture {
     return result
   }
 
-  protected expectDispatchSuccess(result: ISubmittableResult, errMessage: string): ISubmittableResult {
+  protected expectDispatchSuccess(
+    result: ISubmittableResult,
+    errMessage: string
+  ): ISubmittableResult {
     const success = result.findRecord('system', 'ExtrinsicSuccess')
 
     if (!success) {
@@ -95,9 +101,13 @@ export abstract class BaseQueryNodeFixture extends BaseFixture {
     queryNodeEvents: T[]
   ): T {
     const { blockNumber, indexInBlock } = eventToFind
-    const qEvent = queryNodeEvents.find((e) => e.inBlock === blockNumber && e.indexInBlock === indexInBlock)
+    const qEvent = queryNodeEvents.find(
+      (e) => e.inBlock === blockNumber && e.indexInBlock === indexInBlock
+    )
     if (!qEvent) {
-      throw new Error(`Could not find matching query-node event (expected ${blockNumber}:${indexInBlock})!`)
+      throw new Error(
+        `Could not find matching query-node event (expected ${blockNumber}:${indexInBlock})!`
+      )
     }
     return qEvent
   }
@@ -111,11 +121,16 @@ export abstract class StandardizedFixture extends BaseQueryNodeFixture {
   protected expectedErrorName: string | undefined
 
   protected abstract getSignerAccountOrAccounts(): Promise<string | string[]>
-  protected abstract getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[] | SubmittableExtrinsic<'promise'>[][]>
+  protected abstract getExtrinsics(): Promise<
+    SubmittableExtrinsic<'promise'>[] | SubmittableExtrinsic<'promise'>[][]
+  >
   protected abstract getEventFromResult(result: ISubmittableResult): Promise<EventDetails>
   protected abstract assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void
 
-  protected assertQueryNodeEventsAreValid(qEvents: AnyQueryNodeEvent[], expectFailureAtIndexes: number[] = []): void {
+  protected assertQueryNodeEventsAreValid(
+    qEvents: AnyQueryNodeEvent[],
+    expectFailureAtIndexes: number[] = []
+  ): void {
     this.events.forEach((e, i) => {
       if (expectFailureAtIndexes.includes(i)) return
       const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)

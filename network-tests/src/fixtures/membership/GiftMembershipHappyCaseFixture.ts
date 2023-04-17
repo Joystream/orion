@@ -7,7 +7,10 @@ import { PalletMembershipMembershipObject as Membership } from '@polkadot/types/
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
 import { EventDetails, EventType } from '../../types'
-import { MembershipGiftedEventFieldsFragment, MembershipFieldsFragment } from '../../graphql/generated/queries'
+import {
+  MembershipGiftedEventFieldsFragment,
+  MembershipFieldsFragment,
+} from '../../graphql/generated/queries'
 import { Utils } from '../../utils'
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableResult } from '@polkadot/api'
@@ -33,10 +36,14 @@ export class GiftMembershipHappyCaseFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return this.accounts.map((a) => this.api.tx.members.giftMembership(generateParamsFromAccountId(a)))
+    return this.accounts.map((a) =>
+      this.api.tx.members.giftMembership(generateParamsFromAccountId(a))
+    )
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<MembershipGiftedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<MembershipGiftedEventDetails> {
     return this.api.getEventDetails(result, 'members', 'MembershipGifted')
   }
 
@@ -78,13 +85,19 @@ export class GiftMembershipHappyCaseFixture extends StandardizedFixture {
       )
       assert.equal(isVerified, false)
       assert.equal(isFoundingMember, false)
-      Utils.assert(entry.__typename === 'MembershipEntryGifted', 'Query node: Invalid membership entry method')
+      Utils.assert(
+        entry.__typename === 'MembershipEntryGifted',
+        'Query node: Invalid membership entry method'
+      )
       Utils.assert(entry.membershipGiftedEvent)
       assert.equal(entry.membershipGiftedEvent.id, qEvent.id)
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: MembershipGiftedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: MembershipGiftedEventFieldsFragment,
+    i: number
+  ): void {
     const account = this.accounts[i]
     const eventDetails = this.events[i]
     const txParams = generateParamsFromAccountId(account)
@@ -105,7 +118,10 @@ export class GiftMembershipHappyCaseFixture extends StandardizedFixture {
 
   async execute(): Promise<void> {
     const membershipFee = await this.api.getMembershipFee()
-    await this.api.treasuryTransferBalance(this.gifterAccount, membershipFee.muln(this.accounts.length))
+    await this.api.treasuryTransferBalance(
+      this.gifterAccount,
+      membershipFee.muln(this.accounts.length)
+    )
     await super.execute()
   }
 

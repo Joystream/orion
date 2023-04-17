@@ -9,7 +9,11 @@ import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { assert } from 'chai'
 
-export default async function managingStakingAccounts({ api, query, env }: FlowProps): Promise<void> {
+export default async function managingStakingAccounts({
+  api,
+  query,
+  env,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:adding-staking-accounts')
   debug('Started')
   api.enableDebugTxLogs()

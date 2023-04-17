@@ -1,7 +1,10 @@
 import { ApplicationMetadata, IOpeningMetadata } from '@joystream/metadata-protobuf'
 import { assert } from 'chai'
 import { Api } from '../../Api'
-import { ApplicationFieldsFragment, AppliedOnOpeningEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  ApplicationFieldsFragment,
+  AppliedOnOpeningEventFieldsFragment,
+} from '../../graphql/generated/queries'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { EventDetails, EventType, WorkingGroupModuleName } from '../../types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
@@ -32,12 +35,17 @@ export type OpeningApplicationsFlattened = {
 }[]
 
 // 'contentWorkingGroup' used just as a reference group (all working-group events are the same)
-type AppliedOnOpeningEventDetails = EventDetails<EventType<'contentWorkingGroup', 'AppliedOnOpening'>>
+type AppliedOnOpeningEventDetails = EventDetails<
+  EventType<'contentWorkingGroup', 'AppliedOnOpening'>
+>
 
 export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
   protected applications: OpeningApplicationsFlattened
   protected events: AppliedOnOpeningEventDetails[] = []
-  protected createdApplicationsByOpeningId: Map<number, ApplicationId[]> = new Map<number, ApplicationId[]>()
+  protected createdApplicationsByOpeningId: Map<number, ApplicationId[]> = new Map<
+    number,
+    ApplicationId[]
+  >()
 
   public constructor(
     api: Api,
@@ -49,7 +57,9 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
     this.applications = this.flattenOpeningApplicationsData(openingsApplications)
   }
 
-  protected flattenOpeningApplicationsData(openingsApplications: OpeningApplications[]): OpeningApplicationsFlattened {
+  protected flattenOpeningApplicationsData(
+    openingsApplications: OpeningApplications[]
+  ): OpeningApplicationsFlattened {
     return openingsApplications.reduce(
       (curr, details) =>
         curr.concat(
@@ -75,7 +85,10 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
       const opening = openings[openingIndex]
       return this.api.tx[this.group].applyOnOpening({
         memberId: a.applicant.memberId,
-        description: Utils.metadataToBytes(ApplicationMetadata, this.getApplicationMetadata(a.openingMetadata, i)),
+        description: Utils.metadataToBytes(
+          ApplicationMetadata,
+          this.getApplicationMetadata(a.openingMetadata, i)
+        ),
         openingId: a.openingId,
         rewardAccountId: a.applicant.rewardAccount,
         roleAccountId: a.applicant.roleAccount,
@@ -87,7 +100,9 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
     })
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<AppliedOnOpeningEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<AppliedOnOpeningEventDetails> {
     return this.api.getEventDetails(result, this.group, 'AppliedOnOpening')
   }
 
@@ -109,7 +124,10 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
     return applicationIds
   }
 
-  protected getApplicationMetadata(openingMetadata: IOpeningMetadata, i: number): ApplicationMetadata {
+  protected getApplicationMetadata(
+    openingMetadata: IOpeningMetadata,
+    i: number
+  ): ApplicationMetadata {
     const metadata = new ApplicationMetadata({ answers: [] })
     ;(openingMetadata.applicationFormQuestions || []).forEach((question, j) => {
       metadata.answers.push(`Answer to question ${j} by applicant number ${i}`)
@@ -139,15 +157,20 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
       const applicationMetadata = this.getApplicationMetadata(applicationDetails.openingMetadata, i)
       assert.deepEqual(
         qApplication.answers.map(({ question: { question }, answer }) => ({ question, answer })),
-        (applicationDetails.openingMetadata.applicationFormQuestions || []).map(({ question }, index) => ({
-          question,
-          answer: applicationMetadata.answers[index],
-        }))
+        (applicationDetails.openingMetadata.applicationFormQuestions || []).map(
+          ({ question }, index) => ({
+            question,
+            answer: applicationMetadata.answers[index],
+          })
+        )
       )
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AppliedOnOpeningEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: AppliedOnOpeningEventFieldsFragment,
+    i: number
+  ): void {
     const applicationDetails = this.applications[i]
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.opening.runtimeId, applicationDetails.openingId.toNumber())

@@ -7,7 +7,10 @@ import { ApplicationId } from '@joystream/types/primitives'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Utils } from '../../utils'
-import { ApplicationFieldsFragment, ApplicationWithdrawnEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  ApplicationFieldsFragment,
+  ApplicationWithdrawnEventFieldsFragment,
+} from '../../graphql/generated/queries'
 
 export class WithdrawApplicationsFixture extends BaseWorkingGroupFixture {
   protected applicationIds: ApplicationId[]
@@ -37,7 +40,10 @@ export class WithdrawApplicationsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'ApplicationWithdrawn')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ApplicationWithdrawnEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ApplicationWithdrawnEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.application.runtimeId, this.applicationIds[i].toNumber())
     assert.equal(qEvent.group.name, this.group)
   }
@@ -48,7 +54,9 @@ export class WithdrawApplicationsFixture extends BaseWorkingGroupFixture {
   ): void {
     this.events.map((e, i) => {
       const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
-      const qApplication = qApplications.find((a) => a.runtimeId === this.applicationIds[i].toNumber())
+      const qApplication = qApplications.find(
+        (a) => a.runtimeId === this.applicationIds[i].toNumber()
+      )
       Utils.assert(qApplication, 'Query node: Application not found!')
       Utils.assert(
         qApplication.status.__typename === 'ApplicationStatusWithdrawn',

@@ -397,7 +397,9 @@ query getDataObjectsByVideoId($videoId: ID) {
 }
 
 query getCuratorPermissionsByIdAndGroupId($curatorGroupId: ID!, $curatorId: ID!) {
-  curatorAgentPermissions(where: { curatorGroup: { id_eq: $curatorGroupId }, curator: { id_eq: $curatorId } }) {
+  curatorAgentPermissions(
+    where: { curatorGroup: { id_eq: $curatorGroupId }, curator: { id_eq: $curatorId } }
+  ) {
     ...CuratorAgentPermissionsFields
   }
 }

@@ -13,7 +13,12 @@ export class RemoveStakingAccountsHappyCaseFixture extends BaseQueryNodeFixture 
   private events: EventDetails[] = []
   private extrinsics: SubmittableExtrinsic<'promise'>[] = []
 
-  public constructor(api: Api, query: QueryNodeApi, memberContext: MemberContext, accounts: string[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    memberContext: MemberContext,
+    accounts: string[]
+  ) {
     super(api, query)
     this.memberContext = memberContext
     this.accounts = accounts
@@ -33,14 +38,22 @@ export class RemoveStakingAccountsHappyCaseFixture extends BaseQueryNodeFixture 
 
   async execute(): Promise<void> {
     const { memberContext, accounts } = this
-    this.extrinsics = accounts.map(() => this.api.tx.members.removeStakingAccount(memberContext.memberId))
+    this.extrinsics = accounts.map(() =>
+      this.api.tx.members.removeStakingAccount(memberContext.memberId)
+    )
 
     const removeStakingAccountFee = await this.api.estimateTxFee(this.extrinsics[0], accounts[0])
 
-    await Promise.all(accounts.map((a) => this.api.treasuryTransferBalance(a, removeStakingAccountFee)))
+    await Promise.all(
+      accounts.map((a) => this.api.treasuryTransferBalance(a, removeStakingAccountFee))
+    )
     // Remove staking accounts
-    const results = await Promise.all(accounts.map((a, i) => this.api.signAndSend(this.extrinsics[i], a)))
-    this.events = await Promise.all(results.map((r) => this.api.getEventDetails(r, 'members', 'StakingAccountRemoved')))
+    const results = await Promise.all(
+      accounts.map((a, i) => this.api.signAndSend(this.extrinsics[i], a))
+    )
+    this.events = await Promise.all(
+      results.map((r) => this.api.getEventDetails(r, 'members', 'StakingAccountRemoved'))
+    )
   }
 
   async runQueryNodeChecks(): Promise<void> {
@@ -61,7 +74,12 @@ export class RemoveStakingAccountsHappyCaseFixture extends BaseQueryNodeFixture 
     const qEvents = await this.query.getStakingAccountRemovedEvents(memberContext.memberId)
     await Promise.all(
       accounts.map(async (account, i) => {
-        this.assertQueryNodeRemoveAccountEventIsValid(events[i], account, extrinsics[i].hash.toString(), qEvents)
+        this.assertQueryNodeRemoveAccountEventIsValid(
+          events[i],
+          account,
+          extrinsics[i].hash.toString(),
+          qEvents
+        )
       })
     )
   }

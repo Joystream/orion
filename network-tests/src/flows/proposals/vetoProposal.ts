@@ -2,7 +2,11 @@ import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
-import { CreateProposalsFixture, DecideOnProposalStatusFixture, ProposalCreationParams } from '../../fixtures/proposals'
+import {
+  CreateProposalsFixture,
+  DecideOnProposalStatusFixture,
+  ProposalCreationParams,
+} from '../../fixtures/proposals'
 import { Resource } from '../../Resources'
 import { createType } from '@joystream/types'
 

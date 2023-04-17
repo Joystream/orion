@@ -13,7 +13,12 @@ import { Bytes } from '@polkadot/types'
 export class RemoveUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
   protected upcomingOpeningIds: string[]
 
-  public constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, upcomingOpeningIds: string[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    group: WorkingGroupModuleName,
+    upcomingOpeningIds: string[]
+  ) {
     super(api, query, group)
     this.upcomingOpeningIds = upcomingOpeningIds
   }
@@ -40,10 +45,19 @@ export class RemoveUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: StatusTextChangedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: StatusTextChangedEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.group.name, this.group)
-    assert.equal(qEvent.metadata, this.getActionMetadataBytes(this.upcomingOpeningIds[i]).toString())
-    Utils.assert(qEvent.result.__typename === 'UpcomingOpeningRemoved', 'Unexpected StatuxTextChangedEvent result type')
+    assert.equal(
+      qEvent.metadata,
+      this.getActionMetadataBytes(this.upcomingOpeningIds[i]).toString()
+    )
+    Utils.assert(
+      qEvent.result.__typename === 'UpcomingOpeningRemoved',
+      'Unexpected StatuxTextChangedEvent result type'
+    )
     assert.equal(qEvent.result.upcomingOpeningId, this.upcomingOpeningIds[i])
   }
 

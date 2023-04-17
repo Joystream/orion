@@ -9,7 +9,10 @@ import { PalletWorkingGroupGroupWorker as Worker } from '@polkadot/types/lookup'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Utils } from '../../utils'
-import { StakeDecreasedEventFieldsFragment, WorkerFieldsFragment } from '../../graphql/generated/queries'
+import {
+  StakeDecreasedEventFieldsFragment,
+  WorkerFieldsFragment,
+} from '../../graphql/generated/queries'
 
 export class DecreaseWorkerStakesFixture extends BaseWorkingGroupFixture {
   protected workerIds: WorkerId[]
@@ -30,11 +33,13 @@ export class DecreaseWorkerStakesFixture extends BaseWorkingGroupFixture {
   }
 
   protected async loadWorkersData(): Promise<void> {
-    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map((optionalWorker) =>
-      optionalWorker.unwrap()
+    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map(
+      (optionalWorker) => optionalWorker.unwrap()
     )
     this.workerStakes = await Promise.all(
-      this.workers.map((w) => this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group)))
+      this.workers.map((w) =>
+        this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group))
+      )
     )
   }
 
@@ -58,7 +63,10 @@ export class DecreaseWorkerStakesFixture extends BaseWorkingGroupFixture {
     await super.execute()
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: StakeDecreasedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: StakeDecreasedEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.worker.runtimeId, this.workerIds[i].toNumber())
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.amount, this.amounts[i].toString())

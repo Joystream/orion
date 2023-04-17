@@ -64,8 +64,12 @@ scenario('Full', async ({ job, env }) => {
 
   // Council (should not interrupt proposalsJob!)
   const secondCouncilJob = job('electing second council', electCouncil).requires(coreJob)
-  const councilFailuresJob = job('council election failures', failToElect).requires(secondCouncilJob)
-  job('council election failure with blacklist', failToElectWithBlacklist).requires(councilFailuresJob)
+  const councilFailuresJob = job('council election failures', failToElect).requires(
+    secondCouncilJob
+  )
+  job('council election failure with blacklist', failToElectWithBlacklist).requires(
+    councilFailuresJob
+  )
 
   // Proposals:
   const proposalsJob = job('proposals & proposal discussion', [
@@ -77,12 +81,15 @@ scenario('Full', async ({ job, env }) => {
     proposalsDiscussion,
   ]).requires(councilFailuresJob)
 
-  const channelPayoutsProposalJob = job('channel payouts proposal', channelPayouts).requires(proposalsJob)
+  const channelPayoutsProposalJob = job('channel payouts proposal', channelPayouts).requires(
+    proposalsJob
+  )
 
   // Working groups
-  const hireLeads = job('lead opening', leadOpening(process.env.IGNORE_HIRED_LEADS === 'true')).after(
-    channelPayoutsProposalJob
-  )
+  const hireLeads = job(
+    'lead opening',
+    leadOpening(process.env.IGNORE_HIRED_LEADS === 'true')
+  ).after(channelPayoutsProposalJob)
   job('openings and applications', openingsAndApplications).requires(hireLeads)
   job('upcoming openings', upcomingOpenings).requires(hireLeads)
   job('group status', groupStatus).requires(hireLeads)
@@ -102,18 +109,26 @@ scenario('Full', async ({ job, env }) => {
   // Content directory
   // following jobs must be run sequentially due to some QN queries that could interfere
   const videoCategoriesJob = job('video categories', testVideoCategories).requires(hireLeads)
-  const channelsAndVideosCliJob = job('manage channels and videos through CLI', channelsAndVideos).requires(
-    videoCategoriesJob
+  const channelsAndVideosCliJob = job(
+    'manage channels and videos through CLI',
+    channelsAndVideos
+  ).requires(videoCategoriesJob)
+  job('add and update video subtitles', addAndUpdateVideoSubtitles).requires(
+    channelsAndVideosCliJob
   )
-  job('add and update video subtitles', addAndUpdateVideoSubtitles).requires(channelsAndVideosCliJob)
-  const videoCountersJob = job('check active video counters', activeVideoCounters).requires(channelsAndVideosCliJob)
-  const nftAuctionAndOffersJob = job('nft auction and offers', nftAuctionAndOffers).after(videoCountersJob)
+  const videoCountersJob = job('check active video counters', activeVideoCounters).requires(
+    channelsAndVideosCliJob
+  )
+  const nftAuctionAndOffersJob = job('nft auction and offers', nftAuctionAndOffers).after(
+    videoCountersJob
+  )
   const commentsAndReactionsJob = job('video comments and reactions', commentsAndReactions).after(
     nftAuctionAndOffersJob
   )
-  const directChannelPaymentJob = job('direct channel payment by members', directChannelPayment).after(
-    commentsAndReactionsJob
-  )
+  const directChannelPaymentJob = job(
+    'direct channel payment by members',
+    directChannelPayment
+  ).after(commentsAndReactionsJob)
 
   // Apps
   job('create app', createApp).after(hireLeads)
@@ -123,7 +138,8 @@ scenario('Full', async ({ job, env }) => {
   const contentDirectoryJob = directChannelPaymentJob // keep updated to last job above
 
   // Storage & distribution CLIs
-  job('init storage and distribution buckets via CLI', [initDistributionBucket, initStorageBucket]).after(
-    contentDirectoryJob
-  )
+  job('init storage and distribution buckets via CLI', [
+    initDistributionBucket,
+    initStorageBucket,
+  ]).after(contentDirectoryJob)
 })

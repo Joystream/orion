@@ -66,7 +66,13 @@ export default async function workerActions({ api, query, env }: FlowProps): Pro
           api.treasuryTransferBalance(workers[i].unwrap().stakingAccountId.toString(), amount)
         )
       )
-      const increaseWorkerStakesFixture = new IncreaseWorkerStakesFixture(api, query, group, workerIds, stakeIncreases)
+      const increaseWorkerStakesFixture = new IncreaseWorkerStakesFixture(
+        api,
+        query,
+        group,
+        workerIds,
+        stakeIncreases
+      )
       const increaseWorkerStakesRunner = new FixtureRunner(increaseWorkerStakesFixture)
       await increaseWorkerStakesRunner.run()
       workerUpdatesRunners.push(increaseWorkerStakesRunner)
@@ -74,7 +80,13 @@ export default async function workerActions({ api, query, env }: FlowProps): Pro
       const newRewards: (BN | null)[] = workerIds.map((id) => id.addn(1).muln(10))
       // At least one case should be null
       newRewards[0] = null
-      const updateRewardsFixture = new UpdateWorkerRewardAmountsFixture(api, query, group, workerIds, newRewards)
+      const updateRewardsFixture = new UpdateWorkerRewardAmountsFixture(
+        api,
+        query,
+        group,
+        workerIds,
+        newRewards
+      )
       const updateRewardsRunner = new FixtureRunner(updateRewardsFixture)
       await updateRewardsRunner.run()
       workerUpdatesRunners.push(updateRewardsRunner)
@@ -86,7 +98,13 @@ export default async function workerActions({ api, query, env }: FlowProps): Pro
 
       // Stake decreases
       const decreaseAmounts = workerIds.map((id) => id.addn(1).muln(100))
-      const decreaseStakesFixture = new DecreaseWorkerStakesFixture(api, query, group, workerIds, decreaseAmounts)
+      const decreaseStakesFixture = new DecreaseWorkerStakesFixture(
+        api,
+        query,
+        group,
+        workerIds,
+        decreaseAmounts
+      )
       const decreaseStakesRunner = new FixtureRunner(decreaseStakesFixture)
       await decreaseStakesRunner.runWithQueryNodeChecks()
 
@@ -118,7 +136,13 @@ export default async function workerActions({ api, query, env }: FlowProps): Pro
       const slashAmounts = leavingWorkerIds.map((id) => id.addn(1).muln(300))
       // Add at least 1 case where slashAmount > stake
       slashAmounts[0] = slashAmounts[0].muln(10)
-      const slashStakesFixture = new SlashWorkerStakesFixture(api, query, group, leavingWorkerIds, slashAmounts)
+      const slashStakesFixture = new SlashWorkerStakesFixture(
+        api,
+        query,
+        group,
+        leavingWorkerIds,
+        slashAmounts
+      )
       const slashStakesRunner = new FixtureRunner(slashStakesFixture)
       await slashStakesRunner.runWithQueryNodeChecks()
 

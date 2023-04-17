@@ -1,4 +1,7 @@
-import { JoystreamNodeRuntimeSessionKeys, PalletStakingValidatorPrefs } from '@polkadot/types/lookup'
+import {
+  JoystreamNodeRuntimeSessionKeys,
+  PalletStakingValidatorPrefs,
+} from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { Api } from '../../Api'
 import { BaseFixture } from '../../Fixture'
@@ -34,7 +37,9 @@ export class ValidatingSucceedsFixture extends BaseFixture {
     )
     assert(
       validatorEntry,
-      `validator entry not found (${this.controller}, ${JSON.stringify(this.preferences.toHuman())})`
+      `validator entry not found (${this.controller}, ${JSON.stringify(
+        this.preferences.toHuman()
+      )})`
     )
 
     if (this.sessionKeys) {

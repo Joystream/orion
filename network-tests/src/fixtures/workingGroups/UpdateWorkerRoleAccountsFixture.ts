@@ -6,7 +6,10 @@ import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Utils } from '../../utils'
-import { WorkerFieldsFragment, WorkerRoleAccountUpdatedEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  WorkerFieldsFragment,
+  WorkerRoleAccountUpdatedEventFieldsFragment,
+} from '../../graphql/generated/queries'
 import { WorkerId } from '@joystream/types/primitives'
 import { AccountId } from '@polkadot/types/interfaces'
 
@@ -55,7 +58,10 @@ export class UpdateWorkerRoleAccountsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'WorkerRoleAccountUpdated')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: WorkerRoleAccountUpdatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: WorkerRoleAccountUpdatedEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.worker.runtimeId, this.workerIds[i].toNumber())
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.newRoleAccount, this.roleAccounts[i].toString())

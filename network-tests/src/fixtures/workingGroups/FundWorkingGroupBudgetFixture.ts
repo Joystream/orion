@@ -30,7 +30,9 @@ export class FundWorkingGroupBudgetFixture extends BaseWorkingGroupFixture {
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
-    return Promise.all(this.params.map(({ memberId }) => this.api.getControllerAccountOfMember(memberId)))
+    return Promise.all(
+      this.params.map(({ memberId }) => this.api.getControllerAccountOfMember(memberId))
+    )
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
@@ -53,7 +55,9 @@ export class FundWorkingGroupBudgetFixture extends BaseWorkingGroupFixture {
   public async execute(): Promise<void> {
     const budgetPre = await this.api.query[this.group].budget()
     await super.execute()
-    this.expectedBudgetPost = budgetPre.add(this.params.reduce((sum, p) => sum.add(p.amount), new BN(0)))
+    this.expectedBudgetPost = budgetPre.add(
+      this.params.reduce((sum, p) => sum.add(p.amount), new BN(0))
+    )
     const budgetPost = await this.api.query[this.group].budget()
     assert.equal(budgetPost.toString(), this.expectedBudgetPost.toString())
   }

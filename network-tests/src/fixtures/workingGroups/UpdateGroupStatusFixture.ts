@@ -18,7 +18,12 @@ import { Bytes } from '@polkadot/types'
 export class UpdateGroupStatusFixture extends BaseWorkingGroupFixture {
   protected updates: IWorkingGroupMetadata[]
 
-  public constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, updates: IWorkingGroupMetadata[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    group: WorkingGroupModuleName,
+    updates: IWorkingGroupMetadata[]
+  ) {
     super(api, query, group)
     this.updates = updates
   }
@@ -45,7 +50,10 @@ export class UpdateGroupStatusFixture extends BaseWorkingGroupFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: StatusTextChangedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: StatusTextChangedEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.metadata, this.getActionMetadataBytes(this.updates[i]).toString())
     assert.equal(qEvent.result.__typename, 'WorkingGroupMetadataSet')
@@ -99,10 +107,13 @@ export class UpdateGroupStatusFixture extends BaseWorkingGroupFixture {
     this.events.forEach((postUpdateEvent, i) => {
       const postUpdateSnapshotIndex = snapshots.findIndex(
         (s) =>
-          s.setInEvent.id === this.query.getQueryNodeEventId(postUpdateEvent.blockNumber, postUpdateEvent.indexInBlock)
+          s.setInEvent.id ===
+          this.query.getQueryNodeEventId(postUpdateEvent.blockNumber, postUpdateEvent.indexInBlock)
       )
-      const postUpdateSnapshot = postUpdateSnapshotIndex > -1 ? snapshots[postUpdateSnapshotIndex] : null
-      const preUpdateSnapshot = postUpdateSnapshotIndex > 0 ? snapshots[postUpdateSnapshotIndex - 1] : null
+      const postUpdateSnapshot =
+        postUpdateSnapshotIndex > -1 ? snapshots[postUpdateSnapshotIndex] : null
+      const preUpdateSnapshot =
+        postUpdateSnapshotIndex > 0 ? snapshots[postUpdateSnapshotIndex - 1] : null
       this.assertQueriedMetadataSnapshotsAreValid(
         postUpdateEvent,
         preUpdateSnapshot,

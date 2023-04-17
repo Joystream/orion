@@ -6,7 +6,9 @@ export class UpdateWorkerAccountsFixture extends BaseFixture {
     await Promise.all(
       workingGroups.map(async (group) =>
         Promise.all(
-          (await this.api.getActiveWorkerIds(group)).map((id) => this.api.assignWorkerWellknownAccount(group, id))
+          (
+            await this.api.getActiveWorkerIds(group)
+          ).map((id) => this.api.assignWorkerWellknownAccount(group, id))
         )
       )
     )

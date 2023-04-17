@@ -8,7 +8,10 @@ import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { AccountId } from '@polkadot/types/interfaces'
 import { Utils } from '../../utils'
-import { WorkerFieldsFragment, WorkerRewardAccountUpdatedEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  WorkerFieldsFragment,
+  WorkerRewardAccountUpdatedEventFieldsFragment,
+} from '../../graphql/generated/queries'
 import { WorkerId } from '@joystream/types/primitives'
 
 export class UpdateWorkerRewardAccountsFixture extends BaseWorkingGroupFixture {
@@ -30,8 +33,8 @@ export class UpdateWorkerRewardAccountsFixture extends BaseWorkingGroupFixture {
   }
 
   protected async loadWorkersData(): Promise<void> {
-    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map((optionalWorker) =>
-      optionalWorker.unwrap()
+    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map(
+      (optionalWorker) => optionalWorker.unwrap()
     )
   }
 
@@ -50,7 +53,10 @@ export class UpdateWorkerRewardAccountsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'WorkerRewardAccountUpdated')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: WorkerRewardAccountUpdatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: WorkerRewardAccountUpdatedEventFieldsFragment,
+    i: number
+  ): void {
     assert.equal(qEvent.worker.runtimeId, this.workerIds[i].toNumber())
     assert.equal(qEvent.group.name, this.group)
     assert.equal(qEvent.newRewardAccount, this.rewardAccounts[i].toString())

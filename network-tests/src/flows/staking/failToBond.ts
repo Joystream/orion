@@ -1,6 +1,9 @@
 import { FlowProps } from '../../Flow'
 import { BondingRestrictedFixture } from '../../fixtures/staking'
-import { BuyMembershipHappyCaseFixture, AddStakingAccountsHappyCaseFixture } from '../../fixtures/membership'
+import {
+  BuyMembershipHappyCaseFixture,
+  AddStakingAccountsHappyCaseFixture,
+} from '../../fixtures/membership'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 
@@ -11,7 +14,11 @@ export default async function bondingFailure({ api, query }: FlowProps): Promise
 
   // Create a member
   const memberAccounts = (await api.createKeyPairs(1)).map(({ key }) => key.address)
-  const buyMembershipHappyCaseFixture = new BuyMembershipHappyCaseFixture(api, query, memberAccounts)
+  const buyMembershipHappyCaseFixture = new BuyMembershipHappyCaseFixture(
+    api,
+    query,
+    memberAccounts
+  )
   await new FixtureRunner(buyMembershipHappyCaseFixture).runWithQueryNodeChecks()
   const [memberId] = buyMembershipHappyCaseFixture.getCreatedMembers()
 

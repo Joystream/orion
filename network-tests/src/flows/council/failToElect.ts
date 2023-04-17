@@ -1,7 +1,10 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { NotEnoughCandidatesFixture, NotEnoughCandidatesWithVotesFixture } from '../../fixtures/council'
+import {
+  NotEnoughCandidatesFixture,
+  NotEnoughCandidatesWithVotesFixture,
+} from '../../fixtures/council'
 
 export default async function failToElectCouncil({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:fail-to-elect-council')

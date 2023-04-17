@@ -4,7 +4,10 @@ import { EventDetails } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { ProposalCancelledEventFieldsFragment, ProposalFieldsFragment } from '../../graphql/generated/queries'
+import {
+  ProposalCancelledEventFieldsFragment,
+  ProposalFieldsFragment,
+} from '../../graphql/generated/queries'
 import { assert } from 'chai'
 import { ProposalId } from '@joystream/types/primitives'
 import { PalletProposalsEngineProposal as Proposal } from '@polkadot/types/lookup'
@@ -43,19 +46,27 @@ export class CancelProposalsFixture extends StandardizedFixture {
       const proposalId = this.proposalIds[i]
       const qProposal = qProposals.find((p) => p.id === proposalId.toString())
       Utils.assert(qProposal, 'Query node: Proposal not found')
-      Utils.assert(qProposal.status.__typename === 'ProposalStatusCancelled', 'Invalid proposal status')
+      Utils.assert(
+        qProposal.status.__typename === 'ProposalStatusCancelled',
+        'Invalid proposal status'
+      )
       assert.equal(qProposal.status.cancelledInEvent?.id, qEvent.id)
       assert.equal(qProposal.isFinalized, true)
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ProposalCancelledEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ProposalCancelledEventFieldsFragment,
+    i: number
+  ): void {
     const proposalId = this.proposalIds[i]
     assert.equal(qEvent.proposal.id, proposalId.toString())
   }
 
   public async execute(): Promise<void> {
-    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(this.proposalIds)
+    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(
+      this.proposalIds
+    )
     await super.execute()
   }
 

@@ -4,7 +4,10 @@ import { EventDetails } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { ProposalFieldsFragment, ProposalVotedEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  ProposalFieldsFragment,
+  ProposalVotedEventFieldsFragment,
+} from '../../graphql/generated/queries'
 import { assert } from 'chai'
 import {
   PalletProposalsEngineProposal as Proposal,
@@ -77,7 +80,9 @@ export class VoteOnProposalsFixture extends StandardizedFixture {
   }
 
   public async execute(): Promise<void> {
-    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(this.votes.map((v) => v.proposalId))
+    this.proposals = await this.api.query.proposalsEngine.proposals.multi<Proposal>(
+      this.votes.map((v) => v.proposalId)
+    )
     await super.execute()
   }
 

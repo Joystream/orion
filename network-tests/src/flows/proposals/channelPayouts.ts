@@ -15,7 +15,10 @@ import {
   WithdrawChannelRewardFixture,
   WithdrawChannelRewardParams,
 } from '../../fixtures/content'
-import { FundCouncilBudgetFixture, FundCouncilBudgetParams } from '../../fixtures/council/FundCouncilBudgetFixture'
+import {
+  FundCouncilBudgetFixture,
+  FundCouncilBudgetParams,
+} from '../../fixtures/council/FundCouncilBudgetFixture'
 import { FlowProps } from '../../Flow'
 import { Resource } from '../../Resources'
 import { Utils } from '../../utils'
@@ -56,12 +59,10 @@ export default async function channelPayouts({ api, query, lock }: FlowProps): P
 
   await joystreamCli.importAccount(channelOwner.keyringPair)
   // Channel claiming the payouts reward
-  const rewardChannelId = await joystreamCli.createChannel(getChannelDefaults(cliExamplesFolderPath, false), [
-    '--context',
-    'Member',
-    '--useMemberId',
-    channelOwner.memberId.toString(),
-  ])
+  const rewardChannelId = await joystreamCli.createChannel(
+    getChannelDefaults(cliExamplesFolderPath, false),
+    ['--context', 'Member', '--useMemberId', channelOwner.memberId.toString()]
+  )
 
   // We'll make 3 cashouts...
   for (let i = 1; i <= 3; ++i) {
@@ -102,7 +103,10 @@ export default async function channelPayouts({ api, query, lock }: FlowProps): P
     )
 
     // Generate protobuf serialized channel payouts payload and save it to the file
-    await joystreamCli.generateChannelPayoutsPayload(channelPayoutsVectorFilePath, channelPayoutsPayloadFilePath)
+    await joystreamCli.generateChannelPayoutsPayload(
+      channelPayoutsVectorFilePath,
+      channelPayoutsPayloadFilePath
+    )
 
     const updateChannelPayoutsParams: UpdateChannelPayoutsProposalParams = {
       asMember: channelPayoutsProposer.memberId,
@@ -127,7 +131,12 @@ export default async function channelPayouts({ api, query, lock }: FlowProps): P
     Utils.assert(channelPayoutsUpdatedEvent.payloadDataObject, 'Payload data object missing!')
     await joystreamCli.reuploadAssets({
       bagId: COUNCIL_BAG_ID,
-      assets: [{ objectId: channelPayoutsUpdatedEvent.payloadDataObject.id, path: channelPayoutsPayloadFilePath }],
+      assets: [
+        {
+          objectId: channelPayoutsUpdatedEvent.payloadDataObject.id,
+          path: channelPayoutsPayloadFilePath,
+        },
+      ],
     })
 
     // Fetch channel payout proof from payload data object in council bag
@@ -156,7 +165,11 @@ export default async function channelPayouts({ api, query, lock }: FlowProps): P
       await new FixtureRunner(claimAndWithdrawChannelRewardFixture).runWithQueryNodeChecks()
     } else {
       // Otherwise we claim and withdraw separately
-      const claimChannelRewardFixture = new ClaimChannelRewardFixture(api, query, claimChannelRewardParams)
+      const claimChannelRewardFixture = new ClaimChannelRewardFixture(
+        api,
+        query,
+        claimChannelRewardParams
+      )
       await new FixtureRunner(claimChannelRewardFixture).runWithQueryNodeChecks()
 
       // Withdraw channel reward to destination account
@@ -167,7 +180,11 @@ export default async function channelPayouts({ api, query, lock }: FlowProps): P
           amount: minCashout,
         },
       ]
-      const withdrawChannelRewardFixture = new WithdrawChannelRewardFixture(api, query, withdrawChannelRewardParams)
+      const withdrawChannelRewardFixture = new WithdrawChannelRewardFixture(
+        api,
+        query,
+        withdrawChannelRewardParams
+      )
       await new FixtureRunner(withdrawChannelRewardFixture).runWithQueryNodeChecks()
     }
   }
@@ -202,7 +219,9 @@ async function fetchChannelPayoutProof(
     }
     if (i !== retryCount) {
       console.log(
-        `No storage provider can serve the request yet, retrying in ${retryTime}s (${i + 1}/${retryCount})...`
+        `No storage provider can serve the request yet, retrying in ${retryTime}s (${
+          i + 1
+        }/${retryCount})...`
       )
       await new Promise((resolve) => setTimeout(resolve, retryTime * 1000))
     }
