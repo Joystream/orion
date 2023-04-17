@@ -30,7 +30,9 @@ export default async function proposalsDiscussion({ api, query, lock }: FlowProp
   await new FixtureRunner(buyMembershipsFixture).run()
   const memberIds = buyMembershipsFixture.getCreatedMembers()
 
-  const unlocks = await Promise.all(Array.from({ length: threadsN }, () => lock(Resource.Proposals)))
+  const unlocks = await Promise.all(
+    Array.from({ length: threadsN }, () => lock(Resource.Proposals))
+  )
   const createProposalFixture = new CreateProposalsFixture(
     api,
     query,
@@ -44,7 +46,9 @@ export default async function proposalsDiscussion({ api, query, lock }: FlowProp
   )
   await new FixtureRunner(createProposalFixture).run()
   const proposalsIds = createProposalFixture.getCreatedProposalsIds()
-  const threadIds = await api.query.proposalsCodex.threadIdByProposalId.multi<ThreadId>(proposalsIds)
+  const threadIds = await api.query.proposalsCodex.threadIdByProposalId.multi<ThreadId>(
+    proposalsIds
+  )
 
   const createPostsParams: PostParams[] = threadIds.reduce(
     (posts, threadId) =>
@@ -86,7 +90,9 @@ export default async function proposalsDiscussion({ api, query, lock }: FlowProp
     {
       threadId: threadIds[1],
       asMember: memberIds[1],
-      newMode: createType('PalletProposalsDiscussionThreadModeBTreeSet', { Closed: [memberIds[0]] }),
+      newMode: createType('PalletProposalsDiscussionThreadModeBTreeSet', {
+        Closed: [memberIds[0]],
+      }),
     },
     {
       threadId: threadIds[1],
@@ -101,7 +107,9 @@ export default async function proposalsDiscussion({ api, query, lock }: FlowProp
   const createPostRepliesParams: PostParams[] = createPostsParams.map((params, i) => ({
     threadId: params.threadId,
     asMember: memberIds[i % memberIds.length],
-    metadata: { value: { text: `Reply to post ${postIds[i].toString()}`, repliesTo: postIds[i].toNumber() } },
+    metadata: {
+      value: { text: `Reply to post ${postIds[i].toString()}`, repliesTo: postIds[i].toNumber() },
+    },
   }))
   const createRepliesFixture = new CreatePostsFixture(api, query, createPostRepliesParams)
   const createRepliesRunner = new FixtureRunner(createRepliesFixture)

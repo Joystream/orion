@@ -6,13 +6,19 @@ import failToElectWithBlacklist from '../flows/council/electWithBlacklist'
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Council', async ({ job }) => {
   const councilJob = job('electing council', electCouncil)
-  const firstElectionFailureJob = job('council election failures after first council', failToElectCouncil).requires(
-    councilJob
-  )
+  const firstElectionFailureJob = job(
+    'council election failures after first council',
+    failToElectCouncil
+  ).requires(councilJob)
 
-  const secondCouncilJob = job('electing second council', electCouncil).requires(firstElectionFailureJob)
-  const secondElectionFailureJob = job('council election failure with blacklist', failToElectWithBlacklist).requires(
-    secondCouncilJob
+  const secondCouncilJob = job('electing second council', electCouncil).requires(
+    firstElectionFailureJob
   )
-  job('council election failures after second council', failToElectCouncil).requires(secondElectionFailureJob)
+  const secondElectionFailureJob = job(
+    'council election failure with blacklist',
+    failToElectWithBlacklist
+  ).requires(secondCouncilJob)
+  job('council election failures after second council', failToElectCouncil).requires(
+    secondElectionFailureJob
+  )
 })

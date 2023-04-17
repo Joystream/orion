@@ -41,9 +41,11 @@ export default async function terminateLeads({ api, query, lock }: FlowProps): P
       const [proposalId] = createTerminateLeadProposalFixture.getCreatedProposalsIds()
 
       // COUNCIL approves and the proosal gets executed
-      const decideOnLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(api, query, [
-        { proposalId, status: 'Approved', expectExecutionFailure: false },
-      ])
+      const decideOnLeadOpeningProposalStatusFixture = new DecideOnProposalStatusFixture(
+        api,
+        query,
+        [{ proposalId, status: 'Approved', expectExecutionFailure: false }]
+      )
       await new FixtureRunner(decideOnLeadOpeningProposalStatusFixture).runWithQueryNodeChecks()
       // const terminateLeadFixture = new TerminateWorkersFixture(api, query, group, [leadId], [new BN(0)])
       // await new FixtureRunner(terminateLeadFixture).runWithQueryNodeChecks()

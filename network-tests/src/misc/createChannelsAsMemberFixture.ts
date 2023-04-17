@@ -11,7 +11,13 @@ export class CreateChannelsAsMemberFixture extends BaseQueryNodeFixture {
   private metadata: Bytes | undefined
   private createdChannels: ChannelId[] = []
 
-  constructor(api: Api, query: QueryNodeApi, memberId: number, numChannels: number, metadata?: Bytes) {
+  constructor(
+    api: Api,
+    query: QueryNodeApi,
+    memberId: number,
+    numChannels: number,
+    metadata?: Bytes
+  ) {
     super(api, query)
     this.memberId = memberId
     this.numChannels = numChannels
@@ -24,12 +30,13 @@ export class CreateChannelsAsMemberFixture extends BaseQueryNodeFixture {
 
   async selectStorageBucketsForNewChannel(): Promise<number[]> {
     const storageBuckets = await this.query.storageBucketsForNewChannel()
-    const { numberOfStorageBuckets: storageBucketsPolicy } = await this.api.query.storage.dynamicBagCreationPolicies(
-      'Channel'
-    )
+    const { numberOfStorageBuckets: storageBucketsPolicy } =
+      await this.api.query.storage.dynamicBagCreationPolicies('Channel')
 
     if (!storageBuckets || storageBuckets.length < storageBucketsPolicy.toNumber()) {
-      throw new Error(`Storage buckets policy constraint unsatifified. Not enough storage buckets exist`)
+      throw new Error(
+        `Storage buckets policy constraint unsatifified. Not enough storage buckets exist`
+      )
     }
 
     return storageBuckets.map((b) => Number(b.id)).slice(0, storageBucketsPolicy.toNumber())
@@ -38,17 +45,20 @@ export class CreateChannelsAsMemberFixture extends BaseQueryNodeFixture {
   async selectDistributionBucketsForNewChannel(): Promise<
     { distributionBucketFamilyId: number; distributionBucketIndex: number }[]
   > {
-    const { families: distributionBucketFamiliesPolicy } = await this.api.query.storage.dynamicBagCreationPolicies(
-      'Channel'
-    )
+    const { families: distributionBucketFamiliesPolicy } =
+      await this.api.query.storage.dynamicBagCreationPolicies('Channel')
 
     const families = await this.query.distributionBucketsForNewChannel()
     const distributionBucketIds = []
 
     for (const { id, buckets } of families || []) {
-      const bucketsCountPolicy = distributionBucketFamiliesPolicy.get(id as unknown as DistributionBucketFamilyId)
+      const bucketsCountPolicy = distributionBucketFamiliesPolicy.get(
+        id as unknown as DistributionBucketFamilyId
+      )
       if (bucketsCountPolicy && bucketsCountPolicy.toNumber() < buckets.length) {
-        throw new Error(`Distribution buckets policy constraint unsatifified. Not enough distribution buckets exist`)
+        throw new Error(
+          `Distribution buckets policy constraint unsatifified. Not enough distribution buckets exist`
+        )
       }
 
       distributionBucketIds.push(
@@ -73,7 +83,13 @@ export class CreateChannelsAsMemberFixture extends BaseQueryNodeFixture {
       const storageBuckets = await this.selectStorageBucketsForNewChannel()
       const distributionBuckets = await this.selectDistributionBucketsForNewChannel()
       channels.push(
-        this.api.createMockChannel(this.memberId, storageBuckets, distributionBuckets, account, this.metadata)
+        this.api.createMockChannel(
+          this.memberId,
+          storageBuckets,
+          distributionBuckets,
+          account,
+          this.metadata
+        )
       )
     }
 

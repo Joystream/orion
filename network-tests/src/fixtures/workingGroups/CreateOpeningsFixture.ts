@@ -5,7 +5,10 @@ import { OpeningId } from '@joystream/types/primitives'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { OpeningAddedEventFieldsFragment, OpeningFieldsFragment } from '../../graphql/generated/queries'
+import {
+  OpeningAddedEventFieldsFragment,
+  OpeningFieldsFragment,
+} from '../../graphql/generated/queries'
 import { WorkingGroupOpeningType } from '../../graphql/generated/schema'
 import { assert } from 'chai'
 import moment from 'moment'
@@ -43,7 +46,10 @@ export const createDefaultOpeningParams = (
       applicationDetails: '- This is automatically created opening, do not apply!',
       applicationFormQuestions: [
         { question: 'Question 1?', type: OpeningMetadata.ApplicationFormQuestion.InputType.TEXT },
-        { question: 'Question 2?', type: OpeningMetadata.ApplicationFormQuestion.InputType.TEXTAREA },
+        {
+          question: 'Question 2?',
+          type: OpeningMetadata.ApplicationFormQuestion.InputType.TEXTAREA,
+        },
       ],
     },
   }
@@ -54,7 +60,12 @@ export class CreateOpeningsFixture extends BaseWorkingGroupFixture {
 
   protected openingsParams: OpeningParams[]
 
-  public constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, openingsParams?: OpeningParams[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    group: WorkingGroupModuleName,
+    openingsParams?: OpeningParams[]
+  ) {
     super(api, query, group)
     this.openingsParams = openingsParams || [createDefaultOpeningParams(api)]
   }
@@ -105,7 +116,9 @@ export class CreateOpeningsFixture extends BaseWorkingGroupFixture {
     return extrinsics
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<OpeningAddedEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<OpeningAddedEventDetails> {
     return this.api.getEventDetails(result, this.group, 'OpeningAdded')
   }
 

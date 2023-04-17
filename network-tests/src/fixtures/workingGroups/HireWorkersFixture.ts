@@ -5,7 +5,10 @@ import { QueryNodeApi } from '../../QueryNodeApi'
 import { WorkingGroupModuleName } from '../../types'
 import { Utils } from '../../utils'
 import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../membership'
-import { ApplicantDetails, ApplyOnOpeningsHappyCaseFixture } from './ApplyOnOpeningsHappyCaseFixture'
+import {
+  ApplicantDetails,
+  ApplyOnOpeningsHappyCaseFixture,
+} from './ApplyOnOpeningsHappyCaseFixture'
 import { CreateOpeningsFixture, createDefaultOpeningParams } from './CreateOpeningsFixture'
 import { FillOpeningsFixture } from './FillOpeningsFixture'
 
@@ -23,14 +26,20 @@ export class HireWorkersFixture extends BaseQueryNodeFixture {
   }
 
   public getCreatedWorkerIds(): WorkerId[] {
-    Utils.assert(this.createdWorkerIds.length, 'Trying to get created workers before they were created!')
+    Utils.assert(
+      this.createdWorkerIds.length,
+      'Trying to get created workers before they were created!'
+    )
     return this.createdWorkerIds
   }
 
   public async execute(): Promise<void> {
     // Transfer funds to leader staking account to cover opening stake
     const leaderStakingAcc = await this.api.getLeaderStakingKey(this.group)
-    await this.api.treasuryTransferBalance(leaderStakingAcc, this.api.consts.contentWorkingGroup.leaderOpeningStake)
+    await this.api.treasuryTransferBalance(
+      leaderStakingAcc,
+      this.api.consts.contentWorkingGroup.leaderOpeningStake
+    )
 
     // Create an opening
     const createOpeningFixture = new CreateOpeningsFixture(this.api, this.query, this.group)
@@ -40,11 +49,21 @@ export class HireWorkersFixture extends BaseQueryNodeFixture {
     const { stake: openingStake, metadata: openingMetadata } = createDefaultOpeningParams(this.api)
 
     // Create the applications
-    const roleAccounts = (await this.api.createKeyPairs(this.workersN)).map(({ key }) => key.address)
-    const stakingAccounts = (await this.api.createKeyPairs(this.workersN)).map(({ key }) => key.address)
-    const rewardAccounts = (await this.api.createKeyPairs(this.workersN)).map(({ key }) => key.address)
+    const roleAccounts = (await this.api.createKeyPairs(this.workersN)).map(
+      ({ key }) => key.address
+    )
+    const stakingAccounts = (await this.api.createKeyPairs(this.workersN)).map(
+      ({ key }) => key.address
+    )
+    const rewardAccounts = (await this.api.createKeyPairs(this.workersN)).map(
+      ({ key }) => key.address
+    )
 
-    const buyMembershipFixture = new BuyMembershipHappyCaseFixture(this.api, this.query, roleAccounts)
+    const buyMembershipFixture = new BuyMembershipHappyCaseFixture(
+      this.api,
+      this.query,
+      roleAccounts
+    )
     await new FixtureRunner(buyMembershipFixture).run()
     const memberIds = buyMembershipFixture.getCreatedMembers()
 
@@ -65,24 +84,37 @@ export class HireWorkersFixture extends BaseQueryNodeFixture {
       stakingAccount: stakingAccounts[i],
       rewardAccount: rewardAccounts[i],
     }))
-    const applyOnOpeningFixture = new ApplyOnOpeningsHappyCaseFixture(this.api, this.query, this.group, [
-      {
-        openingId,
-        openingMetadata,
-        applicants,
-      },
-    ])
+    const applyOnOpeningFixture = new ApplyOnOpeningsHappyCaseFixture(
+      this.api,
+      this.query,
+      this.group,
+      [
+        {
+          openingId,
+          openingMetadata,
+          applicants,
+        },
+      ]
+    )
     const applyRunner = new FixtureRunner(applyOnOpeningFixture)
     await applyRunner.run()
     const applicationIds = await applyOnOpeningFixture.getCreatedApplicationsByOpeningId(openingId)
 
     // Fill the opening
-    const fillOpeningFixture = new FillOpeningsFixture(this.api, this.query, this.group, [openingId], [applicationIds])
+    const fillOpeningFixture = new FillOpeningsFixture(
+      this.api,
+      this.query,
+      this.group,
+      [openingId],
+      [applicationIds]
+    )
     const fillOpeningRunner = new FixtureRunner(fillOpeningFixture)
     await fillOpeningRunner.run()
 
     this.createdWorkerIds = fillOpeningFixture.getCreatedWorkerIdsByOpeningId(openingId)
-    await Promise.all(this.createdWorkerIds.map((id) => this.api.assignWorkerWellknownAccount(this.group, id)))
+    await Promise.all(
+      this.createdWorkerIds.map((id) => this.api.assignWorkerWellknownAccount(this.group, id))
+    )
   }
 
   public async runQueryNodeChecks(): Promise<void> {

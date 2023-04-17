@@ -4,7 +4,10 @@ import { QueryNodeApi } from '../../QueryNodeApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { BaseQueryNodeFixture } from '../../Fixture'
 import { MemberContext, EventDetails } from '../../types'
-import { MembershipFieldsFragment, MemberProfileUpdatedEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  MembershipFieldsFragment,
+  MemberProfileUpdatedEventFieldsFragment,
+} from '../../graphql/generated/queries'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
 import { Utils } from '../../utils'
 import { isSet } from '@joystream/metadata-protobuf/utils'
@@ -62,7 +65,9 @@ export class UpdateProfileHappyCaseFixture extends BaseQueryNodeFixture {
       handle: isSet(this.newValues.handle) ? this.newValues.handle : this.oldValues.handle,
       name: isSet(this.newValues.name) ? this.newValues.name || null : this.oldValues.name,
       about: isSet(this.newValues.about) ? this.newValues.about || null : this.oldValues.about,
-      avatarUri: isSet(this.newValues.avatarUri) ? this.newValues.avatarUri || null : this.oldValues.avatarUri,
+      avatarUri: isSet(this.newValues.avatarUri)
+        ? this.newValues.avatarUri || null
+        : this.oldValues.avatarUri,
       externalResources: isSet(this.newValues.externalResources)
         ? this.newValues.externalResources || null
         : this.oldValues.externalResources,

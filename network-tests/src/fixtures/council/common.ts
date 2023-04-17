@@ -28,20 +28,31 @@ export async function assertCouncilMembersRuntimeQnMatch(api: Api, query: QueryN
   )
 }
 
-export async function prepareFailToElectResources(api: Api, query: QueryNodeApi): Promise<IFailToElectResources> {
+export async function prepareFailToElectResources(
+  api: Api,
+  query: QueryNodeApi
+): Promise<IFailToElectResources> {
   const { councilSize, minNumberOfExtraCandidates } = api.consts.council
   const numberOfCandidates = councilSize.add(minNumberOfExtraCandidates).toNumber()
 
   // prepare memberships
-  const candidatesMemberAccounts = (await api.createKeyPairs(numberOfCandidates)).map(({ key }) => key.address)
-  const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, candidatesMemberAccounts)
+  const candidatesMemberAccounts = (await api.createKeyPairs(numberOfCandidates)).map(
+    ({ key }) => key.address
+  )
+  const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(
+    api,
+    query,
+    candidatesMemberAccounts
+  )
   await new FixtureRunner(buyMembershipsFixture).run()
   const candidatesMemberIds = buyMembershipsFixture.getCreatedMembers()
 
   // prepare staking accounts
   const councilCandidateStake = api.consts.council.minCandidateStake
 
-  const candidatesStakingAccounts = (await api.createKeyPairs(numberOfCandidates)).map(({ key }) => key.address)
+  const candidatesStakingAccounts = (await api.createKeyPairs(numberOfCandidates)).map(
+    ({ key }) => key.address
+  )
   const addStakingAccountsFixture = new AddStakingAccountsHappyCaseFixture(
     api,
     query,

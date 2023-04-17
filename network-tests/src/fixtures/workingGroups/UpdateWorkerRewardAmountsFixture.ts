@@ -9,7 +9,10 @@ import { PalletWorkingGroupGroupWorker as Worker } from '@polkadot/types/lookup'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Utils } from '../../utils'
-import { WorkerFieldsFragment, WorkerRewardAmountUpdatedEventFieldsFragment } from '../../graphql/generated/queries'
+import {
+  WorkerFieldsFragment,
+  WorkerRewardAmountUpdatedEventFieldsFragment,
+} from '../../graphql/generated/queries'
 
 export class UpdateWorkerRewardAmountsFixture extends BaseWorkingGroupFixture {
   protected workerIds: WorkerId[]
@@ -43,7 +46,10 @@ export class UpdateWorkerRewardAmountsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'WorkerRewardAmountUpdated')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: WorkerRewardAmountUpdatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: WorkerRewardAmountUpdatedEventFieldsFragment,
+    i: number
+  ): void {
     const newReward = this.newRewards[i]
     assert.equal(qEvent.worker.runtimeId, this.workerIds[i].toNumber())
     assert.equal(qEvent.group.name, this.group)

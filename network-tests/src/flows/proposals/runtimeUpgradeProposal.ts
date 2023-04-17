@@ -14,7 +14,12 @@ import { assert } from 'chai'
 import { Resource } from '../../Resources'
 import { createType } from '@joystream/types'
 
-export default async function runtimeUpgradeProposal({ api, query, lock, env }: FlowProps): Promise<void> {
+export default async function runtimeUpgradeProposal({
+  api,
+  query,
+  lock,
+  env,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:runtime-upgrade-proposal')
   debug('Started')
   api.enableVerboseTxLogs()
@@ -72,7 +77,10 @@ export default async function runtimeUpgradeProposal({ api, query, lock, env }: 
         proposal.status.__typename === 'ProposalStatusCanceledByRuntime',
         `Proposal expected to be CanceledByRuntime. Actual status: ${proposal.status.__typename}`
       )
-      Utils.assert(proposal.status.proposalDecisionMadeEvent, 'Missing proposalDecisionMadeEvent reference')
+      Utils.assert(
+        proposal.status.proposalDecisionMadeEvent,
+        'Missing proposalDecisionMadeEvent reference'
+      )
       assert.equal(
         proposal.status.proposalDecisionMadeEvent.decisionStatus.__typename,
         'ProposalStatusCanceledByRuntime'

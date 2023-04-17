@@ -4,7 +4,10 @@ import { QueryNodeApi } from '../../QueryNodeApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { BaseQueryNodeFixture } from '../../Fixture'
 import { EventDetails, MemberContext } from '../../types'
-import { MemberAccountsUpdatedEventFieldsFragment, MembershipFieldsFragment } from '../../graphql/generated/queries'
+import {
+  MemberAccountsUpdatedEventFieldsFragment,
+  MembershipFieldsFragment,
+} from '../../graphql/generated/queries'
 
 export class UpdateAccountsHappyCaseFixture extends BaseQueryNodeFixture {
   private memberContext: MemberContext

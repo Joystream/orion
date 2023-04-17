@@ -20,12 +20,18 @@ export type FundCouncilBudgetParams = {
 export class FundCouncilBudgetFixture extends StandardizedFixture {
   protected fundCouncilBudgetParams: FundCouncilBudgetParams
 
-  public constructor(api: Api, query: QueryNodeApi, fundCouncilBudgetParams: FundCouncilBudgetParams) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    fundCouncilBudgetParams: FundCouncilBudgetParams
+  ) {
     super(api, query)
     this.fundCouncilBudgetParams = fundCouncilBudgetParams
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<CouncilBudgetFundedEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<CouncilBudgetFundedEventDetails> {
     return this.api.getEventDetails(result, 'council', 'CouncilBudgetFunded')
   }
 

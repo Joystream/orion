@@ -9879,7 +9879,11 @@ export type CouncilMemberWhereUniqueInput = {
   id: Scalars['ID']
 }
 
-export type CouncilStage = CouncilStageAnnouncing | CouncilStageElection | CouncilStageIdle | VariantNone
+export type CouncilStage =
+  | CouncilStageAnnouncing
+  | CouncilStageElection
+  | CouncilStageIdle
+  | VariantNone
 
 export type CouncilStageAnnouncing = {
   /** Number of candidates aspiring to be elected as council members. */
@@ -10289,7 +10293,9 @@ export type CuratorGroup = BaseGraphQlObject & {
   nftboughteventownerCuratorGroup?: Maybe<Array<NftBoughtEvent>>
   nftissuedeventownerCuratorGroup?: Maybe<Array<NftIssuedEvent>>
   nftsellordermadeeventownerCuratorGroup?: Maybe<Array<NftSellOrderMadeEvent>>
-  nftslingedbacktotheoriginalartisteventownerCuratorGroup?: Maybe<Array<NftSlingedBackToTheOriginalArtistEvent>>
+  nftslingedbacktotheoriginalartisteventownerCuratorGroup?: Maybe<
+    Array<NftSlingedBackToTheOriginalArtistEvent>
+  >
   offeracceptedeventownerCuratorGroup?: Maybe<Array<OfferAcceptedEvent>>
   offercanceledeventownerCuratorGroup?: Maybe<Array<OfferCanceledEvent>>
   offerstartedeventownerCuratorGroup?: Maybe<Array<OfferStartedEvent>>
@@ -12031,7 +12037,9 @@ export type ForumCategory = BaseGraphQlObject & {
   status: CategoryStatus
   categoryarchivalstatusupdatedeventcategory?: Maybe<Array<CategoryArchivalStatusUpdatedEvent>>
   categorydeletedeventcategory?: Maybe<Array<CategoryDeletedEvent>>
-  categorymembershipofmoderatorupdatedeventcategory?: Maybe<Array<CategoryMembershipOfModeratorUpdatedEvent>>
+  categorymembershipofmoderatorupdatedeventcategory?: Maybe<
+    Array<CategoryMembershipOfModeratorUpdatedEvent>
+  >
   categorystickythreadupdateeventcategory?: Maybe<Array<CategoryStickyThreadUpdateEvent>>
   forumcategoryparent?: Maybe<Array<ForumCategory>>
   threadmovedeventoldCategory?: Maybe<Array<ThreadMovedEvent>>
@@ -12846,7 +12854,10 @@ export type GeoCoordinatesWhereUniqueInput = {
   id: Scalars['ID']
 }
 
-export type GeographicalArea = GeographicalAreaContinent | GeographicalAreaCountry | GeographicalAreaSubdivistion
+export type GeographicalArea =
+  | GeographicalAreaContinent
+  | GeographicalAreaCountry
+  | GeographicalAreaSubdivistion
 
 export type GeographicalAreaContinent = {
   code?: Maybe<Continent>
@@ -15070,7 +15081,9 @@ export type Membership = BaseGraphQlObject & {
   nftboughteventownerMember?: Maybe<Array<NftBoughtEvent>>
   nftissuedeventownerMember?: Maybe<Array<NftIssuedEvent>>
   nftsellordermadeeventownerMember?: Maybe<Array<NftSellOrderMadeEvent>>
-  nftslingedbacktotheoriginalartisteventownerMember?: Maybe<Array<NftSlingedBackToTheOriginalArtistEvent>>
+  nftslingedbacktotheoriginalartisteventownerMember?: Maybe<
+    Array<NftSlingedBackToTheOriginalArtistEvent>
+  >
   offeracceptedeventownerMember?: Maybe<Array<OfferAcceptedEvent>>
   offercanceledeventownerMember?: Maybe<Array<OfferCanceledEvent>>
   offerstartedeventmember?: Maybe<Array<OfferStartedEvent>>
@@ -15082,7 +15095,9 @@ export type Membership = BaseGraphQlObject & {
   proposalcreator?: Maybe<Array<Proposal>>
   proposaldiscussionpostauthor?: Maybe<Array<ProposalDiscussionPost>>
   proposaldiscussionpostdeletedeventactor?: Maybe<Array<ProposalDiscussionPostDeletedEvent>>
-  proposaldiscussionthreadmodechangedeventactor?: Maybe<Array<ProposalDiscussionThreadModeChangedEvent>>
+  proposaldiscussionthreadmodechangedeventactor?: Maybe<
+    Array<ProposalDiscussionThreadModeChangedEvent>
+  >
   proposalvotedeventvoter?: Maybe<Array<ProposalVotedEvent>>
   stakingaccountaddedeventmember?: Maybe<Array<StakingAccountAddedEvent>>
   stakingaccountconfirmedeventmember?: Maybe<Array<StakingAccountConfirmedEvent>>
@@ -16105,7 +16120,9 @@ export type MetaprotocolTransactionErrored = {
   message: Scalars['String']
 }
 
-export type MetaprotocolTransactionStatus = MetaprotocolTransactionSuccessful | MetaprotocolTransactionErrored
+export type MetaprotocolTransactionStatus =
+  | MetaprotocolTransactionSuccessful
+  | MetaprotocolTransactionErrored
 
 export type MetaprotocolTransactionStatusEvent = Event &
   BaseGraphQlObject & {
@@ -19604,7 +19621,11 @@ export type PostOriginThreadReply = {
   postAddedEvent?: Maybe<PostAddedEvent>
 }
 
-export type PostStatus = PostStatusActive | PostStatusLocked | PostStatusModerated | PostStatusRemoved
+export type PostStatus =
+  | PostStatusActive
+  | PostStatusLocked
+  | PostStatusModerated
+  | PostStatusRemoved
 
 export type PostStatusActive = {
   phantom?: Maybe<Scalars['Int']>
@@ -20830,7 +20851,9 @@ export type ProposalDiscussionThreadEdge = {
   cursor: Scalars['String']
 }
 
-export type ProposalDiscussionThreadMode = ProposalDiscussionThreadModeOpen | ProposalDiscussionThreadModeClosed
+export type ProposalDiscussionThreadMode =
+  | ProposalDiscussionThreadModeOpen
+  | ProposalDiscussionThreadModeClosed
 
 export type ProposalDiscussionThreadModeChangedEvent = Event &
   BaseGraphQlObject & {
@@ -21257,7 +21280,10 @@ export type ProposalExecutedEventWhereUniqueInput = {
 
 export type ProposalExecutionStatus = ProposalStatusExecuted | ProposalStatusExecutionFailed
 
-export type ProposalIntermediateStatus = ProposalStatusDeciding | ProposalStatusGracing | ProposalStatusDormant
+export type ProposalIntermediateStatus =
+  | ProposalStatusDeciding
+  | ProposalStatusGracing
+  | ProposalStatusDormant
 
 export enum ProposalOrderByInput {
   CreatedAtAsc = 'createdAt_ASC',
@@ -30865,7 +30891,11 @@ export type ThreadMovedEventWhereUniqueInput = {
   id: Scalars['ID']
 }
 
-export type ThreadStatus = ThreadStatusActive | ThreadStatusLocked | ThreadStatusModerated | ThreadStatusRemoved
+export type ThreadStatus =
+  | ThreadStatusActive
+  | ThreadStatusLocked
+  | ThreadStatusModerated
+  | ThreadStatusRemoved
 
 export type ThreadStatusActive = {
   phantom?: Maybe<Scalars['Int']>
@@ -34225,7 +34255,9 @@ export type Worker = BaseGraphQlObject & {
   managedForumCategories: Array<ForumCategory>
   categoryarchivalstatusupdatedeventactor?: Maybe<Array<CategoryArchivalStatusUpdatedEvent>>
   categorydeletedeventactor?: Maybe<Array<CategoryDeletedEvent>>
-  categorymembershipofmoderatorupdatedeventmoderator?: Maybe<Array<CategoryMembershipOfModeratorUpdatedEvent>>
+  categorymembershipofmoderatorupdatedeventmoderator?: Maybe<
+    Array<CategoryMembershipOfModeratorUpdatedEvent>
+  >
   categorystickythreadupdateeventactor?: Maybe<Array<CategoryStickyThreadUpdateEvent>>
   leaderseteventworker?: Maybe<Array<LeaderSetEvent>>
   leaderunseteventleader?: Maybe<Array<LeaderUnsetEvent>>
@@ -35015,7 +35047,11 @@ export type WorkerStartedLeavingEventWhereUniqueInput = {
   id: Scalars['ID']
 }
 
-export type WorkerStatus = WorkerStatusActive | WorkerStatusLeaving | WorkerStatusLeft | WorkerStatusTerminated
+export type WorkerStatus =
+  | WorkerStatusActive
+  | WorkerStatusLeaving
+  | WorkerStatusLeft
+  | WorkerStatusTerminated
 
 export type WorkerStatusActive = {
   phantom?: Maybe<Scalars['Int']>
@@ -35835,7 +35871,10 @@ export enum WorkingGroupOpeningOrderByInput {
   RewardPerBlockDesc = 'rewardPerBlock_DESC',
 }
 
-export type WorkingGroupOpeningStatus = OpeningStatusOpen | OpeningStatusFilled | OpeningStatusCancelled
+export type WorkingGroupOpeningStatus =
+  | OpeningStatusOpen
+  | OpeningStatusFilled
+  | OpeningStatusCancelled
 
 export enum WorkingGroupOpeningType {
   Regular = 'REGULAR',

@@ -59,15 +59,23 @@ export class DeletePostsFixture extends StandardizedFixture {
       const qPost = qPosts.find((p) => p.id === params.postId.toString())
       const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
       const hidden = params.hide === undefined || params.hide
-      const expectedStatus = hidden ? 'ProposalDiscussionPostStatusRemoved' : 'ProposalDiscussionPostStatusLocked'
+      const expectedStatus = hidden
+        ? 'ProposalDiscussionPostStatusRemoved'
+        : 'ProposalDiscussionPostStatusLocked'
       Utils.assert(qPost, 'Query node: Post not found')
-      Utils.assert(qPost.status.__typename === expectedStatus, `Invalid post status (${qPost.status.__typename})`)
+      Utils.assert(
+        qPost.status.__typename === expectedStatus,
+        `Invalid post status (${qPost.status.__typename})`
+      )
       assert.equal(qPost.status.deletedInEvent?.id, qEvent.id)
       assert.equal(qPost.isVisible, !hidden)
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ProposalDiscussionPostDeletedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ProposalDiscussionPostDeletedEventFieldsFragment,
+    i: number
+  ): void {
     const params = this.deletePostsParams[i]
     assert.equal(qEvent.post.id, params.postId.toString())
     assert.equal(qEvent.actor.id, params.asMember.toString())
@@ -82,7 +90,9 @@ export class DeletePostsFixture extends StandardizedFixture {
     )
 
     // Query the posts
-    const qPosts = await this.query.getProposalDiscussionPostsByIds(this.deletePostsParams.map((p) => p.postId))
+    const qPosts = await this.query.getProposalDiscussionPostsByIds(
+      this.deletePostsParams.map((p) => p.postId)
+    )
     this.assertQueriedPostsAreValid(qPosts, qEvents)
   }
 }

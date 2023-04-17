@@ -3,7 +3,10 @@ import { assert } from 'chai'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { EventDetails, EventType, MemberContext } from '../../types'
-import { MemberInvitedEventFieldsFragment, MembershipFieldsFragment } from '../../graphql/generated/queries'
+import {
+  MemberInvitedEventFieldsFragment,
+  MembershipFieldsFragment,
+} from '../../graphql/generated/queries'
 import { MemberId } from '@joystream/types/primitives'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
 import { Utils } from '../../utils'
@@ -22,13 +25,21 @@ export class InviteMembersHappyCaseFixture extends StandardizedFixture {
   protected expectedWGBudget?: BN
   protected events: MemberInvitedEventDetails[] = []
 
-  public constructor(api: Api, query: QueryNodeApi, inviterContext: MemberContext, accounts: string[]) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    inviterContext: MemberContext,
+    accounts: string[]
+  ) {
     super(api, query)
     this.inviterContext = inviterContext
     this.accounts = accounts
   }
 
-  generateInviteMemberTx(memberId: MemberId, inviteeAccountId: string): SubmittableExtrinsic<'promise'> {
+  generateInviteMemberTx(
+    memberId: MemberId,
+    inviteeAccountId: string
+  ): SubmittableExtrinsic<'promise'> {
     return this.api.tx.members.inviteMember({
       ...generateParamsFromAccountId(inviteeAccountId),
       invitingMemberId: memberId,
@@ -43,7 +54,9 @@ export class InviteMembersHappyCaseFixture extends StandardizedFixture {
     return this.accounts.map((a) => this.generateInviteMemberTx(this.inviterContext.memberId, a))
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<MemberInvitedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<MemberInvitedEventDetails> {
     return this.api.getEventDetails(result, 'members', 'MemberInvited')
   }
 
@@ -80,7 +93,10 @@ export class InviteMembersHappyCaseFixture extends StandardizedFixture {
         metadata.externalResources?.map(asMembershipExternalResource) ?? []
       )
       assert.equal(isVerified, false)
-      Utils.assert(entry.__typename === 'MembershipEntryInvited', 'Query node: Invalid member entry method')
+      Utils.assert(
+        entry.__typename === 'MembershipEntryInvited',
+        'Query node: Invalid member entry method'
+      )
       Utils.assert(entry.memberInvitedEvent, 'Query node: Empty memberInvitedEvent reference')
       assert.equal(entry.memberInvitedEvent.id, qEvent.id)
       Utils.assert(invitedBy, 'invitedBy cannot be empty')
@@ -111,7 +127,9 @@ export class InviteMembersHappyCaseFixture extends StandardizedFixture {
   async execute(): Promise<void> {
     // Membership WG balance MUST be already set up to support addition of new members
     // Load initial invites count
-    this.initialInvitesCount = (await this.api.query.members.membershipById(this.inviterContext.memberId))
+    this.initialInvitesCount = (
+      await this.api.query.members.membershipById(this.inviterContext.memberId)
+    )
       .unwrap()
       .invites.toNumber()
     // Load initial invitation balance

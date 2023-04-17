@@ -32,7 +32,11 @@ export class UpdateVerificationStatusFixture extends StandardizedFixture {
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     return this.updates.map((u) =>
-      this.api.tx.members.updateProfileVerification(this.membershipWgLead[0], u.memberId, u.isVerified)
+      this.api.tx.members.updateProfileVerification(
+        this.membershipWgLead[0],
+        u.memberId,
+        u.isVerified
+      )
     )
   }
 
@@ -40,7 +44,10 @@ export class UpdateVerificationStatusFixture extends StandardizedFixture {
     return this.membershipWgLead[1].roleAccountId.toString()
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: MemberVerificationStatusUpdatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: MemberVerificationStatusUpdatedEventFieldsFragment,
+    i: number
+  ): void {
     const update = this.updates[i]
     assert.equal(qEvent.isVerified, update.isVerified)
     assert.equal(qEvent.worker.id, `membershipWorkingGroup-${this.membershipWgLead[0].toString()}`)

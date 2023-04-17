@@ -17,7 +17,11 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
   protected async maybeBlackListVoters(votersStakingAccounts: string[]) {
     if (this._optOutVoters) {
       // failing case for opted-out voters
-      const optOutVotersFixture = new BlackListVoteFixture(this.api, this.query, votersStakingAccounts)
+      const optOutVotersFixture = new BlackListVoteFixture(
+        this.api,
+        this.query,
+        votersStakingAccounts
+      )
       await new FixtureRunner(optOutVotersFixture).run()
       return
     }
@@ -46,7 +50,12 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
       const optionId = candidatesMemberIds[i % numberOfCandidates]
       const salt = createType('Bytes', `salt${i}`)
 
-      const payload = Buffer.concat([accountId.toU8a(), optionId.toU8a(), salt.toU8a(), cycleId.toU8a()])
+      const payload = Buffer.concat([
+        accountId.toU8a(),
+        optionId.toU8a(),
+        salt.toU8a(),
+        cycleId.toU8a(),
+      ])
       const commitment = blake2AsHex(payload)
       return commitment
     })
@@ -83,10 +92,16 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     const { councilSize, minNumberOfExtraCandidates } = this.api.consts.council
 
     const numberOfCandidates = councilSize.add(minNumberOfExtraCandidates).toNumber()
-    const candidatesMemberAccounts = (await this.api.createKeyPairs(numberOfCandidates)).map(({ key }) => key.address)
+    const candidatesMemberAccounts = (await this.api.createKeyPairs(numberOfCandidates)).map(
+      ({ key }) => key.address
+    )
     const numberOfVoters = numberOfCandidates
 
-    const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, candidatesMemberAccounts)
+    const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(
+      api,
+      query,
+      candidatesMemberAccounts
+    )
     await new FixtureRunner(buyMembershipsFixture).run()
     const candidatesMemberIds = buyMembershipsFixture.getCreatedMembers()
 
@@ -94,7 +109,9 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     const councilCandidateStake = api.consts.council.minCandidateStake
     const voteStake = api.consts.referendum.minimumStake
 
-    const candidatesStakingAccounts = (await this.api.createKeyPairs(numberOfCandidates)).map(({ key }) => key.address)
+    const candidatesStakingAccounts = (await this.api.createKeyPairs(numberOfCandidates)).map(
+      ({ key }) => key.address
+    )
     const addStakingAccountsFixture = new AddStakingAccountsHappyCaseFixture(
       api,
       query,
@@ -131,7 +148,9 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     // Voting stage
     await this.api.untilCouncilStage('Voting')
 
-    const votersStakingAccounts = (await this.api.createKeyPairs(numberOfVoters)).map(({ key }) => key.address)
+    const votersStakingAccounts = (await this.api.createKeyPairs(numberOfVoters)).map(
+      ({ key }) => key.address
+    )
     await api.treasuryTransferBalanceToAccounts(votersStakingAccounts, voteStake) // fund accounts
 
     // blacklist all voters if flag is set
@@ -153,7 +172,9 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     await api.prepareAccountsForFeeExpenses(votersStakingAccounts, revealingTxs)
     await api.sendExtrinsicsAndGetResults(revealingTxs, votersStakingAccounts)
 
-    const candidatesToWinIds = candidatesMemberIds.slice(0, councilSize.toNumber()).map((id) => id.toString())
+    const candidatesToWinIds = candidatesMemberIds
+      .slice(0, councilSize.toNumber())
+      .map((id) => id.toString())
 
     // check intermediate election winners are properly set
     if (this.queryNodeChecksEnabled) {

@@ -2,7 +2,10 @@ import { MembershipMetadata } from '@joystream/metadata-protobuf'
 import { Utils } from '../../utils'
 import { Bytes } from '@polkadot/types'
 import { isSet } from '@joystream/metadata-protobuf/utils'
-import { MembershipExternalResource, MembershipExternalResourceType } from '../../graphql/generated/schema'
+import {
+  MembershipExternalResource,
+  MembershipExternalResourceType,
+} from '../../graphql/generated/schema'
 import { Api } from '../../Api'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { BuyMembershipHappyCaseFixture } from './BuyMembershipHappyCaseFixture'
@@ -22,13 +25,19 @@ type MemberCreationParams = {
 }
 
 // Common code for Membership fixtures
-export function generateParamsFromAccountId(accountId: string, isFoundingMember = false): MemberCreationParams {
+export function generateParamsFromAccountId(
+  accountId: string,
+  isFoundingMember = false
+): MemberCreationParams {
   const affix = accountId.substring(0, 14)
   const name = `name${affix}`
   const about = `about${affix}`
   const avatarUri = `https://example.com/${affix}.jpg`
   const externalResources = [
-    { type: MembershipMetadata.ExternalResource.ResourceType.HYPERLINK, value: `https://${affix}.com` },
+    {
+      type: MembershipMetadata.ExternalResource.ResourceType.HYPERLINK,
+      value: `https://${affix}.com`,
+    },
   ]
   const metadataBytes = Utils.metadataToBytes(MembershipMetadata, {
     name,
@@ -60,13 +69,19 @@ export function asMembershipExternalResource({
   if (isSet(type) && isSet(value)) {
     return {
       __typename: 'MembershipExternalResource',
-      type: MembershipMetadata.ExternalResource.ResourceType[type] as MembershipExternalResourceType,
+      type: MembershipMetadata.ExternalResource.ResourceType[
+        type
+      ] as MembershipExternalResourceType,
       value,
     }
   }
 }
 
-export async function makeMembers(api: Api, query: QueryNodeApi, n: number): Promise<MemberContext[]> {
+export async function makeMembers(
+  api: Api,
+  query: QueryNodeApi,
+  n: number
+): Promise<MemberContext[]> {
   const accounts = (await api.createKeyPairs(n)).map((k) => k.key.address)
   const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, accounts)
   await new FixtureRunner(buyMembershipFixture).run()

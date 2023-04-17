@@ -27,7 +27,12 @@ export class AnnounceCandidacyFixture extends StandardizedFixture {
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise', ISubmittableResult>[]> {
     return Array.from(this.announcements).map(([, params]) =>
-      this.api.tx.council.announceCandidacy(params.memberId, params.stakingAccount, params.rewardAccount, params.stake)
+      this.api.tx.council.announceCandidacy(
+        params.memberId,
+        params.stakingAccount,
+        params.rewardAccount,
+        params.stake
+      )
     )
   }
 

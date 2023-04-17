@@ -62,7 +62,12 @@ import {
   workingGroupNameByModuleName,
 } from './consts'
 
-import { AppAction, CreateVideoCategory, IAppAction, MemberRemarked } from '@joystream/metadata-protobuf'
+import {
+  AppAction,
+  CreateVideoCategory,
+  IAppAction,
+  MemberRemarked,
+} from '@joystream/metadata-protobuf'
 import { PERBILL_ONE_PERCENT } from '../../../query-node/mappings/src/temporaryConstants'
 import { createType, JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 
@@ -110,7 +115,9 @@ export class ApiFactory {
 
         // Log runtime version
         const version = await api.rpc.state.getRuntimeVersion()
-        console.log(`Runtime Version: ${version.authoringVersion}.${version.specVersion}.${version.implVersion}`)
+        console.log(
+          `Runtime Version: ${version.authoringVersion}.${version.specVersion}.${version.implVersion}`
+        )
 
         return new ApiFactory(api, treasuryAccountUri, miniSecret)
       } catch (err) {
@@ -200,7 +207,13 @@ export class Api {
   // source of funds for all new accounts
   private readonly treasuryAccount: string
 
-  constructor(factory: ApiFactory, api: ApiPromise, treasuryAccount: string, keyring: Keyring, label: string) {
+  constructor(
+    factory: ApiFactory,
+    api: ApiPromise,
+    treasuryAccount: string,
+    keyring: Keyring,
+    label: string
+  ) {
     this.factory = factory
     this.api = api
     this.treasuryAccount = treasuryAccount
@@ -287,10 +300,15 @@ export class Api {
     this.sender.setLogLevel(LogLevel.Verbose)
   }
 
-  public async createKeyPairs(n: number, withExistentialDeposit = true): Promise<{ key: KeyringPair; id: number }[]> {
+  public async createKeyPairs(
+    n: number,
+    withExistentialDeposit = true
+  ): Promise<{ key: KeyringPair; id: number }[]> {
     const pairs = this.factory.createKeyPairs(n)
     if (withExistentialDeposit) {
-      await Promise.all(pairs.map(({ key }) => this.treasuryTransferBalance(key.address, this.existentialDeposit())))
+      await Promise.all(
+        pairs.map(({ key }) => this.treasuryTransferBalance(key.address, this.existentialDeposit()))
+      )
     }
     return pairs
   }
@@ -343,7 +361,9 @@ export class Api {
     return this.api.query.electionProviderMultiPhase.round()
   }
 
-  public async getElectionSnapshot(): Promise<Option<PalletElectionProviderMultiPhaseRoundSnapshot>> {
+  public async getElectionSnapshot(): Promise<
+    Option<PalletElectionProviderMultiPhaseRoundSnapshot>
+  > {
     return this.api.query.electionProviderMultiPhase.snapshot()
   }
 
@@ -400,7 +420,10 @@ export class Api {
     return accountData.data.free
   }
 
-  public async getStakedBalance(address: string | AccountId, lockId?: LockIdentifier | string): Promise<BN> {
+  public async getStakedBalance(
+    address: string | AccountId,
+    lockId?: LockIdentifier | string
+  ): Promise<BN> {
     const locks = await this.api.query.balances.locks(address)
     if (lockId) {
       const foundLock = locks.find((l) => l.id.eq(lockId))
@@ -425,9 +448,14 @@ export class Api {
     return this.transferBalance({ from: this.treasuryAccount, to, amount })
   }
 
-  public treasuryTransferBalanceToAccounts(destinations: string[], amount: BN): Promise<ISubmittableResult[]> {
+  public treasuryTransferBalanceToAccounts(
+    destinations: string[],
+    amount: BN
+  ): Promise<ISubmittableResult[]> {
     return Promise.all(
-      destinations.map((account) => this.transferBalance({ from: this.treasuryAccount, to: account, amount }))
+      destinations.map((account) =>
+        this.transferBalance({ from: this.treasuryAccount, to: account, amount })
+      )
     )
   }
 
@@ -440,7 +468,10 @@ export class Api {
   ): Promise<void> {
     const fees = await Promise.all(
       extrinsics.map((tx, i) =>
-        this.estimateTxFee(tx, Array.isArray(accountOrAccounts) ? accountOrAccounts[i] : accountOrAccounts)
+        this.estimateTxFee(
+          tx,
+          Array.isArray(accountOrAccounts) ? accountOrAccounts[i] : accountOrAccounts
+        )
       )
     )
 
@@ -465,7 +496,10 @@ export class Api {
     return this.api.query.members.membershipPrice()
   }
 
-  public async estimateTxFee(tx: SubmittableExtrinsic<'promise'>, account: string): Promise<Balance> {
+  public async estimateTxFee(
+    tx: SubmittableExtrinsic<'promise'>,
+    account: string
+  ): Promise<Balance> {
     const paymentInfo = await tx.paymentInfo(account)
     return paymentInfo.partialFee
   }
@@ -480,9 +514,8 @@ export class Api {
     method: M
   ): EventType<S, M> | undefined {
     if (Array.isArray(result)) {
-      return result.find(({ event }) => event.section === section && event.method === method)?.event as
-        | EventType<S, M>
-        | undefined
+      return result.find(({ event }) => event.section === section && event.method === method)
+        ?.event as EventType<S, M> | undefined
     }
     return result.findRecord(section, method)?.event as EventType<S, M> | undefined
   }
@@ -510,7 +543,9 @@ export class Api {
     expectedCount?: number
   ): EventType<S, M>[] {
     const events = Array.isArray(result)
-      ? result.filter(({ event }) => event.section === section && event.method === method).map(({ event }) => event)
+      ? result
+          .filter(({ event }) => event.section === section && event.method === method)
+          .map(({ event }) => event)
       : result.filterRecords(section, method).map((r) => r.event)
     if (expectedCount && events.length !== expectedCount) {
       throw new Error(
@@ -519,7 +554,10 @@ export class Api {
         )}. ` + `Expected: ${expectedCount}, Got: ${events.length}`
       )
     }
-    return events.sort((a, b) => new BN(a.index).cmp(new BN(b.index))) as unknown as EventType<S, M>[]
+    return events.sort((a, b) => new BN(a.index).cmp(new BN(b.index))) as unknown as EventType<
+      S,
+      M
+    >[]
   }
 
   public async getEventDetails<S extends EventSection, M extends EventMethod<S>>(
@@ -593,7 +631,11 @@ export class Api {
     return [leadId, (await this.api.query[group].workerById(leadId)).unwrap()]
   }
 
-  public async fundWorkingGroupBudget(group: WorkingGroupModuleName, memberId: u64, amount: BN): Promise<void> {
+  public async fundWorkingGroupBudget(
+    group: WorkingGroupModuleName,
+    memberId: u64,
+    amount: BN
+  ): Promise<void> {
     const controllerAccount = await this.getControllerAccountOfMember(memberId)
     const fundTx = this.api.tx[group].fundWorkingGroupBudget(memberId, amount, 'Test')
     await this.treasuryTransferBalance(controllerAccount, amount)
@@ -611,7 +653,10 @@ export class Api {
     )
   }
 
-  public async getWorkerRoleAccounts(workerIds: WorkerId[], module: WorkingGroupModuleName): Promise<string[]> {
+  public async getWorkerRoleAccounts(
+    workerIds: WorkerId[],
+    module: WorkingGroupModuleName
+  ): Promise<string[]> {
     const workers = await this.api.query[module].workerById.multi<Option<Worker>>(workerIds)
 
     return workers.map((worker) => {
@@ -636,7 +681,11 @@ export class Api {
     )
   }
 
-  public async untilBlock(blockNumber: number, intervalMs = BLOCKTIME, timeoutMs = 180000): Promise<void> {
+  public async untilBlock(
+    blockNumber: number,
+    intervalMs = BLOCKTIME,
+    timeoutMs = 180000
+  ): Promise<void> {
     await Utils.until(
       `blocknumber ${blockNumber}`,
       async ({ debug }) => {
@@ -659,7 +708,9 @@ export class Api {
       async ({ debug }) => {
         const { maxActiveProposalLimit } = this.consts.proposalsEngine
         const activeProposalsN = await this.query.proposalsEngine.activeProposalCount()
-        debug(`Currently active proposals: ${activeProposalsN.toNumber()}/${maxActiveProposalLimit.toNumber()}`)
+        debug(
+          `Currently active proposals: ${activeProposalsN.toNumber()}/${maxActiveProposalLimit.toNumber()}`
+        )
         return maxActiveProposalLimit.sub(activeProposalsN).toNumber() >= numberOfProposals
       },
       intervalMs,
@@ -683,7 +734,10 @@ export class Api {
           ? (currentElectionStage.type as 'Voting' | 'Revealing')
           : (currentCouncilStage.stage.type as 'Announcing' | 'Idle')
         const currentStageStartedAt = currentCouncilStage.stage.isElection
-          ? (currentElectionStage.isVoting ? currentElectionStage.asVoting : currentElectionStage.asRevealing).started // TODO: check no panic
+          ? (currentElectionStage.isVoting
+              ? currentElectionStage.asVoting
+              : currentElectionStage.asRevealing
+            ).started // TODO: check no panic
           : currentCouncilStage.changedAt
 
         const currentBlock = await this.getBestBlock()
@@ -696,10 +750,14 @@ export class Api {
           'Idle': idlePeriodDuration,
         } as const
 
-        const currentStageEndsIn = currentStageStartedAt.add(durationByStage[currentStage]).sub(currentBlock)
+        const currentStageEndsIn = currentStageStartedAt
+          .add(durationByStage[currentStage])
+          .sub(currentBlock)
 
         const currentAnnouncementPeriodNr =
-          announcementPeriodNr === null ? null : (await this.api.query.council.announcementPeriodNr()).toNumber()
+          announcementPeriodNr === null
+            ? null
+            : (await this.api.query.council.announcementPeriodNr()).toNumber()
 
         debug(`Current stage: ${currentStage}, blocks left: ${currentStageEndsIn.toNumber()}`)
 
@@ -723,7 +781,9 @@ export class Api {
   }
 
   async getMemberControllerAccount(memberId: number): Promise<string | undefined> {
-    return (await this.api.query.members.membershipById(memberId)).unwrap().controllerAccount.toString()
+    return (await this.api.query.members.membershipById(memberId))
+      .unwrap()
+      .controllerAccount.toString()
   }
 
   public async getNumberOfOutstandingVideos(): Promise<number> {
@@ -761,7 +821,8 @@ export class Api {
     memberControllerAccount?: string,
     channelMeta?: Bytes
   ): Promise<ChannelId> {
-    memberControllerAccount = memberControllerAccount || (await this.getMemberControllerAccount(memberId))
+    memberControllerAccount =
+      memberControllerAccount || (await this.getMemberControllerAccount(memberId))
 
     if (!memberControllerAccount) {
       throw new Error('invalid member id')
@@ -792,7 +853,8 @@ export class Api {
     memberControllerAccount?: string,
     videoMeta?: IAppAction
   ): Promise<VideoId> {
-    memberControllerAccount = memberControllerAccount || (await this.getMemberControllerAccount(memberId))
+    memberControllerAccount =
+      memberControllerAccount || (await this.getMemberControllerAccount(memberId))
 
     if (!memberControllerAccount) {
       throw new Error('invalid member id')
@@ -877,12 +939,18 @@ export class Api {
     memberId: MemberId,
     newAccount: string
   ): Promise<ISubmittableResult> {
-    const updateControllerAccount = this.api.tx.members.updateAccounts(memberId, newAccount, newAccount)
+    const updateControllerAccount = this.api.tx.members.updateAccounts(
+      memberId,
+      newAccount,
+      newAccount
+    )
     await this.prepareAccountsForFeeExpenses(oldAccount, [updateControllerAccount])
     return this.sender.signAndSend(updateControllerAccount, oldAccount)
   }
 
-  async updateCouncillorsAccounts(initialBalance = KNOWN_COUNCILLOR_ACCOUNT_DEFAULT_BALANCE): Promise<string[]> {
+  async updateCouncillorsAccounts(
+    initialBalance = KNOWN_COUNCILLOR_ACCOUNT_DEFAULT_BALANCE
+  ): Promise<string[]> {
     const memberIds = (await this.query.council.councilMembers()).map((m) => m.membershipId)
     const memberRootAccounts = await Promise.all(
       memberIds.map(async (id) => {
@@ -921,7 +989,11 @@ export class Api {
     )
   }
 
-  async acceptStorageBucketInvitation(accountFrom: string, workerId: WorkerId, storageBucketId: StorageBucketId) {
+  async acceptStorageBucketInvitation(
+    accountFrom: string,
+    workerId: WorkerId,
+    storageBucketId: StorageBucketId
+  ) {
     return this.sender.signAndSend(
       this.api.tx.storage.acceptStorageBucketInvitation(workerId, storageBucketId, accountFrom),
       accountFrom
@@ -950,7 +1022,10 @@ export class Api {
     accountFrom: string, // group leader
     limit: number
   ) {
-    return this.sender.signAndSend(this.api.tx.storage.updateStorageBucketsPerBagLimit(limit), accountFrom)
+    return this.sender.signAndSend(
+      this.api.tx.storage.updateStorageBucketsPerBagLimit(limit),
+      accountFrom
+    )
   }
 
   async updateStorageBucketsVoucherMaxLimits(
@@ -972,10 +1047,19 @@ export class Api {
     dataObjectIds: string[]
   ): Promise<ISubmittableResult> {
     const bagId = { Dynamic: { Channel: channelId } }
-    const encodedDataObjectIds = new BTreeSet<DataObjectId>(this.api.registry, 'DataObjectId', dataObjectIds)
+    const encodedDataObjectIds = new BTreeSet<DataObjectId>(
+      this.api.registry,
+      'DataObjectId',
+      dataObjectIds
+    )
 
     return this.sender.signAndSend(
-      this.api.tx.storage.acceptPendingDataObjects(workerId, storageBucketId, bagId, encodedDataObjectIds),
+      this.api.tx.storage.acceptPendingDataObjects(
+        workerId,
+        storageBucketId,
+        bagId,
+        encodedDataObjectIds
+      ),
       accountFrom
     )
   }
@@ -1082,7 +1166,8 @@ export class Api {
     const boundaries = await this.getAuctionParametersBoundaries()
 
     // auction duration must be larger than extension period (enforced in runtime)
-    const auctionDuration = options.duration ?? BN.max(boundaries.auctionDuration.min, boundaries.extensionPeriod.min)
+    const auctionDuration =
+      options.duration ?? BN.max(boundaries.auctionDuration.min, boundaries.extensionPeriod.min)
 
     const startingPrice = boundaries.startingPrice.min
     const minimalBidStep = boundaries.bidStep.min
@@ -1155,8 +1240,15 @@ export class Api {
     )
   }
 
-  async settleEnglishAuction(accountFrom: string, memberId: number, videoId: number): Promise<ISubmittableResult> {
-    return await this.sender.signAndSend(this.api.tx.content.settleEnglishAuction(videoId), accountFrom)
+  async settleEnglishAuction(
+    accountFrom: string,
+    memberId: number,
+    videoId: number
+  ): Promise<ISubmittableResult> {
+    return await this.sender.signAndSend(
+      this.api.tx.content.settleEnglishAuction(videoId),
+      accountFrom
+    )
   }
 
   async pickOpenAuctionWinner(
@@ -1167,28 +1259,60 @@ export class Api {
     commitBalance: BN
   ): Promise<ISubmittableResult> {
     return await this.sender.signAndSend(
-      this.api.tx.content.pickOpenAuctionWinner({ Member: ownerMemberId }, videoId, winnerMemberId, commitBalance),
+      this.api.tx.content.pickOpenAuctionWinner(
+        { Member: ownerMemberId },
+        videoId,
+        winnerMemberId,
+        commitBalance
+      ),
       accountFrom
     )
   }
 
-  async cancelOpenAuctionBid(accountFrom: string, participantId: number, videoId: number): Promise<ISubmittableResult> {
-    return await this.sender.signAndSend(this.api.tx.content.cancelOpenAuctionBid(participantId, videoId), accountFrom)
+  async cancelOpenAuctionBid(
+    accountFrom: string,
+    participantId: number,
+    videoId: number
+  ): Promise<ISubmittableResult> {
+    return await this.sender.signAndSend(
+      this.api.tx.content.cancelOpenAuctionBid(participantId, videoId),
+      accountFrom
+    )
   }
 
-  async cancelOpenAuction(accountFrom: string, ownerId: number, videoId: number): Promise<ISubmittableResult> {
+  async cancelOpenAuction(
+    accountFrom: string,
+    ownerId: number,
+    videoId: number
+  ): Promise<ISubmittableResult> {
     return await this.sender.signAndSend(
       this.api.tx.content.cancelOpenAuction({ Member: ownerId }, videoId),
       accountFrom
     )
   }
 
-  async sellNft(accountFrom: string, videoId: number, ownerId: number, price: BN): Promise<ISubmittableResult> {
-    return await this.sender.signAndSend(this.api.tx.content.sellNft(videoId, { Member: ownerId }, price), accountFrom)
+  async sellNft(
+    accountFrom: string,
+    videoId: number,
+    ownerId: number,
+    price: BN
+  ): Promise<ISubmittableResult> {
+    return await this.sender.signAndSend(
+      this.api.tx.content.sellNft(videoId, { Member: ownerId }, price),
+      accountFrom
+    )
   }
 
-  async buyNft(accountFrom: string, videoId: number, participantId: number, price: BN): Promise<ISubmittableResult> {
-    return await this.sender.signAndSend(this.api.tx.content.buyNft(videoId, participantId, price), accountFrom)
+  async buyNft(
+    accountFrom: string,
+    videoId: number,
+    participantId: number,
+    price: BN
+  ): Promise<ISubmittableResult> {
+    return await this.sender.signAndSend(
+      this.api.tx.content.buyNft(videoId, participantId, price),
+      accountFrom
+    )
   }
 
   async updateBuyNowPrice(
@@ -1221,7 +1345,10 @@ export class Api {
     videoId: number,
     price: BN | null = null
   ): Promise<ISubmittableResult> {
-    return await this.sender.signAndSend(this.api.tx.content.acceptIncomingOffer(videoId, price), accountFrom)
+    return await this.sender.signAndSend(
+      this.api.tx.content.acceptIncomingOffer(videoId, price),
+      accountFrom
+    )
   }
 
   async channelBagWitness(channelId: ChannelId | number): Promise<PalletContentChannelBagWitness> {
@@ -1234,7 +1361,9 @@ export class Api {
     })
   }
 
-  async channelBagWitnessByVideoId(videoId: VideoId | number): Promise<PalletContentChannelBagWitness> {
+  async channelBagWitnessByVideoId(
+    videoId: VideoId | number
+  ): Promise<PalletContentChannelBagWitness> {
     const video = await this.api.query.content.videoById(videoId)
     return this.channelBagWitness(video.inChannel)
   }

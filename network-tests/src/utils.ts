@@ -63,7 +63,10 @@ export class Utils {
     return '0x' + Buffer.from(metaClass.encode(obj).finish()).toString('hex')
   }
 
-  public static metadataFromBytes<T>(metaClass: AnyMetadataClass<T>, bytes: Bytes): DecodedMetadataObject<T> {
+  public static metadataFromBytes<T>(
+    metaClass: AnyMetadataClass<T>,
+    bytes: Bytes
+  ): DecodedMetadataObject<T> {
     // We use `toObject()` to get rid of .prototype defaults for optional fields
     return metaToObject(metaClass, metaClass.decode(bytes.toU8a(true)))
   }
@@ -99,7 +102,10 @@ export class Utils {
     return encodeDecode(metadataClass, input.value)
   }
 
-  public static getMetadataBytesFromInput<T>(metadataClass: AnyMetadataClass<T>, input: MetadataInput<T>): Bytes {
+  public static getMetadataBytesFromInput<T>(
+    metadataClass: AnyMetadataClass<T>,
+    input: MetadataInput<T>
+  ): Bytes {
     return typeof input.value === 'string'
       ? createType('Bytes', input.value)
       : Utils.metadataToBytes(metadataClass, input.value)
@@ -141,7 +147,10 @@ export class Utils {
   ): Promise<void> {
     const debug = extendDebug(`awaiting:${name}`)
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error(`Awaiting ${name} - timeout reached`)), timeoutMs)
+      const timeout = setTimeout(
+        () => reject(new Error(`Awaiting ${name} - timeout reached`)),
+        timeoutMs
+      )
       const check = async () => {
         if (await conditionFunc({ debug })) {
           clearInterval(interval)

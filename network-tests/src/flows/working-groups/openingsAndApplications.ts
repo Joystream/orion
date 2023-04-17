@@ -11,7 +11,10 @@ import {
 import { Api } from '../../Api'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
+import {
+  AddStakingAccountsHappyCaseFixture,
+  BuyMembershipHappyCaseFixture,
+} from '../../fixtures/membership'
 import { workingGroups } from '../../consts'
 import { assert } from 'chai'
 
@@ -60,7 +63,11 @@ const openingsToCreate = (api: Api): OpeningParams[] => [
   },
 ]
 
-export default async function openingsAndApplications({ api, query, env }: FlowProps): Promise<void> {
+export default async function openingsAndApplications({
+  api,
+  query,
+  env,
+}: FlowProps): Promise<void> {
   const APPLICATION_CREATE_N = parseInt(env.APPLICATION_STATUS_CREATE_N || '')
   const APPLICATION_WITHDRAW_N = parseInt(env.APPLICATION_STATUS_WITHDRAW_N || '')
   assert.isAbove(APPLICATION_CREATE_N, 0)
@@ -81,16 +88,27 @@ export default async function openingsAndApplications({ api, query, env }: FlowP
       )
 
       // Create an opening
-      const createOpeningsFixture = new CreateOpeningsFixture(api, query, group, openingsToCreate(api))
+      const createOpeningsFixture = new CreateOpeningsFixture(
+        api,
+        query,
+        group,
+        openingsToCreate(api)
+      )
       const openingsRunner = new FixtureRunner(createOpeningsFixture)
       await openingsRunner.run()
       const [openingId] = createOpeningsFixture.getCreatedOpeningIds()
       const { stake: openingStake, metadata: openingMetadata } = createDefaultOpeningParams(api)
 
       // Create some applications
-      const roleAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(({ key }) => key.address)
-      const stakingAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(({ key }) => key.address)
-      const rewardAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(({ key }) => key.address)
+      const roleAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(
+        ({ key }) => key.address
+      )
+      const stakingAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(
+        ({ key }) => key.address
+      )
+      const rewardAccounts = (await api.createKeyPairs(APPLICATION_CREATE_N)).map(
+        ({ key }) => key.address
+      )
 
       const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, roleAccounts)
       await new FixtureRunner(buyMembershipFixture).run()
@@ -141,7 +159,10 @@ export default async function openingsAndApplications({ api, query, env }: FlowP
       await cancelOpeningRunner.run()
 
       // Run query node check
-      await Promise.all([withdrawApplicationsRunner.runQueryNodeChecks(), cancelOpeningRunner.runQueryNodeChecks()])
+      await Promise.all([
+        withdrawApplicationsRunner.runQueryNodeChecks(),
+        cancelOpeningRunner.runQueryNodeChecks(),
+      ])
 
       debug('Done')
     })

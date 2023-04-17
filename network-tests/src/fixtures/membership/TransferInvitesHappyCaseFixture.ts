@@ -49,15 +49,18 @@ export class TransferInvitesHappyCaseFixture extends BaseQueryNodeFixture {
   async execute(): Promise<void> {
     const { fromContext, toContext, invitesToTransfer } = this
 
-    const [fromMember, toMember] = await this.api.query.members.membershipById.multi<Option<Membership>>([
-      fromContext.memberId,
-      toContext.memberId,
-    ])
+    const [fromMember, toMember] = await this.api.query.members.membershipById.multi<
+      Option<Membership>
+    >([fromContext.memberId, toContext.memberId])
 
     this.fromMemberInitialInvites = fromMember.unwrap().invites.toNumber()
     this.toMemberInitialInvites = toMember.unwrap().invites.toNumber()
 
-    this.tx = this.api.tx.members.transferInvites(fromContext.memberId, toContext.memberId, invitesToTransfer)
+    this.tx = this.api.tx.members.transferInvites(
+      fromContext.memberId,
+      toContext.memberId,
+      invitesToTransfer
+    )
     const txFee = await this.api.estimateTxFee(this.tx, fromContext.account)
     await this.api.treasuryTransferBalance(fromContext.account, txFee)
 

@@ -48,7 +48,10 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
 
   public getCreatedWorkerIdsByOpeningId(openingId: OpeningId): WorkerId[] {
     const workerIds = this.createdWorkerIdsByOpeningId.get(openingId.toNumber())
-    Utils.assert(workerIds, `No created worker ids for opening id ${openingId.toString()} were found!`)
+    Utils.assert(
+      workerIds,
+      `No created worker ids for opening id ${openingId.toString()} were found!`
+    )
     return workerIds
   }
 
@@ -78,7 +81,10 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
       this.acceptedApplicationsArrays.map((acceptedApplications) =>
         Promise.all(
           acceptedApplications.map((a) =>
-            this.api.getStakedBalance(a.unwrap().stakingAccountId, this.api.lockIdByGroup(this.group))
+            this.api.getStakedBalance(
+              a.unwrap().stakingAccountId,
+              this.api.lockIdByGroup(this.group)
+            )
           )
         )
       )
@@ -94,7 +100,10 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
     await this.loadOpeningsData()
     await super.execute()
     this.events.forEach((e, i) => {
-      this.createdWorkerIdsByOpeningId.set(this.openingIds[i].toNumber(), Array.from(e.event.data[1].values()))
+      this.createdWorkerIdsByOpeningId.set(
+        this.openingIds[i].toNumber(),
+        Array.from(e.event.data[1].values())
+      )
     })
   }
 
@@ -113,7 +122,10 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
         `WorkerId for application id ${acceptedApplId.toString()} not found in OpeningFilled event!`
       )
       const qWorker = qEvent.workersHired.find((w) => w.runtimeId === workerId.toNumber())
-      Utils.assert(qWorker, `Query node: Worker not found in OpeningFilled.hiredWorkers (id: ${workerId.toString()})`)
+      Utils.assert(
+        qWorker,
+        `Query node: Worker not found in OpeningFilled.hiredWorkers (id: ${workerId.toString()})`
+      )
       this.assertHiredWorkerIsValid(
         this.acceptedApplicationsIdsArrays[i][j],
         this.acceptedApplicationsArrays[i][j].unwrap(),
@@ -155,8 +167,14 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
       const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
       const qOpening = qOpenings.find((o) => o.runtimeId === openingId.toNumber())
       Utils.assert(qOpening, 'Query node: Opening not found')
-      Utils.assert(qOpening.status.__typename === 'OpeningStatusFilled', 'Query node: Invalid opening status')
-      Utils.assert(qOpening.status.openingFilledEvent, 'Query node: Missing openingFilledEvent relation')
+      Utils.assert(
+        qOpening.status.__typename === 'OpeningStatusFilled',
+        'Query node: Invalid opening status'
+      )
+      Utils.assert(
+        qOpening.status.openingFilledEvent,
+        'Query node: Missing openingFilledEvent relation'
+      )
       assert.equal(qOpening.status.openingFilledEvent.id, qEvent.id)
     })
   }
@@ -172,14 +190,22 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
       const qOpening = qOpenings.find((o) => o.runtimeId === openingId.toNumber())
       Utils.assert(qOpening, 'Query node: Opening not found')
       qOpening.applications.forEach((qApplication) => {
-        const isAccepted = acceptedApplicationsIds.some((id) => id.toNumber() === qApplication.runtimeId)
+        const isAccepted = acceptedApplicationsIds.some(
+          (id) => id.toNumber() === qApplication.runtimeId
+        )
         if (isAccepted) {
-          Utils.assert(qApplication.status.__typename === 'ApplicationStatusAccepted', 'Invalid application status')
+          Utils.assert(
+            qApplication.status.__typename === 'ApplicationStatusAccepted',
+            'Invalid application status'
+          )
           // FIXME: Missing due to Hydra bug now
           // Utils.assert(qApplication.status.openingFilledEvent, 'Query node: Missing openingFilledEvent relation')
           // assert.equal(qApplication.status.openingFilledEvent.id, qEvent.id)
         } else {
-          assert.oneOf(qApplication.status.__typename, ['ApplicationStatusRejected', 'ApplicationStatusWithdrawn'])
+          assert.oneOf(qApplication.status.__typename, [
+            'ApplicationStatusRejected',
+            'ApplicationStatusWithdrawn',
+          ])
           if (qApplication.status.__typename === 'ApplicationStatusRejected') {
             // FIXME: Missing due to Hydra bug now
             // Utils.assert(qApplication.status.openingFilledEvent, 'Query node: Missing openingFilledEvent relation')

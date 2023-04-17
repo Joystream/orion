@@ -93,7 +93,11 @@ export class Sender {
               // example Error: findMetaError: Unable to find Error with index 0x1400/[{"index":20,"error":0}]
               // Happens for dispatchable calls that don't explicitly use `-> DispatchResult` return value even
               // if they return an error enum variant from the decl_error! macro
-              this.debug('Dispatch Error (error details not found):', err.asModule.toHuman(), sentTx)
+              this.debug(
+                'Dispatch Error (error details not found):',
+                err.asModule.toHuman(),
+                sentTx
+              )
             }
           } else {
             this.debug('Dispatch Error:', err.toHuman(), sentTx)
@@ -130,7 +134,10 @@ export class Sender {
       try {
         unsubscribe = await signedTx.send(handleEvents)
         if (this.logs === LogLevel.Verbose) {
-          this.debug('Submitted tx:', `${section}.${method} (nonce: ${nonce}, tip: ${formatBalance(tip)})`)
+          this.debug(
+            'Submitted tx:',
+            `${section}.${method} (nonce: ${nonce}, tip: ${formatBalance(tip)})`
+          )
         }
         nonceCacheByAccount.set(account.toString(), nonce.toNumber() + 1)
       } catch (err) {

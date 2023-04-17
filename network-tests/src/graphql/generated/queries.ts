@@ -107,7 +107,11 @@ export type ChannelFieldsFragment = {
   videos: Array<VideoFieldsFragment>
 }
 
-export type VideoCategoryFieldsFragment = { id: string; name?: Types.Maybe<string>; activeVideosCounter: number }
+export type VideoCategoryFieldsFragment = {
+  id: string
+  name?: Types.Maybe<string>
+  activeVideosCounter: number
+}
 
 export type VideoReactionFieldsFragment = {
   id: string
@@ -274,7 +278,9 @@ export type GetVideoCategoryByIdQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']
 }>
 
-export type GetVideoCategoryByIdQuery = { videoCategoryByUniqueInput?: Types.Maybe<VideoCategoryFieldsFragment> }
+export type GetVideoCategoryByIdQuery = {
+  videoCategoryByUniqueInput?: Types.Maybe<VideoCategoryFieldsFragment>
+}
 
 export type GetVideoCategoriesQueryVariables = Types.Exact<{
   order?: Types.Maybe<Array<Types.VideoCategoryOrderByInput> | Types.VideoCategoryOrderByInput>
@@ -315,13 +321,17 @@ export type GetBidsByMemberIdQuery = { bids: Array<BidFieldsFragment> }
 
 export type GetChannelNftCollectorsQueryVariables = Types.Exact<{ [key: string]: never }>
 
-export type GetChannelNftCollectorsQuery = { channelNftCollectors: Array<ChannelNftCollectorFieldsFragment> }
+export type GetChannelNftCollectorsQuery = {
+  channelNftCollectors: Array<ChannelNftCollectorFieldsFragment>
+}
 
 export type GetDataObjectsByVideoIdQueryVariables = Types.Exact<{
   videoId?: Types.Maybe<Types.Scalars['ID']>
 }>
 
-export type GetDataObjectsByVideoIdQuery = { storageDataObjects: Array<StorageDataObjectFieldsFragment> }
+export type GetDataObjectsByVideoIdQuery = {
+  storageDataObjects: Array<StorageDataObjectFieldsFragment>
+}
 
 export type GetCuratorPermissionsByIdAndGroupIdQueryVariables = Types.Exact<{
   curatorGroupId: Types.Scalars['ID']
@@ -353,7 +363,9 @@ export type GetCommentCreatedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetCommentCreatedEventsByEventIdsQuery = { commentCreatedEvents: Array<CommentCreatedEventFieldsFragment> }
+export type GetCommentCreatedEventsByEventIdsQuery = {
+  commentCreatedEvents: Array<CommentCreatedEventFieldsFragment>
+}
 
 export type CommentDeletedEventFieldsFragment = {
   id: string
@@ -369,7 +381,9 @@ export type GetCommentDeletedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetCommentDeletedEventsByEventIdsQuery = { commentDeletedEvents: Array<CommentDeletedEventFieldsFragment> }
+export type GetCommentDeletedEventsByEventIdsQuery = {
+  commentDeletedEvents: Array<CommentDeletedEventFieldsFragment>
+}
 
 export type CommentTextUpdatedEventFieldsFragment = {
   id: string
@@ -424,7 +438,9 @@ export type GetCommentPinnedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetCommentPinnedEventsByEventIdsQuery = { commentPinnedEvents: Array<CommentPinnedEventFieldsFragment> }
+export type GetCommentPinnedEventsByEventIdsQuery = {
+  commentPinnedEvents: Array<CommentPinnedEventFieldsFragment>
+}
 
 export type VideoReactedEventFieldsFragment = {
   id: string
@@ -442,7 +458,9 @@ export type GetVideoReactedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetVideoReactedEventsByEventIdsQuery = { videoReactedEvents: Array<VideoReactedEventFieldsFragment> }
+export type GetVideoReactedEventsByEventIdsQuery = {
+  videoReactedEvents: Array<VideoReactedEventFieldsFragment>
+}
 
 export type CommentReactedEventFieldsFragment = {
   id: string
@@ -460,7 +478,9 @@ export type GetCommentReactedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetCommentReactedEventsByEventIdsQuery = { commentReactedEvents: Array<CommentReactedEventFieldsFragment> }
+export type GetCommentReactedEventsByEventIdsQuery = {
+  commentReactedEvents: Array<CommentReactedEventFieldsFragment>
+}
 
 export type MemberBannedFromChannelEventFieldsFragment = {
   id: string
@@ -615,7 +635,9 @@ export type ChannelPayoutsUpdatedEventFragment = {
   payloadDataObject?: Types.Maybe<{ id: string }>
 }
 
-export type GetMostRecentChannelPayoutsUpdatedEventQueryVariables = Types.Exact<{ [key: string]: never }>
+export type GetMostRecentChannelPayoutsUpdatedEventQueryVariables = Types.Exact<{
+  [key: string]: never
+}>
 
 export type GetMostRecentChannelPayoutsUpdatedEventQuery = {
   channelPayoutsUpdatedEvents: Array<ChannelPayoutsUpdatedEventFragment>
@@ -732,7 +754,9 @@ export type GetNftIssuedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetNftIssuedEventsByEventIdsQuery = { nftIssuedEvents: Array<NftIssuedEventFieldsFragment> }
+export type GetNftIssuedEventsByEventIdsQuery = {
+  nftIssuedEvents: Array<NftIssuedEventFieldsFragment>
+}
 
 export type EnglishAuctionSettledEventFieldsFragment = {
   winner: { id: string }
@@ -798,7 +822,10 @@ export type ForumCategoryFieldsFragment = {
   createdInEvent: { id: string }
   status:
     | { __typename: 'CategoryStatusActive' }
-    | { __typename: 'CategoryStatusArchived'; categoryArchivalStatusUpdatedEvent?: Types.Maybe<{ id: string }> }
+    | {
+        __typename: 'CategoryStatusArchived'
+        categoryArchivalStatusUpdatedEvent?: Types.Maybe<{ id: string }>
+      }
     | { __typename: 'CategoryStatusRemoved'; categoryDeletedEvent?: Types.Maybe<{ id: string }> }
 }
 
@@ -853,7 +880,9 @@ export type GetThreadsWithInitialPostsByIdsQueryVariables = Types.Exact<{
   ids?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetThreadsWithInitialPostsByIdsQuery = { forumThreads: Array<ForumThreadWithInitialPostFragment> }
+export type GetThreadsWithInitialPostsByIdsQuery = {
+  forumThreads: Array<ForumThreadWithInitialPostFragment>
+}
 
 export type GetPostsByIdsQueryVariables = Types.Exact<{
   ids?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
@@ -934,7 +963,9 @@ export type GetThreadCreatedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetThreadCreatedEventsByEventIdsQuery = { threadCreatedEvents: Array<ThreadCreatedEventFieldsFragment> }
+export type GetThreadCreatedEventsByEventIdsQuery = {
+  threadCreatedEvents: Array<ThreadCreatedEventFieldsFragment>
+}
 
 export type ThreadMetadataUpdatedEventFieldsFragment = {
   id: string
@@ -969,7 +1000,9 @@ export type GetThreadDeletedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetThreadDeletedEventsByEventIdsQuery = { threadDeletedEvents: Array<ThreadDeletedEventFieldsFragment> }
+export type GetThreadDeletedEventsByEventIdsQuery = {
+  threadDeletedEvents: Array<ThreadDeletedEventFieldsFragment>
+}
 
 export type PostAddedEventFieldsFragment = {
   id: string
@@ -987,7 +1020,9 @@ export type GetPostAddedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetPostAddedEventsByEventIdsQuery = { postAddedEvents: Array<PostAddedEventFieldsFragment> }
+export type GetPostAddedEventsByEventIdsQuery = {
+  postAddedEvents: Array<PostAddedEventFieldsFragment>
+}
 
 export type ThreadMovedEventFieldsFragment = {
   id: string
@@ -1006,7 +1041,9 @@ export type GetThreadMovedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetThreadMovedEventsByEventIdsQuery = { threadMovedEvents: Array<ThreadMovedEventFieldsFragment> }
+export type GetThreadMovedEventsByEventIdsQuery = {
+  threadMovedEvents: Array<ThreadMovedEventFieldsFragment>
+}
 
 export type CategoryStickyThreadUpdateEventFieldsFragment = {
   id: string
@@ -1084,7 +1121,9 @@ export type GetPostModeratedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetPostModeratedEventsByEventIdsQuery = { postModeratedEvents: Array<PostModeratedEventFieldsFragment> }
+export type GetPostModeratedEventsByEventIdsQuery = {
+  postModeratedEvents: Array<PostModeratedEventFieldsFragment>
+}
 
 export type PostTextUpdatedEventFieldsFragment = {
   id: string
@@ -1121,13 +1160,17 @@ export type GetPostDeletedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetPostDeletedEventsByEventIdsQuery = { postDeletedEvents: Array<PostDeletedEventFieldsFragment> }
+export type GetPostDeletedEventsByEventIdsQuery = {
+  postDeletedEvents: Array<PostDeletedEventFieldsFragment>
+}
 
 export type MemberMetadataFieldsFragment = {
   name?: Types.Maybe<string>
   about?: Types.Maybe<string>
   avatar?: Types.Maybe<{ avatarUri: string }>
-  externalResources?: Types.Maybe<Array<{ type: Types.MembershipExternalResourceType; value: string }>>
+  externalResources?: Types.Maybe<
+    Array<{ type: Types.MembershipExternalResourceType; value: string }>
+  >
 }
 
 export type MembershipFieldsFragment = {
@@ -1144,7 +1187,10 @@ export type MembershipFieldsFragment = {
     | { __typename: 'MembershipEntryPaid'; membershipBoughtEvent?: Types.Maybe<{ id: string }> }
     | { __typename: 'MembershipEntryInvited'; memberInvitedEvent?: Types.Maybe<{ id: string }> }
     | { __typename: 'MembershipEntryGifted'; membershipGiftedEvent?: Types.Maybe<{ id: string }> }
-    | { __typename: 'MembershipEntryMemberCreated'; memberCreatedEvent?: Types.Maybe<{ id: string }> }
+    | {
+        __typename: 'MembershipEntryMemberCreated'
+        memberCreatedEvent?: Types.Maybe<{ id: string }>
+      }
     | { __typename: 'MembershipEntryGenesis' }
   invitedBy?: Types.Maybe<{ id: string }>
   invitees: Array<{ id: string }>
@@ -1244,7 +1290,9 @@ export type GetMemberCreatedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetMemberCreatedEventsByEventIdsQuery = { memberCreatedEvents: Array<MemberCreatedEventFieldsFragment> }
+export type GetMemberCreatedEventsByEventIdsQuery = {
+  memberCreatedEvents: Array<MemberCreatedEventFieldsFragment>
+}
 
 export type MembershipGiftedEventFieldsFragment = {
   id: string
@@ -1288,7 +1336,9 @@ export type GetMemberInvitedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetMemberInvitedEventsByEventIdsQuery = { memberInvitedEvents: Array<MemberInvitedEventFieldsFragment> }
+export type GetMemberInvitedEventsByEventIdsQuery = {
+  memberInvitedEvents: Array<MemberInvitedEventFieldsFragment>
+}
 
 export type InvitesTransferredEventFieldsFragment = {
   id: string
@@ -1546,7 +1596,9 @@ type ProposalStatusFields_ProposalStatusExecuted_Fragment = {
   __typename: 'ProposalStatusExecuted'
   proposalExecutedEvent?: Types.Maybe<{
     id: string
-    executionStatus: { __typename: 'ProposalStatusExecuted' } | { __typename: 'ProposalStatusExecutionFailed' }
+    executionStatus:
+      | { __typename: 'ProposalStatusExecuted' }
+      | { __typename: 'ProposalStatusExecutionFailed' }
   }>
 }
 
@@ -1555,7 +1607,9 @@ type ProposalStatusFields_ProposalStatusExecutionFailed_Fragment = {
   errorMessage: string
   proposalExecutedEvent?: Types.Maybe<{
     id: string
-    executionStatus: { __typename: 'ProposalStatusExecuted' } | { __typename: 'ProposalStatusExecutionFailed' }
+    executionStatus:
+      | { __typename: 'ProposalStatusExecuted' }
+      | { __typename: 'ProposalStatusExecutionFailed' }
   }>
 }
 
@@ -1641,7 +1695,10 @@ export type ProposalStatusFieldsFragment =
   | ProposalStatusFields_ProposalStatusCancelled_Fragment
   | ProposalStatusFields_ProposalStatusCanceledByRuntime_Fragment
 
-type ProposalDetailsFields_SignalProposalDetails_Fragment = { __typename: 'SignalProposalDetails'; text: string }
+type ProposalDetailsFields_SignalProposalDetails_Fragment = {
+  __typename: 'SignalProposalDetails'
+  text: string
+}
 
 type ProposalDetailsFields_RuntimeUpgradeProposalDetails_Fragment = {
   __typename: 'RuntimeUpgradeProposalDetails'
@@ -2111,7 +2168,9 @@ export type GetProposalVotedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetProposalVotedEventsByEventIdsQuery = { proposalVotedEvents: Array<ProposalVotedEventFieldsFragment> }
+export type GetProposalVotedEventsByEventIdsQuery = {
+  proposalVotedEvents: Array<ProposalVotedEventFieldsFragment>
+}
 
 export type ProposalCancelledEventFieldsFragment = {
   id: string
@@ -2146,7 +2205,10 @@ export type GetStorageBucketsQueryVariables = Types.Exact<{ [key: string]: never
 
 export type GetStorageBucketsQuery = { storageBuckets: Array<StorageNodeInfoFragment> }
 
-export type DistributionBucketFamilyFieldsFragment = { id: string; buckets: Array<{ id: string; bucketIndex: number }> }
+export type DistributionBucketFamilyFieldsFragment = {
+  id: string
+  buckets: Array<{ id: string; bucketIndex: number }>
+}
 
 export type GetDistributionFamiliesAdndBucketsQueryVariables = Types.Exact<{ [key: string]: never }>
 
@@ -2161,8 +2223,14 @@ export type ApplicationBasicFieldsFragment = {
     | { __typename: 'ApplicationStatusPending' }
     | { __typename: 'ApplicationStatusAccepted'; openingFilledEvent?: Types.Maybe<{ id: string }> }
     | { __typename: 'ApplicationStatusRejected'; openingFilledEvent?: Types.Maybe<{ id: string }> }
-    | { __typename: 'ApplicationStatusWithdrawn'; applicationWithdrawnEvent?: Types.Maybe<{ id: string }> }
-    | { __typename: 'ApplicationStatusCancelled'; openingCanceledEvent?: Types.Maybe<{ id: string }> }
+    | {
+        __typename: 'ApplicationStatusWithdrawn'
+        applicationWithdrawnEvent?: Types.Maybe<{ id: string }>
+      }
+    | {
+        __typename: 'ApplicationStatusCancelled'
+        openingCanceledEvent?: Types.Maybe<{ id: string }>
+      }
 }
 
 type OpeningStatusFields_OpeningStatusOpen_Fragment = { __typename: 'OpeningStatusOpen' }
@@ -2255,7 +2323,9 @@ export type GetOpeningByIdQueryVariables = Types.Exact<{
   openingId: Types.Scalars['ID']
 }>
 
-export type GetOpeningByIdQuery = { workingGroupOpeningByUniqueInput?: Types.Maybe<OpeningFieldsFragment> }
+export type GetOpeningByIdQuery = {
+  workingGroupOpeningByUniqueInput?: Types.Maybe<OpeningFieldsFragment>
+}
 
 export type GetOpeningsByIdsQueryVariables = Types.Exact<{
   openingIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
@@ -2278,13 +2348,17 @@ export type GetApplicationByIdQueryVariables = Types.Exact<{
   applicationId: Types.Scalars['ID']
 }>
 
-export type GetApplicationByIdQuery = { workingGroupApplicationByUniqueInput?: Types.Maybe<ApplicationFieldsFragment> }
+export type GetApplicationByIdQuery = {
+  workingGroupApplicationByUniqueInput?: Types.Maybe<ApplicationFieldsFragment>
+}
 
 export type GetApplicationsByIdsQueryVariables = Types.Exact<{
   applicationIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetApplicationsByIdsQuery = { workingGroupApplications: Array<ApplicationFieldsFragment> }
+export type GetApplicationsByIdsQuery = {
+  workingGroupApplications: Array<ApplicationFieldsFragment>
+}
 
 export type WorkingGroupFieldsFragment = {
   id: string
@@ -2298,7 +2372,9 @@ export type GetWorkingGroupByNameQueryVariables = Types.Exact<{
   name: Types.Scalars['String']
 }>
 
-export type GetWorkingGroupByNameQuery = { workingGroupByUniqueInput?: Types.Maybe<WorkingGroupFieldsFragment> }
+export type GetWorkingGroupByNameQuery = {
+  workingGroupByUniqueInput?: Types.Maybe<WorkingGroupFieldsFragment>
+}
 
 export type UpcomingOpeningFieldsFragment = {
   id: string
@@ -2377,7 +2453,9 @@ export type GetOpeningAddedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetOpeningAddedEventsByEventIdsQuery = { openingAddedEvents: Array<OpeningAddedEventFieldsFragment> }
+export type GetOpeningAddedEventsByEventIdsQuery = {
+  openingAddedEvents: Array<OpeningAddedEventFieldsFragment>
+}
 
 export type LeaderSetEventFieldsFragment = {
   id: string
@@ -2394,7 +2472,9 @@ export type GetLeaderSetEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetLeaderSetEventsByEventIdsQuery = { leaderSetEvents: Array<LeaderSetEventFieldsFragment> }
+export type GetLeaderSetEventsByEventIdsQuery = {
+  leaderSetEvents: Array<LeaderSetEventFieldsFragment>
+}
 
 export type OpeningFilledEventFieldsFragment = {
   id: string
@@ -2412,7 +2492,9 @@ export type GetOpeningFilledEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetOpeningFilledEventsByEventIdsQuery = { openingFilledEvents: Array<OpeningFilledEventFieldsFragment> }
+export type GetOpeningFilledEventsByEventIdsQuery = {
+  openingFilledEvents: Array<OpeningFilledEventFieldsFragment>
+}
 
 export type ApplicationWithdrawnEventFieldsFragment = {
   id: string
@@ -2532,7 +2614,9 @@ export type GetStakeIncreasedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetStakeIncreasedEventsByEventIdsQuery = { stakeIncreasedEvents: Array<StakeIncreasedEventFieldsFragment> }
+export type GetStakeIncreasedEventsByEventIdsQuery = {
+  stakeIncreasedEvents: Array<StakeIncreasedEventFieldsFragment>
+}
 
 export type WorkerStartedLeavingEventFieldsFragment = {
   id: string
@@ -2592,7 +2676,9 @@ export type GetStakeSlashedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetStakeSlashedEventsByEventIdsQuery = { stakeSlashedEvents: Array<StakeSlashedEventFieldsFragment> }
+export type GetStakeSlashedEventsByEventIdsQuery = {
+  stakeSlashedEvents: Array<StakeSlashedEventFieldsFragment>
+}
 
 export type StakeDecreasedEventFieldsFragment = {
   id: string
@@ -2610,7 +2696,9 @@ export type GetStakeDecreasedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetStakeDecreasedEventsByEventIdsQuery = { stakeDecreasedEvents: Array<StakeDecreasedEventFieldsFragment> }
+export type GetStakeDecreasedEventsByEventIdsQuery = {
+  stakeDecreasedEvents: Array<StakeDecreasedEventFieldsFragment>
+}
 
 export type TerminatedWorkerEventFieldsFragment = {
   id: string
@@ -2669,7 +2757,9 @@ export type GetLeaderUnsetEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetLeaderUnsetEventsByEventIdsQuery = { leaderUnsetEvents: Array<LeaderUnsetEventFieldsFragment> }
+export type GetLeaderUnsetEventsByEventIdsQuery = {
+  leaderUnsetEvents: Array<LeaderUnsetEventFieldsFragment>
+}
 
 export type BudgetSetEventFieldsFragment = {
   id: string
@@ -2686,7 +2776,9 @@ export type GetBudgetSetEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetBudgetSetEventsByEventIdsQuery = { budgetSetEvents: Array<BudgetSetEventFieldsFragment> }
+export type GetBudgetSetEventsByEventIdsQuery = {
+  budgetSetEvents: Array<BudgetSetEventFieldsFragment>
+}
 
 export type BudgetSpendingEventFieldsFragment = {
   id: string
@@ -2705,7 +2797,9 @@ export type GetBudgetSpendingEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetBudgetSpendingEventsByEventIdsQuery = { budgetSpendingEvents: Array<BudgetSpendingEventFieldsFragment> }
+export type GetBudgetSpendingEventsByEventIdsQuery = {
+  budgetSpendingEvents: Array<BudgetSpendingEventFieldsFragment>
+}
 
 export type BudgetFundedEventFieldsFragment = {
   id: string
@@ -2724,7 +2818,9 @@ export type GetBudgetFundedEventsByEventIdsQueryVariables = Types.Exact<{
   eventIds?: Types.Maybe<Array<Types.Scalars['ID']> | Types.Scalars['ID']>
 }>
 
-export type GetBudgetFundedEventsByEventIdsQuery = { budgetFundedEvents: Array<BudgetFundedEventFieldsFragment> }
+export type GetBudgetFundedEventsByEventIdsQuery = {
+  budgetFundedEvents: Array<BudgetFundedEventFieldsFragment>
+}
 
 export const AppFields = gql`
   fragment AppFields on App {
@@ -5387,7 +5483,9 @@ export const GetDataObjectsByVideoId = gql`
 `
 export const GetCuratorPermissionsByIdAndGroupId = gql`
   query getCuratorPermissionsByIdAndGroupId($curatorGroupId: ID!, $curatorId: ID!) {
-    curatorAgentPermissions(where: { curatorGroup: { id_eq: $curatorGroupId }, curator: { id_eq: $curatorId } }) {
+    curatorAgentPermissions(
+      where: { curatorGroup: { id_eq: $curatorGroupId }, curator: { id_eq: $curatorId } }
+    ) {
       ...CuratorAgentPermissionsFields
     }
   }

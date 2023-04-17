@@ -17,7 +17,9 @@ export type EventMethod<Section extends EventSection> = keyof ApiPromise['events
 export type EventType<
   Section extends EventSection,
   Method extends EventMethod<Section>
-> = ApiPromise['events'][Section][Method] extends AugmentedEvent<'promise', infer T> ? IEvent<T> : never
+> = ApiPromise['events'][Section][Method] extends AugmentedEvent<'promise', infer T>
+  ? IEvent<T>
+  : never
 export interface EventDetails<T = unknown> {
   event: T
   blockNumber: number
@@ -64,7 +66,8 @@ export type ProposalType = ProposalDetails['type']
 //   InstanceType<ProposalDetails['type'][T]>
 // >
 
-export type ProposalDetailsJsonByType<T extends ProposalType = ProposalType> = ProposalDetails[`as${T}`]
+export type ProposalDetailsJsonByType<T extends ProposalType = ProposalType> =
+  ProposalDetails[`as${T}`]
 // Forum
 
 export type ThreadPath = {

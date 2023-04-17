@@ -15,7 +15,10 @@ import {
   ProposalDiscussionPostId as PostId,
   ProposalDiscussionThreadId as ThreadId,
 } from '@joystream/types/primitives'
-import { ProposalsDiscussionPostMetadata, IProposalsDiscussionPostMetadata } from '@joystream/metadata-protobuf'
+import {
+  ProposalsDiscussionPostMetadata,
+  IProposalsDiscussionPostMetadata,
+} from '@joystream/metadata-protobuf'
 import { EventDetails } from '@joystream/cli/src/Types'
 
 export type PostParams = {
@@ -25,7 +28,9 @@ export type PostParams = {
   metadata: MetadataInput<IProposalsDiscussionPostMetadata> & { expectReplyFailure?: boolean }
 }
 
-type ProposalDiscussionPostCreatedEventDetails = EventDetails<EventType<'proposalsDiscussion', 'PostCreated'>>
+type ProposalDiscussionPostCreatedEventDetails = EventDetails<
+  EventType<'proposalsDiscussion', 'PostCreated'>
+>
 
 export class CreatePostsFixture extends StandardizedFixture {
   protected events: ProposalDiscussionPostCreatedEventDetails[] = []
@@ -51,7 +56,9 @@ export class CreatePostsFixture extends StandardizedFixture {
     const accounts = await this.getSignerAccountOrAccounts()
     // Send required funds to accounts (ProposalsPostDeposit)
     await Promise.all(
-      accounts.map((a) => this.api.treasuryTransferBalance(a, this.api.consts.proposalsDiscussion.postDeposit))
+      accounts.map((a) =>
+        this.api.treasuryTransferBalance(a, this.api.consts.proposalsDiscussion.postDeposit)
+      )
     )
     await super.execute()
   }
@@ -67,7 +74,9 @@ export class CreatePostsFixture extends StandardizedFixture {
     )
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<ProposalDiscussionPostCreatedEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<ProposalDiscussionPostCreatedEventDetails> {
     return this.api.getEventDetails(result, 'proposalsDiscussion', 'PostCreated')
   }
 
@@ -76,8 +85,13 @@ export class CreatePostsFixture extends StandardizedFixture {
       ProposalsDiscussionPostMetadata,
       postParams.metadata
     )
-    const metadataBytes = Utils.getMetadataBytesFromInput(ProposalsDiscussionPostMetadata, postParams.metadata)
-    return typeof expectedMetadata?.text === 'string' ? expectedMetadata.text : Utils.bytesToString(metadataBytes)
+    const metadataBytes = Utils.getMetadataBytesFromInput(
+      ProposalsDiscussionPostMetadata,
+      postParams.metadata
+    )
+    return typeof expectedMetadata?.text === 'string'
+      ? expectedMetadata.text
+      : Utils.bytesToString(metadataBytes)
   }
 
   protected assertQueriedPostsAreValid(
@@ -110,7 +124,10 @@ export class CreatePostsFixture extends StandardizedFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ProposalDiscussionPostCreatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ProposalDiscussionPostCreatedEventFieldsFragment,
+    i: number
+  ): void {
     const params = this.postsParams[i]
     assert.equal(qEvent.post.id, this.events[i].event.data[0].toString())
     assert.equal(qEvent.text, this.getPostExpectedText(params))
@@ -125,7 +142,9 @@ export class CreatePostsFixture extends StandardizedFixture {
     )
 
     // Query the posts
-    const qPosts = await this.query.getProposalDiscussionPostsByIds(this.events.map((e) => e.event.data[0]))
+    const qPosts = await this.query.getProposalDiscussionPostsByIds(
+      this.events.map((e) => e.event.data[0])
+    )
     this.assertQueriedPostsAreValid(qPosts, qEvents)
   }
 }

@@ -15,7 +15,12 @@ export type VotingParams = {
 export class VoteFixture extends StandardizedFixture {
   private votes: Map<string, VotingParams>
 
-  constructor(api: Api, query: QueryNodeApi, votes: Map<string, VotingParams>, failureExpected = false) {
+  constructor(
+    api: Api,
+    query: QueryNodeApi,
+    votes: Map<string, VotingParams>,
+    failureExpected = false
+  ) {
     super(api, query)
     this.votes = votes
     this.decrementalTip = true
@@ -26,7 +31,9 @@ export class VoteFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise', ISubmittableResult>[]> {
-    return Array.from(this.votes).map(([, params]) => this.api.tx.referendum.vote(params.commitment, params.stake))
+    return Array.from(this.votes).map(([, params]) =>
+      this.api.tx.referendum.vote(params.commitment, params.stake)
+    )
   }
 
   protected getEventFromResult(result: ISubmittableResult): Promise<EventDetails<unknown>> {

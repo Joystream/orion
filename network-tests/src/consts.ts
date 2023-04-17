@@ -15,7 +15,8 @@ export const BLOCKTIME = 1000
 export const KNOWN_WORKER_ROLE_ACCOUNT_DEFAULT_BALANCE = new BN(1000000000000)
 export const KNOWN_COUNCILLOR_ACCOUNT_DEFAULT_BALANCE = new BN(1000000000000)
 
-export const ALL_BYTES = '0x' + Array.from({ length: 256 }, (v, i) => Buffer.from([i]).toString('hex')).join('')
+export const ALL_BYTES =
+  '0x' + Array.from({ length: 256 }, (v, i) => Buffer.from([i]).toString('hex')).join('')
 
 export const workingGroups: WorkingGroupModuleName[] = [
   'storageWorkingGroup',
@@ -94,5 +95,7 @@ export const proposalTypeToProposalParamsKey = {
   'UpdateChannelPayouts': 'updateChannelPayoutsProposalParameters',
 } as const
 
-type ProposalTypeToProposalParamsKeyMap = { [K in ProposalType]: keyof AugmentedConsts<'promise'>['proposalsCodex'] }
+type ProposalTypeToProposalParamsKeyMap = {
+  [K in ProposalType]: keyof AugmentedConsts<'promise'>['proposalsCodex']
+}
 validateType<ProposalTypeToProposalParamsKeyMap>(proposalTypeToProposalParamsKey)

@@ -35,11 +35,13 @@ export class TerminateWorkersFixture extends BaseWorkingGroupFixture {
   }
 
   protected async loadWorkersData(): Promise<void> {
-    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map((optionalWorker) =>
-      optionalWorker.unwrap()
+    this.workers = (await this.api.query[this.group].workerById.multi(this.workerIds)).map(
+      (optionalWorker) => optionalWorker.unwrap()
     )
     this.workerStakes = await Promise.all(
-      this.workers.map((w) => this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group)))
+      this.workers.map((w) =>
+        this.api.getStakedBalance(w.stakingAccountId, this.api.lockIdByGroup(this.group))
+      )
     )
   }
 
@@ -49,7 +51,11 @@ export class TerminateWorkersFixture extends BaseWorkingGroupFixture {
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     const extrinsics = this.workerIds.map((workerId, i) =>
-      this.api.tx[this.group].terminateRole(workerId, this.penalties[i], this.getRationale(workerId))
+      this.api.tx[this.group].terminateRole(
+        workerId,
+        this.penalties[i],
+        this.getRationale(workerId)
+      )
     )
     return extrinsics
   }
@@ -92,7 +98,10 @@ export class TerminateWorkersFixture extends BaseWorkingGroupFixture {
         worker.status.__typename === 'WorkerStatusTerminated',
         `Invalid worker status: ${worker.status.__typename}`
       )
-      Utils.assert(worker.status.terminatedWorkerEvent, 'Query node: Missing terminatedWorkerEvent relation')
+      Utils.assert(
+        worker.status.terminatedWorkerEvent,
+        'Query node: Missing terminatedWorkerEvent relation'
+      )
       assert.equal(worker.status.terminatedWorkerEvent.id, qEvent.id)
     })
   }

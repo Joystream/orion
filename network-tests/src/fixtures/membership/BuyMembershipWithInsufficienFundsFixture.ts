@@ -37,15 +37,24 @@ export class BuyMembershipWithInsufficienFundsFixture extends BaseFixture {
 
     assert.isBelow(
       balance.toNumber(),
-      membershipFee.add(membershipTransactionFee).add(this.api.consts.balances.existentialDeposit).toNumber(),
+      membershipFee
+        .add(membershipTransactionFee)
+        .add(this.api.consts.balances.existentialDeposit)
+        .toNumber(),
       'Account already has sufficient balance to purchase membership'
     )
 
-    const result = await this.api.signAndSend(this.generateBuyMembershipTx(this.account), this.account)
+    const result = await this.api.signAndSend(
+      this.generateBuyMembershipTx(this.account),
+      this.account
+    )
 
     this.expectDispatchError(result, 'Buying membership with insufficient funds should fail.')
 
     // Assert that failure occured for expected reason
-    assert.equal(this.api.getErrorNameFromExtrinsicFailedRecord(result), 'NotEnoughBalanceToBuyMembership')
+    assert.equal(
+      this.api.getErrorNameFromExtrinsicFailedRecord(result),
+      'NotEnoughBalanceToBuyMembership'
+    )
   }
 }

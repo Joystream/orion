@@ -48,7 +48,10 @@ function writeOutput(api: Api, miniSecret: string) {
   fs.writeFileSync(OUTPUT_FILE_PATH, JSON.stringify(output, undefined, 2))
 }
 
-export async function scenario(label: string, scene: (props: ScenarioProps) => Promise<void>): Promise<void> {
+export async function scenario(
+  label: string,
+  scene: (props: ScenarioProps) => Promise<void>
+): Promise<void> {
   // Load env variables - test framework specific
   config({ path: path.join(__dirname, '../.env') })
   // root workspace .env used by docker-compose services
@@ -60,7 +63,11 @@ export async function scenario(label: string, scene: (props: ScenarioProps) => P
   const nodeUrl: string = env.NODE_URL || 'ws://127.0.0.1:9944'
   const provider = new WsProvider(nodeUrl)
   const miniSecret = env.SURI_MINI_SECRET || ''
-  const apiFactory = await ApiFactory.create(provider, env.TREASURY_ACCOUNT_URI || '//Alice', miniSecret)
+  const apiFactory = await ApiFactory.create(
+    provider,
+    env.TREASURY_ACCOUNT_URI || '//Alice',
+    miniSecret
+  )
 
   const api = apiFactory.getApi('Key Generation')
 

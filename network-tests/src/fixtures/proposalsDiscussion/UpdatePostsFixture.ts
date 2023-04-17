@@ -51,7 +51,9 @@ export class UpdatePostsFixture extends StandardizedFixture {
     qPosts: ProposalDiscussionPostFieldsFragment[],
     qEvents: ProposalDiscussionPostUpdatedEventFieldsFragment[]
   ): void {
-    for (const [postId, updates] of _.entries(_.groupBy(this.postsUpdates, (p) => p.postId.toString()))) {
+    for (const [postId, updates] of _.entries(
+      _.groupBy(this.postsUpdates, (p) => p.postId.toString())
+    )) {
       const finalUpdate = _.last(updates)
       const qPost = qPosts.find((p) => p.id === postId.toString())
       Utils.assert(qPost, 'Query node: Post not found!')
@@ -64,7 +66,10 @@ export class UpdatePostsFixture extends StandardizedFixture {
     }
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: ProposalDiscussionPostUpdatedEventFieldsFragment, i: number): void {
+  protected assertQueryNodeEventIsValid(
+    qEvent: ProposalDiscussionPostUpdatedEventFieldsFragment,
+    i: number
+  ): void {
     const params = this.postsUpdates[i]
     assert.equal(qEvent.post.id, params.postId.toString())
     assert.equal(qEvent.text, Utils.asText(params.newText))
@@ -79,7 +84,9 @@ export class UpdatePostsFixture extends StandardizedFixture {
     )
 
     // Query the posts
-    const qPosts = await this.query.getProposalDiscussionPostsByIds(this.postsUpdates.map((u) => u.postId))
+    const qPosts = await this.query.getProposalDiscussionPostsByIds(
+      this.postsUpdates.map((u) => u.postId)
+    )
     this.assertQueriedPostsAreValid(qPosts, qEvents)
   }
 }

@@ -26,7 +26,9 @@ export default async function updatingProfile({ api, query }: FlowProps): Promis
       name: '',
       about: '',
       avatarUri: '',
-      externalResources: [{ type: MembershipMetadata.ExternalResource.ResourceType.EMAIL, value: 'A@example.com' }],
+      externalResources: [
+        { type: MembershipMetadata.ExternalResource.ResourceType.EMAIL, value: 'A@example.com' },
+      ],
     },
     // Full update
     {
@@ -49,7 +51,13 @@ export default async function updatingProfile({ api, query }: FlowProps): Promis
   let oldValues: MemberProfileData = generateParamsFromAccountId(account)
   for (const newValues of updates) {
     const context = { account, memberId }
-    const updateProfileHappyCaseFixture = new UpdateProfileHappyCaseFixture(api, query, context, oldValues, newValues)
+    const updateProfileHappyCaseFixture = new UpdateProfileHappyCaseFixture(
+      api,
+      query,
+      context,
+      oldValues,
+      newValues
+    )
     await new FixtureRunner(updateProfileHappyCaseFixture).runWithQueryNodeChecks()
     oldValues = updateProfileHappyCaseFixture.getExpectedValues()
   }

@@ -520,7 +520,9 @@ export class QueryNodeApi {
       try {
         assertResultIsValid(result)
       } catch (e) {
-        debug(`Unexpected query result${e && (e as Error).message ? ` (${(e as Error).message})` : ''}`)
+        debug(
+          `Unexpected query result${e && (e as Error).message ? ` (${(e as Error).message})` : ''}`
+        )
         await retry(e)
         continue
       }
@@ -530,7 +532,9 @@ export class QueryNodeApi {
   }
 
   private debugQuery(query: DocumentNode, args: Record<string, unknown>): void {
-    const queryDef = query.definitions.find((d) => d.kind === 'OperationDefinition') as OperationDefinitionNode
+    const queryDef = query.definitions.find(
+      (d) => d.kind === 'OperationDefinition'
+    ) as OperationDefinitionNode
     this.queryDebug(`${queryDef.name?.value}(${JSON.stringify(args)})`)
   }
 
@@ -544,26 +548,43 @@ export class QueryNodeApi {
     resultKey: keyof QueryT
   ): Promise<Required<QueryT>[keyof QueryT] | null> {
     this.debugQuery(query, variables)
-    return (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[resultKey] || null
+    return (
+      (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
+        resultKey
+      ] || null
+    )
   }
 
   // Query entities by "non-unique" input and return first result
-  private async firstEntityQuery<QueryT extends { [k: string]: unknown[] }, VariablesT extends Record<string, unknown>>(
+  private async firstEntityQuery<
+    QueryT extends { [k: string]: unknown[] },
+    VariablesT extends Record<string, unknown>
+  >(
     query: DocumentNode,
     variables: VariablesT,
     resultKey: keyof QueryT
   ): Promise<QueryT[keyof QueryT][number] | null> {
     this.debugQuery(query, variables)
-    return (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[resultKey][0] || null
+    return (
+      (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
+        resultKey
+      ][0] || null
+    )
   }
 
   // Query multiple entities
   private async multipleEntitiesQuery<
     QueryT extends { [k: string]: unknown[] },
     VariablesT extends Record<string, unknown>
-  >(query: DocumentNode, variables: VariablesT, resultKey: keyof QueryT): Promise<QueryT[keyof QueryT]> {
+  >(
+    query: DocumentNode,
+    variables: VariablesT,
+    resultKey: keyof QueryT
+  ): Promise<QueryT[keyof QueryT]> {
     this.debugQuery(query, variables)
-    return (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[resultKey]
+    return (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
+      resultKey
+    ]
   }
 
   public getQueryNodeEventId(blockNumber: number, indexInBlock: number): string {
@@ -586,7 +607,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getMembershipBoughtEvents(events: EventDetails[]): Promise<MembershipBoughtEventFieldsFragment[]> {
+  public async getMembershipBoughtEvents(
+    events: EventDetails[]
+  ): Promise<MembershipBoughtEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetMembershipBoughtEventsByEventIdsQuery,
@@ -594,21 +617,35 @@ export class QueryNodeApi {
     >(GetMembershipBoughtEventsByEventIds, { eventIds }, 'membershipBoughtEvents')
   }
 
-  public async getMemberProfileUpdatedEvents(memberId: MemberId): Promise<MemberProfileUpdatedEventFieldsFragment[]> {
+  public async getMemberProfileUpdatedEvents(
+    memberId: MemberId
+  ): Promise<MemberProfileUpdatedEventFieldsFragment[]> {
     return this.multipleEntitiesQuery<
       GetMemberProfileUpdatedEventsByMemberIdQuery,
       GetMemberProfileUpdatedEventsByMemberIdQueryVariables
-    >(GetMemberProfileUpdatedEventsByMemberId, { memberId: memberId.toString() }, 'memberProfileUpdatedEvents')
+    >(
+      GetMemberProfileUpdatedEventsByMemberId,
+      { memberId: memberId.toString() },
+      'memberProfileUpdatedEvents'
+    )
   }
 
-  public async getMemberAccountsUpdatedEvents(memberId: MemberId): Promise<MemberAccountsUpdatedEventFieldsFragment[]> {
+  public async getMemberAccountsUpdatedEvents(
+    memberId: MemberId
+  ): Promise<MemberAccountsUpdatedEventFieldsFragment[]> {
     return this.multipleEntitiesQuery<
       GetMemberAccountsUpdatedEventsByMemberIdQuery,
       GetMemberAccountsUpdatedEventsByMemberIdQueryVariables
-    >(GetMemberAccountsUpdatedEventsByMemberId, { memberId: memberId.toString() }, 'memberAccountsUpdatedEvents')
+    >(
+      GetMemberAccountsUpdatedEventsByMemberId,
+      { memberId: memberId.toString() },
+      'memberAccountsUpdatedEvents'
+    )
   }
 
-  public async getMemberCreatedEvents(events: EventDetails[]): Promise<MemberCreatedEventFieldsFragment[]> {
+  public async getMemberCreatedEvents(
+    events: EventDetails[]
+  ): Promise<MemberCreatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetMemberCreatedEventsByEventIdsQuery,
@@ -616,7 +653,9 @@ export class QueryNodeApi {
     >(GetMemberCreatedEventsByEventIds, { eventIds }, 'memberCreatedEvents')
   }
 
-  public async getMembershipGiftedEvents(events: EventDetails[]): Promise<MembershipGiftedEventFieldsFragment[]> {
+  public async getMembershipGiftedEvents(
+    events: EventDetails[]
+  ): Promise<MembershipGiftedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetMembershipGiftedEventsByEventIdsQuery,
@@ -624,7 +663,9 @@ export class QueryNodeApi {
     >(GetMembershipGiftedEventsByEventIds, { eventIds }, 'membershipGiftedEvents')
   }
 
-  public async getMemberInvitedEvents(events: EventDetails[]): Promise<MemberInvitedEventFieldsFragment[]> {
+  public async getMemberInvitedEvents(
+    events: EventDetails[]
+  ): Promise<MemberInvitedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetMemberInvitedEventsByEventIdsQuery,
@@ -633,11 +674,10 @@ export class QueryNodeApi {
   }
 
   public async getCurrentCouncilMembers(): Promise<ElectedCouncilFieldsFragment | null> {
-    return this.firstEntityQuery<GetCurrentCouncilMembersQuery, GetCurrentCouncilMembersQueryVariables>(
-      GetCurrentCouncilMembers,
-      {},
-      'electedCouncils'
-    )
+    return this.firstEntityQuery<
+      GetCurrentCouncilMembersQuery,
+      GetCurrentCouncilMembersQueryVariables
+    >(GetCurrentCouncilMembers, {}, 'electedCouncils')
   }
 
   public async getReferendumIntermediateWinners(
@@ -657,7 +697,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getCouncilBudgetFundedEvents(events: EventDetails[]): Promise<CouncilBudgetFundedEventFieldsFragment[]> {
+  public async getCouncilBudgetFundedEvents(
+    events: EventDetails[]
+  ): Promise<CouncilBudgetFundedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCouncilBudgetFundedEventsByEventIdsQuery,
@@ -679,7 +721,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getStakingAccountAddedEvents(events: EventDetails[]): Promise<StakingAccountAddedEventFieldsFragment[]> {
+  public async getStakingAccountAddedEvents(
+    events: EventDetails[]
+  ): Promise<StakingAccountAddedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetStakingAccountAddedEventsByEventIdsQuery,
@@ -694,14 +738,24 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetStakingAccountConfirmedEventsByEventIdsQuery,
       GetStakingAccountConfirmedEventsByEventIdsQueryVariables
-    >(GetStakingAccountConfirmedEventsByEventIds, { ids: eventIds }, 'stakingAccountConfirmedEvents')
+    >(
+      GetStakingAccountConfirmedEventsByEventIds,
+      { ids: eventIds },
+      'stakingAccountConfirmedEvents'
+    )
   }
 
-  public async getStakingAccountRemovedEvents(memberId: MemberId): Promise<StakingAccountRemovedEventFieldsFragment[]> {
+  public async getStakingAccountRemovedEvents(
+    memberId: MemberId
+  ): Promise<StakingAccountRemovedEventFieldsFragment[]> {
     return this.multipleEntitiesQuery<
       GetStakingAccountRemovedEventsByMemberIdQuery,
       GetStakingAccountRemovedEventsByMemberIdQueryVariables
-    >(GetStakingAccountRemovedEventsByMemberId, { memberId: memberId.toString() }, 'stakingAccountRemovedEvents')
+    >(
+      GetStakingAccountRemovedEventsByMemberId,
+      { memberId: memberId.toString() },
+      'stakingAccountRemovedEvents'
+    )
   }
 
   public async getReferralCutUpdatedEvent(
@@ -760,7 +814,10 @@ export class QueryNodeApi {
     )
   }
 
-  public async getOpeningById(id: OpeningId, group: WorkingGroupModuleName): Promise<OpeningFieldsFragment | null> {
+  public async getOpeningById(
+    id: OpeningId,
+    group: WorkingGroupModuleName
+  ): Promise<OpeningFieldsFragment | null> {
     return this.uniqueEntityQuery<GetOpeningByIdQuery, GetOpeningByIdQueryVariables>(
       GetOpeningById,
       { openingId: `${group}-${id.toString()}` },
@@ -768,7 +825,10 @@ export class QueryNodeApi {
     )
   }
 
-  public async getOpeningsByIds(ids: OpeningId[], group: WorkingGroupModuleName): Promise<OpeningFieldsFragment[]> {
+  public async getOpeningsByIds(
+    ids: OpeningId[],
+    group: WorkingGroupModuleName
+  ): Promise<OpeningFieldsFragment[]> {
     const openingIds = ids.map((id) => `${group}-${id.toString()}`)
     return this.multipleEntitiesQuery<GetOpeningsByIdsQuery, GetOpeningsByIdsQueryVariables>(
       GetOpeningsByIds,
@@ -793,14 +853,15 @@ export class QueryNodeApi {
     group: WorkingGroupModuleName
   ): Promise<ApplicationFieldsFragment[]> {
     const applicationIds = ids.map((id) => `${group}-${id.toString()}`)
-    return this.multipleEntitiesQuery<GetApplicationsByIdsQuery, GetApplicationsByIdsQueryVariables>(
-      GetApplicationsByIds,
-      { applicationIds },
-      'workingGroupApplications'
-    )
+    return this.multipleEntitiesQuery<
+      GetApplicationsByIdsQuery,
+      GetApplicationsByIdsQueryVariables
+    >(GetApplicationsByIds, { applicationIds }, 'workingGroupApplications')
   }
 
-  public async getAppliedOnOpeningEvents(events: EventDetails[]): Promise<AppliedOnOpeningEventFieldsFragment[]> {
+  public async getAppliedOnOpeningEvents(
+    events: EventDetails[]
+  ): Promise<AppliedOnOpeningEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetAppliedOnOpeningEventsByEventIdsQuery,
@@ -808,7 +869,9 @@ export class QueryNodeApi {
     >(GetAppliedOnOpeningEventsByEventIds, { eventIds }, 'appliedOnOpeningEvents')
   }
 
-  public async getOpeningAddedEvents(events: EventDetails[]): Promise<OpeningAddedEventFieldsFragment[]> {
+  public async getOpeningAddedEvents(
+    events: EventDetails[]
+  ): Promise<OpeningAddedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetOpeningAddedEventsByEventIdsQuery,
@@ -816,7 +879,9 @@ export class QueryNodeApi {
     >(GetOpeningAddedEventsByEventIds, { eventIds }, 'openingAddedEvents')
   }
 
-  public async getOpeningFilledEvents(events: EventDetails[]): Promise<OpeningFilledEventFieldsFragment[]> {
+  public async getOpeningFilledEvents(
+    events: EventDetails[]
+  ): Promise<OpeningFilledEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetOpeningFilledEventsByEventIdsQuery,
@@ -834,7 +899,9 @@ export class QueryNodeApi {
     >(GetApplicationWithdrawnEventsByEventIds, { eventIds }, 'applicationWithdrawnEvents')
   }
 
-  public async getOpeningCancelledEvents(events: EventDetails[]): Promise<OpeningCanceledEventFieldsFragment[]> {
+  public async getOpeningCancelledEvents(
+    events: EventDetails[]
+  ): Promise<OpeningCanceledEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetOpeningCancelledEventsByEventIdsQuery,
@@ -842,7 +909,9 @@ export class QueryNodeApi {
     >(GetOpeningCancelledEventsByEventIds, { eventIds }, 'openingCanceledEvents')
   }
 
-  public async getStatusTextChangedEvents(events: EventDetails[]): Promise<StatusTextChangedEventFieldsFragment[]> {
+  public async getStatusTextChangedEvents(
+    events: EventDetails[]
+  ): Promise<StatusTextChangedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetStatusTextChangedEventsByEventIdsQuery,
@@ -851,21 +920,28 @@ export class QueryNodeApi {
   }
 
   public async getUpcomingOpeningById(id: string): Promise<UpcomingOpeningFieldsFragment | null> {
-    return this.uniqueEntityQuery<GetUpcomingOpeningByIdQuery, GetUpcomingOpeningByIdQueryVariables>(
-      GetUpcomingOpeningById,
-      { id },
-      'upcomingWorkingGroupOpeningByUniqueInput'
-    )
+    return this.uniqueEntityQuery<
+      GetUpcomingOpeningByIdQuery,
+      GetUpcomingOpeningByIdQueryVariables
+    >(GetUpcomingOpeningById, { id }, 'upcomingWorkingGroupOpeningByUniqueInput')
   }
 
-  public async getUpcomingOpeningsByCreatedInEventIds(eventIds: string[]): Promise<UpcomingOpeningFieldsFragment[]> {
+  public async getUpcomingOpeningsByCreatedInEventIds(
+    eventIds: string[]
+  ): Promise<UpcomingOpeningFieldsFragment[]> {
     return this.multipleEntitiesQuery<
       GetUpcomingOpeningsByCreatedInEventIdsQuery,
       GetUpcomingOpeningsByCreatedInEventIdsQueryVariables
-    >(GetUpcomingOpeningsByCreatedInEventIds, { createdInEventIds: eventIds }, 'upcomingWorkingGroupOpenings')
+    >(
+      GetUpcomingOpeningsByCreatedInEventIds,
+      { createdInEventIds: eventIds },
+      'upcomingWorkingGroupOpenings'
+    )
   }
 
-  public async getWorkingGroup(name: WorkingGroupModuleName): Promise<WorkingGroupFieldsFragment | null> {
+  public async getWorkingGroup(
+    name: WorkingGroupModuleName
+  ): Promise<WorkingGroupFieldsFragment | null> {
     return this.uniqueEntityQuery<GetWorkingGroupByNameQuery, GetWorkingGroupByNameQueryVariables>(
       GetWorkingGroupByName,
       { name },
@@ -873,7 +949,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getGroupMetaSnapshotsByTimeAsc(groupId: string): Promise<WorkingGroupMetadataFieldsFragment[]> {
+  public async getGroupMetaSnapshotsByTimeAsc(
+    groupId: string
+  ): Promise<WorkingGroupMetadataFieldsFragment[]> {
     return this.multipleEntitiesQuery<
       GetWorkingGroupMetadataSnapshotsByTimeAscQuery,
       GetWorkingGroupMetadataSnapshotsByTimeAscQueryVariables
@@ -897,10 +975,16 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetWorkerRewardAccountUpdatedEventsByEventIdsQuery,
       GetWorkerRewardAccountUpdatedEventsByEventIdsQueryVariables
-    >(GetWorkerRewardAccountUpdatedEventsByEventIds, { eventIds }, 'workerRewardAccountUpdatedEvents')
+    >(
+      GetWorkerRewardAccountUpdatedEventsByEventIds,
+      { eventIds },
+      'workerRewardAccountUpdatedEvents'
+    )
   }
 
-  public async getStakeIncreasedEvents(events: EventDetails[]): Promise<StakeIncreasedEventFieldsFragment[]> {
+  public async getStakeIncreasedEvents(
+    events: EventDetails[]
+  ): Promise<StakeIncreasedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetStakeIncreasedEventsByEventIdsQuery,
@@ -908,8 +992,14 @@ export class QueryNodeApi {
     >(GetStakeIncreasedEventsByEventIds, { eventIds }, 'stakeIncreasedEvents')
   }
 
-  public async getWorkersByIds(ids: WorkerId[], group: WorkingGroupModuleName): Promise<WorkerFieldsFragment[]> {
-    return this.multipleEntitiesQuery<GetWorkersByRuntimeIdsQuery, GetWorkersByRuntimeIdsQueryVariables>(
+  public async getWorkersByIds(
+    ids: WorkerId[],
+    group: WorkingGroupModuleName
+  ): Promise<WorkerFieldsFragment[]> {
+    return this.multipleEntitiesQuery<
+      GetWorkersByRuntimeIdsQuery,
+      GetWorkersByRuntimeIdsQueryVariables
+    >(
       GetWorkersByRuntimeIds,
       { workerIds: ids.map((id) => id.toNumber()), groupId: group },
       'workers'
@@ -926,7 +1016,9 @@ export class QueryNodeApi {
     >(GetWorkerStartedLeavingEventsByEventIds, { eventIds }, 'workerStartedLeavingEvents')
   }
 
-  public async getTerminatedWorkerEvents(events: EventDetails[]): Promise<TerminatedWorkerEventFieldsFragment[]> {
+  public async getTerminatedWorkerEvents(
+    events: EventDetails[]
+  ): Promise<TerminatedWorkerEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetTerminatedWorkerEventsByEventIdsQuery,
@@ -934,7 +1026,9 @@ export class QueryNodeApi {
     >(GetTerminatedWorkerEventsByEventIds, { eventIds }, 'terminatedWorkerEvents')
   }
 
-  public async getTerminatedLeaderEvents(events: EventDetails[]): Promise<TerminatedLeaderEventFieldsFragment[]> {
+  public async getTerminatedLeaderEvents(
+    events: EventDetails[]
+  ): Promise<TerminatedLeaderEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetTerminatedLeaderEventsByEventIdsQuery,
@@ -952,7 +1046,9 @@ export class QueryNodeApi {
     >(GetWorkerRewardAmountUpdatedEventsByEventIds, { eventIds }, 'workerRewardAmountUpdatedEvents')
   }
 
-  public async getStakeSlashedEvents(events: EventDetails[]): Promise<StakeSlashedEventFieldsFragment[]> {
+  public async getStakeSlashedEvents(
+    events: EventDetails[]
+  ): Promise<StakeSlashedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetStakeSlashedEventsByEventIdsQuery,
@@ -960,7 +1056,9 @@ export class QueryNodeApi {
     >(GetStakeSlashedEventsByEventIds, { eventIds }, 'stakeSlashedEvents')
   }
 
-  public async getStakeDecreasedEvents(events: EventDetails[]): Promise<StakeDecreasedEventFieldsFragment[]> {
+  public async getStakeDecreasedEvents(
+    events: EventDetails[]
+  ): Promise<StakeDecreasedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetStakeDecreasedEventsByEventIdsQuery,
@@ -970,14 +1068,15 @@ export class QueryNodeApi {
 
   public async getBudgetSetEvents(events: EventDetails[]): Promise<BudgetSetEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
-    return this.multipleEntitiesQuery<GetBudgetSetEventsByEventIdsQuery, GetBudgetSetEventsByEventIdsQueryVariables>(
-      GetBudgetSetEventsByEventIds,
-      { eventIds },
-      'budgetSetEvents'
-    )
+    return this.multipleEntitiesQuery<
+      GetBudgetSetEventsByEventIdsQuery,
+      GetBudgetSetEventsByEventIdsQueryVariables
+    >(GetBudgetSetEventsByEventIds, { eventIds }, 'budgetSetEvents')
   }
 
-  public async getBudgetFundedEvents(events: EventDetails[]): Promise<BudgetFundedEventFieldsFragment[]> {
+  public async getBudgetFundedEvents(
+    events: EventDetails[]
+  ): Promise<BudgetFundedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetBudgetFundedEventsByEventIdsQuery,
@@ -985,7 +1084,9 @@ export class QueryNodeApi {
     >(GetBudgetFundedEventsByEventIds, { eventIds }, 'budgetFundedEvents')
   }
 
-  public async getBudgetSpendingEvents(events: EventDetails[]): Promise<BudgetSpendingEventFieldsFragment[]> {
+  public async getBudgetSpendingEvents(
+    events: EventDetails[]
+  ): Promise<BudgetSpendingEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetBudgetSpendingEventsByEventIdsQuery,
@@ -993,22 +1094,24 @@ export class QueryNodeApi {
     >(GetBudgetSpendingEventsByEventIds, { eventIds }, 'budgetSpendingEvents')
   }
 
-  public async getLeaderSetEvent(event: EventDetails): Promise<LeaderSetEventFieldsFragment | null> {
+  public async getLeaderSetEvent(
+    event: EventDetails
+  ): Promise<LeaderSetEventFieldsFragment | null> {
     const eventId = this.getQueryNodeEventId(event.blockNumber, event.indexInBlock)
-    return this.firstEntityQuery<GetLeaderSetEventsByEventIdsQuery, GetLeaderSetEventsByEventIdsQueryVariables>(
-      GetLeaderSetEventsByEventIds,
-      { eventIds: [eventId] },
-      'leaderSetEvents'
-    )
+    return this.firstEntityQuery<
+      GetLeaderSetEventsByEventIdsQuery,
+      GetLeaderSetEventsByEventIdsQueryVariables
+    >(GetLeaderSetEventsByEventIds, { eventIds: [eventId] }, 'leaderSetEvents')
   }
 
-  public async getLeaderUnsetEvent(event: EventDetails): Promise<LeaderUnsetEventFieldsFragment | null> {
+  public async getLeaderUnsetEvent(
+    event: EventDetails
+  ): Promise<LeaderUnsetEventFieldsFragment | null> {
     const eventId = this.getQueryNodeEventId(event.blockNumber, event.indexInBlock)
-    return this.firstEntityQuery<GetLeaderUnsetEventsByEventIdsQuery, GetLeaderUnsetEventsByEventIdsQueryVariables>(
-      GetLeaderUnsetEventsByEventIds,
-      { eventIds: [eventId] },
-      'leaderUnsetEvents'
-    )
+    return this.firstEntityQuery<
+      GetLeaderUnsetEventsByEventIdsQuery,
+      GetLeaderUnsetEventsByEventIdsQueryVariables
+    >(GetLeaderUnsetEventsByEventIds, { eventIds: [eventId] }, 'leaderUnsetEvents')
   }
 
   public async getProposalsByIds(ids: (ProposalId | string)[]): Promise<ProposalFieldsFragment[]> {
@@ -1019,7 +1122,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getProposalVotedEvents(events: EventDetails[]): Promise<ProposalVotedEventFieldsFragment[]> {
+  public async getProposalVotedEvents(
+    events: EventDetails[]
+  ): Promise<ProposalVotedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetProposalVotedEventsByEventIdsQuery,
@@ -1027,7 +1132,9 @@ export class QueryNodeApi {
     >(GetProposalVotedEventsByEventIds, { eventIds }, 'proposalVotedEvents')
   }
 
-  public async getProposalCancelledEvents(events: EventDetails[]): Promise<ProposalCancelledEventFieldsFragment[]> {
+  public async getProposalCancelledEvents(
+    events: EventDetails[]
+  ): Promise<ProposalCancelledEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetProposalCancelledEventsByEventIdsQuery,
@@ -1043,7 +1150,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getCategoryCreatedEvents(events: EventDetails[]): Promise<CategoryCreatedEventFieldsFragment[]> {
+  public async getCategoryCreatedEvents(
+    events: EventDetails[]
+  ): Promise<CategoryCreatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCategoryCreatedEventsByEventIdsQuery,
@@ -1058,10 +1167,16 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetCategoryArchivalStatusUpdatedEventsByEventIdsQuery,
       GetCategoryArchivalStatusUpdatedEventsByEventIdsQueryVariables
-    >(GetCategoryArchivalStatusUpdatedEventsByEventIds, { eventIds }, 'categoryArchivalStatusUpdatedEvents')
+    >(
+      GetCategoryArchivalStatusUpdatedEventsByEventIds,
+      { eventIds },
+      'categoryArchivalStatusUpdatedEvents'
+    )
   }
 
-  public async getCategoryDeletedEvents(events: EventDetails[]): Promise<CategoryDeletedEventFieldsFragment[]> {
+  public async getCategoryDeletedEvents(
+    events: EventDetails[]
+  ): Promise<CategoryDeletedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCategoryDeletedEventsByEventIdsQuery,
@@ -1069,7 +1184,9 @@ export class QueryNodeApi {
     >(GetCategoryDeletedEventsByEventIds, { eventIds }, 'categoryDeletedEvents')
   }
 
-  public async getThreadCreatedEvents(events: EventDetails[]): Promise<ThreadCreatedEventFieldsFragment[]> {
+  public async getThreadCreatedEvents(
+    events: EventDetails[]
+  ): Promise<ThreadCreatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetThreadCreatedEventsByEventIdsQuery,
@@ -1087,14 +1204,18 @@ export class QueryNodeApi {
     >(GetThreadMetadataUpdatedEventsByEventIds, { eventIds }, 'threadMetadataUpdatedEvents')
   }
 
-  public async getThreadsWithInitialPostsByIds(ids: ForumThreadId[]): Promise<ForumThreadWithInitialPostFragment[]> {
+  public async getThreadsWithInitialPostsByIds(
+    ids: ForumThreadId[]
+  ): Promise<ForumThreadWithInitialPostFragment[]> {
     return this.multipleEntitiesQuery<
       GetThreadsWithInitialPostsByIdsQuery,
       GetThreadsWithInitialPostsByIdsQueryVariables
     >(GetThreadsWithInitialPostsByIds, { ids: ids.map((id) => id.toString()) }, 'forumThreads')
   }
 
-  public async getThreadDeletedEvents(events: EventDetails[]): Promise<ThreadDeletedEventFieldsFragment[]> {
+  public async getThreadDeletedEvents(
+    events: EventDetails[]
+  ): Promise<ThreadDeletedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetThreadDeletedEventsByEventIdsQuery,
@@ -1112,14 +1233,15 @@ export class QueryNodeApi {
 
   public async getPostAddedEvents(events: EventDetails[]): Promise<PostAddedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
-    return this.multipleEntitiesQuery<GetPostAddedEventsByEventIdsQuery, GetPostAddedEventsByEventIdsQueryVariables>(
-      GetPostAddedEventsByEventIds,
-      { eventIds },
-      'postAddedEvents'
-    )
+    return this.multipleEntitiesQuery<
+      GetPostAddedEventsByEventIdsQuery,
+      GetPostAddedEventsByEventIdsQueryVariables
+    >(GetPostAddedEventsByEventIds, { eventIds }, 'postAddedEvents')
   }
 
-  public async getThreadMovedEvents(events: EventDetails[]): Promise<ThreadMovedEventFieldsFragment[]> {
+  public async getThreadMovedEvents(
+    events: EventDetails[]
+  ): Promise<ThreadMovedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetThreadMovedEventsByEventIdsQuery,
@@ -1134,7 +1256,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetCategoryStickyThreadUpdateEventsByEventIdsQuery,
       GetCategoryStickyThreadUpdateEventsByEventIdsQueryVariables
-    >(GetCategoryStickyThreadUpdateEventsByEventIds, { eventIds }, 'categoryStickyThreadUpdateEvents')
+    >(
+      GetCategoryStickyThreadUpdateEventsByEventIds,
+      { eventIds },
+      'categoryStickyThreadUpdateEvents'
+    )
   }
 
   public async getCategoryMembershipOfModeratorUpdatedEvents(
@@ -1151,7 +1277,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getThreadModeratedEvents(events: EventDetails[]): Promise<ThreadModeratedEventFieldsFragment[]> {
+  public async getThreadModeratedEvents(
+    events: EventDetails[]
+  ): Promise<ThreadModeratedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetThreadModeratedEventsByEventIdsQuery,
@@ -1159,7 +1287,9 @@ export class QueryNodeApi {
     >(GetThreadModeratedEventsByEventIds, { eventIds }, 'threadModeratedEvents')
   }
 
-  public async getPostModeratedEvents(events: EventDetails[]): Promise<PostModeratedEventFieldsFragment[]> {
+  public async getPostModeratedEvents(
+    events: EventDetails[]
+  ): Promise<PostModeratedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetPostModeratedEventsByEventIdsQuery,
@@ -1167,7 +1297,9 @@ export class QueryNodeApi {
     >(GetPostModeratedEventsByEventIds, { eventIds }, 'postModeratedEvents')
   }
 
-  public async getPostTextUpdatedEvents(events: EventDetails[]): Promise<PostTextUpdatedEventFieldsFragment[]> {
+  public async getPostTextUpdatedEvents(
+    events: EventDetails[]
+  ): Promise<PostTextUpdatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetPostTextUpdatedEventsByEventIdsQuery,
@@ -1175,7 +1307,9 @@ export class QueryNodeApi {
     >(GetPostTextUpdatedEventsByEventIds, { eventIds }, 'postTextUpdatedEvents')
   }
 
-  public async getPostDeletedEvents(events: EventDetails[]): Promise<PostDeletedEventFieldsFragment[]> {
+  public async getPostDeletedEvents(
+    events: EventDetails[]
+  ): Promise<PostDeletedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetPostDeletedEventsByEventIdsQuery,
@@ -1210,7 +1344,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetProposalDiscussionThreadModeChangedEventsQuery,
       GetProposalDiscussionThreadModeChangedEventsQueryVariables
-    >(GetProposalDiscussionThreadModeChangedEvents, { eventIds }, 'proposalDiscussionThreadModeChangedEvents')
+    >(
+      GetProposalDiscussionThreadModeChangedEvents,
+      { eventIds },
+      'proposalDiscussionThreadModeChangedEvents'
+    )
   }
 
   public async getProposalDiscussionPostDeletedEvents(
@@ -1229,7 +1367,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetProposalDiscussionPostsByIdsQuery,
       GetProposalDiscussionPostsByIdsQueryVariables
-    >(GetProposalDiscussionPostsByIds, { ids: ids.map((id) => id.toString()) }, 'proposalDiscussionPosts')
+    >(
+      GetProposalDiscussionPostsByIds,
+      { ids: ids.map((id) => id.toString()) },
+      'proposalDiscussionPosts'
+    )
   }
 
   public async getProposalDiscussionThreadsByIds(
@@ -1238,7 +1380,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetProposalDiscussionThreadsByIdsQuery,
       GetProposalDiscussionThreadsByIdsQueryVariables
-    >(GetProposalDiscussionThreadsByIds, { ids: ids.map((id) => id.toString()) }, 'proposalDiscussionThreads')
+    >(
+      GetProposalDiscussionThreadsByIds,
+      { ids: ids.map((id) => id.toString()) },
+      'proposalDiscussionThreads'
+    )
   }
 
   public async channelById(id: string): Promise<Maybe<ChannelFieldsFragment>> {
@@ -1290,19 +1436,17 @@ export class QueryNodeApi {
   }
 
   public async getChannelNftCollectors(): Promise<ChannelNftCollectorFieldsFragment[]> {
-    return this.multipleEntitiesQuery<GetChannelNftCollectorsQuery, GetChannelNftCollectorsQueryVariables>(
-      GetChannelNftCollectors,
-      {},
-      'channelNftCollectors'
-    )
+    return this.multipleEntitiesQuery<
+      GetChannelNftCollectorsQuery,
+      GetChannelNftCollectorsQueryVariables
+    >(GetChannelNftCollectors, {}, 'channelNftCollectors')
   }
 
   public async dataObjectsByVideoId(videoId: string): Promise<StorageDataObjectFieldsFragment[]> {
-    return this.multipleEntitiesQuery<GetDataObjectsByVideoIdQuery, GetDataObjectsByVideoIdQueryVariables>(
-      GetDataObjectsByVideoId,
-      { videoId },
-      'storageDataObjects'
-    )
+    return this.multipleEntitiesQuery<
+      GetDataObjectsByVideoIdQuery,
+      GetDataObjectsByVideoIdQueryVariables
+    >(GetDataObjectsByVideoId, { videoId }, 'storageDataObjects')
   }
 
   public async getCuratorPermissionsByIdAndGroupId(
@@ -1315,12 +1459,13 @@ export class QueryNodeApi {
     >(GetCuratorPermissionsByIdAndGroupId, { curatorGroupId, curatorId }, 'curatorAgentPermissions')
   }
 
-  public async getCollaboratorsByChannelId(channelId: string): Promise<CollaboratorsFieldsFragment[]> {
-    return this.multipleEntitiesQuery<GetCollaboratorsByChannelIdQuery, GetCollaboratorsByChannelIdQueryVariables>(
-      GetCollaboratorsByChannelId,
-      { channelId },
-      'collaborators'
-    )
+  public async getCollaboratorsByChannelId(
+    channelId: string
+  ): Promise<CollaboratorsFieldsFragment[]> {
+    return this.multipleEntitiesQuery<
+      GetCollaboratorsByChannelIdQuery,
+      GetCollaboratorsByChannelIdQueryVariables
+    >(GetCollaboratorsByChannelId, { channelId }, 'collaborators')
   }
 
   public async getMembershipVerificationStatusUpdatedEvents(
@@ -1330,7 +1475,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetMemberVerificationStatusUpdatedEventsByEventIdsQuery,
       GetMemberVerificationStatusUpdatedEventsByEventIdsQueryVariables
-    >(GetMemberVerificationStatusUpdatedEventsByEventIds, { eventIds }, 'memberVerificationStatusUpdatedEvents')
+    >(
+      GetMemberVerificationStatusUpdatedEventsByEventIds,
+      { eventIds },
+      'memberVerificationStatusUpdatedEvents'
+    )
   }
 
   public async videoById(videoId: string): Promise<VideoFieldsFragment | null> {
@@ -1357,7 +1506,9 @@ export class QueryNodeApi {
     )
   }
 
-  public async getCommentCreatedEvents(events: EventDetails[]): Promise<CommentCreatedEventFieldsFragment[]> {
+  public async getCommentCreatedEvents(
+    events: EventDetails[]
+  ): Promise<CommentCreatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentCreatedEventsByEventIdsQuery,
@@ -1365,7 +1516,9 @@ export class QueryNodeApi {
     >(GetCommentCreatedEventsByEventIds, { eventIds }, 'commentCreatedEvents')
   }
 
-  public async getCommentEditedEvents(events: EventDetails[]): Promise<CommentTextUpdatedEventFieldsFragment[]> {
+  public async getCommentEditedEvents(
+    events: EventDetails[]
+  ): Promise<CommentTextUpdatedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentEditedEventsByEventIdsQuery,
@@ -1373,7 +1526,9 @@ export class QueryNodeApi {
     >(GetCommentEditedEventsByEventIds, { eventIds }, 'commentTextUpdatedEvents')
   }
 
-  public async getCommentDeletedEvents(events: EventDetails[]): Promise<CommentDeletedEventFieldsFragment[]> {
+  public async getCommentDeletedEvents(
+    events: EventDetails[]
+  ): Promise<CommentDeletedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentDeletedEventsByEventIdsQuery,
@@ -1381,7 +1536,9 @@ export class QueryNodeApi {
     >(GetCommentDeletedEventsByEventIds, { eventIds }, 'commentDeletedEvents')
   }
 
-  public async getCommentModeratedEvents(events: EventDetails[]): Promise<CommentModeratedEventFieldsFragment[]> {
+  public async getCommentModeratedEvents(
+    events: EventDetails[]
+  ): Promise<CommentModeratedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentModeratedEventsByEventIdsQuery,
@@ -1389,7 +1546,9 @@ export class QueryNodeApi {
     >(GetCommentModeratedEventsByEventIds, { eventIds }, 'commentModeratedEvents')
   }
 
-  public async getVideoReactedEvents(events: EventDetails[]): Promise<VideoReactedEventFieldsFragment[]> {
+  public async getVideoReactedEvents(
+    events: EventDetails[]
+  ): Promise<VideoReactedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetVideoReactedEventsByEventIdsQuery,
@@ -1397,7 +1556,9 @@ export class QueryNodeApi {
     >(GetVideoReactedEventsByEventIds, { eventIds }, 'videoReactedEvents')
   }
 
-  public async getCommentReactedEvents(events: EventDetails[]): Promise<CommentReactedEventFieldsFragment[]> {
+  public async getCommentReactedEvents(
+    events: EventDetails[]
+  ): Promise<CommentReactedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentReactedEventsByEventIdsQuery,
@@ -1405,7 +1566,9 @@ export class QueryNodeApi {
     >(GetCommentReactedEventsByEventIds, { eventIds }, 'commentReactedEvents')
   }
 
-  public async getCommentPinnedEvents(events: EventDetails[]): Promise<CommentPinnedEventFieldsFragment[]> {
+  public async getCommentPinnedEvents(
+    events: EventDetails[]
+  ): Promise<CommentPinnedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetCommentPinnedEventsByEventIdsQuery,
@@ -1445,11 +1608,10 @@ export class QueryNodeApi {
 
   public async getNftIssuedEvents(events: EventDetails[]): Promise<NftIssuedEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
-    return this.multipleEntitiesQuery<GetNftIssuedEventsByEventIdsQuery, GetNftIssuedEventsByEventIdsQueryVariables>(
-      GetNftIssuedEventsByEventIds,
-      { eventIds },
-      'nftIssuedEvents'
-    )
+    return this.multipleEntitiesQuery<
+      GetNftIssuedEventsByEventIdsQuery,
+      GetNftIssuedEventsByEventIdsQueryVariables
+    >(GetNftIssuedEventsByEventIds, { eventIds }, 'nftIssuedEvents')
   }
 
   public async getEnglishAuctionSettledEvents(
@@ -1489,7 +1651,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetChannelAssetsDeletedByModeratorEventsByEventIdsQuery,
       GetChannelAssetsDeletedByModeratorEventsByEventIdsQueryVariables
-    >(GetChannelAssetsDeletedByModeratorEventsByEventIds, { eventIds }, 'channelAssetsDeletedByModeratorEvents')
+    >(
+      GetChannelAssetsDeletedByModeratorEventsByEventIds,
+      { eventIds },
+      'channelAssetsDeletedByModeratorEvents'
+    )
   }
 
   public async getVideoAssetsDeletedByModeratorEvents(
@@ -1499,7 +1665,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetVideoAssetsDeletedByModeratorEventsByEventIdsQuery,
       GetVideoAssetsDeletedByModeratorEventsByEventIdsQueryVariables
-    >(GetVideoAssetsDeletedByModeratorEventsByEventIds, { eventIds }, 'videoAssetsDeletedByModeratorEvents')
+    >(
+      GetVideoAssetsDeletedByModeratorEventsByEventIds,
+      { eventIds },
+      'videoAssetsDeletedByModeratorEvents'
+    )
   }
 
   public async getVideoVisibilitySetByModeratorEvents(
@@ -1509,15 +1679,18 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetVideoVisibilitySetByModeratorEventsByEventIdsQuery,
       GetVideoVisibilitySetByModeratorEventsByEventIdsQueryVariables
-    >(GetVideoAssetsDeletedByModeratorEventsByEventIds, { eventIds }, 'videoVisibilitySetByModeratorEvents')
+    >(
+      GetVideoAssetsDeletedByModeratorEventsByEventIds,
+      { eventIds },
+      'videoVisibilitySetByModeratorEvents'
+    )
   }
 
   async storageNodesInfoByBagId(bagId: string): Promise<StorageNodeInfoFragment[]> {
-    return this.multipleEntitiesQuery<GetStorageNodesInfoByBagIdQuery, GetStorageNodesInfoByBagIdQueryVariables>(
-      GetStorageNodesInfoByBagId,
-      { bagId },
-      'storageBuckets'
-    )
+    return this.multipleEntitiesQuery<
+      GetStorageNodesInfoByBagIdQuery,
+      GetStorageNodesInfoByBagIdQueryVariables
+    >(GetStorageNodesInfoByBagId, { bagId }, 'storageBuckets')
   }
 
   async storageBucketsForNewChannel(): Promise<StorageNodeInfoFragment[]> {
@@ -1559,7 +1732,11 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetChannelRewardClaimedAndWithdrawnEventsByEventIdsQuery,
       GetChannelRewardClaimedAndWithdrawnEventsByEventIdsQueryVariables
-    >(GetChannelRewardClaimedAndWithdrawnEventsByEventIds, { eventIds }, 'channelRewardClaimedAndWithdrawnEvents')
+    >(
+      GetChannelRewardClaimedAndWithdrawnEventsByEventIds,
+      { eventIds },
+      'channelRewardClaimedAndWithdrawnEvents'
+    )
   }
 
   public async getChannelFundsWithdrawnEvents(
@@ -1572,7 +1749,9 @@ export class QueryNodeApi {
     >(GetChannelFundsWithdrawnEventsByEventIds, { eventIds }, 'channelFundsWithdrawnEvents')
   }
 
-  public async getChannelPaymentMadeEvents(events: EventDetails[]): Promise<ChannelPaymentMadeEventFieldsFragment[]> {
+  public async getChannelPaymentMadeEvents(
+    events: EventDetails[]
+  ): Promise<ChannelPaymentMadeEventFieldsFragment[]> {
     const eventIds = events.map((e) => this.getQueryNodeEventId(e.blockNumber, e.indexInBlock))
     return this.multipleEntitiesQuery<
       GetChannelPaymentMadeEventsByEventIdsQuery,
@@ -1587,23 +1766,34 @@ export class QueryNodeApi {
     return this.multipleEntitiesQuery<
       GetMetaprotocolTransactionalStatusEventsByEventIdsQuery,
       GetMetaprotocolTransactionalStatusEventsByEventIdsQueryVariables
-    >(GetMetaprotocolTransactionalStatusEventsByEventIds, { eventIds }, 'metaprotocolTransactionStatusEvents')
+    >(
+      GetMetaprotocolTransactionalStatusEventsByEventIds,
+      { eventIds },
+      'metaprotocolTransactionStatusEvents'
+    )
   }
 
   public async getAppById(id: string): Promise<AppFieldsFragment | null> {
-    return this.uniqueEntityQuery<GetAppByIdQuery, GetAppByIdQueryVariables>(GetAppById, { id }, 'appByUniqueInput')
+    return this.uniqueEntityQuery<GetAppByIdQuery, GetAppByIdQueryVariables>(
+      GetAppById,
+      { id },
+      'appByUniqueInput'
+    )
   }
 
   public async getAppsByName(name: string): Promise<AppFieldsFragment[] | null> {
-    return this.multipleEntitiesQuery<GetAppsByNameQuery, GetAppsByNameQueryVariables>(GetAppsByName, { name }, 'apps')
+    return this.multipleEntitiesQuery<GetAppsByNameQuery, GetAppsByNameQueryVariables>(
+      GetAppsByName,
+      { name },
+      'apps'
+    )
   }
 
   async getChannelsCount(): Promise<number> {
-    const result = await this.uniqueEntityQuery<GetChannelsCountQuery, GetChannelsCountQueryVariables>(
-      GetChannelsCount,
-      {},
-      'channelsConnection'
-    )
+    const result = await this.uniqueEntityQuery<
+      GetChannelsCountQuery,
+      GetChannelsCountQueryVariables
+    >(GetChannelsCount, {}, 'channelsConnection')
     Utils.assert(result)
     return result.totalCount
   }
