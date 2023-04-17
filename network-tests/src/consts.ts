@@ -11,6 +11,9 @@ export const validateType = <T>(obj: T): T => obj
 // Test chain blocktime
 export const BLOCKTIME = 1000
 
+// per bill constant
+export const PERBILL_ONE_PERCENT = 10_000_000
+
 // Known worker role account default balance (JOY)
 export const KNOWN_WORKER_ROLE_ACCOUNT_DEFAULT_BALANCE = new BN(1000000000000)
 export const KNOWN_COUNCILLOR_ACCOUNT_DEFAULT_BALANCE = new BN(1000000000000)

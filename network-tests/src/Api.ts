@@ -68,7 +68,7 @@ import {
   IAppAction,
   MemberRemarked,
 } from '@joystream/metadata-protobuf'
-import { PERBILL_ONE_PERCENT } from '../../../query-node/mappings/src/temporaryConstants'
+import { PERBILL_ONE_PERCENT } from './consts'
 import { createType, JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 
 export class ApiFactory {
@@ -888,7 +888,7 @@ export class Api {
     })
 
     return this.sender.signAndSend(
-      this.api.tx.members.memberRemark(memberId, Utils.metadataToBytes(MemberRemarked, meta), null),
+      this.api.tx.members.memberRemark(memberId, Utils.metadataToBytes(MemberRemarked, meta)),
       memberAccount.toString()
     )
   }

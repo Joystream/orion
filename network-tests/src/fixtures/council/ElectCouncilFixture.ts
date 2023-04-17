@@ -5,27 +5,14 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { GenericAccountId, u64 } from '@polkadot/types'
 import { assert } from 'chai'
 import { createType, registry } from '@joystream/types'
-import { BlackListVoteFixture, VoteFixture } from '../referendum'
 import { AnnounceCandidacyFixture } from './announceCandidacyFixture'
 import { Api } from 'src/Api'
 import { QueryNodeApi } from 'src/QueryNodeApi'
 import BN from 'bn.js'
+import { VoteFixture } from '../referendum'
 
 export class ElectCouncilFixture extends BaseQueryNodeFixture {
   private _optOutVoters: boolean
-
-  protected async maybeBlackListVoters(votersStakingAccounts: string[]) {
-    if (this._optOutVoters) {
-      // failing case for opted-out voters
-      const optOutVotersFixture = new BlackListVoteFixture(
-        this.api,
-        this.query,
-        votersStakingAccounts
-      )
-      await new FixtureRunner(optOutVotersFixture).run()
-      return
-    }
-  }
 
   protected async getCouncilMembersControllerAccounts(): Promise<string[]> {
     const memberIds = (await this.api.query.council.councilMembers()).map((m) => m.membershipId)
@@ -152,9 +139,6 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
       ({ key }) => key.address
     )
     await api.treasuryTransferBalanceToAccounts(votersStakingAccounts, voteStake) // fund accounts
-
-    // blacklist all voters if flag is set
-    await this.maybeBlackListVoters(votersStakingAccounts)
 
     // run vote fixture with assertions
     const cycleId = await this.runVoteFixture(votersStakingAccounts, candidatesMemberIds, voteStake)
