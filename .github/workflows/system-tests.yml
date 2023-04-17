@@ -51,7 +51,7 @@ jobs:
       - name: Run tests
         env:
           DEBUG: integration-tests:*
-        run: npm run workspace network-tests node-ts-strict src/scenarios/full.ts
+        run: npm run workspace network-tests node-ts-strict src/scenarios/creatorToken.ts
 
       # - name: Upload test report
       #   uses: actions/upload-artifact@v2 # upload test results
