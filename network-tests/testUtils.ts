@@ -21,6 +21,22 @@ export function waitMilliSec(milliseconds: number): Promise<void> {
   })
 }
 
+export function pollCondition(condition: () => boolean, maxRetries = 10, retryInterval = 6000): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    let retries = 0
+    const intervalId = setInterval(() => {
+      retries++
+      if (condition()) {
+        clearInterval(intervalId)
+        resolve(true)
+      } else if (retries >= maxRetries) {
+        clearInterval(intervalId)
+        resolve(false)
+      }
+    }, retryInterval)
+  })
+}
+
 export class TestContext {
   private _waitTimeForBlockProductionMs = 5000
   private _jsNode: JsNodeApi | undefined

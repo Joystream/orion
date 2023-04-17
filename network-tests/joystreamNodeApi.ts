@@ -79,9 +79,9 @@ export class TransactionBuilder {
   }
 
   private async fundFees(): Promise<void> {
-    const fee = (await this._tx!.paymentInfo(this._address!)).partialFee
-    const fundingTx = this._api.tx.balances.transfer(this._address!, fee)
-    await this._sender.signAndSend(this._treasuryAccount, fundingTx)
+    const fee = await this._tx!.paymentInfo(this._address!).then((info) => info.partialFee.toBn())
+    this._api.tx.balances.transfer(this._address!, fee).signAndSend(this._treasuryAccount)
+    await this._tx!.signAndSend(this._address!)
   }
 
   private async _execute(): Promise<SubmittableResult | undefined> {
@@ -117,8 +117,6 @@ export class Sender {
     tip?: BN
   ): Promise<SubmittableResult | undefined> {
     let txResult: SubmittableResult | undefined
-    let unsubscribe: () => void
-    let finalized: { (result: SubmittableResult): void }
     const pair = this._keyring.getPair(address)
 
     tx.signAndSend(pair, (result: SubmittableResult) => {
@@ -135,16 +133,6 @@ export class Sender {
       }
 
       txResult = result
-
-      const success = result.findRecord('system', 'ExtrinsicSuccess')
-      const failed = result.findRecord('system', 'ExtrinsicFailed')
-
-      if (success || failed) {
-        if (unsubscribe) {
-          unsubscribe()
-        }
-        finalized(result)
-      }
     })
 
     // await this._locks.acquire(`nonce-${address}`, async () => {
