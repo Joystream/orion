@@ -10,7 +10,7 @@ function cleanup() {
     docker logs ${CONTAINER_ID} --tail 15
     docker stop ${CONTAINER_ID}
     docker rm ${CONTAINER_ID}
-    docker-compose -f ../../docker-compose.yml down -v
+    docker-compose -f ../../docker-compose.node.yml down -v
 }
 
 trap cleanup EXIT
@@ -22,21 +22,6 @@ yarn workspace api-scripts tsnode-strict src/status.ts | grep Runtime
 
 # Start any other services we want
 # docker-compose -f ../../docker-compose.yml up -d colossus-1
-
-# Start a query-node
-if [ "${NO_QN}" != true ]
-then
-  ../../query-node/start.sh
-fi
-
-# Execute tests
-
-if [ "${NO_STORAGE}" != true ]
-then
-  ./start-storage.sh
-  export REUSE_KEYS=true
-  export SKIP_STORAGE_AND_DISTRIBUTION=true
-fi
 
 # First scenario..
 IGNORE_HIRED_LEADS=true ./run-test-scenario.sh $1
