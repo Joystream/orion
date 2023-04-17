@@ -40,7 +40,7 @@ jobs:
         env:
           RUNTIME: ${{ needs.get_shasum.outputs.shasum }}
         run: |
-          network-tests/scripts/run_joystream_node.sh
+          network-tests/run-test-node-docker.sh
           sleep 30
 
       - name: run orion
@@ -49,7 +49,7 @@ jobs:
           make up
 
       - name: Run tests
-        run: npm run test --workspace=network-tests
+         DEBUG=integration-tests:* yarn workspace network-tests node-ts-strict src/scenarios/full.ts
 
       # - name: Upload test report
       #   uses: actions/upload-artifact@v2 # upload test results
@@ -60,7 +60,7 @@ jobs:
 
       - name: Cleanup
         run: |
-          rm -rf network-tests/scripts/data
+          rm -rf network-tests/data
           docker-compose -f network-tests/docker-compose.node.yml down -v
           docker-compose down -v
           docker-compose -f archive/docker-compose.yml down -v

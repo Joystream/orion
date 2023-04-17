@@ -15,7 +15,6 @@ DATA_PATH=$PWD/data
 mkdir -p ${DATA_PATH}
 
 RUNTIME=${RUNTIME:=latest}
-RUNTIME_PROFILE=TESTING
 
 # Source of funds for all new accounts that are created in the tests.
 TREASURY_INITIAL_BALANCE=${TREASURY_INITIAL_BALANCE:="100000000"}
