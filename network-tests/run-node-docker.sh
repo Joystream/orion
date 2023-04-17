@@ -64,7 +64,7 @@ docker run --rm -v ${DATA_PATH}:/spec joystream/node:${RUNTIME} build-spec \
 
 # Start a chain with generated chain spec
 export JOYSTREAM_NODE_TAG=${RUNTIME}
-docker-compose -f ../docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name joystream-node \
+docker-compose -f ./docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name joystream-node \
   -p 9944:9944 -p 9933:9933 joystream-node \
   --alice --validator --unsafe-ws-external --unsafe-rpc-external \
   --rpc-methods Unsafe --rpc-cors=all -l runtime \
