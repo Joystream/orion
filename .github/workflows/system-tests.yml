@@ -49,7 +49,9 @@ jobs:
           make up
 
       - name: Run tests
-         DEBUG=integration-tests:* yarn workspace network-tests node-ts-strict src/scenarios/full.ts
+        env:
+          DEBUG: integration-tests:*
+        run: npm run workspace network-tests node-ts-strict src/scenarios/full.ts
 
       # - name: Upload test report
       #   uses: actions/upload-artifact@v2 # upload test results
