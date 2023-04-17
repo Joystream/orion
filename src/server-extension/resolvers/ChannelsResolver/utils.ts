@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { ExtendedChannelsArgs } from './types'
+import { ExtendedChannelsArgs, TopSellingChannelsArgs } from './types'
 import { parseSqlArguments, parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
@@ -7,6 +7,7 @@ import { model } from '../model'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { extendClause } from '../../../utils/sql'
+import NodeCache from 'node-cache'
 
 export function buildExtendedChannelsQuery(
   args: ExtendedChannelsArgs,
@@ -101,6 +102,98 @@ export function buildExtendedChannelsQuery(
       }
       return resultRow
     })
+  }
+
+  return listQuery
+}
+
+export function buildTopSellingChannelsQuery(
+  args: TopSellingChannelsArgs,
+  info: GraphQLResolveInfo,
+  ctx: Context
+) {
+  const roundedDate = new Date().setMinutes(0, 0, 0)
+
+  const tree = getResolveTree(info)
+
+  // Extract subsquid-supported Channel sql args
+  const sqlArgs = parseSqlArguments(model, 'Channel', {
+    ...args,
+    where: args.where?.channel, // only supported WHERE part
+  })
+
+  // Extract subsquid-supported Channel fields
+  const channelSubTree = tree.fieldsByTypeName.TopSellingChannelsResult.channel
+  const channelFields = parseAnyTree(model, 'Channel', info.schema, channelSubTree)
+
+  // Generate query using subsquid's ListQuery
+  const listQuery = new ListQuery(model, ctx.openreader.dialect, 'Channel', channelFields, sqlArgs)
+  let listQuerySql = listQuery.sql
+
+  // Count NFT sells from the auctions and buy now events and add them to the query
+  listQuerySql = extendClause(listQuerySql, 'SELECT', '"top_selling_channels"."amount"')
+
+  listQuerySql = extendClause(
+    listQuerySql,
+    'FROM',
+    ` 
+           INNER JOIN (
+              WITH nftBoughtEvents AS (
+                SELECT
+                  (data#>>'{price}')::bigint AS price,
+                  data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+                  "timestamp" 
+                FROM 
+                  processor.event
+                WHERE
+                 data#>>'{isTypeOf}' = 'NftBoughtEventData'
+                 AND "timestamp" > '${new Date(
+                   roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+                 ).toISOString()}'
+                 AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel'),
+              auctionSettledEvents AS (
+                SELECT
+                  data#>>'{winningBid}' AS bid_id,
+                  data#>>'{previousNftOwner,channel}' AS previous_owner_id,
+                  bid.amount AS price,
+                  "timestamp" 
+                FROM processor.event
+                LEFT JOIN bid ON data#>>'{winningBid}' = bid.id
+                WHERE data#>>'{isTypeOf}' IN ('EnglishAuctionSettledEventData', 'BidMadeCompletingAuctionEventData', 'OpenAuctionBidAcceptedEventData')
+                AND "timestamp" > '${new Date(
+                  roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+                ).toISOString()}'
+                AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel')
+             SELECT 
+              previous_owner_id,
+              sum(price::bigint) as amount
+             FROM (
+              SELECT 
+                price,
+                previous_owner_id FROM nftBoughtEvents
+              UNION ALL
+              SELECT 
+              price,
+              previous_owner_id FROM auctionSettledEvents
+              ) s
+              GROUP BY previous_owner_id
+              ORDER BY amount desc 
+           ) AS top_selling_channels ON top_selling_channels.previous_owner_id = channel.id`,
+    ''
+  )
+
+  listQuerySql = extendClause(listQuerySql, 'ORDER BY', '"top_selling_channels"."amount" DESC')
+  ;(listQuery as { sql: string }).sql = listQuerySql
+
+  // Attach channels earnings amounts in the response
+  const oldListQMap = listQuery.map.bind(listQuery)
+  listQuery.map = (rows: unknown[][]) => {
+    const sellAmounts: unknown[] = []
+    for (const row of rows) {
+      sellAmounts.push(row.pop())
+    }
+    const channelsMapped = oldListQMap(rows)
+    return channelsMapped.map((channel, i) => ({ channel, amount: sellAmounts[i] }))
   }
 
   return listQuery
