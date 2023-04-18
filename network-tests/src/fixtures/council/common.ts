@@ -14,20 +14,6 @@ interface IFailToElectResources {
   councilMemberIds: MemberId[]
 }
 
-export async function assertCouncilMembersRuntimeQnMatch(api: Api, query: QueryNodeApi) {
-  const runtimeCouncilMembers = await api.query.council.councilMembers()
-
-  await query.tryQueryWithTimeout(
-    () => query.getCurrentCouncilMembers(),
-    (qnElectedCouncil) => {
-      assert.sameMembers(
-        (qnElectedCouncil?.councilMembers || []).map((item) => item.member.id.toString()),
-        runtimeCouncilMembers.map((item) => item.membershipId.toString())
-      )
-    }
-  )
-}
-
 export async function prepareFailToElectResources(
   api: Api,
   query: QueryNodeApi

@@ -1,14 +1,11 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
+ "compilerOptions": {
+    "target": "es2018",
     "module": "commonjs",
-    "outDir": "dist",
-    "rootDirs": ["src"],
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "resolveJsonModule": true
+    "outDir": "dist",
+    "rootDirs": ["src"],
+    "baseUrl": "."
   }
 }

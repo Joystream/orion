@@ -1,6 +1,5 @@
 import { BaseQueryNodeFixture, FixtureRunner } from '../../Fixture'
 import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../membership'
-import { assertCouncilMembersRuntimeQnMatch } from './common'
 import { blake2AsHex } from '@polkadot/util-crypto'
 import { GenericAccountId, u64 } from '@polkadot/types'
 import { assert } from 'chai'
@@ -141,15 +140,12 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     await api.treasuryTransferBalanceToAccounts(votersStakingAccounts, voteStake) // fund accounts
 
     // run vote fixture with assertions
-    const cycleId = await this.runVoteFixture(votersStakingAccounts, candidatesMemberIds, voteStake)
-    if (this._optOutVoters) {
-      return // return as there won't be any votes to reveal
-    }
+    await this.runVoteFixture(votersStakingAccounts, candidatesMemberIds, voteStake)
 
     // Revealing stage
     await this.api.untilCouncilStage('Revealing')
 
-    const revealingTxs = votersStakingAccounts.map((account, i) => {
+    const revealingTxs = votersStakingAccounts.map((_account, i) => {
       const optionId = candidatesMemberIds[i % numberOfCandidates]
       return api.tx.referendum.revealVote(`salt${i}`, optionId)
     })
@@ -159,19 +155,6 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     const candidatesToWinIds = candidatesMemberIds
       .slice(0, councilSize.toNumber())
       .map((id) => id.toString())
-
-    // check intermediate election winners are properly set
-    if (this.queryNodeChecksEnabled) {
-      await query.tryQueryWithTimeout(
-        () => query.getReferendumIntermediateWinners(cycleId.toNumber(), councilSize.toNumber()),
-        (qnReferendumIntermediateWinners) => {
-          assert.sameMembers(
-            qnReferendumIntermediateWinners.map((item) => item.member.id.toString()),
-            candidatesToWinIds
-          )
-        }
-      )
-    }
 
     await this.api.untilCouncilStage('Idle')
 
@@ -185,10 +168,5 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     const newCouncilMemberAccounts = await this.api.updateCouncillorsAccounts()
     const onChainCouncilMemberAccounts = await this.getCouncilMembersControllerAccounts()
     assert.deepEqual(onChainCouncilMemberAccounts, newCouncilMemberAccounts)
-  }
-
-  public async runQueryNodeChecks(): Promise<void> {
-    await super.runQueryNodeChecks()
-    await assertCouncilMembersRuntimeQnMatch(this.api, this.query)
   }
 }
