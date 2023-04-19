@@ -192,29 +192,19 @@ function isValidLon(lon: number | undefined): lon is number {
   return !Number.isNaN(lon) && lon >= -180 && lon <= 180
 }
 
-type NodeWithDistance = { node: NodeData; distance: number }
-function findClosestNode(nodes: NodeData[], clientLoc: Coordinates): NodeWithDistance | undefined {
-  const closestNode = nodes.reduce(
-    (lowestDistNode: NodeWithDistance | undefined, node: NodeData) => {
-      const distance = node.location ? haversineDistance(clientLoc, node.location) : Infinity
-      locationLogger.trace(
-        `Node: ${JSON.stringify(node)}, Client loc: ${JSON.stringify(
-          clientLoc
-        )}, Distance: ${distance}`
-      )
-      if (!lowestDistNode || distance < lowestDistNode.distance) {
-        return { node, distance }
-      }
-      return lowestDistNode
-    },
-    undefined
-  )
-  if (closestNode) {
-    locationLogger.debug(
-      `Closest node to client (${JSON.stringify(clientLoc)}) found: ${JSON.stringify(closestNode)}`
+function getDistance(node: NodeData, clientLoc: Coordinates) {
+  return node.location ? haversineDistance(clientLoc, node.location) : Infinity
+}
+
+function sortNodesByClosest(nodes: NodeData[], clientLoc: Coordinates): void {
+  nodes.sort((nodeA, nodeB) => getDistance(nodeA, clientLoc) - getDistance(nodeB, clientLoc))
+  nodes.forEach((n) => {
+    locationLogger.trace(
+      `Node: ${JSON.stringify(n)}, Client loc: ${JSON.stringify(
+        clientLoc
+      )}, Distance: ${getDistance(n, clientLoc)}`
     )
-  }
-  return closestNode
+  })
 }
 
 function getClientLoc(ctx: Context): Coordinates | undefined {
@@ -232,13 +222,17 @@ function getClientLoc(ctx: Context): Coordinates | undefined {
   return { lat, lon }
 }
 
+function getResolvedUrlsLimit(ctx: Context): number {
+  return parseInt(ctx.req.headers['x-asset-urls-limit']?.toString() || '0')
+}
+
 @ObjectType()
 export class StorageDataObject {
   @Field()
   id!: string
 
-  @Field(() => String, { nullable: true })
-  resolvedUrl: string
+  @Field(() => [String])
+  resolvedUrls: string[]
 }
 
 @Resolver(() => StorageDataObject)
@@ -246,29 +240,31 @@ export class AssetsResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
 
-  @FieldResolver()
-  async resolvedUrl(
-    @Root() object: StorageDataObject,
-    @Ctx() ctx: Context
-  ): Promise<string | undefined> {
+  @FieldResolver(() => [String])
+  async resolvedUrls(@Root() object: StorageDataObject, @Ctx() ctx: Context): Promise<string[]> {
     const em = await this.em()
     const clientLoc = await getClientLoc(ctx)
+    const limit = await getResolvedUrlsLimit(ctx)
     // The resolvedUrl field is initially populated with the object ID
-    const objectId = object.resolvedUrl
+    const [objectId] = object.resolvedUrls
     if (!objectId) {
-      return
+      return []
     }
     const { storageBagId } =
       (await em.getRepository(DataObjectEntity).findOneBy({ id: objectId })) || {}
     if (!storageBagId) {
-      return
+      return []
     }
     const buckets = await distributionBucketsCache.getBucketsByBagId(storageBagId)
     const nodes = buckets.flatMap((b) => b.nodes)
-    const chosenEndpoint = clientLoc
-      ? findClosestNode(nodes, clientLoc)?.node.endpoint
-      : _.sample(nodes)?.endpoint
+    if (clientLoc) {
+      sortNodesByClosest(nodes, clientLoc)
+    } else {
+      nodes.sort(() => (_.random(0, 1) ? 1 : -1))
+    }
 
-    return chosenEndpoint && urljoin(chosenEndpoint, 'api/v1/assets/', objectId)
+    return nodes
+      .slice(0, limit || nodes.length)
+      .map((n) => urljoin(n.endpoint, 'api/v1/assets/', objectId))
   }
 }
