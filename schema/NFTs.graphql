@@ -57,6 +57,9 @@ type OwnedNft @entity {
 
   "All NFT auction bids"
   bids: [Bid!]! @derivedFrom(field: "nft")
+
+  "Flag to indicate whether the NFT is featured or not"
+  isFeatured: Boolean!
 }
 
 "Represents various action types"

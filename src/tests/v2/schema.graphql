@@ -40,6 +40,11 @@ type GeneratedSignature {
   signature: String!
 }
 
+type SetFeaturedNftsResult {
+  # The updated number of nft that are now explicitly featured by the Gateway
+  newNumberOfNftsFeatured: Int
+}
+
 type Channel {
   # Runtime entity identifier (EntityId)
   id: String!
@@ -110,6 +115,9 @@ type Channel {
 
   # Number of videos ever created in this channel
   totalVideosCreated: Int!
+
+  # Cumulative rewards claimed by this channel
+  cumulativeRewardClaimed: BigInt
 }
 
 type Video {
@@ -411,8 +419,8 @@ type StorageDataObject {
   # Data object runtime id
   id: String!
 
-  # Resolved asset url
-  resolvedUrl: String
+  # Resolved asset urls
+  resolvedUrls: [String!]!
 
   # Timestamp of the block the data object was created at
   createdAt: DateTime!
@@ -437,6 +445,15 @@ type StorageDataObject {
 
   # If the object is no longer used as an asset - the time at which it was unset (if known)
   unsetAt: DateTime
+}
+
+type NftFeaturedRequstInfo {
+  nftId: String!
+  id: String!
+  rationale: String!
+  createdAt: DateTime!
+  reporterIp: String!
+  created: Boolean!
 }
 
 input FeaturedVideoInput {
@@ -612,6 +629,15 @@ input ChannelWhereInput {
   totalVideosCreated_lte: Int
   totalVideosCreated_in: [Int!]
   totalVideosCreated_not_in: [Int!]
+  cumulativeRewardClaimed_isNull: Boolean
+  cumulativeRewardClaimed_eq: BigInt
+  cumulativeRewardClaimed_not_eq: BigInt
+  cumulativeRewardClaimed_gt: BigInt
+  cumulativeRewardClaimed_gte: BigInt
+  cumulativeRewardClaimed_lt: BigInt
+  cumulativeRewardClaimed_lte: BigInt
+  cumulativeRewardClaimed_in: [BigInt!]
+  cumulativeRewardClaimed_not_in: [BigInt!]
   AND: [ChannelWhereInput!]
   OR: [ChannelWhereInput!]
 }
@@ -645,126 +671,6 @@ type Query {
     periodDays: Int
     limit: Int!
   ): VideosConnection!
-  events(
-    where: EventWhereInput
-    orderBy: [EventOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Event!]!
-  eventById(id: String!): Event
-  eventByUniqueInput(where: WhereIdInput!): Event
-    @deprecated(reason: "Use eventById")
-  eventsConnection(
-    orderBy: [EventOrderByInput!]!
-    after: String
-    first: Int
-    where: EventWhereInput
-  ): EventsConnection!
-  notifications(
-    where: NotificationWhereInput
-    orderBy: [NotificationOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Notification!]!
-  notificationById(id: String!): Notification
-  notificationByUniqueInput(where: WhereIdInput!): Notification
-    @deprecated(reason: "Use notificationById")
-  notificationsConnection(
-    orderBy: [NotificationOrderByInput!]!
-    after: String
-    first: Int
-    where: NotificationWhereInput
-  ): NotificationsConnection!
-  nftHistoryEntries(
-    where: NftHistoryEntryWhereInput
-    orderBy: [NftHistoryEntryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [NftHistoryEntry!]!
-  nftHistoryEntryById(id: String!): NftHistoryEntry
-  nftHistoryEntryByUniqueInput(where: WhereIdInput!): NftHistoryEntry
-    @deprecated(reason: "Use nftHistoryEntryById")
-  nftHistoryEntriesConnection(
-    orderBy: [NftHistoryEntryOrderByInput!]!
-    after: String
-    first: Int
-    where: NftHistoryEntryWhereInput
-  ): NftHistoryEntriesConnection!
-  nftActivities(
-    where: NftActivityWhereInput
-    orderBy: [NftActivityOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [NftActivity!]!
-  nftActivityById(id: String!): NftActivity
-  nftActivityByUniqueInput(where: WhereIdInput!): NftActivity
-    @deprecated(reason: "Use nftActivityById")
-  nftActivitiesConnection(
-    orderBy: [NftActivityOrderByInput!]!
-    after: String
-    first: Int
-    where: NftActivityWhereInput
-  ): NftActivitiesConnection!
-  channels(
-    where: ChannelWhereInput
-    orderBy: [ChannelOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Channel!]!
-  channelById(id: String!): Channel
-  channelByUniqueInput(where: WhereIdInput!): Channel
-    @deprecated(reason: "Use channelById")
-  channelsConnection(
-    orderBy: [ChannelOrderByInput!]!
-    after: String
-    first: Int
-    where: ChannelWhereInput
-  ): ChannelsConnection!
-  bannedMembers(
-    where: BannedMemberWhereInput
-    orderBy: [BannedMemberOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [BannedMember!]!
-  bannedMemberById(id: String!): BannedMember
-  bannedMemberByUniqueInput(where: WhereIdInput!): BannedMember
-    @deprecated(reason: "Use bannedMemberById")
-  bannedMembersConnection(
-    orderBy: [BannedMemberOrderByInput!]!
-    after: String
-    first: Int
-    where: BannedMemberWhereInput
-  ): BannedMembersConnection!
-  memberMetadata(
-    where: MemberMetadataWhereInput
-    orderBy: [MemberMetadataOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [MemberMetadata!]!
-  memberMetadataById(id: String!): MemberMetadata
-  memberMetadataByUniqueInput(where: WhereIdInput!): MemberMetadata
-    @deprecated(reason: "Use memberMetadataById")
-  memberMetadataConnection(
-    orderBy: [MemberMetadataOrderByInput!]!
-    after: String
-    first: Int
-    where: MemberMetadataWhereInput
-  ): MemberMetadataConnection!
-  memberships(
-    where: MembershipWhereInput
-    orderBy: [MembershipOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Membership!]!
-  membershipById(id: String!): Membership
-  membershipByUniqueInput(where: WhereIdInput!): Membership
-    @deprecated(reason: "Use membershipById")
-  membershipsConnection(
-    orderBy: [MembershipOrderByInput!]!
-    after: String
-    first: Int
-    where: MembershipWhereInput
-  ): MembershipsConnection!
   ownedNfts(
     where: OwnedNftWhereInput
     orderBy: [OwnedNftOrderByInput!]
@@ -826,217 +732,6 @@ type Query {
     first: Int
     where: BidWhereInput
   ): BidsConnection!
-  apps(
-    where: AppWhereInput
-    orderBy: [AppOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [App!]!
-  appById(id: String!): App
-  appByUniqueInput(where: WhereIdInput!): App @deprecated(reason: "Use appById")
-  appsConnection(
-    orderBy: [AppOrderByInput!]!
-    after: String
-    first: Int
-    where: AppWhereInput
-  ): AppsConnection!
-  commentReactions(
-    where: CommentReactionWhereInput
-    orderBy: [CommentReactionOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [CommentReaction!]!
-  commentReactionById(id: String!): CommentReaction
-  commentReactionByUniqueInput(where: WhereIdInput!): CommentReaction
-    @deprecated(reason: "Use commentReactionById")
-  commentReactionsConnection(
-    orderBy: [CommentReactionOrderByInput!]!
-    after: String
-    first: Int
-    where: CommentReactionWhereInput
-  ): CommentReactionsConnection!
-  comments(
-    where: CommentWhereInput
-    orderBy: [CommentOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Comment!]!
-  commentById(id: String!): Comment
-  commentByUniqueInput(where: WhereIdInput!): Comment
-    @deprecated(reason: "Use commentById")
-  commentsConnection(
-    orderBy: [CommentOrderByInput!]!
-    after: String
-    first: Int
-    where: CommentWhereInput
-  ): CommentsConnection!
-  videoCategories(
-    where: VideoCategoryWhereInput
-    orderBy: [VideoCategoryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoCategory!]!
-  videoCategoryById(id: String!): VideoCategory
-  videoCategoryByUniqueInput(where: WhereIdInput!): VideoCategory
-    @deprecated(reason: "Use videoCategoryById")
-  videoCategoriesConnection(
-    orderBy: [VideoCategoryOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoCategoryWhereInput
-  ): VideoCategoriesConnection!
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
-  videoById(id: String!): Video
-  videoByUniqueInput(where: WhereIdInput!): Video
-    @deprecated(reason: "Use videoById")
-  videosConnection(
-    orderBy: [VideoOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoWhereInput
-  ): VideosConnection!
-  videoFeaturedInCategories(
-    where: VideoFeaturedInCategoryWhereInput
-    orderBy: [VideoFeaturedInCategoryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoFeaturedInCategory!]!
-  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
-  videoFeaturedInCategoryByUniqueInput(
-    where: WhereIdInput!
-  ): VideoFeaturedInCategory
-    @deprecated(reason: "Use videoFeaturedInCategoryById")
-  videoFeaturedInCategoriesConnection(
-    orderBy: [VideoFeaturedInCategoryOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoFeaturedInCategoryWhereInput
-  ): VideoFeaturedInCategoriesConnection!
-  videoHeros(
-    where: VideoHeroWhereInput
-    orderBy: [VideoHeroOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoHero!]!
-  videoHeroById(id: String!): VideoHero
-  videoHeroByUniqueInput(where: WhereIdInput!): VideoHero
-    @deprecated(reason: "Use videoHeroById")
-  videoHerosConnection(
-    orderBy: [VideoHeroOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoHeroWhereInput
-  ): VideoHerosConnection!
-  videoMediaMetadata(
-    where: VideoMediaMetadataWhereInput
-    orderBy: [VideoMediaMetadataOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoMediaMetadata!]!
-  videoMediaMetadataById(id: String!): VideoMediaMetadata
-  videoMediaMetadataByUniqueInput(where: WhereIdInput!): VideoMediaMetadata
-    @deprecated(reason: "Use videoMediaMetadataById")
-  videoMediaMetadataConnection(
-    orderBy: [VideoMediaMetadataOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoMediaMetadataWhereInput
-  ): VideoMediaMetadataConnection!
-  videoMediaEncodings(
-    where: VideoMediaEncodingWhereInput
-    orderBy: [VideoMediaEncodingOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoMediaEncoding!]!
-  videoMediaEncodingById(id: String!): VideoMediaEncoding
-  videoMediaEncodingByUniqueInput(where: WhereIdInput!): VideoMediaEncoding
-    @deprecated(reason: "Use videoMediaEncodingById")
-  videoMediaEncodingsConnection(
-    orderBy: [VideoMediaEncodingOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoMediaEncodingWhereInput
-  ): VideoMediaEncodingsConnection!
-  licenses(
-    where: LicenseWhereInput
-    orderBy: [LicenseOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [License!]!
-  licenseById(id: String!): License
-  licenseByUniqueInput(where: WhereIdInput!): License
-    @deprecated(reason: "Use licenseById")
-  licensesConnection(
-    orderBy: [LicenseOrderByInput!]!
-    after: String
-    first: Int
-    where: LicenseWhereInput
-  ): LicensesConnection!
-  videoSubtitles(
-    where: VideoSubtitleWhereInput
-    orderBy: [VideoSubtitleOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoSubtitle!]!
-  videoSubtitleById(id: String!): VideoSubtitle
-  videoSubtitleByUniqueInput(where: WhereIdInput!): VideoSubtitle
-    @deprecated(reason: "Use videoSubtitleById")
-  videoSubtitlesConnection(
-    orderBy: [VideoSubtitleOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoSubtitleWhereInput
-  ): VideoSubtitlesConnection!
-  videoReactions(
-    where: VideoReactionWhereInput
-    orderBy: [VideoReactionOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoReaction!]!
-  videoReactionById(id: String!): VideoReaction
-  videoReactionByUniqueInput(where: WhereIdInput!): VideoReaction
-    @deprecated(reason: "Use videoReactionById")
-  videoReactionsConnection(
-    orderBy: [VideoReactionOrderByInput!]!
-    after: String
-    first: Int
-    where: VideoReactionWhereInput
-  ): VideoReactionsConnection!
-  curatorGroups(
-    where: CuratorGroupWhereInput
-    orderBy: [CuratorGroupOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [CuratorGroup!]!
-  curatorGroupById(id: String!): CuratorGroup
-  curatorGroupByUniqueInput(where: WhereIdInput!): CuratorGroup
-    @deprecated(reason: "Use curatorGroupById")
-  curatorGroupsConnection(
-    orderBy: [CuratorGroupOrderByInput!]!
-    after: String
-    first: Int
-    where: CuratorGroupWhereInput
-  ): CuratorGroupsConnection!
-  curators(
-    where: CuratorWhereInput
-    orderBy: [CuratorOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Curator!]!
-  curatorById(id: String!): Curator
-  curatorByUniqueInput(where: WhereIdInput!): Curator
-    @deprecated(reason: "Use curatorById")
-  curatorsConnection(
-    orderBy: [CuratorOrderByInput!]!
-    after: String
-    first: Int
-    where: CuratorWhereInput
-  ): CuratorsConnection!
   storageBucketOperatorMetadata(
     where: StorageBucketOperatorMetadataWhereInput
     orderBy: [StorageBucketOperatorMetadataOrderByInput!]
@@ -1217,6 +912,186 @@ type Query {
     first: Int
     where: DistributionBucketFamilyWhereInput
   ): DistributionBucketFamiliesConnection!
+  channels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+  channelById(id: String!): Channel
+  channelByUniqueInput(where: WhereIdInput!): Channel
+    @deprecated(reason: "Use channelById")
+  channelsConnection(
+    orderBy: [ChannelOrderByInput!]!
+    after: String
+    first: Int
+    where: ChannelWhereInput
+  ): ChannelsConnection!
+  bannedMembers(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+  bannedMemberById(id: String!): BannedMember
+  bannedMemberByUniqueInput(where: WhereIdInput!): BannedMember
+    @deprecated(reason: "Use bannedMemberById")
+  bannedMembersConnection(
+    orderBy: [BannedMemberOrderByInput!]!
+    after: String
+    first: Int
+    where: BannedMemberWhereInput
+  ): BannedMembersConnection!
+  events(
+    where: EventWhereInput
+    orderBy: [EventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Event!]!
+  eventById(id: String!): Event
+  eventByUniqueInput(where: WhereIdInput!): Event
+    @deprecated(reason: "Use eventById")
+  eventsConnection(
+    orderBy: [EventOrderByInput!]!
+    after: String
+    first: Int
+    where: EventWhereInput
+  ): EventsConnection!
+  notifications(
+    where: NotificationWhereInput
+    orderBy: [NotificationOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Notification!]!
+  notificationById(id: String!): Notification
+  notificationByUniqueInput(where: WhereIdInput!): Notification
+    @deprecated(reason: "Use notificationById")
+  notificationsConnection(
+    orderBy: [NotificationOrderByInput!]!
+    after: String
+    first: Int
+    where: NotificationWhereInput
+  ): NotificationsConnection!
+  nftHistoryEntries(
+    where: NftHistoryEntryWhereInput
+    orderBy: [NftHistoryEntryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftHistoryEntry!]!
+  nftHistoryEntryById(id: String!): NftHistoryEntry
+  nftHistoryEntryByUniqueInput(where: WhereIdInput!): NftHistoryEntry
+    @deprecated(reason: "Use nftHistoryEntryById")
+  nftHistoryEntriesConnection(
+    orderBy: [NftHistoryEntryOrderByInput!]!
+    after: String
+    first: Int
+    where: NftHistoryEntryWhereInput
+  ): NftHistoryEntriesConnection!
+  nftActivities(
+    where: NftActivityWhereInput
+    orderBy: [NftActivityOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftActivity!]!
+  nftActivityById(id: String!): NftActivity
+  nftActivityByUniqueInput(where: WhereIdInput!): NftActivity
+    @deprecated(reason: "Use nftActivityById")
+  nftActivitiesConnection(
+    orderBy: [NftActivityOrderByInput!]!
+    after: String
+    first: Int
+    where: NftActivityWhereInput
+  ): NftActivitiesConnection!
+  memberMetadata(
+    where: MemberMetadataWhereInput
+    orderBy: [MemberMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [MemberMetadata!]!
+  memberMetadataById(id: String!): MemberMetadata
+  memberMetadataByUniqueInput(where: WhereIdInput!): MemberMetadata
+    @deprecated(reason: "Use memberMetadataById")
+  memberMetadataConnection(
+    orderBy: [MemberMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: MemberMetadataWhereInput
+  ): MemberMetadataConnection!
+  memberships(
+    where: MembershipWhereInput
+    orderBy: [MembershipOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Membership!]!
+  membershipById(id: String!): Membership
+  membershipByUniqueInput(where: WhereIdInput!): Membership
+    @deprecated(reason: "Use membershipById")
+  membershipsConnection(
+    orderBy: [MembershipOrderByInput!]!
+    after: String
+    first: Int
+    where: MembershipWhereInput
+  ): MembershipsConnection!
+  commentReactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+  commentReactionById(id: String!): CommentReaction
+  commentReactionByUniqueInput(where: WhereIdInput!): CommentReaction
+    @deprecated(reason: "Use commentReactionById")
+  commentReactionsConnection(
+    orderBy: [CommentReactionOrderByInput!]!
+    after: String
+    first: Int
+    where: CommentReactionWhereInput
+  ): CommentReactionsConnection!
+  comments(
+    where: CommentWhereInput
+    orderBy: [CommentOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Comment!]!
+  commentById(id: String!): Comment
+  commentByUniqueInput(where: WhereIdInput!): Comment
+    @deprecated(reason: "Use commentById")
+  commentsConnection(
+    orderBy: [CommentOrderByInput!]!
+    after: String
+    first: Int
+    where: CommentWhereInput
+  ): CommentsConnection!
+  curatorGroups(
+    where: CuratorGroupWhereInput
+    orderBy: [CuratorGroupOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CuratorGroup!]!
+  curatorGroupById(id: String!): CuratorGroup
+  curatorGroupByUniqueInput(where: WhereIdInput!): CuratorGroup
+    @deprecated(reason: "Use curatorGroupById")
+  curatorGroupsConnection(
+    orderBy: [CuratorGroupOrderByInput!]!
+    after: String
+    first: Int
+    where: CuratorGroupWhereInput
+  ): CuratorGroupsConnection!
+  curators(
+    where: CuratorWhereInput
+    orderBy: [CuratorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Curator!]!
+  curatorById(id: String!): Curator
+  curatorByUniqueInput(where: WhereIdInput!): Curator
+    @deprecated(reason: "Use curatorById")
+  curatorsConnection(
+    orderBy: [CuratorOrderByInput!]!
+    after: String
+    first: Int
+    where: CuratorWhereInput
+  ): CuratorsConnection!
   videoViewEvents(
     where: VideoViewEventWhereInput
     orderBy: [VideoViewEventOrderByInput!]
@@ -1247,6 +1122,21 @@ type Query {
     first: Int
     where: ReportWhereInput
   ): ReportsConnection!
+  nftFeaturingRequests(
+    where: NftFeaturingRequestWhereInput
+    orderBy: [NftFeaturingRequestOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftFeaturingRequest!]!
+  nftFeaturingRequestById(id: String!): NftFeaturingRequest
+  nftFeaturingRequestByUniqueInput(where: WhereIdInput!): NftFeaturingRequest
+    @deprecated(reason: "Use nftFeaturingRequestById")
+  nftFeaturingRequestsConnection(
+    orderBy: [NftFeaturingRequestOrderByInput!]!
+    after: String
+    first: Int
+    where: NftFeaturingRequestWhereInput
+  ): NftFeaturingRequestsConnection!
   channelFollows(
     where: ChannelFollowWhereInput
     orderBy: [ChannelFollowOrderByInput!]
@@ -1262,6 +1152,157 @@ type Query {
     first: Int
     where: ChannelFollowWhereInput
   ): ChannelFollowsConnection!
+  videoCategories(
+    where: VideoCategoryWhereInput
+    orderBy: [VideoCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoCategory!]!
+  videoCategoryById(id: String!): VideoCategory
+  videoCategoryByUniqueInput(where: WhereIdInput!): VideoCategory
+    @deprecated(reason: "Use videoCategoryById")
+  videoCategoriesConnection(
+    orderBy: [VideoCategoryOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoCategoryWhereInput
+  ): VideoCategoriesConnection!
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  videoById(id: String!): Video
+  videoByUniqueInput(where: WhereIdInput!): Video
+    @deprecated(reason: "Use videoById")
+  videosConnection(
+    orderBy: [VideoOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoWhereInput
+  ): VideosConnection!
+  videoFeaturedInCategories(
+    where: VideoFeaturedInCategoryWhereInput
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoFeaturedInCategory!]!
+  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
+  videoFeaturedInCategoryByUniqueInput(
+    where: WhereIdInput!
+  ): VideoFeaturedInCategory
+    @deprecated(reason: "Use videoFeaturedInCategoryById")
+  videoFeaturedInCategoriesConnection(
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoFeaturedInCategoryWhereInput
+  ): VideoFeaturedInCategoriesConnection!
+  videoHeros(
+    where: VideoHeroWhereInput
+    orderBy: [VideoHeroOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoHero!]!
+  videoHeroById(id: String!): VideoHero
+  videoHeroByUniqueInput(where: WhereIdInput!): VideoHero
+    @deprecated(reason: "Use videoHeroById")
+  videoHerosConnection(
+    orderBy: [VideoHeroOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoHeroWhereInput
+  ): VideoHerosConnection!
+  videoMediaMetadata(
+    where: VideoMediaMetadataWhereInput
+    orderBy: [VideoMediaMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaMetadata!]!
+  videoMediaMetadataById(id: String!): VideoMediaMetadata
+  videoMediaMetadataByUniqueInput(where: WhereIdInput!): VideoMediaMetadata
+    @deprecated(reason: "Use videoMediaMetadataById")
+  videoMediaMetadataConnection(
+    orderBy: [VideoMediaMetadataOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoMediaMetadataWhereInput
+  ): VideoMediaMetadataConnection!
+  videoMediaEncodings(
+    where: VideoMediaEncodingWhereInput
+    orderBy: [VideoMediaEncodingOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaEncoding!]!
+  videoMediaEncodingById(id: String!): VideoMediaEncoding
+  videoMediaEncodingByUniqueInput(where: WhereIdInput!): VideoMediaEncoding
+    @deprecated(reason: "Use videoMediaEncodingById")
+  videoMediaEncodingsConnection(
+    orderBy: [VideoMediaEncodingOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoMediaEncodingWhereInput
+  ): VideoMediaEncodingsConnection!
+  licenses(
+    where: LicenseWhereInput
+    orderBy: [LicenseOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [License!]!
+  licenseById(id: String!): License
+  licenseByUniqueInput(where: WhereIdInput!): License
+    @deprecated(reason: "Use licenseById")
+  licensesConnection(
+    orderBy: [LicenseOrderByInput!]!
+    after: String
+    first: Int
+    where: LicenseWhereInput
+  ): LicensesConnection!
+  videoSubtitles(
+    where: VideoSubtitleWhereInput
+    orderBy: [VideoSubtitleOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoSubtitle!]!
+  videoSubtitleById(id: String!): VideoSubtitle
+  videoSubtitleByUniqueInput(where: WhereIdInput!): VideoSubtitle
+    @deprecated(reason: "Use videoSubtitleById")
+  videoSubtitlesConnection(
+    orderBy: [VideoSubtitleOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoSubtitleWhereInput
+  ): VideoSubtitlesConnection!
+  videoReactions(
+    where: VideoReactionWhereInput
+    orderBy: [VideoReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoReaction!]!
+  videoReactionById(id: String!): VideoReaction
+  videoReactionByUniqueInput(where: WhereIdInput!): VideoReaction
+    @deprecated(reason: "Use videoReactionById")
+  videoReactionsConnection(
+    orderBy: [VideoReactionOrderByInput!]!
+    after: String
+    first: Int
+    where: VideoReactionWhereInput
+  ): VideoReactionsConnection!
+  apps(
+    where: AppWhereInput
+    orderBy: [AppOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [App!]!
+  appById(id: String!): App
+  appByUniqueInput(where: WhereIdInput!): App @deprecated(reason: "Use appById")
+  appsConnection(
+    orderBy: [AppOrderByInput!]!
+    after: String
+    first: Int
+    where: AppWhereInput
+  ): AppsConnection!
   squidStatus: SquidStatus
 }
 
@@ -1298,8 +1339,6 @@ enum ChannelOrderByInput {
   coverPhoto_stateBloatBond_DESC
   coverPhoto_unsetAt_ASC
   coverPhoto_unsetAt_DESC
-  coverPhoto_resolvedUrl_ASC
-  coverPhoto_resolvedUrl_DESC
   avatarPhoto_id_ASC
   avatarPhoto_id_DESC
   avatarPhoto_createdAt_ASC
@@ -1314,8 +1353,6 @@ enum ChannelOrderByInput {
   avatarPhoto_stateBloatBond_DESC
   avatarPhoto_unsetAt_ASC
   avatarPhoto_unsetAt_DESC
-  avatarPhoto_resolvedUrl_ASC
-  avatarPhoto_resolvedUrl_DESC
   isPublic_ASC
   isPublic_DESC
   isCensored_ASC
@@ -1360,6 +1397,8 @@ enum ChannelOrderByInput {
   entryApp_authKey_DESC
   totalVideosCreated_ASC
   totalVideosCreated_DESC
+  cumulativeRewardClaimed_ASC
+  cumulativeRewardClaimed_DESC
 }
 
 enum ChannelNftCollectorsOrderByInput {
@@ -1400,6 +1439,8 @@ enum VideoOrderByInput {
   channel_videoViewsNum_DESC
   channel_totalVideosCreated_ASC
   channel_totalVideosCreated_DESC
+  channel_cumulativeRewardClaimed_ASC
+  channel_cumulativeRewardClaimed_DESC
   category_id_ASC
   category_id_DESC
   category_name_ASC
@@ -1430,8 +1471,6 @@ enum VideoOrderByInput {
   thumbnailPhoto_stateBloatBond_DESC
   thumbnailPhoto_unsetAt_ASC
   thumbnailPhoto_unsetAt_DESC
-  thumbnailPhoto_resolvedUrl_ASC
-  thumbnailPhoto_resolvedUrl_DESC
   language_ASC
   language_DESC
   hasMarketing_ASC
@@ -1454,6 +1493,8 @@ enum VideoOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   isExplicit_ASC
   isExplicit_DESC
   license_id_ASC
@@ -1478,8 +1519,6 @@ enum VideoOrderByInput {
   media_stateBloatBond_DESC
   media_unsetAt_ASC
   media_unsetAt_DESC
-  media_resolvedUrl_ASC
-  media_resolvedUrl_DESC
   videoStateBloatBond_ASC
   videoStateBloatBond_DESC
   mediaMetadata_id_ASC
@@ -1784,6 +1823,10 @@ type Mutation {
     # Whether the Gateway should support videos that have no category assigned
     supportNoCategoryVideos: Boolean
   ): SetSupportedCategoriesResult!
+  setFeaturedNfts(
+    # IDs of the NFTs that should be featured by the Gateway
+    featuredNftsIds: [String!]!
+  ): SetFeaturedNftsResult!
   excludeContent(
     # Type of the content to exclude/hide
     type: ExcludableContentType!
@@ -1814,6 +1857,7 @@ type Mutation {
   reportChannel(channelId: String!, rationale: String!): ChannelReportInfo!
   addVideoView(videoId: String!): AddVideoViewResult!
   reportVideo(videoId: String!, rationale: String!): VideoReportInfo!
+  requestNftFeatured(nftId: String!, rationale: String!): NftFeaturedRequstInfo!
 }
 
 enum ExcludableContentType {
@@ -1829,62 +1873,6 @@ enum AppActionActionType {
 
 type Subscription {
   processorState: ProcessorState!
-  events(
-    where: EventWhereInput
-    orderBy: [EventOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Event!]!
-  eventById(id: String!): Event
-  notifications(
-    where: NotificationWhereInput
-    orderBy: [NotificationOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Notification!]!
-  notificationById(id: String!): Notification
-  nftHistoryEntries(
-    where: NftHistoryEntryWhereInput
-    orderBy: [NftHistoryEntryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [NftHistoryEntry!]!
-  nftHistoryEntryById(id: String!): NftHistoryEntry
-  nftActivities(
-    where: NftActivityWhereInput
-    orderBy: [NftActivityOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [NftActivity!]!
-  nftActivityById(id: String!): NftActivity
-  channels(
-    where: ChannelWhereInput
-    orderBy: [ChannelOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Channel!]!
-  channelById(id: String!): Channel
-  bannedMembers(
-    where: BannedMemberWhereInput
-    orderBy: [BannedMemberOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [BannedMember!]!
-  bannedMemberById(id: String!): BannedMember
-  memberMetadata(
-    where: MemberMetadataWhereInput
-    orderBy: [MemberMetadataOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [MemberMetadata!]!
-  memberMetadataById(id: String!): MemberMetadata
-  memberships(
-    where: MembershipWhereInput
-    orderBy: [MembershipOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Membership!]!
-  membershipById(id: String!): Membership
   ownedNfts(
     where: OwnedNftWhereInput
     orderBy: [OwnedNftOrderByInput!]
@@ -1913,104 +1901,6 @@ type Subscription {
     limit: Int
   ): [Bid!]!
   bidById(id: String!): Bid
-  apps(
-    where: AppWhereInput
-    orderBy: [AppOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [App!]!
-  appById(id: String!): App
-  commentReactions(
-    where: CommentReactionWhereInput
-    orderBy: [CommentReactionOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [CommentReaction!]!
-  commentReactionById(id: String!): CommentReaction
-  comments(
-    where: CommentWhereInput
-    orderBy: [CommentOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Comment!]!
-  commentById(id: String!): Comment
-  videoCategories(
-    where: VideoCategoryWhereInput
-    orderBy: [VideoCategoryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoCategory!]!
-  videoCategoryById(id: String!): VideoCategory
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
-  videoById(id: String!): Video
-  videoFeaturedInCategories(
-    where: VideoFeaturedInCategoryWhereInput
-    orderBy: [VideoFeaturedInCategoryOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoFeaturedInCategory!]!
-  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
-  videoHeros(
-    where: VideoHeroWhereInput
-    orderBy: [VideoHeroOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoHero!]!
-  videoHeroById(id: String!): VideoHero
-  videoMediaMetadata(
-    where: VideoMediaMetadataWhereInput
-    orderBy: [VideoMediaMetadataOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoMediaMetadata!]!
-  videoMediaMetadataById(id: String!): VideoMediaMetadata
-  videoMediaEncodings(
-    where: VideoMediaEncodingWhereInput
-    orderBy: [VideoMediaEncodingOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoMediaEncoding!]!
-  videoMediaEncodingById(id: String!): VideoMediaEncoding
-  licenses(
-    where: LicenseWhereInput
-    orderBy: [LicenseOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [License!]!
-  licenseById(id: String!): License
-  videoSubtitles(
-    where: VideoSubtitleWhereInput
-    orderBy: [VideoSubtitleOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoSubtitle!]!
-  videoSubtitleById(id: String!): VideoSubtitle
-  videoReactions(
-    where: VideoReactionWhereInput
-    orderBy: [VideoReactionOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [VideoReaction!]!
-  videoReactionById(id: String!): VideoReaction
-  curatorGroups(
-    where: CuratorGroupWhereInput
-    orderBy: [CuratorGroupOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [CuratorGroup!]!
-  curatorGroupById(id: String!): CuratorGroup
-  curators(
-    where: CuratorWhereInput
-    orderBy: [CuratorOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Curator!]!
-  curatorById(id: String!): Curator
   storageBucketOperatorMetadata(
     where: StorageBucketOperatorMetadataWhereInput
     orderBy: [StorageBucketOperatorMetadataOrderByInput!]
@@ -2092,6 +1982,90 @@ type Subscription {
     limit: Int
   ): [DistributionBucketFamily!]!
   distributionBucketFamilyById(id: String!): DistributionBucketFamily
+  channels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
+  channelById(id: String!): Channel
+  bannedMembers(
+    where: BannedMemberWhereInput
+    orderBy: [BannedMemberOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [BannedMember!]!
+  bannedMemberById(id: String!): BannedMember
+  events(
+    where: EventWhereInput
+    orderBy: [EventOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Event!]!
+  eventById(id: String!): Event
+  notifications(
+    where: NotificationWhereInput
+    orderBy: [NotificationOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Notification!]!
+  notificationById(id: String!): Notification
+  nftHistoryEntries(
+    where: NftHistoryEntryWhereInput
+    orderBy: [NftHistoryEntryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftHistoryEntry!]!
+  nftHistoryEntryById(id: String!): NftHistoryEntry
+  nftActivities(
+    where: NftActivityWhereInput
+    orderBy: [NftActivityOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftActivity!]!
+  nftActivityById(id: String!): NftActivity
+  memberMetadata(
+    where: MemberMetadataWhereInput
+    orderBy: [MemberMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [MemberMetadata!]!
+  memberMetadataById(id: String!): MemberMetadata
+  memberships(
+    where: MembershipWhereInput
+    orderBy: [MembershipOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Membership!]!
+  membershipById(id: String!): Membership
+  commentReactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+  commentReactionById(id: String!): CommentReaction
+  comments(
+    where: CommentWhereInput
+    orderBy: [CommentOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Comment!]!
+  commentById(id: String!): Comment
+  curatorGroups(
+    where: CuratorGroupWhereInput
+    orderBy: [CuratorGroupOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CuratorGroup!]!
+  curatorGroupById(id: String!): CuratorGroup
+  curators(
+    where: CuratorWhereInput
+    orderBy: [CuratorOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Curator!]!
+  curatorById(id: String!): Curator
   videoViewEvents(
     where: VideoViewEventWhereInput
     orderBy: [VideoViewEventOrderByInput!]
@@ -2106,6 +2080,13 @@ type Subscription {
     limit: Int
   ): [Report!]!
   reportById(id: String!): Report
+  nftFeaturingRequests(
+    where: NftFeaturingRequestWhereInput
+    orderBy: [NftFeaturingRequestOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [NftFeaturingRequest!]!
+  nftFeaturingRequestById(id: String!): NftFeaturingRequest
   channelFollows(
     where: ChannelFollowWhereInput
     orderBy: [ChannelFollowOrderByInput!]
@@ -2113,102 +2094,121 @@ type Subscription {
     limit: Int
   ): [ChannelFollow!]!
   channelFollowById(id: String!): ChannelFollow
-}
-
-type Event {
-  # {blockNumber}-{indexInBlock}
-  id: String!
-
-  # Blocknumber of the block in which the event was emitted.
-  inBlock: Int!
-
-  # Hash of the extrinsic the event was emitted in
-  inExtrinsic: String
-
-  # Index of event in block from which it was emitted.
-  indexInBlock: Int!
-
-  # Timestamp of the block the event was emitted in
-  timestamp: DateTime!
-
-  # More specific event data, which depends on event type
-  data: EventData!
-}
-
-union EventData =
-    CommentCreatedEventData
-  | CommentTextUpdatedEventData
-  | OpenAuctionStartedEventData
-  | EnglishAuctionStartedEventData
-  | NftIssuedEventData
-  | AuctionBidMadeEventData
-  | AuctionBidCanceledEventData
-  | AuctionCanceledEventData
-  | EnglishAuctionSettledEventData
-  | BidMadeCompletingAuctionEventData
-  | OpenAuctionBidAcceptedEventData
-  | NftSellOrderMadeEventData
-  | NftBoughtEventData
-  | BuyNowCanceledEventData
-  | BuyNowPriceUpdatedEventData
-  | MetaprotocolTransactionStatusEventData
-  | MemberBannedFromChannelEventData
-
-type CommentCreatedEventData {
-  # The comment that was added
-  comment: Comment!
-
-  # Comment's original text
-  text: String!
-}
-
-type Comment {
-  # METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}
-  id: String!
-
-  # Timestamp of the block the comment was created at
-  createdAt: DateTime!
-
-  # Author of the video comment
-  author: Membership!
-
-  # Comment text
-  text: String!
-
-  # Video the comment was added to
-  video: Video!
-
-  # Status of the comment; either it is visible, deleted, or moderated (deleted by moderator)
-  status: CommentStatus!
-
-  # List of all reactions to the comment
-  reactions(
-    where: CommentReactionWhereInput
-    orderBy: [CommentReactionOrderByInput!]
+  videoCategories(
+    where: VideoCategoryWhereInput
+    orderBy: [VideoCategoryOrderByInput!]
     offset: Int
     limit: Int
-  ): [CommentReaction!]!
+  ): [VideoCategory!]!
+  videoCategoryById(id: String!): VideoCategory
+  videos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  videoById(id: String!): Video
+  videoFeaturedInCategories(
+    where: VideoFeaturedInCategoryWhereInput
+    orderBy: [VideoFeaturedInCategoryOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoFeaturedInCategory!]!
+  videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
+  videoHeros(
+    where: VideoHeroWhereInput
+    orderBy: [VideoHeroOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoHero!]!
+  videoHeroById(id: String!): VideoHero
+  videoMediaMetadata(
+    where: VideoMediaMetadataWhereInput
+    orderBy: [VideoMediaMetadataOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaMetadata!]!
+  videoMediaMetadataById(id: String!): VideoMediaMetadata
+  videoMediaEncodings(
+    where: VideoMediaEncodingWhereInput
+    orderBy: [VideoMediaEncodingOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoMediaEncoding!]!
+  videoMediaEncodingById(id: String!): VideoMediaEncoding
+  licenses(
+    where: LicenseWhereInput
+    orderBy: [LicenseOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [License!]!
+  licenseById(id: String!): License
+  videoSubtitles(
+    where: VideoSubtitleWhereInput
+    orderBy: [VideoSubtitleOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoSubtitle!]!
+  videoSubtitleById(id: String!): VideoSubtitle
+  videoReactions(
+    where: VideoReactionWhereInput
+    orderBy: [VideoReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [VideoReaction!]!
+  videoReactionById(id: String!): VideoReaction
+  apps(
+    where: AppWhereInput
+    orderBy: [AppOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [App!]!
+  appById(id: String!): App
+}
 
-  # Reactions count by reaction Id
-  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
+# Represents NFT details
+type OwnedNft {
+  id: String!
 
-  # A (parent) comment that this comment replies to (if any)
-  parentComment: Comment
+  # Timestamp of the block the NFT was created at
+  createdAt: DateTime!
 
-  # How many comments has replied to this comment
-  repliesCount: Int!
+  # NFT's video
+  video: Video!
 
-  # Total number of reactions to this comment
-  reactionsCount: Int!
+  # Auctions done for this NFT
+  auctions(
+    where: AuctionWhereInput
+    orderBy: [AuctionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Auction!]!
 
-  # Sum of replies and reactions
-  reactionsAndRepliesCount: Int!
+  # Current owner of the NFT.
+  owner: NftOwner!
 
-  # Whether comment has been edited or not
-  isEdited: Boolean!
+  # NFT's transactional status
+  transactionalStatus: TransactionalStatus
 
-  # Whether a comment has been excluded/hidden (by the gateway operator)
-  isExcluded: Boolean!
+  # Creator royalty (if any)
+  creatorRoyalty: Float
+
+  # NFT's last sale price (if any)
+  lastSalePrice: BigInt
+
+  # NFT's last sale date (if any)
+  lastSaleDate: DateTime
+
+  # All NFT auction bids
+  bids(
+    where: BidWhereInput
+    orderBy: [BidOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Bid!]!
+
+  # Flag to indicate whether the NFT is featured or not
+  isFeatured: Boolean!
 }
 
 type MemberMetadata {
@@ -2345,23 +2345,10 @@ input StorageDataObjectWhereInput {
   unsetAt_lte: DateTime
   unsetAt_in: [DateTime!]
   unsetAt_not_in: [DateTime!]
-  resolvedUrl_isNull: Boolean
-  resolvedUrl_eq: String
-  resolvedUrl_not_eq: String
-  resolvedUrl_gt: String
-  resolvedUrl_gte: String
-  resolvedUrl_lt: String
-  resolvedUrl_lte: String
-  resolvedUrl_in: [String!]
-  resolvedUrl_not_in: [String!]
-  resolvedUrl_contains: String
-  resolvedUrl_not_contains: String
-  resolvedUrl_containsInsensitive: String
-  resolvedUrl_not_containsInsensitive: String
-  resolvedUrl_startsWith: String
-  resolvedUrl_not_startsWith: String
-  resolvedUrl_endsWith: String
-  resolvedUrl_not_endsWith: String
+  resolvedUrls_isNull: Boolean
+  resolvedUrls_containsAll: [String!]
+  resolvedUrls_containsAny: [String!]
+  resolvedUrls_containsNone: [String!]
   AND: [StorageDataObjectWhereInput!]
   OR: [StorageDataObjectWhereInput!]
 }
@@ -3030,6 +3017,15 @@ input DataObjectTypeWhereInput {
   video: VideoWhereInput
   subtitle_isNull: Boolean
   subtitle: VideoSubtitleWhereInput
+  phantom_isNull: Boolean
+  phantom_eq: Int
+  phantom_not_eq: Int
+  phantom_gt: Int
+  phantom_gte: Int
+  phantom_lt: Int
+  phantom_lte: Int
+  phantom_in: [Int!]
+  phantom_not_in: [Int!]
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -3403,6 +3399,9 @@ input OwnedNftWhereInput {
   bids_every: BidWhereInput
   bids_some: BidWhereInput
   bids_none: BidWhereInput
+  isFeatured_isNull: Boolean
+  isFeatured_eq: Boolean
+  isFeatured_not_eq: Boolean
   AND: [OwnedNftWhereInput!]
   OR: [OwnedNftWhereInput!]
 }
@@ -4447,14 +4446,14 @@ enum StorageDataObjectOrderByInput {
   storageBag_id_DESC
   ipfsHash_ASC
   ipfsHash_DESC
+  type_phantom_ASC
+  type_phantom_DESC
   type_isTypeOf_ASC
   type_isTypeOf_DESC
   stateBloatBond_ASC
   stateBloatBond_DESC
   unsetAt_ASC
   unsetAt_DESC
-  resolvedUrl_ASC
-  resolvedUrl_DESC
 }
 
 type StorageBucketBag {
@@ -4788,123 +4787,70 @@ union DataObjectType =
   | DataObjectTypeVideoMedia
   | DataObjectTypeVideoThumbnail
   | DataObjectTypeVideoSubtitle
+  | DataObjectTypeChannelPayoutsPayload
 
 type DataObjectTypeChannelAvatar {
   # Related channel entity
   channel: Channel!
 }
 
-type VideoFeaturedInCategory {
-  # {categoryId-videoId}
-  id: String!
-
-  # Video being featured
-  video: Video!
-
-  # Category the video is featured in
-  category: VideoCategory!
-
-  # Url to video fragment to be displayed in the UI
-  videoCutUrl: String
+type DataObjectTypeChannelCoverPhoto {
+  # Related channel entity
+  channel: Channel!
 }
 
-enum VideoFeaturedInCategoryOrderByInput {
-  id_ASC
-  id_DESC
-  video_id_ASC
-  video_id_DESC
-  video_createdAt_ASC
-  video_createdAt_DESC
-  video_title_ASC
-  video_title_DESC
-  video_description_ASC
-  video_description_DESC
-  video_duration_ASC
-  video_duration_DESC
-  video_language_ASC
-  video_language_DESC
-  video_hasMarketing_ASC
-  video_hasMarketing_DESC
-  video_publishedBeforeJoystream_ASC
-  video_publishedBeforeJoystream_DESC
-  video_isPublic_ASC
-  video_isPublic_DESC
-  video_isCensored_ASC
-  video_isCensored_DESC
-  video_isExcluded_ASC
-  video_isExcluded_DESC
-  video_isExplicit_ASC
-  video_isExplicit_DESC
-  video_videoStateBloatBond_ASC
-  video_videoStateBloatBond_DESC
-  video_createdInBlock_ASC
-  video_createdInBlock_DESC
-  video_isCommentSectionEnabled_ASC
-  video_isCommentSectionEnabled_DESC
-  video_commentsCount_ASC
-  video_commentsCount_DESC
-  video_isReactionFeatureEnabled_ASC
-  video_isReactionFeatureEnabled_DESC
-  video_reactionsCount_ASC
-  video_reactionsCount_DESC
-  video_viewsNum_ASC
-  video_viewsNum_DESC
-  video_ytVideoId_ASC
-  video_ytVideoId_DESC
-  category_id_ASC
-  category_id_DESC
-  category_name_ASC
-  category_name_DESC
-  category_description_ASC
-  category_description_DESC
-  category_isSupported_ASC
-  category_isSupported_DESC
-  category_createdInBlock_ASC
-  category_createdInBlock_DESC
-  videoCutUrl_ASC
-  videoCutUrl_DESC
+type DataObjectTypeVideoMedia {
+  # Related video entity
+  video: Video!
 }
 
-# Represents NFT details
-type OwnedNft {
+type DataObjectTypeVideoThumbnail {
+  # Related video entity
+  video: Video!
+}
+
+type DataObjectTypeVideoSubtitle {
+  # Related subtitle entity
+  subtitle: VideoSubtitle!
+
+  # Related video entity
+  video: Video!
+}
+
+type VideoSubtitle {
+  # {type}-{language}
   id: String!
 
-  # Timestamp of the block the NFT was created at
-  createdAt: DateTime!
-
-  # NFT's video
+  # Subtitle's video
   video: Video!
 
-  # Auctions done for this NFT
-  auctions(
-    where: AuctionWhereInput
-    orderBy: [AuctionOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Auction!]!
+  # Subtitle's type
+  type: String!
 
-  # Current owner of the NFT.
-  owner: NftOwner!
+  # Subtitle's language
+  language: String
 
-  # NFT's transactional status
-  transactionalStatus: TransactionalStatus
+  # MIME type description of format used for this subtitle
+  mimeType: String!
 
-  # Creator royalty (if any)
-  creatorRoyalty: Float
+  # Storage object representing the subtitle file
+  asset: StorageDataObject
+}
 
-  # NFT's last sale price (if any)
-  lastSalePrice: BigInt
+type DataObjectTypeChannelPayoutsPayload {
+  phantom: Int
+}
 
-  # NFT's last sale date (if any)
-  lastSaleDate: DateTime
+type AvatarUri {
+  # The avatar URL
+  avatarUri: String!
+}
 
-  # All NFT auction bids
-  bids(
-    where: BidWhereInput
-    orderBy: [BidOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Bid!]!
+type AuctionWhitelistedMember {
+  # {auctionId}-{memberId}
+  id: String!
+  auction: Auction!
+  member: Membership!
 }
 
 # Represents NFT auction
@@ -5045,6 +4991,8 @@ enum BidOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   bidder_id_ASC
   bidder_id_DESC
   bidder_createdAt_ASC
@@ -5077,13 +5025,6 @@ enum BidOrderByInput {
   previousTopBid_indexInBlock_DESC
 }
 
-type AuctionWhitelistedMember {
-  # {auctionId}-{memberId}
-  id: String!
-  auction: Auction!
-  member: Membership!
-}
-
 enum AuctionWhitelistedMemberOrderByInput {
   id_ASC
   id_DESC
@@ -5113,106 +5054,169 @@ enum AuctionWhitelistedMemberOrderByInput {
   member_totalChannelsCreated_DESC
 }
 
-enum AuctionOrderByInput {
-  id_ASC
-  id_DESC
-  nft_id_ASC
-  nft_id_DESC
-  nft_createdAt_ASC
-  nft_createdAt_DESC
-  nft_creatorRoyalty_ASC
-  nft_creatorRoyalty_DESC
-  nft_lastSalePrice_ASC
-  nft_lastSalePrice_DESC
-  nft_lastSaleDate_ASC
-  nft_lastSaleDate_DESC
-  winningMember_id_ASC
-  winningMember_id_DESC
-  winningMember_createdAt_ASC
-  winningMember_createdAt_DESC
-  winningMember_handle_ASC
-  winningMember_handle_DESC
-  winningMember_controllerAccount_ASC
-  winningMember_controllerAccount_DESC
-  winningMember_totalChannelsCreated_ASC
-  winningMember_totalChannelsCreated_DESC
-  startingPrice_ASC
-  startingPrice_DESC
-  buyNowPrice_ASC
-  buyNowPrice_DESC
-  auctionType_duration_ASC
-  auctionType_duration_DESC
-  auctionType_extensionPeriod_ASC
-  auctionType_extensionPeriod_DESC
-  auctionType_plannedEndAtBlock_ASC
-  auctionType_plannedEndAtBlock_DESC
-  auctionType_minimalBidStep_ASC
-  auctionType_minimalBidStep_DESC
-  auctionType_bidLockDuration_ASC
-  auctionType_bidLockDuration_DESC
-  auctionType_isTypeOf_ASC
-  auctionType_isTypeOf_DESC
-  topBid_id_ASC
-  topBid_id_DESC
-  topBid_createdAt_ASC
-  topBid_createdAt_DESC
-  topBid_amount_ASC
-  topBid_amount_DESC
-  topBid_isCanceled_ASC
-  topBid_isCanceled_DESC
-  topBid_createdInBlock_ASC
-  topBid_createdInBlock_DESC
-  topBid_indexInBlock_ASC
-  topBid_indexInBlock_DESC
-  startsAtBlock_ASC
-  startsAtBlock_DESC
-  endedAtBlock_ASC
-  endedAtBlock_DESC
-  isCanceled_ASC
-  isCanceled_DESC
-  isCompleted_ASC
-  isCompleted_DESC
-}
-
-union NftOwner = NftOwnerChannel | NftOwnerMember
-
-type NftOwnerChannel {
+type BannedMember {
+  # {memberId}-{channelId}
+  id: String!
+  member: Membership!
   channel: Channel!
 }
 
-type NftOwnerMember {
-  member: Membership!
+enum BannedMemberOrderByInput {
+  id_ASC
+  id_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  channel_id_ASC
+  channel_id_DESC
+  channel_createdAt_ASC
+  channel_createdAt_DESC
+  channel_title_ASC
+  channel_title_DESC
+  channel_description_ASC
+  channel_description_DESC
+  channel_isPublic_ASC
+  channel_isPublic_DESC
+  channel_isCensored_ASC
+  channel_isCensored_DESC
+  channel_isExcluded_ASC
+  channel_isExcluded_DESC
+  channel_language_ASC
+  channel_language_DESC
+  channel_createdInBlock_ASC
+  channel_createdInBlock_DESC
+  channel_rewardAccount_ASC
+  channel_rewardAccount_DESC
+  channel_channelStateBloatBond_ASC
+  channel_channelStateBloatBond_DESC
+  channel_followsNum_ASC
+  channel_followsNum_DESC
+  channel_videoViewsNum_ASC
+  channel_videoViewsNum_DESC
+  channel_totalVideosCreated_ASC
+  channel_totalVideosCreated_DESC
+  channel_cumulativeRewardClaimed_ASC
+  channel_cumulativeRewardClaimed_DESC
 }
 
-# NFT transactional state
-union TransactionalStatus =
-    TransactionalStatusIdle
-  | TransactionalStatusInitiatedOfferToMember
-  | TransactionalStatusBuyNow
-  | TransactionalStatusAuction
+type App {
+  # Runtime entity identifier (EntityId)
+  id: String!
 
-# Represents TransactionalStatus Idle
-type TransactionalStatusIdle {
-  phantom: Int
+  # The name of the App
+  name: String!
+
+  # Member owning the App
+  ownerMember: Membership!
+
+  # Url where user can read more about the project or company for this app
+  websiteUrl: String
+
+  # Url to the app
+  useUri: String
+  smallIcon: String
+  mediumIcon: String
+  bigIcon: String
+
+  # Tagline of the app
+  oneLiner: String
+  description: String
+  termsOfService: String
+
+  # List of platforms on which the app will be available, e.g. [mobile, web, native]
+  platforms: [String]
+  category: String
+  authKey: String
+  appVideos(
+    where: VideoWhereInput
+    orderBy: [VideoOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Video!]!
+  appChannels(
+    where: ChannelWhereInput
+    orderBy: [ChannelOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [Channel!]!
 }
 
-# Represents TransactionalStatus InitiatedOfferToMember
-type TransactionalStatusInitiatedOfferToMember {
-  # Member that recieved the offer
-  member: Membership!
+type VideoFeaturedInCategory {
+  # {categoryId-videoId}
+  id: String!
 
-  # The price that the member should pay to accept offer (optional)
-  price: BigInt
+  # Video being featured
+  video: Video!
+
+  # Category the video is featured in
+  category: VideoCategory!
+
+  # Url to video fragment to be displayed in the UI
+  videoCutUrl: String
 }
 
-# Represents TransactionalStatus BuyNow
-type TransactionalStatusBuyNow {
-  price: BigInt!
-}
-
-# Represents TransactionalStatus Auction
-type TransactionalStatusAuction {
-  auction: Auction!
+enum VideoFeaturedInCategoryOrderByInput {
+  id_ASC
+  id_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+  category_id_ASC
+  category_id_DESC
+  category_name_ASC
+  category_name_DESC
+  category_description_ASC
+  category_description_DESC
+  category_isSupported_ASC
+  category_isSupported_DESC
+  category_createdInBlock_ASC
+  category_createdInBlock_DESC
+  videoCutUrl_ASC
+  videoCutUrl_DESC
 }
 
 type License {
@@ -5259,26 +5263,6 @@ type VideoMediaEncoding {
 
   # Content MIME type
   mimeMediaType: String
-}
-
-type VideoSubtitle {
-  # {type}-{language}
-  id: String!
-
-  # Subtitle's video
-  video: Video!
-
-  # Subtitle's type
-  type: String!
-
-  # Subtitle's language
-  language: String
-
-  # MIME type description of format used for this subtitle
-  mimeType: String!
-
-  # Storage object representing the subtitle file
-  asset: StorageDataObject
 }
 
 enum VideoSubtitleOrderByInput {
@@ -5344,8 +5328,155 @@ enum VideoSubtitleOrderByInput {
   asset_stateBloatBond_DESC
   asset_unsetAt_ASC
   asset_unsetAt_DESC
-  asset_resolvedUrl_ASC
-  asset_resolvedUrl_DESC
+}
+
+type Comment {
+  # METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}
+  id: String!
+
+  # Timestamp of the block the comment was created at
+  createdAt: DateTime!
+
+  # Author of the video comment
+  author: Membership!
+
+  # Comment text
+  text: String!
+
+  # Video the comment was added to
+  video: Video!
+
+  # Status of the comment; either it is visible, deleted, or moderated (deleted by moderator)
+  status: CommentStatus!
+
+  # List of all reactions to the comment
+  reactions(
+    where: CommentReactionWhereInput
+    orderBy: [CommentReactionOrderByInput!]
+    offset: Int
+    limit: Int
+  ): [CommentReaction!]!
+
+  # Reactions count by reaction Id
+  reactionsCountByReactionId: [CommentReactionsCountByReactionId!]
+
+  # A (parent) comment that this comment replies to (if any)
+  parentComment: Comment
+
+  # How many comments has replied to this comment
+  repliesCount: Int!
+
+  # Total number of reactions to this comment
+  reactionsCount: Int!
+
+  # Sum of replies and reactions
+  reactionsAndRepliesCount: Int!
+
+  # Whether comment has been edited or not
+  isEdited: Boolean!
+
+  # Whether a comment has been excluded/hidden (by the gateway operator)
+  isExcluded: Boolean!
+}
+
+type CommentReaction {
+  # {memberId}-{commentId}-{reactionId}
+  id: String!
+
+  # The Reaction id
+  reactionId: Int!
+
+  # The member that reacted
+  member: Membership!
+
+  # The comment that has been reacted to
+  comment: Comment!
+
+  # The video the comment (that has been reacted) exists
+  video: Video!
+}
+
+enum CommentReactionOrderByInput {
+  id_ASC
+  id_DESC
+  reactionId_ASC
+  reactionId_DESC
+  member_id_ASC
+  member_id_DESC
+  member_createdAt_ASC
+  member_createdAt_DESC
+  member_handle_ASC
+  member_handle_DESC
+  member_controllerAccount_ASC
+  member_controllerAccount_DESC
+  member_totalChannelsCreated_ASC
+  member_totalChannelsCreated_DESC
+  comment_id_ASC
+  comment_id_DESC
+  comment_createdAt_ASC
+  comment_createdAt_DESC
+  comment_text_ASC
+  comment_text_DESC
+  comment_status_ASC
+  comment_status_DESC
+  comment_repliesCount_ASC
+  comment_repliesCount_DESC
+  comment_reactionsCount_ASC
+  comment_reactionsCount_DESC
+  comment_reactionsAndRepliesCount_ASC
+  comment_reactionsAndRepliesCount_DESC
+  comment_isEdited_ASC
+  comment_isEdited_DESC
+  comment_isExcluded_ASC
+  comment_isExcluded_DESC
+  video_id_ASC
+  video_id_DESC
+  video_createdAt_ASC
+  video_createdAt_DESC
+  video_title_ASC
+  video_title_DESC
+  video_description_ASC
+  video_description_DESC
+  video_duration_ASC
+  video_duration_DESC
+  video_language_ASC
+  video_language_DESC
+  video_hasMarketing_ASC
+  video_hasMarketing_DESC
+  video_publishedBeforeJoystream_ASC
+  video_publishedBeforeJoystream_DESC
+  video_isPublic_ASC
+  video_isPublic_DESC
+  video_isCensored_ASC
+  video_isCensored_DESC
+  video_isExcluded_ASC
+  video_isExcluded_DESC
+  video_isExplicit_ASC
+  video_isExplicit_DESC
+  video_videoStateBloatBond_ASC
+  video_videoStateBloatBond_DESC
+  video_createdInBlock_ASC
+  video_createdInBlock_DESC
+  video_isCommentSectionEnabled_ASC
+  video_isCommentSectionEnabled_DESC
+  video_commentsCount_ASC
+  video_commentsCount_DESC
+  video_isReactionFeatureEnabled_ASC
+  video_isReactionFeatureEnabled_DESC
+  video_reactionsCount_ASC
+  video_reactionsCount_DESC
+  video_viewsNum_ASC
+  video_viewsNum_DESC
+  video_ytVideoId_ASC
+  video_ytVideoId_DESC
+}
+
+type CommentReactionsCountByReactionId {
+  # The reaction id
+  reactionId: Int!
+
+  # No of times the comment has been reacted with given reaction Id
+  count: Int!
 }
 
 enum CommentOrderByInput {
@@ -5521,176 +5652,115 @@ type VideoReactionsCountByReactionType {
   count: Int!
 }
 
-type App {
-  # Runtime entity identifier (EntityId)
-  id: String!
-
-  # The name of the App
-  name: String!
-
-  # Member owning the App
-  ownerMember: Membership!
-
-  # Url where user can read more about the project or company for this app
-  websiteUrl: String
-
-  # Url to the app
-  useUri: String
-  smallIcon: String
-  mediumIcon: String
-  bigIcon: String
-
-  # Tagline of the app
-  oneLiner: String
-  description: String
-  termsOfService: String
-
-  # List of platforms on which the app will be available, e.g. [mobile, web, native]
-  platforms: [String]
-  category: String
-  authKey: String
-  appVideos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
-  appChannels(
-    where: ChannelWhereInput
-    orderBy: [ChannelOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Channel!]!
+enum AuctionOrderByInput {
+  id_ASC
+  id_DESC
+  nft_id_ASC
+  nft_id_DESC
+  nft_createdAt_ASC
+  nft_createdAt_DESC
+  nft_creatorRoyalty_ASC
+  nft_creatorRoyalty_DESC
+  nft_lastSalePrice_ASC
+  nft_lastSalePrice_DESC
+  nft_lastSaleDate_ASC
+  nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
+  winningMember_id_ASC
+  winningMember_id_DESC
+  winningMember_createdAt_ASC
+  winningMember_createdAt_DESC
+  winningMember_handle_ASC
+  winningMember_handle_DESC
+  winningMember_controllerAccount_ASC
+  winningMember_controllerAccount_DESC
+  winningMember_totalChannelsCreated_ASC
+  winningMember_totalChannelsCreated_DESC
+  startingPrice_ASC
+  startingPrice_DESC
+  buyNowPrice_ASC
+  buyNowPrice_DESC
+  auctionType_duration_ASC
+  auctionType_duration_DESC
+  auctionType_extensionPeriod_ASC
+  auctionType_extensionPeriod_DESC
+  auctionType_plannedEndAtBlock_ASC
+  auctionType_plannedEndAtBlock_DESC
+  auctionType_minimalBidStep_ASC
+  auctionType_minimalBidStep_DESC
+  auctionType_bidLockDuration_ASC
+  auctionType_bidLockDuration_DESC
+  auctionType_isTypeOf_ASC
+  auctionType_isTypeOf_DESC
+  topBid_id_ASC
+  topBid_id_DESC
+  topBid_createdAt_ASC
+  topBid_createdAt_DESC
+  topBid_amount_ASC
+  topBid_amount_DESC
+  topBid_isCanceled_ASC
+  topBid_isCanceled_DESC
+  topBid_createdInBlock_ASC
+  topBid_createdInBlock_DESC
+  topBid_indexInBlock_ASC
+  topBid_indexInBlock_DESC
+  startsAtBlock_ASC
+  startsAtBlock_DESC
+  endedAtBlock_ASC
+  endedAtBlock_DESC
+  isCanceled_ASC
+  isCanceled_DESC
+  isCompleted_ASC
+  isCompleted_DESC
 }
 
-type BannedMember {
-  # {memberId}-{channelId}
-  id: String!
-  member: Membership!
+union NftOwner = NftOwnerChannel | NftOwnerMember
+
+type NftOwnerChannel {
   channel: Channel!
 }
 
-enum BannedMemberOrderByInput {
-  id_ASC
-  id_DESC
-  member_id_ASC
-  member_id_DESC
-  member_createdAt_ASC
-  member_createdAt_DESC
-  member_handle_ASC
-  member_handle_DESC
-  member_controllerAccount_ASC
-  member_controllerAccount_DESC
-  member_totalChannelsCreated_ASC
-  member_totalChannelsCreated_DESC
-  channel_id_ASC
-  channel_id_DESC
-  channel_createdAt_ASC
-  channel_createdAt_DESC
-  channel_title_ASC
-  channel_title_DESC
-  channel_description_ASC
-  channel_description_DESC
-  channel_isPublic_ASC
-  channel_isPublic_DESC
-  channel_isCensored_ASC
-  channel_isCensored_DESC
-  channel_isExcluded_ASC
-  channel_isExcluded_DESC
-  channel_language_ASC
-  channel_language_DESC
-  channel_createdInBlock_ASC
-  channel_createdInBlock_DESC
-  channel_rewardAccount_ASC
-  channel_rewardAccount_DESC
-  channel_channelStateBloatBond_ASC
-  channel_channelStateBloatBond_DESC
-  channel_followsNum_ASC
-  channel_followsNum_DESC
-  channel_videoViewsNum_ASC
-  channel_videoViewsNum_DESC
-  channel_totalVideosCreated_ASC
-  channel_totalVideosCreated_DESC
+type NftOwnerMember {
+  member: Membership!
 }
 
-type DataObjectTypeChannelCoverPhoto {
-  # Related channel entity
-  channel: Channel!
+# NFT transactional state
+union TransactionalStatus =
+    TransactionalStatusIdle
+  | TransactionalStatusInitiatedOfferToMember
+  | TransactionalStatusBuyNow
+  | TransactionalStatusAuction
+
+# Represents TransactionalStatus Idle
+type TransactionalStatusIdle {
+  phantom: Int
 }
 
-type DataObjectTypeVideoMedia {
-  # Related video entity
-  video: Video!
-}
-
-type DataObjectTypeVideoThumbnail {
-  # Related video entity
-  video: Video!
-}
-
-type DataObjectTypeVideoSubtitle {
-  # Related subtitle entity
-  subtitle: VideoSubtitle!
-
-  # Related video entity
-  video: Video!
-}
-
-type AvatarUri {
-  # The avatar URL
-  avatarUri: String!
-}
-
-type CommentReaction {
-  # {memberId}-{commentId}-{reactionId}
-  id: String!
-
-  # The Reaction id
-  reactionId: Int!
-
-  # The member that reacted
+# Represents TransactionalStatus InitiatedOfferToMember
+type TransactionalStatusInitiatedOfferToMember {
+  # Member that recieved the offer
   member: Membership!
 
-  # The comment that has been reacted to
-  comment: Comment!
-
-  # The video the comment (that has been reacted) exists
-  video: Video!
+  # The price that the member should pay to accept offer (optional)
+  price: BigInt
 }
 
-enum CommentReactionOrderByInput {
+# Represents TransactionalStatus BuyNow
+type TransactionalStatusBuyNow {
+  price: BigInt!
+}
+
+# Represents TransactionalStatus Auction
+type TransactionalStatusAuction {
+  auction: Auction!
+}
+
+enum OwnedNftOrderByInput {
   id_ASC
   id_DESC
-  reactionId_ASC
-  reactionId_DESC
-  member_id_ASC
-  member_id_DESC
-  member_createdAt_ASC
-  member_createdAt_DESC
-  member_handle_ASC
-  member_handle_DESC
-  member_controllerAccount_ASC
-  member_controllerAccount_DESC
-  member_totalChannelsCreated_ASC
-  member_totalChannelsCreated_DESC
-  comment_id_ASC
-  comment_id_DESC
-  comment_createdAt_ASC
-  comment_createdAt_DESC
-  comment_text_ASC
-  comment_text_DESC
-  comment_status_ASC
-  comment_status_DESC
-  comment_repliesCount_ASC
-  comment_repliesCount_DESC
-  comment_reactionsCount_ASC
-  comment_reactionsCount_DESC
-  comment_reactionsAndRepliesCount_ASC
-  comment_reactionsAndRepliesCount_DESC
-  comment_isEdited_ASC
-  comment_isEdited_DESC
-  comment_isExcluded_ASC
-  comment_isExcluded_DESC
+  createdAt_ASC
+  createdAt_DESC
   video_id_ASC
   video_id_DESC
   video_createdAt_ASC
@@ -5731,14 +5801,384 @@ enum CommentReactionOrderByInput {
   video_viewsNum_DESC
   video_ytVideoId_ASC
   video_ytVideoId_DESC
+  owner_isTypeOf_ASC
+  owner_isTypeOf_DESC
+  transactionalStatus_phantom_ASC
+  transactionalStatus_phantom_DESC
+  transactionalStatus_price_ASC
+  transactionalStatus_price_DESC
+  transactionalStatus_isTypeOf_ASC
+  transactionalStatus_isTypeOf_DESC
+  creatorRoyalty_ASC
+  creatorRoyalty_DESC
+  lastSalePrice_ASC
+  lastSalePrice_DESC
+  lastSaleDate_ASC
+  lastSaleDate_DESC
+  isFeatured_ASC
+  isFeatured_DESC
 }
 
-type CommentReactionsCountByReactionId {
-  # The reaction id
-  reactionId: Int!
+input WhereIdInput {
+  id: String!
+}
 
-  # No of times the comment has been reacted with given reaction Id
-  count: Int!
+type OwnedNftsConnection {
+  edges: [OwnedNftEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type OwnedNftEdge {
+  node: OwnedNft!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+type AuctionsConnection {
+  edges: [AuctionEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuctionEdge {
+  node: Auction!
+  cursor: String!
+}
+
+type AuctionWhitelistedMembersConnection {
+  edges: [AuctionWhitelistedMemberEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuctionWhitelistedMemberEdge {
+  node: AuctionWhitelistedMember!
+  cursor: String!
+}
+
+type BidsConnection {
+  edges: [BidEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BidEdge {
+  node: Bid!
+  cursor: String!
+}
+
+enum StorageBucketOperatorMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  storageBucket_id_ASC
+  storageBucket_id_DESC
+  storageBucket_acceptingNewBags_ASC
+  storageBucket_acceptingNewBags_DESC
+  storageBucket_dataObjectsSizeLimit_ASC
+  storageBucket_dataObjectsSizeLimit_DESC
+  storageBucket_dataObjectCountLimit_ASC
+  storageBucket_dataObjectCountLimit_DESC
+  storageBucket_dataObjectsCount_ASC
+  storageBucket_dataObjectsCount_DESC
+  storageBucket_dataObjectsSize_ASC
+  storageBucket_dataObjectsSize_DESC
+  nodeEndpoint_ASC
+  nodeEndpoint_DESC
+  nodeLocation_countryCode_ASC
+  nodeLocation_countryCode_DESC
+  nodeLocation_city_ASC
+  nodeLocation_city_DESC
+  extra_ASC
+  extra_DESC
+}
+
+type StorageBucketOperatorMetadataConnection {
+  edges: [StorageBucketOperatorMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketOperatorMetadataEdge {
+  node: StorageBucketOperatorMetadata!
+  cursor: String!
+}
+
+enum StorageBucketOrderByInput {
+  id_ASC
+  id_DESC
+  operatorStatus_phantom_ASC
+  operatorStatus_phantom_DESC
+  operatorStatus_workerId_ASC
+  operatorStatus_workerId_DESC
+  operatorStatus_transactorAccountId_ASC
+  operatorStatus_transactorAccountId_DESC
+  operatorStatus_isTypeOf_ASC
+  operatorStatus_isTypeOf_DESC
+  operatorMetadata_id_ASC
+  operatorMetadata_id_DESC
+  operatorMetadata_nodeEndpoint_ASC
+  operatorMetadata_nodeEndpoint_DESC
+  operatorMetadata_extra_ASC
+  operatorMetadata_extra_DESC
+  acceptingNewBags_ASC
+  acceptingNewBags_DESC
+  dataObjectsSizeLimit_ASC
+  dataObjectsSizeLimit_DESC
+  dataObjectCountLimit_ASC
+  dataObjectCountLimit_DESC
+  dataObjectsCount_ASC
+  dataObjectsCount_DESC
+  dataObjectsSize_ASC
+  dataObjectsSize_DESC
+}
+
+type StorageBucketsConnection {
+  edges: [StorageBucketEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketEdge {
+  node: StorageBucket!
+  cursor: String!
+}
+
+enum StorageBagOrderByInput {
+  id_ASC
+  id_DESC
+  owner_phantom_ASC
+  owner_phantom_DESC
+  owner_workingGroupId_ASC
+  owner_workingGroupId_DESC
+  owner_memberId_ASC
+  owner_memberId_DESC
+  owner_channelId_ASC
+  owner_channelId_DESC
+  owner_daoId_ASC
+  owner_daoId_DESC
+  owner_isTypeOf_ASC
+  owner_isTypeOf_DESC
+}
+
+type StorageBagsConnection {
+  edges: [StorageBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBagEdge {
+  node: StorageBag!
+  cursor: String!
+}
+
+type StorageBucketBagsConnection {
+  edges: [StorageBucketBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageBucketBagEdge {
+  node: StorageBucketBag!
+  cursor: String!
+}
+
+type DistributionBucketBagsConnection {
+  edges: [DistributionBucketBagEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketBagEdge {
+  node: DistributionBucketBag!
+  cursor: String!
+}
+
+type StorageDataObjectsConnection {
+  edges: [StorageDataObjectEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type StorageDataObjectEdge {
+  node: StorageDataObject!
+  cursor: String!
+}
+
+enum DistributionBucketFamilyMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  family_id_ASC
+  family_id_DESC
+  region_ASC
+  region_DESC
+  description_ASC
+  description_DESC
+}
+
+type DistributionBucketFamilyMetadataConnection {
+  edges: [DistributionBucketFamilyMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketFamilyMetadataEdge {
+  node: DistributionBucketFamilyMetadata!
+  cursor: String!
+}
+
+enum DistributionBucketOperatorMetadataOrderByInput {
+  id_ASC
+  id_DESC
+  distirbutionBucketOperator_id_ASC
+  distirbutionBucketOperator_id_DESC
+  distirbutionBucketOperator_workerId_ASC
+  distirbutionBucketOperator_workerId_DESC
+  distirbutionBucketOperator_status_ASC
+  distirbutionBucketOperator_status_DESC
+  nodeEndpoint_ASC
+  nodeEndpoint_DESC
+  nodeLocation_countryCode_ASC
+  nodeLocation_countryCode_DESC
+  nodeLocation_city_ASC
+  nodeLocation_city_DESC
+  extra_ASC
+  extra_DESC
+}
+
+type DistributionBucketOperatorMetadataConnection {
+  edges: [DistributionBucketOperatorMetadataEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketOperatorMetadataEdge {
+  node: DistributionBucketOperatorMetadata!
+  cursor: String!
+}
+
+type DistributionBucketOperatorsConnection {
+  edges: [DistributionBucketOperatorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketOperatorEdge {
+  node: DistributionBucketOperator!
+  cursor: String!
+}
+
+type DistributionBucketsConnection {
+  edges: [DistributionBucketEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketEdge {
+  node: DistributionBucket!
+  cursor: String!
+}
+
+enum DistributionBucketFamilyOrderByInput {
+  id_ASC
+  id_DESC
+  metadata_id_ASC
+  metadata_id_DESC
+  metadata_region_ASC
+  metadata_region_DESC
+  metadata_description_ASC
+  metadata_description_DESC
+}
+
+type DistributionBucketFamiliesConnection {
+  edges: [DistributionBucketFamilyEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type DistributionBucketFamilyEdge {
+  node: DistributionBucketFamily!
+  cursor: String!
+}
+
+type ChannelsConnection {
+  edges: [ChannelEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChannelEdge {
+  node: Channel!
+  cursor: String!
+}
+
+type BannedMembersConnection {
+  edges: [BannedMemberEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BannedMemberEdge {
+  node: BannedMember!
+  cursor: String!
+}
+
+type Event {
+  # {blockNumber}-{indexInBlock}
+  id: String!
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Hash of the extrinsic the event was emitted in
+  inExtrinsic: String
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Timestamp of the block the event was emitted in
+  timestamp: DateTime!
+
+  # More specific event data, which depends on event type
+  data: EventData!
+}
+
+union EventData =
+    CommentCreatedEventData
+  | CommentTextUpdatedEventData
+  | OpenAuctionStartedEventData
+  | EnglishAuctionStartedEventData
+  | NftIssuedEventData
+  | AuctionBidMadeEventData
+  | AuctionBidCanceledEventData
+  | AuctionCanceledEventData
+  | EnglishAuctionSettledEventData
+  | BidMadeCompletingAuctionEventData
+  | OpenAuctionBidAcceptedEventData
+  | NftSellOrderMadeEventData
+  | NftBoughtEventData
+  | BuyNowCanceledEventData
+  | BuyNowPriceUpdatedEventData
+  | MetaprotocolTransactionStatusEventData
+  | ChannelRewardClaimedEventData
+  | ChannelRewardClaimedAndWithdrawnEventData
+  | ChannelFundsWithdrawnEventData
+  | ChannelPayoutsUpdatedEventData
+  | ChannelPaymentMadeEventData
+  | MemberBannedFromChannelEventData
+
+type CommentCreatedEventData {
+  # The comment that was added
+  comment: Comment!
+
+  # Comment's original text
+  text: String!
 }
 
 type CommentTextUpdatedEventData {
@@ -5923,6 +6363,7 @@ union MetaprotocolTransactionResult =
   | MetaprotocolTransactionResultCommentDeleted
   | MetaprotocolTransactionResultCommentModerated
   | MetaprotocolTransactionResultFailed
+  | MetaprotocolTransactionResultChannelPaid
 
 type MetaprotocolTransactionResultOK {
   phantom: Int
@@ -5946,6 +6387,94 @@ type MetaprotocolTransactionResultCommentModerated {
 
 type MetaprotocolTransactionResultFailed {
   errorMessage: String!
+}
+
+type MetaprotocolTransactionResultChannelPaid {
+  channelPaid: Channel
+}
+
+type ChannelRewardClaimedEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+}
+
+type ChannelRewardClaimedAndWithdrawnEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
+type ChannelFundsWithdrawnEventData {
+  # The channel that claimed the reward
+  channel: Channel!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null if claimed by curators' channel (paid to council budget in this case)
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
+type ChannelPayoutsUpdatedEventData {
+  # Merkle root of the channel payouts
+  commitment: String
+
+  # Storage data object corresponding to the channel payouts payload
+  payloadDataObject: StorageDataObject
+
+  # Minimum amount of channel reward cashout allowed at a time
+  minCashoutAllowed: BigInt
+
+  # Maximum amount of channel reward cashout allowed at a time
+  maxCashoutAllowed: BigInt
+
+  # Can channel cashout the rewards
+  channelCashoutsEnabled: Boolean
+}
+
+# Direct channel payment by any member by-passing the council payouts
+type ChannelPaymentMadeEventData {
+  # Actor that made the payment
+  payer: Membership!
+
+  # Amount of the payment
+  amount: BigInt!
+
+  # Payment and payee context
+  paymentContext: PaymentContext
+
+  # Channel that received the payment (if any)
+  payeeChannel: Channel
+
+  # Reason of the payment
+  rationale: String
+}
+
+# Various Channel Payment Contexts
+union PaymentContext = PaymentContextVideo | PaymentContextChannel
+
+type PaymentContextVideo {
+  # Video for which the payment was made
+  video: Video!
+}
+
+type PaymentContextChannel {
+  # Channel for which the payment was made
+  channel: Channel!
 }
 
 type MemberBannedFromChannelEventData {
@@ -6104,6 +6633,95 @@ input EventDataWhereInput {
   result: MetaprotocolTransactionResultWhereInput
   channel_isNull: Boolean
   channel: ChannelWhereInput
+  amount_isNull: Boolean
+  amount_eq: BigInt
+  amount_not_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  amount_not_in: [BigInt!]
+  account_isNull: Boolean
+  account_eq: String
+  account_not_eq: String
+  account_gt: String
+  account_gte: String
+  account_lt: String
+  account_lte: String
+  account_in: [String!]
+  account_not_in: [String!]
+  account_contains: String
+  account_not_contains: String
+  account_containsInsensitive: String
+  account_not_containsInsensitive: String
+  account_startsWith: String
+  account_not_startsWith: String
+  account_endsWith: String
+  account_not_endsWith: String
+  commitment_isNull: Boolean
+  commitment_eq: String
+  commitment_not_eq: String
+  commitment_gt: String
+  commitment_gte: String
+  commitment_lt: String
+  commitment_lte: String
+  commitment_in: [String!]
+  commitment_not_in: [String!]
+  commitment_contains: String
+  commitment_not_contains: String
+  commitment_containsInsensitive: String
+  commitment_not_containsInsensitive: String
+  commitment_startsWith: String
+  commitment_not_startsWith: String
+  commitment_endsWith: String
+  commitment_not_endsWith: String
+  payloadDataObject_isNull: Boolean
+  payloadDataObject: StorageDataObjectWhereInput
+  minCashoutAllowed_isNull: Boolean
+  minCashoutAllowed_eq: BigInt
+  minCashoutAllowed_not_eq: BigInt
+  minCashoutAllowed_gt: BigInt
+  minCashoutAllowed_gte: BigInt
+  minCashoutAllowed_lt: BigInt
+  minCashoutAllowed_lte: BigInt
+  minCashoutAllowed_in: [BigInt!]
+  minCashoutAllowed_not_in: [BigInt!]
+  maxCashoutAllowed_isNull: Boolean
+  maxCashoutAllowed_eq: BigInt
+  maxCashoutAllowed_not_eq: BigInt
+  maxCashoutAllowed_gt: BigInt
+  maxCashoutAllowed_gte: BigInt
+  maxCashoutAllowed_lt: BigInt
+  maxCashoutAllowed_lte: BigInt
+  maxCashoutAllowed_in: [BigInt!]
+  maxCashoutAllowed_not_in: [BigInt!]
+  channelCashoutsEnabled_isNull: Boolean
+  channelCashoutsEnabled_eq: Boolean
+  channelCashoutsEnabled_not_eq: Boolean
+  payer_isNull: Boolean
+  payer: MembershipWhereInput
+  paymentContext_isNull: Boolean
+  paymentContext: PaymentContextWhereInput
+  payeeChannel_isNull: Boolean
+  payeeChannel: ChannelWhereInput
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
   action_isNull: Boolean
   action_eq: Boolean
   action_not_eq: Boolean
@@ -6216,6 +6834,32 @@ input MetaprotocolTransactionResultWhereInput {
   errorMessage_not_startsWith: String
   errorMessage_endsWith: String
   errorMessage_not_endsWith: String
+  channelPaid_isNull: Boolean
+  channelPaid: ChannelWhereInput
+  isTypeOf_isNull: Boolean
+  isTypeOf_eq: String
+  isTypeOf_not_eq: String
+  isTypeOf_gt: String
+  isTypeOf_gte: String
+  isTypeOf_lt: String
+  isTypeOf_lte: String
+  isTypeOf_in: [String!]
+  isTypeOf_not_in: [String!]
+  isTypeOf_contains: String
+  isTypeOf_not_contains: String
+  isTypeOf_containsInsensitive: String
+  isTypeOf_not_containsInsensitive: String
+  isTypeOf_startsWith: String
+  isTypeOf_not_startsWith: String
+  isTypeOf_endsWith: String
+  isTypeOf_not_endsWith: String
+}
+
+input PaymentContextWhereInput {
+  video_isNull: Boolean
+  video: VideoWhereInput
+  channel_isNull: Boolean
+  channel: ChannelWhereInput
   isTypeOf_isNull: Boolean
   isTypeOf_eq: String
   isTypeOf_not_eq: String
@@ -6254,14 +6898,24 @@ enum EventOrderByInput {
   data_price_DESC
   data_newPrice_ASC
   data_newPrice_DESC
+  data_amount_ASC
+  data_amount_DESC
+  data_account_ASC
+  data_account_DESC
+  data_commitment_ASC
+  data_commitment_DESC
+  data_minCashoutAllowed_ASC
+  data_minCashoutAllowed_DESC
+  data_maxCashoutAllowed_ASC
+  data_maxCashoutAllowed_DESC
+  data_channelCashoutsEnabled_ASC
+  data_channelCashoutsEnabled_DESC
+  data_rationale_ASC
+  data_rationale_DESC
   data_action_ASC
   data_action_DESC
   data_isTypeOf_ASC
   data_isTypeOf_DESC
-}
-
-input WhereIdInput {
-  id: String!
 }
 
 type EventsConnection {
@@ -6273,13 +6927,6 @@ type EventsConnection {
 type EventEdge {
   node: Event!
   cursor: String!
-}
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String!
-  endCursor: String!
 }
 
 type Notification {
@@ -6405,6 +7052,8 @@ enum NftHistoryEntryOrderByInput {
   nft_lastSalePrice_DESC
   nft_lastSaleDate_ASC
   nft_lastSaleDate_DESC
+  nft_isFeatured_ASC
+  nft_isFeatured_DESC
   event_id_ASC
   event_id_DESC
   event_inBlock_ASC
@@ -6501,28 +7150,6 @@ type NftActivityEdge {
   cursor: String!
 }
 
-type ChannelsConnection {
-  edges: [ChannelEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type ChannelEdge {
-  node: Channel!
-  cursor: String!
-}
-
-type BannedMembersConnection {
-  edges: [BannedMemberEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type BannedMemberEdge {
-  node: BannedMember!
-  cursor: String!
-}
-
 enum MemberMetadataOrderByInput {
   id_ASC
   id_DESC
@@ -6587,159 +7214,6 @@ type MembershipEdge {
   cursor: String!
 }
 
-enum OwnedNftOrderByInput {
-  id_ASC
-  id_DESC
-  createdAt_ASC
-  createdAt_DESC
-  video_id_ASC
-  video_id_DESC
-  video_createdAt_ASC
-  video_createdAt_DESC
-  video_title_ASC
-  video_title_DESC
-  video_description_ASC
-  video_description_DESC
-  video_duration_ASC
-  video_duration_DESC
-  video_language_ASC
-  video_language_DESC
-  video_hasMarketing_ASC
-  video_hasMarketing_DESC
-  video_publishedBeforeJoystream_ASC
-  video_publishedBeforeJoystream_DESC
-  video_isPublic_ASC
-  video_isPublic_DESC
-  video_isCensored_ASC
-  video_isCensored_DESC
-  video_isExcluded_ASC
-  video_isExcluded_DESC
-  video_isExplicit_ASC
-  video_isExplicit_DESC
-  video_videoStateBloatBond_ASC
-  video_videoStateBloatBond_DESC
-  video_createdInBlock_ASC
-  video_createdInBlock_DESC
-  video_isCommentSectionEnabled_ASC
-  video_isCommentSectionEnabled_DESC
-  video_commentsCount_ASC
-  video_commentsCount_DESC
-  video_isReactionFeatureEnabled_ASC
-  video_isReactionFeatureEnabled_DESC
-  video_reactionsCount_ASC
-  video_reactionsCount_DESC
-  video_viewsNum_ASC
-  video_viewsNum_DESC
-  video_ytVideoId_ASC
-  video_ytVideoId_DESC
-  owner_isTypeOf_ASC
-  owner_isTypeOf_DESC
-  transactionalStatus_phantom_ASC
-  transactionalStatus_phantom_DESC
-  transactionalStatus_price_ASC
-  transactionalStatus_price_DESC
-  transactionalStatus_isTypeOf_ASC
-  transactionalStatus_isTypeOf_DESC
-  creatorRoyalty_ASC
-  creatorRoyalty_DESC
-  lastSalePrice_ASC
-  lastSalePrice_DESC
-  lastSaleDate_ASC
-  lastSaleDate_DESC
-}
-
-type OwnedNftsConnection {
-  edges: [OwnedNftEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type OwnedNftEdge {
-  node: OwnedNft!
-  cursor: String!
-}
-
-type AuctionsConnection {
-  edges: [AuctionEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type AuctionEdge {
-  node: Auction!
-  cursor: String!
-}
-
-type AuctionWhitelistedMembersConnection {
-  edges: [AuctionWhitelistedMemberEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type AuctionWhitelistedMemberEdge {
-  node: AuctionWhitelistedMember!
-  cursor: String!
-}
-
-type BidsConnection {
-  edges: [BidEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type BidEdge {
-  node: Bid!
-  cursor: String!
-}
-
-enum AppOrderByInput {
-  id_ASC
-  id_DESC
-  name_ASC
-  name_DESC
-  ownerMember_id_ASC
-  ownerMember_id_DESC
-  ownerMember_createdAt_ASC
-  ownerMember_createdAt_DESC
-  ownerMember_handle_ASC
-  ownerMember_handle_DESC
-  ownerMember_controllerAccount_ASC
-  ownerMember_controllerAccount_DESC
-  ownerMember_totalChannelsCreated_ASC
-  ownerMember_totalChannelsCreated_DESC
-  websiteUrl_ASC
-  websiteUrl_DESC
-  useUri_ASC
-  useUri_DESC
-  smallIcon_ASC
-  smallIcon_DESC
-  mediumIcon_ASC
-  mediumIcon_DESC
-  bigIcon_ASC
-  bigIcon_DESC
-  oneLiner_ASC
-  oneLiner_DESC
-  description_ASC
-  description_DESC
-  termsOfService_ASC
-  termsOfService_DESC
-  category_ASC
-  category_DESC
-  authKey_ASC
-  authKey_DESC
-}
-
-type AppsConnection {
-  edges: [AppEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type AppEdge {
-  node: App!
-  cursor: String!
-}
-
 type CommentReactionsConnection {
   edges: [CommentReactionEdge!]!
   pageInfo: PageInfo!
@@ -6759,6 +7233,543 @@ type CommentsConnection {
 
 type CommentEdge {
   node: Comment!
+  cursor: String!
+}
+
+type CuratorGroup {
+  # Runtime identifier
+  id: String!
+
+  # Is group active or not
+  isActive: Boolean!
+}
+
+input CuratorGroupWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  isActive_isNull: Boolean
+  isActive_eq: Boolean
+  isActive_not_eq: Boolean
+  AND: [CuratorGroupWhereInput!]
+  OR: [CuratorGroupWhereInput!]
+}
+
+enum CuratorGroupOrderByInput {
+  id_ASC
+  id_DESC
+  isActive_ASC
+  isActive_DESC
+}
+
+type CuratorGroupsConnection {
+  edges: [CuratorGroupEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CuratorGroupEdge {
+  node: CuratorGroup!
+  cursor: String!
+}
+
+enum CuratorOrderByInput {
+  id_ASC
+  id_DESC
+}
+
+type CuratorsConnection {
+  edges: [CuratorEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type CuratorEdge {
+  node: Curator!
+  cursor: String!
+}
+
+type VideoViewEvent {
+  # Unique identifier of the video view event
+  id: String!
+
+  # ID of the video that was viewed (the video may no longer exist)
+  videoId: String!
+
+  # IP address of the viewer
+  ip: String!
+
+  # Video view event timestamp
+  timestamp: DateTime!
+}
+
+input VideoViewEventWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [VideoViewEventWhereInput!]
+  OR: [VideoViewEventWhereInput!]
+}
+
+enum VideoViewEventOrderByInput {
+  id_ASC
+  id_DESC
+  videoId_ASC
+  videoId_DESC
+  ip_ASC
+  ip_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type VideoViewEventsConnection {
+  edges: [VideoViewEventEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type VideoViewEventEdge {
+  node: VideoViewEvent!
+  cursor: String!
+}
+
+type Report {
+  # Unique identifier of the report
+  id: String!
+
+  # IP address of the reporter
+  ip: String!
+
+  # If it's a channel report: ID of the channel being reported (the channel may no longer exist)
+  channelId: String
+
+  # If it's a video report: ID of the video being reported (the video may no longer exist)
+  videoId: String
+
+  # Time of the report
+  timestamp: DateTime!
+
+  # Rationale behind the report
+  rationale: String!
+}
+
+input ReportWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  videoId_isNull: Boolean
+  videoId_eq: String
+  videoId_not_eq: String
+  videoId_gt: String
+  videoId_gte: String
+  videoId_lt: String
+  videoId_lte: String
+  videoId_in: [String!]
+  videoId_not_in: [String!]
+  videoId_contains: String
+  videoId_not_contains: String
+  videoId_containsInsensitive: String
+  videoId_not_containsInsensitive: String
+  videoId_startsWith: String
+  videoId_not_startsWith: String
+  videoId_endsWith: String
+  videoId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
+  AND: [ReportWhereInput!]
+  OR: [ReportWhereInput!]
+}
+
+enum ReportOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  videoId_ASC
+  videoId_DESC
+  timestamp_ASC
+  timestamp_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+type ReportsConnection {
+  edges: [ReportEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ReportEdge {
+  node: Report!
+  cursor: String!
+}
+
+type NftFeaturingRequest {
+  # Unique identifier of the request
+  id: String!
+
+  # IP address of the reporter
+  ip: String!
+
+  # ID of the nft that is being requested to be featured by operator
+  nftId: String!
+
+  # Time of the request
+  timestamp: DateTime!
+
+  # Rationale behind the request
+  rationale: String!
+}
+
+input NftFeaturingRequestWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  nftId_isNull: Boolean
+  nftId_eq: String
+  nftId_not_eq: String
+  nftId_gt: String
+  nftId_gte: String
+  nftId_lt: String
+  nftId_lte: String
+  nftId_in: [String!]
+  nftId_not_in: [String!]
+  nftId_contains: String
+  nftId_not_contains: String
+  nftId_containsInsensitive: String
+  nftId_not_containsInsensitive: String
+  nftId_startsWith: String
+  nftId_not_startsWith: String
+  nftId_endsWith: String
+  nftId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  rationale_isNull: Boolean
+  rationale_eq: String
+  rationale_not_eq: String
+  rationale_gt: String
+  rationale_gte: String
+  rationale_lt: String
+  rationale_lte: String
+  rationale_in: [String!]
+  rationale_not_in: [String!]
+  rationale_contains: String
+  rationale_not_contains: String
+  rationale_containsInsensitive: String
+  rationale_not_containsInsensitive: String
+  rationale_startsWith: String
+  rationale_not_startsWith: String
+  rationale_endsWith: String
+  rationale_not_endsWith: String
+  AND: [NftFeaturingRequestWhereInput!]
+  OR: [NftFeaturingRequestWhereInput!]
+}
+
+enum NftFeaturingRequestOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  nftId_ASC
+  nftId_DESC
+  timestamp_ASC
+  timestamp_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+type NftFeaturingRequestsConnection {
+  edges: [NftFeaturingRequestEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type NftFeaturingRequestEdge {
+  node: NftFeaturingRequest!
+  cursor: String!
+}
+
+type ChannelFollow {
+  # Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)
+  id: String!
+
+  # IP address of the follower
+  ip: String!
+
+  # ID of the channel being followed (the channel may no longer exist)
+  channelId: String!
+
+  # Time when user started following the channel
+  timestamp: DateTime!
+}
+
+input ChannelFollowWhereInput {
+  id_isNull: Boolean
+  id_eq: String
+  id_not_eq: String
+  id_gt: String
+  id_gte: String
+  id_lt: String
+  id_lte: String
+  id_in: [String!]
+  id_not_in: [String!]
+  id_contains: String
+  id_not_contains: String
+  id_containsInsensitive: String
+  id_not_containsInsensitive: String
+  id_startsWith: String
+  id_not_startsWith: String
+  id_endsWith: String
+  id_not_endsWith: String
+  ip_isNull: Boolean
+  ip_eq: String
+  ip_not_eq: String
+  ip_gt: String
+  ip_gte: String
+  ip_lt: String
+  ip_lte: String
+  ip_in: [String!]
+  ip_not_in: [String!]
+  ip_contains: String
+  ip_not_contains: String
+  ip_containsInsensitive: String
+  ip_not_containsInsensitive: String
+  ip_startsWith: String
+  ip_not_startsWith: String
+  ip_endsWith: String
+  ip_not_endsWith: String
+  channelId_isNull: Boolean
+  channelId_eq: String
+  channelId_not_eq: String
+  channelId_gt: String
+  channelId_gte: String
+  channelId_lt: String
+  channelId_lte: String
+  channelId_in: [String!]
+  channelId_not_in: [String!]
+  channelId_contains: String
+  channelId_not_contains: String
+  channelId_containsInsensitive: String
+  channelId_not_containsInsensitive: String
+  channelId_startsWith: String
+  channelId_not_startsWith: String
+  channelId_endsWith: String
+  channelId_not_endsWith: String
+  timestamp_isNull: Boolean
+  timestamp_eq: DateTime
+  timestamp_not_eq: DateTime
+  timestamp_gt: DateTime
+  timestamp_gte: DateTime
+  timestamp_lt: DateTime
+  timestamp_lte: DateTime
+  timestamp_in: [DateTime!]
+  timestamp_not_in: [DateTime!]
+  AND: [ChannelFollowWhereInput!]
+  OR: [ChannelFollowWhereInput!]
+}
+
+enum ChannelFollowOrderByInput {
+  id_ASC
+  id_DESC
+  ip_ASC
+  ip_DESC
+  channelId_ASC
+  channelId_DESC
+  timestamp_ASC
+  timestamp_DESC
+}
+
+type ChannelFollowsConnection {
+  edges: [ChannelFollowEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ChannelFollowEdge {
+  node: ChannelFollow!
   cursor: String!
 }
 
@@ -7098,650 +8109,51 @@ type VideoReactionEdge {
   cursor: String!
 }
 
-type CuratorGroup {
-  # Runtime identifier
-  id: String!
-
-  # Is group active or not
-  isActive: Boolean!
-}
-
-input CuratorGroupWhereInput {
-  id_isNull: Boolean
-  id_eq: String
-  id_not_eq: String
-  id_gt: String
-  id_gte: String
-  id_lt: String
-  id_lte: String
-  id_in: [String!]
-  id_not_in: [String!]
-  id_contains: String
-  id_not_contains: String
-  id_containsInsensitive: String
-  id_not_containsInsensitive: String
-  id_startsWith: String
-  id_not_startsWith: String
-  id_endsWith: String
-  id_not_endsWith: String
-  isActive_isNull: Boolean
-  isActive_eq: Boolean
-  isActive_not_eq: Boolean
-  AND: [CuratorGroupWhereInput!]
-  OR: [CuratorGroupWhereInput!]
-}
-
-enum CuratorGroupOrderByInput {
+enum AppOrderByInput {
   id_ASC
   id_DESC
-  isActive_ASC
-  isActive_DESC
-}
-
-type CuratorGroupsConnection {
-  edges: [CuratorGroupEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type CuratorGroupEdge {
-  node: CuratorGroup!
-  cursor: String!
-}
-
-enum CuratorOrderByInput {
-  id_ASC
-  id_DESC
-}
-
-type CuratorsConnection {
-  edges: [CuratorEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type CuratorEdge {
-  node: Curator!
-  cursor: String!
-}
-
-enum StorageBucketOperatorMetadataOrderByInput {
-  id_ASC
-  id_DESC
-  storageBucket_id_ASC
-  storageBucket_id_DESC
-  storageBucket_acceptingNewBags_ASC
-  storageBucket_acceptingNewBags_DESC
-  storageBucket_dataObjectsSizeLimit_ASC
-  storageBucket_dataObjectsSizeLimit_DESC
-  storageBucket_dataObjectCountLimit_ASC
-  storageBucket_dataObjectCountLimit_DESC
-  storageBucket_dataObjectsCount_ASC
-  storageBucket_dataObjectsCount_DESC
-  storageBucket_dataObjectsSize_ASC
-  storageBucket_dataObjectsSize_DESC
-  nodeEndpoint_ASC
-  nodeEndpoint_DESC
-  nodeLocation_countryCode_ASC
-  nodeLocation_countryCode_DESC
-  nodeLocation_city_ASC
-  nodeLocation_city_DESC
-  extra_ASC
-  extra_DESC
-}
-
-type StorageBucketOperatorMetadataConnection {
-  edges: [StorageBucketOperatorMetadataEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type StorageBucketOperatorMetadataEdge {
-  node: StorageBucketOperatorMetadata!
-  cursor: String!
-}
-
-enum StorageBucketOrderByInput {
-  id_ASC
-  id_DESC
-  operatorStatus_phantom_ASC
-  operatorStatus_phantom_DESC
-  operatorStatus_workerId_ASC
-  operatorStatus_workerId_DESC
-  operatorStatus_transactorAccountId_ASC
-  operatorStatus_transactorAccountId_DESC
-  operatorStatus_isTypeOf_ASC
-  operatorStatus_isTypeOf_DESC
-  operatorMetadata_id_ASC
-  operatorMetadata_id_DESC
-  operatorMetadata_nodeEndpoint_ASC
-  operatorMetadata_nodeEndpoint_DESC
-  operatorMetadata_extra_ASC
-  operatorMetadata_extra_DESC
-  acceptingNewBags_ASC
-  acceptingNewBags_DESC
-  dataObjectsSizeLimit_ASC
-  dataObjectsSizeLimit_DESC
-  dataObjectCountLimit_ASC
-  dataObjectCountLimit_DESC
-  dataObjectsCount_ASC
-  dataObjectsCount_DESC
-  dataObjectsSize_ASC
-  dataObjectsSize_DESC
-}
-
-type StorageBucketsConnection {
-  edges: [StorageBucketEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type StorageBucketEdge {
-  node: StorageBucket!
-  cursor: String!
-}
-
-enum StorageBagOrderByInput {
-  id_ASC
-  id_DESC
-  owner_phantom_ASC
-  owner_phantom_DESC
-  owner_workingGroupId_ASC
-  owner_workingGroupId_DESC
-  owner_memberId_ASC
-  owner_memberId_DESC
-  owner_channelId_ASC
-  owner_channelId_DESC
-  owner_daoId_ASC
-  owner_daoId_DESC
-  owner_isTypeOf_ASC
-  owner_isTypeOf_DESC
-}
-
-type StorageBagsConnection {
-  edges: [StorageBagEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type StorageBagEdge {
-  node: StorageBag!
-  cursor: String!
-}
-
-type StorageBucketBagsConnection {
-  edges: [StorageBucketBagEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type StorageBucketBagEdge {
-  node: StorageBucketBag!
-  cursor: String!
-}
-
-type DistributionBucketBagsConnection {
-  edges: [DistributionBucketBagEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type DistributionBucketBagEdge {
-  node: DistributionBucketBag!
-  cursor: String!
-}
-
-type StorageDataObjectsConnection {
-  edges: [StorageDataObjectEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type StorageDataObjectEdge {
-  node: StorageDataObject!
-  cursor: String!
-}
-
-enum DistributionBucketFamilyMetadataOrderByInput {
-  id_ASC
-  id_DESC
-  family_id_ASC
-  family_id_DESC
-  region_ASC
-  region_DESC
+  name_ASC
+  name_DESC
+  ownerMember_id_ASC
+  ownerMember_id_DESC
+  ownerMember_createdAt_ASC
+  ownerMember_createdAt_DESC
+  ownerMember_handle_ASC
+  ownerMember_handle_DESC
+  ownerMember_controllerAccount_ASC
+  ownerMember_controllerAccount_DESC
+  ownerMember_totalChannelsCreated_ASC
+  ownerMember_totalChannelsCreated_DESC
+  websiteUrl_ASC
+  websiteUrl_DESC
+  useUri_ASC
+  useUri_DESC
+  smallIcon_ASC
+  smallIcon_DESC
+  mediumIcon_ASC
+  mediumIcon_DESC
+  bigIcon_ASC
+  bigIcon_DESC
+  oneLiner_ASC
+  oneLiner_DESC
   description_ASC
   description_DESC
+  termsOfService_ASC
+  termsOfService_DESC
+  category_ASC
+  category_DESC
+  authKey_ASC
+  authKey_DESC
 }
 
-type DistributionBucketFamilyMetadataConnection {
-  edges: [DistributionBucketFamilyMetadataEdge!]!
+type AppsConnection {
+  edges: [AppEdge!]!
   pageInfo: PageInfo!
   totalCount: Int!
 }
 
-type DistributionBucketFamilyMetadataEdge {
-  node: DistributionBucketFamilyMetadata!
-  cursor: String!
-}
-
-enum DistributionBucketOperatorMetadataOrderByInput {
-  id_ASC
-  id_DESC
-  distirbutionBucketOperator_id_ASC
-  distirbutionBucketOperator_id_DESC
-  distirbutionBucketOperator_workerId_ASC
-  distirbutionBucketOperator_workerId_DESC
-  distirbutionBucketOperator_status_ASC
-  distirbutionBucketOperator_status_DESC
-  nodeEndpoint_ASC
-  nodeEndpoint_DESC
-  nodeLocation_countryCode_ASC
-  nodeLocation_countryCode_DESC
-  nodeLocation_city_ASC
-  nodeLocation_city_DESC
-  extra_ASC
-  extra_DESC
-}
-
-type DistributionBucketOperatorMetadataConnection {
-  edges: [DistributionBucketOperatorMetadataEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type DistributionBucketOperatorMetadataEdge {
-  node: DistributionBucketOperatorMetadata!
-  cursor: String!
-}
-
-type DistributionBucketOperatorsConnection {
-  edges: [DistributionBucketOperatorEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type DistributionBucketOperatorEdge {
-  node: DistributionBucketOperator!
-  cursor: String!
-}
-
-type DistributionBucketsConnection {
-  edges: [DistributionBucketEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type DistributionBucketEdge {
-  node: DistributionBucket!
-  cursor: String!
-}
-
-enum DistributionBucketFamilyOrderByInput {
-  id_ASC
-  id_DESC
-  metadata_id_ASC
-  metadata_id_DESC
-  metadata_region_ASC
-  metadata_region_DESC
-  metadata_description_ASC
-  metadata_description_DESC
-}
-
-type DistributionBucketFamiliesConnection {
-  edges: [DistributionBucketFamilyEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type DistributionBucketFamilyEdge {
-  node: DistributionBucketFamily!
-  cursor: String!
-}
-
-type VideoViewEvent {
-  # Unique identifier of the video view event
-  id: String!
-
-  # ID of the video that was viewed (the video may no longer exist)
-  videoId: String!
-
-  # IP address of the viewer
-  ip: String!
-
-  # Video view event timestamp
-  timestamp: DateTime!
-}
-
-input VideoViewEventWhereInput {
-  id_isNull: Boolean
-  id_eq: String
-  id_not_eq: String
-  id_gt: String
-  id_gte: String
-  id_lt: String
-  id_lte: String
-  id_in: [String!]
-  id_not_in: [String!]
-  id_contains: String
-  id_not_contains: String
-  id_containsInsensitive: String
-  id_not_containsInsensitive: String
-  id_startsWith: String
-  id_not_startsWith: String
-  id_endsWith: String
-  id_not_endsWith: String
-  videoId_isNull: Boolean
-  videoId_eq: String
-  videoId_not_eq: String
-  videoId_gt: String
-  videoId_gte: String
-  videoId_lt: String
-  videoId_lte: String
-  videoId_in: [String!]
-  videoId_not_in: [String!]
-  videoId_contains: String
-  videoId_not_contains: String
-  videoId_containsInsensitive: String
-  videoId_not_containsInsensitive: String
-  videoId_startsWith: String
-  videoId_not_startsWith: String
-  videoId_endsWith: String
-  videoId_not_endsWith: String
-  ip_isNull: Boolean
-  ip_eq: String
-  ip_not_eq: String
-  ip_gt: String
-  ip_gte: String
-  ip_lt: String
-  ip_lte: String
-  ip_in: [String!]
-  ip_not_in: [String!]
-  ip_contains: String
-  ip_not_contains: String
-  ip_containsInsensitive: String
-  ip_not_containsInsensitive: String
-  ip_startsWith: String
-  ip_not_startsWith: String
-  ip_endsWith: String
-  ip_not_endsWith: String
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
-  AND: [VideoViewEventWhereInput!]
-  OR: [VideoViewEventWhereInput!]
-}
-
-enum VideoViewEventOrderByInput {
-  id_ASC
-  id_DESC
-  videoId_ASC
-  videoId_DESC
-  ip_ASC
-  ip_DESC
-  timestamp_ASC
-  timestamp_DESC
-}
-
-type VideoViewEventsConnection {
-  edges: [VideoViewEventEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type VideoViewEventEdge {
-  node: VideoViewEvent!
-  cursor: String!
-}
-
-type Report {
-  # Unique identifier of the report
-  id: String!
-
-  # IP address of the reporter
-  ip: String!
-
-  # ID of the channel being reported or channel that owns the video being reported (the channel may no longer exist)
-  channelId: String!
-
-  # ID of the video being reported (the video may no longer exist)
-  videoId: String
-
-  # Time of the report
-  timestamp: DateTime!
-
-  # Rationale behind the report
-  rationale: String!
-}
-
-input ReportWhereInput {
-  id_isNull: Boolean
-  id_eq: String
-  id_not_eq: String
-  id_gt: String
-  id_gte: String
-  id_lt: String
-  id_lte: String
-  id_in: [String!]
-  id_not_in: [String!]
-  id_contains: String
-  id_not_contains: String
-  id_containsInsensitive: String
-  id_not_containsInsensitive: String
-  id_startsWith: String
-  id_not_startsWith: String
-  id_endsWith: String
-  id_not_endsWith: String
-  ip_isNull: Boolean
-  ip_eq: String
-  ip_not_eq: String
-  ip_gt: String
-  ip_gte: String
-  ip_lt: String
-  ip_lte: String
-  ip_in: [String!]
-  ip_not_in: [String!]
-  ip_contains: String
-  ip_not_contains: String
-  ip_containsInsensitive: String
-  ip_not_containsInsensitive: String
-  ip_startsWith: String
-  ip_not_startsWith: String
-  ip_endsWith: String
-  ip_not_endsWith: String
-  channelId_isNull: Boolean
-  channelId_eq: String
-  channelId_not_eq: String
-  channelId_gt: String
-  channelId_gte: String
-  channelId_lt: String
-  channelId_lte: String
-  channelId_in: [String!]
-  channelId_not_in: [String!]
-  channelId_contains: String
-  channelId_not_contains: String
-  channelId_containsInsensitive: String
-  channelId_not_containsInsensitive: String
-  channelId_startsWith: String
-  channelId_not_startsWith: String
-  channelId_endsWith: String
-  channelId_not_endsWith: String
-  videoId_isNull: Boolean
-  videoId_eq: String
-  videoId_not_eq: String
-  videoId_gt: String
-  videoId_gte: String
-  videoId_lt: String
-  videoId_lte: String
-  videoId_in: [String!]
-  videoId_not_in: [String!]
-  videoId_contains: String
-  videoId_not_contains: String
-  videoId_containsInsensitive: String
-  videoId_not_containsInsensitive: String
-  videoId_startsWith: String
-  videoId_not_startsWith: String
-  videoId_endsWith: String
-  videoId_not_endsWith: String
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
-  rationale_isNull: Boolean
-  rationale_eq: String
-  rationale_not_eq: String
-  rationale_gt: String
-  rationale_gte: String
-  rationale_lt: String
-  rationale_lte: String
-  rationale_in: [String!]
-  rationale_not_in: [String!]
-  rationale_contains: String
-  rationale_not_contains: String
-  rationale_containsInsensitive: String
-  rationale_not_containsInsensitive: String
-  rationale_startsWith: String
-  rationale_not_startsWith: String
-  rationale_endsWith: String
-  rationale_not_endsWith: String
-  AND: [ReportWhereInput!]
-  OR: [ReportWhereInput!]
-}
-
-enum ReportOrderByInput {
-  id_ASC
-  id_DESC
-  ip_ASC
-  ip_DESC
-  channelId_ASC
-  channelId_DESC
-  videoId_ASC
-  videoId_DESC
-  timestamp_ASC
-  timestamp_DESC
-  rationale_ASC
-  rationale_DESC
-}
-
-type ReportsConnection {
-  edges: [ReportEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type ReportEdge {
-  node: Report!
-  cursor: String!
-}
-
-type ChannelFollow {
-  # Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)
-  id: String!
-
-  # IP address of the follower
-  ip: String!
-
-  # ID of the channel being followed (the channel may no longer exist)
-  channelId: String!
-
-  # Time when user started following the channel
-  timestamp: DateTime!
-}
-
-input ChannelFollowWhereInput {
-  id_isNull: Boolean
-  id_eq: String
-  id_not_eq: String
-  id_gt: String
-  id_gte: String
-  id_lt: String
-  id_lte: String
-  id_in: [String!]
-  id_not_in: [String!]
-  id_contains: String
-  id_not_contains: String
-  id_containsInsensitive: String
-  id_not_containsInsensitive: String
-  id_startsWith: String
-  id_not_startsWith: String
-  id_endsWith: String
-  id_not_endsWith: String
-  ip_isNull: Boolean
-  ip_eq: String
-  ip_not_eq: String
-  ip_gt: String
-  ip_gte: String
-  ip_lt: String
-  ip_lte: String
-  ip_in: [String!]
-  ip_not_in: [String!]
-  ip_contains: String
-  ip_not_contains: String
-  ip_containsInsensitive: String
-  ip_not_containsInsensitive: String
-  ip_startsWith: String
-  ip_not_startsWith: String
-  ip_endsWith: String
-  ip_not_endsWith: String
-  channelId_isNull: Boolean
-  channelId_eq: String
-  channelId_not_eq: String
-  channelId_gt: String
-  channelId_gte: String
-  channelId_lt: String
-  channelId_lte: String
-  channelId_in: [String!]
-  channelId_not_in: [String!]
-  channelId_contains: String
-  channelId_not_contains: String
-  channelId_containsInsensitive: String
-  channelId_not_containsInsensitive: String
-  channelId_startsWith: String
-  channelId_not_startsWith: String
-  channelId_endsWith: String
-  channelId_not_endsWith: String
-  timestamp_isNull: Boolean
-  timestamp_eq: DateTime
-  timestamp_not_eq: DateTime
-  timestamp_gt: DateTime
-  timestamp_gte: DateTime
-  timestamp_lt: DateTime
-  timestamp_lte: DateTime
-  timestamp_in: [DateTime!]
-  timestamp_not_in: [DateTime!]
-  AND: [ChannelFollowWhereInput!]
-  OR: [ChannelFollowWhereInput!]
-}
-
-enum ChannelFollowOrderByInput {
-  id_ASC
-  id_DESC
-  ip_ASC
-  ip_DESC
-  channelId_ASC
-  channelId_DESC
-  timestamp_ASC
-  timestamp_DESC
-}
-
-type ChannelFollowsConnection {
-  edges: [ChannelFollowEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type ChannelFollowEdge {
-  node: ChannelFollow!
+type AppEdge {
+  node: App!
   cursor: String!
 }
 

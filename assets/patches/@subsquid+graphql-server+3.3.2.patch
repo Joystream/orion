@@ -1,0 +1,58 @@
+diff --git a/node_modules/@subsquid/graphql-server/lib/resolvers.js b/node_modules/@subsquid/graphql-server/lib/resolvers.js
+index ea605c2..2564ebd 100644
+--- a/node_modules/@subsquid/graphql-server/lib/resolvers.js
++++ b/node_modules/@subsquid/graphql-server/lib/resolvers.js
+@@ -19,6 +19,7 @@ async function loadCustomResolvers(mod) {
+     return (0, type_graphql_1.buildSchema)({
+         resolvers: [mod],
+         scalarsMap,
++        validate: { forbidUnknownValues: false },
+         container: resolverData => new CustomResolversContainer(resolverData)
+     });
+ }
+diff --git a/node_modules/@subsquid/graphql-server/lib/server.js b/node_modules/@subsquid/graphql-server/lib/server.js
+index 04e74c3..e95a07b 100644
+--- a/node_modules/@subsquid/graphql-server/lib/server.js
++++ b/node_modules/@subsquid/graphql-server/lib/server.js
+@@ -90,16 +90,17 @@ class Server {
+         });
+     }
+     async schema() {
+-        let schemas = [
+-            new schema_2.SchemaBuilder({ model: this.model(), subscriptions: this.options.subscriptions }).build()
+-        ];
+-        if (this.options.squidStatus !== false) {
+-            schemas.push(this.squidStatusSchema());
+-        }
+         let customResolvers = await this.customResolvers();
++        let schemas = []
+         if (customResolvers) {
+             schemas.push(customResolvers);
+         }
++        schemas.push(
++            new schema_2.SchemaBuilder({ model: this.model(), subscriptions: this.options.subscriptions }).build()
++        );
++        if (this.options.squidStatus !== false) {
++            schemas.push(this.squidStatusSchema());
++        }
+         return (0, schema_1.mergeSchemas)({ schemas });
+     }
+     squidStatusSchema() {
+@@ -177,7 +178,7 @@ class Server {
+                 return new db_1.PoolOpenreaderContext(dialect, pool, pool, this.options.subscriptionPollInterval);
+             };
+         }
+-        return () => {
++        return ({ req }) => {
+             let openreader = createOpenreader();
+             if (this.options.maxResponseNodes) {
+                 openreader.responseSizeLimit = new limit_1.ResponseSizeLimit(this.options.maxResponseNodes);
+@@ -186,7 +187,7 @@ class Server {
+             if (this.options.subscriptionMaxResponseNodes) {
+                 openreader.subscriptionResponseSizeLimit = new limit_1.ResponseSizeLimit(this.options.subscriptionMaxResponseNodes);
+             }
+-            return { openreader };
++            return { req, openreader };
+         };
+     }
+     async createTypeormConnection(options) {
