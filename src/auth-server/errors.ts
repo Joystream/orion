@@ -23,3 +23,9 @@ export class NotFoundError extends AuthApiError {
     super(message, 404)
   }
 }
+
+export class TooManyRequestsError extends AuthApiError {
+  constructor(message = 'Too many requests') {
+    super(message, 429)
+  }
+}

@@ -20,7 +20,7 @@ export const login: (
   try {
     const { email, password } = req.body
     const em = await globalEm
-    await em.transaction(async (em) => {
+    const session = await em.transaction(async (em) => {
       const account = await em.getRepository(Account).findOneBy({
         email,
       })
@@ -28,11 +28,12 @@ export const login: (
         throw new UnauthorizedError('Invalid credentials')
       }
 
-      const session = await getOrCreateSession(em, req, account.userId, account.id)
-      res.status(200).json({
-        success: true,
-        sessionId: session.id,
-      })
+      return getOrCreateSession(em, req, account.userId, account.id)
+    })
+
+    res.status(200).json({
+      success: true,
+      sessionId: session.id,
     })
   } catch (e) {
     next(e)

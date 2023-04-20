@@ -20,7 +20,8 @@ export const anonymousAuth: (
   try {
     const { userId } = req.body
     const em = await globalEm
-    await em.transaction(async (em) => {
+
+    const { user, session } = await em.transaction(async (em) => {
       const user = userId
         ? await em.getRepository(User).findOneBy({
             id: userId,
@@ -40,11 +41,14 @@ export const anonymousAuth: (
       }
 
       const session = await getOrCreateSession(em, req, user.id)
-      res.status(200).json({
-        success: true,
-        userId: user.id,
-        sessionId: session.id,
-      })
+
+      return { user, session }
+    })
+
+    res.status(200).json({
+      success: true,
+      userId: user.id,
+      sessionId: session.id,
     })
   } catch (e) {
     next(e)

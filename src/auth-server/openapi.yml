@@ -123,6 +123,8 @@ paths:
           $ref: '#/components/responses/GenericOkResponse'
         '400':
           $ref: '#/components/responses/RequestTokenBadRequestResponse'
+        '404':
+          $ref: '#/components/responses/RequestEmailConfirmationAccountNotFoundResponse'
         '429':
           $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
         default:
@@ -310,6 +312,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
+    RequestEmailConfirmationAccountNotFoundResponse:
+      description: Provided e-mail address is not associated with any account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
   schemas:
     AnonymousUserAuthRequestData:
       type: object
@@ -413,6 +421,8 @@ components:
           $ref: '#/components/schemas/Password'
     RequestTokenRequestData:
       type: object
+      required:
+        - email
       properties:
         email:
           type: string

@@ -3,8 +3,12 @@ import { sr25519Verify, decodeAddress, cryptoWaitReady } from '@polkadot/util-cr
 import { BadRequestError } from './errors'
 import { config, ConfigVariable } from '../utils/config'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-import { Account } from '../model'
+import { Account, Token, TokenType } from '../model'
 import { EntityManager } from 'typeorm'
+import { uniqueId } from '../utils/crypto'
+import { sendMail } from '../utils/mail'
+import { registerEmailData } from './emails'
+import { formatDate } from '../utils/date'
 
 export async function verifyConnectOrDisconnectAccountPayload(
   em: EntityManager,
@@ -46,4 +50,38 @@ export async function verifyConnectOrDisconnectAccountPayload(
   if (payload.timestamp > Date.now()) {
     throw new BadRequestError('Payload timestamp is in the future.')
   }
+}
+
+export async function issueEmailConfirmationToken(
+  account: Account,
+  em: EntityManager
+): Promise<Token> {
+  const issuedAt = new Date()
+  const lifetimeMs =
+    (await config.get(ConfigVariable.EmailConfirmationTokenExpiryTimeHours, em)) * 3_600_000
+  const expiry = new Date(issuedAt.getTime() + lifetimeMs)
+  const token = new Token({
+    id: uniqueId(),
+    type: TokenType.EMAIL_CONFIRMATION,
+    expiry,
+    issuedAt,
+    issuedForId: account.id,
+  })
+  return em.save(token)
+}
+
+export async function sendWelcomeEmail(account: Account, em: EntityManager): Promise<void> {
+  const emailConfirmationToken = await issueEmailConfirmationToken(account, em)
+  const appName = await config.get(ConfigVariable.AppName, em)
+  const confirmEmailRoute = await config.get(ConfigVariable.EmailConfirmationRoute, em)
+  const emailConfirmationLink = confirmEmailRoute.replace('{token}', emailConfirmationToken.id)
+  await sendMail({
+    from: await config.get(ConfigVariable.SendgridFromEmail, em),
+    to: account.email,
+    ...registerEmailData({
+      link: emailConfirmationLink,
+      linkExpiryDate: formatDate(emailConfirmationToken.expiry),
+      appName,
+    }),
+  })
 }
