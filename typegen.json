@@ -1,6 +1,6 @@
 {
   "outDir": "src/types",
-  "specVersions": "https://joystream.archive.subsquid.io/graphql",
+  "specVersions": "http://localhost:8888/graphql",
   "events": [
     "Content.VideoCreated",
     "Content.VideoUpdated",
