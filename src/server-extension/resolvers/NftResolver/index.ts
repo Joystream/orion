@@ -9,9 +9,11 @@ import { randomAsHex } from '@polkadot/util-crypto'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { model } from '../model'
-import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { isObject } from 'lodash'
+import { has } from '../../../utils/misc'
 
 @Resolver()
 export class NftResolver {
@@ -23,15 +25,33 @@ export class NftResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<OwnedNft[]> {
+    const em = await this.em()
+    const dbResult: unknown = await em.query('SELECT "height" FROM "squid_processor"."status"')
+    const lastProcessedBlock =
+      Array.isArray(dbResult) &&
+      isObject(dbResult[0]) &&
+      has(dbResult[0], 'height') &&
+      typeof dbResult[0].height === 'number'
+        ? dbResult[0].height
+        : -1
+
     const tree = getResolveTree(info)
 
-    // Extract subsquid-supported Membership fields
+    const sqlArgs = parseSqlArguments(model, 'OwnedNft', {
+      ...args,
+    })
+
+    // Extract subsquid-supported OwnedNft fields
     const ownedNftFields = parseAnyTree(model, 'OwnedNft', info.schema, tree)
 
     // Generate query using subsquid's ListQuery
-    const listQuery = new ListQuery(model, ctx.openreader.dialect, 'OwnedNft', ownedNftFields, {
-      limit: args.limit,
-    })
+    const listQuery = new ListQuery(
+      model,
+      ctx.openreader.dialect,
+      'OwnedNft',
+      ownedNftFields,
+      sqlArgs
+    )
     let listQuerySql = listQuery.sql
 
     listQuerySql = extendClause(
@@ -39,9 +59,10 @@ export class NftResolver {
       'FROM',
       `
         INNER JOIN (
-          SELECT nft_id, auction_type, auction_type#>>'{plannedEndAtBlock}' AS end_block FROM auction a
-          WHERE auction_type#>>'{isTypeOf}' = 'AuctionTypeEnglish'
-          AND a.is_completed = false 
+          SELECT nft_id, auction_type->>'plannedEndAtBlock' AS end_block FROM auction a
+          WHERE auction_type->>'isTypeOf' = 'AuctionTypeEnglish'
+          AND (auction_type->>'plannedEndAtBlock')::int > ${lastProcessedBlock}
+          AND a.is_canceled = false
         ) AS auctions ON auctions.nft_id = owned_nft.id 
 `,
       ''
@@ -50,7 +71,6 @@ export class NftResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
