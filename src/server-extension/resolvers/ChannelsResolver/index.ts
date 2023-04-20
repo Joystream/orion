@@ -23,7 +23,7 @@ import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
-import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
+import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
@@ -86,24 +86,24 @@ export class ChannelsResolver {
     @Ctx() ctx: Context
   ): Promise<TopSellingChannelsResult[]> {
     const currentTime = new Date().getTime()
-    const cacheKey = `top-selling-channels-${args?.periodDays}`
-    const cachedData = cache?.get(cacheKey)
-    const dataTTL = cache?.getTtl(cacheKey)
+    const cacheKey = `top-selling-channels-${args?.periodDays}${
+      args?.where && `-${JSON.stringify(args.where)}`
+    }`
+    const cachedData = cache.get(cacheKey)
+    const dataTTL = cache.getTtl(cacheKey)
 
     const listQuery = buildTopSellingChannelsQuery(args, info, ctx)
 
     // check if we need to update the cache
-    console.log('cache data', cachedData, dataTTL)
     if (!cachedData || !dataTTL || dataTTL - currentTime < 5 * 1000) {
       if (cachedData) {
-        console.log('cache expires soon, updating ', cacheKey)
         // data is in the cache, so just trigger the update
         setTimeout(() => {
           ctx.openreader
             .executeQuery(listQuery)
             .then((result) => {
               console.log('Result', result)
-              cache?.set(cacheKey, result)
+              cache.set(cacheKey, result)
             })
             .catch(() => {
               // do nothing
@@ -111,14 +111,12 @@ export class ChannelsResolver {
         }, 0)
         return cachedData as TopSellingChannelsResult[]
       } else {
-        console.log('cache miss', cacheKey)
         // there is no data in cache, so we need to wait for it before returning it
         const result = await ctx.openreader.executeQuery(listQuery)
         cache?.set(cacheKey, result)
         return result
       }
     }
-    console.log('Took data from cache', cacheKey)
     return cachedData as TopSellingChannelsResult[]
   }
 

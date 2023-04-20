@@ -144,7 +144,7 @@ export function buildTopSellingChannelsQuery(
                   data#>>'{previousNftOwner,channel}' AS previous_owner_id,
                   "timestamp" 
                 FROM 
-                  processor.event
+                  event
                 WHERE
                  data#>>'{isTypeOf}' = 'NftBoughtEventData'
                  AND "timestamp" > '${new Date(
@@ -157,7 +157,7 @@ export function buildTopSellingChannelsQuery(
                   data#>>'{previousNftOwner,channel}' AS previous_owner_id,
                   bid.amount AS price,
                   "timestamp" 
-                FROM processor.event
+                FROM event
                 LEFT JOIN bid ON data#>>'{winningBid}' = bid.id
                 WHERE data#>>'{isTypeOf}' IN ('EnglishAuctionSettledEventData', 'BidMadeCompletingAuctionEventData', 'OpenAuctionBidAcceptedEventData')
                 AND "timestamp" > '${new Date(
