@@ -17,3 +17,9 @@ export class UnauthorizedError extends AuthApiError {
     super(message, 401)
   }
 }
+
+export class NotFoundError extends AuthApiError {
+  constructor(message = 'Not found') {
+    super(message, 404)
+  }
+}

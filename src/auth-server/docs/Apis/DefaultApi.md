@@ -6,9 +6,10 @@ All URIs are relative to *http://localhost:4074/api/v1*
 |------------- | ------------- | -------------|
 | [**anonymousAuth**](DefaultApi.md#anonymousAuth) | **POST** /anonymous-auth |  |
 | [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
+| [**connectAccount**](DefaultApi.md#connectAccount) | **POST** /connect-account |  |
+| [**disconnectAccount**](DefaultApi.md#disconnectAccount) | **POST** /disconnect-account |  |
 | [**login**](DefaultApi.md#login) | **POST** /login |  |
 | [**logout**](DefaultApi.md#logout) | **POST** /logout |  |
-| [**proveMembership**](DefaultApi.md#proveMembership) | **POST** /prove-membership |  |
 | [**register**](DefaultApi.md#register) | **POST** /register |  |
 | [**requestEmailConfirmationToken**](DefaultApi.md#requestEmailConfirmationToken) | **POST** /request-email-confirmation-token |  |
 | [**requestPasswordResetToken**](DefaultApi.md#requestPasswordResetToken) | **POST** /request-password-reset-token |  |
@@ -69,6 +70,60 @@ No authorization required
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="connectAccount"></a>
+# **connectAccount**
+> GenericOkResponseData connectAccount(ConnectOrDisconnectAccountRequestData)
+
+
+
+    Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **ConnectOrDisconnectAccountRequestData** | [**ConnectOrDisconnectAccountRequestData**](../Models/ConnectOrDisconnectAccountRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="disconnectAccount"></a>
+# **disconnectAccount**
+> GenericOkResponseData disconnectAccount(ConnectOrDisconnectAccountRequestData)
+
+
+
+    Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **ConnectOrDisconnectAccountRequestData** | [**ConnectOrDisconnectAccountRequestData**](../Models/ConnectOrDisconnectAccountRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
 <a name="login"></a>
 # **login**
 > LoginResponseData login(LoginRequestData)
@@ -118,33 +173,6 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
-
-<a name="proveMembership"></a>
-# **proveMembership**
-> GenericOkResponseData proveMembership(ProveMembershipRequestData)
-
-
-
-    Prove ownership of an on-chain membership by an account.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **ProveMembershipRequestData** | [**ProveMembershipRequestData**](../Models/ProveMembershipRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="register"></a>
