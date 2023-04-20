@@ -15,6 +15,7 @@ export enum ConfigVariable {
   AppName = 'APP_NAME',
   EmailConfirmationRoute = 'EMAIL_CONFIRMATION_ROUTE',
   EmailConfirmationTokenExpiryTimeHours = 'EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS',
+  AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
 }
 
 const boolType = {
@@ -46,6 +47,7 @@ export const configVariables = {
   [ConfigVariable.AppName]: stringType,
   [ConfigVariable.EmailConfirmationRoute]: stringType,
   [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
+  [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>

@@ -20,7 +20,8 @@
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
-    "v1-migration:prepare": "./scripts/orion-v1-migration/export.sh && npx ts-node ./scripts/orion-v1-migration/prepareData.ts"
+    "v1-migration:prepare": "./scripts/orion-v1-migration/export.sh && npx ts-node ./scripts/orion-v1-migration/prepareData.ts",
+    "tests:auth-api": "./src/auth-server/tests/run.sh"
   },
   "overrides": {
     "@polkadot/api": "8.9.1",
@@ -89,6 +90,11 @@
     "eslint-plugin-standard": "^5.0.0",
     "openapi-typescript": "^6.1.1",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.2",
+    "mocha": "^10.2.0",
+    "ts-mocha": "^10.0.0",
+    "@types/mocha": "^10.0.1",
+    "@types/supertest": "^2.0.12",
+    "supertest": "^6.3.3"
   }
 }

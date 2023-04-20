@@ -9,7 +9,7 @@ import { authenticate } from '../utils/auth'
 
 export const logger = createLogger('auth-api')
 
-const app = express()
+export const app = express()
 
 app.use(express.json())
 app.use(cors())

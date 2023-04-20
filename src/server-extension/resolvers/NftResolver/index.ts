@@ -1,7 +1,7 @@
 import { Args, Ctx, Mutation, Resolver } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { RequestFeaturedNftArgs, NftFeaturedRequstInfo } from './types'
-import { ContextWithIP } from '../../check'
+import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
 import { NftFeaturingRequest, OwnedNft } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
@@ -13,7 +13,7 @@ export class NftResolver {
   @Mutation(() => NftFeaturedRequstInfo)
   async requestNftFeatured(
     @Args() { nftId, rationale }: RequestFeaturedNftArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<NftFeaturedRequstInfo> {
     const em = await this.em()
     const { ip } = ctx

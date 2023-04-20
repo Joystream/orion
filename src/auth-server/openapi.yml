@@ -128,15 +128,34 @@ paths:
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
 
-  /prove-membership:
+  /connect-account:
     post:
-      operationId: proveMembership
-      x-eov-operation-handler: proveMembership
-      description: Prove ownership of an on-chain membership by an account.
+      operationId: connectAccount
+      x-eov-operation-handler: connectAccount
+      description: Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership.
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/ProveMembershipRequestBody'
+        $ref: '#/components/requestBodies/ConnectOrDisconnectAccountRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
+  /disconnect-account:
+    post:
+      operationId: disconnectAccount
+      x-eov-operation-handler: disconnectAccount
+      description: Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership.
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ConnectOrDisconnectAccountRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
@@ -145,9 +164,10 @@ paths:
         '401':
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         '404':
-          $ref: '#/components/responses/ProveMembershipNotFoundResponse'
+          $ref: '#/components/responses/DisconnectAccountNotFoundResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
+
   /logout:
     post:
       operationId: logout
@@ -195,11 +215,11 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ResetPasswordRequestData'
-    ProveMembershipRequestBody:
+    ConnectOrDisconnectAccountRequestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ProveMembershipRequestData'
+            $ref: '#/components/schemas/ConnectOrDisconnectAccountRequestData'
     RequestTokenRequestBody:
       content:
         application/json:
@@ -266,12 +286,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
-    ProveMembershipNotFoundResponse:
-      description: Transaction not found by the provided id (may not have been processed yet).
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
     GenericUnauthorizedResponse:
       description: Access token (session id) is missing or invalid.
       content:
@@ -286,6 +300,12 @@ components:
             $ref: '#/components/schemas/GenericErrorResponseData'
     RequestTokenTooManyRequestsResponse:
       description: Too many requests for a new token sent within a given timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    DisconnectAccountNotFoundResponse:
+      description: Provided key is not connected to the account.
       content:
         application/json:
           schema:
@@ -338,12 +358,35 @@ components:
           pattern: ^\S+@\S+\.\S+$
         password:
           $ref: '#/components/schemas/Password'
-    ProveMembershipRequestData:
+    ConnectOrDisconnectAccountRequestData:
       type: object
       required:
-        - txId
+        - payload
+        - signature
       properties:
-        txId:
+        payload:
+          type: object
+          required:
+            - joystreamAccountId
+            - gatewayAccountId
+            - gatewayName
+            - timestamp
+            - action
+          properties:
+            joystreamAccountId:
+              type: string
+            gatewayAccountId:
+              type: string
+            gatewayName:
+              type: string
+            timestamp:
+              type: number
+            action:
+              type: string
+              enum:
+                - connect
+                - disconnect
+        signature:
           type: string
     ConfirmEmailRequestData:
       type: object

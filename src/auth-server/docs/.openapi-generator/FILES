@@ -1,12 +1,15 @@
 Apis/DefaultApi.md
 Models/AnonymousUserAuthRequestData.md
 Models/AnonymousUserAuthResponseData.md
+Models/AnonymousUserAuthResponseData_allOf.md
 Models/ConfirmEmailRequestData.md
+Models/ConnectOrDisconnectAccountRequestData.md
+Models/ConnectOrDisconnectAccountRequestData_payload.md
 Models/GenericErrorResponseData.md
 Models/GenericOkResponseData.md
 Models/LoginRequestData.md
 Models/LoginResponseData.md
-Models/ProveMembershipRequestData.md
+Models/LoginResponseData_allOf.md
 Models/RegisterRequestData.md
 Models/RequestTokenRequestData.md
 Models/ResetPasswordRequestData.md

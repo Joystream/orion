@@ -3,310 +3,334 @@
  * Do not make direct changes to the file.
  */
 
+
 export interface paths {
-  '/anonymous-auth': {
+  "/anonymous-auth": {
     /** @description Authenticate as an anonymous user, either using an existing user identifier or creating a new one. */
-    post: operations['anonymousAuth']
-  }
-  '/login': {
+    post: operations["anonymousAuth"];
+  };
+  "/login": {
     /** @description Login to user's account, using e-mail and password. */
-    post: operations['login']
-  }
-  '/register': {
+    post: operations["login"];
+  };
+  "/register": {
     /** @description Create an account. Requires anonymousAuth to be performed first. */
-    post: operations['register']
-  }
-  '/confirm-email': {
+    post: operations["register"];
+  };
+  "/confirm-email": {
     /** @description Confirm account's e-mail address provided during registration. */
-    post: operations['confirmEmail']
-  }
-  '/reset-password': {
+    post: operations["confirmEmail"];
+  };
+  "/reset-password": {
     /** @description Reset account's password using a password reset token. */
-    post: operations['resetPassword']
-  }
-  '/request-password-reset-token': {
+    post: operations["resetPassword"];
+  };
+  "/request-password-reset-token": {
     /** @description Request a token to be sent to account's e-mail address, which will allow resetting the account's password */
-    post: operations['requestPasswordResetToken']
-  }
-  '/request-email-confirmation-token': {
+    post: operations["requestPasswordResetToken"];
+  };
+  "/request-email-confirmation-token": {
     /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
-    post: operations['requestEmailConfirmationToken']
-  }
-  '/prove-membership': {
-    /** @description Prove ownership of an on-chain membership by an account. */
-    post: operations['proveMembership']
-  }
-  '/logout': {
+    post: operations["requestEmailConfirmationToken"];
+  };
+  "/connect-account": {
+    /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
+    post: operations["connectAccount"];
+  };
+  "/disconnect-account": {
+    /** @description Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. */
+    post: operations["disconnectAccount"];
+  };
+  "/logout": {
     /** @description Terminate the current session. */
-    post: operations['logout']
-  }
+    post: operations["logout"];
+  };
 }
 
-export type webhooks = Record<string, never>
+export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
     AnonymousUserAuthRequestData: {
-      userId?: string
-    }
-    AnonymousUserAuthResponseData: components['schemas']['GenericOkResponseData'] & {
-      userId: string
-      sessionId: string
-    }
+      userId?: string;
+    };
+    AnonymousUserAuthResponseData: components["schemas"]["GenericOkResponseData"] & {
+      userId: string;
+      sessionId: string;
+    };
     LoginRequestData: {
-      email: string
-      password: string
-    }
-    LoginResponseData: components['schemas']['GenericOkResponseData'] & {
-      sessionId: string
-    }
+      email: string;
+      password: string;
+    };
+    LoginResponseData: components["schemas"]["GenericOkResponseData"] & {
+      sessionId: string;
+    };
     RegisterRequestData: {
-      email: string
-      password: components['schemas']['Password']
-    }
-    ProveMembershipRequestData: {
-      txId: string
-    }
+      email: string;
+      password: components["schemas"]["Password"];
+    };
+    ConnectOrDisconnectAccountRequestData: {
+      payload: {
+        joystreamAccountId: string;
+        gatewayAccountId: string;
+        gatewayName: string;
+        timestamp: number;
+        /** @enum {string} */
+        action: "connect" | "disconnect";
+      };
+      signature: string;
+    };
     ConfirmEmailRequestData: {
       /** @description Confirmation token recieved by the user via an e-mail. */
-      token: string
-    }
+      token: string;
+    };
     ResetPasswordRequestData: {
       /** @description Password-reset token recieved by the user via an e-mail. */
-      token: string
+      token: string;
       /** @description User's e-mail address. */
-      email: string
-      newPassword: components['schemas']['Password']
-    }
+      email: string;
+      newPassword: components["schemas"]["Password"];
+    };
     RequestTokenRequestData: {
       /** @description User's e-mail address. */
-      email?: string
-    }
+      email?: string;
+    };
     GenericErrorResponseData: {
-      message?: string
-      errors?: string[]
-    }
+      message?: string;
+      errors?: (string)[];
+    };
     GenericOkResponseData: {
-      success: boolean
-    }
-    Password: string
-  }
+      success: boolean;
+    };
+    Password: string;
+  };
   responses: {
     /** @description Ok */
     AnonymousUserAuthOkResponse: {
       content: {
-        'application/json': components['schemas']['AnonymousUserAuthResponseData']
-      }
-    }
+        "application/json": components["schemas"]["AnonymousUserAuthResponseData"];
+      };
+    };
     /** @description Invalid request data */
     GenericBadRequestResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Internal server error */
     GenericInternalServerErrorResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Anonymous user id not recognized */
     UnauthorizedAnonymousUserResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Logged in */
     LoginOkResponse: {
       content: {
-        'application/json': components['schemas']['LoginResponseData']
-      }
-    }
+        "application/json": components["schemas"]["LoginResponseData"];
+      };
+    };
     /** @description Invalid e-mail or password */
     LoginUnauthorizedResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Cannot create user account with the provided credentials */
     RegisterBadRequestResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Ok */
     GenericOkResponse: {
       content: {
-        'application/json': components['schemas']['GenericOkResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericOkResponseData"];
+      };
+    };
     /** @description Missing token or provided token is invalid / already used. */
     ConfirmEmailBadRequestResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Request is malformatted or provided e-mail address, token or new password is not valid. */
     ResetPasswordBadRequestResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
-    /** @description Transaction not found by the provided id (may not have been processed yet). */
-    ProveMembershipNotFoundResponse: {
-      content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Access token (session id) is missing or invalid. */
     GenericUnauthorizedResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Request is malformatted or provided e-mail address is not valid. */
     RequestTokenBadRequestResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
     /** @description Too many requests for a new token sent within a given timeframe. */
     RequestTokenTooManyRequestsResponse: {
       content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
-  }
-  parameters: never
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
+    /** @description Provided key is not connected to the account. */
+    DisconnectAccountNotFoundResponse: {
+      content: {
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
+  };
+  parameters: never;
   requestBodies: {
     AnonymousUserAuthRequestBody?: {
       content: {
-        'application/json': components['schemas']['AnonymousUserAuthRequestData']
-      }
-    }
+        "application/json": components["schemas"]["AnonymousUserAuthRequestData"];
+      };
+    };
     LoginRequestBody?: {
       content: {
-        'application/json': components['schemas']['LoginRequestData']
-      }
-    }
+        "application/json": components["schemas"]["LoginRequestData"];
+      };
+    };
     RegisterRequestBody?: {
       content: {
-        'application/json': components['schemas']['RegisterRequestData']
-      }
-    }
+        "application/json": components["schemas"]["RegisterRequestData"];
+      };
+    };
     ConfirmEmailRequestBody?: {
       content: {
-        'application/json': components['schemas']['ConfirmEmailRequestData']
-      }
-    }
+        "application/json": components["schemas"]["ConfirmEmailRequestData"];
+      };
+    };
     ResetPasswordRequestBody?: {
       content: {
-        'application/json': components['schemas']['ResetPasswordRequestData']
-      }
-    }
-    ProveMembershipRequestBody?: {
+        "application/json": components["schemas"]["ResetPasswordRequestData"];
+      };
+    };
+    ConnectOrDisconnectAccountRequestBody?: {
       content: {
-        'application/json': components['schemas']['ProveMembershipRequestData']
-      }
-    }
+        "application/json": components["schemas"]["ConnectOrDisconnectAccountRequestData"];
+      };
+    };
     RequestTokenRequestBody?: {
       content: {
-        'application/json': components['schemas']['RequestTokenRequestData']
-      }
-    }
-  }
-  headers: never
-  pathItems: never
+        "application/json": components["schemas"]["RequestTokenRequestData"];
+      };
+    };
+  };
+  headers: never;
+  pathItems: never;
 }
 
-export type external = Record<string, never>
+export type external = Record<string, never>;
 
 export interface operations {
+
+  /** @description Authenticate as an anonymous user, either using an existing user identifier or creating a new one. */
   anonymousAuth: {
-    /** @description Authenticate as an anonymous user, either using an existing user identifier or creating a new one. */
-    requestBody: components['requestBodies']['AnonymousUserAuthRequestBody']
+    requestBody: components["requestBodies"]["AnonymousUserAuthRequestBody"];
     responses: {
-      200: components['responses']['AnonymousUserAuthOkResponse']
-      400: components['responses']['GenericBadRequestResponse']
-      401: components['responses']['UnauthorizedAnonymousUserResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["AnonymousUserAuthOkResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      401: components["responses"]["UnauthorizedAnonymousUserResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Login to user's account, using e-mail and password. */
   login: {
-    /** @description Login to user's account, using e-mail and password. */
-    requestBody: components['requestBodies']['LoginRequestBody']
+    requestBody: components["requestBodies"]["LoginRequestBody"];
     responses: {
-      200: components['responses']['LoginOkResponse']
-      400: components['responses']['GenericBadRequestResponse']
-      401: components['responses']['LoginUnauthorizedResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["LoginOkResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      401: components["responses"]["LoginUnauthorizedResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Create an account. Requires anonymousAuth to be performed first. */
   register: {
-    /** @description Create an account. Requires anonymousAuth to be performed first. */
-    requestBody: components['requestBodies']['RegisterRequestBody']
+    requestBody: components["requestBodies"]["RegisterRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['RegisterBadRequestResponse']
-      401: components['responses']['GenericUnauthorizedResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["RegisterBadRequestResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Confirm account's e-mail address provided during registration. */
   confirmEmail: {
-    /** @description Confirm account's e-mail address provided during registration. */
-    requestBody: components['requestBodies']['ConfirmEmailRequestBody']
+    requestBody: components["requestBodies"]["ConfirmEmailRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['ConfirmEmailBadRequestResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["ConfirmEmailBadRequestResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Reset account's password using a password reset token. */
   resetPassword: {
-    /** @description Reset account's password using a password reset token. */
-    requestBody: components['requestBodies']['ResetPasswordRequestBody']
+    requestBody: components["requestBodies"]["ResetPasswordRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['ResetPasswordBadRequestResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["ResetPasswordBadRequestResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Request a token to be sent to account's e-mail address, which will allow resetting the account's password */
   requestPasswordResetToken: {
-    /** @description Request a token to be sent to account's e-mail address, which will allow resetting the account's password */
-    requestBody: components['requestBodies']['RequestTokenRequestBody']
+    requestBody: components["requestBodies"]["RequestTokenRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['RequestTokenBadRequestResponse']
-      429: components['responses']['RequestTokenTooManyRequestsResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["RequestTokenBadRequestResponse"];
+      429: components["responses"]["RequestTokenTooManyRequestsResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
   requestEmailConfirmationToken: {
-    /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
-    requestBody: components['requestBodies']['RequestTokenRequestBody']
+    requestBody: components["requestBodies"]["RequestTokenRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['RequestTokenBadRequestResponse']
-      429: components['responses']['RequestTokenTooManyRequestsResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
-  proveMembership: {
-    /** @description Prove ownership of an on-chain membership by an account. */
-    requestBody: components['requestBodies']['ProveMembershipRequestBody']
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["RequestTokenBadRequestResponse"];
+      429: components["responses"]["RequestTokenTooManyRequestsResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
+  connectAccount: {
+    requestBody: components["requestBodies"]["ConnectOrDisconnectAccountRequestBody"];
     responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['GenericBadRequestResponse']
-      401: components['responses']['GenericUnauthorizedResponse']
-      404: components['responses']['ProveMembershipNotFoundResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. */
+  disconnectAccount: {
+    requestBody: components["requestBodies"]["ConnectOrDisconnectAccountRequestBody"];
+    responses: {
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
+      404: components["responses"]["DisconnectAccountNotFoundResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Terminate the current session. */
   logout: {
-    /** @description Terminate the current session. */
     responses: {
-      200: components['responses']['GenericOkResponse']
-      401: components['responses']['GenericUnauthorizedResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
+      200: components["responses"]["GenericOkResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
 }
