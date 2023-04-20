@@ -2,7 +2,7 @@ import './config'
 import request from 'supertest'
 import { app } from '../index'
 import { globalEm } from '../../utils/globalEm'
-import { Token, TokenType, Account, ConnectedAccount } from '../../model'
+import { ConnectedAccount } from '../../model'
 import { Keyring } from '@polkadot/keyring'
 import assert from 'assert'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
@@ -10,58 +10,7 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
-
-type AccountInfo = {
-  sessionId: string
-  accountId: string
-}
-
-async function setupAccount(): Promise<AccountInfo> {
-  const em = await globalEm
-  const {
-    body: { sessionId: anonSessionId },
-  } = await request(app)
-    .post('/api/v1/anonymous-auth')
-    .set('Content-Type', 'application/json')
-    .expect(200)
-  await request(app)
-    .post('/api/v1/register')
-    .set('Content-Type', 'application/json')
-    .set('Authorization', `Bearer ${anonSessionId}`)
-    .send({
-      email: 'test.account@example.com',
-      password: 'TestPassword123!',
-    })
-    .expect(200)
-  const account = await em.getRepository(Account).findOneBy({
-    email: 'test.account@example.com',
-  })
-  assert(account, 'Account not found')
-  const token = await em.getRepository(Token).findOneBy({
-    type: TokenType.EMAIL_CONFIRMATION,
-    issuedFor: account,
-  })
-  assert(token, 'Token not found')
-  await request(app)
-    .post('/api/v1/confirm-email')
-    .set('Content-Type', 'application/json')
-    .send({
-      token: token.id,
-    })
-    .expect(200)
-  const {
-    body: { sessionId: userSessionId },
-  } = await request(app)
-    .post('/api/v1/login')
-    .set('Content-Type', 'application/json')
-    .send({
-      email: 'test.account@example.com',
-      password: 'TestPassword123!',
-    })
-    .expect(200)
-
-  return { sessionId: userSessionId, accountId: account.id }
-}
+import { AccountInfo, setupAccount } from './common'
 
 type ConnectOrDisconnectAccountArgs = {
   accountId: string

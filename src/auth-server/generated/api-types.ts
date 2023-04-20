@@ -93,7 +93,7 @@ export interface components {
     };
     RequestTokenRequestData: {
       /** @description User's e-mail address. */
-      email?: string;
+      email: string;
     };
     GenericErrorResponseData: {
       message?: string;
@@ -185,6 +185,12 @@ export interface components {
     };
     /** @description Provided key is not connected to the account. */
     DisconnectAccountNotFoundResponse: {
+      content: {
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
+    /** @description Provided e-mail address is not associated with any account. */
+    RequestEmailConfirmationAccountNotFoundResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
@@ -300,6 +306,7 @@ export interface operations {
     responses: {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["RequestTokenBadRequestResponse"];
+      404: components["responses"]["RequestEmailConfirmationAccountNotFoundResponse"];
       429: components["responses"]["RequestTokenTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };

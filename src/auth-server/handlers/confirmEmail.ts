@@ -30,12 +30,17 @@ export const confirmEmail: (
         throw new BadRequestError('Token not found. Possibly expired or already used.')
       }
 
+      if (token.issuedFor.isEmailConfirmed) {
+        throw new BadRequestError('Email already confirmed')
+      }
+
       const account = token.issuedFor
       account.isEmailConfirmed = true
-      await em.save(account)
-      await em.remove(token)
-      res.status(200).json({ success: true })
+      token.expiry = new Date()
+      await em.save([account, token])
     })
+
+    res.status(200).json({ success: true })
   } catch (e) {
     next(e)
   }
