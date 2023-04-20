@@ -41,6 +41,6 @@ query GetNftsConnection(
 
 query GetEndingAuctionsNfts($where: OwnedNftWhereInput, $limit: Int, $offset: Int) {
   endingAuctionsNfts(where: $where, limit: $limit, offset: $offset) {
-      ...FullNftFields
+    ...FullNftFields
   }
 }
