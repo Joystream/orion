@@ -1,14 +1,59 @@
-import { Args, Ctx, Mutation, Resolver } from 'type-graphql'
+import { Args, Ctx, Info, Mutation, Query, Resolver } from 'type-graphql'
 import { EntityManager } from 'typeorm'
-import { RequestFeaturedNftArgs, NftFeaturedRequstInfo } from './types'
+import { RequestFeaturedNftArgs, NftFeaturedRequstInfo, EndingAuctionsNftsArgs } from './types'
 import { ContextWithIP } from '../../check'
-import { withHiddenEntities } from '../../../utils/sql'
-import { NftFeaturingRequest, OwnedNft } from '../../../model'
+import { extendClause, withHiddenEntities } from '../../../utils/sql'
+import { NftFeaturingRequest } from '../../../model'
+import { OwnedNft } from '../baseTypes'
 import { randomAsHex } from '@polkadot/util-crypto'
+import { GraphQLResolveInfo } from 'graphql'
+import { Context } from '@subsquid/openreader/lib/context'
+import { model } from '../model'
+import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
+import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 
 @Resolver()
 export class NftResolver {
   constructor(private em: () => Promise<EntityManager>) {}
+
+  @Query(() => [OwnedNft])
+  async endingAuctionsNfts(
+    @Args() args: EndingAuctionsNftsArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<OwnedNft[]> {
+    const tree = getResolveTree(info)
+
+    // Extract subsquid-supported Membership fields
+    const ownedNftFields = parseAnyTree(model, 'OwnedNft', info.schema, tree)
+
+    // Generate query using subsquid's ListQuery
+    const listQuery = new ListQuery(model, ctx.openreader.dialect, 'OwnedNft', ownedNftFields, {
+      limit: args.limit,
+    })
+    let listQuerySql = listQuery.sql
+
+    listQuerySql = extendClause(
+      listQuerySql,
+      'FROM',
+      `
+        INNER JOIN (
+          SELECT nft_id, auction_type, auction_type#>>'{plannedEndAtBlock}' AS end_block FROM auction a
+          WHERE auction_type#>>'{isTypeOf}' = 'AuctionTypeEnglish'
+          AND a.is_completed = false 
+        ) AS auctions ON auctions.nft_id = owned_nft.id 
+`,
+      ''
+    )
+    listQuerySql = extendClause(listQuerySql, 'ORDER BY', 'end_block::int asc', '')
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+    console.log('Result', result)
+
+    return result
+  }
 
   @Mutation(() => NftFeaturedRequstInfo)
   async requestNftFeatured(
