@@ -136,49 +136,27 @@ export function buildTopSellingChannelsQuery(
   listQuerySql = extendClause(
     listQuerySql,
     'FROM',
-    ` 
-           INNER JOIN (
-              WITH nftBoughtEvents AS (
-                SELECT
-                  (data#>>'{price}')::bigint AS price,
-                  data#>>'{previousNftOwner,channel}' AS previous_owner_id,
-                  "timestamp" 
-                FROM 
-                  event
-                WHERE
-                 data#>>'{isTypeOf}' = 'NftBoughtEventData'
-                 AND "timestamp" > '${new Date(
-                   roundedDate - args.periodDays * 24 * 60 * 60 * 1000
-                 ).toISOString()}'
-                 AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel'),
-              auctionSettledEvents AS (
-                SELECT
-                  data#>>'{winningBid}' AS bid_id,
-                  data#>>'{previousNftOwner,channel}' AS previous_owner_id,
-                  bid.amount AS price,
-                  "timestamp" 
-                FROM event
-                LEFT JOIN bid ON data#>>'{winningBid}' = bid.id
-                WHERE data#>>'{isTypeOf}' IN ('EnglishAuctionSettledEventData', 'BidMadeCompletingAuctionEventData', 'OpenAuctionBidAcceptedEventData')
-                AND "timestamp" > '${new Date(
-                  roundedDate - args.periodDays * 24 * 60 * 60 * 1000
-                ).toISOString()}'
-                AND data#>>'{previousNftOwner,isTypeOf}' = 'NftOwnerChannel')
-             SELECT 
-              previous_owner_id,
-              sum(price::bigint) as amount
-             FROM (
-              SELECT 
-                price,
-                previous_owner_id FROM nftBoughtEvents
-              UNION ALL
-              SELECT 
-              price,
-              previous_owner_id FROM auctionSettledEvents
-              ) s
-              GROUP BY previous_owner_id
-              ORDER BY amount desc 
-           ) AS top_selling_channels ON top_selling_channels.previous_owner_id = channel.id`,
+    `
+    INNER JOIN (
+      SELECT
+        (SUM((COALESCE(event.data->>'price', '0')::bigint)) + SUM(COALESCE(winning_bid.amount, 0))) AS "amount",
+        "data"->'previousNftOwner'->>'channel' AS "channel_id"
+      FROM "event"
+      LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
+      WHERE
+        "event"."timestamp" > '${new Date(
+          roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+        ).toISOString()}' AND
+        "event"."data"->>'isTypeOf' IN (
+          'NftBoughtEventData',
+          'EnglishAuctionSettledEventData',
+          'BidMadeCompletingAuctionEventData',
+          'OpenAuctionBidAcceptedEventData'
+        ) AND
+        "data"->'previousNftOwner'->>'channel' IS NOT NULL
+        GROUP BY "event"."data"->'previousNftOwner'->>'channel'
+    ) AS "top_selling_channels" ON "top_selling_channels"."channel_id" = "channel"."id"
+    `,
     ''
   )
 
