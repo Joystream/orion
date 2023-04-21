@@ -60,9 +60,9 @@ jobs:
       #     name: test-results
       #     path: network-tests/jest-report.xml
 
-    Cleanup:
-      needs: basic_setup
+    cleanup:
       runs-on: ubuntu-latest
+      needs: basic_setup
       steps:
         run: |
           rm -rf network-tests/data
