@@ -5,9 +5,7 @@ import { OpeningId } from '@joystream/types/primitives'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import {
-  OpeningAddedEventFieldsFragment,
-} from '../../graphql/generated/queries'
+import { OpeningAddedEventFieldsFragment } from '../../graphql/generated/queries'
 import moment from 'moment'
 import BN from 'bn.js'
 import { IOpeningMetadata, OpeningMetadata } from '@joystream/metadata-protobuf'
@@ -118,6 +116,5 @@ export class CreateOpeningsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'OpeningAdded')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: OpeningAddedEventFieldsFragment, i: number): void {
-  }
+  protected assertQueryNodeEventIsValid(qEvent: OpeningAddedEventFieldsFragment, i: number): void {}
 }

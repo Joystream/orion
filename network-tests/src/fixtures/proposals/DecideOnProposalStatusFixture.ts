@@ -227,8 +227,8 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     this.params.forEach(({ proposalId, status }, i) => {
       if (status === 'Approved') {
         const proposal = this.proposals[i]
-        const executionBlock = proposal.exactExecutionBlock.isSome ?
-          proposal.exactExecutionBlock.unwrap().toNumber()
+        const executionBlock = proposal.exactExecutionBlock.isSome
+          ? proposal.exactExecutionBlock.unwrap().toNumber()
           : gracingBlock + proposal.parameters.gracePeriod.toNumber()
         this.proposalsExecutionBlock.set(proposalId.toNumber(), executionBlock)
       }
@@ -251,7 +251,9 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
 
     await Promise.all(
       this.proposals.map(async (proposal, i) => {
-        const executionBlock = this.proposalsExecutionBlock.get(this.params[i].proposalId.toNumber())!
+        const executionBlock = this.proposalsExecutionBlock.get(
+          this.params[i].proposalId.toNumber()
+        )!
         await this.api.untilBlock(executionBlock)
         // let qProposal = qProposals[i]
         if (this.getExpectedProposalStatus(i) === 'ProposalStatusGracing') {
@@ -290,7 +292,6 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     const events = await Promise.all(
       Array.from(this.proposalsExecutionBlock).map(async ([, proposalExecutionBlock]) => {
         if (proposalExecutionBlock) {
-          const currentBlock = (await this.api.getBestBlock()).toNumber()
           // search within the execution block for the appropriate event
           const blockHash = await this.api.getBlockHash(proposalExecutionBlock)
           const blockEvents = await this.api.query.system.events.at(blockHash)
