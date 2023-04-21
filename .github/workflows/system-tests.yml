@@ -26,11 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: basic_setup
     steps:
-      run: |
-        rm -rf network-tests/data
-        docker-compose -f network-tests/docker-compose.node.yml down -v
-        docker-compose down -v
-        docker-compose -f archive/docker-compose.yml down -v
+      - name: perform cleanup
+        run: |
+          rm -rf network-tests/data
+          docker-compose -f network-tests/docker-compose.node.yml down -v
+          docker-compose down -v
+          docker-compose -f archive/docker-compose.yml down -v
 
   basic_setup:
     runs-on: ubuntu-latest
