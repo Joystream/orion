@@ -16,6 +16,7 @@ import { createType } from '@joystream/types'
 import { CreateProposalsFixture, DecideOnProposalStatusFixture } from '../../fixtures/proposals'
 import { Resource } from '../../Resources'
 import { OpeningId, WorkerId } from '@joystream/types/primitives'
+import { expect } from 'chai'
 
 export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = workingGroups) =>
   async function leadOpening({ api, query, lock }: FlowProps): Promise<void> {
@@ -71,8 +72,10 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
           [{ proposalId: leadOpeningProposalId, status: 'Approved', expectExecutionFailure: false }]
         )
         await new FixtureRunner(decideOnLeadOpeningProposalStatusFixture).run()
+        const proposalExecutionBlock = decideOnLeadOpeningProposalStatusFixture.getExecutionBlock(leadOpeningProposalId.toNumber())
+        await api.untilBlock(proposalExecutionBlock!)
         unlock()
-
+        
         const openingsCreated = (
           await decideOnLeadOpeningProposalStatusFixture.getExecutionEvents(group, 'OpeningAdded')
         ).map((dispatchEvents) => {
@@ -144,6 +147,8 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
           ]
         )
         await new FixtureRunner(decideOnFillLeadOpeningProposalStatusFixture).run()
+        const fillLeadOpeningExecution = decideOnFillLeadOpeningProposalStatusFixture.getExecutionBlock(fillLeadOpeningProposalId.toNumber())
+        await api.untilBlock(fillLeadOpeningExecution!)
         unlockFillPosition()
 
         const workerIds = (
