@@ -72,10 +72,12 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
           [{ proposalId: leadOpeningProposalId, status: 'Approved', expectExecutionFailure: false }]
         )
         await new FixtureRunner(decideOnLeadOpeningProposalStatusFixture).run()
-        const proposalExecutionBlock = decideOnLeadOpeningProposalStatusFixture.getExecutionBlock(leadOpeningProposalId.toNumber())
+        const proposalExecutionBlock = decideOnLeadOpeningProposalStatusFixture.getExecutionBlock(
+          leadOpeningProposalId.toNumber()
+        )
         await api.untilBlock(proposalExecutionBlock!)
         unlock()
-        
+
         const openingsCreated = (
           await decideOnLeadOpeningProposalStatusFixture.getExecutionEvents(group, 'OpeningAdded')
         ).map((dispatchEvents) => {
@@ -147,7 +149,10 @@ export default (skipIfAlreadySet = false, groups: WorkingGroupModuleName[] = wor
           ]
         )
         await new FixtureRunner(decideOnFillLeadOpeningProposalStatusFixture).run()
-        const fillLeadOpeningExecution = decideOnFillLeadOpeningProposalStatusFixture.getExecutionBlock(fillLeadOpeningProposalId.toNumber())
+        const fillLeadOpeningExecution =
+          decideOnFillLeadOpeningProposalStatusFixture.getExecutionBlock(
+            fillLeadOpeningProposalId.toNumber()
+          )
         await api.untilBlock(fillLeadOpeningExecution!)
         unlockFillPosition()
 

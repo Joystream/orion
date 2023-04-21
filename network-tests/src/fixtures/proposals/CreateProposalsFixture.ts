@@ -110,9 +110,7 @@ export class CreateProposalsFixture extends StandardizedFixture {
   protected assertQueryNodeEventIsValid(
     qEvent: ProposalCreatedEventFieldsFragment,
     i: number
-  ): void {
-  }
+  ): void {}
 
-  async runQueryNodeChecks(): Promise<void> {
-  }
+  async runQueryNodeChecks(): Promise<void> {}
 }
