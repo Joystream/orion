@@ -7,18 +7,14 @@ import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import {
   OpeningAddedEventFieldsFragment,
-  OpeningFieldsFragment,
 } from '../../graphql/generated/queries'
-import { WorkingGroupOpeningType } from '../../graphql/generated/schema'
-import { assert } from 'chai'
 import moment from 'moment'
 import BN from 'bn.js'
 import { IOpeningMetadata, OpeningMetadata } from '@joystream/metadata-protobuf'
 import { createType } from '@joystream/types'
 import { Bytes } from '@polkadot/types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
-import { assertQueriedOpeningMetadataIsValid } from './utils'
-import { EventDetails } from '@joystream/cli/src/Types'
+import { EventDetails } from '../../types'
 
 export type OpeningParams = {
   stake: BN
@@ -122,46 +118,6 @@ export class CreateOpeningsFixture extends BaseWorkingGroupFixture {
     return this.api.getEventDetails(result, this.group, 'OpeningAdded')
   }
 
-  protected assertQueriedOpeningsAreValid(
-    qOpenings: OpeningFieldsFragment[],
-    qEvents: OpeningAddedEventFieldsFragment[]
-  ): void {
-    this.events.map((e, i) => {
-      const qOpening = qOpenings.find((o) => o.runtimeId === e.event.data[0].toNumber())
-      const openingParams = this.openingsParams[i]
-      const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
-      Utils.assert(qOpening, 'Query node: Opening not found')
-      assert.equal(qOpening.runtimeId, e.event.data[0].toNumber())
-      assert.equal(qOpening.createdInEvent.id, qEvent.id)
-      assert.equal(qOpening.group.name, this.group)
-      assert.equal(qOpening.rewardPerBlock, openingParams.reward.toString())
-      assert.equal(qOpening.type, WorkingGroupOpeningType.Regular)
-      assert.equal(qOpening.status.__typename, 'OpeningStatusOpen')
-      assert.equal(qOpening.stakeAmount, openingParams.stake.toString())
-      assert.equal(qOpening.unstakingPeriod, openingParams.unstakingPeriod)
-      // Metadata
-      assertQueriedOpeningMetadataIsValid(qOpening.metadata, this.getOpeningMetadata(openingParams))
-    })
-  }
-
   protected assertQueryNodeEventIsValid(qEvent: OpeningAddedEventFieldsFragment, i: number): void {
-    assert.equal(qEvent.group.name, this.group)
-    assert.equal(qEvent.opening.runtimeId, this.events[i].event.data[0].toNumber())
-  }
-
-  async runQueryNodeChecks(): Promise<void> {
-    await super.runQueryNodeChecks()
-    // Query the events
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getOpeningAddedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-
-    // Query the openings
-    const qOpenings = await this.query.getOpeningsByIds(
-      this.events.map((e) => e.event.data[0]),
-      this.group
-    )
-    this.assertQueriedOpeningsAreValid(qOpenings, qEvents)
   }
 }

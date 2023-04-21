@@ -86,7 +86,7 @@ export async function scenario(
   await api.createKeyPairs(startKeyId, false)
   customKeys.forEach((k) => api.createCustomKeyPair(k))
 
-  const queryNodeUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:8081/graphql'
+  const queryNodeUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:4350/graphql'
 
   const queryNodeProvider = new ApolloClient({
     link: new HttpLink({ uri: queryNodeUrl, fetch }),

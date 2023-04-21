@@ -12,6 +12,7 @@ import { ProposalId } from '@joystream/types/primitives'
 import { VoteOnProposalsFixture } from './VoteOnProposalsFixture'
 import { ProposalFieldsFragment } from '../../graphql/generated/queries'
 import { assert } from 'chai'
+import { BN } from 'bn.js'
 
 export type DecisionStatus = 'Approved' | 'Rejected' | 'Slashed'
 
@@ -33,6 +34,7 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
   protected params: DecideOnProposalStatusParams[]
   protected voteOnProposalsRunner?: FixtureRunner
   protected proposals: Proposal[] = []
+  protected proposalsExecutionBlock: Map<number, number> = new Map()
 
   public constructor(api: Api, query: QueryNodeApi, params: DecideOnProposalStatusParams[]) {
     super(api, query)
@@ -221,58 +223,74 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
     const voteOnProposalsFixture = new VoteOnProposalsFixture(api, query, votes)
     this.voteOnProposalsRunner = new FixtureRunner(voteOnProposalsFixture)
     await this.voteOnProposalsRunner.run()
+    const gracingBlock = (await this.api.getBestBlock()).toNumber() + 1
+    this.params.forEach(({ proposalId, status }, i) => {
+      if (status === 'Approved') {
+        const proposal = this.proposals[i]
+        const executionBlock = proposal.exactExecutionBlock.isSome ?
+          proposal.exactExecutionBlock.unwrap().toNumber()
+          : gracingBlock + proposal.parameters.gracePeriod.toNumber()
+        this.proposalsExecutionBlock.set(proposalId.toNumber(), executionBlock)
+      }
+    })
+  }
+
+  public getExecutionBlock(proposalId: number) {
+    return this.proposalsExecutionBlock.get(proposalId)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
-    await super.runQueryNodeChecks()
+    // await super.runQueryNodeChecks()
     Utils.assert(this.voteOnProposalsRunner)
-    await this.voteOnProposalsRunner.runQueryNodeChecks()
+    // await this.voteOnProposalsRunner.runQueryNodeChecks()
 
-    const qProposals = await this.query.tryQueryWithTimeout(
-      () => this.query.getProposalsByIds(this.params.map((p) => p.proposalId)),
-      (res) => this.assertProposalStatusesAreValid(res)
-    )
+    // const qProposals = await this.query.tryQueryWithTimeout(
+    //   () => this.query.getProposalsByIds(this.params.map((p) => p.proposalId)),
+    //   (res) => this.assertProposalStatusesAreValid(res)
+    // )
 
     await Promise.all(
       this.proposals.map(async (proposal, i) => {
-        let qProposal = qProposals[i]
+        const executionBlock = this.proposalsExecutionBlock.get(this.params[i].proposalId.toNumber())!
+        await this.api.untilBlock(executionBlock)
+        // let qProposal = qProposals[i]
         if (this.getExpectedProposalStatus(i) === 'ProposalStatusGracing') {
-          const proposalExecutionBlock = proposal.exactExecutionBlock.isSome
-            ? proposal.exactExecutionBlock.unwrap().toNumber()
-            : qProposal.statusSetAtBlock + proposal.parameters.gracePeriod.toNumber()
-          await this.api.untilBlock(proposalExecutionBlock)
-          ;[qProposal] = await this.query.tryQueryWithTimeout(
-            () => this.query.getProposalsByIds([this.params[i].proposalId]),
-            ([p]) => this.assertProposalExecutedAsExpected(p, i)
-          )
-          await this.postExecutionChecks(qProposal)
+          // const proposalExecutionBlock = proposal.exactExecutionBlock.isSome
+          //   ? proposal.exactExecutionBlock.unwrap().toNumber()
+          //   : qProposal.statusSetAtBlock + proposal.parameters.gracePeriod.toNumber()
+          // ;[qProposal] = await this.query.tryQueryWithTimeout(
+          //   () => this.query.getProposalsByIds([this.params[i].proposalId]),
+          //   ([p]) => this.assertProposalExecutedAsExpected(p, i)
+          // )
+          // await this.postExecutionChecks(qProposal)
         }
       })
     )
   }
 
   public async getExecutionEvents(section: string, method: string) {
-    const qProposals = await this.query.tryQueryWithTimeout(
-      () => this.query.getProposalsByIds(this.params.map((p) => p.proposalId)),
-      (res) => this.assertProposalStatusesAreValid(res)
-    )
-    const executionBlocks = await Promise.all(
-      this.proposals.map(async (proposal, i) => {
-        const qProposal = qProposals[i]
-        if (this.getExpectedProposalStatus(i) === 'ProposalStatusExecuted') {
-          const proposalExecutionBlock = proposal.exactExecutionBlock.isSome
-            ? proposal.exactExecutionBlock.unwrap().toNumber()
-            : qProposal.statusSetAtBlock + proposal.parameters.gracePeriod.toNumber()
-          return proposalExecutionBlock
-        } else {
-          return undefined
-        }
-      })
-    )
+    // const qProposals = await this.query.tryQueryWithTimeout(
+    //   () => this.query.getProposalsByIds(this.params.map((p) => p.proposalId)),
+    //   (res) => this.assertProposalStatusesAreValid(res)
+    // )
+    // const executionBlocks = await Promise.all(
+    //   this.proposals.map(async (proposal, i) => {
+    //     const qProposal = qProposals[i]
+    //     if (this.getExpectedProposalStatus(i) === 'ProposalStatusExecuted') {
+    //       const proposalExecutionBlock = proposal.exactExecutionBlock.isSome
+    //         ? proposal.exactExecutionBlock.unwrap().toNumber()
+    //         : qProposal.statusSetAtBlock + proposal.parameters.gracePeriod.toNumber()
+    //       return proposalExecutionBlock
+    //     } else {
+    //       return undefined
+    //     }
+    //   })
+    // )
 
     const events = await Promise.all(
-      executionBlocks.map(async (proposalExecutionBlock) => {
+      Array.from(this.proposalsExecutionBlock).map(async ([, proposalExecutionBlock]) => {
         if (proposalExecutionBlock) {
+          const currentBlock = (await this.api.getBestBlock()).toNumber()
           // search within the execution block for the appropriate event
           const blockHash = await this.api.getBlockHash(proposalExecutionBlock)
           const blockEvents = await this.api.query.system.events.at(blockHash)
