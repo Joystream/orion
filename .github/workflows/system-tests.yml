@@ -26,8 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: basic_setup
     steps:
-      - name: perform cleanup
       - uses: actions/checkout@v2
+
+      - name: perform cleanup
         run: |
           rm -rf network-tests/data
           docker-compose -f network-tests/docker-compose.node.yml down -v
@@ -64,3 +65,4 @@ jobs:
         env:
           DEBUG: integration-tests:*
         run: npm run --workspace network-tests node-ts-strict src/scenarios/requiredBasicSetup.ts
+
