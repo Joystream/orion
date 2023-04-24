@@ -144,10 +144,11 @@ export function buildTopSellingChannelsQuery(
       LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
       WHERE
       ${
-        args?.periodDays > 0 &&
-        ` "event"."timestamp" > '${new Date(
-          roundedDate - args.periodDays * 24 * 60 * 60 * 1000
-        ).toISOString()}' AND`
+        args?.periodDays > 0
+          ? ` "event"."timestamp" > '${new Date(
+              roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+            ).toISOString()}' AND`
+          : ''
       }
         "event"."data"->>'isTypeOf' IN (
           'NftBoughtEventData',
