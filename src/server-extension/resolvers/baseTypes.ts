@@ -9,6 +9,11 @@ export class Channel {
   @Field(() => String, { nullable: false }) id!: string
 }
 
+@ObjectType()
+export class OwnedNft {
+  @Field(() => String, { nullable: false }) id!: string
+}
+
 export const ChannelWhereInput = new GraphQLScalarType({
   name: 'ChannelWhereInput',
 })
@@ -51,3 +56,6 @@ registerEnumType(VideoOrderByInput, { name: 'VideoOrderByInput' })
 export class VideosConnection {
   @Field(() => Int, { nullable: false }) totalCount!: number
 }
+export const OwnedNftWhereInput = new GraphQLScalarType({
+  name: 'OwnedNftWhereInput',
+})
