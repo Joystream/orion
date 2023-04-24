@@ -28,7 +28,6 @@ import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { ContextWithIP } from '../../check'
-import { cache } from '../../cache'
 
 @Resolver()
 export class ChannelsResolver {
@@ -85,39 +84,10 @@ export class ChannelsResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<TopSellingChannelsResult[]> {
-    const currentTime = new Date().getTime()
-    const cacheKey = `top-selling-channels-${args?.periodDays}${
-      args?.where && `-${JSON.stringify(args.where)}`
-    }`
-    const cachedData = cache.get(cacheKey)
-    const dataTTL = cache.getTtl(cacheKey)
-
     const listQuery = buildTopSellingChannelsQuery(args, info, ctx)
 
-    // check if we need to update the cache
-    if (!cachedData || !dataTTL || dataTTL - currentTime < 5 * 1000) {
-      if (cachedData) {
-        // data is in the cache, so just trigger the update
-        setTimeout(() => {
-          ctx.openreader
-            .executeQuery(listQuery)
-            .then((result) => {
-              console.log('Result', result)
-              cache.set(cacheKey, result)
-            })
-            .catch(() => {
-              // do nothing
-            })
-        }, 0)
-        return cachedData as TopSellingChannelsResult[]
-      } else {
-        // there is no data in cache, so we need to wait for it before returning it
-        const result = await ctx.openreader.executeQuery(listQuery)
-        cache?.set(cacheKey, result)
-        return result
-      }
-    }
-    return cachedData as TopSellingChannelsResult[]
+    const result = await ctx.openreader.executeQuery(listQuery)
+    return result
   }
 
   @Query(() => [ChannelNftCollector])

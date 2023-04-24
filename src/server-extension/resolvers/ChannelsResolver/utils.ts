@@ -7,7 +7,6 @@ import { model } from '../model'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { extendClause } from '../../../utils/sql'
-import NodeCache from 'node-cache'
 
 export function buildExtendedChannelsQuery(
   args: ExtendedChannelsArgs,
@@ -144,9 +143,12 @@ export function buildTopSellingChannelsQuery(
       FROM "event"
       LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
       WHERE
-        "event"."timestamp" > '${new Date(
+      ${
+        args?.periodDays > 0 &&
+        ` "event"."timestamp" > '${new Date(
           roundedDate - args.periodDays * 24 * 60 * 60 * 1000
-        ).toISOString()}' AND
+        ).toISOString()}' AND`
+      }
         "event"."data"->>'isTypeOf' IN (
           'NftBoughtEventData',
           'EnglishAuctionSettledEventData',
