@@ -2,6 +2,9 @@ import { EntityManager } from 'typeorm'
 import { CommentStatus } from '../model'
 import { config, ConfigVariable } from './config'
 
+// constant used to parse seconds from creation
+export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
+
 export class VideoRelevanceManager {
   private videosToUpdate: Set<string> = new Set()
 
@@ -19,7 +22,7 @@ export class VideoRelevanceManager {
         UPDATE "video"
         SET
           "video_relevance" = ROUND(
-          ((30 - (extract(epoch from now() - created_at) / (60 * 60 * 24))) * ${newnessWeight}) +
+          ((30 - (extract(epoch from now() - created_at) / ${NEWNESS_SECONDS_DIVIDER})) * ${newnessWeight}) +
           (views_num * ${viewsWeight}) +
           (
             SELECT COUNT(*) * ${commentsWeight} FROM "comment"
