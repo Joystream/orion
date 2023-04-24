@@ -3,14 +3,14 @@ import request from 'supertest'
 import { app } from '../index'
 import { globalEm } from '../../utils/globalEm'
 import { ConnectedAccount } from '../../model'
-import { Keyring } from '@polkadot/keyring'
 import assert from 'assert'
-import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
-import { AccountInfo, setupAccount } from './common'
+import { AccountInfo, createAccountAndSignIn, keyring } from './common'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { components } from '../generated/api-types'
 
 type ConnectOrDisconnectAccountArgs = {
   accountId: string
@@ -35,12 +35,12 @@ async function connectOrDisconnectAccount({
   endpoint = `/api/v1/${action}-account`,
   timestamp = Date.now(),
 }: ConnectOrDisconnectAccountArgs): Promise<string> {
-  const payload = {
+  const payload: components['schemas']['ConnectAccountRequestData']['payload'] = {
     joystreamAccountId,
     gatewayAccountId: accountId,
     gatewayName,
     timestamp,
-    action,
+    action: action as 'connect',
   }
   const signature = u8aToHex(signingKey.sign(JSON.stringify(payload)))
   await request(app)
@@ -58,19 +58,17 @@ async function connectOrDisconnectAccount({
 
 describe('connectAndDisconnectAccount', () => {
   let accountInfo: AccountInfo
-  let keyring: Keyring
-  let alice: KeyringPair
-  let bob: KeyringPair
   let gatewayName: string
   let em: EntityManager
+  let alice: KeyringPair, bob: KeyringPair
 
   before(async () => {
-    accountInfo = await setupAccount()
-    keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
-    alice = keyring.addFromUri('//Alice')
-    bob = keyring.addFromUri('//Bob')
+    await cryptoWaitReady()
+    accountInfo = await createAccountAndSignIn()
     em = await globalEm
     gatewayName = await config.get(ConfigVariable.AppName, em)
+    alice = keyring.addFromUri('//Alice')
+    bob = keyring.addFromUri('//Bob')
   })
 
   async function assertConnectedAccountStatusNotChanged(

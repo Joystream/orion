@@ -31,7 +31,7 @@ paths:
     post:
       operationId: login
       x-eov-operation-handler: login
-      description: Login to user's account, using e-mail and password.
+      description: Login to user's account by providing a message signed by one of the user's connected accounts.
       requestBody:
         $ref: '#/components/requestBodies/LoginRequestBody'
       responses:
@@ -43,23 +43,55 @@ paths:
           $ref: '#/components/responses/LoginUnauthorizedResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /register:
+  /artifacts:
+    get:
+      operationId: getArtifacts
+      x-eov-operation-handler: getArtifacts
+      description: Get wallet seed encryption artifacts.
+      parameters:
+        - name: id
+          in: query
+          description: The lookup key derived from user's credentials.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/GetArtifactsResponse'
+        '404':
+          $ref: '#/components/responses/GetArtifactsNotFoundResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
     post:
-      operationId: register
-      x-eov-operation-handler: register
-      description: Create an account.
+      operationId: postArtifacts
+      x-eov-operation-handler: postArtifacts
+      description: Save wallet seed encryption artifacts on the server.
+      requestBody:
+        $ref: '#/components/requestBodies/PostArtifactsRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /account:
+    post:
+      operationId: createAccount
+      x-eov-operation-handler: createAccount
+      description: Create a new Gateway account.
         Requires anonymousAuth to be performed first.
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/RegisterRequestBody'
+        $ref: '#/components/requestBodies/CreateAccountRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
         '401':
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         '400':
-          $ref: '#/components/responses/RegisterBadRequestResponse'
+          $ref: '#/components/responses/CreateAccountBadRequestResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
   /confirm-email:
@@ -76,7 +108,6 @@ paths:
           $ref: '#/components/responses/ConfirmEmailBadRequestResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /reset-password:
     post:
       operationId: resetPassword
@@ -91,7 +122,6 @@ paths:
           $ref: '#/components/responses/ResetPasswordBadRequestResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /request-password-reset-token:
     post:
       operationId: requestPasswordResetToken
@@ -109,7 +139,6 @@ paths:
           $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /request-email-confirmation-token:
     post:
       operationId: requestEmailConfirmationToken
@@ -129,7 +158,6 @@ paths:
           $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /connect-account:
     post:
       operationId: connectAccount
@@ -138,7 +166,7 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/ConnectOrDisconnectAccountRequestBody'
+        $ref: '#/components/requestBodies/ConnectAccountRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
@@ -148,7 +176,6 @@ paths:
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /disconnect-account:
     post:
       operationId: disconnectAccount
@@ -157,7 +184,7 @@ paths:
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/ConnectOrDisconnectAccountRequestBody'
+        $ref: '#/components/requestBodies/DisconnectAccountRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
@@ -169,7 +196,6 @@ paths:
           $ref: '#/components/responses/DisconnectAccountNotFoundResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
   /logout:
     post:
       operationId: logout
@@ -184,7 +210,6 @@ paths:
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-
 components:
   securitySchemes:
     bearerAuth:
@@ -202,11 +227,11 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/LoginRequestData'
-    RegisterRequestBody:
+    CreateAccountRequestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RegisterRequestData'
+            $ref: '#/components/schemas/CreateAccountRequestData'
     ConfirmEmailRequestBody:
       content:
         application/json:
@@ -217,16 +242,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ResetPasswordRequestData'
-    ConnectOrDisconnectAccountRequestBody:
+    ConnectAccountRequestBody:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ConnectOrDisconnectAccountRequestData'
+            $ref: '#/components/schemas/ConnectAccountRequestData'
+    DisconnectAccountRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DisconnectAccountRequestData'
     RequestTokenRequestBody:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/RequestTokenRequestData'
+    PostArtifactsRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EncryptionArtifacts'
   responses:
     AnonymousUserAuthOkResponse:
       description: Ok
@@ -264,7 +299,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
-    RegisterBadRequestResponse:
+    CreateAccountBadRequestResponse:
       description: Cannot create user account with the provided credentials
       content:
         application/json:
@@ -318,7 +353,45 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
+    GetArtifactsResponse:
+      description: Encryption artifacts found and provided in the response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EncryptionArtifacts'
+    GetArtifactsNotFoundResponse:
+      description: Encryption artifacts not found by the provided lookup key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
   schemas:
+    ActionExecutionPayload:
+      type: object
+      required:
+        - joystreamAccountId
+        - gatewayName
+        - timestamp
+        - action
+      properties:
+        joystreamAccountId:
+          type: string
+        gatewayName:
+          type: string
+        timestamp:
+          type: number
+        action:
+          type: string
+    ActionExecutionRequestData:
+      type: object
+      required:
+        - payload
+        - signature
+      properties:
+        signature:
+          type: string
+        payload:
+          $ref: '#/components/schemas/ActionExecutionPayload'
     AnonymousUserAuthRequestData:
       type: object
       properties:
@@ -337,15 +410,23 @@ components:
             sessionId:
               type: string
     LoginRequestData:
-      type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-        password:
-          type: string
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - gatewayAccountId
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - login
+                    gatewayAccountId:
+                      type: string
     LoginResponseData:
       allOf:
         - $ref: '#/components/schemas/GenericOkResponseData'
@@ -355,47 +436,61 @@ components:
           properties:
             sessionId:
               type: string
-    RegisterRequestData:
-      type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-          pattern: ^\S+@\S+\.\S+$
-        password:
-          $ref: '#/components/schemas/Password'
-    ConnectOrDisconnectAccountRequestData:
-      type: object
-      required:
-        - payload
-        - signature
-      properties:
-        payload:
-          type: object
-          required:
-            - joystreamAccountId
-            - gatewayAccountId
-            - gatewayName
-            - timestamp
-            - action
+    CreateAccountRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
           properties:
-            joystreamAccountId:
-              type: string
-            gatewayAccountId:
-              type: string
-            gatewayName:
-              type: string
-            timestamp:
-              type: number
-            action:
-              type: string
-              enum:
-                - connect
-                - disconnect
-        signature:
-          type: string
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - email
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - createAccount
+                    email:
+                      type: string
+                      pattern: ^\S+@\S+\.\S+$
+    ConnectAccountRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - gatewayAccountId
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - connect
+                    gatewayAccountId:
+                      type: string
+    DisconnectAccountRequestData:
+      allOf:
+        - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  required:
+                    - gatewayAccountId
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - disconnect
+                    gatewayAccountId:
+                      type: string
     ConfirmEmailRequestData:
       type: object
       required:
@@ -443,6 +538,16 @@ components:
       properties:
         success:
           type: boolean
+    EncryptionArtifacts:
+      type: object
+      required:
+        - encryptedSeed
+        - cipherIv
+      properties:
+        encryptedSeed:
+          type: string
+        cipherIv:
+          type: string
     Password:
       type: string
       minLength: 8

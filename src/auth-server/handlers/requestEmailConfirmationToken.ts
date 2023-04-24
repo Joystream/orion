@@ -48,7 +48,7 @@ export const requestEmailConfirmationToken: (
 
       const tokensInTimeframeCount = await em.getRepository(Token).count({
         where: {
-          issuedFor: account,
+          issuedForId: account.id,
           type: TokenType.EMAIL_CONFIRMATION,
           issuedAt: MoreThan(
             new Date(Date.now() - emailConfirmationTokenExpiryTimeHours * 3600 * 1000)
@@ -63,7 +63,7 @@ export const requestEmailConfirmationToken: (
       // Deactivate all currently active email confirmation tokens for this account
       await em.getRepository(Token).update(
         {
-          issuedFor: account,
+          issuedForId: account.id,
           type: TokenType.EMAIL_CONFIRMATION,
           expiry: MoreThan(new Date()),
         },
