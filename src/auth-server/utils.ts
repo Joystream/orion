@@ -3,18 +3,16 @@ import { sr25519Verify, decodeAddress, cryptoWaitReady } from '@polkadot/util-cr
 import { BadRequestError } from './errors'
 import { config, ConfigVariable } from '../utils/config'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-import { Account, Token, TokenType } from '../model'
+import { Account, ConnectedAccount, ConnectedAccountProof, Token, TokenType } from '../model'
 import { EntityManager } from 'typeorm'
 import { uniqueId } from '../utils/crypto'
 import { sendMail } from '../utils/mail'
 import { registerEmailData } from './emails'
 import { formatDate } from '../utils/date'
 
-export async function verifyConnectOrDisconnectAccountPayload(
+export async function verifyActionExecutionRequest(
   em: EntityManager,
-  payload: components['schemas']['ConnectOrDisconnectAccountRequestData']['payload'],
-  userAccount: Account,
-  signature: string
+  { payload, signature }: components['schemas']['ActionExecutionRequestData']
 ): Promise<void> {
   await cryptoWaitReady()
   if (
@@ -33,10 +31,6 @@ export async function verifyConnectOrDisconnectAccountPayload(
     em
   )
 
-  if (payload.gatewayAccountId !== userAccount.id) {
-    throw new BadRequestError('Payload gatewayAccountId does not match the account id.')
-  }
-
   if (payload.gatewayName !== appName) {
     throw new BadRequestError('Payload gatewayName does not match the app name.')
   }
@@ -50,6 +44,34 @@ export async function verifyConnectOrDisconnectAccountPayload(
   if (payload.timestamp > Date.now()) {
     throw new BadRequestError('Payload timestamp is in the future.')
   }
+}
+
+export async function connectAccount(
+  em: EntityManager,
+  account: Account,
+  {
+    payload: { gatewayName, timestamp, joystreamAccountId },
+    signature,
+  }:
+    | components['schemas']['ConnectAccountRequestData']
+    | components['schemas']['CreateAccountRequestData']
+): Promise<[ConnectedAccountProof, ConnectedAccount]> {
+  const proof = new ConnectedAccountProof({
+    id: uniqueId(),
+    gatewayAppName: gatewayName,
+    signature,
+    timestamp: new Date(timestamp),
+  })
+
+  const connectedAccount = new ConnectedAccount({
+    id: joystreamAccountId,
+    accountId: account.id,
+    connectedAt: new Date(),
+    isLoginAllowed: true,
+    proofId: proof.id,
+  })
+
+  return (await em.save([proof, connectedAccount])) as [ConnectedAccountProof, ConnectedAccount]
 }
 
 export async function issueEmailConfirmationToken(

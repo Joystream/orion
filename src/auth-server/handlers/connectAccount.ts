@@ -3,15 +3,14 @@ import { components } from '../generated/api-types'
 import { UnauthorizedError, BadRequestError } from '../errors'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
-import { ConnectedAccountProof, ConnectedAccount } from '../../model'
-import { uniqueId } from '../../utils/crypto'
-import { verifyConnectOrDisconnectAccountPayload } from '../utils'
+import { ConnectedAccount } from '../../model'
+import { verifyActionExecutionRequest, connectAccount as dbConnectAccount } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
-type ReqBody = components['schemas']['ConnectOrDisconnectAccountRequestData']
+type ReqBody = components['schemas']['ConnectAccountRequestData']
 type ResLocals = { authContext: AuthContext }
 
 export const connectAccount: (
@@ -21,7 +20,7 @@ export const connectAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      body: { payload, signature },
+      body: { payload },
     } = req
     const {
       locals: { authContext },
@@ -42,27 +41,13 @@ export const connectAccount: (
       throw new BadRequestError('Provided account is already connected to a gateway account.')
     }
 
-    await verifyConnectOrDisconnectAccountPayload(em, payload, account, signature)
+    await verifyActionExecutionRequest(em, req.body)
 
-    if (payload.action !== 'connect') {
-      throw new BadRequestError('Invalid action.')
+    if (payload.gatewayAccountId !== account.id) {
+      throw new BadRequestError('Invalid gateway account id provided in payload.')
     }
 
-    const proof = new ConnectedAccountProof({
-      id: uniqueId(),
-      signature,
-      timestamp: new Date(payload.timestamp),
-      gatewayAppName: payload.gatewayName,
-    })
-
-    const connectedAccount = new ConnectedAccount({
-      id: payload.joystreamAccountId,
-      accountId: account.id,
-      connectedAt: new Date(),
-      proofId: proof.id,
-    })
-
-    await em.save([proof, connectedAccount])
+    await dbConnectAccount(em, account, req.body)
 
     res.status(200).json({ success: true })
   } catch (err) {

@@ -1,10 +1,10 @@
 import express from 'express'
-import { Account } from '../../model'
+import { ConnectedAccount } from '../../model'
 import { globalEm } from '../../utils/globalEm'
 import { UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
-import { compare } from 'bcryptjs'
 import { getOrCreateSession } from '../../utils/auth'
+import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -18,15 +18,28 @@ export const login: (
   next: express.NextFunction
 ) => Promise<void> = async (req, res, next) => {
   try {
-    const { email, password } = req.body
+    const {
+      payload: { joystreamAccountId },
+    } = req.body
     const em = await globalEm
+
+    await verifyActionExecutionRequest(em, req.body)
+
     const session = await em.transaction(async (em) => {
-      const account = await em.getRepository(Account).findOneBy({
-        email,
+      const connectedAccount = await em.getRepository(ConnectedAccount).findOne({
+        where: {
+          id: joystreamAccountId,
+          isLoginAllowed: true,
+        },
+        relations: {
+          account: { user: true },
+        },
       })
-      if (!account || account.email !== email || !(await compare(password, account.paswordHash))) {
+      if (!connectedAccount) {
         throw new UnauthorizedError('Invalid credentials')
       }
+
+      const { account } = connectedAccount
 
       return getOrCreateSession(em, req, account.userId, account.id)
     })

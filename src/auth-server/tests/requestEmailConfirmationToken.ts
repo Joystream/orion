@@ -1,15 +1,16 @@
 import './config'
 import { globalEm } from '../../utils/globalEm'
 import { EntityManager, MoreThan } from 'typeorm'
-import { confirmEmail, register, requestEmailConfirmationToken } from './common'
+import { confirmEmail, createAccount, requestEmailConfirmationToken } from './common'
 import { Account, Token, TokenType } from '../../model'
 import assert from 'assert'
 import { ConfigVariable, config } from '../../utils/config'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
 
 async function findActiveToken(em: EntityManager, account: Account): Promise<Token | null> {
   return em.getRepository(Token).findOneBy({
     type: TokenType.EMAIL_CONFIRMATION,
-    issuedFor: account,
+    issuedForId: account.id,
     expiry: MoreThan(new Date()),
   })
 }
@@ -23,8 +24,9 @@ describe('requestEmailConfirmationToken', () => {
   let account: Account
 
   before(async () => {
+    await cryptoWaitReady()
     em = await globalEm
-    account = await register()
+    account = await createAccount()
   })
 
   it('should fail if account does not exist', async () => {
@@ -52,7 +54,7 @@ describe('requestEmailConfirmationToken', () => {
   })
 
   it('should fail if rate limit is exceeded', async () => {
-    const account = await register()
+    const account = await createAccount()
     const rateLimit = await config.get(ConfigVariable.EmailConfirmationTokenRateLimit, em)
     // We substract 1 from rateLimit, because register() already requests a token
     for (let i = 0; i < rateLimit - 1; i++) {

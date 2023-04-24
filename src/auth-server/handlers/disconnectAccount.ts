@@ -4,13 +4,13 @@ import { UnauthorizedError, NotFoundError, BadRequestError } from '../errors'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { ConnectedAccount } from '../../model'
-import { verifyConnectOrDisconnectAccountPayload } from '../utils'
+import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
-type ReqBody = components['schemas']['ConnectOrDisconnectAccountRequestData']
+type ReqBody = components['schemas']['DisconnectAccountRequestData']
 type ResLocals = { authContext: AuthContext }
 
 export const disconnectAccount: (
@@ -20,7 +20,7 @@ export const disconnectAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      body: { payload, signature },
+      body: { payload },
     } = req
     const {
       locals: { authContext },
@@ -43,7 +43,11 @@ export const disconnectAccount: (
       )
     }
 
-    await verifyConnectOrDisconnectAccountPayload(em, payload, account, signature)
+    await verifyActionExecutionRequest(em, req.body)
+
+    if (payload.gatewayAccountId !== account.id) {
+      throw new BadRequestError('Invalid gateway account id provided in payload.')
+    }
 
     if (payload.action !== 'disconnect') {
       throw new BadRequestError('Invalid action.')

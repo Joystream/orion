@@ -10,12 +10,18 @@ export interface paths {
     post: operations["anonymousAuth"];
   };
   "/login": {
-    /** @description Login to user's account, using e-mail and password. */
+    /** @description Login to user's account by providing a message signed by one of the user's connected accounts. */
     post: operations["login"];
   };
-  "/register": {
-    /** @description Create an account. Requires anonymousAuth to be performed first. */
-    post: operations["register"];
+  "/artifacts": {
+    /** @description Get wallet seed encryption artifacts. */
+    get: operations["getArtifacts"];
+    /** @description Save wallet seed encryption artifacts on the server. */
+    post: operations["postArtifacts"];
+  };
+  "/account": {
+    /** @description Create a new Gateway account. Requires anonymousAuth to be performed first. */
+    post: operations["createAccount"];
   };
   "/confirm-email": {
     /** @description Confirm account's e-mail address provided during registration. */
@@ -51,6 +57,16 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    ActionExecutionPayload: {
+      joystreamAccountId: string;
+      gatewayName: string;
+      timestamp: number;
+      action: string;
+    };
+    ActionExecutionRequestData: {
+      signature: string;
+      payload: components["schemas"]["ActionExecutionPayload"];
+    };
     AnonymousUserAuthRequestData: {
       userId?: string;
     };
@@ -58,28 +74,39 @@ export interface components {
       userId: string;
       sessionId: string;
     };
-    LoginRequestData: {
-      email: string;
-      password: string;
-    };
+    LoginRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
+      payload?: components["schemas"]["ActionExecutionPayload"] & {
+        /** @enum {string} */
+        action?: "login";
+        gatewayAccountId: string;
+      };
+    });
     LoginResponseData: components["schemas"]["GenericOkResponseData"] & {
       sessionId: string;
     };
-    RegisterRequestData: {
-      email: string;
-      password: components["schemas"]["Password"];
-    };
-    ConnectOrDisconnectAccountRequestData: {
-      payload: {
+    CreateAccountRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
+      payload?: components["schemas"]["ActionExecutionPayload"] & {
+        /** @enum {string} */
+        action?: "createAccount";
+        email: string;
+      };
+    });
+    ConnectAccountRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
+      payload?: components["schemas"]["ActionExecutionPayload"] & {
+        /** @enum {string} */
+        action?: "connect";
         joystreamAccountId: string;
         gatewayAccountId: string;
-        gatewayName: string;
-        timestamp: number;
-        /** @enum {string} */
-        action: "connect" | "disconnect";
       };
-      signature: string;
-    };
+    });
+    DisconnectAccountRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
+      payload?: components["schemas"]["ActionExecutionPayload"] & {
+        /** @enum {string} */
+        action?: "disconnect";
+        joystreamAccountId: string;
+        gatewayAccountId: string;
+      };
+    });
     ConfirmEmailRequestData: {
       /** @description Confirmation token recieved by the user via an e-mail. */
       token: string;
@@ -101,6 +128,10 @@ export interface components {
     };
     GenericOkResponseData: {
       success: boolean;
+    };
+    EncryptionArtifacts: {
+      encryptedSeed: string;
+      cipherIv: string;
     };
     Password: string;
   };
@@ -142,7 +173,7 @@ export interface components {
       };
     };
     /** @description Cannot create user account with the provided credentials */
-    RegisterBadRequestResponse: {
+    CreateAccountBadRequestResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
@@ -195,6 +226,18 @@ export interface components {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
     };
+    /** @description Encryption artifacts found and provided in the response. */
+    GetArtifactsResponse: {
+      content: {
+        "application/json": components["schemas"]["EncryptionArtifacts"];
+      };
+    };
+    /** @description Encryption artifacts not found by the provided lookup key. */
+    GetArtifactsNotFoundResponse: {
+      content: {
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
   };
   parameters: never;
   requestBodies: {
@@ -208,9 +251,9 @@ export interface components {
         "application/json": components["schemas"]["LoginRequestData"];
       };
     };
-    RegisterRequestBody?: {
+    CreateAccountRequestBody?: {
       content: {
-        "application/json": components["schemas"]["RegisterRequestData"];
+        "application/json": components["schemas"]["CreateAccountRequestData"];
       };
     };
     ConfirmEmailRequestBody?: {
@@ -223,14 +266,24 @@ export interface components {
         "application/json": components["schemas"]["ResetPasswordRequestData"];
       };
     };
-    ConnectOrDisconnectAccountRequestBody?: {
+    ConnectAccountRequestBody?: {
       content: {
-        "application/json": components["schemas"]["ConnectOrDisconnectAccountRequestData"];
+        "application/json": components["schemas"]["ConnectAccountRequestData"];
+      };
+    };
+    DisconnectAccountRequestBody?: {
+      content: {
+        "application/json": components["schemas"]["DisconnectAccountRequestData"];
       };
     };
     RequestTokenRequestBody?: {
       content: {
         "application/json": components["schemas"]["RequestTokenRequestData"];
+      };
+    };
+    PostArtifactsRequestBody?: {
+      content: {
+        "application/json": components["schemas"]["EncryptionArtifacts"];
       };
     };
   };
@@ -252,7 +305,7 @@ export interface operations {
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
-  /** @description Login to user's account, using e-mail and password. */
+  /** @description Login to user's account by providing a message signed by one of the user's connected accounts. */
   login: {
     requestBody: components["requestBodies"]["LoginRequestBody"];
     responses: {
@@ -262,12 +315,35 @@ export interface operations {
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
-  /** @description Create an account. Requires anonymousAuth to be performed first. */
-  register: {
-    requestBody: components["requestBodies"]["RegisterRequestBody"];
+  /** @description Get wallet seed encryption artifacts. */
+  getArtifacts: {
+    parameters: {
+      query: {
+        /** @description The lookup key derived from user credentials. */
+        id: string;
+      };
+    };
+    responses: {
+      200: components["responses"]["GetArtifactsResponse"];
+      404: components["responses"]["GetArtifactsNotFoundResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Save wallet seed encryption artifacts on the server. */
+  postArtifacts: {
+    requestBody: components["requestBodies"]["PostArtifactsRequestBody"];
     responses: {
       200: components["responses"]["GenericOkResponse"];
-      400: components["responses"]["RegisterBadRequestResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Create a new Gateway account. Requires anonymousAuth to be performed first. */
+  createAccount: {
+    requestBody: components["requestBodies"]["CreateAccountRequestBody"];
+    responses: {
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["CreateAccountBadRequestResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
@@ -313,7 +389,7 @@ export interface operations {
   };
   /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
   connectAccount: {
-    requestBody: components["requestBodies"]["ConnectOrDisconnectAccountRequestBody"];
+    requestBody: components["requestBodies"]["ConnectAccountRequestBody"];
     responses: {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
@@ -323,7 +399,7 @@ export interface operations {
   };
   /** @description Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. */
   disconnectAccount: {
-    requestBody: components["requestBodies"]["ConnectOrDisconnectAccountRequestBody"];
+    requestBody: components["requestBodies"]["DisconnectAccountRequestBody"];
     responses: {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
