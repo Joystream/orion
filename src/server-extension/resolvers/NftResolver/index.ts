@@ -63,6 +63,7 @@ export class NftResolver {
           WHERE auction_type->>'isTypeOf' = 'AuctionTypeEnglish'
           AND (auction_type->>'plannedEndAtBlock')::int > ${lastProcessedBlock}
           AND a.is_canceled = false
+          AND a.is_completed = false
         ) AS auctions ON auctions.nft_id = owned_nft.id 
 `,
       ''
