@@ -591,6 +591,16 @@ export type GetNftsConnectionQuery = {
   }
 }
 
+export type GetEndingAuctionsNftsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.OwnedNftWhereInput>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  offset?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetEndingAuctionsNftsQuery = {
+  endingAuctionsNfts: Array<Types.Maybe<FullNftFieldsFragment>>
+}
+
 export type GetNotificationsQueryVariables = Types.Exact<{
   memberId: Types.Scalars['String']
   limit: Types.Scalars['Int']
@@ -2970,6 +2980,14 @@ export const GetNftsConnection = gql`
         endCursor
       }
       totalCount
+    }
+  }
+  ${FullNftFields}
+`
+export const GetEndingAuctionsNfts = gql`
+  query GetEndingAuctionsNfts($where: OwnedNftWhereInput, $limit: Int, $offset: Int) {
+    endingAuctionsNfts(where: $where, limit: $limit, offset: $offset) {
+      ...FullNftFields
     }
   }
   ${FullNftFields}

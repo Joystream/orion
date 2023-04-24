@@ -1002,6 +1002,11 @@ type Query {
     first: Int
     where: NftActivityWhereInput
   ): NftActivitiesConnection!
+  endingAuctionsNfts(
+    where: OwnedNftWhereInput
+    offset: Int
+    limit: Int
+  ): [OwnedNft]!
   memberMetadata(
     where: MemberMetadataWhereInput
     orderBy: [MemberMetadataOrderByInput!]
