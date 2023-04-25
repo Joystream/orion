@@ -8,9 +8,10 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
-import { AccountInfo, anonymousAuth, createAccountAndSignIn, keyring } from './common'
+import { LoggedInAccountInfo, anonymousAuth, createAccountAndSignIn, keyring } from './common'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
+import { SESSION_COOKIE_NAME } from '../../utils/auth'
 
 type ConnectOrDisconnectAccountArgs = {
   accountId: string
@@ -45,7 +46,7 @@ async function connectOrDisconnectAccount({
   const signature = u8aToHex(signingKey.sign(JSON.stringify(payload)))
   await request(app)
     .post(endpoint)
-    .set('Authorization', sessionId ? `Bearer ${sessionId}` : '')
+    .set('Cookie', sessionId ? `${SESSION_COOKIE_NAME}=${sessionId}` : '')
     .set('Content-Type', 'application/json')
     .send({
       payload,
@@ -57,7 +58,7 @@ async function connectOrDisconnectAccount({
 }
 
 describe('connectAndDisconnectAccount', () => {
-  let accountInfo: AccountInfo
+  let accountInfo: LoggedInAccountInfo
   let gatewayName: string
   let em: EntityManager
   let alice: KeyringPair, bob: KeyringPair

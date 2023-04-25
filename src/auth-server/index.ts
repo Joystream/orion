@@ -6,11 +6,26 @@ import path from 'path'
 import { AuthApiError, UnauthorizedError } from './errors'
 import { createLogger } from '@subsquid/logger'
 import { authenticate } from '../utils/auth'
+import cookieParser from 'cookie-parser'
 
 export const logger = createLogger('auth-api')
 
 export const app = express()
 
+function authHandler(type: 'header' | 'cookie') {
+  return async (req: express.Request) => {
+    const authContext = await authenticate(req, type)
+    if (!authContext) {
+      throw new UnauthorizedError()
+    }
+    if (req.res) {
+      req.res.locals.authContext = authContext
+    }
+    return true
+  }
+}
+
+app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
 app.use(cors())
 app.use(
@@ -19,16 +34,8 @@ app.use(
     operationHandlers: path.join(__dirname, 'handlers'),
     validateSecurity: {
       handlers: {
-        bearerAuth: async (req: express.Request) => {
-          const authContext = await authenticate(req)
-          if (!authContext) {
-            throw new UnauthorizedError()
-          }
-          if (req.res) {
-            req.res.locals.authContext = authContext
-          }
-          return true
-        },
+        bearerAuth: authHandler('header'),
+        cookieAuth: authHandler('cookie'),
       },
     },
   })

@@ -80,7 +80,7 @@ paths:
   /session-artifacts:
     get:
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       operationId: getSessionArtifacts
       x-eov-operation-handler: getSessionArtifacts
       description: Get wallet seed encryption artifacts for the current session.
@@ -95,7 +95,7 @@ paths:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
     post:
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       operationId: postSessionArtifacts
       x-eov-operation-handler: postSessionArtifacts
       description: Save wallet seed encryption artifacts for the current session on the server.
@@ -117,7 +117,7 @@ paths:
       description: Create a new Gateway account.
         Requires anonymousAuth to be performed first.
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/CreateAccountRequestBody'
       responses:
@@ -199,7 +199,7 @@ paths:
       x-eov-operation-handler: connectAccount
       description: Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership.
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/ConnectAccountRequestBody'
       responses:
@@ -217,7 +217,7 @@ paths:
       x-eov-operation-handler: disconnectAccount
       description: Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership.
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/DisconnectAccountRequestBody'
       responses:
@@ -237,7 +237,7 @@ paths:
       x-eov-operation-handler: logout
       description: Terminate the current session.
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
@@ -251,6 +251,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: Session ID
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
   requestBodies:
     AnonymousUserAuthRequestBody:
       content:
@@ -332,7 +336,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/LoginResponseData'
+            $ref: '#/components/schemas/GenericOkResponseData'
     LoginUnauthorizedResponse:
       description: Invalid e-mail or password
       content:
@@ -449,11 +453,8 @@ components:
         - type: object
           required:
             - userId
-            - sessionId
           properties:
             userId:
-              type: string
-            sessionId:
               type: string
     LoginRequestData:
       allOf:
@@ -473,15 +474,6 @@ components:
                         - login
                     gatewayAccountId:
                       type: string
-    LoginResponseData:
-      allOf:
-        - $ref: '#/components/schemas/GenericOkResponseData'
-        - type: object
-          required:
-            - sessionId
-          properties:
-            sessionId:
-              type: string
     CreateAccountRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'

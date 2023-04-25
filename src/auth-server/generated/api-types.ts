@@ -78,7 +78,6 @@ export interface components {
     };
     AnonymousUserAuthResponseData: components["schemas"]["GenericOkResponseData"] & {
       userId: string;
-      sessionId: string;
     };
     LoginRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
       payload?: components["schemas"]["ActionExecutionPayload"] & {
@@ -87,9 +86,6 @@ export interface components {
         gatewayAccountId: string;
       };
     });
-    LoginResponseData: components["schemas"]["GenericOkResponseData"] & {
-      sessionId: string;
-    };
     CreateAccountRequestData: components["schemas"]["ActionExecutionRequestData"] & ({
       payload?: components["schemas"]["ActionExecutionPayload"] & {
         /** @enum {string} */
@@ -172,7 +168,7 @@ export interface components {
     /** @description Logged in */
     LoginOkResponse: {
       content: {
-        "application/json": components["schemas"]["LoginResponseData"];
+        "application/json": components["schemas"]["GenericOkResponseData"];
       };
     };
     /** @description Invalid e-mail or password */
