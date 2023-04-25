@@ -61,7 +61,8 @@
     "typeorm": "^0.3.11",
     "ua-parser-js": "^1.0.34",
     "node-cache": "^5.1.2",
-    "url-join": "^4"
+    "url-join": "^4",
+    "cookie-parser": "^1.4.6"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
@@ -77,6 +78,7 @@
     "@types/url-join": "^4",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.43.0",
+    "@types/cookie-parser": "^1.4.3",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",

@@ -4,7 +4,7 @@ import { uniqueId } from '../../utils/crypto'
 import { globalEm } from '../../utils/globalEm'
 import { components } from '../generated/api-types'
 import { UnauthorizedError } from '../errors'
-import { getOrCreateSession } from '../../utils/auth'
+import { getOrCreateSession, setSessionCookie } from '../../utils/auth'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -21,7 +21,7 @@ export const anonymousAuth: (
     const { userId } = req.body
     const em = await globalEm
 
-    const { user, session } = await em.transaction(async (em) => {
+    const { user, sessionData } = await em.transaction(async (em) => {
       const user = userId
         ? await em.getRepository(User).findOneBy({
             id: userId,
@@ -40,15 +40,18 @@ export const anonymousAuth: (
         throw new UnauthorizedError('Cannot use anonymous auth for registered users')
       }
 
-      const session = await getOrCreateSession(em, req, user.id)
+      const sessionData = await getOrCreateSession(em, req, user.id)
 
-      return { user, session }
+      return { user, sessionData }
     })
+
+    if (sessionData.isNew) {
+      setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
+    }
 
     res.status(200).json({
       success: true,
       userId: user.id,
-      sessionId: session.id,
     })
   } catch (e) {
     next(e)

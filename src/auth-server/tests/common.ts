@@ -12,11 +12,13 @@ import { u8aToHex } from '@polkadot/util'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { uniqueId } from '../../utils/crypto'
 import { ScryptOptions, createCipheriv, createDecipheriv, scrypt } from 'crypto'
+import { SESSION_COOKIE_NAME } from '../../utils/auth'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
-export type AccountInfo = {
+export type LoggedInAccountInfo = {
   sessionId: string
+  sessionIdRaw: string
   accountId: string
 }
 
@@ -98,7 +100,7 @@ export async function createAccount(
   await request(app)
     .post('/api/v1/account')
     .set('Content-Type', 'application/json')
-    .set('Authorization', `Bearer ${anonSessionId}`)
+    .set('Cookie', `${SESSION_COOKIE_NAME}=${anonSessionId}`)
     .send(createAccountReqData)
     .expect(200)
   const account = await em.getRepository(Account).findOneBy({ email })
@@ -128,7 +130,7 @@ export async function requestEmailConfirmationToken(
 export async function createAccountAndSignIn(
   email = `test.${uniqueId()}@example.com`,
   keypair?: KeyringPair
-): Promise<AccountInfo> {
+): Promise<LoggedInAccountInfo> {
   if (!keypair) {
     keypair = keyring.addFromUri(`//${email}`)
   }
@@ -147,23 +149,36 @@ export async function createAccountAndSignIn(
     },
     keypair
   )
-  const {
-    body: { sessionId: userSessionId },
-  } = await request(app)
+  const loginResp = await request(app)
     .post('/api/v1/login')
     .set('Content-Type', 'application/json')
     .send(loginReqData)
     .expect(200)
 
-  return { sessionId: userSessionId, accountId: account.id }
+  const sessionId = extractSessionId(loginResp)
+  const sessionIdRaw = sessionId.split('.')[0].split(':')[1]
+  return {
+    sessionId: extractSessionId(loginResp),
+    sessionIdRaw,
+    accountId: account.id,
+  }
+}
+
+function extractSessionId(response: request.Response): string {
+  const setCookieHeader: unknown = response.headers['set-cookie']
+  assert(setCookieHeader, 'Set-Cookie header not found')
+  const setCookieHeaderStr = Array.isArray(setCookieHeader)
+    ? setCookieHeader[0].toString()
+    : setCookieHeader.toString()
+  const [, sessionId] = setCookieHeaderStr.match(new RegExp(`${SESSION_COOKIE_NAME}=([^;]+)`)) || []
+  assert(sessionId, 'Session id not found')
+  return sessionId
 }
 
 export async function anonymousAuth(): Promise<string> {
-  const {
-    body: { sessionId },
-  } = await request(app)
+  const response = await request(app)
     .post('/api/v1/anonymous-auth')
     .set('Content-Type', 'application/json')
     .expect(200)
-  return sessionId
+  return extractSessionId(response)
 }

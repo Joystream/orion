@@ -3,12 +3,12 @@ import { ConnectedAccount } from '../../model'
 import { globalEm } from '../../utils/globalEm'
 import { UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
-import { getOrCreateSession } from '../../utils/auth'
+import { getOrCreateSession, setSessionCookie } from '../../utils/auth'
 import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
-  | components['schemas']['LoginResponseData']
+  | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['LoginRequestData']
 
@@ -25,7 +25,7 @@ export const login: (
 
     await verifyActionExecutionRequest(em, req.body)
 
-    const session = await em.transaction(async (em) => {
+    const sessionData = await em.transaction(async (em) => {
       const connectedAccount = await em.getRepository(ConnectedAccount).findOne({
         where: {
           id: joystreamAccountId,
@@ -44,9 +44,12 @@ export const login: (
       return getOrCreateSession(em, req, account.userId, account.id)
     })
 
+    if (sessionData.isNew) {
+      setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
+    }
+
     res.status(200).json({
       success: true,
-      sessionId: session.id,
     })
   } catch (e) {
     next(e)

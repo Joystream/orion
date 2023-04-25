@@ -6,7 +6,7 @@ import { Account, EncryptionArtifacts, SessionEncryptionArtifacts } from '../../
 import assert from 'assert'
 import { EntityManager } from 'typeorm'
 import {
-  AccountInfo,
+  LoggedInAccountInfo,
   aes256CbcDecrypt,
   aes256CbcEncrypt,
   anonymousAuth,
@@ -17,6 +17,7 @@ import {
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 import { randomBytes } from 'crypto'
+import { SESSION_COOKIE_NAME } from '../../utils/auth'
 
 describe('artifacts', () => {
   let em: EntityManager
@@ -100,7 +101,7 @@ describe('artifacts', () => {
   })
 
   describe('sessionEncryptionArtifacts', () => {
-    let loggedInAccountInfo: AccountInfo
+    let loggedInAccountInfo: LoggedInAccountInfo
     let sessionEncryptedSeed: string
     let cipherIv: Buffer
     let cipherKey: Buffer
@@ -127,7 +128,7 @@ describe('artifacts', () => {
       await request(app)
         .post('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
         .send(artifacts)
         .expect(401)
     })
@@ -138,7 +139,7 @@ describe('artifacts', () => {
         await request(app)
           .post('/api/v1/session-artifacts')
           .set('Content-Type', 'application/json')
-          .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+          .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
           .send(artifactsWithoutField)
           .expect(400)
       })
@@ -148,7 +149,7 @@ describe('artifacts', () => {
       await request(app)
         .post('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
         .send({})
         .expect(400)
     })
@@ -157,7 +158,7 @@ describe('artifacts', () => {
       await request(app)
         .get(`/api/v1/session-artifacts`)
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
         .expect(404)
     })
 
@@ -165,11 +166,11 @@ describe('artifacts', () => {
       await request(app)
         .post('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
         .send(artifacts)
         .expect(200)
       const savedArtifacts = await em.getRepository(SessionEncryptionArtifacts).findOneBy({
-        sessionId: loggedInAccountInfo.sessionId,
+        sessionId: loggedInAccountInfo.sessionIdRaw,
       })
       assert(savedArtifacts, 'Encryption artifacts not saved')
     })
@@ -178,7 +179,7 @@ describe('artifacts', () => {
       await request(app)
         .post('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
         .send(artifacts)
         .expect(400)
     })
@@ -187,7 +188,7 @@ describe('artifacts', () => {
       const response = await request(app)
         .get(`/api/v1/session-artifacts`)
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${loggedInAccountInfo.sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
         .expect(200)
       const { cipherIv, cipherKey } =
         response.body as components['schemas']['SessionEncryptionArtifacts']
@@ -204,7 +205,7 @@ describe('artifacts', () => {
       await request(app)
         .get('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
-        .set('Authorization', `Bearer ${sessionId}`)
+        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
         .expect(401)
     })
 

@@ -1,4 +1,4 @@
-import { Request } from 'express'
+import { Request, Response } from 'express'
 import { EntityManager, FindOptionsWhere, IsNull, MoreThan } from 'typeorm'
 import { Account, Session } from '../model'
 import {
@@ -14,6 +14,8 @@ import { globalEm } from './globalEm'
 import { uniqueId } from './crypto'
 
 const authLogger = createLogger('authentication')
+
+export const SESSION_COOKIE_NAME = 'session_id'
 
 export async function findActiveSession(
   req: Request,
@@ -105,9 +107,22 @@ sessionCache.on('expired', (sessionId: string, cachedData: CachedSessionData) =>
 
 export type AuthContext = Session
 
-export async function authenticate(req: Request): Promise<AuthContext | false> {
-  const em = await globalEm
+export async function getSessionIdFromHeader(req: Request): Promise<string | undefined> {
   const [, sessionId] = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9+/=]+)$/) || []
+  return sessionId
+}
+
+export async function getSessionIdFromCookie(req: Request): Promise<string | undefined> {
+  return req.cookies[SESSION_COOKIE_NAME]
+}
+
+export async function authenticate(
+  req: Request,
+  authType: 'cookie' | 'header'
+): Promise<AuthContext | false> {
+  const em = await globalEm
+  const sessionId =
+    authType === 'cookie' ? await getSessionIdFromCookie(req) : await getSessionIdFromHeader(req)
   if (!sessionId) {
     authLogger.debug(
       `Recieved a request w/ no sessionId provided. Authorization header: ${req.headers.authorization}`
@@ -139,7 +154,11 @@ export async function getOrCreateSession(
   req: Request,
   userId: string,
   accountId?: string
-): Promise<Session> {
+): Promise<{
+  session: Session
+  sessionMaxDurationHours: number
+  isNew: boolean
+}> {
   const now = new Date()
   const sessionExpiryAfterMinutes = await config.get(
     ConfigVariable.SessionExpiryAfterInactivityMinutes,
@@ -152,15 +171,20 @@ export async function getOrCreateSession(
     userId,
     accountId: accountId || IsNull(),
   })
+  const sessionMaxDurationHours = await config.get(ConfigVariable.SessionMaxDurationHours, em)
+
   if (existingSession) {
-    const sessionMaxDurationHours = await config.get(ConfigVariable.SessionMaxDurationHours, em)
     existingSession.expiry = new Date(
       Math.min(
         existingSession.startedAt.getTime() + sessionMaxDurationHours * 3_600_000,
         sessionExpiry.getTime()
       )
     )
-    return em.save(existingSession)
+    return {
+      session: await em.save(existingSession),
+      isNew: false,
+      sessionMaxDurationHours,
+    }
   }
 
   const ip = resolveIP(req)
@@ -177,5 +201,18 @@ export async function getOrCreateSession(
     userId,
     accountId,
   })
-  return em.save(session)
+  return {
+    session: await em.save(session),
+    isNew: true,
+    sessionMaxDurationHours,
+  }
+}
+
+export function setSessionCookie(res: Response, sessionId: string, maxDurationHours: number): void {
+  res.cookie(SESSION_COOKIE_NAME, sessionId, {
+    maxAge: maxDurationHours * 3_600_000,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  })
 }
