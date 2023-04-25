@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "yarn generate:all && tsc --noEmit",
+    "build": "npm run generate:all && tsc --noEmit",
     "test": "./run-tests.sh",
     "run-test-scenario": "./run-test-scenario.sh",
     "node-ts-strict": "node -r ts-node/register --unhandled-rejections=strict",
     "lint": "eslint . --quiet --ext .ts",
-    "checks": "tsc --noEmit --pretty && prettier ./ --check && yarn lint",
+    "checks": "tsc --noEmit --pretty && prettier ./ --check && npm lint",
     "format": "prettier ./ --write",
     "generate:types:graphql": "graphql-codegen",
-    "generate:all": "yarn generate:types:graphql"
+    "generate:all": "npm run generate:types:graphql"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
@@ -28,16 +28,17 @@
     "dotenv": "^8.2.0",
     "fs": "^0.0.1-security",
     "graphql": "^14.7.0",
+    "graphql-scalars": "^1.21.3",
     "long": "^4.0.0",
     "node-cleanup": "^2.1.2",
     "react": "^18.2.0",
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^1.21.4",
+    "@graphql-codegen/cli": "^3.0.0",
     "@graphql-codegen/import-types-preset": "^1.18.1",
     "@graphql-codegen/typescript": "^1.22.0",
-    "@graphql-codegen/typescript-document-nodes": "^1.17.11",
+    "@graphql-codegen/typescript-document-nodes": "^2.2.11",
     "@graphql-codegen/typescript-operations": "^1.17.16",
     "@types/chai": "^4.2.11",
     "@types/debug": "^4.1.7",
@@ -48,3 +49,4 @@
     "typescript": "^4.4.3"
   }
 }
+
