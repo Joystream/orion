@@ -58,6 +58,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/GetArtifactsResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
         '404':
           $ref: '#/components/responses/GetArtifactsNotFoundResponse'
         default:
@@ -73,6 +75,39 @@ paths:
           $ref: '#/components/responses/GenericOkResponse'
         '400':
           $ref: '#/components/responses/GenericBadRequestResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /session-artifacts:
+    get:
+      security:
+        - bearerAuth: []
+      operationId: getSessionArtifacts
+      x-eov-operation-handler: getSessionArtifacts
+      description: Get wallet seed encryption artifacts for the current session.
+      responses:
+        '200':
+          $ref: '#/components/responses/GetArtifactsResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/GetSessionArtifactsNotFoundResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+    post:
+      security:
+        - bearerAuth: []
+      operationId: postSessionArtifacts
+      x-eov-operation-handler: postSessionArtifacts
+      description: Save wallet seed encryption artifacts for the current session on the server.
+      requestBody:
+        $ref: '#/components/requestBodies/PostSessionArtifactsRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
   /account:
@@ -262,6 +297,11 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/EncryptionArtifacts'
+    PostSessionArtifactsRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SessionEncryptionArtifacts'
   responses:
     AnonymousUserAuthOkResponse:
       description: Ok
@@ -361,6 +401,12 @@ components:
             $ref: '#/components/schemas/EncryptionArtifacts'
     GetArtifactsNotFoundResponse:
       description: Encryption artifacts not found by the provided lookup key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GetSessionArtifactsNotFoundResponse:
+      description: No artifacts associated with the current session found.
       content:
         application/json:
           schema:
@@ -541,10 +587,23 @@ components:
     EncryptionArtifacts:
       type: object
       required:
+        - id
         - encryptedSeed
         - cipherIv
       properties:
+        id:
+          type: string
         encryptedSeed:
+          type: string
+        cipherIv:
+          type: string
+    SessionEncryptionArtifacts:
+      type: object
+      required:
+        - cipherKey
+        - cipherIv
+      properties:
+        cipherKey:
           type: string
         cipherIv:
           type: string

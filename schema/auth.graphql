@@ -13,11 +13,25 @@ type EncryptionArtifacts @entity {
   "ID / lookupKey"
   id: ID!
 
-  "The IV used to encrypt the wallet seed by the client"
-  cipherIvClient: String!
+  "The IV used to encrypt the wallet seed with user credentials"
+  cipherIv: String!
   
-  "Wallet seed encrypted by the client"
-  clientEncryptedSeed: String!
+  "Wallet seed encrypted with user credentials"
+  encryptedSeed: String!
+}
+
+type SessionEncryptionArtifacts @entity {
+  "Unique identifier"
+  id: ID!
+
+  "The session the encryption artifacts are associated with"
+  session: Session! @unique
+
+  "The IV used to encrypt the seed with cipherKey"
+  cipherIv: String!
+  
+  "cipherKey used to encrypt the seed stored client-side for the duration of the session"
+  cipherKey: String!
 }
 
 type Session @entity {
