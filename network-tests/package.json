@@ -3,15 +3,13 @@
   "version": "0.1.0",
   "license": "GPL-3.0-only",
   "scripts": {
-    "build": "npm run generate:all && tsc --noEmit",
+    "codegen": "graphql-codegen",
     "test": "./run-tests.sh",
     "run-test-scenario": "./run-test-scenario.sh",
     "node-ts-strict": "node -r ts-node/register --unhandled-rejections=strict",
     "lint": "eslint . --quiet --ext .ts",
     "checks": "tsc --noEmit --pretty && prettier ./ --check && npm lint",
-    "format": "prettier ./ --write",
-    "generate:types:graphql": "graphql-codegen",
-    "generate:all": "npm run generate:types:graphql"
+    "format": "prettier ./ --write"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
@@ -27,8 +25,6 @@
     "cross-fetch": "^3.0.6",
     "dotenv": "^8.2.0",
     "fs": "^0.0.1-security",
-    "graphql": "^14.7.0",
-    "graphql-scalars": "^1.21.3",
     "long": "^4.0.0",
     "node-cleanup": "^2.1.2",
     "react": "^18.2.0",
@@ -49,4 +45,3 @@
     "typescript": "^4.4.3"
   }
 }
-

@@ -1,20 +1,31 @@
-import { StandardizedFixture } from "src/Fixture";
+import { StandardizedFixture } from 'src/Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { Api } from '../../Api'
-import { PalletContentPermissionsContentActor, PalletProjectTokenTokenIssuanceParameters } from '@polkadot/types/lookup'
+import {
+  PalletContentPermissionsContentActor,
+  PalletProjectTokenTokenIssuanceParameters,
+} from '@polkadot/types/lookup'
 import { u64 } from '@polkadot/types'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
-export type IssueCreatorTokenParameters = [PalletContentPermissionsContentActor, u64, PalletProjectTokenTokenIssuanceParameters];
+export type IssueCreatorTokenParameters = [
+  PalletContentPermissionsContentActor,
+  u64,
+  PalletProjectTokenTokenIssuanceParameters
+]
 
 export class IssueCreatorTokenFixture extends StandardizedFixture {
   protected params: Map<string, IssueCreatorTokenParameters>
 
-  public constructor(api: Api, query: QueryNodeApi, params: Map<string, IssueCreatorTokenParameters>) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    params: Map<string, IssueCreatorTokenParameters>
+  ) {
     super(api, query)
     this.params = params
   }
@@ -29,13 +40,9 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     )
   }
 
-  protected async getEventFromResult(
-    result: SubmittableResult
-  ): Promise<TokenIssuedEventDetails> {
+  protected async getEventFromResult(result: SubmittableResult): Promise<TokenIssuedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
