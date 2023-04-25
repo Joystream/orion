@@ -1,21 +1,31 @@
-import { StandardizedFixture } from "src/Fixture";
+import { StandardizedFixture } from 'src/Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { Api } from '../../Api'
-import { PalletContentChannelOwner, PalletContentChannelCreationParametersRecord } from '@polkadot/types/lookup'
+import {
+  PalletContentChannelOwner,
+  PalletContentChannelCreationParametersRecord,
+} from '@polkadot/types/lookup'
 
 type ChannelCreatedEventDetails = EventDetails<EventType<'content', 'ChannelCreated'>>
 
-export type ChannelCreationParameters = [PalletContentChannelOwner, PalletContentChannelCreationParametersRecord];
+export type ChannelCreationParameters = [
+  PalletContentChannelOwner,
+  PalletContentChannelCreationParametersRecord
+]
 
 export class CreateChannelFixture extends StandardizedFixture {
   protected params: Map<string, ChannelCreationParameters>
 
-  public constructor(api: Api, query: QueryNodeApi, params: Map<string, ChannelCreationParameters>) {
+  public constructor(
+    api: Api,
+    query: QueryNodeApi,
+    params: Map<string, ChannelCreationParameters>
+  ) {
     super(api, query)
-    this.params = params 
+    this.params = params
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -34,7 +44,5 @@ export class CreateChannelFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'content', 'ChannelCreated')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-    
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

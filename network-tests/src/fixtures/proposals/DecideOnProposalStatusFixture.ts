@@ -12,7 +12,6 @@ import { ProposalId } from '@joystream/types/primitives'
 import { VoteOnProposalsFixture } from './VoteOnProposalsFixture'
 import { ProposalFieldsFragment } from '../../graphql/generated/queries'
 import { assert } from 'chai'
-import { BN } from 'bn.js'
 
 export type DecisionStatus = 'Approved' | 'Rejected' | 'Slashed'
 
