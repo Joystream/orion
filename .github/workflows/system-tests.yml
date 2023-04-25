@@ -65,4 +65,3 @@ jobs:
         env:
           DEBUG: integration-tests:*
         run: npm run --workspace network-tests node-ts-strict src/scenarios/requiredBasicSetup.ts
-

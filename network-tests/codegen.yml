@@ -1,6 +1,6 @@
 overwrite: true
 
-schema: 
+schema:
   - './graphql/schema.graphql'
 
 documents:
@@ -17,16 +17,16 @@ generates:
   ./graphql/generated/schema.ts:
     plugins:
       - typescript
-    # hooks:
-    #   afterOneFileWrite:
-    #     - prettier --write
-  # ./graphql/generated/queries.ts:
-  #   preset: import-types
-  #   presetConfig:
-  #     typesPath: ./schema
-  #   hooks:
-  #     afterOneFileWrite:
-  #       - prettier --write
-  #   plugins:
-  #     - typescript-operations
-  #     - typescript-document-nodes
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
+  ./graphql/generated/queries.ts:
+    preset: import-types
+    presetConfig:
+      typesPath: ./schema
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
+    plugins:
+      - typescript-operations
+      - typescript-document-nodes

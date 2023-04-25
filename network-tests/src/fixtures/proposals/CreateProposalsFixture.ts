@@ -2,21 +2,15 @@ import { Api } from '../../Api'
 import { QueryNodeApi } from '../../QueryNodeApi'
 import { EventType, ProposalDetailsJsonByType, ProposalType } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
-import { Utils } from '../../utils'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import {
   ProposalCreatedEventFieldsFragment,
   ProposalFieldsFragment,
 } from '../../graphql/generated/queries'
-import { assert } from 'chai'
 import { PalletProposalsEngineProposalParameters as ProposalParameters } from '@polkadot/types/lookup'
 import { MemberId, ProposalId } from '@joystream/types/primitives'
 import { FixtureRunner, StandardizedFixture } from '../../Fixture'
 import { AddStakingAccountsHappyCaseFixture } from '../membership'
-import { getWorkingGroupModuleName } from '../../consts'
-import { assertQueriedOpeningMetadataIsValid } from '../workingGroups/utils'
-import { OpeningMetadata } from '@joystream/metadata-protobuf'
-import { blake2AsHex } from '@polkadot/util-crypto'
 import { EventDetails } from '../../types'
 
 export type ProposalCreationParams<T extends ProposalType = ProposalType> = {
