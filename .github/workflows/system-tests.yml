@@ -35,6 +35,16 @@ jobs:
           docker-compose down -v
           docker-compose -f archive/docker-compose.yml down -v
 
+  tsc_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: checks for errors
+        run: |
+          cd network-tests
+          npx tsc --noEmit
+
   basic_setup:
     runs-on: ubuntu-latest
     needs: get_shasum
