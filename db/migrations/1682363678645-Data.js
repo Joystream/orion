@@ -1,5 +1,5 @@
-module.exports = class Data1682354993770 {
-    name = 'Data1682354993770'
+module.exports = class Data1682363678645 {
+    name = 'Data1682363678645'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -119,7 +119,7 @@ module.exports = class Data1682354993770 {
         await db.query(`CREATE INDEX "IDX_5944dc5896cb16bd395414a0ce" ON "video_media_metadata" ("encoding_id") `)
         await db.query(`CREATE INDEX "IDX_4dc101240e8e1536b770aee202" ON "video_media_metadata" ("video_id") `)
         await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "is_root" boolean NOT NULL, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "encryption_artifacts" ("id" character varying NOT NULL, "cipher_iv_client" text NOT NULL, "client_encrypted_seed" text NOT NULL, CONSTRAINT "PK_6441471581ba6d149ad75655bd0" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "encryption_artifacts" ("id" character varying NOT NULL, "cipher_iv" text NOT NULL, "encrypted_seed" text NOT NULL, CONSTRAINT "PK_6441471581ba6d149ad75655bd0" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "connected_account_proof" ("id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "gateway_app_name" text NOT NULL, "signature" text NOT NULL, CONSTRAINT "PK_cc3bbaae220d43867bc456dd0d8" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "connected_account" ("id" character varying NOT NULL, "account_id" character varying, "connected_at" TIMESTAMP WITH TIME ZONE NOT NULL, "is_login_allowed" boolean NOT NULL, "proof_id" character varying NOT NULL, CONSTRAINT "ConnectedAccount_proof" UNIQUE ("proof_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_cc3bbaae220d43867bc456dd0d" UNIQUE ("proof_id"), CONSTRAINT "PK_af3a2cd1c156fe196c013b86ae7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8c6c35c0881f2be01f29411fa2" ON "connected_account" ("account_id") `)
@@ -131,6 +131,8 @@ module.exports = class Data1682354993770 {
         await db.query(`CREATE INDEX "IDX_30e98e8746699fb9af235410af" ON "session" ("user_id") `)
         await db.query(`CREATE INDEX "IDX_fae5a6b4a57f098e9af8520d49" ON "session" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_213b5a19bfdbe0ab6e06b1dede" ON "session" ("ip") `)
+        await db.query(`CREATE TABLE "session_encryption_artifacts" ("id" character varying NOT NULL, "session_id" character varying NOT NULL, "cipher_iv" text NOT NULL, "cipher_key" text NOT NULL, CONSTRAINT "SessionEncryptionArtifacts_session" UNIQUE ("session_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_3612880efd8926a17eba5ab0e1" UNIQUE ("session_id"), CONSTRAINT "PK_e328da2643599e265a848219885" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_3612880efd8926a17eba5ab0e1" ON "session_encryption_artifacts" ("session_id") `)
         await db.query(`CREATE TABLE "token" ("id" character varying NOT NULL, "type" character varying(18) NOT NULL, "issued_at" TIMESTAMP WITH TIME ZONE NOT NULL, "expiry" TIMESTAMP WITH TIME ZONE NOT NULL, "issued_for_id" character varying, CONSTRAINT "PK_82fae97f905930df5d62a702fc9" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a6fe18c105f85a63d761ccb078" ON "token" ("issued_for_id") `)
         await db.query(`CREATE TABLE "next_entity_id" ("entity_name" character varying NOT NULL, "next_id" bigint NOT NULL, CONSTRAINT "PK_09a3b40db622a65096e7344d7ae" PRIMARY KEY ("entity_name"))`)
@@ -197,6 +199,7 @@ module.exports = class Data1682354993770 {
         await db.query(`ALTER TABLE "account" ADD CONSTRAINT "FK_efef1e5fdbe318a379c06678c51" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "session" ADD CONSTRAINT "FK_30e98e8746699fb9af235410aff" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "session" ADD CONSTRAINT "FK_fae5a6b4a57f098e9af8520d499" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "session_encryption_artifacts" ADD CONSTRAINT "FK_3612880efd8926a17eba5ab0e1a" FOREIGN KEY ("session_id") REFERENCES "session"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780" FOREIGN KEY ("issued_for_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
     }
 
@@ -330,6 +333,8 @@ module.exports = class Data1682354993770 {
         await db.query(`DROP INDEX "public"."IDX_30e98e8746699fb9af235410af"`)
         await db.query(`DROP INDEX "public"."IDX_fae5a6b4a57f098e9af8520d49"`)
         await db.query(`DROP INDEX "public"."IDX_213b5a19bfdbe0ab6e06b1dede"`)
+        await db.query(`DROP TABLE "session_encryption_artifacts"`)
+        await db.query(`DROP INDEX "public"."IDX_3612880efd8926a17eba5ab0e1"`)
         await db.query(`DROP TABLE "token"`)
         await db.query(`DROP INDEX "public"."IDX_a6fe18c105f85a63d761ccb078"`)
         await db.query(`DROP TABLE "next_entity_id"`)
@@ -396,6 +401,7 @@ module.exports = class Data1682354993770 {
         await db.query(`ALTER TABLE "account" DROP CONSTRAINT "FK_efef1e5fdbe318a379c06678c51"`)
         await db.query(`ALTER TABLE "session" DROP CONSTRAINT "FK_30e98e8746699fb9af235410aff"`)
         await db.query(`ALTER TABLE "session" DROP CONSTRAINT "FK_fae5a6b4a57f098e9af8520d499"`)
+        await db.query(`ALTER TABLE "session_encryption_artifacts" DROP CONSTRAINT "FK_3612880efd8926a17eba5ab0e1a"`)
         await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780"`)
     }
 }

@@ -19,6 +19,12 @@ export interface paths {
     /** @description Save wallet seed encryption artifacts on the server. */
     post: operations["postArtifacts"];
   };
+  "/session-artifacts": {
+    /** @description Get wallet seed encryption artifacts for the current session. */
+    get: operations["getSessionArtifacts"];
+    /** @description Save wallet seed encryption artifacts for the current session on the server. */
+    post: operations["postSessionArtifacts"];
+  };
   "/account": {
     /** @description Create a new Gateway account. Requires anonymousAuth to be performed first. */
     post: operations["createAccount"];
@@ -95,7 +101,6 @@ export interface components {
       payload?: components["schemas"]["ActionExecutionPayload"] & {
         /** @enum {string} */
         action?: "connect";
-        joystreamAccountId: string;
         gatewayAccountId: string;
       };
     });
@@ -103,7 +108,6 @@ export interface components {
       payload?: components["schemas"]["ActionExecutionPayload"] & {
         /** @enum {string} */
         action?: "disconnect";
-        joystreamAccountId: string;
         gatewayAccountId: string;
       };
     });
@@ -130,7 +134,12 @@ export interface components {
       success: boolean;
     };
     EncryptionArtifacts: {
+      id: string;
       encryptedSeed: string;
+      cipherIv: string;
+    };
+    SessionEncryptionArtifacts: {
+      cipherKey: string;
       cipherIv: string;
     };
     Password: string;
@@ -238,6 +247,12 @@ export interface components {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
     };
+    /** @description No artifacts associated with the current session found. */
+    GetSessionArtifactsNotFoundResponse: {
+      content: {
+        "application/json": components["schemas"]["GenericErrorResponseData"];
+      };
+    };
   };
   parameters: never;
   requestBodies: {
@@ -286,6 +301,11 @@ export interface components {
         "application/json": components["schemas"]["EncryptionArtifacts"];
       };
     };
+    PostSessionArtifactsRequestBody?: {
+      content: {
+        "application/json": components["schemas"]["SessionEncryptionArtifacts"];
+      };
+    };
   };
   headers: never;
   pathItems: never;
@@ -319,12 +339,13 @@ export interface operations {
   getArtifacts: {
     parameters: {
       query: {
-        /** @description The lookup key derived from user credentials. */
+        /** @description The lookup key derived from user's credentials. */
         id: string;
       };
     };
     responses: {
       200: components["responses"]["GetArtifactsResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
       404: components["responses"]["GetArtifactsNotFoundResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
@@ -335,6 +356,25 @@ export interface operations {
     responses: {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Get wallet seed encryption artifacts for the current session. */
+  getSessionArtifacts: {
+    responses: {
+      200: components["responses"]["GetArtifactsResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
+      404: components["responses"]["GetSessionArtifactsNotFoundResponse"];
+      default: components["responses"]["GenericInternalServerErrorResponse"];
+    };
+  };
+  /** @description Save wallet seed encryption artifacts for the current session on the server. */
+  postSessionArtifacts: {
+    requestBody: components["requestBodies"]["PostSessionArtifactsRequestBody"];
+    responses: {
+      200: components["responses"]["GenericOkResponse"];
+      400: components["responses"]["GenericBadRequestResponse"];
+      401: components["responses"]["GenericUnauthorizedResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };

@@ -8,7 +8,7 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
-import { AccountInfo, createAccountAndSignIn, keyring } from './common'
+import { AccountInfo, anonymousAuth, createAccountAndSignIn, keyring } from './common'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 
@@ -125,12 +125,7 @@ describe('connectAndDisconnectAccount', () => {
     })
 
     it('should fail if anonymounsly authenticated', async () => {
-      const {
-        body: { sessionId: anonSessionId },
-      } = await request(app)
-        .post('/api/v1/anonymous-auth')
-        .set('Content-Type', 'application/json')
-        .expect(200)
+      const anonSessionId = await anonymousAuth()
       await connectOrDisconnectAccount({
         action,
         ...accountInfo,

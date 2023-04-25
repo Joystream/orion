@@ -11,12 +11,48 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { uniqueId } from '../../utils/crypto'
+import { ScryptOptions, createCipheriv, createDecipheriv, scrypt } from 'crypto'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
 export type AccountInfo = {
   sessionId: string
   accountId: string
+}
+
+export async function scryptHash(
+  data: string,
+  salt: Buffer | string,
+  keylen = 32,
+  options: ScryptOptions = { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 }
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    scrypt(data, salt, keylen, options, (err, derivedKey) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(derivedKey)
+      }
+    })
+  })
+}
+
+export function aes256CbcEncrypt(data: string, key: Buffer | string, iv: Buffer | string): string {
+  const cipher = createCipheriv('aes-256-cbc', key, iv)
+  let encrypted = cipher.update(data, 'utf8', 'hex')
+  encrypted += cipher.final('hex')
+  return encrypted
+}
+
+export function aes256CbcDecrypt(
+  encryptedData: string,
+  key: Buffer | string,
+  iv: Buffer | string
+): string {
+  const decipher = createDecipheriv('aes-256-cbc', key, iv)
+  let decrypted = decipher.update(encryptedData, 'hex', 'utf8')
+  decrypted += decipher.final('utf8')
+  return decrypted
 }
 
 export const DEFAULT_PASSWORD = 'TestPassword123!'
@@ -49,12 +85,7 @@ export async function createAccount(
     keypair = keyring.addFromUri(`//${email}`)
   }
   const em = await globalEm
-  const {
-    body: { sessionId: anonSessionId },
-  } = await request(app)
-    .post('/api/v1/anonymous-auth')
-    .set('Content-Type', 'application/json')
-    .expect(200)
+  const anonSessionId = await anonymousAuth()
   const createAccountReqData = await signedAction<
     components['schemas']['CreateAccountRequestData']
   >(
@@ -125,4 +156,14 @@ export async function createAccountAndSignIn(
     .expect(200)
 
   return { sessionId: userSessionId, accountId: account.id }
+}
+
+export async function anonymousAuth(): Promise<string> {
+  const {
+    body: { sessionId },
+  } = await request(app)
+    .post('/api/v1/anonymous-auth')
+    .set('Content-Type', 'application/json')
+    .expect(200)
+  return sessionId
 }
