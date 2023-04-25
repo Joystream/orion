@@ -137,6 +137,18 @@ export type GetPayloadDataObjectIdByCommitmentQuery = {
   }>
 }
 
+export type GetTopSellingChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+  limit: Types.Scalars['Int']
+  periodDays: Types.Scalars['Int']
+}>
+
+export type GetTopSellingChannelsQuery = {
+  topSellingChannels?: Types.Maybe<
+    Array<Types.Maybe<{ amount: number; channel: BasicChannelFieldsFragment }>>
+  >
+}
+
 export type ReportChannelMutationVariables = Types.Exact<{
   channelId: Types.Scalars['String']
   rationale: Types.Scalars['String']
@@ -2691,6 +2703,17 @@ export const GetPayloadDataObjectIdByCommitment = gql`
       }
     }
   }
+`
+export const GetTopSellingChannels = gql`
+  query GetTopSellingChannels($where: ExtendedChannelWhereInput, $limit: Int!, $periodDays: Int!) {
+    topSellingChannels(where: $where, limit: $limit, periodDays: $periodDays) {
+      channel {
+        ...BasicChannelFields
+      }
+      amount
+    }
+  }
+  ${BasicChannelFields}
 `
 export const ReportChannel = gql`
   mutation ReportChannel($channelId: String!, $rationale: String!) {

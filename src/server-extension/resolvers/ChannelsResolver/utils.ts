@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { ExtendedChannelsArgs } from './types'
+import { ExtendedChannelsArgs, TopSellingChannelsArgs } from './types'
 import { parseSqlArguments, parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
@@ -101,6 +101,80 @@ export function buildExtendedChannelsQuery(
       }
       return resultRow
     })
+  }
+
+  return listQuery
+}
+
+export function buildTopSellingChannelsQuery(
+  args: TopSellingChannelsArgs,
+  info: GraphQLResolveInfo,
+  ctx: Context
+) {
+  const roundedDate = new Date().setMinutes(0, 0, 0)
+
+  const tree = getResolveTree(info)
+
+  // Extract subsquid-supported Channel sql args
+  const sqlArgs = parseSqlArguments(model, 'Channel', {
+    ...args,
+    where: args.where?.channel, // only supported WHERE part
+  })
+
+  // Extract subsquid-supported Channel fields
+  const channelSubTree = tree.fieldsByTypeName.TopSellingChannelsResult.channel
+  const channelFields = parseAnyTree(model, 'Channel', info.schema, channelSubTree)
+
+  // Generate query using subsquid's ListQuery
+  const listQuery = new ListQuery(model, ctx.openreader.dialect, 'Channel', channelFields, sqlArgs)
+  let listQuerySql = listQuery.sql
+
+  // Count NFT sells from the auctions and buy now events and add them to the query
+  listQuerySql = extendClause(listQuerySql, 'SELECT', '"top_selling_channels"."amount"')
+
+  listQuerySql = extendClause(
+    listQuerySql,
+    'FROM',
+    `
+    INNER JOIN (
+      SELECT
+        (SUM((COALESCE(event.data->>'price', '0')::bigint)) + SUM(COALESCE(winning_bid.amount, 0))) AS "amount",
+        "data"->'previousNftOwner'->>'channel' AS "channel_id"
+      FROM "event"
+      LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
+      WHERE
+      ${
+        args?.periodDays > 0
+          ? ` "event"."timestamp" > '${new Date(
+              roundedDate - args.periodDays * 24 * 60 * 60 * 1000
+            ).toISOString()}' AND`
+          : ''
+      }
+        "event"."data"->>'isTypeOf' IN (
+          'NftBoughtEventData',
+          'EnglishAuctionSettledEventData',
+          'BidMadeCompletingAuctionEventData',
+          'OpenAuctionBidAcceptedEventData'
+        ) AND
+        "data"->'previousNftOwner'->>'channel' IS NOT NULL
+        GROUP BY "event"."data"->'previousNftOwner'->>'channel'
+    ) AS "top_selling_channels" ON "top_selling_channels"."channel_id" = "channel"."id"
+    `,
+    ''
+  )
+
+  listQuerySql = extendClause(listQuerySql, 'ORDER BY', '"top_selling_channels"."amount" DESC')
+  ;(listQuery as { sql: string }).sql = listQuerySql
+
+  // Attach channels earnings amounts in the response
+  const oldListQMap = listQuery.map.bind(listQuery)
+  listQuery.map = (rows: unknown[][]) => {
+    const sellAmounts: unknown[] = []
+    for (const row of rows) {
+      sellAmounts.push(row.pop())
+    }
+    const channelsMapped = oldListQMap(rows)
+    return channelsMapped.map((channel, i) => ({ channel, amount: sellAmounts[i] }))
   }
 
   return listQuery
