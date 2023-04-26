@@ -12,9 +12,6 @@ export enum ConfigVariable {
   SendgridApiKey = 'SENDGRID_API_KEY',
   SendgridFromEmail = 'SENDGRID_FROM_EMAIL',
   AppName = 'APP_NAME',
-  EmailConfirmationRoute = 'EMAIL_CONFIRMATION_ROUTE',
-  EmailConfirmationTokenExpiryTimeHours = 'EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS',
-  EmailConfirmationTokenRateLimit = 'EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT',
   AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
 }
 
@@ -44,10 +41,7 @@ export const configVariables = {
   [ConfigVariable.SendgridApiKey]: stringType,
   [ConfigVariable.SendgridFromEmail]: stringType,
   [ConfigVariable.AppName]: stringType,
-  [ConfigVariable.EmailConfirmationRoute]: stringType,
-  [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
   [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
-  [ConfigVariable.EmailConfirmationTokenRateLimit]: intType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>

@@ -5,7 +5,7 @@ import { globalEm } from '../../utils/globalEm'
 import { Account, NextEntityId } from '../../model'
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
-import { connectAccount, sendWelcomeEmail, verifyActionExecutionRequest } from '../utils'
+import { connectAccount, verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -61,8 +61,6 @@ export const createAccount: (
         new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }),
       ])
       await connectAccount(em, account, req.body)
-
-      await sendWelcomeEmail(account, em)
     })
     res.status(200).json({ success: true })
   } catch (e) {

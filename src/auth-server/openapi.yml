@@ -143,74 +143,6 @@ paths:
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /confirm-email:
-    post:
-      operationId: confirmEmail
-      x-eov-operation-handler: confirmEmail
-      description: Confirm account's e-mail address provided during registration.
-      requestBody:
-        $ref: '#/components/requestBodies/ConfirmEmailRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/ConfirmEmailBadRequestResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /reset-password:
-    post:
-      operationId: resetPassword
-      x-eov-operation-handler: resetPassword
-      description: Reset account's password using a password reset token.
-      requestBody:
-        $ref: '#/components/requestBodies/ResetPasswordRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/ResetPasswordBadRequestResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /request-password-reset-token:
-    post:
-      operationId: requestPasswordResetToken
-      x-eov-operation-handler: requestPasswordResetToken
-      description: Request a token to be sent to account's e-mail address,
-        which will allow resetting the account's password
-      requestBody:
-        $ref: '#/components/requestBodies/RequestTokenRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/RequestTokenBadRequestResponse'
-        '429':
-          $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /request-email-confirmation-token:
-    post:
-      operationId: requestEmailConfirmationToken
-      x-eov-operation-handler: requestEmailConfirmationToken
-      description: Request a token to be sent to account's e-mail address,
-        which will allow confirming the ownership of the e-mail by the user.
-      requestBody:
-        $ref: '#/components/requestBodies/RequestTokenRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/RequestTokenBadRequestResponse'
-        '404':
-          $ref: '#/components/responses/RequestEmailConfirmationAccountNotFoundResponse'
-        '429':
-          $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
   /connect-account:
     post:
       operationId: connectAccount
@@ -295,16 +227,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateAccountRequestData'
-    ConfirmEmailRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ConfirmEmailRequestData'
-    ResetPasswordRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ResetPasswordRequestData'
     ConnectAccountRequestBody:
       content:
         application/json:
@@ -315,11 +237,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/DisconnectAccountRequestData'
-    RequestTokenRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/RequestTokenRequestData'
     PostArtifactsRequestBody:
       content:
         application/json:
@@ -362,7 +279,7 @@ components:
           schema:
             $ref: '#/components/schemas/GenericOkResponseData'
     LoginUnauthorizedResponse:
-      description: Invalid e-mail or password
+      description: Account not found by provided address or the address cannot be used to login.
       content:
         application/json:
           schema:
@@ -379,32 +296,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericOkResponseData'
-    ConfirmEmailBadRequestResponse:
-      description: Missing token or provided token is invalid / already used.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    ResetPasswordBadRequestResponse:
-      description: Request is malformatted or provided e-mail address, token or new password is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
     GenericUnauthorizedResponse:
       description: Access token (session id) is missing or invalid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    RequestTokenBadRequestResponse:
-      description: Request is malformatted or provided e-mail address is not valid.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    RequestTokenTooManyRequestsResponse:
-      description: Too many requests for a new token sent within a given timeframe.
       content:
         application/json:
           schema:
@@ -417,12 +310,6 @@ components:
             $ref: '#/components/schemas/GenericErrorResponseData'
     DisconnectAccountNotFoundResponse:
       description: Provided key is not connected to the account.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    RequestEmailConfirmationAccountNotFoundResponse:
-      description: Provided e-mail address is not associated with any account.
       content:
         application/json:
           schema:
@@ -559,37 +446,6 @@ components:
                         - disconnect
                     gatewayAccountId:
                       type: string
-    ConfirmEmailRequestData:
-      type: object
-      required:
-        - token
-      properties:
-        token:
-          type: string
-          description: Confirmation token recieved by the user via an e-mail.
-    ResetPasswordRequestData:
-      type: object
-      required:
-        - token
-        - email
-        - newPassword
-      properties:
-        token:
-          type: string
-          description: Password-reset token recieved by the user via an e-mail.
-        email:
-          type: string
-          description: User's e-mail address.
-        newPassword:
-          $ref: '#/components/schemas/Password'
-    RequestTokenRequestData:
-      type: object
-      required:
-        - email
-      properties:
-        email:
-          type: string
-          description: User's e-mail address.
     GenericErrorResponseData:
       type: object
       properties:
@@ -629,9 +485,4 @@ components:
           type: string
         cipherIv:
           type: string
-    Password:
-      type: string
-      minLength: 8
-      maxLength: 70 # Bcrypt allows up to 72 bytes
-      pattern: ^[ -~]+$ # Only ascii characters allowed
 

@@ -5,15 +5,15 @@ All URIs are relative to *http://localhost:4074/api/v1*
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**anonymousAuth**](DefaultApi.md#anonymousAuth) | **POST** /anonymous-auth |  |
-| [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
 | [**connectAccount**](DefaultApi.md#connectAccount) | **POST** /connect-account |  |
+| [**createAccount**](DefaultApi.md#createAccount) | **POST** /account |  |
 | [**disconnectAccount**](DefaultApi.md#disconnectAccount) | **POST** /disconnect-account |  |
+| [**getArtifacts**](DefaultApi.md#getArtifacts) | **GET** /artifacts |  |
+| [**getSessionArtifacts**](DefaultApi.md#getSessionArtifacts) | **GET** /session-artifacts |  |
 | [**login**](DefaultApi.md#login) | **POST** /login |  |
 | [**logout**](DefaultApi.md#logout) | **POST** /logout |  |
-| [**register**](DefaultApi.md#register) | **POST** /register |  |
-| [**requestEmailConfirmationToken**](DefaultApi.md#requestEmailConfirmationToken) | **POST** /request-email-confirmation-token |  |
-| [**requestPasswordResetToken**](DefaultApi.md#requestPasswordResetToken) | **POST** /request-password-reset-token |  |
-| [**resetPassword**](DefaultApi.md#resetPassword) | **POST** /reset-password |  |
+| [**postArtifacts**](DefaultApi.md#postArtifacts) | **POST** /artifacts |  |
+| [**postSessionArtifacts**](DefaultApi.md#postSessionArtifacts) | **POST** /session-artifacts |  |
 
 
 <a name="anonymousAuth"></a>
@@ -43,36 +43,9 @@ No authorization required
 - **Content-Type**: application/json
 - **Accept**: application/json
 
-<a name="confirmEmail"></a>
-# **confirmEmail**
-> GenericOkResponseData confirmEmail(ConfirmEmailRequestData)
-
-
-
-    Confirm account&#39;s e-mail address provided during registration.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **ConfirmEmailRequestData** | [**ConfirmEmailRequestData**](../Models/ConfirmEmailRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-No authorization required
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
 <a name="connectAccount"></a>
 # **connectAccount**
-> GenericOkResponseData connectAccount(ConnectOrDisconnectAccountRequestData)
+> GenericOkResponseData connectAccount(ConnectAccountRequestData)
 
 
 
@@ -82,7 +55,7 @@ No authorization required
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **ConnectOrDisconnectAccountRequestData** | [**ConnectOrDisconnectAccountRequestData**](../Models/ConnectOrDisconnectAccountRequestData.md)|  | [optional] |
+| **ConnectAccountRequestData** | [**ConnectAccountRequestData**](../Models/ConnectAccountRequestData.md)|  | [optional] |
 
 ### Return type
 
@@ -90,7 +63,34 @@ No authorization required
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[cookieAuth](../README.md#cookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="createAccount"></a>
+# **createAccount**
+> GenericOkResponseData createAccount(CreateAccountRequestData)
+
+
+
+    Create a new Gateway account. Requires anonymousAuth to be performed first.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **CreateAccountRequestData** | [**CreateAccountRequestData**](../Models/CreateAccountRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 
@@ -99,7 +99,7 @@ No authorization required
 
 <a name="disconnectAccount"></a>
 # **disconnectAccount**
-> GenericOkResponseData disconnectAccount(ConnectOrDisconnectAccountRequestData)
+> GenericOkResponseData disconnectAccount(DisconnectAccountRequestData)
 
 
 
@@ -109,7 +109,7 @@ No authorization required
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **ConnectOrDisconnectAccountRequestData** | [**ConnectOrDisconnectAccountRequestData**](../Models/ConnectOrDisconnectAccountRequestData.md)|  | [optional] |
+| **DisconnectAccountRequestData** | [**DisconnectAccountRequestData**](../Models/DisconnectAccountRequestData.md)|  | [optional] |
 
 ### Return type
 
@@ -117,20 +117,71 @@ No authorization required
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="getArtifacts"></a>
+# **getArtifacts**
+> EncryptionArtifacts getArtifacts(id)
+
+
+
+    Get wallet seed encryption artifacts.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **id** | **String**| The lookup key derived from user&#39;s credentials. | [default to null] |
+
+### Return type
+
+[**EncryptionArtifacts**](../Models/EncryptionArtifacts.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+<a name="getSessionArtifacts"></a>
+# **getSessionArtifacts**
+> EncryptionArtifacts getSessionArtifacts()
+
+
+
+    Get wallet seed encryption artifacts for the current session.
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**EncryptionArtifacts**](../Models/EncryptionArtifacts.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="login"></a>
 # **login**
-> LoginResponseData login(LoginRequestData)
+> GenericOkResponseData login(LoginRequestData)
 
 
 
-    Login to user&#39;s account, using e-mail and password.
+    Login to user&#39;s account by providing a message signed by one of the user&#39;s connected accounts.
 
 ### Parameters
 
@@ -140,7 +191,7 @@ No authorization required
 
 ### Return type
 
-[**LoginResponseData**](../Models/LoginResponseData.md)
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
 
 ### Authorization
 
@@ -168,53 +219,26 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-[bearerAuth](../README.md#bearerAuth)
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
 
-<a name="register"></a>
-# **register**
-> GenericOkResponseData register(RegisterRequestData)
+<a name="postArtifacts"></a>
+# **postArtifacts**
+> GenericOkResponseData postArtifacts(EncryptionArtifacts)
 
 
 
-    Create an account. Requires anonymousAuth to be performed first.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **RegisterRequestData** | [**RegisterRequestData**](../Models/RegisterRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[bearerAuth](../README.md#bearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-<a name="requestEmailConfirmationToken"></a>
-# **requestEmailConfirmationToken**
-> GenericOkResponseData requestEmailConfirmationToken(RequestTokenRequestData)
-
-
-
-    Request a token to be sent to account&#39;s e-mail address, which will allow confirming the ownership of the e-mail by the user.
+    Save wallet seed encryption artifacts on the server.
 
 ### Parameters
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **RequestTokenRequestData** | [**RequestTokenRequestData**](../Models/RequestTokenRequestData.md)|  | [optional] |
+| **EncryptionArtifacts** | [**EncryptionArtifacts**](../Models/EncryptionArtifacts.md)|  | [optional] |
 
 ### Return type
 
@@ -229,19 +253,19 @@ No authorization required
 - **Content-Type**: application/json
 - **Accept**: application/json
 
-<a name="requestPasswordResetToken"></a>
-# **requestPasswordResetToken**
-> GenericOkResponseData requestPasswordResetToken(RequestTokenRequestData)
+<a name="postSessionArtifacts"></a>
+# **postSessionArtifacts**
+> GenericOkResponseData postSessionArtifacts(SessionEncryptionArtifacts)
 
 
 
-    Request a token to be sent to account&#39;s e-mail address, which will allow resetting the account&#39;s password
+    Save wallet seed encryption artifacts for the current session on the server.
 
 ### Parameters
 
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
-| **RequestTokenRequestData** | [**RequestTokenRequestData**](../Models/RequestTokenRequestData.md)|  | [optional] |
+| **SessionEncryptionArtifacts** | [**SessionEncryptionArtifacts**](../Models/SessionEncryptionArtifacts.md)|  | [optional] |
 
 ### Return type
 
@@ -249,34 +273,7 @@ No authorization required
 
 ### Authorization
 
-No authorization required
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-<a name="resetPassword"></a>
-# **resetPassword**
-> GenericOkResponseData resetPassword(ResetPasswordRequestData)
-
-
-
-    Reset account&#39;s password using a password reset token.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **ResetPasswordRequestData** | [**ResetPasswordRequestData**](../Models/ResetPasswordRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-No authorization required
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 

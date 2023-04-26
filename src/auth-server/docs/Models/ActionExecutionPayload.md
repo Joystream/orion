@@ -1,10 +1,9 @@
-# ConnectOrDisconnectAccountRequestData_payload
+# ActionExecutionPayload
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
 | **joystreamAccountId** | **String** |  | [default to null] |
-| **gatewayAccountId** | **String** |  | [default to null] |
 | **gatewayName** | **String** |  | [default to null] |
 | **timestamp** | **BigDecimal** |  | [default to null] |
 | **action** | **String** |  | [default to null] |
