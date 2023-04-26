@@ -7,6 +7,7 @@ import { AuthApiError, UnauthorizedError } from './errors'
 import { createLogger } from '@subsquid/logger'
 import { authenticate } from '../utils/auth'
 import cookieParser from 'cookie-parser'
+import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimits'
 
 export const logger = createLogger('auth-api')
 
@@ -25,9 +26,11 @@ function authHandler(type: 'header' | 'cookie') {
   }
 }
 
+app.set('trust proxy', process.env.TRUST_PROXY || false)
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
 app.use(cors())
+applyRateLimits(app, globalRateLimit, rateLimitsPerRoute)
 app.use(
   OpenApiValidator.middleware({
     apiSpec: path.join(__dirname, 'openapi.yml'),

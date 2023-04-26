@@ -13,6 +13,7 @@ import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { uniqueId } from '../../utils/crypto'
 import { ScryptOptions, createCipheriv, createDecipheriv, scrypt } from 'crypto'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
+import { SimpleRateLimit } from '../rateLimits'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
@@ -165,11 +166,9 @@ export async function createAccountAndSignIn(
 }
 
 function extractSessionId(response: request.Response): string {
-  const setCookieHeader: unknown = response.headers['set-cookie']
+  const setCookieHeader = response.get('Set-Cookie')
   assert(setCookieHeader, 'Set-Cookie header not found')
-  const setCookieHeaderStr = Array.isArray(setCookieHeader)
-    ? setCookieHeader[0].toString()
-    : setCookieHeader.toString()
+  const [setCookieHeaderStr] = setCookieHeader
   const [, sessionId] = setCookieHeaderStr.match(new RegExp(`${SESSION_COOKIE_NAME}=([^;]+)`)) || []
   assert(sessionId, 'Session id not found')
   return sessionId
@@ -181,4 +180,38 @@ export async function anonymousAuth(): Promise<string> {
     .set('Content-Type', 'application/json')
     .expect(200)
   return extractSessionId(response)
+}
+
+export async function verifyRateLimit(
+  requestGenerator: (i: number) => { req: request.Test; status: number },
+  rateLimit: SimpleRateLimit | undefined
+) {
+  assert(rateLimit, 'Rate limit not set')
+  let remaining = rateLimit.limit
+  let reset = rateLimit.windowMinutes * 60
+  let i = 0
+  while (remaining > 0) {
+    const { req, status } = requestGenerator(i++)
+    const resp = await req.expect(status)
+    const limitInHeader = resp.get('ratelimit-limit')
+    const resetInHeader = resp.get('ratelimit-reset')
+    const remainingInHeader = resp.get('ratelimit-remaining')
+    assert.equal(
+      limitInHeader,
+      rateLimit.limit.toString(),
+      'Limit header does not match the configured limit'
+    )
+    assert(
+      parseInt(resetInHeader) <= reset,
+      'Reset time in header has increased since the last request or is greater than the configured reset time'
+    )
+    assert(
+      parseInt(remainingInHeader) < remaining,
+      'Number of remaining requests in header is not decreasing'
+    )
+    remaining = parseInt(remainingInHeader)
+    reset = parseInt(resetInHeader)
+  }
+  const { req } = requestGenerator(i)
+  await req.expect(429)
 }

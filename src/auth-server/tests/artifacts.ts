@@ -13,11 +13,13 @@ import {
   createAccount,
   createAccountAndSignIn,
   scryptHash,
+  verifyRateLimit,
 } from './common'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 import { randomBytes } from 'crypto'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
+import { rateLimitsPerRoute } from '../rateLimits'
 
 describe('artifacts', () => {
   let em: EntityManager
@@ -97,6 +99,30 @@ describe('artifacts', () => {
 
     it('should not be possible to retrieve encryption artifacts without id provided', async () => {
       await request(app).get(`/api/v1/artifacts`).expect(400)
+    })
+
+    it('should not be possible to exceed rate limit when posting artifacts', async () => {
+      await verifyRateLimit(() => {
+        const id = randomBytes(32).toString('hex')
+        const cipherIv = randomBytes(16).toString('hex')
+        const encryptedSeed = randomBytes(32).toString('hex')
+        const req = request(app)
+          .post('/api/v1/artifacts')
+          .set('Content-Type', 'application/json')
+          .send({ id, cipherIv, encryptedSeed })
+        return { req, status: 200 }
+      }, rateLimitsPerRoute['/artifacts']?.post)
+    })
+
+    it('should not be possible to exceed rate limit when retrieving artifacts (brute-force)', async () => {
+      await verifyRateLimit(() => {
+        // We speficially test 404 status, as this would be the typical brute-force scenario
+        const id = randomBytes(32).toString('hex')
+        return {
+          req: request(app).get(`/api/v1/artifacts?id=${id}`),
+          status: 404,
+        }
+      }, rateLimitsPerRoute['/artifacts']?.get)
     })
   })
 
@@ -214,6 +240,29 @@ describe('artifacts', () => {
         .get('/api/v1/session-artifacts')
         .set('Content-Type', 'application/json')
         .expect(401)
+    })
+
+    it('should not be possible to exceed rate limit when posting artifacts', async () => {
+      await verifyRateLimit(() => {
+        const cipherIv = randomBytes(16).toString('hex')
+        const cipherKey = randomBytes(32).toString('hex')
+        const req = request(app)
+          .post('/api/v1/session-artifacts')
+          .set('Content-Type', 'application/json')
+          .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
+          .send({ cipherIv, cipherKey })
+        return { req, status: 400 }
+      }, rateLimitsPerRoute['/session-artifacts']?.post)
+    })
+
+    it('should not be possible to exceed rate limit when retrieving artifacts', async () => {
+      await verifyRateLimit(() => {
+        const req = request(app)
+          .get('/api/v1/session-artifacts')
+          .set('Content-Type', 'application/json')
+          .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
+        return { req, status: 200 }
+      }, rateLimitsPerRoute['/session-artifacts']?.get)
     })
   })
 })

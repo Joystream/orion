@@ -9,7 +9,6 @@ type ResBody =
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['EncryptionArtifacts']
 
-// TODO: Rate limiting, also for other endpoints
 export const postArtifacts: (
   req: express.Request<ReqParams, ResBody, ReqBody>,
   res: express.Response<ResBody>,

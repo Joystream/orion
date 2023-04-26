@@ -1,15 +1,6 @@
 import { Request } from 'express'
 import { UAParser } from 'ua-parser-js'
 
-export function resolveIP(req: Request): string {
-  const forwardedFor = req.headers['x-forwarded-for'] as string | undefined
-  const trustedReverseProxies = parseInt(process.env.TRUSTED_REVERSE_PROXIES || '0')
-  return (
-    (trustedReverseProxies && forwardedFor?.split(',').splice(-trustedReverseProxies, 1)[0]) ||
-    req.ip
-  )
-}
-
 export type UserAgentData = {
   browser: string
   os: string

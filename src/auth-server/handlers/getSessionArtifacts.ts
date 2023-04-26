@@ -11,7 +11,6 @@ type ResBody =
   | components['schemas']['GenericErrorResponseData']
 type ResLocals = { authContext: AuthContext }
 
-// TODO: Rate limiting, also for other endpoints
 export const getSessionArtifacts: (
   req: express.Request<ReqParams, ResBody>,
   res: express.Response<ResBody, ResLocals>,

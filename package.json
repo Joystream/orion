@@ -62,7 +62,8 @@
     "ua-parser-js": "^1.0.34",
     "node-cache": "^5.1.2",
     "url-join": "^4",
-    "cookie-parser": "^1.4.6"
+    "cookie-parser": "^1.4.6",
+    "express-rate-limit": "^6.7.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^3.0.0",
@@ -95,6 +96,7 @@
     "ts-mocha": "^10.0.0",
     "@types/mocha": "^10.0.1",
     "@types/supertest": "^2.0.12",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "@types/express-rate-limit": "^6.0.0"
   }
 }

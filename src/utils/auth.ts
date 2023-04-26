@@ -8,7 +8,7 @@ import {
   SESSION_CACHE_EXPIRY_TTL_MARGIN,
 } from './cache'
 import { config, ConfigVariable } from './config'
-import { getUserAgentData, resolveIP } from './http'
+import { getUserAgentData } from './http'
 import { createLogger } from '@subsquid/logger'
 import { globalEm } from './globalEm'
 import { uniqueId } from './crypto'
@@ -22,7 +22,7 @@ export async function findActiveSession(
   em: EntityManager,
   where: FindOptionsWhere<Session>
 ): Promise<Session | undefined> {
-  const ip = resolveIP(req)
+  const { ip } = req
   const { browser, device, os } = getUserAgentData(req)
   const activeSession = await em.getRepository(Session).findOne({
     where: {
@@ -187,7 +187,7 @@ export async function getOrCreateSession(
     }
   }
 
-  const ip = resolveIP(req)
+  const { ip } = req
   const { browser, device, deviceType, os } = getUserAgentData(req)
   const session = new Session({
     id: uniqueId(),
