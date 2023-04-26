@@ -5,6 +5,7 @@ import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { ConnectedAccount } from '../../model'
 import { verifyActionExecutionRequest, connectAccount as dbConnectAccount } from '../utils'
+import { ConfigVariable, config } from '../../utils/config'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -39,6 +40,13 @@ export const connectAccount: (
 
     if (existingConnectedAccount) {
       throw new BadRequestError('Provided account is already connected to a gateway account.')
+    }
+
+    const maxConnectedAccounts = await config.get(ConfigVariable.MaxConnectedAccountsPerUser, em)
+    const connectedAccountCount = await em.countBy(ConnectedAccount, { accountId: account.id })
+
+    if (connectedAccountCount >= maxConnectedAccounts) {
+      throw new BadRequestError('Maximum number of connected accounts reached.')
     }
 
     await verifyActionExecutionRequest(em, req.body)

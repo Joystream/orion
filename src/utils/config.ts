@@ -13,6 +13,7 @@ export enum ConfigVariable {
   SendgridFromEmail = 'SENDGRID_FROM_EMAIL',
   AppName = 'APP_NAME',
   AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
+  MaxConnectedAccountsPerUser = 'MAX_CONNECTED_ACCOUNTS_PER_USER',
 }
 
 const boolType = {
@@ -42,6 +43,7 @@ export const configVariables = {
   [ConfigVariable.SendgridFromEmail]: stringType,
   [ConfigVariable.AppName]: stringType,
   [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
+  [ConfigVariable.MaxConnectedAccountsPerUser]: intType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
