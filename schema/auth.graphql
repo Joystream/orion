@@ -15,7 +15,7 @@ type EncryptionArtifacts @entity {
 
   "The IV used to encrypt the wallet seed with user credentials"
   cipherIv: String!
-  
+
   "Wallet seed encrypted with user credentials"
   encryptedSeed: String!
 }
@@ -29,7 +29,7 @@ type SessionEncryptionArtifacts @entity {
 
   "The IV used to encrypt the seed with cipherKey"
   cipherIv: String!
-  
+
   "cipherKey used to encrypt the seed stored client-side for the duration of the session"
   cipherKey: String!
 }
