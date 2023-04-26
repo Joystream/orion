@@ -29,22 +29,6 @@ export interface paths {
     /** @description Create a new Gateway account. Requires anonymousAuth to be performed first. */
     post: operations["createAccount"];
   };
-  "/confirm-email": {
-    /** @description Confirm account's e-mail address provided during registration. */
-    post: operations["confirmEmail"];
-  };
-  "/reset-password": {
-    /** @description Reset account's password using a password reset token. */
-    post: operations["resetPassword"];
-  };
-  "/request-password-reset-token": {
-    /** @description Request a token to be sent to account's e-mail address, which will allow resetting the account's password */
-    post: operations["requestPasswordResetToken"];
-  };
-  "/request-email-confirmation-token": {
-    /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
-    post: operations["requestEmailConfirmationToken"];
-  };
   "/connect-account": {
     /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
     post: operations["connectAccount"];
@@ -107,21 +91,6 @@ export interface components {
         gatewayAccountId: string;
       };
     });
-    ConfirmEmailRequestData: {
-      /** @description Confirmation token recieved by the user via an e-mail. */
-      token: string;
-    };
-    ResetPasswordRequestData: {
-      /** @description Password-reset token recieved by the user via an e-mail. */
-      token: string;
-      /** @description User's e-mail address. */
-      email: string;
-      newPassword: components["schemas"]["Password"];
-    };
-    RequestTokenRequestData: {
-      /** @description User's e-mail address. */
-      email: string;
-    };
     GenericErrorResponseData: {
       message?: string;
       errors?: (string)[];
@@ -138,7 +107,6 @@ export interface components {
       cipherKey: string;
       cipherIv: string;
     };
-    Password: string;
   };
   responses: {
     /** @description Ok */
@@ -171,7 +139,7 @@ export interface components {
         "application/json": components["schemas"]["GenericOkResponseData"];
       };
     };
-    /** @description Invalid e-mail or password */
+    /** @description Account not found by provided address or the address cannot be used to login. */
     LoginUnauthorizedResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
@@ -189,44 +157,20 @@ export interface components {
         "application/json": components["schemas"]["GenericOkResponseData"];
       };
     };
-    /** @description Missing token or provided token is invalid / already used. */
-    ConfirmEmailBadRequestResponse: {
-      content: {
-        "application/json": components["schemas"]["GenericErrorResponseData"];
-      };
-    };
-    /** @description Request is malformatted or provided e-mail address, token or new password is not valid. */
-    ResetPasswordBadRequestResponse: {
-      content: {
-        "application/json": components["schemas"]["GenericErrorResponseData"];
-      };
-    };
     /** @description Access token (session id) is missing or invalid. */
     GenericUnauthorizedResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
     };
-    /** @description Request is malformatted or provided e-mail address is not valid. */
-    RequestTokenBadRequestResponse: {
-      content: {
-        "application/json": components["schemas"]["GenericErrorResponseData"];
-      };
-    };
-    /** @description Too many requests for a new token sent within a given timeframe. */
-    RequestTokenTooManyRequestsResponse: {
+    /** @description Too many requests sent within a given timeframe. */
+    GenericTooManyRequestsResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
     };
     /** @description Provided key is not connected to the account. */
     DisconnectAccountNotFoundResponse: {
-      content: {
-        "application/json": components["schemas"]["GenericErrorResponseData"];
-      };
-    };
-    /** @description Provided e-mail address is not associated with any account. */
-    RequestEmailConfirmationAccountNotFoundResponse: {
       content: {
         "application/json": components["schemas"]["GenericErrorResponseData"];
       };
@@ -267,16 +211,6 @@ export interface components {
         "application/json": components["schemas"]["CreateAccountRequestData"];
       };
     };
-    ConfirmEmailRequestBody?: {
-      content: {
-        "application/json": components["schemas"]["ConfirmEmailRequestData"];
-      };
-    };
-    ResetPasswordRequestBody?: {
-      content: {
-        "application/json": components["schemas"]["ResetPasswordRequestData"];
-      };
-    };
     ConnectAccountRequestBody?: {
       content: {
         "application/json": components["schemas"]["ConnectAccountRequestData"];
@@ -285,11 +219,6 @@ export interface components {
     DisconnectAccountRequestBody?: {
       content: {
         "application/json": components["schemas"]["DisconnectAccountRequestData"];
-      };
-    };
-    RequestTokenRequestBody?: {
-      content: {
-        "application/json": components["schemas"]["RequestTokenRequestData"];
       };
     };
     PostArtifactsRequestBody?: {
@@ -318,6 +247,7 @@ export interface operations {
       200: components["responses"]["AnonymousUserAuthOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
       401: components["responses"]["UnauthorizedAnonymousUserResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -328,6 +258,7 @@ export interface operations {
       200: components["responses"]["LoginOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
       401: components["responses"]["LoginUnauthorizedResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -343,6 +274,7 @@ export interface operations {
       200: components["responses"]["GetArtifactsResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
       404: components["responses"]["GetArtifactsNotFoundResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -352,6 +284,7 @@ export interface operations {
     responses: {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -361,6 +294,7 @@ export interface operations {
       200: components["responses"]["GetArtifactsResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
       404: components["responses"]["GetSessionArtifactsNotFoundResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -371,6 +305,7 @@ export interface operations {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -381,45 +316,7 @@ export interface operations {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["CreateAccountBadRequestResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
-      default: components["responses"]["GenericInternalServerErrorResponse"];
-    };
-  };
-  /** @description Confirm account's e-mail address provided during registration. */
-  confirmEmail: {
-    requestBody: components["requestBodies"]["ConfirmEmailRequestBody"];
-    responses: {
-      200: components["responses"]["GenericOkResponse"];
-      400: components["responses"]["ConfirmEmailBadRequestResponse"];
-      default: components["responses"]["GenericInternalServerErrorResponse"];
-    };
-  };
-  /** @description Reset account's password using a password reset token. */
-  resetPassword: {
-    requestBody: components["requestBodies"]["ResetPasswordRequestBody"];
-    responses: {
-      200: components["responses"]["GenericOkResponse"];
-      400: components["responses"]["ResetPasswordBadRequestResponse"];
-      default: components["responses"]["GenericInternalServerErrorResponse"];
-    };
-  };
-  /** @description Request a token to be sent to account's e-mail address, which will allow resetting the account's password */
-  requestPasswordResetToken: {
-    requestBody: components["requestBodies"]["RequestTokenRequestBody"];
-    responses: {
-      200: components["responses"]["GenericOkResponse"];
-      400: components["responses"]["RequestTokenBadRequestResponse"];
-      429: components["responses"]["RequestTokenTooManyRequestsResponse"];
-      default: components["responses"]["GenericInternalServerErrorResponse"];
-    };
-  };
-  /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
-  requestEmailConfirmationToken: {
-    requestBody: components["requestBodies"]["RequestTokenRequestBody"];
-    responses: {
-      200: components["responses"]["GenericOkResponse"];
-      400: components["responses"]["RequestTokenBadRequestResponse"];
-      404: components["responses"]["RequestEmailConfirmationAccountNotFoundResponse"];
-      429: components["responses"]["RequestTokenTooManyRequestsResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -430,6 +327,7 @@ export interface operations {
       200: components["responses"]["GenericOkResponse"];
       400: components["responses"]["GenericBadRequestResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -441,6 +339,7 @@ export interface operations {
       400: components["responses"]["GenericBadRequestResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
       404: components["responses"]["DisconnectAccountNotFoundResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };
@@ -449,6 +348,7 @@ export interface operations {
     responses: {
       200: components["responses"]["GenericOkResponse"];
       401: components["responses"]["GenericUnauthorizedResponse"];
+      429: components["responses"]["GenericTooManyRequestsResponse"];
       default: components["responses"]["GenericInternalServerErrorResponse"];
     };
   };

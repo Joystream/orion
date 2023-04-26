@@ -1,9 +1,10 @@
-# AnonymousUserAuthResponseData_allOf
+# SessionEncryptionArtifacts
 ## Properties
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-| **userId** | **String** |  | [default to null] |
+| **cipherKey** | **String** |  | [default to null] |
+| **cipherIv** | **String** |  | [default to null] |
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

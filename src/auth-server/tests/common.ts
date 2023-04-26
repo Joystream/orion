@@ -2,7 +2,7 @@ import './config'
 import request from 'supertest'
 import { app } from '../index'
 import { globalEm } from '../../utils/globalEm'
-import { Token, TokenType, Account } from '../../model'
+import { Account } from '../../model'
 import assert from 'assert'
 import { components } from '../generated/api-types'
 import { Keyring } from '@polkadot/keyring'
@@ -109,25 +109,6 @@ export async function createAccount(
   return account
 }
 
-export async function confirmEmail(token: string, expectedStatus: number): Promise<void> {
-  await request(app)
-    .post('/api/v1/confirm-email')
-    .set('Content-Type', 'application/json')
-    .send({ token })
-    .expect(expectedStatus)
-}
-
-export async function requestEmailConfirmationToken(
-  email: string,
-  expectedStatus: number
-): Promise<void> {
-  await request(app)
-    .post('/api/v1/request-email-confirmation-token')
-    .set('Content-Type', 'application/json')
-    .send({ email })
-    .expect(expectedStatus)
-}
-
 export async function createAccountAndSignIn(
   email = `test.${uniqueId()}@example.com`,
   keypair?: KeyringPair
@@ -135,14 +116,7 @@ export async function createAccountAndSignIn(
   if (!keypair) {
     keypair = keyring.addFromUri(`//${email}`)
   }
-  const em = await globalEm
   const account = await createAccount(email, keypair)
-  const token = await em.getRepository(Token).findOneBy({
-    type: TokenType.EMAIL_CONFIRMATION,
-    issuedForId: account.id,
-  })
-  assert(token, 'Token not found')
-  await confirmEmail(token.id, 200)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {
       action: 'login',
