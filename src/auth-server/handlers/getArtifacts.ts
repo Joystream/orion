@@ -11,7 +11,6 @@ type ResBody =
   | components['schemas']['EncryptionArtifacts']
   | components['schemas']['GenericErrorResponseData']
 
-// TODO: Rate limiting, also for other endpoints
 export const getArtifacts: (
   req: express.Request<ReqParams, ResBody, ReqBody, ReqQuery>,
   res: express.Response<ResBody>,

@@ -11,4 +11,6 @@ until docker-compose logs orion_db | grep "server started"; do
 done
 make migrate
 
-npx ts-mocha ./src/auth-server/tests/*.ts --timeout 60000 --exit
+npx ts-mocha "./src/auth-server/tests/!(globalRateLimit).ts" --timeout 60000 --exit
+# Run global rate limit test after all other tests
+npx ts-mocha ./src/auth-server/tests/globalRateLimit.ts --timeout 60000 --exit

@@ -21,7 +21,7 @@ index ccb64b5..faa6199 100644
  //# sourceMappingURL=context.d.ts.map
 \ No newline at end of file
 diff --git a/node_modules/@subsquid/openreader/lib/server.d.ts b/node_modules/@subsquid/openreader/lib/server.d.ts
-index 7f5df76..066e4b2 100644
+index da31a85..3691776 100644
 --- a/node_modules/@subsquid/openreader/lib/server.d.ts
 +++ b/node_modules/@subsquid/openreader/lib/server.d.ts
 @@ -7,6 +7,7 @@ import type { Pool } from 'pg';
@@ -32,7 +32,7 @@ index 7f5df76..066e4b2 100644
  export interface ServerOptions {
      port: number | string;
      model: Model;
-@@ -28,7 +29,7 @@ export declare type Dispose = () => Promise<void>;
+@@ -28,7 +29,7 @@ export type Dispose = () => Promise<void>;
  export interface ApolloOptions {
      port: number | string;
      disposals: Dispose[];
@@ -42,7 +42,7 @@ index 7f5df76..066e4b2 100644
      plugins?: PluginDefinition[];
      subscriptions?: boolean;
 diff --git a/node_modules/@subsquid/openreader/lib/server.js b/node_modules/@subsquid/openreader/lib/server.js
-index 6fb0711..854393f 100644
+index 6fb0711..395f435 100644
 --- a/node_modules/@subsquid/openreader/lib/server.js
 +++ b/node_modules/@subsquid/openreader/lib/server.js
 @@ -21,7 +21,7 @@ async function serve(options) {
@@ -62,3 +62,11 @@ index 6fb0711..854393f 100644
              openreader
          };
      };
+@@ -53,6 +54,7 @@ async function runApollo(options) {
+     const { disposals, context, schema, log, maxRootFields } = options;
+     let maxRequestSizeBytes = options.maxRequestSizeBytes ?? 256 * 1024;
+     let app = (0, express_1.default)();
++    app.set('trust proxy', process.env.TRUST_PROXY || false)
+     let server = http_1.default.createServer(app);
+     const execute = maxRootFields
+         ? (args) => (0, execute_1.executeWithLimit)(maxRootFields, args)
