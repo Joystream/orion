@@ -158,6 +158,15 @@ query GetPayloadDataObjectIdByCommitment($commitment: String!) {
   }
 }
 
+query GetTopSellingChannels($where: ExtendedChannelWhereInput, $limit: Int!, $periodDays: Int!) {
+  topSellingChannels(where: $where, limit: $limit, periodDays: $periodDays) {
+    channel {
+      ...BasicChannelFields
+    }
+    amount
+  }
+}
+
 # CHANGE: `ID` is now `String`
 mutation ReportChannel($channelId: String!, $rationale: String!) {
   reportChannel(channelId: $channelId, rationale: $rationale) {

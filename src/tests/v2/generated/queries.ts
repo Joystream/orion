@@ -137,6 +137,18 @@ export type GetPayloadDataObjectIdByCommitmentQuery = {
   }>
 }
 
+export type GetTopSellingChannelsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.ExtendedChannelWhereInput>
+  limit: Types.Scalars['Int']
+  periodDays: Types.Scalars['Int']
+}>
+
+export type GetTopSellingChannelsQuery = {
+  topSellingChannels?: Types.Maybe<
+    Array<Types.Maybe<{ amount: number; channel: BasicChannelFieldsFragment }>>
+  >
+}
+
 export type ReportChannelMutationVariables = Types.Exact<{
   channelId: Types.Scalars['String']
   rationale: Types.Scalars['String']
@@ -589,6 +601,16 @@ export type GetNftsConnectionQuery = {
     edges: Array<{ cursor: string; node: FullNftFieldsFragment }>
     pageInfo: { hasNextPage: boolean; endCursor: string }
   }
+}
+
+export type GetEndingAuctionsNftsQueryVariables = Types.Exact<{
+  where?: Types.Maybe<Types.OwnedNftWhereInput>
+  limit?: Types.Maybe<Types.Scalars['Int']>
+  offset?: Types.Maybe<Types.Scalars['Int']>
+}>
+
+export type GetEndingAuctionsNftsQuery = {
+  endingAuctionsNfts: Array<Types.Maybe<FullNftFieldsFragment>>
 }
 
 export type GetNotificationsQueryVariables = Types.Exact<{
@@ -2682,6 +2704,17 @@ export const GetPayloadDataObjectIdByCommitment = gql`
     }
   }
 `
+export const GetTopSellingChannels = gql`
+  query GetTopSellingChannels($where: ExtendedChannelWhereInput, $limit: Int!, $periodDays: Int!) {
+    topSellingChannels(where: $where, limit: $limit, periodDays: $periodDays) {
+      channel {
+        ...BasicChannelFields
+      }
+      amount
+    }
+  }
+  ${BasicChannelFields}
+`
 export const ReportChannel = gql`
   mutation ReportChannel($channelId: String!, $rationale: String!) {
     reportChannel(channelId: $channelId, rationale: $rationale) {
@@ -2970,6 +3003,14 @@ export const GetNftsConnection = gql`
         endCursor
       }
       totalCount
+    }
+  }
+  ${FullNftFields}
+`
+export const GetEndingAuctionsNfts = gql`
+  query GetEndingAuctionsNfts($where: OwnedNftWhereInput, $limit: Int, $offset: Int) {
+    endingAuctionsNfts(where: $where, limit: $limit, offset: $offset) {
+      ...FullNftFields
     }
   }
   ${FullNftFields}
