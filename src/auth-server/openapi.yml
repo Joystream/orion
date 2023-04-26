@@ -410,6 +410,7 @@ components:
                     email:
                       type: string
                       pattern: ^\S+@\S+\.\S+$
+                      maxLength: 255
     ConnectAccountRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'
@@ -471,10 +472,13 @@ components:
       properties:
         id:
           type: string
+          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
         encryptedSeed:
           type: string
+          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
         cipherIv:
           type: string
+          maxLength: 34 # 16 bytes, hex-encoded + 2 bytes for optional 0x prefix
     SessionEncryptionArtifacts:
       type: object
       required:
@@ -483,6 +487,7 @@ components:
       properties:
         cipherKey:
           type: string
+          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
         cipherIv:
           type: string
-
+          maxLength: 34 # 16 bytes, hex-encoded + 2 bytes for optional 0x prefix

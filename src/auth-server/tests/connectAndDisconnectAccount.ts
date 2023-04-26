@@ -9,7 +9,7 @@ import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
 import { LoggedInAccountInfo, anonymousAuth, createAccountAndSignIn, keyring } from './common'
-import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { cryptoWaitReady, randomAsU8a } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 
@@ -230,6 +230,23 @@ describe('connectAndDisconnectAccount', () => {
         signingKey: alice,
         expectedStatus: 400,
       })
+    })
+
+    it('should fail if max connected accounts limit reached', async () => {
+      const max = await config.get(ConfigVariable.MaxConnectedAccountsPerUser, em)
+      let currentCount: number
+      do {
+        currentCount = await em.countBy(ConnectedAccount, { accountId: accountInfo.accountId })
+        const acc = keyring.addFromSeed(randomAsU8a(32))
+        await connectOrDisconnectAccount({
+          action: 'connect',
+          ...accountInfo,
+          gatewayName,
+          joystreamAccountId: acc.address,
+          signingKey: acc,
+          expectedStatus: currentCount < max ? 200 : 400,
+        })
+      } while (currentCount < max)
     })
   })
 
