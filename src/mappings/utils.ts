@@ -15,8 +15,10 @@ import { Bytes } from '@polkadot/types/primitive'
 import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
+import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 
 export const commentCountersManager = new CommentCountersManager()
+export const videoRelevanceManager = new VideoRelevanceManager()
 
 export const JOYSTREAM_SS58_PREFIX = 126
 

@@ -6,6 +6,8 @@ export enum ConfigVariable {
   SupportNewCategories = 'SUPPORT_NEW_CATEGORIES',
   KillSwitch = 'KILL_SWITCH_ON',
   VideoViewPerIpTimeLimit = 'VIDEO_VIEW_PER_IP_TIME_LIMIT',
+  VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
+  RelevanceWeights = 'RELEVANCE_WEIGHTS',
   AppPrivateKey = 'APP_PRIVATE_KEY',
   SessionExpiryAfterInactivityMinutes = 'SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES',
   SessionMaxDurationHours = 'SESSION_MAX_DURATION_HOURS',
@@ -34,11 +36,18 @@ const stringType = {
   deserialize: (v: string) => v,
 }
 
+const jsonType = <T>() => ({
+  serialize: (v: T) => JSON.stringify(v),
+  deserialize: (v: string) => JSON.parse(v) as T,
+})
+
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerIpTimeLimit]: intType,
+  [ConfigVariable.VideoRelevanceViewsTick]: intType,
+  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number]>(),
   [ConfigVariable.AppPrivateKey]: stringType,
   [ConfigVariable.SessionMaxDurationHours]: intType,
   [ConfigVariable.SessionExpiryAfterInactivityMinutes]: intType,

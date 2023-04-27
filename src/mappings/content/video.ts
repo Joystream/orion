@@ -12,6 +12,8 @@ import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { config, ConfigVariable } from '../../utils/config'
+import { NEWNESS_SECONDS_DIVIDER } from '../../utils/VideoRelevanceManager'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -26,6 +28,10 @@ export async function processVideoCreatedEvent({
 
   const videoId = contentId.toString()
   const viewsNum = await overlay.getEm().getRepository(VideoViewEvent).countBy({ videoId })
+  const [newnessWeight, viewsWeight] = await config.get(
+    ConfigVariable.RelevanceWeights,
+    overlay.getEm()
+  )
   const video = overlay.getRepository(Video).new({
     id: videoId,
     createdAt: new Date(block.timestamp),
@@ -39,6 +45,12 @@ export async function processVideoCreatedEvent({
     commentsCount: 0,
     reactionsCount: 0,
     viewsNum,
+    // First we need to dic by 1k to match postgres epoch (in seconds) then apply the further dividers
+    videoRelevance: +(
+      (30 - (Date.now() - new Date(block.timestamp).getTime()) / (1000 * NEWNESS_SECONDS_DIVIDER)) *
+        newnessWeight +
+      viewsNum * viewsWeight
+    ).toFixed(2),
   })
 
   // fetch related channel and owner
