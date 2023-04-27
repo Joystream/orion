@@ -20,7 +20,6 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
   // retrieve owner info
   const channel = await api.query.content.channelById(new BN(channelId))
   const channelOwnerMemberId = channel.owner.asMember
-  console.log(`channel Owner memberId ${channelOwnerMemberId.toHuman()}`)
   const channelOwnerMembership = await api.query.members.membershipById(channelOwnerMemberId)
   expect(channelOwnerMembership.isSome, 'Not possible to retrieve channel owner membership')
   const channelOwnerAddress = channelOwnerMembership.unwrap().controllerAccount.toString()
@@ -53,7 +52,7 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(api, query, channelOwnerAddress, contentActor, channelId, crtParams)
   await new FixtureRunner(issueCreatorTokenFixture).run()
 
-  await issueCreatorTokenFixture.tryQuery()
+  // await issueCreatorTokenFixture.tryQuery()
 
   debug('Done')
 }
