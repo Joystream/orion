@@ -2,14 +2,14 @@ import { EventEmitter } from 'events'
 import { Flow } from './Flow'
 import { Job, JobOutcome, JobProps } from './Job'
 import { ApiFactory } from './Api'
-import { QueryNodeApi } from './QueryNodeApi'
+import { OrionApi } from './OrionApi'
 import { ResourceManager } from './Resources'
 
 export class JobManager extends EventEmitter {
   private _jobs: Job[] = []
   private readonly _apiFactory: ApiFactory
   private readonly _env: NodeJS.ProcessEnv
-  private readonly _query: QueryNodeApi
+  private readonly _query: OrionApi
 
   constructor({
     apiFactory,
@@ -18,7 +18,7 @@ export class JobManager extends EventEmitter {
   }: {
     apiFactory: ApiFactory
     env: NodeJS.ProcessEnv
-    query: QueryNodeApi
+    query: OrionApi
   }) {
     super()
     this._apiFactory = apiFactory

@@ -7,7 +7,7 @@ import {
   MembershipExternalResourceType,
 } from '../../graphql/generated/schema'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { BuyMembershipHappyCaseFixture } from './BuyMembershipHappyCaseFixture'
 import { FixtureRunner } from '../../Fixture'
 import { MemberContext } from '../../types'
@@ -79,7 +79,7 @@ export function asMembershipExternalResource({
 
 export async function makeMembers(
   api: Api,
-  query: QueryNodeApi,
+  query: OrionApi,
   n: number
 ): Promise<MemberContext[]> {
   const accounts = (await api.createKeyPairs(n)).map((k) => k.key.address)

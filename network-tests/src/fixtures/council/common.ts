@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../membership'
 import { FixtureRunner } from '../../Fixture'
 import { MemberId } from '@joystream/types/primitives'
@@ -16,7 +16,7 @@ interface IFailToElectResources {
 
 export async function prepareFailToElectResources(
   api: Api,
-  query: QueryNodeApi
+  query: OrionApi
 ): Promise<IFailToElectResources> {
   const { councilSize, minNumberOfExtraCandidates } = api.consts.council
   const numberOfCandidates = councilSize.add(minNumberOfExtraCandidates).toNumber()

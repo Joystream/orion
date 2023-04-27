@@ -1,0 +1,20 @@
+fragment TokenFields on Token {
+  createdAt
+  deissued
+  isInviteOnly
+  status
+  symbol
+  totalSupply
+  accountsNum
+  annualCreatorReward
+  ammNonce
+  revenueShareRatioPercent
+  revenueShareNonce
+  description
+}
+
+query getTokenById($id: String!) {
+  tokenById(id: $id) {
+    ...TokenFields
+  }
+}
