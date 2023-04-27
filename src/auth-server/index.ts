@@ -8,6 +8,9 @@ import { createLogger } from '@subsquid/logger'
 import { authenticate } from '../utils/auth'
 import cookieParser from 'cookie-parser'
 import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimits'
+import swaggerUi, { JsonObject } from 'swagger-ui-express'
+import YAML from 'js-yaml'
+import fs from 'fs'
 
 export const logger = createLogger('auth-api')
 
@@ -29,8 +32,21 @@ function authHandler(type: 'header' | 'cookie') {
 app.set('trust proxy', process.env.TRUST_PROXY || false)
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
-app.use(cors())
+app.use(
+  cors({
+    credentials:
+      process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true',
+  })
+)
 applyRateLimits(app, globalRateLimit, rateLimitsPerRoute)
+if (process.env.OPENAPI_PLAYGROUND === 'true' || process.env.OPENAPI_PLAYGROUND === '1') {
+  const spec = YAML.load(
+    fs.readFileSync(path.join(__dirname, 'openapi.yml')).toString()
+  ) as JsonObject
+  logger.info('Running playground at /playground')
+  console.log('Spec', spec)
+  app.use('/playground', swaggerUi.serve, swaggerUi.setup(spec))
+}
 app.use(
   OpenApiValidator.middleware({
     apiSpec: path.join(__dirname, 'openapi.yml'),

@@ -42,10 +42,16 @@ index da31a85..3691776 100644
      plugins?: PluginDefinition[];
      subscriptions?: boolean;
 diff --git a/node_modules/@subsquid/openreader/lib/server.js b/node_modules/@subsquid/openreader/lib/server.js
-index 6fb0711..395f435 100644
+index 6fb0711..5060c59 100644
 --- a/node_modules/@subsquid/openreader/lib/server.js
 +++ b/node_modules/@subsquid/openreader/lib/server.js
-@@ -21,7 +21,7 @@ async function serve(options) {
+@@ -17,11 +17,13 @@ const schema_1 = require("./opencrud/schema");
+ const error_handling_1 = require("./util/error-handling");
+ const execute_1 = require("./util/execute");
+ const limit_1 = require("./util/limit");
++const cookieParser = require('cookie-parser')
++const cors = require('cors')
+ async function serve(options) {
      let { connection, subscriptionConnection, subscriptionPollInterval, maxResponseNodes, subscriptionMaxResponseNodes } = options;
      let dialect = options.dialect ?? 'postgres';
      let schema = new schema_1.SchemaBuilder(options).build();
@@ -54,7 +60,7 @@ index 6fb0711..395f435 100644
          let openreader = new db_1.PoolOpenreaderContext(dialect, connection, subscriptionConnection, subscriptionPollInterval);
          if (maxResponseNodes) {
              openreader.responseSizeLimit = new limit_1.ResponseSizeLimit(maxResponseNodes);
-@@ -31,6 +31,7 @@ async function serve(options) {
+@@ -31,6 +33,7 @@ async function serve(options) {
              openreader.subscriptionResponseSizeLimit = new limit_1.ResponseSizeLimit(subscriptionMaxResponseNodes);
          }
          return {
@@ -62,11 +68,17 @@ index 6fb0711..395f435 100644
              openreader
          };
      };
-@@ -53,6 +54,7 @@ async function runApollo(options) {
+@@ -53,6 +56,13 @@ async function runApollo(options) {
      const { disposals, context, schema, log, maxRootFields } = options;
      let maxRequestSizeBytes = options.maxRequestSizeBytes ?? 256 * 1024;
      let app = (0, express_1.default)();
++    // CUSTOM CONFIG START
 +    app.set('trust proxy', process.env.TRUST_PROXY || false)
++    app.use(cookieParser(process.env.COOKIE_SECRET))
++    app.use(cors({
++        credentials: process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true'
++    }))
++    // CUSTOM CONFIG END
      let server = http_1.default.createServer(app);
      const execute = maxRootFields
          ? (args) => (0, execute_1.executeWithLimit)(maxRootFields, args)
