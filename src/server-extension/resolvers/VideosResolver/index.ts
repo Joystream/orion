@@ -217,6 +217,7 @@ export class VideosResolver {
         videoRelevanceManager.scheduleRecalcForVideo(videoId)
       }
       await em.save([video, video.channel, newView])
+      await videoRelevanceManager.updateVideoRelevanceValue(em)
       return {
         videoId,
         viewsNum: video.viewsNum,

@@ -28,7 +28,10 @@ export async function processVideoCreatedEvent({
 
   const videoId = contentId.toString()
   const viewsNum = await overlay.getEm().getRepository(VideoViewEvent).countBy({ videoId })
-  const [newnessWeight] = await config.get(ConfigVariable.RelevanceWeights, overlay.getEm())
+  const [newnessWeight, commentsWeight] = await config.get(
+    ConfigVariable.RelevanceWeights,
+    overlay.getEm()
+  )
   const video = overlay.getRepository(Video).new({
     id: videoId,
     createdAt: new Date(block.timestamp),
@@ -45,7 +48,8 @@ export async function processVideoCreatedEvent({
     // First we need to dic by 1k to match postgres epoch (in seconds) then apply the further dividers
     videoRelevance: +(
       (30 - (Date.now() - new Date(block.timestamp).getTime()) / (1000 * NEWNESS_SECONDS_DIVIDER)) *
-      newnessWeight
+        newnessWeight +
+      viewsNum * commentsWeight
     ).toFixed(2),
   })
 
