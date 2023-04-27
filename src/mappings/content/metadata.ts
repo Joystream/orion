@@ -63,6 +63,7 @@ import {
   genericEventFields,
   invalidMetadata,
   metaprotocolTransactionFailure,
+  videoRelevanceManager,
 } from '../utils'
 import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
 
@@ -571,6 +572,7 @@ export async function processModerateCommentMessage(
   // schedule comment counters updates
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
+  videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
 
   comment.text = ''
   comment.status = CommentStatus.MODERATED

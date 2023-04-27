@@ -88,7 +88,7 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
-import { commentCountersManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 
 const defaultEventOptions = {
@@ -278,6 +278,7 @@ async function processEvent<EventName extends EventNames>(
 async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
+  await videoRelevanceManager.updateVideoRelevanceValue(em)
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
