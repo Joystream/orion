@@ -6,6 +6,8 @@ export enum ConfigVariable {
   SupportNewCategories = 'SUPPORT_NEW_CATEGORIES',
   KillSwitch = 'KILL_SWITCH_ON',
   VideoViewPerIpTimeLimit = 'VIDEO_VIEW_PER_IP_TIME_LIMIT',
+  VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
+  RelevanceWeights = 'RELEVANCE_WEIGHTS',
   AppPrivateKey = 'APP_PRIVATE_KEY',
 }
 
@@ -24,11 +26,18 @@ const stringType = {
   deserialize: (v: string) => v,
 }
 
+const jsonType = <T>() => ({
+  serialize: (v: T) => JSON.stringify(v),
+  deserialize: (v: string) => JSON.parse(v) as T,
+})
+
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerIpTimeLimit]: numberType,
+  [ConfigVariable.VideoRelevanceViewsTick]: numberType,
+  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number]>(),
   [ConfigVariable.AppPrivateKey]: stringType,
 } as const
 
