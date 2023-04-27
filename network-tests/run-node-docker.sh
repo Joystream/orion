@@ -66,6 +66,10 @@ docker run --rm -v ${DATA_PATH}:/spec joystream/node:${RUNTIME} build-spec \
 # create network
 docker network create joystream_default || true
 
+# start orion services
+docker-compose -f ../docker-compose.yml up -d
+docker-compose -f ../archive/docker-compose.yml up -d
+
 # Start a chain with generated chain spec
 export JOYSTREAM_NODE_TAG=${RUNTIME}
 docker-compose -f ./docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name joystream-node \
