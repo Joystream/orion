@@ -49,7 +49,7 @@ export async function processVideoCreatedEvent({
     videoRelevance: +(
       (30 - (Date.now() - new Date(block.timestamp).getTime()) / (1000 * NEWNESS_SECONDS_DIVIDER)) *
         newnessWeight +
-      viewsNum * commentsWeight
+      viewsNum * viewsWeight
     ).toFixed(2),
   })
 
