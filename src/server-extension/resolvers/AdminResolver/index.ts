@@ -20,7 +20,9 @@ import {
   SetVideoHeroInput,
   SetVideoHeroResult,
   SetVideoViewPerIpTimeLimitInput,
+  SetVideoWeightsInput,
   VideoViewPerIpTimeLimit,
+  VideoWeights,
 } from './types'
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
@@ -44,11 +46,25 @@ import { generateAppActionCommitment } from '@joystream/js/utils'
 import { AppAction } from '@joystream/metadata-protobuf'
 import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
+import { videoRelevanceManager } from '../../../mappings/utils'
 
 @Resolver()
 export class AdminResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => VideoWeights)
+  async setVideoWeights(@Args() args: SetVideoWeightsInput): Promise<VideoWeights> {
+    const em = await this.em()
+    await config.set(
+      ConfigVariable.RelevanceWeights,
+      [args.newnessWeight, args.viewsWeight, args.commentsWeight, args.reactionsWeight],
+      em
+    )
+    await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+    return { isApplied: true }
+  }
 
   @UseMiddleware(OperatorOnly)
   @Mutation(() => KillSwitch)
