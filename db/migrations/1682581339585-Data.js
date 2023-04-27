@@ -1,15 +1,5 @@
-<<<<<<<< HEAD:db/migrations/1680280600588-Data.js
-<<<<<<<< HEAD:db/migrations/1680280600588-Data.js
-module.exports = class Data1680280600588 {
-    name = 'Data1680280600588'
-========
-module.exports = class Data1681294948952 {
-    name = 'Data1681294948952'
->>>>>>>> 06d904b (Introduce new video property and scheduler to update it):db/migrations/1681294948952-Data.js
-========
-module.exports = class Data1681380812653 {
-    name = 'Data1681380812653'
->>>>>>>> 225fbc9 (Adjust equation and change score to float):db/migrations/1681380812653-Data.js
+module.exports = class Data1682581339585 {
+    name = 'Data1682581339585'
 
     async up(db) {
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)

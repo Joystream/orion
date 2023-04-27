@@ -1,5 +1,4 @@
 import { EntityManager } from 'typeorm'
-import { CommentStatus } from '../model'
 import { config, ConfigVariable } from './config'
 
 // constant used to parse seconds from creation
@@ -25,16 +24,10 @@ export class VideoRelevanceManager {
           ((30 - (extract(epoch from now() - created_at) / ${NEWNESS_SECONDS_DIVIDER})) * ${newnessWeight}) +
           (views_num * ${viewsWeight}) +
           (
-            SELECT COUNT(*) * ${commentsWeight} FROM "comment"
-            WHERE
-              "comment"."video_id" = "video"."id"
-              AND "comment"."status" = '${CommentStatus.VISIBLE}'
-              AND "comment"."is_excluded" = '0'
+            comments_count * ${commentsWeight} 
           ) +
           (
-            SELECT COUNT(*) * ${reactionsWeight} FROM "video_reaction"
-            WHERE
-              "video_reaction"."video_id" = "video"."id"
+            reactions_count * ${reactionsWeight} 
           ), 2)
         ${
           forceUpdateAll
