@@ -134,3 +134,24 @@ type ConnectedAccountProof @entity {
   """
   signature: String!
 }
+
+enum TokenType {
+  EMAIL_CONFIRMATION
+}
+
+type Token @entity {
+  "The token itself (32-byte string, securely random)"
+  id: ID!
+
+  "Type of the token (its intended purpose)"
+  type: TokenType!
+
+  "When was the token issued"
+  issuedAt: DateTime!
+
+  "When does the token expire or when has it expired"
+  expiry: DateTime!
+
+  "The account the token was issued for"
+  issuedFor: Account!
+}

@@ -4,6 +4,7 @@ Models/ActionExecutionRequestData.md
 Models/AnonymousUserAuthRequestData.md
 Models/AnonymousUserAuthResponseData.md
 Models/AnonymousUserAuthResponseData_allOf.md
+Models/ConfirmEmailRequestData.md
 Models/ConnectAccountRequestData.md
 Models/ConnectAccountRequestData_allOf.md
 Models/CreateAccountRequestData.md
@@ -15,5 +16,6 @@ Models/GenericErrorResponseData.md
 Models/GenericOkResponseData.md
 Models/LoginRequestData.md
 Models/LoginRequestData_allOf.md
+Models/RequestTokenRequestData.md
 Models/SessionEncryptionArtifacts.md
 README.md

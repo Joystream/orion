@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**anonymousAuth**](DefaultApi.md#anonymousAuth) | **POST** /anonymous-auth |  |
+| [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
 | [**connectAccount**](DefaultApi.md#connectAccount) | **POST** /connect-account |  |
 | [**createAccount**](DefaultApi.md#createAccount) | **POST** /account |  |
 | [**disconnectAccount**](DefaultApi.md#disconnectAccount) | **POST** /disconnect-account |  |
@@ -14,6 +15,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
 | [**logout**](DefaultApi.md#logout) | **POST** /logout |  |
 | [**postArtifacts**](DefaultApi.md#postArtifacts) | **POST** /artifacts |  |
 | [**postSessionArtifacts**](DefaultApi.md#postSessionArtifacts) | **POST** /session-artifacts |  |
+| [**requestEmailConfirmationToken**](DefaultApi.md#requestEmailConfirmationToken) | **POST** /request-email-confirmation-token |  |
 
 
 <a name="anonymousAuth"></a>
@@ -33,6 +35,33 @@ All URIs are relative to *http://localhost:4074/api/v1*
 ### Return type
 
 [**AnonymousUserAuthResponseData**](../Models/AnonymousUserAuthResponseData.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="confirmEmail"></a>
+# **confirmEmail**
+> GenericOkResponseData confirmEmail(ConfirmEmailRequestData)
+
+
+
+    Confirm account&#39;s e-mail address provided during registration.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **ConfirmEmailRequestData** | [**ConfirmEmailRequestData**](../Models/ConfirmEmailRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
 
 ### Authorization
 
@@ -274,6 +303,33 @@ No authorization required
 ### Authorization
 
 [cookieAuth](../README.md#cookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="requestEmailConfirmationToken"></a>
+# **requestEmailConfirmationToken**
+> GenericOkResponseData requestEmailConfirmationToken(RequestTokenRequestData)
+
+
+
+    Request a token to be sent to account&#39;s e-mail address, which will allow confirming the ownership of the e-mail by the user.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **RequestTokenRequestData** | [**RequestTokenRequestData**](../Models/RequestTokenRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+No authorization required
 
 ### HTTP request headers
 

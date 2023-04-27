@@ -1,0 +1,10 @@
+<html>
+<body>
+    <h1>Welcome to {{ appName }}!</h1>
+    <p>
+        In order to confirm your e-mail address, click the link below:<br />
+        <a href="{{ link }}">{{ link }}</a><br />
+        <small><i>This link will expire at: <b>{{ linkExpiryDate }}</b></i></small>
+    </p>
+</body>
+</html>
