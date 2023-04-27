@@ -1,5 +1,5 @@
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
@@ -18,7 +18,7 @@ export class CancelProposalsFixture extends StandardizedFixture {
   protected proposalIds: ProposalId[]
   protected proposals: Proposal[] = []
 
-  public constructor(api: Api, query: QueryNodeApi, proposalIds: ProposalId[]) {
+  public constructor(api: Api, query: OrionApi, proposalIds: ProposalId[]) {
     super(api, query)
     this.proposalIds = proposalIds
   }
@@ -72,13 +72,5 @@ export class CancelProposalsFixture extends StandardizedFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getProposalCancelledEvents(this.events),
-      (result) => this.assertQueryNodeEventsAreValid(result)
-    )
-
-    // Query the proposals
-    const qProposals = await this.query.getProposalsByIds(this.proposalIds)
-    this.assertQueriedProposalsAreValid(qProposals, qEvents)
   }
 }

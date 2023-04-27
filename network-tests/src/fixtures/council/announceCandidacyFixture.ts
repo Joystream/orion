@@ -2,7 +2,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types'
 import BN from 'bn.js'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, AnyQueryNodeEvent } from '../../types'
 import { BaseFixture, StandardizedFixture } from '../../Fixture'
 
@@ -16,7 +16,7 @@ export type AnnouncementParams = {
 export class AnnounceCandidacyFixture extends StandardizedFixture {
   private announcements: Map<string, AnnouncementParams>
 
-  constructor(api: Api, query: QueryNodeApi, announcements: Map<string, AnnouncementParams>) {
+  constructor(api: Api, query: OrionApi, announcements: Map<string, AnnouncementParams>) {
     super(api, query)
     this.announcements = announcements
   }

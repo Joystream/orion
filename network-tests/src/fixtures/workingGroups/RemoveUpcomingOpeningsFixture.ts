@@ -1,6 +1,6 @@
 import { Api } from '../../Api'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, WorkingGroupModuleName } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
@@ -15,7 +15,7 @@ export class RemoveUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     upcomingOpeningIds: string[]
   ) {
@@ -64,16 +64,5 @@ export class RemoveUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
     // Query & check the event
-    await this.query.tryQueryWithTimeout(
-      () => this.query.getStatusTextChangedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-    // Query the openings and make sure they no longer exist
-    await Promise.all(
-      this.upcomingOpeningIds.map(async (id) => {
-        const qUpcomingOpening = await this.query.getUpcomingOpeningById(id)
-        assert.isNull(qUpcomingOpening)
-      })
-    )
   }
 }

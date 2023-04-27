@@ -6,7 +6,7 @@ import { assert } from 'chai'
 import { createType, registry } from '@joystream/types'
 import { AnnounceCandidacyFixture } from './announceCandidacyFixture'
 import { Api } from 'src/Api'
-import { QueryNodeApi } from 'src/QueryNodeApi'
+import { OrionApi } from 'src/OrionApi'
 import BN from 'bn.js'
 import { VoteFixture } from '../referendum'
 
@@ -68,7 +68,7 @@ export class ElectCouncilFixture extends BaseQueryNodeFixture {
     return cycleId
   }
 
-  constructor(api: Api, query: QueryNodeApi, optOutVoters = false) {
+  constructor(api: Api, query: OrionApi, optOutVoters = false) {
     super(api, query)
     this._optOutVoters = optOutVoters
   }

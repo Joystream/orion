@@ -1,6 +1,6 @@
 import { WsProvider } from '@polkadot/api'
 import { ApiFactory, Api } from './Api'
-import { QueryNodeApi } from './QueryNodeApi'
+import { OrionApi } from './OrionApi'
 import { config } from 'dotenv'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Debugger, extendDebug } from './Debugger'
@@ -86,15 +86,15 @@ export async function scenario(
   await api.createKeyPairs(startKeyId, false)
   customKeys.forEach((k) => api.createCustomKeyPair(k))
 
-  const queryNodeUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:4350/graphql'
+  const orionUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:4350/graphql'
 
-  const queryNodeProvider = new ApolloClient({
-    link: new HttpLink({ uri: queryNodeUrl, fetch }),
+  const apolloClient = new ApolloClient({
+    link: new HttpLink({ uri: orionUrl, fetch }),
     cache: new InMemoryCache(),
     defaultOptions: { query: { fetchPolicy: 'no-cache', errorPolicy: 'all' } },
   })
 
-  const query = new QueryNodeApi(queryNodeProvider)
+  const query = new OrionApi(apolloClient)
 
   const debug = extendDebug('scenario')
 

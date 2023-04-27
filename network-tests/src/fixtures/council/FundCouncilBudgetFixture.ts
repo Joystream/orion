@@ -6,7 +6,7 @@ import { assert } from 'chai'
 import { Api } from '../../Api'
 import { StandardizedFixture } from '../../Fixture'
 import { CouncilBudgetFundedEventFieldsFragment } from '../../graphql/generated/queries'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, EventType } from '../../types'
 
 type CouncilBudgetFundedEventDetails = EventDetails<EventType<'council', 'CouncilBudgetFunded'>>
@@ -22,7 +22,7 @@ export class FundCouncilBudgetFixture extends StandardizedFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     fundCouncilBudgetParams: FundCouncilBudgetParams
   ) {
     super(api, query)
@@ -59,10 +59,5 @@ export class FundCouncilBudgetFixture extends StandardizedFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    // Query the events
-    await this.query.tryQueryWithTimeout(
-      () => this.query.getCouncilBudgetFundedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
   }
 }

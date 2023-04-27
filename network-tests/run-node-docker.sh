@@ -62,6 +62,7 @@ docker run --rm -v ${DATA_PATH}:/spec joystream/node:${RUNTIME} build-spec \
   --raw --disable-default-bootnode \
   --chain /spec/chain-spec.json > ${DATA_PATH}/chain-spec-raw.json
 
+
 # Start a chain with generated chain spec
 export JOYSTREAM_NODE_TAG=${RUNTIME}
 docker-compose -f ./docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name joystream-node \
@@ -71,3 +72,8 @@ docker-compose -f ./docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name 
   --chain /spec/chain-spec-raw.json --pruning=archive --no-telemetry
 
 >&2 echo "node running"
+
+export WS_SOURCE=ws://127.0.0.1:9944
+docker-compose -f ../docker-compose.yml up -d
+docker-compose -f ../archive/docker-compose.yml up -d
+

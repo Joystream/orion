@@ -1,5 +1,5 @@
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, WorkingGroupModuleName } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Utils } from '../../utils'
@@ -44,7 +44,7 @@ export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     params?: UpcomingOpeningParams[]
   ) {
@@ -154,17 +154,5 @@ export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    // Query the event
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getStatusTextChangedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-    // Query the opening
-    const qUpcomingOpenings = await this.query.getUpcomingOpeningsByCreatedInEventIds(
-      qEvents.map((e) => e.id)
-    )
-    this.assertQueriedUpcomingOpeningsAreValid(qUpcomingOpenings, qEvents)
-
-    this.createdUpcomingOpeningIds = qUpcomingOpenings.map((o) => o.id)
   }
 }

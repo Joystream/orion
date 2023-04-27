@@ -2,6 +2,7 @@ import { AugmentedConsts } from '@polkadot/api/types'
 import BN from 'bn.js'
 import { ProposalType, WorkingGroupModuleName } from './types'
 import { PalletCommonWorkingGroupIterableEnumsWorkingGroup as WorkingGroup } from '@polkadot/types/lookup'
+import { u64 } from '@polkadot/types';
 
 export const debuggingCli = false // set to true to see CLI commands run
 
@@ -102,3 +103,7 @@ type ProposalTypeToProposalParamsKeyMap = {
   [K in ProposalType]: keyof AugmentedConsts<'promise'>['proposalsCodex']
 }
 validateType<ProposalTypeToProposalParamsKeyMap>(proposalTypeToProposalParamsKey)
+
+
+// joystream types not pubblished yet
+export declare type TokenId = u64;

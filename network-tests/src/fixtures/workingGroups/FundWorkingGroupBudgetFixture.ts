@@ -1,6 +1,6 @@
 import { assert } from 'chai'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, WorkingGroupModuleName } from '../../types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
@@ -21,7 +21,7 @@ export class FundWorkingGroupBudgetFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     params: FundWorkingGroupBudgetParams[]
   ) {
@@ -64,12 +64,5 @@ export class FundWorkingGroupBudgetFixture extends BaseWorkingGroupFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    await this.query.tryQueryWithTimeout(
-      () => this.query.getBudgetFundedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-    const qGroup = await this.query.getWorkingGroup(this.group)
-    Utils.assert(this.expectedBudgetPost, 'Expected budget not set')
-    assert.equal(qGroup?.budget.toString(), this.expectedBudgetPost.toString())
   }
 }

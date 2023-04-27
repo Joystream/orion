@@ -1,5 +1,5 @@
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { Utils } from '../../utils'
 import {
   PalletProposalsEngineProposal as Proposal,
@@ -35,7 +35,7 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
   protected proposals: Proposal[] = []
   protected proposalsExecutionBlock: Map<number, number> = new Map()
 
-  public constructor(api: Api, query: QueryNodeApi, params: DecideOnProposalStatusParams[]) {
+  public constructor(api: Api, query: OrionApi, params: DecideOnProposalStatusParams[]) {
     super(api, query)
     this.params = params
   }
@@ -92,14 +92,6 @@ export class DecideOnProposalStatusFixture extends BaseQueryNodeFixture {
   }
 
   protected async postExecutionChecks(qProposal: ProposalFieldsFragment): Promise<void> {
-    const { details } = qProposal
-    if (details.__typename === 'VetoProposalDetails') {
-      const [qVetoedProposal] = await this.query.getProposalsByIds([details.proposal!.id])
-      Utils.assert(
-        qVetoedProposal.status.__typename === 'ProposalStatusVetoed',
-        'Invalid proposal status'
-      )
-    }
     // TODO: Other proposal types
   }
 

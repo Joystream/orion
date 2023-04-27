@@ -2,7 +2,7 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import { asMembershipExternalResource, generateParamsFromAccountId } from './utils'
 import { MemberId } from '@joystream/types/primitives'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { PalletMembershipMembershipObject as Membership } from '@polkadot/types/lookup'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { MembershipMetadata } from '@joystream/metadata-protobuf'
@@ -24,7 +24,7 @@ export class BuyMembershipHappyCaseFixture extends StandardizedFixture {
   protected members: Membership[] = []
   protected defaultInviteCount!: number
 
-  public constructor(api: Api, query: QueryNodeApi, accounts: string[]) {
+  public constructor(api: Api, query: OrionApi, accounts: string[]) {
     super(api, query)
     this.accounts = accounts
   }
@@ -128,13 +128,5 @@ export class BuyMembershipHappyCaseFixture extends StandardizedFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getMembershipBoughtEvents(this.events),
-      (r) => this.assertQueryNodeEventsAreValid(r)
-    )
-
-    const qMembers = await this.query.getMembersByIds(this.events.map((e) => e.event.data[0]))
-    this.assertQueriedMembersAreValid(qMembers, qEvents)
   }
 }

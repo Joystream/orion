@@ -1,7 +1,7 @@
 import { WorkerId } from '@joystream/types/primitives'
 import { Api } from '../../Api'
 import { BaseQueryNodeFixture, FixtureRunner } from '../../Fixture'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { WorkingGroupModuleName } from '../../types'
 import { Utils } from '../../utils'
 import { AddStakingAccountsHappyCaseFixture, BuyMembershipHappyCaseFixture } from '../membership'
@@ -19,7 +19,7 @@ export class HireWorkersFixture extends BaseQueryNodeFixture {
 
   protected fillOpeningRunner?: FixtureRunner
 
-  constructor(api: Api, query: QueryNodeApi, group: WorkingGroupModuleName, workersN: number) {
+  constructor(api: Api, query: OrionApi, group: WorkingGroupModuleName, workersN: number) {
     super(api, query)
     this.group = group
     this.workersN = workersN

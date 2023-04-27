@@ -1,8 +1,8 @@
-import { StandardizedFixture } from 'src/Fixture'
+import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import {
   PalletContentChannelOwner,
@@ -17,25 +17,29 @@ export type ChannelCreationParameters = [
 ]
 
 export class CreateChannelFixture extends StandardizedFixture {
-  protected params: Map<string, ChannelCreationParameters>
+  protected channelCreationParams: PalletContentChannelCreationParametersRecord
+  protected channelOwner: PalletContentChannelOwner
+  protected channelOwnerAddress: string
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
-    params: Map<string, ChannelCreationParameters>
+    query: OrionApi,
+    channelCreationParams: PalletContentChannelCreationParametersRecord,
+    channelOwner: PalletContentChannelOwner,
+    channelOwnerAddress: string,
   ) {
     super(api, query)
-    this.params = params
+    this.channelCreationParams = channelCreationParams
+    this.channelOwner = channelOwner
+    this.channelOwnerAddress = channelOwnerAddress
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
-    return Array.from(this.params.keys())
+    return [ this.channelOwnerAddress]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return Array.from(this.params.values()).map(([owner, parameters]) =>
-      this.api.tx.content.createChannel(owner, parameters)
-    )
+      return [this.api.tx.content.createChannel(this.channelOwner, this.channelCreationParams)]
   }
 
   protected async getEventFromResult(
@@ -44,5 +48,5 @@ export class CreateChannelFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'content', 'ChannelCreated')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }
