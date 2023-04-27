@@ -2,7 +2,7 @@ import './config'
 import request from 'supertest'
 import { app } from '../index'
 import { globalEm } from '../../utils/globalEm'
-import { Account } from '../../model'
+import { Token, TokenType, Account } from '../../model'
 import assert from 'assert'
 import { components } from '../generated/api-types'
 import { Keyring } from '@polkadot/keyring'
@@ -107,6 +107,25 @@ export async function createAccount(
   const account = await em.getRepository(Account).findOneBy({ email })
   assert(account, 'Account not found')
   return account
+}
+
+export async function confirmEmail(token: string, expectedStatus: number): Promise<void> {
+  await request(app)
+    .post('/api/v1/confirm-email')
+    .set('Content-Type', 'application/json')
+    .send({ token })
+    .expect(expectedStatus)
+}
+
+export async function requestEmailConfirmationToken(
+  email: string,
+  expectedStatus: number
+): Promise<void> {
+  await request(app)
+    .post('/api/v1/request-email-confirmation-token')
+    .set('Content-Type', 'application/json')
+    .send({ email })
+    .expect(expectedStatus)
 }
 
 export async function createAccountAndSignIn(

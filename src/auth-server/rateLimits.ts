@@ -67,6 +67,18 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
       limit: 10,
     },
   },
+  '/request-email-confirmation-token': {
+    post: {
+      windowMinutes: 5,
+      limit: 10,
+    },
+  },
+  '/confirm-email': {
+    post: {
+      windowMinutes: 5,
+      limit: 10,
+    },
+  },
 }
 
 export function applyRateLimits(
