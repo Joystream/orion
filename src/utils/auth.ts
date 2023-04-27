@@ -108,12 +108,14 @@ sessionCache.on('expired', (sessionId: string, cachedData: CachedSessionData) =>
 export type AuthContext = Session
 
 export async function getSessionIdFromHeader(req: Request): Promise<string | undefined> {
+  authLogger.trace(`Authorization header: ${JSON.stringify(req.headers.authorization, null, 2)}`)
   const [, sessionId] = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9+/=]+)$/) || []
   return sessionId
 }
 
 export async function getSessionIdFromCookie(req: Request): Promise<string | undefined> {
-  return req.cookies[SESSION_COOKIE_NAME]
+  authLogger.trace(`Cookies: ${JSON.stringify(req.cookies, null, 2)}`)
+  return req.cookies ? req.cookies[SESSION_COOKIE_NAME] : undefined
 }
 
 export async function authenticate(
@@ -124,9 +126,7 @@ export async function authenticate(
   const sessionId =
     authType === 'cookie' ? await getSessionIdFromCookie(req) : await getSessionIdFromHeader(req)
   if (!sessionId) {
-    authLogger.debug(
-      `Recieved a request w/ no sessionId provided. Authorization header: ${req.headers.authorization}`
-    )
+    authLogger.debug(`Recieved a request w/ no sessionId provided. AuthType: ${authType}.`)
     return false
   }
   authLogger.trace(`Authenticating... SessionId: ${sessionId}`)
@@ -209,10 +209,14 @@ export async function getOrCreateSession(
 }
 
 export function setSessionCookie(res: Response, sessionId: string, maxDurationHours: number): void {
+  const sameSite =
+    process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true'
+      ? 'none'
+      : 'strict'
   res.cookie(SESSION_COOKIE_NAME, sessionId, {
     maxAge: maxDurationHours * 3_600_000,
     httpOnly: true,
     secure: true,
-    sameSite: 'strict',
+    sameSite,
   })
 }
