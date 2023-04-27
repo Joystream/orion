@@ -9,9 +9,12 @@ services:
     ports:
       - 9944:9944
       - 9933:9933
-    # networks:
-    # - joystream_default
 
 volumes:
   chain-data:
     driver: local
+
+networks:
+  default:
+    external:
+      name: joystream_default
