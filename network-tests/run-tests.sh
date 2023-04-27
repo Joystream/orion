@@ -13,6 +13,7 @@ function cleanup() {
     docker-compose -f ../docker-compose.yml up -d
     docker-compose -f ../archive/docker-compose.yml up -d
     docker-compose -f ./docker-compose.node.yml down -v
+    docker network rm joystream_default
 }
 
 trap cleanup EXIT
