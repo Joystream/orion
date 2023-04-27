@@ -28,7 +28,7 @@ export async function processVideoCreatedEvent({
 
   const videoId = contentId.toString()
   const viewsNum = await overlay.getEm().getRepository(VideoViewEvent).countBy({ videoId })
-  const [newnessWeight, commentsWeight] = await config.get(
+  const [newnessWeight, viewsWeight] = await config.get(
     ConfigVariable.RelevanceWeights,
     overlay.getEm()
   )
