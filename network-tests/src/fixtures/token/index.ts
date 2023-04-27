@@ -1,1 +1,1 @@
-export { IssueCreatorTokenFixture, IssueCreatorTokenParameters } from './IssueCreatorToken'
+export { IssueCreatorTokenFixture } from './IssueCreatorToken'

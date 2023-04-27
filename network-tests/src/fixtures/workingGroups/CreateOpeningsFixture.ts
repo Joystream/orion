@@ -1,5 +1,5 @@
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventType, WorkingGroupModuleName } from '../../types'
 import { OpeningId } from '@joystream/types/primitives'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
@@ -56,7 +56,7 @@ export class CreateOpeningsFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     openingsParams?: OpeningParams[]
   ) {

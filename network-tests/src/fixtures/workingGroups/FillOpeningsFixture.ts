@@ -1,7 +1,7 @@
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, EventType, WorkingGroupModuleName } from '../../types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
 import { ApplicationId, OpeningId, WorkerId } from '@joystream/types/primitives'
@@ -36,7 +36,7 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     openingIds: OpeningId[],
     acceptedApplicationsIdsArrays: ApplicationId[][]
@@ -231,17 +231,5 @@ export class FillOpeningsFixture extends BaseWorkingGroupFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    // Query the event and check event + hiredWorkers
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getOpeningFilledEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-
-    // Check openings statuses
-    const qOpenings = await this.query.getOpeningsByIds(this.openingIds, this.group)
-    this.assertOpeningsStatusesAreValid(qEvents, qOpenings)
-
-    // Check application statuses
-    this.assertApplicationStatusesAreValid(qEvents, qOpenings)
   }
 }

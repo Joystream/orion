@@ -1,7 +1,7 @@
 import { Api } from './Api'
 import { assert } from 'chai'
 import { ISubmittableResult } from '@polkadot/types/types/'
-import { QueryNodeApi } from './QueryNodeApi'
+import { OrionApi } from './OrionApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { extendDebug, Debugger } from './Debugger'
 import { AnyQueryNodeEvent, EventDetails } from './types'
@@ -79,10 +79,10 @@ export abstract class BaseFixture {
 }
 
 export abstract class BaseQueryNodeFixture extends BaseFixture {
-  protected readonly query: QueryNodeApi
+  protected readonly query: OrionApi 
   public readonly queryNodeChecksEnabled: boolean
 
-  constructor(api: Api, query: QueryNodeApi) {
+  constructor(api: Api, query: OrionApi) {
     super(api)
     this.query = query
     this.queryNodeChecksEnabled = !process.env.SKIP_QUERY_NODE_CHECKS

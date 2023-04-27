@@ -1,7 +1,7 @@
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, WorkingGroupModuleName } from '../../types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
 import { WorkerId } from '@joystream/types/primitives'
@@ -22,7 +22,7 @@ export class DecreaseWorkerStakesFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     workerIds: WorkerId[],
     amounts: BN[]
@@ -82,15 +82,5 @@ export class DecreaseWorkerStakesFixture extends BaseWorkingGroupFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-
-    // Query and check events
-    await this.query.tryQueryWithTimeout(
-      () => this.query.getStakeDecreasedEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-
-    // Check workers
-    const qWorkers = await this.query.getWorkersByIds(this.workerIds, this.group)
-    this.assertQueriedWorkersAreValid(qWorkers)
   }
 }

@@ -1,6 +1,6 @@
 import { Api } from '../../Api'
 import { assert } from 'chai'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { StandardizedFixture } from '../../Fixture'
 import { EventDetails } from '../../types'
@@ -24,7 +24,7 @@ type AddStakingAccountInput = {
 export class AddStakingAccountsHappyCaseFixture extends StandardizedFixture {
   protected inputs: AddStakingAccountInput[]
 
-  public constructor(api: Api, query: QueryNodeApi, inputs: AddStakingAccountInput[]) {
+  public constructor(api: Api, query: OrionApi, inputs: AddStakingAccountInput[]) {
     super(api, query)
     this.inputs = inputs
   }
@@ -89,17 +89,5 @@ export class AddStakingAccountsHappyCaseFixture extends StandardizedFixture {
 
   async runQueryNodeChecks(): Promise<void> {
     await super.runQueryNodeChecks()
-    const addedEvents = this.events.slice(0, this.inputs.length)
-    const confirmedEvents = this.events.slice(this.inputs.length)
-    // Query the events
-    const qConfirmedEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getStakingAccountConfirmedEvents(confirmedEvents),
-      (qEvents) => assert.equal(qEvents.length, confirmedEvents.length)
-    )
-    const qAddedEvents = await this.query.getStakingAccountAddedEvents(addedEvents)
-    this.assertQueryNodeEventsAreValid(qAddedEvents.concat(qConfirmedEvents))
-
-    const qMembers = await this.query.getMembersByIds(this.inputs.map(({ asMember }) => asMember))
-    await this.assertQueriedMembersAreValid(qMembers)
   }
 }

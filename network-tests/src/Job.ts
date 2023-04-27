@@ -1,7 +1,7 @@
 import { Debugger, extendDebug } from './Debugger'
 import { EventEmitter } from 'events'
 import { ApiFactory } from './Api'
-import { QueryNodeApi } from './QueryNodeApi'
+import { OrionApi } from './OrionApi'
 import { Flow } from './Flow'
 import { InvertedPromise } from './InvertedPromise'
 import { ResourceManager } from './Resources'
@@ -9,7 +9,7 @@ import { ResourceManager } from './Resources'
 export type JobProps = {
   apiFactory: ApiFactory
   env: NodeJS.ProcessEnv
-  query: QueryNodeApi
+  query: OrionApi
 }
 
 export enum JobOutcome {

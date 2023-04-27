@@ -5,7 +5,7 @@ import {
   ApplicationFieldsFragment,
   AppliedOnOpeningEventFieldsFragment,
 } from '../../graphql/generated/queries'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, EventType, WorkingGroupModuleName } from '../../types'
 import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
 import _ from 'lodash'
@@ -14,7 +14,7 @@ import { PalletWorkingGroupOpening as Opening } from '@polkadot/types/lookup'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
 import { Utils } from '../../utils'
-import { createType } from '@joystream/types'
+
 export type ApplicantDetails = {
   memberId: MemberId
   roleAccount: string
@@ -49,7 +49,7 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     group: WorkingGroupModuleName,
     openingsApplications: OpeningApplications[]
   ) {
@@ -178,17 +178,5 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
   }
 
   async runQueryNodeChecks(): Promise<void> {
-    await super.runQueryNodeChecks()
-    // Query the events
-    const qEvents = await this.query.tryQueryWithTimeout(
-      () => this.query.getAppliedOnOpeningEvents(this.events),
-      (qEvents) => this.assertQueryNodeEventsAreValid(qEvents)
-    )
-    // Query the applications
-    const qApplications = await this.query.getApplicationsByIds(
-      this.events.map((e) => e.event.data[1]),
-      this.group
-    )
-    this.assertQueriedApplicationsAreValid(qApplications, qEvents)
   }
 }

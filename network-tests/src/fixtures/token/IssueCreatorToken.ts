@@ -1,48 +1,54 @@
-import { StandardizedFixture } from 'src/Fixture'
+import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import {
   PalletContentPermissionsContentActor,
   PalletProjectTokenTokenIssuanceParameters,
 } from '@polkadot/types/lookup'
-import { u64 } from '@polkadot/types'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
-export type IssueCreatorTokenParameters = [
-  PalletContentPermissionsContentActor,
-  u64,
-  PalletProjectTokenTokenIssuanceParameters
-]
-
 export class IssueCreatorTokenFixture extends StandardizedFixture {
-  protected params: Map<string, IssueCreatorTokenParameters>
+  protected creatorAddress: string
+  protected contentActor: PalletContentPermissionsContentActor
+  protected channelId: number
+  protected crtParams: PalletProjectTokenTokenIssuanceParameters
 
   public constructor(
     api: Api,
-    query: QueryNodeApi,
-    params: Map<string, IssueCreatorTokenParameters>
+    query: OrionApi,
+    creatorAddress: string,
+    contentActor: PalletContentPermissionsContentActor,
+    channelId: number,
+    crtParams: PalletProjectTokenTokenIssuanceParameters,
   ) {
     super(api, query)
-    this.params = params
+    this.creatorAddress = creatorAddress
+    this.contentActor = contentActor
+    this.channelId = channelId
+    this.crtParams = crtParams
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
-    return Array.from(this.params.keys())
+    return [this.creatorAddress]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return Array.from(this.params.values()).map(([actor, channelId, params]) =>
-      this.api.tx.content.issueCreatorToken(actor, channelId, params)
-    )
+    return [this.api.tx.content.issueCreatorToken(this.contentActor, this.channelId, this.crtParams)]
   }
 
   protected async getEventFromResult(result: SubmittableResult): Promise<TokenIssuedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public async tryQuery(): Promise<void> {
+    const token = await this.query.getTokenById(this.api.createType('u64', 0))
+    console.log(`Query result:\n ${token}`)
+  }
+
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
+  }
 }

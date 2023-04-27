@@ -1,5 +1,5 @@
 import { Api } from '../../Api'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventType, ProposalDetailsJsonByType, ProposalType } from '../../types'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { ISubmittableResult } from '@polkadot/types/types/'
@@ -30,7 +30,7 @@ export class CreateProposalsFixture extends StandardizedFixture {
   protected proposalsParams: ProposalCreationParams[]
   protected stakingAccounts: string[] = []
 
-  public constructor(api: Api, query: QueryNodeApi, proposalsParams: ProposalCreationParams[]) {
+  public constructor(api: Api, query: OrionApi, proposalsParams: ProposalCreationParams[]) {
     super(api, query)
     this.proposalsParams = proposalsParams
   }

@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Api } from '../../Api'
 import { StandardizedFixture } from '../../Fixture'
-import { QueryNodeApi } from '../../QueryNodeApi'
+import { OrionApi } from '../../OrionApi'
 import { EventDetails, AnyQueryNodeEvent } from '../../types'
 
 export type VotingParams = {
@@ -17,7 +17,7 @@ export class VoteFixture extends StandardizedFixture {
 
   constructor(
     api: Api,
-    query: QueryNodeApi,
+    query: OrionApi,
     votes: Map<string, VotingParams>,
     failureExpected = false
   ) {
