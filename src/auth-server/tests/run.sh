@@ -4,6 +4,7 @@ set -e
 SCRIPT_PATH="$(dirname "${BASH_SOURCE[0]}")"
 cd $SCRIPT_PATH/../../..
 
+docker network create joystream_default || true
 docker-compose down -v
 docker-compose up -d orion_db
 until docker-compose logs orion_db | grep "database system is ready to accept connections"; do
