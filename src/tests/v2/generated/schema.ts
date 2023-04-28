@@ -4279,6 +4279,7 @@ export type Query = {
   distributionBucketOperatorsConnection: DistributionBucketOperatorsConnection
   distributionBuckets: Array<DistributionBucket>
   distributionBucketsConnection: DistributionBucketsConnection
+  endingAuctionsNfts: Array<Maybe<OwnedNft>>
   eventById?: Maybe<Event>
   /** @deprecated Use eventById */
   eventByUniqueInput?: Maybe<Event>
@@ -4788,6 +4789,12 @@ export type QueryDistributionBucketsConnectionArgs = {
   first?: Maybe<Scalars['Int']>
   orderBy: Array<DistributionBucketOrderByInput>
   where?: Maybe<DistributionBucketWhereInput>
+}
+
+export type QueryEndingAuctionsNftsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  where?: Maybe<OwnedNftWhereInput>
 }
 
 export type QueryEventByIdArgs = {
