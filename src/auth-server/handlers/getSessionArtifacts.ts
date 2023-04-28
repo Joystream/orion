@@ -28,7 +28,8 @@ export const getSessionArtifacts: (
     if (!artifacts) {
       throw new NotFoundError('Encryption artifacts assiocated with the current session not found')
     }
-    res.status(200).json(artifacts)
+    const { cipherIv, cipherKey } = artifacts
+    res.status(200).json({ cipherIv, cipherKey })
   } catch (e) {
     next(e)
   }
