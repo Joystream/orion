@@ -206,7 +206,7 @@ This endpoint does not need any parameter.
 
 <a name="login"></a>
 # **login**
-> GenericOkResponseData login(LoginRequestData)
+> LoginResponseData login(LoginRequestData)
 
 
 
@@ -220,7 +220,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+[**LoginResponseData**](../Models/LoginResponseData.md)
 
 ### Authorization
 

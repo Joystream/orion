@@ -40,7 +40,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
  - [GenericErrorResponseData](./Models/GenericErrorResponseData.md)
  - [GenericOkResponseData](./Models/GenericOkResponseData.md)
  - [LoginRequestData](./Models/LoginRequestData.md)
- - [LoginRequestData_allOf](./Models/LoginRequestData_allOf.md)
+ - [LoginResponseData](./Models/LoginResponseData.md)
  - [RequestTokenRequestData](./Models/RequestTokenRequestData.md)
  - [SessionEncryptionArtifacts](./Models/SessionEncryptionArtifacts.md)
 
