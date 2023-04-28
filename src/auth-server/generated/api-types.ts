@@ -70,12 +70,9 @@ export interface components {
     AnonymousUserAuthResponseData: components['schemas']['GenericOkResponseData'] & {
       userId: string
     }
-    LoginRequestData: components['schemas']['ActionExecutionRequestData'] & {
-      payload?: components['schemas']['ActionExecutionPayload'] & {
-        /** @enum {string} */
-        action?: 'login'
-        gatewayAccountId: string
-      }
+    LoginRequestData: components['schemas']['ActionExecutionRequestData']
+    LoginResponseData: {
+      accountId: string
     }
     CreateAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
       payload?: components['schemas']['ActionExecutionPayload'] & {
@@ -151,7 +148,7 @@ export interface components {
     /** @description Logged in */
     LoginOkResponse: {
       content: {
-        'application/json': components['schemas']['GenericOkResponseData']
+        'application/json': components['schemas']['LoginResponseData']
       }
     }
     /** @description Account not found by provided address or the address cannot be used to login. */

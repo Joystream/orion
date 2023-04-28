@@ -8,7 +8,7 @@ import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
-  | components['schemas']['GenericOkResponseData']
+  | components['schemas']['LoginResponseData']
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['LoginRequestData']
 
@@ -25,7 +25,7 @@ export const login: (
 
     await verifyActionExecutionRequest(em, req.body)
 
-    const sessionData = await em.transaction(async (em) => {
+    const [sessionData, account] = await em.transaction(async (em) => {
       const connectedAccount = await em.getRepository(ConnectedAccount).findOne({
         where: {
           id: joystreamAccountId,
@@ -41,7 +41,9 @@ export const login: (
 
       const { account } = connectedAccount
 
-      return getOrCreateSession(em, req, account.userId, account.id)
+      const sessionData = await getOrCreateSession(em, req, account.userId, account.id)
+
+      return [sessionData, account]
     })
 
     if (sessionData.isNew) {
@@ -49,7 +51,7 @@ export const login: (
     }
 
     res.status(200).json({
-      success: true,
+      accountId: account.id,
     })
   } catch (e) {
     next(e)
