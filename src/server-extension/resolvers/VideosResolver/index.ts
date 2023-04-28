@@ -131,12 +131,34 @@ export class VideosResolver {
     }
 
     const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
-    const connectionQuerySql = extendClause(
-      connectionQuery.sql,
-      'WHERE',
-      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
-      'AND'
-    )
+
+    let connectionQuerySql: string
+
+    const hasPeriodDaysArgAndIsOrderedByViews =
+      args.periodDays &&
+      (args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_DESC') ||
+        args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
+
+    if (hasPeriodDaysArgAndIsOrderedByViews) {
+      connectionQuerySql = extendClause(
+        connectionQuery.sql,
+        'FROM',
+        `JOIN unnest('{${ids
+          .map((id) => `"${id}"`)
+          .join(', ')}}'::text[]) WITH ORDINALITY t(id, ord) USING ("id")`,
+        ''
+      )
+
+      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" DESC', 't.ord')
+      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" ASC', 't.ord DESC')
+    } else {
+      connectionQuerySql = extendClause(
+        connectionQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
+    }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql
