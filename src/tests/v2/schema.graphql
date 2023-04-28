@@ -355,7 +355,8 @@ type ExtendedChannel {
 
 type TopSellingChannelsResult {
   channel: Channel!
-  amount: Int!
+  amount: String!
+  nftSold: Int!
 }
 
 type ChannelNftCollector {

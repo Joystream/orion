@@ -130,7 +130,11 @@ export function buildTopSellingChannelsQuery(
   let listQuerySql = listQuery.sql
 
   // Count NFT sells from the auctions and buy now events and add them to the query
-  listQuerySql = extendClause(listQuerySql, 'SELECT', '"top_selling_channels"."amount"')
+  listQuerySql = extendClause(
+    listQuerySql,
+    'SELECT',
+    '"top_selling_channels"."amount", "top_selling_channels"."nftSold"'
+  )
 
   listQuerySql = extendClause(
     listQuerySql,
@@ -139,7 +143,8 @@ export function buildTopSellingChannelsQuery(
     INNER JOIN (
       SELECT
         (SUM((COALESCE(event.data->>'price', '0')::bigint)) + SUM(COALESCE(winning_bid.amount, 0))) AS "amount",
-        "data"->'previousNftOwner'->>'channel' AS "channel_id"
+        "data"->'previousNftOwner'->>'channel' AS "channel_id",
+        COUNT("event"."data"->'previousNftOwner'->>'channel') as "nftSold"
       FROM "event"
       LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
       WHERE
@@ -170,11 +175,17 @@ export function buildTopSellingChannelsQuery(
   const oldListQMap = listQuery.map.bind(listQuery)
   listQuery.map = (rows: unknown[][]) => {
     const sellAmounts: unknown[] = []
+    const nftCount: unknown[] = []
     for (const row of rows) {
+      nftCount.push(row.pop())
       sellAmounts.push(row.pop())
     }
     const channelsMapped = oldListQMap(rows)
-    return channelsMapped.map((channel, i) => ({ channel, amount: sellAmounts[i] }))
+    return channelsMapped.map((channel, i) => ({
+      channel,
+      amount: sellAmounts[i],
+      nftSold: nftCount[i],
+    }))
   }
 
   return listQuery
