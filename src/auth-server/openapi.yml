@@ -322,7 +322,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GenericOkResponseData'
+            $ref: '#/components/schemas/LoginResponseData'
     LoginUnauthorizedResponse:
       description: Account not found by provided address or the address cannot be used to login.
       content:
@@ -445,21 +445,13 @@ components:
     LoginRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'
-        - type: object
-          properties:
-            payload:
-              allOf:
-                - $ref: '#/components/schemas/ActionExecutionPayload'
-                - type: object
-                  required:
-                    - gatewayAccountId
-                  properties:
-                    action:
-                      type: string
-                      enum:
-                        - login
-                    gatewayAccountId:
-                      type: string
+    LoginResponseData:
+      type: object
+      required:
+        - accountId
+      properties:
+        accountId:
+          type: string
     CreateAccountRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'

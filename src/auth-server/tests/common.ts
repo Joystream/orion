@@ -139,7 +139,6 @@ export async function createAccountAndSignIn(
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {
       action: 'login',
-      gatewayAccountId: keypair.address,
     },
     keypair
   )
