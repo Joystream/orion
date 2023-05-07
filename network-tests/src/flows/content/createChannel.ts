@@ -1,7 +1,7 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { CreateChannelFixture, ChannelCreationParameters } from '../../fixtures/content'
+import { CreateChannelFixture } from '../../fixtures/content'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { BTreeSet, u64 } from '@polkadot/types-codec'
 import { BN } from 'bn.js'
