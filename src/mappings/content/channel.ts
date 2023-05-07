@@ -25,7 +25,7 @@ export async function processChannelCreatedEvent({
   overlay,
   block,
   event: {
-    asV1000: [
+    asV2001: [
       channelId,
       { owner, dataObjects, channelStateBloatBond },
       channelCreationParameters,
@@ -101,7 +101,7 @@ export async function processChannelUpdatedEvent({
   overlay,
   block,
   event: {
-    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
+    asV2001: [, channelId, channelUpdateParameters, newDataObjects],
   },
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -133,7 +133,7 @@ export async function processChannelUpdatedEvent({
 export async function processChannelDeletedEvent({
   overlay,
   event: {
-    asV1000: [, channelId],
+    asV2001: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
   await deleteChannel(overlay, channelId)
@@ -142,7 +142,7 @@ export async function processChannelDeletedEvent({
 export async function processChannelDeletedByModeratorEvent({
   overlay,
   event: {
-    asV1000: [, channelId],
+    asV2001: [, channelId],
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
@@ -151,7 +151,7 @@ export async function processChannelDeletedByModeratorEvent({
 export async function processChannelVisibilitySetByModeratorEvent({
   overlay,
   event: {
-    asV1000: [, channelId, isHidden],
+    asV2001: [, channelId, isHidden],
   },
 }: EventHandlerContext<'Content.ChannelVisibilitySetByModerator'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -164,7 +164,7 @@ export async function processChannelOwnerRemarkedEvent({
   extrinsicHash,
   overlay,
   event: {
-    asV1000: [channelId, messageBytes],
+    asV2001: [channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelOwnerRemarked'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
@@ -189,7 +189,7 @@ export async function processChannelAgentRemarkedEvent({
   indexInBlock,
   extrinsicHash,
   event: {
-    asV1000: [, channelId, messageBytes],
+    asV2001: [, channelId, messageBytes],
   },
 }: EventHandlerContext<'Content.ChannelAgentRemarked'>): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
