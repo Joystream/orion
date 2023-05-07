@@ -206,6 +206,14 @@ export class Api {
   private readonly sender: Sender
   // source of funds for all new accounts
   private readonly treasuryAccount: string
+  
+  // --- Creator Token actors ---
+  private creatorAddress: undefined | string
+  private creatorMemberId: undefined | number
+  private firstHolderAddress: undefined | string
+  private firstHolderMemberId: undefined | number
+  private secondHolderAddress: undefined | string
+  private secondHolderMemberId: undefined | number
 
   constructor(
     factory: ApiFactory,
@@ -218,6 +226,30 @@ export class Api {
     this.api = api
     this.treasuryAccount = treasuryAccount
     this.sender = new Sender(api, keyring, label)
+  }
+
+
+  // getter & setters for creator token actors
+  public get creator(): [string, number] {
+    return [this.creatorAddress!, this.creatorMemberId!]
+  }
+  public get firstHolder(): [string, number] {
+    return [this.firstHolderAddress!, this.firstHolderMemberId!]
+  }
+  public get secondHolder(): [string, number] {
+    return [this.secondHolderAddress!, this.secondHolderMemberId!]
+  }
+  public setCreator(address: string, memberId: number) {
+    this.creatorAddress = address
+    this.creatorMemberId = memberId
+  }
+  public setFirstHolder(address: string, memberId: number) {
+    this.firstHolderAddress = address
+    this.firstHolderMemberId = memberId
+  }
+  public setSecondHolder(address: string, memberId: number) {
+    this.secondHolderAddress = address
+    this.secondHolderMemberId = memberId
   }
 
   public get query(): ApiPromise['query'] {
