@@ -6,6 +6,7 @@ import { expect } from 'chai'
 import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
 import { ExitRevenueShareFixture } from 'src/fixtures/token/ExitRevenueShareFixture'
+import { FinalizeRevenueShareFixture } from 'src/fixtures/token/FinalizeRevenueShareFixture'
 
 export default async function revenueShare({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:revenue-share')
@@ -40,5 +41,9 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
   debug('User exists revenue share')
   const exitRevenueShareFixture = new ExitRevenueShareFixture(api, query, firstHolderAddress, firstHolderMemberId, tokenId)
   await new FixtureRunner(exitRevenueShareFixture).run()
+
+  debug('revenue share finalized')
+  const finalizeRevenueShareFixture = new FinalizeRevenueShareFixture(api, query, firstHolderAddress, firstHolderMemberId, tokenId)
+  await new FixtureRunner(finalizeRevenueShareFixture).run()
 }
 
