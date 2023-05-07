@@ -49,6 +49,9 @@ export enum Resource {
   Council = 'Council',
   Proposals = 'Proposals',
   MembershipWgBudget = 'MembershipWgBudget',
+  Creator = 'Creator',
+  FirstHolder = 'FirstHolder',
+  SecondHolder = 'SecondHolder'
 }
 
 export class ResourceManager {
@@ -78,6 +81,10 @@ export class ResourceManager {
       [Resource.Proposals]: this.add(Resource.Proposals, 20),
       // mutex for meembership working group budget
       [Resource.MembershipWgBudget]: this.add(Resource.MembershipWgBudget),
+      // r/w locks for crt actors 
+      [Resource.Creator]: this.add(Resource.Creator),
+      [Resource.FirstHolder]: this.add(Resource.FirstHolder),
+      [Resource.SecondHolder]: this.add(Resource.SecondHolder)
     }
   }
 

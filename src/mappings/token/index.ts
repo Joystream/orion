@@ -110,7 +110,7 @@ export async function processTokenIssuedEvent({
 export async function processCreatorTokenIssuedEvent({
   overlay,
   event: {
-    asV1000: [, channelId, tokenId],
+    asV2001: [, channelId, tokenId],
   },
 }: EventHandlerContext<"Content.CreatorTokenIssued">) {
   overlay.getRepository(TokenChannel).new({
@@ -124,7 +124,7 @@ export async function processTokenAmountTransferredEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, sourceMemberId, validatedTransfers],
+    asV2001: [tokenId, sourceMemberId, validatedTransfers],
   },
 }: EventHandlerContext<"ProjectToken.TokenAmountTransferred">) {
   // get sourceAccount by getManyByRelation with tokenId and memberId
@@ -150,7 +150,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, sourceMemberId, validatedTransfers],
+    asV2001: [tokenId, sourceMemberId, validatedTransfers],
   },
 }: EventHandlerContext<"ProjectToken.TokenAmountTransferredByIssuer">) {
   const token = await overlay
@@ -184,7 +184,7 @@ export async function processTokenDeissuedEvent({
 export async function processAccountDustedByEvent({
   overlay,
   event: {
-    asV1000: [tokenId, dustedAccountId, , ,],
+    asV2001: [tokenId, dustedAccountId, , ,],
   },
 }: EventHandlerContext<"ProjectToken.AccountDustedBy">) {
   const token = await overlay
@@ -293,7 +293,7 @@ export async function processTokenSaleInitializedEvent({
 export async function processPatronageRateDecreasedToEvent({
   overlay,
   event: {
-    asV1000: [tokenId, newRate],
+    asV2001: [tokenId, newRate],
   },
 }: EventHandlerContext<"ProjectToken.PatronageRateDecreasedTo">) {
   const token = await overlay
@@ -309,7 +309,7 @@ export async function processPatronageRateDecreasedToEvent({
 export async function processPatronageCreditClaimedEvent({
   overlay,
   event: {
-    asV1000: [tokenId, amount, memberId],
+    asV2001: [tokenId, amount, memberId],
   },
 }: EventHandlerContext<"ProjectToken.PatronageCreditClaimed">) {
   const creator = await getTokenAccountByMemberByTokenOrFail(
@@ -489,7 +489,7 @@ export async function processRevenueSplitIssuedEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, startBlock, duration, joyAllocation],
+    asV2001: [tokenId, startBlock, duration, joyAllocation],
   },
 }: EventHandlerContext<"ProjectToken.RevenueSplitIssued">) {
   const endsAt = startBlock + duration;
@@ -516,7 +516,7 @@ export async function processRevenueSplitIssuedEvent({
 export async function processMemberJoinedWhitelistEvent({
   overlay,
   event: {
-    asV1000: [tokenId, memberId],
+    asV2001: [tokenId, memberId],
   },
 }: EventHandlerContext<"ProjectToken.MemberJoinedWhitelist">) {
   const token = await overlay
@@ -548,7 +548,7 @@ export async function processAmmDeactivatedEvent({
 export async function processTokensBurnedEvent({
   overlay,
   event: {
-    asV1000: [tokenId, memberId, amountBurned],
+    asV2001: [tokenId, memberId, amountBurned],
   },
 }: EventHandlerContext<"ProjectToken.TokensBurned">) {
   const token = await overlay
@@ -607,7 +607,7 @@ export async function processTokenSaleFinalizedEvent({
 export async function processRevenueSplitLeftEvent({
   overlay,
   event: {
-    asV1000: [tokenId, memberId, unstakedAmount],
+    asV2001: [tokenId, memberId, unstakedAmount],
   },
 }: EventHandlerContext<"ProjectToken.RevenueSplitLeft">) {
   const account = await getTokenAccountByMemberByTokenOrFail(
@@ -621,7 +621,7 @@ export async function processRevenueSplitLeftEvent({
 export async function processRevenueSplitFinalizedEvent({
   overlay,
   event: {
-    asV1000: [tokenId, ,], // leftover JOYs not processed in orion
+    asV2001: [tokenId, ,], // leftover JOYs not processed in orion
   },
 }: EventHandlerContext<"ProjectToken.RevenueSplitFinalized">) {
   const token = await overlay
@@ -638,7 +638,7 @@ export async function processUserParticipatedInSplitEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, memberId, stakedAmount, joyDividend],
+    asV2001: [tokenId, memberId, stakedAmount, joyDividend],
   },
 }: EventHandlerContext<"ProjectToken.UserParticipatedInSplit">) {
   const token = await overlay
