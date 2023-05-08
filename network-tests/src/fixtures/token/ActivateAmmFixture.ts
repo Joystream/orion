@@ -4,40 +4,41 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import BN from 'bn.js'
+import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 
-type TokensBurnedEventDetails = EventDetails<EventType<'projectToken', 'AmmActivated'>>
+type AmmActivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmActivated'>>
 
-export class BurnTokensFixture extends StandardizedFixture {
-  protected creatorAddress
-  protected tokenId: number
-  protected fromMemberId: number
-  protected amount: BN
+export class ActivateAmmFixture extends StandardizedFixture {
+  protected creatorAddress: string
+  protected creatorMemberId: number 
+  protected channelId: number
+  protected parameters: PalletProjectTokenAmmParams
 
   public constructor(
     api: Api,
     query: OrionApi,
     creatorAddress: string,
-    tokenId: number,
-    fromMemberId: number,
-    amount: BN
+    creatorMemberId: number,
+    channelId: number,
+    parameters: PalletProjectTokenAmmParams,
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
-    this.tokenId = tokenId
-    this.fromMemberId = fromMemberId
-    this.amount = amount
+    this.creatorMemberId = creatorMemberId
+    this.channelId = channelId 
+    this.parameters = parameters
   }
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [this.api.tx.projectToken.burn(this.tokenId, this.fromMemberId, this.amount)]
+    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId})
+    return [this.api.tx.content.activateAmm(actor, this.channelId, this.parameters)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokensBurnedEventDetails> {
-    return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
+  protected async getEventFromResult(result: SubmittableResult): Promise<AmmActivatedEventDetails> {
+    return this.api.getEventDetails(result, 'projectToken', 'AmmActivated')
   }
 
   public async tryQuery(): Promise<void> {
