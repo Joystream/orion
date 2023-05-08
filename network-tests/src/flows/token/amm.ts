@@ -4,7 +4,7 @@ import { FixtureRunner } from '../../Fixture'
 import { expect } from 'chai'
 import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
-import { ActivateAmmFixture, BuyOnAmmFixture } from '../../fixtures/token'
+import { ActivateAmmFixture, BuyOnAmmFixture, SellOnAmmFixture } from '../../fixtures/token'
 
 export default async function amm({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:token-sale')
@@ -38,6 +38,11 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
   const amountBought = new BN(1000)
   const buyOnAmmFixture = new BuyOnAmmFixture(api, query, firstHolderAddress, firstHolderId, tokenId, amountBought)
   await new FixtureRunner(buyOnAmmFixture).run()
+
+  debug('sell on amm')
+  const amountSold = new BN(1000)
+  const sellOnAmmFixture = new SellOnAmmFixture(api, query, firstHolderAddress, firstHolderId, tokenId, amountSold)
+  await new FixtureRunner(sellOnAmmFixture).run()
 }
 
 
