@@ -4,7 +4,7 @@ import { FixtureRunner } from '../../Fixture'
 import { expect } from 'chai'
 import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
-import { ActivateAmmFixture } from '../../fixtures/token'
+import { ActivateAmmFixture, BuyOnAmmFixture } from '../../fixtures/token'
 
 export default async function amm({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:token-sale')
@@ -26,13 +26,18 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
   unlockFirstHolderAccess()
 
   // sale params
-  debug('issue token sale')
+  debug('activate amm')
   const ammParams = api.createType('PalletProjectTokenAmmParams', {
         slope: api.createType('Permill', new BN(10)),
         intercept: api.createType('Permill', new BN(10000))
   })
   const activateAmmFixture = new ActivateAmmFixture(api, query, creatorAddress, creatorMemberId, channelId, ammParams)
   await new FixtureRunner(activateAmmFixture).run()
+
+  debug('buy on amm')
+  const amountBought = new BN(1000)
+  const buyOnAmmFixture = new BuyOnAmmFixture(api, query, firstHolderAddress, firstHolderId, tokenId, amountBought)
+  await new FixtureRunner(buyOnAmmFixture).run()
 }
 
 
