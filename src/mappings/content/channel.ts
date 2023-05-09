@@ -59,6 +59,7 @@ export async function processChannelCreatedEvent({
     .countBy({ channelId: channelId.toString() });
 
   // create entity
+  console.log("****** CREATE_CHANNEL");
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
@@ -74,6 +75,7 @@ export async function processChannelCreatedEvent({
     totalVideosCreated: 0,
   });
 
+  console.log("****** CHANNEL CREATED");
   const ownerMember = channel.ownerMemberId
     ? await overlay
         .getRepository(Membership)
