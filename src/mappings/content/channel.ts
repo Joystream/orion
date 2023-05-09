@@ -39,13 +39,14 @@ export async function processChannelCreatedEvent({
     rewardAccount,
   ] = event.isV1000 ? event.asV1000 : event.asV2002
 
+  console.log(`******* channel id ${channelId}`)
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
     .countBy({ channelId: channelId.toString() })
 
   // create entity
-  console.log('****** CREATE_CHANNEL')
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
@@ -58,10 +59,8 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
-    revenueShareRatioPercent: null,
   })
 
-  console.log('****** CHANNEL CREATED')
   const ownerMember = channel.ownerMemberId
     ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
     : undefined

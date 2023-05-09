@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/migrations/1683649157251-Data.js
 <<<<<<<< HEAD:db/migrations/1686758014971-Data.js
 module.exports = class Data1686758014971 {
     name = 'Data1686758014971'
@@ -8,6 +9,13 @@ module.exports = class Data1680797388456 {
 module.exports = class Data1683649157251 {
     name = 'Data1683649157251'
 >>>>>>>> 0cf12751 (fix: mignations):db/migrations/1683649157251-Data.js
+||||||| parent of 2f722f3b (fix: solve channel not being added):db/migrations/1683649157251-Data.js
+module.exports = class Data1683649157251 {
+    name = 'Data1683649157251'
+=======
+module.exports = class Data1683652751170 {
+    name = 'Data1683652751170'
+>>>>>>> 2f722f3b (fix: solve channel not being added):db/migrations/1683652751170-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
