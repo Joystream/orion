@@ -548,45 +548,45 @@ export async function processUserParticipatedInSplitEvent({
   account.stakedAmount += stakedAmount
 }
 
-export async function processCreatorTokenIssuerRemarkedEvent({
-  overlay,
-  event: {
-    asV2001: [tokenId, metadataBytes],
-  },
-}: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
-  const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
-  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+// export async function processCreatorTokenIssuerRemarkedEvent({
+//   overlay,
+//   event: {
+//     asV2001: [tokenId, metadataBytes],
+//   },
+// }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
+//   const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
+//   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
-  if (!metadata) {
-    return
-  }
+//   if (!metadata) {
+//     return
+//   }
 
-  if (metadata!.description) {
-    token.description = metadata!.description!
-  }
+//   if (metadata!.description) {
+//     token.description = metadata!.description!
+//   }
 
-  if (metadata!.benefits) {
-    for (const benefit of metadata!.benefits!) {
-      overlay.getRepository(Benefit).new({
-        title: benefit.title ? benefit.title! : undefined,
-        description: benefit.description ? benefit.description! : undefined,
-        emojiCode: benefit.emoji ? benefit.emoji! : undefined,
-        displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
-      })
-    }
-  }
+//   if (metadata!.benefits) {
+//     for (const benefit of metadata!.benefits!) {
+//       overlay.getRepository(Benefit).new({
+//         title: benefit.title ? benefit.title! : undefined,
+//         description: benefit.description ? benefit.description! : undefined,
+//         emojiCode: benefit.emoji ? benefit.emoji! : undefined,
+//         displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
+//       })
+//     }
+//   }
 
-  if (isSet(metadata!.whitelistApplicationNote)) {
-    token.whitelistApplicantNote = metadata!.whitelistApplicationNote || null
-  }
+//   if (isSet(metadata!.whitelistApplicationNote)) {
+//     token.whitelistApplicantNote = metadata!.whitelistApplicationNote || null
+//   }
 
-  if (isSet(metadata!.whitelistApplicationApplyLink)) {
-    token.whitelistApplicantLink = metadata!.whitelistApplicationApplyLink || null
-  }
+//   if (isSet(metadata!.whitelistApplicationApplyLink)) {
+//     token.whitelistApplicantLink = metadata!.whitelistApplicationApplyLink || null
+//   }
 
-  if (isSet(metadata!.avatarUri)) {
-    token.avatar = metadata!.avatarUri
-      ? new TokenAvatarUri({ avatarUri: metadata!.avatarUri })
-      : null
-  }
-}
+//   if (isSet(metadata!.avatarUri)) {
+//     token.avatar = metadata!.avatarUri
+//       ? new TokenAvatarUri({ avatarUri: metadata!.avatarUri })
+//       : null
+//   }
+// }

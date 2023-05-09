@@ -30,20 +30,22 @@ import { generateAppActionCommitment } from '@joystream/js/utils'
 export async function processChannelCreatedEvent({
   overlay,
   block,
-  event: {
-    asV2002: [
-      channelId,
-      { owner, dataObjects, channelStateBloatBond },
-      channelCreationParameters,
-      rewardAccount,
-    ],
-  },
+  event,
 }: EventHandlerContext<'Content.ChannelCreated'>) {
+  const [
+    channelId,
+    { owner, dataObjects, channelStateBloatBond },
+    channelCreationParameters,
+    rewardAccount,
+  ] = event.isV1000 ? event.asV1000 : event.asV2002
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
     .countBy({ channelId: channelId.toString() })
+
   // create entity
+  console.log('****** CREATE_CHANNEL')
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
@@ -56,8 +58,10 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+    revenueShareRatioPercent: null,
   })
 
+  console.log('****** CHANNEL CREATED')
   const ownerMember = channel.ownerMemberId
     ? await overlay.getRepository(Membership).getByIdOrFail(channel.ownerMemberId)
     : undefined
@@ -179,8 +183,8 @@ export async function processChannelOwnerRemarkedEvent({
   const result = decodedMessage
     ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -204,8 +208,8 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
