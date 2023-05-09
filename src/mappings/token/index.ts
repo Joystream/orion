@@ -37,7 +37,7 @@ export async function processTokenIssuedEvent({
   overlay,
   block,
   event: {
-    asV2001: [
+    asV1000: [
       tokenId,
       { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },
     ],
@@ -81,7 +81,7 @@ export async function processTokenIssuedEvent({
 export async function processCreatorTokenIssuedEvent({
   overlay,
   event: {
-    asV2001: [, channelId, tokenId],
+    asV1000: [, channelId, tokenId],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssued'>) {
   overlay.getRepository(TokenChannel).new({
@@ -94,7 +94,7 @@ export async function processTokenAmountTransferredEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, sourceMemberId, validatedTransfers],
+    asV1000: [tokenId, sourceMemberId, validatedTransfers],
   },
 }: EventHandlerContext<'ProjectToken.TokenAmountTransferred'>) {
   const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, sourceMemberId)
@@ -130,7 +130,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, sourceMemberId, validatedTransfers],
+    asV1000: [tokenId, sourceMemberId, validatedTransfers],
   },
 }: EventHandlerContext<'ProjectToken.TokenAmountTransferredByIssuer'>) {
   const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, sourceMemberId)
@@ -170,7 +170,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
 
 export async function processTokenDeissuedEvent({
   overlay,
-  event: { asV2001: tokenId },
+  event: { asV1000: tokenId },
 }: EventHandlerContext<'ProjectToken.TokenDeissued'>) {
   const token = await overlay.getTokenOrFail(tokenId)
   token.deissued = true
@@ -179,7 +179,7 @@ export async function processTokenDeissuedEvent({
 export async function processAccountDustedByEvent({
   overlay,
   event: {
-    asV2001: [tokenId, dustedAccountId, , ,],
+    asV1000: [tokenId, dustedAccountId, , ,],
   },
 }: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
   const account = await overlay.getTokenAccountOrFail(tokenId, dustedAccountId)
@@ -189,7 +189,7 @@ export async function processAccountDustedByEvent({
 export async function processAmmActivatedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, , { slope, intercept }],
+    asV2002: [tokenId, , { slope, intercept }],
   },
 }: EventHandlerContext<'ProjectToken.AmmActivated'>) {
   const id = overlay.getRepository(AmmCurve).getNextIdNumber()
@@ -210,7 +210,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, saleNonce, fundsSourceMemberId, tokenSale, metadataBytes],
+    asV1000: [tokenId, saleNonce, tokenSale, metadataBytes],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   if (tokenSale.vestingScheduleParams !== undefined) {
@@ -226,47 +226,49 @@ export async function processTokenSaleInitializedEvent({
 
     overlay.getRepository(VestedSale).new({
       id: overlay.getRepository(VestedSale).getNextIdNumber().toString(),
-      saleId: tokenId.toString() + saleNonce.toString(),
+      saleId: tokenId.toString(),
       vestingId: vestingData.id(),
     })
   }
 
-  const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
-  sourceAccount.totalAmount -= tokenSale.quantityLeft
+  // TODO: enable the following code below
 
-  const sale = overlay.getRepository(Sale).new({
-    id: tokenId.toString() + saleNonce.toString(),
-    tokenId: tokenId.toString(),
-    tokensSold: BigInt(0),
-    createdIn: block.height,
-    startBlock: tokenSale.startBlock,
-    durationInBlocks: tokenSale.duration,
-    endsAt: tokenSale.startBlock + tokenSale.duration,
-    maxAmountPerMember: tokenSale.capPerMember,
-    tokenSaleAllocation: tokenSale.quantityLeft,
-    pricePerUnit: tokenSale.unitPrice,
-    finalized: false,
-    termsAndConditions: '', // TODO Sale metadata (next PR)
-    fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
-  })
+  // const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
+  // sourceAccount.totalAmount -= tokenSale.quantityLeft
 
-  const token = await overlay.getTokenOrFail(tokenId)
-  token.status = TokenStatus.SALE
+  // const sale = overlay.getRepository(Sale).new({
+  //   id: tokenId.toString() + saleNonce.toString(),
+  //   tokenId: tokenId.toString(),
+  //   tokensSold: BigInt(0),
+  //   createdIn: block.height,
+  //   startBlock: tokenSale.startBlock,
+  //   durationInBlocks: tokenSale.duration,
+  //   endsAt: tokenSale.startBlock + tokenSale.duration,
+  //   maxAmountPerMember: tokenSale.capPerMember,
+  //   tokenSaleAllocation: tokenSale.quantityLeft,
+  //   pricePerUnit: tokenSale.unitPrice,
+  //   finalized: false,
+  //   termsAndConditions: '', // TODO Sale metadata (next PR)
+  //   fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
+  // })
 
-  if (metadataBytes) {
-    const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
-    if (metadata) {
-      if (isSet(metadata!.termsAndConditions)) {
-        sale.termsAndConditions = metadata!.termsAndConditions.toString()
-      }
-    }
-  }
+  // const token = await overlay.getTokenOrFail(tokenId)
+  // token.status = TokenStatus.SALE
+
+  // if (metadataBytes) {
+  //   const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
+  //   if (metadata) {
+  //     if (isSet(metadata!.termsAndConditions)) {
+  //       sale.termsAndConditions = metadata!.termsAndConditions.toString()
+  //     }
+  //   }
+  // }
 }
 
 export async function processPatronageRateDecreasedToEvent({
   overlay,
   event: {
-    asV2001: [tokenId, newRate],
+    asV1000: [tokenId, newRate],
   },
 }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
   const token = await overlay.getTokenOrFail(tokenId)
@@ -276,7 +278,7 @@ export async function processPatronageRateDecreasedToEvent({
 export async function processPatronageCreditClaimedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, amount, memberId],
+    asV1000: [tokenId, amount, memberId],
   },
 }: EventHandlerContext<'ProjectToken.PatronageCreditClaimed'>) {
   const creator = await overlay.getTokenAccountOrFail(tokenId, memberId)
@@ -290,7 +292,7 @@ export async function processTokensBoughtOnAmmEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, memberId, crtMinted, joysDeposited],
+    asV2002: [tokenId, memberId, crtMinted, joysDeposited],
   },
 }: EventHandlerContext<'ProjectToken.TokensBoughtOnAmm'>) {
   const token = await overlay.getTokenOrFail(tokenId)
@@ -324,7 +326,7 @@ export async function processTokensSoldOnAmmEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, memberId, crtBurned, joysRecovered],
+    asV2002: [tokenId, memberId, crtBurned, joysRecovered],
   },
 }: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -352,7 +354,7 @@ export async function processTokensPurchasedOnSaleEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, saleId, amountPurchased, memberId],
+    asV1000: [tokenId, saleId, amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
   const buyerAccount = await overlay
@@ -392,7 +394,7 @@ export async function processTokensPurchasedOnSaleEvent({
 export async function processUpcomingTokenSaleUpdatedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, saleId, newStart, newDuration],
+    asV1000: [tokenId, saleId, newStart, newDuration],
   },
 }: EventHandlerContext<'ProjectToken.UpcomingTokenSaleUpdated'>) {
   const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
@@ -411,7 +413,7 @@ export async function processRevenueSplitIssuedEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, startBlock, duration, joyAllocation],
+    asV1000: [tokenId, startBlock, duration, joyAllocation],
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitIssued'>) {
   const endsAt = startBlock + duration
@@ -436,7 +438,7 @@ export async function processRevenueSplitIssuedEvent({
 export async function processMemberJoinedWhitelistEvent({
   overlay,
   event: {
-    asV2001: [tokenId, memberId],
+    asV1000: [tokenId, memberId],
   },
 }: EventHandlerContext<'ProjectToken.MemberJoinedWhitelist'>) {
   const token = await overlay.getTokenOrFail(tokenId)
@@ -446,7 +448,7 @@ export async function processMemberJoinedWhitelistEvent({
 export async function processAmmDeactivatedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, burnedAmount],
+    asV2002: [tokenId, burnedAmount],
   },
 }: EventHandlerContext<'ProjectToken.AmmDeactivated'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -462,7 +464,7 @@ export async function processAmmDeactivatedEvent({
 export async function processTokensBurnedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, memberId, amountBurned],
+    asV1000: [tokenId, memberId, amountBurned],
   },
 }: EventHandlerContext<'ProjectToken.TokensBurned'>) {
   const token = await overlay.getTokenOrFail(tokenId)
@@ -479,7 +481,7 @@ export async function processTokensBurnedEvent({
 
 export async function processTransferPolicyChangedToPermissionlessEvent({
   overlay,
-  event: { asV2001: tokenId },
+  event: { asV1000: tokenId },
 }: EventHandlerContext<'ProjectToken.TransferPolicyChangedToPermissionless'>) {
   const token = await overlay.getTokenOrFail(tokenId)
   token.isInviteOnly = false
@@ -488,7 +490,7 @@ export async function processTransferPolicyChangedToPermissionlessEvent({
 export async function processTokenSaleFinalizedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, saleId, quantityLeft, ,],
+    asV1000: [tokenId, saleId, quantityLeft, ,],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
   const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
@@ -506,7 +508,7 @@ export async function processTokenSaleFinalizedEvent({
 export async function processRevenueSplitLeftEvent({
   overlay,
   event: {
-    asV2001: [tokenId, memberId, unstakedAmount],
+    asV1000: [tokenId, memberId, unstakedAmount],
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitLeft'>) {
   const account = await overlay.getTokenAccountOrFail(tokenId, memberId)
@@ -516,7 +518,7 @@ export async function processRevenueSplitLeftEvent({
 export async function processRevenueSplitFinalizedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, ,], // leftover JOYs not processed in orion
+    asV1000: [tokenId, ,], // leftover JOYs not processed in orion
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
   const token = await overlay.getTokenOrFail(tokenId)
@@ -530,7 +532,7 @@ export async function processUserParticipatedInSplitEvent({
   overlay,
   block,
   event: {
-    asV2001: [tokenId, memberId, stakedAmount, joyDividend],
+    asV1000: [tokenId, memberId, stakedAmount, joyDividend],
   },
 }: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
   const token = await overlay.getTokenOrFail(tokenId)
