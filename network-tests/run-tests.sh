@@ -16,7 +16,7 @@ function cleanup() {
     docker network rm joystream_default
 }
 
-trap cleanup EXIT
+# trap cleanup EXIT
 
 sleep 3
 

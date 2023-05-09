@@ -63,7 +63,7 @@ type Channel @entity {
   creatorToken: TokenChannel @derivedFrom(field: "channel")
 
   "% of channel balance that the creator devotes to revenue shares"
-  revenueShareRatioPercent: Int!
+  revenueShareRatioPercent: Int
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
