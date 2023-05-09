@@ -17,7 +17,7 @@
     "tests:codegen": "npx graphql-codegen -c ./src/tests/v1/codegen.yml && npx graphql-codegen -c ./src/tests/v2/codegen.yml",
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
-    "v1-migration:prepare": "./scripts/orion-v1-migration/export.sh && npx ts-node ./scripts/orion-v1-migration/prepareData.ts"
+    "offchain-state:export": "npx ts-node ./scripts/offchain-state/export.ts"
   },
   "overrides": {
     "@polkadot/api": "8.9.1",
