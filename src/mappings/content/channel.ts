@@ -53,6 +53,8 @@ export async function processChannelCreatedEvent({
     rewardAccount,
   ] = event.isV1000 ? event.asV1000 : event.asV2002;
 
+  console.log(`******* channel id ${channelId}`);
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
