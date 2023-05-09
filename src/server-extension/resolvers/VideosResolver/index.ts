@@ -134,29 +134,26 @@ export class VideosResolver {
 
     let connectionQuerySql: string
 
+    connectionQuerySql = extendClause(
+      connectionQuery.sql,
+      'WHERE',
+      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+      'AND'
+    )
+
     const hasPeriodDaysArgAndIsOrderedByViews =
       args.periodDays &&
       (args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_DESC') ||
         args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
 
     if (hasPeriodDaysArgAndIsOrderedByViews) {
-      connectionQuerySql = extendClause(
-        connectionQuery.sql,
-        'FROM',
-        `JOIN unnest('{${ids
-          .map((id) => `"${id}"`)
-          .join(', ')}}'::text[]) WITH ORDINALITY t(id, ord) USING ("id")`,
-        ''
-      )
-
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" DESC', 't.ord')
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" ASC', 't.ord DESC')
-    } else {
-      connectionQuerySql = extendClause(
-        connectionQuery.sql,
-        'WHERE',
-        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
-        'AND'
+      connectionQuerySql = overrideClause(
+        connectionQuerySql,
+        'ORDER BY',
+        `array_position(
+          array[${ids.map((id) => `'${id}'`).join(', ')}],
+          video.id  
+        ) ASC`
       )
     }
 
