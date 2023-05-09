@@ -22,3 +22,5 @@ sleep 3
 
 DEBUG=integration-tests:* npm run node-ts-strict ./src/scenarios/token.ts
 
+sleep 10
+
