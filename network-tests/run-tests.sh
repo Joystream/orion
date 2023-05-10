@@ -10,8 +10,8 @@ function cleanup() {
     docker logs ${CONTAINER_ID} --tail 15
     docker stop ${CONTAINER_ID}
     docker rm ${CONTAINER_ID}
-    docker-compose -f ../docker-compose.yml up -d
-    docker-compose -f ../archive/docker-compose.yml up -d
+    # docker-compose -f ../docker-compose.yml up -d
+    # docker-compose -f ../archive/docker-compose.yml up -d
     docker-compose -f ./docker-compose.node.yml down -v
     docker network rm joystream_default
 }
