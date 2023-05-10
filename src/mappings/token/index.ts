@@ -84,7 +84,9 @@ export async function processCreatorTokenIssuedEvent({
     asV1000: [, channelId, tokenId],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssued'>) {
+  console.log(`-------> ********** channel id - token id: ${[channelId, tokenId]}`)
   overlay.getRepository(TokenChannel).new({
+    id: tokenId.toString() + channelId.toString(),
     channelId: channelId.toString(),
     tokenId: tokenId.toString(),
   })
