@@ -116,15 +116,9 @@ export class VideosResolver {
           : ''),
       ''
     )
-    const viewsOrder =
-      args.orderBy.find((orderBy) => orderBy.startsWith('viewsNum_'))?.split('_')?.[1] || 'DESC'
 
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
-    idsQuerySql = overrideClause(
-      idsQuerySql,
-      'ORDER BY',
-      `COUNT("video_view_event"."id") ${viewsOrder}`
-    )
+    idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', `COUNT("video_view_event"."id") DESC`)
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'LIMIT', `${args.limit}`)
 
