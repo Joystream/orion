@@ -5,6 +5,7 @@ import { OperationDefinitionNode } from 'graphql'
 import { BLOCKTIME } from './consts'
 import { Utils } from './utils'
 import { TokenId } from './consts'
+
 import { GetTokenById, GetTokenByIdQuery, GetTokenByIdQueryVariables, TokenFieldsFragment } from '../graphql/generated/queries'
 
 export class OrionApi {
@@ -20,7 +21,31 @@ export class OrionApi {
     this.tryDebug = this.debug.extend('try')
   }
 
-  // TODO: Refactor to use graphql subscription (stateSubscription.lastCompleteBlock) instead
+  public async retryQuery<QueryResultT>(query: () => Promise<QueryResultT>): Promise<QueryResultT | null> {
+    const label = query.toString().replace(/^.*\.([A-za-z0-9]+\(.*\))$/g, '$1')
+    const debug = this.tryDebug.extend(label)
+    let attempts = 0;
+    let result = null
+
+    while (attempts < 6 && result === null) {
+      result = await query();
+
+      if (result === null) {
+        // Wait for 10 seconds before trying again
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        attempts++;
+      }
+    }
+
+    if (result === null) {
+      debug('max amount of retries for orion graphql server')
+    }
+
+    return result;
+
+  }
+
+  // Refactor to use graphql subscription (stateSubscription.lastCompleteBlock) instead
   public async tryQueryWithTimeout<QueryResultT>(
     query: () => Promise<QueryResultT>,
     assertResultIsValid: (res: QueryResultT) => void,
@@ -97,11 +122,9 @@ export class OrionApi {
     resultKey: keyof QueryT
   ): Promise<QueryT[keyof QueryT][number] | null> {
     this.debugQuery(query, variables)
-    return (
-      (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
-      resultKey
-      ][0] || null
-    )
+    const _qResult = (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[resultKey]
+    const qResult = Array.isArray(_qResult) ? _qResult[0] : _qResult
+    return qResult || null
   }
 
   // Query multiple entities
@@ -119,11 +142,11 @@ export class OrionApi {
     ]
   }
 
-  public async getTokenById(id: TokenId): Promise<TokenFieldsFragment[] | null> {
+  public async getTokenById(id: TokenId): Promise<TokenFieldsFragment> {
     return this.firstEntityQuery(
       GetTokenById,
       { id: id.toString() },
-      'getTokenById'
+      'tokenById'
     )
   }
 }

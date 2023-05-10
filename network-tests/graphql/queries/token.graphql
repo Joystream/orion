@@ -1,4 +1,5 @@
 fragment TokenFields on Token {
+  id
   createdAt
   deissued
   isInviteOnly
