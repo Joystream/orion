@@ -8,6 +8,9 @@ import {
   PalletContentPermissionsContentActor,
   PalletProjectTokenTokenIssuanceParameters,
 } from '@polkadot/types/lookup'
+import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { assert } from 'chai'
+import { TokenStatus } from '../../../graphql/generated/schema'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -16,6 +19,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   protected contentActor: PalletContentPermissionsContentActor
   protected channelId: number
   protected crtParams: PalletProjectTokenTokenIssuanceParameters
+  protected events: TokenIssuedEventDetails[] = []
 
   public constructor(
     api: Api,
@@ -44,11 +48,24 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
+    //   const [tokenId, { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate }] =
+    //     this.events[i].event.data
+    //   assert.equal(qEvent.status, TokenStatus.Idle)
+    //   assert.equal(qEvent.isInviteOnly, true)
+    //   assert.equal(qEvent.id, tokenId.toString())
+    //   // assert.equal(qToken.symbol, symbol.toString())
+    //   // assert.equal(qToken.annualCreatorReward, patronageRate.toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
+  public async runQueryNodeChecks(): Promise<void> {
+    await super.runQueryNodeChecks()
+    const qToken = await this.query.retryQuery(
+      () => this.query.getTokenById(this.api.createType('u64', 0)),
+    )
+    assert.isNotNull(qToken)
+    assert.equal(qToken!.id, '0')
+    assert.equal(qToken!.status, TokenStatus.Idle)
   }
+
 }
