@@ -88,6 +88,9 @@ type Token @entity {
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
+  "tokenId ++ channelId"
+  id: ID! 
+
   "token reference"
   token: Token! @unique
 
