@@ -151,9 +151,15 @@ export class VideosResolver {
       const arrayPosition = `array_position(
         array[${ids.map((id) => `'${id}'`).join(', ')}],
         video.id  
-      ) ASC`
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" DESC', arrayPosition)
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" ASC', arrayPosition)
+      )`
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" DESC',
+        `${arrayPosition} ASC`
+      )
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" ASC',
+        `${arrayPosition} DESC`
+      )
     }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
