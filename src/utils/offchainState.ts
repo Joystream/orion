@@ -84,6 +84,11 @@ export class OffchainState {
   }
 
   public async import(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
+    if (!fs.existsSync(exportFilePath)) {
+      throw new Error(
+        `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
+      )
+    }
     const { data }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
