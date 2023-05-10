@@ -118,7 +118,7 @@ export class VideosResolver {
     )
 
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
-    idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', `COUNT("video_view_event"."id") DESC`)
+    idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'LIMIT', `${args.limit}`)
 
