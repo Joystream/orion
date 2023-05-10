@@ -11,6 +11,8 @@ ADD assets assets
 RUN npm ci
 ADD tsconfig.json .
 ADD src src
+ADD schema schema
+RUN npx squid-typeorm-codegen
 RUN npm run build
 
 FROM node-with-gyp AS deps

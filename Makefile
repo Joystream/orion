@@ -7,13 +7,8 @@ install:
 build:
 	@npm run build
 
-build-processor-image:
-	@docker build . --target processor -t orion-processor
-
-build-query-node-image:
-	@docker build . --target query-node -t orion-api
-
-build-images: build-processor-image build-query-node-image
+build-docker:
+	@docker build . -t joystream/orion
 
 serve:
 	@npx squid-graphql-server --subscriptions

@@ -107,7 +107,7 @@ export class VideosResolver {
     idsQuerySql = extendClause(
       idsQuerySql,
       'FROM',
-      `LEFT JOIN "processor"."video_view_event" ` +
+      `INNER JOIN "processor"."video_view_event" ` +
         `ON "video_view_event"."video_id" = "video"."id"` +
         (args.periodDays
           ? ` AND "video_view_event"."timestamp" > '${new Date(
@@ -116,6 +116,7 @@ export class VideosResolver {
           : ''),
       ''
     )
+
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
@@ -134,29 +135,30 @@ export class VideosResolver {
 
     let connectionQuerySql: string
 
+    connectionQuerySql = extendClause(
+      connectionQuery.sql,
+      'WHERE',
+      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+      'AND'
+    )
+
     const hasPeriodDaysArgAndIsOrderedByViews =
       args.periodDays &&
       (args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_DESC') ||
         args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
 
     if (hasPeriodDaysArgAndIsOrderedByViews) {
-      connectionQuerySql = extendClause(
-        connectionQuery.sql,
-        'FROM',
-        `JOIN unnest('{${ids
-          .map((id) => `"${id}"`)
-          .join(', ')}}'::text[]) WITH ORDINALITY t(id, ord) USING ("id")`,
-        ''
+      const arrayPosition = `array_position(
+        array[${ids.map((id) => `'${id}'`).join(', ')}],
+        video.id  
+      )`
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" DESC',
+        `${arrayPosition} ASC`
       )
-
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" DESC', 't.ord')
-      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" ASC', 't.ord DESC')
-    } else {
-      connectionQuerySql = extendClause(
-        connectionQuery.sql,
-        'WHERE',
-        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
-        'AND'
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" ASC',
+        `${arrayPosition} DESC`
       )
     }
 
