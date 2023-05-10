@@ -99,10 +99,11 @@ fragment StateQueryMetaprotocolTransactionResultFields on MetaprotocolTransactio
       id
     }
   }
-  # TODO: Ephesus
-  # ...on MetaprotocolTransactionResultChannelPaid {
-  #   channelPaid { id }
-  # }
+  ... on MetaprotocolTransactionResultChannelPaid {
+    channelPaid {
+      id
+    }
+  }
   ... on MetaprotocolTransactionResultCommentModerated {
     commentModerated {
       id
@@ -276,45 +277,73 @@ fragment StateQueryEventFields on Event {
         ...StateQueryMetaprotocolTransactionResultFields
       }
     }
-    # TODO: Ephesus
-    # ...on ChannelRewardClaimedEventData {
-    #   channel { id }
-    #   amount
-    # }
-    # 	...on ChannelRewardClaimedAndWithdrawnEventData {
-    #   channel { id }
-    #   amount
-    #   account
-    #   actor { ...StateQueryActorFields }
-    # }
-    # 	...on ChannelFundsWithdrawnEventData {
-    #   channel { id }
-    #   amount
-    #   account
-    #   actor { ...StateQueryActorFields }
-    # }
-    # ...on ChannelPayoutsUpdatedEventData {
-    #   commitment
-    #   payloadDataObject { id }
-    #   minCashoutAllowed
-    #   maxCashoutAllowed
-    #   channelCashoutsEnabled
-    # }
-    # ...on ChannelPaymentMadeEventData {
-    #   payer { id }
-    #   amount
-    #   payeeChannel { id }
-    #   paymentContext {
-    #     __typename
-    #     ...on PaymentContextVideo {
-    #       video { id }
-    #     }
-    #     ...on PaymentContextChannel {
-    #       channel { id }
-    #     }
-    #   }
-    #   rationale
-    # }
+    ... on ChannelRewardClaimedEventData {
+      channel {
+        id
+      }
+      amount
+    }
+    ... on ChannelRewardClaimedAndWithdrawnEventData {
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...StateQueryActorFields
+      }
+    }
+    ... on ChannelFundsWithdrawnEventData {
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...StateQueryActorFields
+      }
+    }
+    ... on ChannelPayoutsUpdatedEventData {
+      commitment
+      payloadDataObject {
+        id
+      }
+      minCashoutAllowed
+      maxCashoutAllowed
+      channelCashoutsEnabled
+    }
+    ... on ChannelPaymentMadeEventData {
+      payer {
+        id
+      }
+      amount
+      payeeChannel {
+        id
+      }
+      paymentContext {
+        __typename
+        ... on PaymentContextVideo {
+          video {
+            id
+          }
+        }
+        ... on PaymentContextChannel {
+          channel {
+            id
+          }
+        }
+      }
+      rationale
+    }
+    ... on MemberBannedFromChannelEventData {
+      channel {
+        id
+      }
+      member {
+        id
+      }
+      action
+    }
   }
 }
 
@@ -362,8 +391,7 @@ query StateQueryV2 {
         id
       }
     }
-    # TODO: Ephesus
-    # cumulativeRewardClaimed
+    cumulativeRewardClaimed
     entryApp {
       id
     }
@@ -459,22 +487,42 @@ query StateQueryV2 {
   ) {
     ...StateQueryEventFields
   }
-  # TODO: Ephesus
-  # channelRewardClaimedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelRewardClaimedEventData" } }) {
-  #   ...StateQueryEventFields
-  # }
-  # channelRewardClaimedAndWithdrawnEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelRewardClaimedAndWithdrawnEventData" } }) {
-  #   ...StateQueryEventFields
-  # }
-  # channelFundsWithdrawnEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelFundsWithdrawnEventData" } }) {
-  #   ...StateQueryEventFields
-  # }
-  # channelPayoutsUpdatedEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData" } }) {
-  #   ...StateQueryEventFields
-  # }
-  # channelPaymentMadeEvents: events(limit: 9999, where: { data: { isTypeOf_eq: "ChannelPaymentMadeEventData" } }) {
-  #   ...StateQueryEventFields
-  # }
+  channelRewardClaimedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "ChannelRewardClaimedEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  channelRewardClaimedAndWithdrawnEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "ChannelRewardClaimedAndWithdrawnEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  channelFundsWithdrawnEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "ChannelFundsWithdrawnEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  channelPayoutsUpdatedEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "ChannelPayoutsUpdatedEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  channelPaymentMadeEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "ChannelPaymentMadeEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
+  memberBannedFromChannelEvents: events(
+    limit: 9999
+    where: { data: { isTypeOf_eq: "MemberBannedFromChannelEventData" } }
+  ) {
+    ...StateQueryEventFields
+  }
   memberships(limit: 9999) {
     id
     createdAt

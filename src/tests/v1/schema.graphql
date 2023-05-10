@@ -817,6 +817,23 @@ type Query {
     where: ChannelDeletedByModeratorEventWhereInput
     orderBy: [ChannelDeletedByModeratorEventOrderByInput!]
   ): ChannelDeletedByModeratorEventConnection!
+  channelFundsWithdrawnEvents(
+    offset: Int
+    limit: Int = 50
+    where: ChannelFundsWithdrawnEventWhereInput
+    orderBy: [ChannelFundsWithdrawnEventOrderByInput!]
+  ): [ChannelFundsWithdrawnEvent!]!
+  channelFundsWithdrawnEventByUniqueInput(
+    where: ChannelFundsWithdrawnEventWhereUniqueInput!
+  ): ChannelFundsWithdrawnEvent
+  channelFundsWithdrawnEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelFundsWithdrawnEventWhereInput
+    orderBy: [ChannelFundsWithdrawnEventOrderByInput!]
+  ): ChannelFundsWithdrawnEventConnection!
   channelNftCollectors(
     offset: Int
     limit: Int = 50
@@ -834,6 +851,74 @@ type Query {
     where: ChannelNftCollectorsWhereInput
     orderBy: [ChannelNftCollectorsOrderByInput!]
   ): ChannelNftCollectorsConnection!
+  channelPaymentMadeEvents(
+    offset: Int
+    limit: Int = 50
+    where: ChannelPaymentMadeEventWhereInput
+    orderBy: [ChannelPaymentMadeEventOrderByInput!]
+  ): [ChannelPaymentMadeEvent!]!
+  channelPaymentMadeEventByUniqueInput(
+    where: ChannelPaymentMadeEventWhereUniqueInput!
+  ): ChannelPaymentMadeEvent
+  channelPaymentMadeEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelPaymentMadeEventWhereInput
+    orderBy: [ChannelPaymentMadeEventOrderByInput!]
+  ): ChannelPaymentMadeEventConnection!
+  channelPayoutsUpdatedEvents(
+    offset: Int
+    limit: Int = 50
+    where: ChannelPayoutsUpdatedEventWhereInput
+    orderBy: [ChannelPayoutsUpdatedEventOrderByInput!]
+  ): [ChannelPayoutsUpdatedEvent!]!
+  channelPayoutsUpdatedEventByUniqueInput(
+    where: ChannelPayoutsUpdatedEventWhereUniqueInput!
+  ): ChannelPayoutsUpdatedEvent
+  channelPayoutsUpdatedEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelPayoutsUpdatedEventWhereInput
+    orderBy: [ChannelPayoutsUpdatedEventOrderByInput!]
+  ): ChannelPayoutsUpdatedEventConnection!
+  channelRewardClaimedAndWithdrawnEvents(
+    offset: Int
+    limit: Int = 50
+    where: ChannelRewardClaimedAndWithdrawnEventWhereInput
+    orderBy: [ChannelRewardClaimedAndWithdrawnEventOrderByInput!]
+  ): [ChannelRewardClaimedAndWithdrawnEvent!]!
+  channelRewardClaimedAndWithdrawnEventByUniqueInput(
+    where: ChannelRewardClaimedAndWithdrawnEventWhereUniqueInput!
+  ): ChannelRewardClaimedAndWithdrawnEvent
+  channelRewardClaimedAndWithdrawnEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelRewardClaimedAndWithdrawnEventWhereInput
+    orderBy: [ChannelRewardClaimedAndWithdrawnEventOrderByInput!]
+  ): ChannelRewardClaimedAndWithdrawnEventConnection!
+  channelRewardClaimedEvents(
+    offset: Int
+    limit: Int = 50
+    where: ChannelRewardClaimedEventWhereInput
+    orderBy: [ChannelRewardClaimedEventOrderByInput!]
+  ): [ChannelRewardClaimedEvent!]!
+  channelRewardClaimedEventByUniqueInput(
+    where: ChannelRewardClaimedEventWhereUniqueInput!
+  ): ChannelRewardClaimedEvent
+  channelRewardClaimedEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: ChannelRewardClaimedEventWhereInput
+    orderBy: [ChannelRewardClaimedEventOrderByInput!]
+  ): ChannelRewardClaimedEventConnection!
   channelVisibilitySetByModeratorEvents(
     offset: Int
     limit: Int = 50
@@ -1032,6 +1117,23 @@ type Query {
     where: CommentWhereInput
     orderBy: [CommentOrderByInput!]
   ): CommentConnection!
+  councilBudgetFundedEvents(
+    offset: Int
+    limit: Int = 50
+    where: CouncilBudgetFundedEventWhereInput
+    orderBy: [CouncilBudgetFundedEventOrderByInput!]
+  ): [CouncilBudgetFundedEvent!]!
+  councilBudgetFundedEventByUniqueInput(
+    where: CouncilBudgetFundedEventWhereUniqueInput!
+  ): CouncilBudgetFundedEvent
+  councilBudgetFundedEventsConnection(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    where: CouncilBudgetFundedEventWhereInput
+    orderBy: [CouncilBudgetFundedEventOrderByInput!]
+  ): CouncilBudgetFundedEventConnection!
   councilMembers(
     offset: Int
     limit: Int = 50
@@ -3849,12 +3951,16 @@ enum EventTypeOptions {
   CategoryDeletedEvent
   CategoryMembershipOfModeratorUpdatedEvent
   CategoryStickyThreadUpdateEvent
+  ChannelFundsWithdrawnEvent
+  ChannelRewardClaimedAndWithdrawnEvent
+  ChannelRewardClaimedEvent
   CommentCreatedEvent
   CommentDeletedEvent
   CommentModeratedEvent
   CommentPinnedEvent
   CommentReactedEvent
   CommentTextUpdatedEvent
+  CouncilBudgetFundedEvent
   CouncilorRewardUpdatedEvent
   EnglishAuctionSettledEvent
   EnglishAuctionStartedEvent
@@ -3945,6 +4051,9 @@ enum EventTypeOptions {
   WorkerStartedLeavingEvent
 }
 
+# GraphQL representation of BigInt
+scalar BigInt
+
 type MemberMetadata implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -3973,9 +4082,6 @@ type MemberMetadata implements BaseGraphQLObject {
 }
 
 union Avatar = AvatarObject | AvatarUri
-
-# GraphQL representation of BigInt
-scalar BigInt
 
 enum RewardPaymentType {
   REGULAR
@@ -4961,6 +5067,49 @@ type VideoSubtitle implements BaseGraphQLObject {
   assetId: String
 }
 
+type ChannelPayoutsUpdatedEvent implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted.
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in.
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Merkle root of the channel payouts
+  commitment: String
+  payloadDataObject: StorageDataObject
+  payloadDataObjectId: String
+
+  # Size of the serialized channel payouts payload
+  payloadSize: BigInt
+
+  # Hash of the serialized channel payouts payload
+  payloadHash: String
+
+  # Minimum amount of channel reward cashout allowed at a time
+  minCashoutAllowed: BigInt
+
+  # Maximum amount of channel reward cashout allowed at a time
+  maxCashoutAllowed: BigInt
+
+  # Can channel cashout the rewards
+  channelCashoutsEnabled: Boolean
+}
+
 type StorageDataObject implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -4995,6 +5144,7 @@ type StorageDataObject implements BaseGraphQLObject {
   videoSubtitle: VideoSubtitle
   channelcoverPhoto: [Channel!]
   channelavatarPhoto: [Channel!]
+  channelpayoutsupdatedeventpayloadDataObject: [ChannelPayoutsUpdatedEvent!]
 }
 
 union DataObjectType =
@@ -5003,6 +5153,7 @@ union DataObjectType =
   | DataObjectTypeVideoMedia
   | DataObjectTypeVideoThumbnail
   | DataObjectTypeVideoSubtitle
+  | DataObjectTypeChannelPayoutsPayload
   | DataObjectTypeUnknown
 
 type License implements BaseGraphQLObject {
@@ -5368,6 +5519,45 @@ type Collaborator implements BaseGraphQLObject {
   permissions: [String!]!
 }
 
+# Direct channel payment by any member by-passing the council payouts
+type ChannelPaymentMadeEvent implements BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted.
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in.
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+  payer: Membership!
+  payerId: String!
+
+  # Amount of the payment
+  amount: BigInt!
+
+  # Payment and payee context
+  paymentContext: PaymentContext
+  payeeChannel: Channel
+  payeeChannelId: String
+
+  # Reason of the payment
+  rationale: String
+}
+
+union PaymentContext = PaymentContextVideo | PaymentContextChannel
+
 type Channel implements BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -5421,8 +5611,15 @@ type Channel implements BaseGraphQLObject {
   # Channel's privilege level
   privilegeLevel: Int
 
+  # Cumulative rewards claimed by this channel
+  cumulativeRewardClaimed: BigInt
+  claimedRewards: [ChannelRewardClaimedEvent!]!
+
   # Number of videos ever created in this channel
   totalVideosCreated: Int!
+  channelfundswithdrawneventchannel: [ChannelFundsWithdrawnEvent!]
+  channelpaymentmadeeventpayeeChannel: [ChannelPaymentMadeEvent!]
+  channelrewardclaimedandwithdrawneventchannel: [ChannelRewardClaimedAndWithdrawnEvent!]
   commentcreatedeventvideoChannel: [CommentCreatedEvent!]
   commentdeletedeventvideoChannel: [CommentDeletedEvent!]
   commentmoderatedeventvideoChannel: [CommentModeratedEvent!]
@@ -5884,6 +6081,7 @@ union ProposalDetails =
   | SetMembershipLeadInvitationQuotaProposalDetails
   | SetReferralCutProposalDetails
   | VetoProposalDetails
+  | UpdateChannelPayoutsProposalDetails
 
 union ProposalStatus =
     ProposalStatusDeciding
@@ -5981,6 +6179,7 @@ type Membership implements BaseGraphQLObject {
   budgetfundedeventmember: [BudgetFundedEvent!]
   buynowcanceledeventownerMember: [BuyNowCanceledEvent!]
   buynowpriceupdatedeventownerMember: [BuyNowPriceUpdatedEvent!]
+  channelpaymentmadeeventpayer: [ChannelPaymentMadeEvent!]
   commentauthor: [Comment!]
   commentcreatedeventparentCommentAuthor: [CommentCreatedEvent!]
   commentreactedeventreactingMember: [CommentReactedEvent!]
@@ -6493,6 +6692,10 @@ type DataObjectTypeChannelCoverPhoto {
   channel: Channel
 }
 
+type DataObjectTypeChannelPayoutsPayload {
+  phantom: Int
+}
+
 type DataObjectTypeUnknown {
   phantom: Int
 }
@@ -6617,6 +6820,9 @@ type MetaprotocolTransactionSuccessful {
 
   # ID of the delete video category (if any)
   videoCategoryDeleted: Video
+
+  # Payment made to channel by the member sending the remark action (if any)
+  channelPaid: Channel
 }
 
 type OpeningStatusCancelled {
@@ -6631,6 +6837,16 @@ type OpeningStatusFilled {
 
 type OpeningStatusOpen {
   phantom: Int
+}
+
+type PaymentContextChannel {
+  # Channel for which the payment was made
+  channel: Channel
+}
+
+type PaymentContextVideo {
+  # Video for which the payment was made
+  video: Video
 }
 
 type PostOriginThreadInitial {
@@ -6892,6 +7108,23 @@ type UpcomingOpeningAdded {
 
 type UpcomingOpeningRemoved {
   upcomingOpeningId: String!
+}
+
+type UpdateChannelPayoutsProposalDetails {
+  # Merkle root of the channel payouts
+  commitment: String
+
+  # Minimum amount of channel reward cashout allowed at a time
+  minCashoutAllowed: BigInt
+
+  # Maximum amount of channel reward cashout allowed at a time
+  maxCashoutAllowed: BigInt
+
+  # Can channel cashout the rewards
+  channelCashoutsEnabled: Boolean
+
+  # The hash of the channel payout payload file
+  payloadHash: String
 }
 
 type UpdateWorkingGroupBudgetProposalDetails {
@@ -7572,6 +7805,17 @@ type ChannelDeletedByModeratorEventConnection {
   pageInfo: PageInfo!
 }
 
+type ChannelFundsWithdrawnEventEdge {
+  node: ChannelFundsWithdrawnEvent!
+  cursor: String!
+}
+
+type ChannelFundsWithdrawnEventConnection {
+  totalCount: Int!
+  edges: [ChannelFundsWithdrawnEventEdge!]!
+  pageInfo: PageInfo!
+}
+
 type ChannelNftCollectorsEdge {
   node: ChannelNftCollectors!
   cursor: String!
@@ -7580,6 +7824,50 @@ type ChannelNftCollectorsEdge {
 type ChannelNftCollectorsConnection {
   totalCount: Int!
   edges: [ChannelNftCollectorsEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ChannelPaymentMadeEventEdge {
+  node: ChannelPaymentMadeEvent!
+  cursor: String!
+}
+
+type ChannelPaymentMadeEventConnection {
+  totalCount: Int!
+  edges: [ChannelPaymentMadeEventEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ChannelPayoutsUpdatedEventEdge {
+  node: ChannelPayoutsUpdatedEvent!
+  cursor: String!
+}
+
+type ChannelPayoutsUpdatedEventConnection {
+  totalCount: Int!
+  edges: [ChannelPayoutsUpdatedEventEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ChannelRewardClaimedAndWithdrawnEventEdge {
+  node: ChannelRewardClaimedAndWithdrawnEvent!
+  cursor: String!
+}
+
+type ChannelRewardClaimedAndWithdrawnEventConnection {
+  totalCount: Int!
+  edges: [ChannelRewardClaimedAndWithdrawnEventEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ChannelRewardClaimedEventEdge {
+  node: ChannelRewardClaimedEvent!
+  cursor: String!
+}
+
+type ChannelRewardClaimedEventConnection {
+  totalCount: Int!
+  edges: [ChannelRewardClaimedEventEdge!]!
   pageInfo: PageInfo!
 }
 
@@ -7747,6 +8035,17 @@ type CommentEdge {
 type CommentConnection {
   totalCount: Int!
   edges: [CommentEdge!]!
+  pageInfo: PageInfo!
+}
+
+type CouncilBudgetFundedEventEdge {
+  node: CouncilBudgetFundedEvent!
+  cursor: String!
+}
+
+type CouncilBudgetFundedEventConnection {
+  totalCount: Int!
+  edges: [CouncilBudgetFundedEventEdge!]!
   pageInfo: PageInfo!
 }
 
@@ -18437,6 +18736,351 @@ input CollaboratorUpdateInput {
   permissions: [String!]
 }
 
+input ChannelRewardClaimedEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  channel: ChannelWhereInput
+  AND: [ChannelRewardClaimedEventWhereInput!]
+  OR: [ChannelRewardClaimedEventWhereInput!]
+  NOT: [ChannelRewardClaimedEventWhereInput!]
+}
+
+input ChannelRewardClaimedEventWhereUniqueInput {
+  id: ID!
+}
+
+input ChannelRewardClaimedEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  channel: ID!
+  amount: String!
+}
+
+input ChannelRewardClaimedEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  channel: ID
+  amount: String
+}
+
+input ChannelFundsWithdrawnEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  account_eq: String
+  account_contains: String
+  account_startsWith: String
+  account_endsWith: String
+  account_in: [String!]
+  actor_json: JSONObject
+  channel: ChannelWhereInput
+  AND: [ChannelFundsWithdrawnEventWhereInput!]
+  OR: [ChannelFundsWithdrawnEventWhereInput!]
+  NOT: [ChannelFundsWithdrawnEventWhereInput!]
+}
+
+input ChannelFundsWithdrawnEventWhereUniqueInput {
+  id: ID!
+}
+
+input ChannelFundsWithdrawnEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  channel: ID!
+  amount: String!
+  account: String
+  actor: JSONObject!
+}
+
+input ChannelFundsWithdrawnEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  channel: ID
+  amount: String
+  account: String
+  actor: JSONObject
+}
+
+input ChannelPaymentMadeEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  paymentContext_json: JSONObject
+  rationale_eq: String
+  rationale_contains: String
+  rationale_startsWith: String
+  rationale_endsWith: String
+  rationale_in: [String!]
+  payer: MembershipWhereInput
+  payeeChannel: ChannelWhereInput
+  AND: [ChannelPaymentMadeEventWhereInput!]
+  OR: [ChannelPaymentMadeEventWhereInput!]
+  NOT: [ChannelPaymentMadeEventWhereInput!]
+}
+
+input ChannelPaymentMadeEventWhereUniqueInput {
+  id: ID!
+}
+
+input ChannelPaymentMadeEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  payer: ID!
+  amount: String!
+  paymentContext: JSONObject!
+  payeeChannel: ID
+  rationale: String
+}
+
+input ChannelPaymentMadeEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  payer: ID
+  amount: String
+  paymentContext: JSONObject
+  payeeChannel: ID
+  rationale: String
+}
+
+input ChannelRewardClaimedAndWithdrawnEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  account_eq: String
+  account_contains: String
+  account_startsWith: String
+  account_endsWith: String
+  account_in: [String!]
+  actor_json: JSONObject
+  channel: ChannelWhereInput
+  AND: [ChannelRewardClaimedAndWithdrawnEventWhereInput!]
+  OR: [ChannelRewardClaimedAndWithdrawnEventWhereInput!]
+  NOT: [ChannelRewardClaimedAndWithdrawnEventWhereInput!]
+}
+
+input ChannelRewardClaimedAndWithdrawnEventWhereUniqueInput {
+  id: ID!
+}
+
+input ChannelRewardClaimedAndWithdrawnEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  channel: ID!
+  amount: String!
+  account: String
+  actor: JSONObject!
+}
+
+input ChannelRewardClaimedAndWithdrawnEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  channel: ID
+  amount: String
+  account: String
+  actor: JSONObject
+}
+
 input CommentReactionWhereInput {
   id_eq: ID
   id_in: [ID!]
@@ -19397,6 +20041,12 @@ input ChannelWhereInput {
   privilegeLevel_lt: Int
   privilegeLevel_lte: Int
   privilegeLevel_in: [Int!]
+  cumulativeRewardClaimed_eq: BigInt
+  cumulativeRewardClaimed_gt: BigInt
+  cumulativeRewardClaimed_gte: BigInt
+  cumulativeRewardClaimed_lt: BigInt
+  cumulativeRewardClaimed_lte: BigInt
+  cumulativeRewardClaimed_in: [BigInt!]
   totalVideosCreated_eq: Int
   totalVideosCreated_gt: Int
   totalVideosCreated_gte: Int
@@ -19421,6 +20071,18 @@ input ChannelWhereInput {
   channelNftCollectors_none: ChannelNftCollectorsWhereInput
   channelNftCollectors_some: ChannelNftCollectorsWhereInput
   channelNftCollectors_every: ChannelNftCollectorsWhereInput
+  claimedRewards_none: ChannelRewardClaimedEventWhereInput
+  claimedRewards_some: ChannelRewardClaimedEventWhereInput
+  claimedRewards_every: ChannelRewardClaimedEventWhereInput
+  channelfundswithdrawneventchannel_none: ChannelFundsWithdrawnEventWhereInput
+  channelfundswithdrawneventchannel_some: ChannelFundsWithdrawnEventWhereInput
+  channelfundswithdrawneventchannel_every: ChannelFundsWithdrawnEventWhereInput
+  channelpaymentmadeeventpayeeChannel_none: ChannelPaymentMadeEventWhereInput
+  channelpaymentmadeeventpayeeChannel_some: ChannelPaymentMadeEventWhereInput
+  channelpaymentmadeeventpayeeChannel_every: ChannelPaymentMadeEventWhereInput
+  channelrewardclaimedandwithdrawneventchannel_none: ChannelRewardClaimedAndWithdrawnEventWhereInput
+  channelrewardclaimedandwithdrawneventchannel_some: ChannelRewardClaimedAndWithdrawnEventWhereInput
+  channelrewardclaimedandwithdrawneventchannel_every: ChannelRewardClaimedAndWithdrawnEventWhereInput
   commentcreatedeventvideoChannel_none: CommentCreatedEventWhereInput
   commentcreatedeventvideoChannel_some: CommentCreatedEventWhereInput
   commentcreatedeventvideoChannel_every: CommentCreatedEventWhereInput
@@ -19473,6 +20135,7 @@ input ChannelCreateInput {
   rewardAccount: String!
   channelStateBloatBond: String!
   privilegeLevel: Float
+  cumulativeRewardClaimed: String
   totalVideosCreated: Float!
 }
 
@@ -19492,6 +20155,7 @@ input ChannelUpdateInput {
   rewardAccount: String
   channelStateBloatBond: String
   privilegeLevel: Float
+  cumulativeRewardClaimed: String
   totalVideosCreated: Float
 }
 
@@ -20139,6 +20803,118 @@ input VideoUpdateInput {
   ytVideoId: String
 }
 
+input ChannelPayoutsUpdatedEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  commitment_eq: String
+  commitment_contains: String
+  commitment_startsWith: String
+  commitment_endsWith: String
+  commitment_in: [String!]
+  payloadSize_eq: BigInt
+  payloadSize_gt: BigInt
+  payloadSize_gte: BigInt
+  payloadSize_lt: BigInt
+  payloadSize_lte: BigInt
+  payloadSize_in: [BigInt!]
+  payloadHash_eq: String
+  payloadHash_contains: String
+  payloadHash_startsWith: String
+  payloadHash_endsWith: String
+  payloadHash_in: [String!]
+  minCashoutAllowed_eq: BigInt
+  minCashoutAllowed_gt: BigInt
+  minCashoutAllowed_gte: BigInt
+  minCashoutAllowed_lt: BigInt
+  minCashoutAllowed_lte: BigInt
+  minCashoutAllowed_in: [BigInt!]
+  maxCashoutAllowed_eq: BigInt
+  maxCashoutAllowed_gt: BigInt
+  maxCashoutAllowed_gte: BigInt
+  maxCashoutAllowed_lt: BigInt
+  maxCashoutAllowed_lte: BigInt
+  maxCashoutAllowed_in: [BigInt!]
+  channelCashoutsEnabled_eq: Boolean
+  channelCashoutsEnabled_in: [Boolean!]
+  payloadDataObject: StorageDataObjectWhereInput
+  AND: [ChannelPayoutsUpdatedEventWhereInput!]
+  OR: [ChannelPayoutsUpdatedEventWhereInput!]
+  NOT: [ChannelPayoutsUpdatedEventWhereInput!]
+}
+
+input ChannelPayoutsUpdatedEventWhereUniqueInput {
+  id: ID!
+}
+
+input ChannelPayoutsUpdatedEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  commitment: String
+  payloadDataObject: ID
+  payloadSize: String
+  payloadHash: String
+  minCashoutAllowed: String
+  maxCashoutAllowed: String
+  channelCashoutsEnabled: Boolean
+}
+
+input ChannelPayoutsUpdatedEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  commitment: String
+  payloadDataObject: ID
+  payloadSize: String
+  payloadHash: String
+  minCashoutAllowed: String
+  maxCashoutAllowed: String
+  channelCashoutsEnabled: Boolean
+}
+
 input StorageDataObjectWhereInput {
   id_eq: ID
   id_in: [ID!]
@@ -20199,6 +20975,9 @@ input StorageDataObjectWhereInput {
   channelavatarPhoto_none: ChannelWhereInput
   channelavatarPhoto_some: ChannelWhereInput
   channelavatarPhoto_every: ChannelWhereInput
+  channelpayoutsupdatedeventpayloadDataObject_none: ChannelPayoutsUpdatedEventWhereInput
+  channelpayoutsupdatedeventpayloadDataObject_some: ChannelPayoutsUpdatedEventWhereInput
+  channelpayoutsupdatedeventpayloadDataObject_every: ChannelPayoutsUpdatedEventWhereInput
   AND: [StorageDataObjectWhereInput!]
   OR: [StorageDataObjectWhereInput!]
   NOT: [StorageDataObjectWhereInput!]
@@ -20551,6 +21330,12 @@ input MemberInvitedEventWhereInput {
   handle_startsWith: String
   handle_endsWith: String
   handle_in: [String!]
+  initialBalance_eq: BigInt
+  initialBalance_gt: BigInt
+  initialBalance_gte: BigInt
+  initialBalance_lt: BigInt
+  initialBalance_lte: BigInt
+  initialBalance_in: [BigInt!]
   invitingMember: MembershipWhereInput
   newMember: MembershipWhereInput
   metadata: MemberMetadataWhereInput
@@ -20574,6 +21359,7 @@ input MemberInvitedEventCreateInput {
   controllerAccount: String!
   handle: String!
   metadata: ID!
+  initialBalance: String!
 }
 
 input MemberInvitedEventUpdateInput {
@@ -20587,6 +21373,7 @@ input MemberInvitedEventUpdateInput {
   controllerAccount: String
   handle: String
   metadata: ID
+  initialBalance: String
 }
 
 input MemberProfileUpdatedEventWhereInput {
@@ -24007,6 +24794,9 @@ input MembershipWhereInput {
   buynowpriceupdatedeventownerMember_none: BuyNowPriceUpdatedEventWhereInput
   buynowpriceupdatedeventownerMember_some: BuyNowPriceUpdatedEventWhereInput
   buynowpriceupdatedeventownerMember_every: BuyNowPriceUpdatedEventWhereInput
+  channelpaymentmadeeventpayer_none: ChannelPaymentMadeEventWhereInput
+  channelpaymentmadeeventpayer_some: ChannelPaymentMadeEventWhereInput
+  channelpaymentmadeeventpayer_every: ChannelPaymentMadeEventWhereInput
   commentauthor_none: CommentWhereInput
   commentauthor_some: CommentWhereInput
   commentauthor_every: CommentWhereInput
@@ -24876,6 +25666,96 @@ input ChannelVisibilitySetByModeratorEventUpdateInput {
   actor: JSONObject
   channelId: Float
   isHidden: Boolean
+  rationale: String
+}
+
+input CouncilBudgetFundedEventWhereInput {
+  id_eq: ID
+  id_in: [ID!]
+  createdAt_eq: DateTime
+  createdAt_lt: DateTime
+  createdAt_lte: DateTime
+  createdAt_gt: DateTime
+  createdAt_gte: DateTime
+  createdById_eq: ID
+  createdById_in: [ID!]
+  updatedAt_eq: DateTime
+  updatedAt_lt: DateTime
+  updatedAt_lte: DateTime
+  updatedAt_gt: DateTime
+  updatedAt_gte: DateTime
+  updatedById_eq: ID
+  updatedById_in: [ID!]
+  deletedAt_all: Boolean
+  deletedAt_eq: DateTime
+  deletedAt_lt: DateTime
+  deletedAt_lte: DateTime
+  deletedAt_gt: DateTime
+  deletedAt_gte: DateTime
+  deletedById_eq: ID
+  deletedById_in: [ID!]
+  inExtrinsic_eq: String
+  inExtrinsic_contains: String
+  inExtrinsic_startsWith: String
+  inExtrinsic_endsWith: String
+  inExtrinsic_in: [String!]
+  inBlock_eq: Int
+  inBlock_gt: Int
+  inBlock_gte: Int
+  inBlock_lt: Int
+  inBlock_lte: Int
+  inBlock_in: [Int!]
+  network_eq: Network
+  network_in: [Network!]
+  indexInBlock_eq: Int
+  indexInBlock_gt: Int
+  indexInBlock_gte: Int
+  indexInBlock_lt: Int
+  indexInBlock_lte: Int
+  indexInBlock_in: [Int!]
+  memberId_eq: Int
+  memberId_gt: Int
+  memberId_gte: Int
+  memberId_lt: Int
+  memberId_lte: Int
+  memberId_in: [Int!]
+  amount_eq: BigInt
+  amount_gt: BigInt
+  amount_gte: BigInt
+  amount_lt: BigInt
+  amount_lte: BigInt
+  amount_in: [BigInt!]
+  rationale_eq: String
+  rationale_contains: String
+  rationale_startsWith: String
+  rationale_endsWith: String
+  rationale_in: [String!]
+  AND: [CouncilBudgetFundedEventWhereInput!]
+  OR: [CouncilBudgetFundedEventWhereInput!]
+  NOT: [CouncilBudgetFundedEventWhereInput!]
+}
+
+input CouncilBudgetFundedEventWhereUniqueInput {
+  id: ID!
+}
+
+input CouncilBudgetFundedEventCreateInput {
+  inExtrinsic: String
+  inBlock: Float!
+  network: Network!
+  indexInBlock: Float!
+  memberId: Float!
+  amount: String!
+  rationale: String!
+}
+
+input CouncilBudgetFundedEventUpdateInput {
+  inExtrinsic: String
+  inBlock: Float
+  network: Network
+  indexInBlock: Float
+  memberId: Float
+  amount: String
   rationale: String
 }
 
@@ -26475,6 +27355,9 @@ type MemberInvitedEvent implements Event & BaseGraphQLObject {
   handle: String!
   metadata: MemberMetadata!
   metadataId: String!
+
+  # Member's initial, invitation-locked balance
+  initialBalance: BigInt!
 }
 
 type MemberProfileUpdatedEvent implements Event & BaseGraphQLObject {
@@ -28825,6 +29708,111 @@ type VideoReactionsPreferenceEvent implements Event & BaseGraphQLObject {
   reactionsStatus: Boolean!
 }
 
+type ChannelRewardClaimedEvent implements Event & BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted.
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in.
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Filtering options for interface implementers
+  type: EventTypeOptions
+  channel: Channel!
+  channelId: String!
+
+  # Reward amount claimed
+  amount: BigInt!
+}
+
+type ChannelFundsWithdrawnEvent implements Event & BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted.
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in.
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Filtering options for interface implementers
+  type: EventTypeOptions
+  channel: Channel!
+  channelId: String!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null in case the funds destination was Council
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
+type ChannelRewardClaimedAndWithdrawnEvent implements Event & BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted.
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in.
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Filtering options for interface implementers
+  type: EventTypeOptions
+  channel: Channel!
+  channelId: String!
+
+  # Reward amount claimed
+  amount: BigInt!
+
+  # Destination account ID. Null in case the funds destination was Council
+  account: String
+
+  # Content actor
+  actor: ContentActor!
+}
+
 type MemberBannedFromChannelEvent implements Event & BaseGraphQLObject {
   id: ID!
   createdAt: DateTime!
@@ -30039,6 +31027,41 @@ type BudgetRefillPlannedEvent implements Event & BaseGraphQLObject {
   # Filtering options for interface implementers
   type: EventTypeOptions
   nextRefillInBlock: Int!
+}
+
+type CouncilBudgetFundedEvent implements Event & BaseGraphQLObject {
+  id: ID!
+  createdAt: DateTime!
+  createdById: ID!
+  updatedAt: DateTime
+  updatedById: ID
+  deletedAt: DateTime
+  deletedById: ID
+  version: Int!
+
+  # Hash of the extrinsic which caused the event to be emitted
+  inExtrinsic: String
+
+  # Blocknumber of the block in which the event was emitted.
+  inBlock: Int!
+
+  # Network the block was produced in
+  network: Network!
+
+  # Index of event in block from which it was emitted.
+  indexInBlock: Int!
+
+  # Filtering options for interface implementers
+  type: EventTypeOptions
+
+  # Funder member.
+  memberId: Int!
+
+  # Funding amount.
+  amount: BigInt!
+
+  # Funding rationale
+  rationale: String!
 }
 
 type CouncilorRewardUpdatedEvent implements Event & BaseGraphQLObject {
@@ -31513,6 +32536,29 @@ enum ChannelDeletedByModeratorEventOrderByInput {
   rationale_DESC
 }
 
+enum ChannelFundsWithdrawnEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  channel_ASC
+  channel_DESC
+  amount_ASC
+  amount_DESC
+  account_ASC
+  account_DESC
+}
+
 enum ChannelNftCollectorsOrderByInput {
   createdAt_ASC
   createdAt_DESC
@@ -31530,6 +32576,106 @@ enum ChannelNftCollectorsOrderByInput {
   amount_DESC
   lastIncreaseAt_ASC
   lastIncreaseAt_DESC
+}
+
+enum ChannelPaymentMadeEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  payer_ASC
+  payer_DESC
+  amount_ASC
+  amount_DESC
+  payeeChannel_ASC
+  payeeChannel_DESC
+  rationale_ASC
+  rationale_DESC
+}
+
+enum ChannelPayoutsUpdatedEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  commitment_ASC
+  commitment_DESC
+  payloadDataObject_ASC
+  payloadDataObject_DESC
+  payloadSize_ASC
+  payloadSize_DESC
+  payloadHash_ASC
+  payloadHash_DESC
+  minCashoutAllowed_ASC
+  minCashoutAllowed_DESC
+  maxCashoutAllowed_ASC
+  maxCashoutAllowed_DESC
+  channelCashoutsEnabled_ASC
+  channelCashoutsEnabled_DESC
+}
+
+enum ChannelRewardClaimedAndWithdrawnEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  channel_ASC
+  channel_DESC
+  amount_ASC
+  amount_DESC
+  account_ASC
+  account_DESC
+}
+
+enum ChannelRewardClaimedEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  channel_ASC
+  channel_DESC
+  amount_ASC
+  amount_DESC
 }
 
 enum ChannelVisibilitySetByModeratorEventOrderByInput {
@@ -31592,6 +32738,8 @@ enum ChannelOrderByInput {
   channelStateBloatBond_DESC
   privilegeLevel_ASC
   privilegeLevel_DESC
+  cumulativeRewardClaimed_ASC
+  cumulativeRewardClaimed_DESC
   totalVideosCreated_ASC
   totalVideosCreated_DESC
 }
@@ -31822,6 +32970,29 @@ enum CommentOrderByInput {
   reactionsAndRepliesCount_DESC
   isEdited_ASC
   isEdited_DESC
+}
+
+enum CouncilBudgetFundedEventOrderByInput {
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  deletedAt_ASC
+  deletedAt_DESC
+  inExtrinsic_ASC
+  inExtrinsic_DESC
+  inBlock_ASC
+  inBlock_DESC
+  network_ASC
+  network_DESC
+  indexInBlock_ASC
+  indexInBlock_DESC
+  memberId_ASC
+  memberId_DESC
+  amount_ASC
+  amount_DESC
+  rationale_ASC
+  rationale_DESC
 }
 
 enum CouncilMemberOrderByInput {
@@ -32480,6 +33651,8 @@ enum MemberInvitedEventOrderByInput {
   handle_DESC
   metadata_ASC
   metadata_DESC
+  initialBalance_ASC
+  initialBalance_DESC
 }
 
 enum MemberMetadataOrderByInput {

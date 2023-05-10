@@ -47,6 +47,10 @@ import {
   processChannelVisibilitySetByModeratorEvent,
   processChannelOwnerRemarkedEvent,
   processChannelAgentRemarkedEvent,
+  processChannelPayoutsUpdatedEvent,
+  processChannelRewardUpdatedEvent,
+  processChannelFundsWithdrawnEvent,
+  processChannelRewardClaimedAndWithdrawnEvent,
 } from './mappings/content/channel'
 import {
   processVideoCreatedEvent,
@@ -84,7 +88,7 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
-import { commentCountersManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 
 const defaultEventOptions = {
@@ -133,6 +137,10 @@ const processor = new SubstrateBatchProcessor()
   .addEvent('Content.BuyNowCanceled', defaultEventOptions)
   .addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
   .addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
+  .addEvent('Content.ChannelPayoutsUpdated', defaultEventOptions)
+  .addEvent('Content.ChannelRewardUpdated', defaultEventOptions)
+  .addEvent('Content.ChannelFundsWithdrawn', defaultEventOptions)
+  .addEvent('Content.ChannelRewardClaimedAndWithdrawn', defaultEventOptions)
   .addEvent('Storage.StorageBucketCreated', defaultEventOptions)
   .addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
   .addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -207,6 +215,10 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
+  'Content.ChannelPayoutsUpdated': processChannelPayoutsUpdatedEvent,
+  'Content.ChannelRewardUpdated': processChannelRewardUpdatedEvent,
+  'Content.ChannelFundsWithdrawn': processChannelFundsWithdrawnEvent,
+  'Content.ChannelRewardClaimedAndWithdrawn': processChannelRewardClaimedAndWithdrawnEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -266,6 +278,7 @@ async function processEvent<EventName extends EventNames>(
 async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
+  await videoRelevanceManager.updateVideoRelevanceValue(em)
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {

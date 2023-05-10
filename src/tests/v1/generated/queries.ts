@@ -347,6 +347,7 @@ export type StorageDataObjectFieldsFragment = {
   type:
     | { __typename: 'DataObjectTypeChannelAvatar' }
     | { __typename: 'DataObjectTypeChannelCoverPhoto' }
+    | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
     | { __typename: 'DataObjectTypeUnknown' }
     | { __typename: 'DataObjectTypeVideoMedia' }
     | { __typename: 'DataObjectTypeVideoSubtitle' }
@@ -1237,6 +1238,7 @@ export type StateQueryV1Query = {
     createdInBlock: number
     rewardAccount: string
     channelStateBloatBond: string
+    cumulativeRewardClaimed?: Types.Maybe<string>
     totalVideosCreated: number
     ownerMember?: Types.Maybe<{ id: string }>
     coverPhoto?: Types.Maybe<{ id: string }>
@@ -1456,6 +1458,80 @@ export type StateQueryV1Query = {
           videoCategoryDeleted?: Types.Maybe<{ id: string }>
         }
   }>
+  channelRewardClaimedEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    channel: { id: string }
+  }>
+  channelRewardClaimedAndWithdrawnEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    account?: Types.Maybe<string>
+    channel: { id: string }
+    actor:
+      | ActorFields_ContentActorCurator_Fragment
+      | ActorFields_ContentActorLead_Fragment
+      | ActorFields_ContentActorMember_Fragment
+  }>
+  channelFundsWithdrawnEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    account?: Types.Maybe<string>
+    channel: { id: string }
+    actor:
+      | ActorFields_ContentActorCurator_Fragment
+      | ActorFields_ContentActorLead_Fragment
+      | ActorFields_ContentActorMember_Fragment
+  }>
+  channelPayoutsUpdatedEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    commitment?: Types.Maybe<string>
+    minCashoutAllowed?: Types.Maybe<string>
+    maxCashoutAllowed?: Types.Maybe<string>
+    channelCashoutsEnabled?: Types.Maybe<boolean>
+    payloadDataObject?: Types.Maybe<{ id: string }>
+  }>
+  channelPaymentMadeEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    amount: string
+    rationale?: Types.Maybe<string>
+    payer: { id: string }
+    payeeChannel?: Types.Maybe<{ id: string }>
+    paymentContext?: Types.Maybe<
+      | { __typename: 'PaymentContextChannel'; channel?: Types.Maybe<{ id: string }> }
+      | { __typename: 'PaymentContextVideo'; video?: Types.Maybe<{ id: string }> }
+    >
+  }>
+  memberBannedFromChannelEvents: Array<{
+    id: string
+    inBlock: number
+    inExtrinsic?: Types.Maybe<string>
+    indexInBlock: number
+    createdAt: any
+    action: boolean
+    channel: { id: string }
+    member: { id: string }
+  }>
   memberships: Array<{
     id: string
     createdAt: any
@@ -1555,6 +1631,7 @@ export type StateQueryV1Query = {
     type:
       | { __typename: 'DataObjectTypeChannelAvatar'; channel?: Types.Maybe<{ id: string }> }
       | { __typename: 'DataObjectTypeChannelCoverPhoto'; channel?: Types.Maybe<{ id: string }> }
+      | { __typename: 'DataObjectTypeChannelPayoutsPayload' }
       | { __typename: 'DataObjectTypeUnknown' }
       | { __typename: 'DataObjectTypeVideoMedia'; video?: Types.Maybe<{ id: string }> }
       | {
@@ -3577,6 +3654,7 @@ export const StateQueryV1 = gql`
       bannedMembers {
         id
       }
+      cumulativeRewardClaimed
       entryApp {
         id
       }
@@ -3896,6 +3974,103 @@ export const StateQueryV1 = gql`
           message
         }
       }
+    }
+    channelRewardClaimedEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+    }
+    channelRewardClaimedAndWithdrawnEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...ActorFields
+      }
+    }
+    channelFundsWithdrawnEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      amount
+      account
+      actor {
+        ...ActorFields
+      }
+    }
+    channelPayoutsUpdatedEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      commitment
+      payloadDataObject {
+        id
+      }
+      minCashoutAllowed
+      maxCashoutAllowed
+      channelCashoutsEnabled
+    }
+    channelPaymentMadeEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      payer {
+        id
+      }
+      amount
+      payeeChannel {
+        id
+      }
+      paymentContext {
+        __typename
+        ... on PaymentContextVideo {
+          video {
+            id
+          }
+        }
+        ... on PaymentContextChannel {
+          channel {
+            id
+          }
+        }
+      }
+      rationale
+    }
+    memberBannedFromChannelEvents(limit: 9999) {
+      id
+      inBlock
+      inExtrinsic
+      indexInBlock
+      createdAt
+      channel {
+        id
+      }
+      member {
+        id
+      }
+      action
     }
     memberships(limit: 9999) {
       id

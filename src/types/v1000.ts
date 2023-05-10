@@ -43,6 +43,25 @@ export interface ChannelCreationParametersRecord {
     expectedDataObjectStateBloatBond: bigint
 }
 
+export type ChannelFundsDestination = ChannelFundsDestination_AccountId | ChannelFundsDestination_CouncilBudget
+
+export interface ChannelFundsDestination_AccountId {
+    __kind: 'AccountId'
+    value: Uint8Array
+}
+
+export interface ChannelFundsDestination_CouncilBudget {
+    __kind: 'CouncilBudget'
+}
+
+export interface UpdateChannelPayoutsParametersRecord {
+    commitment: (Uint8Array | undefined)
+    payload: (ChannelPayoutsPayloadParametersRecord | undefined)
+    minCashoutAllowed: (bigint | undefined)
+    maxCashoutAllowed: (bigint | undefined)
+    channelCashoutsEnabled: (boolean | undefined)
+}
+
 export interface ChannelUpdateParametersRecord {
     assetsToUpload: (StorageAssetsRecord | undefined)
     newMeta: (Uint8Array | undefined)
@@ -341,6 +360,13 @@ export interface RepayableBloatBond {
 export interface StorageAssetsRecord {
     objectCreationList: DataObjectCreationParameters[]
     expectedDataSizeFee: bigint
+}
+
+export interface ChannelPayoutsPayloadParametersRecord {
+    uploaderAccount: Uint8Array
+    objectCreationParams: DataObjectCreationParameters
+    expectedDataSizeFee: bigint
+    expectedDataObjectStateBloatBond: bigint
 }
 
 export type InitTransactionalStatusRecord = InitTransactionalStatusRecord_Idle | InitTransactionalStatusRecord_BuyNow | InitTransactionalStatusRecord_InitiatedOfferToMember | InitTransactionalStatusRecord_EnglishAuction | InitTransactionalStatusRecord_OpenAuction
