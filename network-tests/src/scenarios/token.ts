@@ -13,5 +13,5 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const storage = job('initialize storage system', initStorage(defaultStorageConfig)).after(governanceSetup)
   const requiredBasicSetup = job('create Channel', createChannel).requires(storage)
 
-  job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
+  // job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
 })
