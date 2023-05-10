@@ -119,6 +119,7 @@ export function createAccount(
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
     whitelisted,
+    deleted: false,
   })
   token.accountsNum += 1
 }
