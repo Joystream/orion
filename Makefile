@@ -8,7 +8,7 @@ build:
 	@npm run build
 
 build-docker:
-	@docker build . -t orion
+	@docker build . -t joystream/orion
 
 serve:
 	@npx squid-graphql-server --subscriptions
