@@ -107,7 +107,7 @@ export class VideosResolver {
     idsQuerySql = extendClause(
       idsQuerySql,
       'FROM',
-      `LEFT JOIN "processor"."video_view_event" ` +
+      `INNER JOIN "processor"."video_view_event" ` +
         `ON "video_view_event"."video_id" = "video"."id"` +
         (args.periodDays
           ? ` AND "video_view_event"."timestamp" > '${new Date(
@@ -116,8 +116,15 @@ export class VideosResolver {
           : ''),
       ''
     )
+    const viewsOrder =
+      args.orderBy.find((orderBy) => orderBy.startsWith('viewsNum_'))?.split('_')?.[1] || 'DESC'
+
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
-    idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
+    idsQuerySql = overrideClause(
+      idsQuerySql,
+      'ORDER BY',
+      `COUNT("video_view_event"."id") ${viewsOrder}`
+    )
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'LIMIT', `${args.limit}`)
 
@@ -147,14 +154,12 @@ export class VideosResolver {
         args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
 
     if (hasPeriodDaysArgAndIsOrderedByViews) {
-      connectionQuerySql = overrideClause(
-        connectionQuerySql,
-        'ORDER BY',
-        `array_position(
-          array[${ids.map((id) => `'${id}'`).join(', ')}],
-          video.id  
-        ) ASC`
-      )
+      const arrayPosition = `array_position(
+        array[${ids.map((id) => `'${id}'`).join(', ')}],
+        video.id  
+      ) ASC`
+      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" DESC', arrayPosition)
+      connectionQuerySql = connectionQuerySql.replace('"video"."views_num" ASC', arrayPosition)
     }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
