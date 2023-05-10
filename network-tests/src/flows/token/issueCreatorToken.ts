@@ -50,11 +50,9 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
       revenueSplitRate,
     })
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(api, query, channelOwnerAddress, contentActor, channelId, crtParams)
-  await new FixtureRunner(issueCreatorTokenFixture).run()
+  await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
 
   api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
-
-  // await issueCreatorTokenFixture.tryQuery()
 
   debug('Done')
 }
