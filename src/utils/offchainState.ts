@@ -136,7 +136,18 @@ export class OffchainState {
           )
         }
       } else {
-        await em.getRepository(entityName).insert(values)
+        // For inserts we also use batches, but this is because otherwise the query may fail
+        // if the number of entities is very large
+        const batchSize = 1000
+        let batchNumber = 1
+        while (values.length) {
+          ++batchNumber
+          const batch = values.splice(0, batchSize)
+          this.logger.info(
+            `Executing batch #${batchNumber} of ${batch.length} entities (${values.length} entities left)...`
+          )
+          await em.getRepository(entityName).insert(batch)
+        }
       }
       this.logger.info(
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
