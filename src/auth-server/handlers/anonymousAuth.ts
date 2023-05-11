@@ -45,9 +45,7 @@ export const anonymousAuth: (
       return { user, sessionData }
     })
 
-    if (sessionData.isNew) {
-      setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
-    }
+    setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
 
     res.status(200).json({
       success: true,

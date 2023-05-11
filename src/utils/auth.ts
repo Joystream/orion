@@ -157,7 +157,6 @@ export async function getOrCreateSession(
 ): Promise<{
   session: Session
   sessionMaxDurationHours: number
-  isNew: boolean
 }> {
   const now = new Date()
   const sessionExpiryAfterMinutes = await config.get(
@@ -182,7 +181,6 @@ export async function getOrCreateSession(
     )
     return {
       session: await em.save(existingSession),
-      isNew: false,
       sessionMaxDurationHours,
     }
   }
@@ -203,7 +201,6 @@ export async function getOrCreateSession(
   })
   return {
     session: await em.save(session),
-    isNew: true,
     sessionMaxDurationHours,
   }
 }
