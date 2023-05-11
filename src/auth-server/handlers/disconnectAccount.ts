@@ -1,10 +1,9 @@
 import express from 'express'
 import { components } from '../generated/api-types'
-import { UnauthorizedError, NotFoundError, BadRequestError } from '../errors'
+import { UnauthorizedError, NotFoundError } from '../errors'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { ConnectedAccount } from '../../model'
-import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -20,7 +19,7 @@ export const disconnectAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      body: { payload },
+      body: { joystreamAccountId },
     } = req
     const {
       locals: { authContext },
@@ -30,27 +29,16 @@ export const disconnectAccount: (
       throw new UnauthorizedError()
     }
 
-    const { account } = authContext
     const em = await globalEm
 
     const existingConnectedAccount = await em.findOne(ConnectedAccount, {
-      where: { id: payload.joystreamAccountId },
+      where: { id: joystreamAccountId },
     })
 
     if (!existingConnectedAccount) {
       throw new NotFoundError(
         'Provided Joystream account is not connected to this gateway account.'
       )
-    }
-
-    await verifyActionExecutionRequest(em, req.body)
-
-    if (payload.gatewayAccountId !== account.id) {
-      throw new BadRequestError('Invalid gateway account id provided in payload.')
-    }
-
-    if (payload.action !== 'disconnect') {
-      throw new BadRequestError('Invalid action.')
     }
 
     await em.remove(existingConnectedAccount)

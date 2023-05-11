@@ -13,7 +13,7 @@ import { cryptoWaitReady, randomAsU8a } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 
-type ConnectOrDisconnectAccountArgs = {
+type ConnectAccountArgs = {
   accountId: string
   sessionId?: string
   gatewayName: string
@@ -21,21 +21,20 @@ type ConnectOrDisconnectAccountArgs = {
   signingKey: KeyringPair
   expectedStatus: number
   timestamp?: number
-  action: 'connect' | 'disconnect'
+  action?: string
   endpoint?: string
 }
 
-async function connectOrDisconnectAccount({
+async function connectAccount({
   accountId,
   sessionId,
   gatewayName,
   joystreamAccountId,
   signingKey,
   expectedStatus,
-  action,
-  endpoint = `/api/v1/${action}-account`,
+  action = 'connect',
   timestamp = Date.now(),
-}: ConnectOrDisconnectAccountArgs): Promise<string> {
+}: ConnectAccountArgs): Promise<string> {
   const payload: components['schemas']['ConnectAccountRequestData']['payload'] = {
     joystreamAccountId,
     gatewayAccountId: accountId,
@@ -45,7 +44,7 @@ async function connectOrDisconnectAccount({
   }
   const signature = u8aToHex(signingKey.sign(JSON.stringify(payload)))
   await request(app)
-    .post(endpoint)
+    .post('/api/v1/connect-account')
     .set('Cookie', sessionId ? `${SESSION_COOKIE_NAME}=${sessionId}` : '')
     .set('Content-Type', 'application/json')
     .send({
@@ -55,6 +54,28 @@ async function connectOrDisconnectAccount({
     .expect(expectedStatus)
 
   return signature
+}
+
+type DisconnectAccountArgs = {
+  sessionId?: string
+  joystreamAccountId: string
+  expectedStatus: number
+}
+
+async function disconnectAccount({
+  sessionId,
+  joystreamAccountId,
+  expectedStatus,
+}: DisconnectAccountArgs): Promise<void> {
+  const data: components['schemas']['DisconnectAccountRequestData'] = {
+    joystreamAccountId,
+  }
+  await request(app)
+    .post('/api/v1/disconnect-account')
+    .set('Cookie', sessionId ? `${SESSION_COOKIE_NAME}=${sessionId}` : '')
+    .set('Content-Type', 'application/json')
+    .send(data)
+    .expect(expectedStatus)
 }
 
 describe('connectAndDisconnectAccount', () => {
@@ -72,49 +93,38 @@ describe('connectAndDisconnectAccount', () => {
     bob = keyring.addFromUri('//Bob')
   })
 
-  async function assertConnectedAccountStatusNotChanged(
-    accountId: string,
-    action: 'connect' | 'disconnect'
-  ): Promise<ConnectedAccount | null> {
+  async function assertAccountNotConnected(accountId: string): Promise<void> {
     const connectedAccount = await em.getRepository(ConnectedAccount).findOneBy({
       id: accountId,
     })
-    if (action === 'connect') {
-      assert(!connectedAccount, 'Connected account found')
-    } else {
-      assert(connectedAccount, 'Connected account not found')
-    }
-    return connectedAccount
+    assert(!connectedAccount, 'Connected account found')
   }
 
-  function commonTests(action: 'connect' | 'disconnect'): void {
+  describe('connectAccount', () => {
     it('should fail with invalid signature', async () => {
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
         signingKey: bob,
         expectedStatus: 400,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail with invalid app name', async () => {
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         gatewayName: 'invalid',
         joystreamAccountId: alice.address,
         signingKey: alice,
         expectedStatus: 400,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if not logged in', async () => {
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         sessionId: undefined,
         gatewayName,
@@ -122,13 +132,12 @@ describe('connectAndDisconnectAccount', () => {
         signingKey: alice,
         expectedStatus: 401,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if anonymounsly authenticated', async () => {
       const anonSessionId = await anonymousAuth()
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         sessionId: anonSessionId,
         gatewayName,
@@ -136,12 +145,11 @@ describe('connectAndDisconnectAccount', () => {
         signingKey: alice,
         expectedStatus: 401,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail with invalid gateway account id', async () => {
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         accountId: 'invalid',
         gatewayName,
@@ -149,7 +157,7 @@ describe('connectAndDisconnectAccount', () => {
         signingKey: alice,
         expectedStatus: 400,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if proof expired', async () => {
@@ -157,8 +165,7 @@ describe('connectAndDisconnectAccount', () => {
         ConfigVariable.AccountOwnershipProofExpiryTimeSeconds,
         em
       )
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
@@ -166,12 +173,11 @@ describe('connectAndDisconnectAccount', () => {
         expectedStatus: 400,
         timestamp: Date.now() - proofExpiryTime * 1000 - 1,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if proof timestamp is in the future', async () => {
-      await connectOrDisconnectAccount({
-        action,
+      await connectAccount({
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
@@ -179,29 +185,23 @@ describe('connectAndDisconnectAccount', () => {
         expectedStatus: 400,
         timestamp: Date.now() + 1000,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if action is not valid', async () => {
-      await connectOrDisconnectAccount({
-        action: action === 'connect' ? 'disconnect' : 'connect',
-        endpoint: `/api/v1/${action}-account`,
+      await connectAccount({
+        action: 'invalid',
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
         signingKey: alice,
         expectedStatus: 400,
       })
-      await assertConnectedAccountStatusNotChanged(alice.address, action)
+      await assertAccountNotConnected(alice.address)
     })
-  }
-
-  describe('connectAccount', () => {
-    commonTests('connect')
 
     it('should work with valid signature', async () => {
-      const signature = await connectOrDisconnectAccount({
-        action: 'connect',
+      const signature = await connectAccount({
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
@@ -222,8 +222,7 @@ describe('connectAndDisconnectAccount', () => {
     })
 
     it('should fail if account is already connected', async () => {
-      await connectOrDisconnectAccount({
-        action: 'connect',
+      await connectAccount({
         ...accountInfo,
         gatewayName,
         joystreamAccountId: alice.address,
@@ -238,8 +237,7 @@ describe('connectAndDisconnectAccount', () => {
       do {
         currentCount = await em.countBy(ConnectedAccount, { accountId: accountInfo.accountId })
         const acc = keyring.addFromSeed(randomAsU8a(32))
-        await connectOrDisconnectAccount({
-          action: 'connect',
+        await connectAccount({
           ...accountInfo,
           gatewayName,
           joystreamAccountId: acc.address,
@@ -251,30 +249,36 @@ describe('connectAndDisconnectAccount', () => {
   })
 
   describe('disconnectAccount', () => {
-    commonTests('disconnect')
-
-    it('should work with valid signature', async () => {
-      await connectOrDisconnectAccount({
-        action: 'disconnect',
-        ...accountInfo,
-        gatewayName,
+    it('should fail if not logged in', async () => {
+      await disconnectAccount({
+        sessionId: undefined,
         joystreamAccountId: alice.address,
-        signingKey: alice,
+        expectedStatus: 401,
+      })
+    })
+
+    it('should fail if anonymounsly authenticated', async () => {
+      const anonSessionId = await anonymousAuth()
+      await disconnectAccount({
+        sessionId: anonSessionId,
+        joystreamAccountId: alice.address,
+        expectedStatus: 401,
+      })
+    })
+
+    it('should work with valid account', async () => {
+      await disconnectAccount({
+        ...accountInfo,
+        joystreamAccountId: alice.address,
         expectedStatus: 200,
       })
-      const connectedAccount = await em.getRepository(ConnectedAccount).findOneBy({
-        id: alice.address,
-      })
-      assert(!connectedAccount, 'Account not disconnected')
+      await assertAccountNotConnected(alice.address)
     })
 
     it('should fail if account is not connected', async () => {
-      await connectOrDisconnectAccount({
-        action: 'disconnect',
+      await disconnectAccount({
         ...accountInfo,
-        gatewayName,
         joystreamAccountId: alice.address,
-        signingKey: alice,
         expectedStatus: 404,
       })
     })
