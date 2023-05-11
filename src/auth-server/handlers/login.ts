@@ -46,9 +46,7 @@ export const login: (
       return [sessionData, account]
     })
 
-    if (sessionData.isNew) {
-      setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
-    }
+    setSessionCookie(res, sessionData.session.id, sessionData.sessionMaxDurationHours)
 
     res.status(200).json({
       accountId: account.id,
