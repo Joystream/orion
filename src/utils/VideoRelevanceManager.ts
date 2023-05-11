@@ -1,6 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { config, ConfigVariable } from './config'
-import { getEm } from '../server-extension/orm'
+import { getEm } from './orm'
 
 // constant used to parse seconds from creation
 export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
