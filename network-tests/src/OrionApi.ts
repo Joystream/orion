@@ -6,7 +6,7 @@ import { BLOCKTIME } from './consts'
 import { Utils } from './utils'
 import { TokenId } from './consts'
 
-import { GetTokenById, GetTokenByIdQuery, GetTokenByIdQueryVariables, TokenFieldsFragment } from '../graphql/generated/queries'
+import { GetTokenById, TokenFieldsFragment, GetTokenAccountById, TokenAccountFieldsFragment } from '../graphql/generated/queries'
 
 export class OrionApi {
   private readonly queryNodeProvider: ApolloClient<NormalizedCacheObject>
@@ -42,7 +42,6 @@ export class OrionApi {
     }
 
     return result;
-
   }
 
   // Refactor to use graphql subscription (stateSubscription.lastCompleteBlock) instead
@@ -147,6 +146,14 @@ export class OrionApi {
       GetTokenById,
       { id: id.toString() },
       'tokenById'
+    )
+  }
+
+  public async getTokenAccountById(id: string): Promise<TokenAccountFieldsFragment> {
+    return this.firstEntityQuery(
+      GetTokenAccountById,
+      { id: id },
+      'tokenAccountById'
     )
   }
 }

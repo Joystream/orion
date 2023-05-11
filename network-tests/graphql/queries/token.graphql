@@ -14,8 +14,28 @@ fragment TokenFields on Token {
   description
 }
 
+fragment TokenAccountFields on TokenAccount {
+  id
+  member {
+    id
+  }
+  token {
+    id
+  }
+  stakedAmount
+  totalAmount
+  whitelisted
+  deleted
+}
+
 query getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
+  }
+}
+
+query getTokenAccountById($id: String!) {
+  tokenAccountById(id: $id) {
+    ...TokenAccountFields
   }
 }

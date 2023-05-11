@@ -7,10 +7,12 @@ import { Api } from '../../Api'
 import {
   PalletContentPermissionsContentActor,
   PalletProjectTokenTokenIssuanceParameters,
+  PalletProjectTokenTokenAllocation,
 } from '@polkadot/types/lookup'
 import { TokenFieldsFragment } from '../../../graphql/generated/queries'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
+import { BN } from 'bn.js'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -49,23 +51,48 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   }
 
   protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-    //   const [tokenId, { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate }] =
-    //     this.events[i].event.data
-    //   assert.equal(qEvent.status, TokenStatus.Idle)
-    //   assert.equal(qEvent.isInviteOnly, true)
-    //   assert.equal(qEvent.id, tokenId.toString())
-    //   // assert.equal(qToken.symbol, symbol.toString())
-    //   // assert.equal(qToken.annualCreatorReward, patronageRate.toString())
   }
 
   public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate }] =
+      this.events[0].event.data
     await super.runQueryNodeChecks()
     const qToken = await this.query.retryQuery(
-      () => this.query.getTokenById(this.api.createType('u64', 0)),
+      () => this.query.getTokenById(tokenId),
     )
+    const initialMembers = [...initialAllocation.keys()]
+    const initialBalances = [...initialAllocation.values()].map((item) => item.amount)
+    const qAccounts = await Promise.all(initialMembers.map(async (memberId) => {
+      return await this.query.retryQuery(
+        () => this.query.getTokenAccountById(tokenId + memberId.toString())
+      )
+    }))
+
+    let totalSupply = new BN(0)
+    initialAllocation.forEach((item) => {
+      totalSupply = totalSupply.add(item.amount)
+    })
+
     assert.isNotNull(qToken)
-    assert.equal(qToken!.id, '0')
+    assert.equal(qToken!.id, tokenId.toString())
     assert.equal(qToken!.status, TokenStatus.Idle)
+    assert.equal(qToken!.revenueShareNonce, 0)
+    assert.equal(qToken!.revenueShareRatioPercent, revenueSplitRate.toNumber())
+    assert.equal(qToken!.totalSupply, totalSupply.toString())
+    // assert.equal(qToken!.symbol, symbol.toString())
+    assert.equal(qToken!.annualCreatorReward, patronageRate.toString())
+    assert.equal(qToken!.createdAt, this.events[0].blockTimestamp)
+    assert.equal(qToken!.isInviteOnly, transferPolicy.isPermissioned)
+    assert.equal(qToken!.accountsNum, initialAllocation.size)
+    assert.equal(qToken!.deissued, false)
+
+    qAccounts.forEach((qAccount, i) => {
+      assert.isNotNull(qAccount)
+      assert.isNotNull(qAccount!.member.id, initialMembers[i].toString())
+      assert.isNotNull(qAccount!.token.id, tokenId.toString())
+      assert.isNotNull(qAccount!.stakedAmount, '0')
+      assert.isNotNull(qAccount!.totalAmount, initialBalances[i].toString())
+    })
   }
 
 }
