@@ -11,7 +11,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
 *DefaultApi* | [**confirmEmail**](Apis/DefaultApi.md#confirmemail) | **POST** /confirm-email | Confirm account's e-mail address provided during registration. |
 *DefaultApi* | [**connectAccount**](Apis/DefaultApi.md#connectaccount) | **POST** /connect-account | Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. |
 *DefaultApi* | [**createAccount**](Apis/DefaultApi.md#createaccount) | **POST** /account | Create a new Gateway account. Requires anonymousAuth to be performed first. |
-*DefaultApi* | [**disconnectAccount**](Apis/DefaultApi.md#disconnectaccount) | **POST** /disconnect-account | Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. |
+*DefaultApi* | [**disconnectAccount**](Apis/DefaultApi.md#disconnectaccount) | **POST** /disconnect-account | Disconnect a Joystream account (key) from the Gateway acount. |
 *DefaultApi* | [**getArtifacts**](Apis/DefaultApi.md#getartifacts) | **GET** /artifacts | Get wallet seed encryption artifacts. |
 *DefaultApi* | [**getSessionArtifacts**](Apis/DefaultApi.md#getsessionartifacts) | **GET** /session-artifacts | Get wallet seed encryption artifacts for the current session. |
 *DefaultApi* | [**login**](Apis/DefaultApi.md#login) | **POST** /login | Login to user's account by providing a message signed by one of the user's connected accounts. |
@@ -35,7 +35,6 @@ All URIs are relative to *http://localhost:4074/api/v1*
  - [CreateAccountRequestData](./Models/CreateAccountRequestData.md)
  - [CreateAccountRequestData_allOf](./Models/CreateAccountRequestData_allOf.md)
  - [DisconnectAccountRequestData](./Models/DisconnectAccountRequestData.md)
- - [DisconnectAccountRequestData_allOf](./Models/DisconnectAccountRequestData_allOf.md)
  - [EncryptionArtifacts](./Models/EncryptionArtifacts.md)
  - [GenericErrorResponseData](./Models/GenericErrorResponseData.md)
  - [GenericOkResponseData](./Models/GenericOkResponseData.md)

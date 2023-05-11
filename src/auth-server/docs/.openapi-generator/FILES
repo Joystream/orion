@@ -10,7 +10,6 @@ Models/ConnectAccountRequestData_allOf.md
 Models/CreateAccountRequestData.md
 Models/CreateAccountRequestData_allOf.md
 Models/DisconnectAccountRequestData.md
-Models/DisconnectAccountRequestData_allOf.md
 Models/EncryptionArtifacts.md
 Models/GenericErrorResponseData.md
 Models/GenericOkResponseData.md

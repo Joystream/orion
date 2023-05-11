@@ -202,7 +202,7 @@ paths:
     post:
       operationId: disconnectAccount
       x-eov-operation-handler: disconnectAccount
-      description: Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership.
+      description: Disconnect a Joystream account (key) from the Gateway acount.
       security:
         - cookieAuth: []
       requestBody:
@@ -491,23 +491,12 @@ components:
                     gatewayAccountId:
                       type: string
     DisconnectAccountRequestData:
-      allOf:
-        - $ref: '#/components/schemas/ActionExecutionRequestData'
-        - type: object
-          properties:
-            payload:
-              allOf:
-                - $ref: '#/components/schemas/ActionExecutionPayload'
-                - type: object
-                  required:
-                    - gatewayAccountId
-                  properties:
-                    action:
-                      type: string
-                      enum:
-                        - disconnect
-                    gatewayAccountId:
-                      type: string
+      type: object
+      required:
+        - joystreamAccountId
+      properties:
+        joystreamAccountId:
+          type: string
     ConfirmEmailRequestData:
       type: object
       required:

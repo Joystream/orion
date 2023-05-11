@@ -132,7 +132,7 @@ No authorization required
 
 
 
-    Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership.
+    Disconnect a Joystream account (key) from the Gateway acount.
 
 ### Parameters
 

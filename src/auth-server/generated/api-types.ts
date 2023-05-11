@@ -41,7 +41,7 @@ export interface paths {
     post: operations['connectAccount']
   }
   '/disconnect-account': {
-    /** @description Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. */
+    /** @description Disconnect a Joystream account (key) from the Gateway acount. */
     post: operations['disconnectAccount']
   }
   '/logout': {
@@ -88,12 +88,8 @@ export interface components {
         gatewayAccountId: string
       }
     }
-    DisconnectAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
-      payload?: components['schemas']['ActionExecutionPayload'] & {
-        /** @enum {string} */
-        action?: 'disconnect'
-        gatewayAccountId: string
-      }
+    DisconnectAccountRequestData: {
+      joystreamAccountId: string
     }
     ConfirmEmailRequestData: {
       /** @description Confirmation token recieved by the user via an e-mail. */
@@ -397,7 +393,7 @@ export interface operations {
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
-  /** @description Disconnect a Joystream account (key) from the Gateway acount by providing a signed proof of ownership. */
+  /** @description Disconnect a Joystream account (key) from the Gateway acount. */
   disconnectAccount: {
     requestBody: components['requestBodies']['DisconnectAccountRequestBody']
     responses: {
