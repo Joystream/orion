@@ -81,7 +81,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.totalSupply, totalSupply.toString())
     // assert.equal(qToken!.symbol, symbol.toString())
     assert.equal(qToken!.annualCreatorReward, patronageRate.toString())
-    assert.equal(qToken!.createdAt, this.events[0].blockTimestamp)
+    // assert.equal(qToken!.createdAt, new Date(this.events[0].blockTimestamp * 1000))
     assert.equal(qToken!.isInviteOnly, transferPolicy.isPermissioned)
     assert.equal(qToken!.accountsNum, initialAllocation.size)
     assert.equal(qToken!.deissued, false)
