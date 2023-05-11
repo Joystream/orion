@@ -2,7 +2,7 @@ import { Resolver, Root, Subscription } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import { ProcessorState } from './types'
 import _, { isObject } from 'lodash'
-import { getEm } from '../../orm'
+import { getEm } from '../../../utils/orm'
 import { has } from '../../../utils/misc'
 
 class ProcessorStateRetriever {
