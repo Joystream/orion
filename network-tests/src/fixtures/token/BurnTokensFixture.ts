@@ -5,6 +5,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
+import { assert } from 'chai'
 import BN from 'bn.js'
 
 type TokensBurnedEventDetails = EventDetails<EventType<'projectToken', 'TokensBurned'>>
@@ -13,6 +14,7 @@ export class BurnTokensFixture extends StandardizedFixture {
   protected creatorAddress
   protected tokenId: number
   protected fromMemberId: number
+  protected events: TokensBurnedEventDetails[] = []
   protected amount: BN
 
   public constructor(
@@ -21,7 +23,7 @@ export class BurnTokensFixture extends StandardizedFixture {
     creatorAddress: string,
     tokenId: number,
     fromMemberId: number,
-    amount: BN
+    amount: BN,
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -41,11 +43,16 @@ export class BurnTokensFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
+  // add a general key-map record to the runQueryNodeChecks as a parameter
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, memberId, amountBurned] = this.events[0].event.data
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId + memberId.toString()))
+
+    assert.isNotNull(qToken)
+    assert.isNotNull(qAccount)
   }
 }
