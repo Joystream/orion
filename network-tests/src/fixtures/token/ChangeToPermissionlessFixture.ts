@@ -4,6 +4,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
+import { assert } from 'chai'
 
 type ChangeToPermissionlessEventDetails = EventDetails<EventType<'projectToken', 'TransferPolicyChangedToPermissionless'>>
 
@@ -11,6 +12,7 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
   protected creatorAddress
   protected creatorMemberId
   protected channelId
+  protected events: ChangeToPermissionlessEventDetails[] = []
 
   public constructor(
     api: Api,
@@ -40,6 +42,14 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
   public async tryQuery(): Promise<void> {
     const token = await this.query.getTokenById(this.api.createType('u64', 0))
     console.log(`Query result:\n ${token}`)
+  }
+
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId] = this.events[0].event.data
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+
+    assert.isNotNull(qToken)
+    assert.equal(qToken!.isInviteOnly, false)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
