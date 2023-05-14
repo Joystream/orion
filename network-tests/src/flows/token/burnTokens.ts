@@ -26,6 +26,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   unlockFirstHolderAccess()
 
   const burnTokenFixture = new BurnTokensFixture(api, query, creatorAddress, tokenId, fromMember, new BN(1000))
+  await burnTokenFixture.preExecHook()
   await new FixtureRunner(burnTokenFixture).run()
 }
 
