@@ -16,6 +16,8 @@ export class BurnTokensFixture extends StandardizedFixture {
   protected fromMemberId: number
   protected events: TokensBurnedEventDetails[] = []
   protected amount: BN
+  protected supplyPre: BN | undefined
+  protected accountAmountPre: BN | undefined
 
   public constructor(
     api: Api,
@@ -31,6 +33,18 @@ export class BurnTokensFixture extends StandardizedFixture {
     this.fromMemberId = fromMemberId
     this.amount = amount
   }
+
+  public async preExecHook(): Promise<void> {
+    const _tokenId = this.api.createType('u64', this.tokenId)
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(this.tokenId + this.fromMemberId.toString()))
+    assert.isNotNull(qToken)
+    assert.isNotNull(qAccount)
+
+    this.supplyPre = new BN(qToken!.totalSupply)
+    this.accountAmountPre = new BN(qAccount!.totalAmount)
+  }
+
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
@@ -52,7 +66,12 @@ export class BurnTokensFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId + memberId.toString()))
 
+    const supplyPost = (this.supplyPre!.sub(amountBurned.toBn())).toString()
+    const accountAmountPost = (this.accountAmountPre!.sub(amountBurned.toBn())).toString()
+
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
+    assert.equal(qToken!.totalSupply, supplyPost)
+    assert.equal(qAccount!.totalAmount, accountAmountPost)
   }
 }
