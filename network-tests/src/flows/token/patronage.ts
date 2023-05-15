@@ -4,6 +4,7 @@ import { FixtureRunner } from '../../Fixture'
 import { DecreasePatronageRateFixture } from '../../fixtures/token'
 import { expect } from 'chai'
 import { Resource } from 'src/Resources'
+import { ClaimPatronageCreditFixture } from 'src/fixtures/token/ClaimPatronageCreditFixture'
 
 export default async function burnTokens({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -19,6 +20,9 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
   unlockCreatorAccess()
+
+  const claimPatronageRateFixture = new ClaimPatronageCreditFixture(api, query, creatorAddress, creatorMemberId, channelId)
+  await new FixtureRunner(claimPatronageRateFixture).runWithQueryNodeChecks()
 
   const decreasePatronageRateFixture = new DecreasePatronageRateFixture(api, query, creatorAddress, creatorMemberId, channelId, 10)
   await new FixtureRunner(decreasePatronageRateFixture).run()
