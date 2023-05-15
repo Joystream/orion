@@ -39,6 +39,7 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
     start,
     duration
   )
+  await issueRevenueShare.preExecHook()
   await new FixtureRunner(issueRevenueShare).runWithQueryNodeChecks()
 
   debug('User participates in revenue share')
@@ -51,6 +52,7 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
     tokenId,
     amount
   )
+  await participateInShareFixture.preExecHook()
   await new FixtureRunner(participateInShareFixture).runWithQueryNodeChecks()
 
   debug('User exists revenue share')
@@ -61,7 +63,8 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
     firstHolderMemberId,
     tokenId
   )
-  await new FixtureRunner(exitRevenueShareFixture).run()
+  await exitRevenueShareFixture.preExecHook()
+  await new FixtureRunner(exitRevenueShareFixture).runWithQueryNodeChecks()
 
   debug('revenue share finalized')
   const finalizeRevenueShareFixture = new FinalizeRevenueShareFixture(
