@@ -29,16 +29,33 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const holderMemberId = buyMembershipsFixture.getCreatedMembers()[0]
 
   // create crt account
-  const actor = api.createType('PalletContentPermissionsContentActor', { Member: creatorMemberId})
+  const actor = api.createType('PalletContentPermissionsContentActor', { Member: creatorMemberId })
   const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
-  outputs.set(api.createType('u64', holderMemberId), api.createType('PalletProjectTokenPaymentWithVesting', {
-    amount: api.createType('u128', new BN(0))
-  }))
+  outputs.set(
+    api.createType('u64', holderMemberId),
+    api.createType('PalletProjectTokenPaymentWithVesting', {
+      amount: api.createType('u128', new BN(0)),
+    })
+  )
   const metadata = ''
-  const issuerTransferFixture = new IssuerTransferFixture(api, query, creatorAddress, actor, channelId, outputs, metadata)
+  const issuerTransferFixture = new IssuerTransferFixture(
+    api,
+    query,
+    creatorAddress,
+    actor,
+    channelId,
+    outputs,
+    metadata
+  )
   await new FixtureRunner(issuerTransferFixture).run()
 
   // dust created account
-  const dustAccountFixture = new DustAccountFixture(api, query, creatorAddress, tokenId, holderMemberId.toNumber())
+  const dustAccountFixture = new DustAccountFixture(
+    api,
+    query,
+    creatorAddress,
+    tokenId,
+    holderMemberId.toNumber()
+  )
   await new FixtureRunner(dustAccountFixture).run()
 }

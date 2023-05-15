@@ -21,13 +21,20 @@ export default async function joinWhitelist({ api, query, lock }: FlowProps): Pr
   unlockFirstHolderAccess()
 
   const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
-  outputs.set(api.createType('u64', firstHolderMemberId), api.createType('PalletProjectTokenPaymentWithVesting', {
-    amount: api.createType('u128', new BN(1000))
-  }))
+  outputs.set(
+    api.createType('u64', firstHolderMemberId),
+    api.createType('PalletProjectTokenPaymentWithVesting', {
+      amount: api.createType('u128', new BN(1000)),
+    })
+  )
   const metadata = ''
 
-  const joinWhitelistFixture = new JoinWhitelistFixture(api, query, creatorAddress, firstHolderMemberId, tokenId)
+  const joinWhitelistFixture = new JoinWhitelistFixture(
+    api,
+    query,
+    creatorAddress,
+    firstHolderMemberId,
+    tokenId
+  )
   await new FixtureRunner(joinWhitelistFixture).run()
 }
-
-

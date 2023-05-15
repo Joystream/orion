@@ -30,20 +30,46 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
   debug('Issue revenue share')
   const duration = 100
   const start = (await api.getBestBlock()).toNumber() + 10
-  const issueRevenueShare = new IssueRevenueShareFixture(api, query, creatorAddress, creatorMemberId, channelId, start, duration)
-  await new FixtureRunner(issueRevenueShare).run()
+  const issueRevenueShare = new IssueRevenueShareFixture(
+    api,
+    query,
+    creatorAddress,
+    creatorMemberId,
+    channelId,
+    start,
+    duration
+  )
+  await new FixtureRunner(issueRevenueShare).runWithQueryNodeChecks()
 
   debug('User participates in revenue share')
   const amount = new BN(100)
-  const participateInShareFixture = new ParticipateInShareFixture(api, query, firstHolderAddress, firstHolderMemberId, tokenId, amount)
-  await new FixtureRunner(participateInShareFixture).run()
+  const participateInShareFixture = new ParticipateInShareFixture(
+    api,
+    query,
+    firstHolderAddress,
+    firstHolderMemberId,
+    tokenId,
+    amount
+  )
+  await new FixtureRunner(participateInShareFixture).runWithQueryNodeChecks()
 
   debug('User exists revenue share')
-  const exitRevenueShareFixture = new ExitRevenueShareFixture(api, query, firstHolderAddress, firstHolderMemberId, tokenId)
+  const exitRevenueShareFixture = new ExitRevenueShareFixture(
+    api,
+    query,
+    firstHolderAddress,
+    firstHolderMemberId,
+    tokenId
+  )
   await new FixtureRunner(exitRevenueShareFixture).run()
 
   debug('revenue share finalized')
-  const finalizeRevenueShareFixture = new FinalizeRevenueShareFixture(api, query, firstHolderAddress, firstHolderMemberId, tokenId)
+  const finalizeRevenueShareFixture = new FinalizeRevenueShareFixture(
+    api,
+    query,
+    firstHolderAddress,
+    firstHolderMemberId,
+    tokenId
+  )
   await new FixtureRunner(finalizeRevenueShareFixture).run()
 }
-

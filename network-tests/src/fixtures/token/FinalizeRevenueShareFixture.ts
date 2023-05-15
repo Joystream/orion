@@ -5,7 +5,9 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 
-type RevenueShareFinalizedEventDetails = EventDetails<EventType<'projectToken', 'RevenueSplitFinalized'>>
+type RevenueShareFinalizedEventDetails = EventDetails<
+  EventType<'projectToken', 'RevenueSplitFinalized'>
+>
 
 export class FinalizeRevenueShareFixture extends StandardizedFixture {
   protected creatorAddress: string
@@ -17,7 +19,7 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     creatorMemberId: number,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -29,11 +31,15 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.finalizeRevenueSplit(actor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<RevenueShareFinalizedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<RevenueShareFinalizedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitFinalized')
   }
 
@@ -42,6 +48,5 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

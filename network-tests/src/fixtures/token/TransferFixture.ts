@@ -25,8 +25,8 @@ export class TransferFixture extends StandardizedFixture {
     metadata: string
   ) {
     super(api, query)
-    this.srcMemberId = srcMemberId 
-    this.tokenId = tokenId 
+    this.srcMemberId = srcMemberId
+    this.tokenId = tokenId
     this.outputs = outputs
     this.metadata = metadata
     this.creatorAddress = creatorAddress
@@ -37,7 +37,14 @@ export class TransferFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [this.api.tx.projectToken.transfer(this.srcMemberId, this.tokenId, this.outputs, this.metadata)]
+    return [
+      this.api.tx.projectToken.transfer(
+        this.srcMemberId,
+        this.tokenId,
+        this.outputs,
+        this.metadata
+      ),
+    ]
   }
 
   protected async getEventFromResult(result: SubmittableResult): Promise<TransferEventDetails> {
@@ -49,6 +56,5 @@ export class TransferFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

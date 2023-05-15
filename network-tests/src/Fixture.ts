@@ -79,7 +79,7 @@ export abstract class BaseFixture {
 }
 
 export abstract class BaseQueryNodeFixture extends BaseFixture {
-  protected readonly query: OrionApi 
+  protected readonly query: OrionApi
   public readonly queryNodeChecksEnabled: boolean
 
   constructor(api: Api, query: OrionApi) {
