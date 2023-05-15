@@ -25,5 +25,5 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   await new FixtureRunner(claimPatronageRateFixture).runWithQueryNodeChecks()
 
   const decreasePatronageRateFixture = new DecreasePatronageRateFixture(api, query, creatorAddress, creatorMemberId, channelId, 10)
-  await new FixtureRunner(decreasePatronageRateFixture).run()
+  await new FixtureRunner(decreasePatronageRateFixture).runQueryNodeChecks()
 }
