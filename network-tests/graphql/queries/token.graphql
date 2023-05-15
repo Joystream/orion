@@ -14,6 +14,19 @@ fragment TokenFields on Token {
   description
 }
 
+fragment RevenueShareParticipationFields on RevenueShareParticipation {
+  id
+  createdIn
+  earnings
+  stakedAmount
+  account {
+    id
+    member {
+      id
+    }
+  }
+}
+
 fragment TokenAccountFields on TokenAccount {
   id
   member {
@@ -28,6 +41,26 @@ fragment TokenAccountFields on TokenAccount {
   deleted
 }
 
+fragment RevenueShareFields on RevenueShare {
+  id
+  startingAt
+  finalized
+  endsAt
+  duration
+  createdIn
+  claimed
+  allocation
+  participantsNum
+  token {
+    id
+  }
+  stakers {
+    account {
+      id
+    }
+  }
+}
+
 query getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
@@ -39,3 +72,16 @@ query getTokenAccountById($id: String!) {
     ...TokenAccountFields
   }
 }
+
+query getRevenueShareById($id: String!) {
+  revenueShareById(id: $id) {
+    ...RevenueShareFields
+  }
+}
+
+query getRevenueShareParticipationById($id: String!) {
+    revenueShareParticipationById(id: $id) {
+      ...RevenueShareParticipationFields
+  }
+}
+

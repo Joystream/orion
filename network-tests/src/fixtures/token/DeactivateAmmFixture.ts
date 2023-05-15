@@ -10,7 +10,7 @@ type AmmDeactivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmDea
 
 export class DeactivateAmmFixture extends StandardizedFixture {
   protected creatorAddress: string
-  protected creatorMemberId: number 
+  protected creatorMemberId: number
   protected channelId: number
 
   public constructor(
@@ -18,23 +18,27 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     creatorMemberId: number,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
     this.creatorMemberId = creatorMemberId
-    this.channelId = channelId 
+    this.channelId = channelId
   }
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId})
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.deactivateAmm(actor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<AmmDeactivatedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<AmmDeactivatedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'AmmDeactivated')
   }
 
@@ -43,6 +47,5 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

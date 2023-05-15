@@ -20,11 +20,7 @@ export type FundCouncilBudgetParams = {
 export class FundCouncilBudgetFixture extends StandardizedFixture {
   protected fundCouncilBudgetParams: FundCouncilBudgetParams
 
-  public constructor(
-    api: Api,
-    query: OrionApi,
-    fundCouncilBudgetParams: FundCouncilBudgetParams
-  ) {
+  public constructor(api: Api, query: OrionApi, fundCouncilBudgetParams: FundCouncilBudgetParams) {
     super(api, query)
     this.fundCouncilBudgetParams = fundCouncilBudgetParams
   }

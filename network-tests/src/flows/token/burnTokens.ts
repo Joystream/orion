@@ -18,15 +18,21 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
 
   // retrieve owner info
   const unlockCreatorAccess = await lock(Resource.Creator)
-  const [creatorAddress, ] = api.creator
+  const [creatorAddress] = api.creator
   unlockCreatorAccess()
 
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
-  const [,fromMember ] = api.firstHolder
+  const [, fromMember] = api.firstHolder
   unlockFirstHolderAccess()
 
-  const burnTokenFixture = new BurnTokensFixture(api, query, creatorAddress, tokenId, fromMember, new BN(1000))
+  const burnTokenFixture = new BurnTokensFixture(
+    api,
+    query,
+    creatorAddress,
+    tokenId,
+    fromMember,
+    new BN(1000)
+  )
   await burnTokenFixture.preExecHook()
   await new FixtureRunner(burnTokenFixture).runWithQueryNodeChecks()
 }
-

@@ -21,9 +21,22 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const [creatorAddress, creatorMemberId] = api.creator
   unlockCreatorAccess()
 
-  const claimPatronageRateFixture = new ClaimPatronageCreditFixture(api, query, creatorAddress, creatorMemberId, channelId)
+  const claimPatronageRateFixture = new ClaimPatronageCreditFixture(
+    api,
+    query,
+    creatorAddress,
+    creatorMemberId,
+    channelId
+  )
   await new FixtureRunner(claimPatronageRateFixture).runWithQueryNodeChecks()
 
-  const decreasePatronageRateFixture = new DecreasePatronageRateFixture(api, query, creatorAddress, creatorMemberId, channelId, 10)
+  const decreasePatronageRateFixture = new DecreasePatronageRateFixture(
+    api,
+    query,
+    creatorAddress,
+    creatorMemberId,
+    channelId,
+    10
+  )
   await new FixtureRunner(decreasePatronageRateFixture).runQueryNodeChecks()
 }

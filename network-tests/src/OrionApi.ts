@@ -5,8 +5,17 @@ import { OperationDefinitionNode } from 'graphql'
 import { BLOCKTIME } from './consts'
 import { Utils } from './utils'
 import { TokenId } from './consts'
+import { u64 } from '@polkadot/types/primitive'
 
-import { GetTokenById, TokenFieldsFragment, GetTokenAccountById, TokenAccountFieldsFragment } from '../graphql/generated/queries'
+import {
+  GetTokenById,
+  TokenFieldsFragment,
+  GetTokenAccountById,
+  TokenAccountFieldsFragment,
+  RevenueShareFieldsFragment,
+  RevenueShareParticipationFieldsFragment,
+  GetRevenueShareById,
+} from '../graphql/generated/queries'
 
 export class OrionApi {
   private readonly queryNodeProvider: ApolloClient<NormalizedCacheObject>
@@ -21,19 +30,21 @@ export class OrionApi {
     this.tryDebug = this.debug.extend('try')
   }
 
-  public async retryQuery<QueryResultT>(query: () => Promise<QueryResultT>): Promise<QueryResultT | null> {
+  public async retryQuery<QueryResultT>(
+    query: () => Promise<QueryResultT>
+  ): Promise<QueryResultT | null> {
     const label = query.toString().replace(/^.*\.([A-za-z0-9]+\(.*\))$/g, '$1')
     const debug = this.tryDebug.extend(label)
-    let attempts = 0;
+    let attempts = 0
     let result = null
 
     while (attempts < 6 && result === null) {
-      result = await query();
+      result = await query()
 
       if (result === null) {
         // Wait for 10 seconds before trying again
-        await new Promise(resolve => setTimeout(resolve, 10000));
-        attempts++;
+        await new Promise((resolve) => setTimeout(resolve, 10000))
+        attempts++
       }
     }
 
@@ -41,7 +52,7 @@ export class OrionApi {
       debug('max amount of retries for orion graphql server')
     }
 
-    return result;
+    return result
   }
 
   // Refactor to use graphql subscription (stateSubscription.lastCompleteBlock) instead
@@ -121,7 +132,8 @@ export class OrionApi {
     resultKey: keyof QueryT
   ): Promise<QueryT[keyof QueryT][number] | null> {
     this.debugQuery(query, variables)
-    const _qResult = (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[resultKey]
+    const _qResult = (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables }))
+      .data[resultKey]
     const qResult = Array.isArray(_qResult) ? _qResult[0] : _qResult
     return qResult || null
   }
@@ -142,18 +154,35 @@ export class OrionApi {
   }
 
   public async getTokenById(id: TokenId): Promise<TokenFieldsFragment> {
-    return this.firstEntityQuery(
-      GetTokenById,
-      { id: id.toString() },
-      'tokenById'
-    )
+    return this.firstEntityQuery(GetTokenById, { id: id.toString() }, 'tokenById')
   }
 
   public async getTokenAccountById(id: string): Promise<TokenAccountFieldsFragment> {
+    return this.firstEntityQuery(GetTokenAccountById, { id: id }, 'tokenAccountById')
+  }
+
+  public async getRevenueShareById(
+    revenueShareNonce: number,
+    tokenId: TokenId
+  ): Promise<RevenueShareFieldsFragment> {
     return this.firstEntityQuery(
-      GetTokenAccountById,
-      { id: id },
-      'tokenAccountById'
+      GetRevenueShareById,
+      { id: revenueShareNonce.toString() + tokenId.toString() },
+      'revenueShareById'
+    )
+  }
+
+  public async getRevenueShareParticpationById(
+    revenueShareNonce: number,
+    tokenId: TokenId,
+    memberId: u64,
+  ): Promise<RevenueShareParticipationFieldsFragment> {
+    const revenueShareId = tokenId.toString() + revenueShareNonce.toString()
+    const accountId = tokenId.toString() + memberId
+    return this.firstEntityQuery(
+      GetRevenueShareById,
+      { id: accountId + revenueShareId },
+      'revenueShareParticipationById'
     )
   }
 }

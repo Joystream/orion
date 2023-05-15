@@ -10,7 +10,7 @@ type AmmActivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmActiv
 
 export class ActivateAmmFixture extends StandardizedFixture {
   protected creatorAddress: string
-  protected creatorMemberId: number 
+  protected creatorMemberId: number
   protected channelId: number
   protected parameters: PalletProjectTokenAmmParams
 
@@ -20,12 +20,12 @@ export class ActivateAmmFixture extends StandardizedFixture {
     creatorAddress: string,
     creatorMemberId: number,
     channelId: number,
-    parameters: PalletProjectTokenAmmParams,
+    parameters: PalletProjectTokenAmmParams
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
     this.creatorMemberId = creatorMemberId
-    this.channelId = channelId 
+    this.channelId = channelId
     this.parameters = parameters
   }
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -33,7 +33,9 @@ export class ActivateAmmFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId})
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.activateAmm(actor, this.channelId, this.parameters)]
   }
 
@@ -46,6 +48,5 @@ export class ActivateAmmFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

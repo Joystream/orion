@@ -177,6 +177,5 @@ export class ApplyOnOpeningsHappyCaseFixture extends BaseWorkingGroupFixture {
     assert.equal(qEvent.application.runtimeId, this.events[i].event.data[1].toNumber())
   }
 
-  async runQueryNodeChecks(): Promise<void> {
-  }
+  async runQueryNodeChecks(): Promise<void> {}
 }

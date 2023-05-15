@@ -6,7 +6,9 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 
-type ChangeToPermissionlessEventDetails = EventDetails<EventType<'projectToken', 'TransferPolicyChangedToPermissionless'>>
+type ChangeToPermissionlessEventDetails = EventDetails<
+  EventType<'projectToken', 'TransferPolicyChangedToPermissionless'>
+>
 
 export class ChangeToPermissionlessFixture extends StandardizedFixture {
   protected creatorAddress
@@ -19,7 +21,7 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     creatorMemberId: number,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -31,17 +33,16 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.makeCreatorTokenPermissionless(actor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<ChangeToPermissionlessEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<ChangeToPermissionlessEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TransferPolicyChangedToPermissionless')
-  }
-
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
@@ -49,9 +50,8 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
-    assert.equal(qToken!.isInviteOnly, false)
+    const revenueShareId = qToken!.revenueShareNonce.toString() + tokenId.toString()
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

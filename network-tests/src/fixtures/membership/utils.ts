@@ -77,11 +77,7 @@ export function asMembershipExternalResource({
   }
 }
 
-export async function makeMembers(
-  api: Api,
-  query: OrionApi,
-  n: number
-): Promise<MemberContext[]> {
+export async function makeMembers(api: Api, query: OrionApi, n: number): Promise<MemberContext[]> {
   const accounts = (await api.createKeyPairs(n)).map((k) => k.key.address)
   const buyMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, accounts)
   await new FixtureRunner(buyMembershipFixture).run()

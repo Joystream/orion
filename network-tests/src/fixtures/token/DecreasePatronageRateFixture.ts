@@ -1,4 +1,3 @@
-
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
@@ -7,7 +6,9 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 
-type PatronageRateDecreasedToEventDetails = EventDetails<EventType<'projectToken', 'PatronageRateDecreasedTo'>>
+type PatronageRateDecreasedToEventDetails = EventDetails<
+  EventType<'projectToken', 'PatronageRateDecreasedTo'>
+>
 
 export class DecreasePatronageRateFixture extends StandardizedFixture {
   protected creatorMemberId: number
@@ -35,11 +36,17 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId})
-    return [this.api.tx.content.reduceCreatorTokenPatronageRateTo(actor, this.channelId, this.targetRate)]
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
+    return [
+      this.api.tx.content.reduceCreatorTokenPatronageRateTo(actor, this.channelId, this.targetRate),
+    ]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<PatronageRateDecreasedToEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<PatronageRateDecreasedToEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'PatronageRateDecreasedTo')
   }
 
@@ -55,6 +62,5 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert.equal(qToken!.annualCreatorReward, newRate.toString())
   }
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

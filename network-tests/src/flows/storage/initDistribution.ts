@@ -107,7 +107,12 @@ export default function createFlow({ families }: InitDistributionConfig) {
     const distributionLeaderKey = distributionLeader.roleAccountId.toString()
     const totalBucketsNum = families.reduce((a, b) => a + b.buckets.length, 0)
 
-    const hireWorkersFixture = new HireWorkersFixture(api, query, 'distributionWorkingGroup', totalBucketsNum)
+    const hireWorkersFixture = new HireWorkersFixture(
+      api,
+      query,
+      'distributionWorkingGroup',
+      totalBucketsNum
+    )
     await new FixtureRunner(hireWorkersFixture).run()
     const operatorIds = hireWorkersFixture.getCreatedWorkerIds()
 
@@ -115,7 +120,8 @@ export default function createFlow({ families }: InitDistributionConfig) {
 
     // Create families, set buckets per bag limit
     const createFamilyTxs = families.map(() => api.tx.storage.createDistributionBucketFamily())
-    const setBucketsPerBagLimitTx = api.tx.storage.updateDistributionBucketsPerBagLimit(totalBucketsNum)
+    const setBucketsPerBagLimitTx =
+      api.tx.storage.updateDistributionBucketsPerBagLimit(totalBucketsNum)
     const [createFamilyResults] = await Promise.all([
       api.sendExtrinsicsAndGetResults(createFamilyTxs, distributionLeaderKey),
       api.sendExtrinsicsAndGetResults([setBucketsPerBagLimitTx], distributionLeaderKey),
@@ -129,11 +135,16 @@ export default function createFlow({ families }: InitDistributionConfig) {
     // Create buckets, update families metadata, set dynamic bag policies
     const createBucketTxs = families.reduce(
       (txs, { buckets }, familyIndex) =>
-        txs.concat(buckets.map(() => api.tx.storage.createDistributionBucket(familyIds[familyIndex], true))),
+        txs.concat(
+          buckets.map(() => api.tx.storage.createDistributionBucket(familyIds[familyIndex], true))
+        ),
       [] as SubmittableExtrinsic<'promise'>[]
     )
     const updateFamilyMetadataTxs = familyIds.map((id, i) => {
-      const metadataBytes = Utils.metadataToBytes(DistributionBucketFamilyMetadata, families[i].metadata)
+      const metadataBytes = Utils.metadataToBytes(
+        DistributionBucketFamilyMetadata,
+        families[i].metadata
+      )
       return api.tx.storage.setDistributionBucketFamilyMetadata(id, metadataBytes)
     })
     const dynamicBagPolicies = new Map<string, [DistributionBucketFamilyId, number][]>()
@@ -144,11 +155,12 @@ export default function createFlow({ families }: InitDistributionConfig) {
         dynamicBagPolicies.set(bagType, [...current, [familyId, bucketsN]])
       })
     })
-    const updateDynamicBagPolicyTxs = _.entries(dynamicBagPolicies).map(([bagType, policyEntries]) =>
-      api.tx.storage.updateFamiliesInDynamicBagCreationPolicy(
-        bagType as DynamicBagId['type'],
-        createType('BTreeMap<u64, u32>', new Map(policyEntries))
-      )
+    const updateDynamicBagPolicyTxs = _.entries(dynamicBagPolicies).map(
+      ([bagType, policyEntries]) =>
+        api.tx.storage.updateFamiliesInDynamicBagCreationPolicy(
+          bagType as DynamicBagId['type'],
+          createType('BTreeMap<u64, u32>', new Map(policyEntries))
+        )
     )
     const [createBucketResults] = await Promise.all([
       api.sendExtrinsicsAndGetResults(createBucketTxs, distributionLeaderKey),
@@ -197,8 +209,15 @@ export default function createFlow({ families }: InitDistributionConfig) {
         if (!bucketConfig) {
           throw new Error('Bucket config not found')
         }
-        const metadataBytes = Utils.metadataToBytes(DistributionBucketOperatorMetadata, bucketConfig.metadata)
-        const setMetaTx = api.tx.storage.setDistributionOperatorMetadata(operatorId, bucketId, metadataBytes)
+        const metadataBytes = Utils.metadataToBytes(
+          DistributionBucketOperatorMetadata,
+          bucketConfig.metadata
+        )
+        const setMetaTx = api.tx.storage.setDistributionOperatorMetadata(
+          operatorId,
+          bucketId,
+          metadataBytes
+        )
         const setMetaPromise = api.sendExtrinsicsAndGetResults([setMetaTx], operatorKey)
         const updateBagTxs = (bucketConfig.staticBags || []).map((sBagId) => {
           return api.tx.storage.updateDistributionBucketsForBag(
@@ -208,7 +227,10 @@ export default function createFlow({ families }: InitDistributionConfig) {
             createType('BTreeSet<u64>', [])
           )
         })
-        const updateBagsPromise = api.sendExtrinsicsAndGetResults(updateBagTxs, distributionLeaderKey)
+        const updateBagsPromise = api.sendExtrinsicsAndGetResults(
+          updateBagTxs,
+          distributionLeaderKey
+        )
         return [updateBagsPromise, setMetaPromise]
       })
     )

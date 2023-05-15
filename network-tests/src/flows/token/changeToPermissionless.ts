@@ -20,7 +20,12 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const [creatorAddress, creatorMemberId] = api.creator
   unlockCreatorAccess()
 
-  const changeToPerissionlessFixture = new ChangeToPermissionlessFixture(api, query, creatorAddress, creatorMemberId, channelId)
+  const changeToPerissionlessFixture = new ChangeToPermissionlessFixture(
+    api,
+    query,
+    creatorAddress,
+    creatorMemberId,
+    channelId
+  )
   await new FixtureRunner(changeToPerissionlessFixture).runWithQueryNodeChecks()
 }
-

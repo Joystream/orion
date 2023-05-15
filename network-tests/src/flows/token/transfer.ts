@@ -18,7 +18,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
 
   // retrieve owner info
   const unlockCreatorAccess = await lock(Resource.Creator)
-  const [creatorAddress,] = api.creator
+  const [creatorAddress] = api.creator
   unlockCreatorAccess()
 
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
@@ -26,12 +26,22 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   unlockFirstHolderAccess()
 
   const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
-  outputs.set(api.createType('u64', firstHolderMemberId), api.createType('PalletProjectTokenPaymentWithVesting', {
-    amount: api.createType('u128', new BN(1000))
-  }))
+  outputs.set(
+    api.createType('u64', firstHolderMemberId),
+    api.createType('PalletProjectTokenPaymentWithVesting', {
+      amount: api.createType('u128', new BN(1000)),
+    })
+  )
   const metadata = ''
 
-  const issuerTransferFixture = new TransferFixture(api, query, creatorAddress, firstHolderMemberId, tokenId, outputs, metadata)
+  const issuerTransferFixture = new TransferFixture(
+    api,
+    query,
+    creatorAddress,
+    firstHolderMemberId,
+    tokenId,
+    outputs,
+    metadata
+  )
   await new FixtureRunner(issuerTransferFixture).run()
 }
-

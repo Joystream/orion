@@ -4,11 +4,11 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import {
-  PalletProjectTokenTokenSaleParams
-} from '@polkadot/types/lookup'
+import { PalletProjectTokenTokenSaleParams } from '@polkadot/types/lookup'
 
-type TokenSaleInitializedEventDetails = EventDetails<EventType<'projectToken', 'TokenSaleInitialized'>>
+type TokenSaleInitializedEventDetails = EventDetails<
+  EventType<'projectToken', 'TokenSaleInitialized'>
+>
 
 export class InitTokenSaleFixture extends StandardizedFixture {
   protected creatorAddress: string
@@ -36,11 +36,15 @@ export class InitTokenSaleFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.initCreatorTokenSale(actor, this.channelId, this.saleParams)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokenSaleInitializedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<TokenSaleInitializedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenSaleInitialized')
   }
 
@@ -49,6 +53,5 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

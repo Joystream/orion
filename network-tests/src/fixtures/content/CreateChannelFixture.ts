@@ -26,7 +26,7 @@ export class CreateChannelFixture extends StandardizedFixture {
     query: OrionApi,
     channelCreationParams: PalletContentChannelCreationParametersRecord,
     channelOwner: PalletContentChannelOwner,
-    channelOwnerAddress: string,
+    channelOwnerAddress: string
   ) {
     super(api, query)
     this.channelCreationParams = channelCreationParams
@@ -35,11 +35,11 @@ export class CreateChannelFixture extends StandardizedFixture {
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
-    return [ this.channelOwnerAddress]
+    return [this.channelOwnerAddress]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-      return [this.api.tx.content.createChannel(this.channelOwner, this.channelCreationParams)]
+    return [this.api.tx.content.createChannel(this.channelOwner, this.channelCreationParams)]
   }
 
   protected async getEventFromResult(
@@ -48,5 +48,5 @@ export class CreateChannelFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'content', 'ChannelCreated')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

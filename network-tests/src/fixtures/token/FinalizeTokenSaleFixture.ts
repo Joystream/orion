@@ -17,7 +17,7 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     creatorMemberId: number,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -30,11 +30,15 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.finalizeCreatorTokenSale(actor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokenSaleFinalizedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<TokenSaleFinalizedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenSaleFinalized')
   }
 
@@ -43,6 +47,5 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
