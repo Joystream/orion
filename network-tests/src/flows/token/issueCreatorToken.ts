@@ -5,9 +5,7 @@ import { IssueCreatorTokenFixture } from '../../fixtures/token'
 import { expect } from 'chai'
 import { BN } from 'bn.js'
 import { blake2AsHex } from '@polkadot/util-crypto'
-import {
-  PalletContentPermissionsContentActor,
-} from '@polkadot/types/lookup'
+import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 
 export default async function issueCreatorToken({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -29,27 +27,33 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
     channelOwnerMemberId,
     api.createType('PalletProjectTokenTokenAllocation', {
       'amount': new BN(100000000),
-    }),
+    })
   )
   const symbol = blake2AsHex('test')
-  const transferPolicy = api.createType(
-    'PalletProjectTokenTransferPolicyParams',
-    'Permissioned'
-  )
+  const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', 'Permissioned')
   const revenueSplitRate = api.createType('Permill', new BN(10))
   const patronageRate = api.createType('Perquintill', new BN(10))
-  const contentActor: PalletContentPermissionsContentActor = api.createType('PalletContentPermissionsContentActor', { Member: channelOwnerMemberId })
+  const contentActor: PalletContentPermissionsContentActor = api.createType(
+    'PalletContentPermissionsContentActor',
+    { Member: channelOwnerMemberId }
+  )
 
   // issue creator token
-  const crtParams =
-    api.createType('PalletProjectTokenTokenIssuanceParameters', {
-      initialAllocation,
-      symbol,
-      transferPolicy,
-      patronageRate,
-      revenueSplitRate,
-    })
-  const issueCreatorTokenFixture = new IssueCreatorTokenFixture(api, query, channelOwnerAddress, contentActor, channelId, crtParams)
+  const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
+    initialAllocation,
+    symbol,
+    transferPolicy,
+    patronageRate,
+    revenueSplitRate,
+  })
+  const issueCreatorTokenFixture = new IssueCreatorTokenFixture(
+    api,
+    query,
+    channelOwnerAddress,
+    contentActor,
+    channelId,
+    crtParams
+  )
   await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
 
   api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())

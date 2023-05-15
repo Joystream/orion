@@ -1,4 +1,3 @@
-
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
@@ -25,7 +24,7 @@ export class BurnTokensFixture extends StandardizedFixture {
     creatorAddress: string,
     tokenId: number,
     fromMemberId: number,
-    amount: BN,
+    amount: BN
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -37,7 +36,9 @@ export class BurnTokensFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(this.tokenId + this.fromMemberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(this.tokenId + this.fromMemberId.toString())
+    )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
 
@@ -57,17 +58,18 @@ export class BurnTokensFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   // add a general key-map record to the runQueryNodeChecks as a parameter
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, amountBurned] = this.events[0].event.data
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId + memberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId + memberId.toString())
+    )
 
-    const supplyPost = (this.supplyPre!.sub(amountBurned.toBn())).toString()
-    const accountAmountPost = (this.accountAmountPre!.sub(amountBurned.toBn())).toString()
+    const supplyPost = this.supplyPre!.sub(amountBurned.toBn()).toString()
+    const accountAmountPost = this.accountAmountPre!.sub(amountBurned.toBn()).toString()
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)

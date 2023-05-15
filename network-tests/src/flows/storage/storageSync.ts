@@ -26,7 +26,9 @@ export async function storageSync({ api, query }: FlowProps): Promise<void> {
 
   // Create 10_000 channels
   const storageBuckets = (await api.query.storage.storageBucketById.keys()).map((k) => k.args[0])
-  const distributionBucketFamilies = (await api.query.storage.distributionBucketFamilyById.keys()).map((k) => k.args[0])
+  const distributionBucketFamilies = (
+    await api.query.storage.distributionBucketFamilyById.keys()
+  ).map((k) => k.args[0])
   const distributionBuckets = (
     await Promise.all(
       distributionBucketFamilies.map(async (familyId) => {
@@ -104,7 +106,10 @@ export async function storageSync({ api, query }: FlowProps): Promise<void> {
 
   const colossus1Endpoint = doubleBucketConfig.buckets[0].metadata.endpoint
   const colossus2Endpoint = doubleBucketConfig.buckets[1].metadata.endpoint
-  Utils.assert(channel && channel.coverPhoto && channel.avatarPhoto, `Channel ${channelId} has missing assets`)
+  Utils.assert(
+    channel && channel.coverPhoto && channel.avatarPhoto,
+    `Channel ${channelId} has missing assets`
+  )
   Utils.assert(colossus1Endpoint && colossus2Endpoint, `Colossus endpoints not set`)
 
   debug('Giving nodes 300 seconds to sync...')
@@ -114,11 +119,27 @@ export async function storageSync({ api, query }: FlowProps): Promise<void> {
   const colossus1Api = new ColossusApi(urljoin(colossus1Endpoint, 'api/v1'))
   const colossus2Api = new ColossusApi(urljoin(colossus2Endpoint, 'api/v1'))
 
-  await colossus1Api.fetchAndVerifyAsset(channel.coverPhoto.id, readFileSync(coverPhotoPath), 'image/bmp')
-  await colossus2Api.fetchAndVerifyAsset(channel.coverPhoto.id, readFileSync(coverPhotoPath), 'image/bmp')
+  await colossus1Api.fetchAndVerifyAsset(
+    channel.coverPhoto.id,
+    readFileSync(coverPhotoPath),
+    'image/bmp'
+  )
+  await colossus2Api.fetchAndVerifyAsset(
+    channel.coverPhoto.id,
+    readFileSync(coverPhotoPath),
+    'image/bmp'
+  )
 
-  await colossus1Api.fetchAndVerifyAsset(channel.avatarPhoto.id, readFileSync(avatarPhotoPath), 'image/bmp')
-  await colossus2Api.fetchAndVerifyAsset(channel.avatarPhoto.id, readFileSync(avatarPhotoPath), 'image/bmp')
+  await colossus1Api.fetchAndVerifyAsset(
+    channel.avatarPhoto.id,
+    readFileSync(avatarPhotoPath),
+    'image/bmp'
+  )
+  await colossus2Api.fetchAndVerifyAsset(
+    channel.avatarPhoto.id,
+    readFileSync(avatarPhotoPath),
+    'image/bmp'
+  )
 
   debug('Done')
 }

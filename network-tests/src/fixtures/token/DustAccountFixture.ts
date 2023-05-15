@@ -17,12 +17,12 @@ export class DustAccountFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     tokenId: number,
-    memberId: number,
+    memberId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
     this.tokenId = tokenId
-    this.memberId = memberId 
+    this.memberId = memberId
   }
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
@@ -36,9 +36,7 @@ export class DustAccountFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'AccountDustedBy')
   }
 
-  public async tryQuery(): Promise<void> {
-  }
+  public async tryQuery(): Promise<void> {}
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

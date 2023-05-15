@@ -29,7 +29,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     creatorAddress: string,
     contentActor: PalletContentPermissionsContentActor,
     channelId: number,
-    crtParams: PalletProjectTokenTokenIssuanceParameters,
+    crtParams: PalletProjectTokenTokenIssuanceParameters
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -43,30 +43,33 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [this.api.tx.content.issueCreatorToken(this.contentActor, this.channelId, this.crtParams)]
+    return [
+      this.api.tx.content.issueCreatorToken(this.contentActor, this.channelId, this.crtParams),
+    ]
   }
 
   protected async getEventFromResult(result: SubmittableResult): Promise<TokenIssuedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId, { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate }] =
-      this.events[0].event.data
+    const [
+      tokenId,
+      { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },
+    ] = this.events[0].event.data
     await super.runQueryNodeChecks()
-    const qToken = await this.query.retryQuery(
-      () => this.query.getTokenById(tokenId),
-    )
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     const initialMembers = [...initialAllocation.keys()]
     const initialBalances = [...initialAllocation.values()].map((item) => item.amount)
-    const qAccounts = await Promise.all(initialMembers.map(async (memberId) => {
-      return await this.query.retryQuery(
-        () => this.query.getTokenAccountById(tokenId + memberId.toString())
-      )
-    }))
+    const qAccounts = await Promise.all(
+      initialMembers.map(async (memberId) => {
+        return await this.query.retryQuery(() =>
+          this.query.getTokenAccountById(tokenId + memberId.toString())
+        )
+      })
+    )
 
     let totalSupply = new BN(0)
     initialAllocation.forEach((item) => {
@@ -94,5 +97,4 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       assert.isNotNull(qAccount!.totalAmount, initialBalances[i].toString())
     })
   }
-
 }

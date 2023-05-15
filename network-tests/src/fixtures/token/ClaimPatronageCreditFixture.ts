@@ -7,7 +7,9 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 
-type PatronageCreditClaimedEventDetails = EventDetails<EventType<'projectToken', 'PatronageCreditClaimed'>>
+type PatronageCreditClaimedEventDetails = EventDetails<
+  EventType<'projectToken', 'PatronageCreditClaimed'>
+>
 
 export class ClaimPatronageCreditFixture extends StandardizedFixture {
   protected creatorMemberId: number
@@ -22,7 +24,7 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     creatorMemberId: number,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -34,18 +36,26 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId})
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.claimCreatorTokenPatronageCredit(actor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<PatronageCreditClaimedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<PatronageCreditClaimedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'PatronageCreditClaimed')
   }
 
   public async preExecHook(): Promise<void> {
-    const tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
+    const tokenId = (
+      await this.api.query.content.channelById(this.channelId)
+    ).creatorTokenId.unwrap()
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId.toString() + this.creatorMemberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId.toString() + this.creatorMemberId.toString())
+    )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
 
@@ -55,10 +65,12 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, amount, memberId] = this.events[0].event.data
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId + memberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId + memberId.toString())
+    )
 
-    const supplyPost = (this.supplyPre!.sub(amount.toBn())).toString()
-    const accountAmountPost = (this.accountAmountPre!.sub(amount.toBn())).toString()
+    const supplyPost = this.supplyPre!.sub(amount.toBn()).toString()
+    const accountAmountPost = this.accountAmountPre!.sub(amount.toBn()).toString()
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
@@ -66,6 +78,5 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
     assert.equal(qAccount!.totalAmount, accountAmountPost)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

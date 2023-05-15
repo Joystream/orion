@@ -1,16 +1,20 @@
-
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletContentPermissionsContentActor, PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
+import {
+  PalletContentPermissionsContentActor,
+  PalletProjectTokenTransfersPaymentWithVesting,
+} from '@polkadot/types/lookup'
 
-type IssuerTransferEventDetails = EventDetails<EventType<'projectToken', 'TokenAmountTransferredByIssuer'>>
+type IssuerTransferEventDetails = EventDetails<
+  EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
+>
 
 export class IssuerTransferFixture extends StandardizedFixture {
-  protected actor: PalletContentPermissionsContentActor 
+  protected actor: PalletContentPermissionsContentActor
   protected creatorAddress: string
   protected channelId: number
   protected outputs: PalletProjectTokenTransfersPaymentWithVesting
@@ -38,10 +42,19 @@ export class IssuerTransferFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [this.api.tx.content.creatorTokenIssuerTransfer(this.actor, this.channelId, this.outputs, this.metadata)]
+    return [
+      this.api.tx.content.creatorTokenIssuerTransfer(
+        this.actor,
+        this.channelId,
+        this.outputs,
+        this.metadata
+      ),
+    ]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<IssuerTransferEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<IssuerTransferEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenAmountTransferredByIssuer')
   }
 
@@ -50,6 +63,5 @@ export class IssuerTransferFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

@@ -1,6 +1,9 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
-import { IStorageBucketOperatorMetadata, StorageBucketOperatorMetadata } from '@joystream/metadata-protobuf'
+import {
+  IStorageBucketOperatorMetadata,
+  StorageBucketOperatorMetadata,
+} from '@joystream/metadata-protobuf'
 import { CreateInterface, createType } from '@joystream/types'
 import {
   PalletStorageDynamicBagIdType as DynamicBagId,
@@ -91,24 +94,36 @@ export default function createFlow({ buckets, dynamicBagPolicy }: InitStorageCon
     const [, storageLeader] = await api.getLeader('storageWorkingGroup')
 
     const storageLeaderKey = storageLeader.roleAccountId.toString()
-    const maxStorageLimit = buckets.sort((a, b) => b.storageLimit.cmp(a.storageLimit))[0].storageLimit
+    const maxStorageLimit = buckets.sort((a, b) => b.storageLimit.cmp(a.storageLimit))[0]
+      .storageLimit
     const maxObjectsLimit = Math.max(...buckets.map((b) => b.objectsLimit))
 
-    const hireWorkersFixture = new HireWorkersFixture(api, query, 'storageWorkingGroup', buckets.length)
+    const hireWorkersFixture = new HireWorkersFixture(
+      api,
+      query,
+      'storageWorkingGroup',
+      buckets.length
+    )
     await new FixtureRunner(hireWorkersFixture).run()
     const operatorIds = hireWorkersFixture.getCreatedWorkerIds()
 
     const operatorKeys = await api.getWorkerRoleAccounts(operatorIds, 'storageWorkingGroup')
 
     // Set global limits and policies
-    const updateDynamicBagPolicyTxs = _.entries(dynamicBagPolicy).map(([bagType, numberOfBuckets]) =>
-      api.tx.storage.updateNumberOfStorageBucketsInDynamicBagCreationPolicy(
-        bagType as DynamicBagId['type'],
-        numberOfBuckets
-      )
+    const updateDynamicBagPolicyTxs = _.entries(dynamicBagPolicy).map(
+      ([bagType, numberOfBuckets]) =>
+        api.tx.storage.updateNumberOfStorageBucketsInDynamicBagCreationPolicy(
+          bagType as DynamicBagId['type'],
+          numberOfBuckets
+        )
     )
-    const setMaxVoucherLimitsTx = api.tx.storage.updateStorageBucketsVoucherMaxLimits(maxStorageLimit, maxObjectsLimit)
-    const setBucketPerBagLimitTx = api.tx.storage.updateStorageBucketsPerBagLimit(Math.max(5, buckets.length))
+    const setMaxVoucherLimitsTx = api.tx.storage.updateStorageBucketsVoucherMaxLimits(
+      maxStorageLimit,
+      maxObjectsLimit
+    )
+    const setBucketPerBagLimitTx = api.tx.storage.updateStorageBucketsPerBagLimit(
+      Math.max(5, buckets.length)
+    )
 
     await api.sendExtrinsicsAndGetResults(
       [...updateDynamicBagPolicyTxs, setMaxVoucherLimitsTx, setBucketPerBagLimitTx],
@@ -119,7 +134,10 @@ export default function createFlow({ buckets, dynamicBagPolicy }: InitStorageCon
     const createBucketTxs = buckets.map((b, i) =>
       api.tx.storage.createStorageBucket(operatorIds[i], true, b.storageLimit, b.objectsLimit)
     )
-    const createBucketResults = await api.sendExtrinsicsAndGetResults(createBucketTxs, storageLeaderKey)
+    const createBucketResults = await api.sendExtrinsicsAndGetResults(
+      createBucketTxs,
+      storageLeaderKey
+    )
     const bucketById = new Map<number, StorageBucketConfig>()
     createBucketResults.forEach((res, i) => {
       const bucketId = api.getEvent(res, 'storage', 'StorageBucketCreated').data[0]
@@ -127,10 +145,12 @@ export default function createFlow({ buckets, dynamicBagPolicy }: InitStorageCon
     })
 
     // Accept invitations
-    const acceptInvitationTxs = Array.from(bucketById.entries()).map(([bucketId, bucketConfig], i) => {
-      const transactorKey = api.createCustomKeyPair(bucketConfig.transactorUri, true).address
-      return api.tx.storage.acceptStorageBucketInvitation(operatorIds[i], bucketId, transactorKey)
-    })
+    const acceptInvitationTxs = Array.from(bucketById.entries()).map(
+      ([bucketId, bucketConfig], i) => {
+        const transactorKey = api.createCustomKeyPair(bucketConfig.transactorUri, true).address
+        return api.tx.storage.acceptStorageBucketInvitation(operatorIds[i], bucketId, transactorKey)
+      }
+    )
     await api.sendExtrinsicsAndGetResults(acceptInvitationTxs, operatorKeys)
 
     // Bucket metadata, static bags, transactor balances
@@ -138,8 +158,15 @@ export default function createFlow({ buckets, dynamicBagPolicy }: InitStorageCon
       Array.from(bucketById.entries()).map(([bucketId, bucketConfig], i) => {
         const operatorId = operatorIds[i]
         const operatorKey = operatorKeys[i]
-        const metadataBytes = Utils.metadataToBytes(StorageBucketOperatorMetadata, bucketConfig.metadata)
-        const setMetaTx = api.tx.storage.setStorageOperatorMetadata(operatorId, bucketId, metadataBytes)
+        const metadataBytes = Utils.metadataToBytes(
+          StorageBucketOperatorMetadata,
+          bucketConfig.metadata
+        )
+        const setMetaTx = api.tx.storage.setStorageOperatorMetadata(
+          operatorId,
+          bucketId,
+          metadataBytes
+        )
         const setMetaPromise = api.sendExtrinsicsAndGetResults([setMetaTx], operatorKey)
         const updateBagTxs = (bucketConfig.staticBags || []).map((sBagId) => {
           return api.tx.storage.updateStorageBucketsForBag(

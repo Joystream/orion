@@ -7,14 +7,16 @@ import { Api } from '../../Api'
 import { u32 } from '@polkadot/types/primitive'
 import { BN } from 'bn.js'
 
-type TokenSaleUpdatedEventDetails = EventDetails<EventType<'projectToken', 'UpcomingTokenSaleUpdated'>>
+type TokenSaleUpdatedEventDetails = EventDetails<
+  EventType<'projectToken', 'UpcomingTokenSaleUpdated'>
+>
 
 export class UpdateUpcomingSaleFixture extends StandardizedFixture {
   protected creatorAddress: string
   protected creatorMemberId: number
   protected channelId: number
-  protected newStartBlock: u32 | null  
-  protected newDuration: u32 | null 
+  protected newStartBlock: u32 | null
+  protected newDuration: u32 | null
 
   public constructor(
     api: Api,
@@ -29,8 +31,8 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     this.creatorAddress = creatorAddress
     this.creatorMemberId = creatorMemberId
     this.channelId = channelId
-    this.newStartBlock = newStartBlock? this.api.createType('u32', new BN(newStartBlock!)) : null
-    this.newDuration = newDuration? this.api.createType('u32', new BN(newDuration!)) : null
+    this.newStartBlock = newStartBlock ? this.api.createType('u32', new BN(newStartBlock!)) : null
+    this.newDuration = newDuration ? this.api.createType('u32', new BN(newDuration!)) : null
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -38,11 +40,22 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
-    return [this.api.tx.content.updateUpcomingCreatorTokenSale(actor, this.channelId, this.newStartBlock, this.newDuration)]
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
+    return [
+      this.api.tx.content.updateUpcomingCreatorTokenSale(
+        actor,
+        this.channelId,
+        this.newStartBlock,
+        this.newDuration
+      ),
+    ]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokenSaleUpdatedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<TokenSaleUpdatedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'UpcomingTokenSaleUpdated')
   }
 
@@ -51,6 +64,5 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

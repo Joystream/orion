@@ -6,12 +6,14 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import BN from 'bn.js'
 
-type TokensPurchasedOnSaleEventDetails = EventDetails<EventType<'projectToken', 'TokensPurchasedOnSale'>>
+type TokensPurchasedOnSaleEventDetails = EventDetails<
+  EventType<'projectToken', 'TokensPurchasedOnSale'>
+>
 
 export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   protected tokenId: number
   protected memberAddress: string
-  protected memberId: number 
+  protected memberId: number
   protected amount: BN
 
   public constructor(
@@ -26,7 +28,7 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     this.amount = amount
     this.memberAddress = memberAddress
     this.memberId = memberId
-    this.tokenId = tokenId 
+    this.tokenId = tokenId
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -37,7 +39,9 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     return [this.api.tx.projectToken.purchaseTokensOnSale(this.tokenId, this.memberId, this.amount)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokensPurchasedOnSaleEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<TokensPurchasedOnSaleEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokensPurchasedOnSale')
   }
 
@@ -46,6 +50,5 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

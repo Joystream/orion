@@ -8,7 +8,7 @@ import { BN } from 'bn.js'
 import { Api } from '../../Api'
 
 async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
-  const { numberOfStorageBuckets }  = await api.query.storage.dynamicBagCreationPolicies('Channel')
+  const { numberOfStorageBuckets } = await api.query.storage.dynamicBagCreationPolicies('Channel')
   const storageBuckets = api.createType('BTreeSet<u64>')
   for (let i = 0; numberOfStorageBuckets.toBn().gtn(i); ++i) {
     storageBuckets.add(api.createType('u64', 0))
@@ -45,11 +45,17 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
   const expectedChannelStateBloatBond = await api.query.content.channelStateBloatBondValue()
   const channelOwner = api.createType('PalletContentChannelOwner', { Member: channelOwnerMemberId })
   const channelCreationParameters = api.createType('PalletContentChannelCreationParametersRecord', {
-      expectedChannelStateBloatBond,
-      expectedDataObjectStateBloatBond,
-      storageBuckets,
-    })
-  const createChannelFixture = new CreateChannelFixture(api, query, channelCreationParameters, channelOwner, channelOwnerAddress) 
+    expectedChannelStateBloatBond,
+    expectedDataObjectStateBloatBond,
+    storageBuckets,
+  })
+  const createChannelFixture = new CreateChannelFixture(
+    api,
+    query,
+    channelCreationParameters,
+    channelOwner,
+    channelOwnerAddress
+  )
   await new FixtureRunner(createChannelFixture).run()
 
   debug('Done')

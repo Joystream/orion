@@ -17,12 +17,12 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     query: OrionApi,
     memberAddress: string,
     memberId: number,
-    tokenId: number,
+    tokenId: number
   ) {
     super(api, query)
-    this.memberId =  memberId
-    this.memberAddress =  memberAddress
-    this.tokenId = tokenId 
+    this.memberId = memberId
+    this.memberAddress = memberAddress
+    this.tokenId = tokenId
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -33,7 +33,9 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     return [this.api.tx.projectToken.exitRevenueSplit(this.tokenId, this.memberId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<RevenueShareLeftEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<RevenueShareLeftEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitLeft')
   }
 
@@ -42,6 +44,5 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

@@ -8,7 +8,9 @@ import { PalletProjectTokenMerkleProof } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import BN from 'bn.js'
 
-type MemberJoinedWhitelistEventDetails = EventDetails<EventType<'projectToken', 'MemberJoinedWhitelist'>>
+type MemberJoinedWhitelistEventDetails = EventDetails<
+  EventType<'projectToken', 'MemberJoinedWhitelist'>
+>
 
 export class JoinWhitelistFixture extends StandardizedFixture {
   protected memberId: number
@@ -41,7 +43,9 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     return [this.api.tx.projectToken.joinWhitelist(this.memberId, this.tokenId, this.proof)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<MemberJoinedWhitelistEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<MemberJoinedWhitelistEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'MemberJoinedWhitelist')
   }
 
@@ -52,14 +56,18 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     this.tokenAccountNumberPre = qToken!.accountsNum
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-  }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId] = this.events[0].event.data
-    const nodeAccount = await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+    const nodeAccount = await this.api.query.projectToken.accountInfoByTokenAndMember(
+      tokenId,
+      memberId
+    )
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId.toString() + memberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+    )
     const tokenAccountNumberPost = this.tokenAccountNumberPre! + 1
 
     assert.isNotNull(qAccount)
@@ -73,4 +81,3 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     assert.equal(qAccount!.deleted, false)
   }
 }
-

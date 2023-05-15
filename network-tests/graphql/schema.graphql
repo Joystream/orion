@@ -80,12 +80,7 @@ type Channel {
   language: String
 
   # List of videos that belong to the channel
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
+  videos(where: VideoWhereInput, orderBy: [VideoOrderByInput!], offset: Int, limit: Int): [Video!]!
 
   # Number of the block the channel was created in
   createdInBlock: Int!
@@ -254,12 +249,7 @@ type VideoCategory {
 
   # Parent category if defined
   parentCategory: VideoCategory
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
+  videos(where: VideoWhereInput, orderBy: [VideoOrderByInput!], offset: Int, limit: Int): [Video!]!
   featuredVideos(
     where: VideoFeaturedInCategoryWhereInput
     orderBy: [VideoFeaturedInCategoryOrderByInput!]
@@ -687,15 +677,9 @@ type Query {
     periodDays: Int
     limit: Int!
   ): VideosConnection!
-  events(
-    where: EventWhereInput
-    orderBy: [EventOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Event!]!
+  events(where: EventWhereInput, orderBy: [EventOrderByInput!], offset: Int, limit: Int): [Event!]!
   eventById(id: String!): Event
-  eventByUniqueInput(where: WhereIdInput!): Event
-    @deprecated(reason: "Use eventById")
+  eventByUniqueInput(where: WhereIdInput!): Event @deprecated(reason: "Use eventById")
   eventsConnection(
     orderBy: [EventOrderByInput!]!
     after: String
@@ -762,15 +746,9 @@ type Query {
     first: Int
     where: VideoCategoryWhereInput
   ): VideoCategoriesConnection!
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
+  videos(where: VideoWhereInput, orderBy: [VideoOrderByInput!], offset: Int, limit: Int): [Video!]!
   videoById(id: String!): Video
-  videoByUniqueInput(where: WhereIdInput!): Video
-    @deprecated(reason: "Use videoById")
+  videoByUniqueInput(where: WhereIdInput!): Video @deprecated(reason: "Use videoById")
   videosConnection(
     orderBy: [VideoOrderByInput!]!
     after: String
@@ -784,9 +762,7 @@ type Query {
     limit: Int
   ): [VideoFeaturedInCategory!]!
   videoFeaturedInCategoryById(id: String!): VideoFeaturedInCategory
-  videoFeaturedInCategoryByUniqueInput(
-    where: WhereIdInput!
-  ): VideoFeaturedInCategory
+  videoFeaturedInCategoryByUniqueInput(where: WhereIdInput!): VideoFeaturedInCategory
     @deprecated(reason: "Use videoFeaturedInCategoryById")
   videoFeaturedInCategoriesConnection(
     orderBy: [VideoFeaturedInCategoryOrderByInput!]!
@@ -801,8 +777,7 @@ type Query {
     limit: Int
   ): [VideoHero!]!
   videoHeroById(id: String!): VideoHero
-  videoHeroByUniqueInput(where: WhereIdInput!): VideoHero
-    @deprecated(reason: "Use videoHeroById")
+  videoHeroByUniqueInput(where: WhereIdInput!): VideoHero @deprecated(reason: "Use videoHeroById")
   videoHerosConnection(
     orderBy: [VideoHeroOrderByInput!]!
     after: String
@@ -846,8 +821,7 @@ type Query {
     limit: Int
   ): [License!]!
   licenseById(id: String!): License
-  licenseByUniqueInput(where: WhereIdInput!): License
-    @deprecated(reason: "Use licenseById")
+  licenseByUniqueInput(where: WhereIdInput!): License @deprecated(reason: "Use licenseById")
   licensesConnection(
     orderBy: [LicenseOrderByInput!]!
     after: String
@@ -906,8 +880,7 @@ type Query {
     limit: Int
   ): [Report!]!
   reportById(id: String!): Report
-  reportByUniqueInput(where: WhereIdInput!): Report
-    @deprecated(reason: "Use reportById")
+  reportByUniqueInput(where: WhereIdInput!): Report @deprecated(reason: "Use reportById")
   reportsConnection(
     orderBy: [ReportOrderByInput!]!
     after: String
@@ -951,9 +924,7 @@ type Query {
     limit: Int
   ): [StorageBucketOperatorMetadata!]!
   storageBucketOperatorMetadataById(id: String!): StorageBucketOperatorMetadata
-  storageBucketOperatorMetadataByUniqueInput(
-    where: WhereIdInput!
-  ): StorageBucketOperatorMetadata
+  storageBucketOperatorMetadataByUniqueInput(where: WhereIdInput!): StorageBucketOperatorMetadata
     @deprecated(reason: "Use storageBucketOperatorMetadataById")
   storageBucketOperatorMetadataConnection(
     orderBy: [StorageBucketOperatorMetadataOrderByInput!]!
@@ -1013,9 +984,8 @@ type Query {
     limit: Int
   ): [DistributionBucketBag!]!
   distributionBucketBagById(id: String!): DistributionBucketBag
-  distributionBucketBagByUniqueInput(
-    where: WhereIdInput!
-  ): DistributionBucketBag @deprecated(reason: "Use distributionBucketBagById")
+  distributionBucketBagByUniqueInput(where: WhereIdInput!): DistributionBucketBag
+    @deprecated(reason: "Use distributionBucketBagById")
   distributionBucketBagsConnection(
     orderBy: [DistributionBucketBagOrderByInput!]!
     after: String
@@ -1043,9 +1013,7 @@ type Query {
     offset: Int
     limit: Int
   ): [DistributionBucketFamilyMetadata!]!
-  distributionBucketFamilyMetadataById(
-    id: String!
-  ): DistributionBucketFamilyMetadata
+  distributionBucketFamilyMetadataById(id: String!): DistributionBucketFamilyMetadata
   distributionBucketFamilyMetadataByUniqueInput(
     where: WhereIdInput!
   ): DistributionBucketFamilyMetadata
@@ -1062,9 +1030,7 @@ type Query {
     offset: Int
     limit: Int
   ): [DistributionBucketOperatorMetadata!]!
-  distributionBucketOperatorMetadataById(
-    id: String!
-  ): DistributionBucketOperatorMetadata
+  distributionBucketOperatorMetadataById(id: String!): DistributionBucketOperatorMetadata
   distributionBucketOperatorMetadataByUniqueInput(
     where: WhereIdInput!
   ): DistributionBucketOperatorMetadata
@@ -1082,9 +1048,7 @@ type Query {
     limit: Int
   ): [DistributionBucketOperator!]!
   distributionBucketOperatorById(id: String!): DistributionBucketOperator
-  distributionBucketOperatorByUniqueInput(
-    where: WhereIdInput!
-  ): DistributionBucketOperator
+  distributionBucketOperatorByUniqueInput(where: WhereIdInput!): DistributionBucketOperator
     @deprecated(reason: "Use distributionBucketOperatorById")
   distributionBucketOperatorsConnection(
     orderBy: [DistributionBucketOperatorOrderByInput!]!
@@ -1114,9 +1078,7 @@ type Query {
     limit: Int
   ): [DistributionBucketFamily!]!
   distributionBucketFamilyById(id: String!): DistributionBucketFamily
-  distributionBucketFamilyByUniqueInput(
-    where: WhereIdInput!
-  ): DistributionBucketFamily
+  distributionBucketFamilyByUniqueInput(where: WhereIdInput!): DistributionBucketFamily
     @deprecated(reason: "Use distributionBucketFamilyById")
   distributionBucketFamiliesConnection(
     orderBy: [DistributionBucketFamilyOrderByInput!]!
@@ -1131,8 +1093,7 @@ type Query {
     limit: Int
   ): [Channel!]!
   channelById(id: String!): Channel
-  channelByUniqueInput(where: WhereIdInput!): Channel
-    @deprecated(reason: "Use channelById")
+  channelByUniqueInput(where: WhereIdInput!): Channel @deprecated(reason: "Use channelById")
   channelsConnection(
     orderBy: [ChannelOrderByInput!]!
     after: String
@@ -1154,12 +1115,7 @@ type Query {
     first: Int
     where: BannedMemberWhereInput
   ): BannedMembersConnection!
-  apps(
-    where: AppWhereInput
-    orderBy: [AppOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [App!]!
+  apps(where: AppWhereInput, orderBy: [AppOrderByInput!], offset: Int, limit: Int): [App!]!
   appById(id: String!): App
   appByUniqueInput(where: WhereIdInput!): App @deprecated(reason: "Use appById")
   appsConnection(
@@ -1168,15 +1124,9 @@ type Query {
     first: Int
     where: AppWhereInput
   ): AppsConnection!
-  tokens(
-    where: TokenWhereInput
-    orderBy: [TokenOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Token!]!
+  tokens(where: TokenWhereInput, orderBy: [TokenOrderByInput!], offset: Int, limit: Int): [Token!]!
   tokenById(id: String!): Token
-  tokenByUniqueInput(where: WhereIdInput!): Token
-    @deprecated(reason: "Use tokenById")
+  tokenByUniqueInput(where: WhereIdInput!): Token @deprecated(reason: "Use tokenById")
   tokensConnection(
     orderBy: [TokenOrderByInput!]!
     after: String
@@ -1220,23 +1170,16 @@ type Query {
     limit: Int
   ): [Benefit!]!
   benefitById(id: String!): Benefit
-  benefitByUniqueInput(where: WhereIdInput!): Benefit
-    @deprecated(reason: "Use benefitById")
+  benefitByUniqueInput(where: WhereIdInput!): Benefit @deprecated(reason: "Use benefitById")
   benefitsConnection(
     orderBy: [BenefitOrderByInput!]!
     after: String
     first: Int
     where: BenefitWhereInput
   ): BenefitsConnection!
-  sales(
-    where: SaleWhereInput
-    orderBy: [SaleOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Sale!]!
+  sales(where: SaleWhereInput, orderBy: [SaleOrderByInput!], offset: Int, limit: Int): [Sale!]!
   saleById(id: String!): Sale
-  saleByUniqueInput(where: WhereIdInput!): Sale
-    @deprecated(reason: "Use saleById")
+  saleByUniqueInput(where: WhereIdInput!): Sale @deprecated(reason: "Use saleById")
   salesConnection(
     orderBy: [SaleOrderByInput!]!
     after: String
@@ -1280,8 +1223,7 @@ type Query {
     limit: Int
   ): [AmmCurve!]!
   ammCurveById(id: String!): AmmCurve
-  ammCurveByUniqueInput(where: WhereIdInput!): AmmCurve
-    @deprecated(reason: "Use ammCurveById")
+  ammCurveByUniqueInput(where: WhereIdInput!): AmmCurve @deprecated(reason: "Use ammCurveById")
   ammCurvesConnection(
     orderBy: [AmmCurveOrderByInput!]!
     after: String
@@ -1355,9 +1297,7 @@ type Query {
     limit: Int
   ): [RevenueShareParticipation!]!
   revenueShareParticipationById(id: String!): RevenueShareParticipation
-  revenueShareParticipationByUniqueInput(
-    where: WhereIdInput!
-  ): RevenueShareParticipation
+  revenueShareParticipationByUniqueInput(where: WhereIdInput!): RevenueShareParticipation
     @deprecated(reason: "Use revenueShareParticipationById")
   revenueShareParticipationsConnection(
     orderBy: [RevenueShareParticipationOrderByInput!]!
@@ -1387,8 +1327,7 @@ type Query {
     limit: Int
   ): [Curator!]!
   curatorById(id: String!): Curator
-  curatorByUniqueInput(where: WhereIdInput!): Curator
-    @deprecated(reason: "Use curatorById")
+  curatorByUniqueInput(where: WhereIdInput!): Curator @deprecated(reason: "Use curatorById")
   curatorsConnection(
     orderBy: [CuratorOrderByInput!]!
     after: String
@@ -1432,8 +1371,7 @@ type Query {
     limit: Int
   ): [OwnedNft!]!
   ownedNftById(id: String!): OwnedNft
-  ownedNftByUniqueInput(where: WhereIdInput!): OwnedNft
-    @deprecated(reason: "Use ownedNftById")
+  ownedNftByUniqueInput(where: WhereIdInput!): OwnedNft @deprecated(reason: "Use ownedNftById")
   ownedNftsConnection(
     orderBy: [OwnedNftOrderByInput!]!
     after: String
@@ -1447,8 +1385,7 @@ type Query {
     limit: Int
   ): [Auction!]!
   auctionById(id: String!): Auction
-  auctionByUniqueInput(where: WhereIdInput!): Auction
-    @deprecated(reason: "Use auctionById")
+  auctionByUniqueInput(where: WhereIdInput!): Auction @deprecated(reason: "Use auctionById")
   auctionsConnection(
     orderBy: [AuctionOrderByInput!]!
     after: String
@@ -1462,9 +1399,7 @@ type Query {
     limit: Int
   ): [AuctionWhitelistedMember!]!
   auctionWhitelistedMemberById(id: String!): AuctionWhitelistedMember
-  auctionWhitelistedMemberByUniqueInput(
-    where: WhereIdInput!
-  ): AuctionWhitelistedMember
+  auctionWhitelistedMemberByUniqueInput(where: WhereIdInput!): AuctionWhitelistedMember
     @deprecated(reason: "Use auctionWhitelistedMemberById")
   auctionWhitelistedMembersConnection(
     orderBy: [AuctionWhitelistedMemberOrderByInput!]!
@@ -1472,12 +1407,7 @@ type Query {
     first: Int
     where: AuctionWhitelistedMemberWhereInput
   ): AuctionWhitelistedMembersConnection!
-  bids(
-    where: BidWhereInput
-    orderBy: [BidOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Bid!]!
+  bids(where: BidWhereInput, orderBy: [BidOrderByInput!], offset: Int, limit: Int): [Bid!]!
   bidById(id: String!): Bid
   bidByUniqueInput(where: WhereIdInput!): Bid @deprecated(reason: "Use bidById")
   bidsConnection(
@@ -1508,8 +1438,7 @@ type Query {
     limit: Int
   ): [Comment!]!
   commentById(id: String!): Comment
-  commentByUniqueInput(where: WhereIdInput!): Comment
-    @deprecated(reason: "Use commentById")
+  commentByUniqueInput(where: WhereIdInput!): Comment @deprecated(reason: "Use commentById")
   commentsConnection(
     orderBy: [CommentOrderByInput!]!
     after: String
@@ -2120,12 +2049,7 @@ enum AppActionActionType {
 
 type Subscription {
   processorState: ProcessorState!
-  events(
-    where: EventWhereInput
-    orderBy: [EventOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Event!]!
+  events(where: EventWhereInput, orderBy: [EventOrderByInput!], offset: Int, limit: Int): [Event!]!
   eventById(id: String!): Event
   notifications(
     where: NotificationWhereInput
@@ -2155,12 +2079,7 @@ type Subscription {
     limit: Int
   ): [VideoCategory!]!
   videoCategoryById(id: String!): VideoCategory
-  videos(
-    where: VideoWhereInput
-    orderBy: [VideoOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Video!]!
+  videos(where: VideoWhereInput, orderBy: [VideoOrderByInput!], offset: Int, limit: Int): [Video!]!
   videoById(id: String!): Video
   videoFeaturedInCategories(
     where: VideoFeaturedInCategoryWhereInput
@@ -2287,18 +2206,14 @@ type Subscription {
     offset: Int
     limit: Int
   ): [DistributionBucketFamilyMetadata!]!
-  distributionBucketFamilyMetadataById(
-    id: String!
-  ): DistributionBucketFamilyMetadata
+  distributionBucketFamilyMetadataById(id: String!): DistributionBucketFamilyMetadata
   distributionBucketOperatorMetadata(
     where: DistributionBucketOperatorMetadataWhereInput
     orderBy: [DistributionBucketOperatorMetadataOrderByInput!]
     offset: Int
     limit: Int
   ): [DistributionBucketOperatorMetadata!]!
-  distributionBucketOperatorMetadataById(
-    id: String!
-  ): DistributionBucketOperatorMetadata
+  distributionBucketOperatorMetadataById(id: String!): DistributionBucketOperatorMetadata
   distributionBucketOperators(
     where: DistributionBucketOperatorWhereInput
     orderBy: [DistributionBucketOperatorOrderByInput!]
@@ -2334,19 +2249,9 @@ type Subscription {
     limit: Int
   ): [BannedMember!]!
   bannedMemberById(id: String!): BannedMember
-  apps(
-    where: AppWhereInput
-    orderBy: [AppOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [App!]!
+  apps(where: AppWhereInput, orderBy: [AppOrderByInput!], offset: Int, limit: Int): [App!]!
   appById(id: String!): App
-  tokens(
-    where: TokenWhereInput
-    orderBy: [TokenOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Token!]!
+  tokens(where: TokenWhereInput, orderBy: [TokenOrderByInput!], offset: Int, limit: Int): [Token!]!
   tokenById(id: String!): Token
   tokenChannels(
     where: TokenChannelWhereInput
@@ -2369,12 +2274,7 @@ type Subscription {
     limit: Int
   ): [Benefit!]!
   benefitById(id: String!): Benefit
-  sales(
-    where: SaleWhereInput
-    orderBy: [SaleOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Sale!]!
+  sales(where: SaleWhereInput, orderBy: [SaleOrderByInput!], offset: Int, limit: Int): [Sale!]!
   saleById(id: String!): Sale
   vestedSales(
     where: VestedSaleWhereInput
@@ -2481,12 +2381,7 @@ type Subscription {
     limit: Int
   ): [AuctionWhitelistedMember!]!
   auctionWhitelistedMemberById(id: String!): AuctionWhitelistedMember
-  bids(
-    where: BidWhereInput
-    orderBy: [BidOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Bid!]!
+  bids(where: BidWhereInput, orderBy: [BidOrderByInput!], offset: Int, limit: Int): [Bid!]!
   bidById(id: String!): Bid
   commentReactions(
     where: CommentReactionWhereInput
@@ -6274,12 +6169,7 @@ type OwnedNft {
   lastSaleDate: DateTime
 
   # All NFT auction bids
-  bids(
-    where: BidWhereInput
-    orderBy: [BidOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Bid!]!
+  bids(where: BidWhereInput, orderBy: [BidOrderByInput!], offset: Int, limit: Int): [Bid!]!
 
   # Flag to indicate whether the NFT is featured or not
   isFeatured: Boolean!
@@ -6309,12 +6199,7 @@ type Auction {
   topBid: Bid
 
   # All bids made during this auction
-  bids(
-    where: BidWhereInput
-    orderBy: [BidOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Bid!]!
+  bids(where: BidWhereInput, orderBy: [BidOrderByInput!], offset: Int, limit: Int): [Bid!]!
 
   # Block when auction starts
   startsAtBlock: Int!
@@ -6957,12 +6842,7 @@ type Token {
   totalSupply: BigInt!
 
   # Whether a sale is ongoing
-  sale(
-    where: SaleWhereInput
-    orderBy: [SaleOrderByInput!]
-    offset: Int
-    limit: Int
-  ): [Sale!]!
+  sale(where: SaleWhereInput, orderBy: [SaleOrderByInput!], offset: Int, limit: Int): [Sale!]!
 
   # symbol for the token uniqueness guaranteed by runtime
   symbol: String!

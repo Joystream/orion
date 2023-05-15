@@ -206,7 +206,7 @@ export class Api {
   private readonly sender: Sender
   // source of funds for all new accounts
   private readonly treasuryAccount: string
-  
+
   // --- Creator Token actors ---
   private creatorAddress: undefined | string
   private creatorMemberId: undefined | number
@@ -227,7 +227,6 @@ export class Api {
     this.treasuryAccount = treasuryAccount
     this.sender = new Sender(api, keyring, label)
   }
-
 
   // getter & setters for creator token actors
   public get creator(): [string, number] {
