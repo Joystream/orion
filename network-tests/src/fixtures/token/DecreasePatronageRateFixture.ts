@@ -5,6 +5,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
+import { assert } from 'chai'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<EventType<'projectToken', 'PatronageRateDecreasedTo'>>
 
@@ -13,6 +14,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
   protected creatorAddress: string
   protected channelId: number
   protected targetRate: number
+  protected events: PatronageRateDecreasedToEventDetails[] = []
 
   public constructor(
     api: Api,
@@ -46,6 +48,13 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, newRate] = this.events[0].event.data
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+
+    assert.isNotNull(qToken)
+    assert.equal(qToken!.annualCreatorReward, newRate.toString())
+  }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
   }
 }
