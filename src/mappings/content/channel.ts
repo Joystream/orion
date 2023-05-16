@@ -182,8 +182,8 @@ export async function processChannelOwnerRemarkedEvent({
   const result = decodedMessage
     ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-      errorMessage: 'Could not decode the metadata',
-    })
+        errorMessage: 'Could not decode the metadata',
+      })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -207,8 +207,8 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-      errorMessage: 'Could not decode the metadata',
-    })
+        errorMessage: 'Could not decode the metadata',
+      })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
