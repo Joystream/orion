@@ -5,6 +5,8 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenTokenSaleParams } from '@polkadot/types/lookup'
+import { assert } from 'chai'
+import BN from 'bn.js'
 
 type TokenSaleInitializedEventDetails = EventDetails<
   EventType<'projectToken', 'TokenSaleInitialized'>
@@ -15,6 +17,8 @@ export class InitTokenSaleFixture extends StandardizedFixture {
   protected creatorMemberId: number
   protected channelId: number
   protected saleParams: PalletProjectTokenTokenSaleParams
+  protected events: TokenSaleInitializedEventDetails[] = []
+  protected bestBlock: BN | undefined
 
   public constructor(
     api: Api,
@@ -48,10 +52,53 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenSaleInitialized')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public async preExecHook(): Promise<void> {
+    this.bestBlock = await this.api.getBestBlock()
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, saleNonce, tokenSale,] = this.events[0].event.data
+    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource, } = tokenSale
+    const end = startBlock.add(duration)
+    const saleId = tokenId.toString() + saleNonce.toString()
+    const fundsSourceAccount = tokenId.toString() + tokensSource.toString()
+
+    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+    assert.isNotNull(qSale)
+    assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
+    assert.equal(qSale!.pricePerUnit, unitPrice.toString())
+    assert.equal(qSale!.finalized, false)
+    if (!qSale!.maxAmountPerMember && capPerMember.isSome) {
+      assert.equal(qSale!.maxAmountPerMember, capPerMember.unwrap().toString())
+    }
+    assert.equal(qSale!.tokensSold, '0')
+    assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
+    assert.equal(qSale!.startBlock.toString(), startBlock.toString())
+    assert.equal(qSale!.durationInBlocks.toString(), duration.toString())
+    assert.equal(qSale!.endsAt.toString(), end.toString())
+    assert.equal(qSale!.fundsSourceAccount.id, fundsSourceAccount)
+    assert.equal(qSale!.tokenSaleAllocation, quantityLeft.toString())
+
+    if (tokenSale.vestingScheduleParams.isSome) {
+      const { linearVestingDuration, cliffAmountPercentage, blocksBeforeCliff } = tokenSale.vestingScheduleParams.unwrap()
+      const cliffBlock = this.bestBlock!.add(blocksBeforeCliff.toBn())
+      const endBlock = cliffBlock.add(linearVestingDuration.toBn())
+      const vestingId =
+        cliffBlock.toString() +
+        linearVestingDuration.toString() +
+        cliffAmountPercentage.toString()
+      const qVesting = await this.query.retryQuery(() => this.query.getVestingSchedulById(
+        vestingId
+      ))
+      assert.isNotNull(qVesting)
+      assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
+      assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
+      assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
+      assert.equal(qVesting!.vestedSale?.sale.id, saleId.toString())
+      assert.isNotNull(qSale!.vestedSale)
+      assert.equal(qSale!.vestedSale!.vesting.id, vestingId)
+    }
+  }
+
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }
