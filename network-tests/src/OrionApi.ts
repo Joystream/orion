@@ -117,7 +117,7 @@ export class OrionApi {
     this.debugQuery(query, variables)
     return (
       (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
-      resultKey
+        resultKey
       ] || null
     )
   }
@@ -175,7 +175,7 @@ export class OrionApi {
   public async getRevenueShareParticpationById(
     revenueShareNonce: number,
     tokenId: TokenId,
-    memberId: u64,
+    memberId: u64
   ): Promise<RevenueShareParticipationFieldsFragment> {
     const revenueShareId = tokenId.toString() + revenueShareNonce.toString()
     const accountId = tokenId.toString() + memberId

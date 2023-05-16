@@ -74,5 +74,6 @@ export default async function revenueShare({ api, query, lock }: FlowProps): Pro
     firstHolderMemberId,
     tokenId
   )
-  await new FixtureRunner(finalizeRevenueShareFixture).run()
+  await finalizeRevenueShareFixture.preExecHook()
+  await new FixtureRunner(finalizeRevenueShareFixture).runWithQueryNodeChecks()
 }

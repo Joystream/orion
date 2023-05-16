@@ -4,6 +4,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
+import { assert } from 'chai'
 
 type RevenueShareFinalizedEventDetails = EventDetails<
   EventType<'projectToken', 'RevenueSplitFinalized'>
@@ -13,6 +14,7 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
   protected creatorAddress: string
   protected creatorMemberId: number
   protected channelId: number
+  protected events: RevenueShareFinalizedEventDetails[] = []
 
   public constructor(
     api: Api,
@@ -43,9 +45,31 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitFinalized')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public async preExecHook(): Promise<void> {
+    const tokenId = (
+      await this.api.query.content.channelById(this.channelId)
+    ).creatorTokenId.unwrap()
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+
+    assert.isNotNull(qToken)
+    const revenueShareNonce = qToken!.revenueShareNonce
+    const qRevenueShare = await this.query.retryQuery(() =>
+      this.query.getRevenueShareById(revenueShareNonce, tokenId)
+    )
+    assert.isNotNull(qRevenueShare)
+    assert.equal(qRevenueShare!.finalized, false)
+  }
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId] = this.events[0].event.data
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+
+    assert.isNotNull(qToken)
+    const revenueShareNonce = qToken!.revenueShareNonce
+    const qRevenueShare = await this.query.retryQuery(() =>
+      this.query.getRevenueShareById(revenueShareNonce, tokenId)
+    )
+    assert.isNotNull(qRevenueShare)
+    assert.equal(qRevenueShare!.finalized, true)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
