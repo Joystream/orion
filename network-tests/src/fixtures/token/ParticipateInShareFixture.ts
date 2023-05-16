@@ -57,7 +57,7 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     console.log(`Query result:\n ${token}`)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, stakedAmount, joyDividend] = this.events[0].event.data
@@ -65,7 +65,9 @@ export class ParticipateInShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     const revenueShareNonce = qToken!.revenueShareNonce
-    const qRevenueShareParticipation = await this.query.retryQuery(() => this.query.getRevenueShareParticpationById(revenueShareNonce, tokenId, memberId))
+    const qRevenueShareParticipation = await this.query.retryQuery(() =>
+      this.query.getRevenueShareParticpationById(revenueShareNonce, tokenId, memberId)
+    )
 
     assert.isNotNull(qRevenueShareParticipation)
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())

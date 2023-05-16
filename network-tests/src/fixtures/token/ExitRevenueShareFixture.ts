@@ -41,7 +41,9 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(_tokenId.toString() + this.memberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(_tokenId.toString() + this.memberId.toString())
+    )
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
@@ -61,12 +63,14 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitLeft')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId.toString() + this.memberId.toString()))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId.toString() + this.memberId.toString())
+    )
     const participantsNumPost = this.participantsNumPre! - 1
     const stakedAmountPost = this.stakedAmountPre!.sub(unstakedAmount.toBn())
 
