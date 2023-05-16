@@ -46,7 +46,8 @@ export default async function tokenSale({ api, query, lock }: FlowProps): Promis
     channelId,
     saleParams
   )
-  await new FixtureRunner(initTokenSaleFixture).run()
+  await initTokenSaleFixture.preExecHook()
+  await new FixtureRunner(initTokenSaleFixture).runWithQueryNodeChecks()
 
   debug('update upcoming token sale')
   const newStartBlock = (await api.getBestBlock()).toNumber() + 1

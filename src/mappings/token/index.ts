@@ -228,8 +228,20 @@ export async function processTokenSaleInitializedEvent({
   event: {
     asV1000: [tokenId, , tokenSale, metadataBytes],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.TokenSaleInitialized">) {
   const fundsSourceMemberId = tokenSale.tokensSource;
+||||||| parent of 540e12d86 (feat: creator token init sale orion checks)
+}: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
+  if (tokenSale.vestingScheduleParams !== undefined) {
+    const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
+=======
+}: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
+  const fundsSourceMemberId = tokenSale.tokensSource
+
+  if (tokenSale.vestingScheduleParams !== undefined) {
+    const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
+>>>>>>> 540e12d86 (feat: creator token init sale orion checks)
 
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(
     overlay,
@@ -280,6 +292,7 @@ export async function processTokenSaleInitializedEvent({
   token.status = TokenStatus.SALE;
   token.currentSaleId = sale.id;
 
+<<<<<<< HEAD
   if (metadataBytes) {
     const metadata = deserializeMetadata(SaleMetadata, metadataBytes);
     if (metadata) {
@@ -288,6 +301,72 @@ export async function processTokenSaleInitializedEvent({
       }
     }
   }
+||||||| parent of 540e12d86 (feat: creator token init sale orion checks)
+  // TODO: enable the following code below
+
+  // const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
+  // sourceAccount.totalAmount -= tokenSale.quantityLeft
+
+  // const sale = overlay.getRepository(Sale).new({
+  //   id: tokenId.toString() + saleNonce.toString(),
+  //   tokenId: tokenId.toString(),
+  //   tokensSold: BigInt(0),
+  //   createdIn: block.height,
+  //   startBlock: tokenSale.startBlock,
+  //   durationInBlocks: tokenSale.duration,
+  //   endsAt: tokenSale.startBlock + tokenSale.duration,
+  //   maxAmountPerMember: tokenSale.capPerMember,
+  //   tokenSaleAllocation: tokenSale.quantityLeft,
+  //   pricePerUnit: tokenSale.unitPrice,
+  //   finalized: false,
+  //   termsAndConditions: '', // TODO Sale metadata (next PR)
+  //   fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
+  // })
+
+  // const token = await overlay.getTokenOrFail(tokenId)
+  // token.status = TokenStatus.SALE
+
+  // if (metadataBytes) {
+  //   const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
+  //   if (metadata) {
+  //     if (isSet(metadata!.termsAndConditions)) {
+  //       sale.termsAndConditions = metadata!.termsAndConditions.toString()
+  //     }
+  //   }
+  // }
+=======
+  // TODO: enable the following code below
+  const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
+  sourceAccount.totalAmount -= tokenSale.quantityLeft
+
+  const sale = overlay.getRepository(Sale).new({
+    id: tokenId.toString() + saleNonce.toString(),
+    tokenId: tokenId.toString(),
+    tokensSold: BigInt(0),
+    createdIn: block.height,
+    startBlock: tokenSale.startBlock,
+    durationInBlocks: tokenSale.duration,
+    endsAt: tokenSale.startBlock + tokenSale.duration,
+    maxAmountPerMember: tokenSale.capPerMember,
+    tokenSaleAllocation: tokenSale.quantityLeft,
+    pricePerUnit: tokenSale.unitPrice,
+    finalized: false,
+    termsAndConditions: '', // TODO Sale metadata (next PR)
+    fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
+  })
+
+  const token = await overlay.getTokenOrFail(tokenId)
+  token.status = TokenStatus.SALE
+
+  if (metadataBytes) {
+    const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
+    if (metadata) {
+      if (isSet(metadata!.termsAndConditions)) {
+        sale.termsAndConditions = metadata!.termsAndConditions.toString()
+      }
+    }
+  }
+>>>>>>> 540e12d86 (feat: creator token init sale orion checks)
 }
 
 export async function processPatronageRateDecreasedToEvent({

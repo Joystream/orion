@@ -61,6 +61,49 @@ fragment RevenueShareFields on RevenueShare {
   }
 }
 
+fragment VestingScheduleFields on VestingSchedule {
+  id
+  endsAt
+  cliffPercent
+  cliffDurationBlocks
+  cliffBlock
+  accounts {
+    account {
+      member {
+        id
+      }
+    }
+  }
+  vestedSale {
+    sale {
+      id
+    }
+  }
+}
+
+fragment SaleFields on Sale {
+  id
+  endsAt
+  durationInBlocks
+  createdIn
+  finalized
+  id
+  maxAmountPerMember
+  pricePerUnit
+  startBlock
+  termsAndConditions
+  tokenSaleAllocation
+  tokensSold
+  vestedSale {
+    vesting {
+      id
+    }
+  }
+  fundsSourceAccount {
+    id
+  }
+}
+
 query getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
@@ -82,5 +125,17 @@ query getRevenueShareById($id: String!) {
 query getRevenueShareParticipationById($id: String!) {
   revenueShareParticipationById(id: $id) {
     ...RevenueShareParticipationFields
+  }
+}
+
+query getVestingScheduleById($id: String!) {
+  vestingScheduleById(id: $id) {
+    ...VestingScheduleFields
+  }
+}
+
+query getSaleById($id: String!) {
+  saleById(id: $id) {
+    ...SaleFields
   }
 }

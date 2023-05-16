@@ -15,6 +15,10 @@ import {
   RevenueShareFieldsFragment,
   RevenueShareParticipationFieldsFragment,
   GetRevenueShareById,
+  GetVestingScheduleById,
+  VestingScheduleFieldsFragment,
+  GetSaleById,
+  SaleFieldsFragment,
 } from '../graphql/generated/queries'
 
 export class OrionApi {
@@ -184,5 +188,13 @@ export class OrionApi {
       { id: accountId + revenueShareId },
       'revenueShareParticipationById'
     )
+  }
+
+  public async getVestingSchedulById(id: string): Promise<VestingScheduleFieldsFragment> {
+    return this.firstEntityQuery(GetVestingScheduleById, { id }, 'vestingScheduleById')
+  }
+
+  public async getSaleById(id: string): Promise<SaleFieldsFragment> {
+    return this.firstEntityQuery(GetSaleById, { id }, 'saleById')
   }
 }
