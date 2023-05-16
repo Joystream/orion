@@ -80,8 +80,7 @@ query getRevenueShareById($id: String!) {
 }
 
 query getRevenueShareParticipationById($id: String!) {
-    revenueShareParticipationById(id: $id) {
-      ...RevenueShareParticipationFields
+  revenueShareParticipationById(id: $id) {
+    ...RevenueShareParticipationFields
   }
 }
-
