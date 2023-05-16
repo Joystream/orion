@@ -214,6 +214,8 @@ export async function processTokenSaleInitializedEvent({
     asV1000: [tokenId, saleNonce, tokenSale, metadataBytes],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
+  const fundsSourceMemberId = tokenSale.tokensSource
+
   if (tokenSale.vestingScheduleParams !== undefined) {
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams!, block.height)
 
@@ -233,37 +235,36 @@ export async function processTokenSaleInitializedEvent({
   }
 
   // TODO: enable the following code below
+  const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
+  sourceAccount.totalAmount -= tokenSale.quantityLeft
 
-  // const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
-  // sourceAccount.totalAmount -= tokenSale.quantityLeft
+  const sale = overlay.getRepository(Sale).new({
+    id: tokenId.toString() + saleNonce.toString(),
+    tokenId: tokenId.toString(),
+    tokensSold: BigInt(0),
+    createdIn: block.height,
+    startBlock: tokenSale.startBlock,
+    durationInBlocks: tokenSale.duration,
+    endsAt: tokenSale.startBlock + tokenSale.duration,
+    maxAmountPerMember: tokenSale.capPerMember,
+    tokenSaleAllocation: tokenSale.quantityLeft,
+    pricePerUnit: tokenSale.unitPrice,
+    finalized: false,
+    termsAndConditions: '', // TODO Sale metadata (next PR)
+    fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
+  })
 
-  // const sale = overlay.getRepository(Sale).new({
-  //   id: tokenId.toString() + saleNonce.toString(),
-  //   tokenId: tokenId.toString(),
-  //   tokensSold: BigInt(0),
-  //   createdIn: block.height,
-  //   startBlock: tokenSale.startBlock,
-  //   durationInBlocks: tokenSale.duration,
-  //   endsAt: tokenSale.startBlock + tokenSale.duration,
-  //   maxAmountPerMember: tokenSale.capPerMember,
-  //   tokenSaleAllocation: tokenSale.quantityLeft,
-  //   pricePerUnit: tokenSale.unitPrice,
-  //   finalized: false,
-  //   termsAndConditions: '', // TODO Sale metadata (next PR)
-  //   fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
-  // })
+  const token = await overlay.getTokenOrFail(tokenId)
+  token.status = TokenStatus.SALE
 
-  // const token = await overlay.getTokenOrFail(tokenId)
-  // token.status = TokenStatus.SALE
-
-  // if (metadataBytes) {
-  //   const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
-  //   if (metadata) {
-  //     if (isSet(metadata!.termsAndConditions)) {
-  //       sale.termsAndConditions = metadata!.termsAndConditions.toString()
-  //     }
-  //   }
-  // }
+  if (metadataBytes) {
+    const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
+    if (metadata) {
+      if (isSet(metadata!.termsAndConditions)) {
+        sale.termsAndConditions = metadata!.termsAndConditions.toString()
+      }
+    }
+  }
 }
 
 export async function processPatronageRateDecreasedToEvent({
