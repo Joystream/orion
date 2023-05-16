@@ -6,6 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { u32 } from '@polkadot/types/primitive'
 import { BN } from 'bn.js'
+import { assert } from 'chai'
 
 type TokenSaleUpdatedEventDetails = EventDetails<
   EventType<'projectToken', 'UpcomingTokenSaleUpdated'>
@@ -17,6 +18,7 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
   protected channelId: number
   protected newStartBlock: u32 | null
   protected newDuration: u32 | null
+  protected events: TokenSaleUpdatedEventDetails[] = []
 
   public constructor(
     api: Api,
@@ -59,9 +61,21 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'UpcomingTokenSaleUpdated')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public async preExecHook(): Promise<void> {}
+
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, saleNonce, newStart, newDuration] = this.events[0].event.data
+    const saleId = tokenId.toString() + saleNonce.toString()
+    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+
+    assert.isNotNull(qSale)
+    if (newStart.isSome) {
+      assert.equal(qSale?.startBlock.toString(), newStart.unwrap().toString())
+    }
+    if (newDuration.isSome) {
+      assert.equal(qSale?.durationInBlocks.toString(), newDuration.unwrap().toString())
+    }
+    assert.equal(qSale!.endsAt, qSale!.durationInBlocks + qSale!.startBlock)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

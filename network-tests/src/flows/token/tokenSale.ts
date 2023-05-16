@@ -61,7 +61,7 @@ export default async function tokenSale({ api, query, lock }: FlowProps): Promis
     newStartBlock,
     newDuration
   )
-  await new FixtureRunner(updateUpcomingSaleFixture).run()
+  await new FixtureRunner(updateUpcomingSaleFixture).runWithQueryNodeChecks()
 
   debug('purchase tokens on sale')
   await api.treasuryTransferBalance(firstHolderAddress, new BN(1000))
@@ -83,5 +83,6 @@ export default async function tokenSale({ api, query, lock }: FlowProps): Promis
     creatorMemberId,
     channelId
   )
-  await new FixtureRunner(finalizeTokenSaleFixture).run()
+  await finalizeTokenSaleFixture.preExecHook()
+  await new FixtureRunner(finalizeTokenSaleFixture).runWithQueryNodeChecks()
 }
