@@ -57,8 +57,8 @@ export class InitTokenSaleFixture extends StandardizedFixture {
   }
 
   public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId, saleNonce, tokenSale,] = this.events[0].event.data
-    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource, } = tokenSale
+    const [tokenId, saleNonce, tokenSale] = this.events[0].event.data
+    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
     const end = startBlock.add(duration)
     const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAccount = tokenId.toString() + tokensSource.toString()
@@ -80,16 +80,15 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.tokenSaleAllocation, quantityLeft.toString())
 
     if (tokenSale.vestingScheduleParams.isSome) {
-      const { linearVestingDuration, cliffAmountPercentage, blocksBeforeCliff } = tokenSale.vestingScheduleParams.unwrap()
+      const { linearVestingDuration, cliffAmountPercentage, blocksBeforeCliff } =
+        tokenSale.vestingScheduleParams.unwrap()
       const cliffBlock = this.bestBlock!.add(blocksBeforeCliff.toBn())
       const endBlock = cliffBlock.add(linearVestingDuration.toBn())
       const vestingId =
-        cliffBlock.toString() +
-        linearVestingDuration.toString() +
-        cliffAmountPercentage.toString()
-      const qVesting = await this.query.retryQuery(() => this.query.getVestingSchedulById(
-        vestingId
-      ))
+        cliffBlock.toString() + linearVestingDuration.toString() + cliffAmountPercentage.toString()
+      const qVesting = await this.query.retryQuery(() =>
+        this.query.getVestingSchedulById(vestingId)
+      )
       assert.isNotNull(qVesting)
       assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
       assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
@@ -100,5 +99,5 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
