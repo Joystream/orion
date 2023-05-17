@@ -44,7 +44,8 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
     channelId,
     ammParams
   )
-  await new FixtureRunner(activateAmmFixture).run()
+  await activateAmmFixture.preExecHook()
+  await new FixtureRunner(activateAmmFixture).runWithQueryNodeChecks()
 
   debug('buy on amm')
   const amountBought = new BN(1000)
@@ -56,7 +57,8 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
     tokenId,
     amountBought
   )
-  await new FixtureRunner(buyOnAmmFixture).run()
+  await buyOnAmmFixture.preExecHook()
+  await new FixtureRunner(buyOnAmmFixture).runWithQueryNodeChecks()
 
   debug('sell on amm')
   const amountSold = new BN(1000)
@@ -68,7 +70,8 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
     tokenId,
     amountSold
   )
-  await new FixtureRunner(sellOnAmmFixture).run()
+  await sellOnAmmFixture.preExecHook()
+  await new FixtureRunner(sellOnAmmFixture).runWithQueryNodeChecks()
 
   debug('deactivate amm')
   const deactivateAmmFixture = new DeactivateAmmFixture(
@@ -78,5 +81,6 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
     creatorMemberId,
     channelId
   )
-  await new FixtureRunner(deactivateAmmFixture).run()
+  await deactivateAmmFixture.preExecHook()
+  await new FixtureRunner(deactivateAmmFixture).runWithQueryNodeChecks()
 }

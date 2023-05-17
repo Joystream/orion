@@ -28,7 +28,6 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   await new FixtureRunner(buyMembershipsFixture).run()
   const firstHolderMemberId = buyMembershipsFixture.getCreatedMembers()[0]
 
-  const actor = api.createType('PalletContentPermissionsContentActor', { Member: creatorMemberId })
   const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
   outputs.set(
     api.createType('u64', firstHolderMemberId),
@@ -42,12 +41,13 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
     api,
     query,
     creatorAddress,
-    actor,
+    creatorMemberId,
     channelId,
     outputs,
     metadata
   )
-  await new FixtureRunner(issuerTransferFixture).run()
+  await issuerTransferFixture.preExecHook()
+  await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
   api.setFirstHolder(firstHolderAddress, firstHolderMemberId.toNumber())
 }

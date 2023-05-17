@@ -5,6 +5,8 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import BN from 'bn.js'
+import { assert } from 'chai'
+import { createTypeUnsafe } from '@polkadot/types-create'
 
 type TokensSoldOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensSoldOnAmm'>>
 
@@ -13,6 +15,9 @@ export class SellOnAmmFixture extends StandardizedFixture {
   protected memberAddress: string
   protected memberId: number
   protected amount: BN
+  protected events: TokensSoldOnAmmEventDetails[] = []
+  protected amountPre: BN | undefined
+  protected supplyPre: BN | undefined
 
   public constructor(
     api: Api,
@@ -53,9 +58,35 @@ export class SellOnAmmFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensSoldOnAmm')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public async preExecHook(): Promise<void> {
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
+    )
+    this.amountPre = new BN(qAccount!.totalAmount)
+
+    const _tokenId = this.api.createType('u64', this.tokenId)
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    assert.isNotNull(qToken)
+    this.supplyPre = new BN(qToken!.totalSupply)
+  }
+
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, memberId, crtBurned] = this.events[0].event.data
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+    )
+
+    const supplyPost = this.supplyPre!.sub(crtBurned)
+    const amountPost = this.amountPre!.sub(crtBurned)
+
+    assert.isNotNull(qAccount)
+    assert.isNotNull(qToken)
+
+    assert.equal(qToken!.totalSupply, supplyPost.toString())
+    assert.equal(qAccount!.totalAmount, amountPost.toString())
+
+    // TODO: check transaction
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
