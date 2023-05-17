@@ -34,7 +34,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   )
   const metadata = ''
 
-  const issuerTransferFixture = new TransferFixture(
+  const transferFixture = new TransferFixture(
     api,
     query,
     creatorAddress,
@@ -43,5 +43,6 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
     outputs,
     metadata
   )
-  await new FixtureRunner(issuerTransferFixture).run()
+  await transferFixture.preExecHook()
+  await new FixtureRunner(transferFixture).runWithQueryNodeChecks()
 }

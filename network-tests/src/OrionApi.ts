@@ -19,6 +19,10 @@ import {
   VestingScheduleFieldsFragment,
   GetSaleById,
   SaleFieldsFragment,
+  VestedAccountFieldsFragment,
+  GetVestedAccountById,
+  AmmCurvFieldsFragment,
+  GetAmmById,
 } from '../graphql/generated/queries'
 
 export class OrionApi {
@@ -196,5 +200,13 @@ export class OrionApi {
 
   public async getSaleById(id: string): Promise<SaleFieldsFragment> {
     return this.firstEntityQuery(GetSaleById, { id }, 'saleById')
+  }
+
+  public async getVestedAccountById(id: string): Promise<VestedAccountFieldsFragment> {
+    return this.firstEntityQuery(GetVestedAccountById, { id }, 'vestedAccountById')
+  }
+
+  public async getAmmById(id: string): Promise<AmmCurvFieldsFragment> {
+    return this.firstEntityQuery(GetAmmById, { id }, 'ammCurveId')
   }
 }

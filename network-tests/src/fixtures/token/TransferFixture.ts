@@ -5,6 +5,8 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
+import BN from 'bn.js'
+import { assert } from 'chai'
 
 type TransferEventDetails = EventDetails<EventType<'projectToken', 'TokenAmountTransferred'>>
 
@@ -14,6 +16,9 @@ export class TransferFixture extends StandardizedFixture {
   protected srcMemberId: number
   protected outputs: PalletProjectTokenTransfersPaymentWithVesting
   protected metadata: string
+  protected events: TransferEventDetails[] = []
+  protected destinationsAmountPre: BN[] | undefined
+  protected srcAmountPre: BN | undefined
 
   public constructor(
     api: Api,
@@ -51,9 +56,54 @@ export class TransferFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenAmountTransferred')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
+  public async preExecHook(): Promise<void> {
+    const accountId = this.tokenId.toString() + this.srcMemberId.toString()
+    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    assert.isNotNull(qAccount)
+    this.destinationsAmountPre = await Promise.all(
+      [...this.outputs.entries()].map(async ([memberId]) => {
+        const destAccountId = this.tokenId.toString() + memberId.toString()
+        const qDestAccount = await this.query.retryQuery(() =>
+          this.query.getTokenAccountById(destAccountId)
+        )
+        if (qDestAccount) {
+          return new BN(qDestAccount!.totalAmount)
+        } else {
+          return new BN(0)
+        }
+      })
+    )
+  }
+
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
+    const accountId = tokenId.toString() + sourceMemberId.toString()
+    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+
+    const total = [...this.outputs.values()]
+      .map((payment) => payment.amount)
+      .reduce((item, acc) => acc.add(item), new BN(0))
+    const sourceAmountPost = this.srcAmountPre!.sub(total)
+
+    assert.isNotNull(qAccount)
+    assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
+
+    const observedAmounts = await Promise.all(
+      [...this.outputs.entries()].map(async ([memberId]) => {
+        const destAccountId = tokenId.toString() + memberId.toString()
+        const qDestAccount = await this.query.retryQuery(() =>
+          this.query.getTokenAccountById(destAccountId)
+        )
+        assert.isNotNull(qDestAccount)
+        return new BN(qDestAccount!.totalAmount)
+      })
+    )
+
+    // unpack validatedTransfers into amount, vesting
+    const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
+      this.destinationsAmountPre![i].add(transfer.payment.amount)
+    )
+    assert.deepEqual(observedAmounts, destinationsAmountPost)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

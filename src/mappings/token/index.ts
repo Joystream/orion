@@ -204,12 +204,23 @@ export async function processAmmActivatedEvent({
   event: {
     asV2002: [tokenId, , { slope, intercept }],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.AmmActivated">) {
   const token = await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString());
   token.status = TokenStatus.MARKET;
   const id = overlay.getRepository(AmmCurve).getNewEntityId();
+||||||| parent of da1c55839 (feat: finish transfer and amm fixture)
+}: EventHandlerContext<'ProjectToken.AmmActivated'>) {
+  const id = overlay.getRepository(AmmCurve).getNextIdNumber()
+=======
+}: EventHandlerContext<'ProjectToken.AmmActivated'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.MARKET
+  const id = tokenId.toString() + token.ammNonce.toString()
+  token.ammNonce++
+>>>>>>> da1c55839 (feat: finish transfer and amm fixture)
   overlay.getRepository(AmmCurve).new({
     burnedByAmm: BigInt(0),
     mintedByAmm: BigInt(0),
@@ -218,8 +229,16 @@ export async function processAmmActivatedEvent({
     ammSlopeParameter: BigInt(slope),
     ammInitPrice: BigInt(intercept),
     finalized: false,
+<<<<<<< HEAD
   });
   token.currentAmmSaleId = id;
+||||||| parent of da1c55839 (feat: finish transfer and amm fixture)
+  })
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.MARKET
+=======
+  })
+>>>>>>> da1c55839 (feat: finish transfer and amm fixture)
 }
 
 export async function processTokenSaleInitializedEvent({
