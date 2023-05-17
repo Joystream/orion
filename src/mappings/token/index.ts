@@ -193,18 +193,19 @@ export async function processAmmActivatedEvent({
     asV2002: [tokenId, , { slope, intercept }],
   },
 }: EventHandlerContext<'ProjectToken.AmmActivated'>) {
-  const id = overlay.getRepository(AmmCurve).getNextIdNumber()
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.MARKET
+  const id = tokenId.toString() + token.ammNonce.toString()
+  token.ammNonce++
   overlay.getRepository(AmmCurve).new({
     burnedByAmm: BigInt(0),
     mintedByAmm: BigInt(0),
     tokenId: tokenId.toString(),
-    id: id.toString(),
+    id,
     ammSlopeParameter: BigInt(slope),
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
-  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  token.status = TokenStatus.MARKET
 }
 
 export async function processTokenSaleInitializedEvent({
