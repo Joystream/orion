@@ -104,6 +104,25 @@ fragment SaleFields on Sale {
   }
 }
 
+fragment VestedAccountFields on VestedAccount {
+  id
+  vesting {
+    id
+  }
+  account {
+    id
+  }
+}
+
+fragment AmmCurvFields on AmmCurve {
+  mintedByAmm
+  id
+  finalized
+  burnedByAmm
+  ammSlopeParameter
+  ammInitPrice
+}
+
 query getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
@@ -137,5 +156,17 @@ query getVestingScheduleById($id: String!) {
 query getSaleById($id: String!) {
   saleById(id: $id) {
     ...SaleFields
+  }
+}
+
+query getVestedAccountById($id: String!) {
+  vestedAccountById(id: $id) {
+    ...VestedAccountFields
+  }
+}
+
+query getAmmById($id: String!) {
+  ammCurveById(id: $id) {
+    ...AmmCurvFields
   }
 }

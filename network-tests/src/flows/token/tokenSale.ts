@@ -73,7 +73,8 @@ export default async function tokenSale({ api, query, lock }: FlowProps): Promis
     tokenId,
     new BN(100)
   )
-  await new FixtureRunner(purchaseTokensOnSaleFixture).run()
+  await purchaseTokensOnSaleFixture.preExecHook()
+  await new FixtureRunner(purchaseTokensOnSaleFixture).runWithQueryNodeChecks()
 
   debug('finalize token sale')
   const finalizeTokenSaleFixture = new FinalizeTokenSaleFixture(
