@@ -19,6 +19,9 @@ export class TopSellingChannelsResult {
 
   @Field(() => String, { nullable: false })
   amount!: string
+
+  @Field(() => Int, { nullable: false })
+  nftSold!: number
 }
 
 @ObjectType()

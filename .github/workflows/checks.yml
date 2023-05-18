@@ -2,8 +2,8 @@ name: Checks
 on: [push, pull_request]
 
 jobs:
-  checks:
-    name: Checks
+  local:
+    name: Local build, linting and formatting
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,3 +20,19 @@ jobs:
         run: npm ci
       - name: Run checks
         run: npm run checks
+  docker:
+    name: Docker build check
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [16.x]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
+      - name: Build docker image
+        run: make build-docker

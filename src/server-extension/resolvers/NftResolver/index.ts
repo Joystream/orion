@@ -3,7 +3,7 @@ import { EntityManager } from 'typeorm'
 import { RequestFeaturedNftArgs, NftFeaturedRequstInfo, EndingAuctionsNftsArgs } from './types'
 import { Context } from '../../check'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
-import { NftFeaturingRequest } from '../../../model'
+import { NftFeaturingRequest, OwnedNft as OwnedNftEntity } from '../../../model'
 import { OwnedNft } from '../baseTypes'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { GraphQLResolveInfo } from 'graphql'
@@ -83,7 +83,7 @@ export class NftResolver {
     const em = await this.em()
     const { ip } = ctx
     return withHiddenEntities(em, async () => {
-      const nft = await em.findOne(OwnedNft, {
+      const nft = await em.findOne(OwnedNftEntity, {
         where: { id: nftId },
       })
 
