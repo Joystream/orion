@@ -19,6 +19,7 @@ import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
+videoRelevanceManager.init(1000 * 60 * 60)
 
 export const JOYSTREAM_SS58_PREFIX = 126
 

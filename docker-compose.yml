@@ -16,7 +16,6 @@ services:
     shm_size: 1g
     volumes:
       - orion_db_data:/var/lib/postgresql/data
-      - ./db/persisted:/persisted_data
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
 
   orion_processor:

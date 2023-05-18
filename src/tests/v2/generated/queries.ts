@@ -145,7 +145,7 @@ export type GetTopSellingChannelsQueryVariables = Types.Exact<{
 
 export type GetTopSellingChannelsQuery = {
   topSellingChannels?: Types.Maybe<
-    Array<Types.Maybe<{ amount: number; channel: BasicChannelFieldsFragment }>>
+    Array<Types.Maybe<{ amount: string; channel: BasicChannelFieldsFragment }>>
   >
 }
 

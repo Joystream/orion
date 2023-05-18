@@ -1,6 +1,40 @@
+# 2.2.0
+
+### Features:
+- New feature: Video relevance. Video relevance is a score calculated based on the age of the video (time since upload) and the number of views, comments and reactions it has. The weight of each of these factors can be configured through `VideoRelevanceWeights` config value (using the new `setVideoWeights` mutation). The relevance score is automatically recalculated for a video:
+    - every hour,
+    - in case its number of views increased and is now divisible by `VideoRelevanceViewsTick` config value,
+    - in case its number of vidoe's reactions / comments has changed.
+
+### Config values:
+- New config value: `VideoRelevanceWeights` - used to configure the weights of the factors used to calculate video relevance score.
+- New config value: `VideoRelevanceViewsTick` - used to configure the number of views after which the video relevance score should be recalculated.
+
+### Schema/API changes:
+- New field: `Video.videoRelevance` - video relevance score.
+- New mutation: `setVideoWeights` - used to set the value of `VideoRelevanceWeights` config.
+- New query: `topSellingChannels` - used to retrieve channels with highest nft sales volume in a given period of time.
+- New query: `endingAuctionsNfts` - used to retrieve nfts that are on active english auction, ordered by the time left until the auction ends.
+- Changes to `mostViewedVideosConnection` query:
+    - `INNER JOIN` to `video_view_events` table is now used, which means videos with `0` views will no longer appear in the results;
+    - in case both `periodDays` arg is provided and `viewsNum` is part of the `orderBy` clause, the videos are now ordered by the number of views in the specified period (not the number of views in general)
+- Added integration w/ the new relevance score recalculation service in terms of recalculating scores on `addVideoView`, `setVideoReactions` and `excludeContent` mutations.
+
+### Mappings:
+- Added integration w/ the new relevance score recalculation service, responsible for recalculating the score for all videos every hour, as well as in case of the following events:
+    - `ReactVideo` metaprotocol message,
+    - `CreateComment` metaprotocol message,
+    - `DeleteComment` metaprotocol message,
+    - `ModerateComment` metaprotocol message,
+
+### Other:
+- Fixed docker build and added automatic `joystream/orion` docker image publishing to docker hub.
+- Improved data migration process during deployment w/ the new `OffchainMigration` service, which can export and import database entities as well as individual field values. 
+
+
 # 2.1.0 (Ephesus release)
 
-### Schema/Query changes:
+### Schema/API changes:
 - `cumulativeRewardClaimed` field has been added to `Channel`
 - new `event.data` types are now supported:
     - `ChannelRewardClaimedEventData`

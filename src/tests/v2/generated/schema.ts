@@ -6758,8 +6758,9 @@ export type SubscriptionVideosArgs = {
 }
 
 export type TopSellingChannelsResult = {
-  amount: Scalars['Int']
+  amount: Scalars['String']
   channel: Channel
+  nftSold: Scalars['Int']
 }
 
 export type TransactionalStatus =

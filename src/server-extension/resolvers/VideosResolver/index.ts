@@ -115,6 +115,7 @@ export class VideosResolver {
           : ''),
       ''
     )
+
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
@@ -130,12 +131,35 @@ export class VideosResolver {
     }
 
     const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
-    const connectionQuerySql = extendClause(
+
+    let connectionQuerySql: string
+
+    connectionQuerySql = extendClause(
       connectionQuery.sql,
       'WHERE',
       `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       'AND'
     )
+
+    const hasPeriodDaysArgAndIsOrderedByViews =
+      args.periodDays &&
+      (args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_DESC') ||
+        args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
+
+    if (hasPeriodDaysArgAndIsOrderedByViews) {
+      const arrayPosition = `array_position(
+        array[${ids.map((id) => `'${id}'`).join(', ')}],
+        video.id  
+      )`
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" DESC',
+        `${arrayPosition} ASC`
+      )
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" ASC',
+        `${arrayPosition} DESC`
+      )
+    }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql

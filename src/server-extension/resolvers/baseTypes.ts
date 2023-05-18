@@ -48,7 +48,9 @@ export class Membership {
 }
 
 export enum VideoOrderByInput {
-  id_ASC,
+  id_ASC = 'id_ASC',
+  viewsNum_ASC = 'viewsNum_ASC',
+  viewsNum_DESC = 'viewsNum_DESC',
 }
 registerEnumType(VideoOrderByInput, { name: 'VideoOrderByInput' })
 
