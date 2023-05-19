@@ -30,5 +30,5 @@
 - `npm run processor-start` - similar to `make process`, but doesn't run migrations
 - `npm run query-node-start` - similar to `make serve`
 - `npm run auth-server-start` - same as `make serve-auth-api`
-- `npm run tests:auth-api` - runs unit tests for the `auth-api` service (see: [Authentication API](./tutorials/authentication-api.md))
+- `npm run tests:auth-api` - runs unit tests for the `auth-api` service (see: [Authentication API](./tutorials/authentication-api.md)). WARNING: it runs `docker-compose down -v` before running the tests in order to ensure clean state!
 - `npm run offchain-state:export` - performs the offchain state export, see: [Preserving offchain state](./tutorials/preserving-offchain-state.md)
