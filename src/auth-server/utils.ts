@@ -1,5 +1,5 @@
 import { components } from './generated/api-types'
-import { sr25519Verify, decodeAddress, cryptoWaitReady } from '@polkadot/util-crypto'
+import { decodeAddress, cryptoWaitReady, signatureVerify } from '@polkadot/util-crypto'
 import { BadRequestError } from './errors'
 import { config, ConfigVariable } from '../utils/config'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
@@ -15,13 +15,12 @@ export async function verifyActionExecutionRequest(
   { payload, signature }: components['schemas']['ActionExecutionRequestData']
 ): Promise<void> {
   await cryptoWaitReady()
-  if (
-    !sr25519Verify(
-      JSON.stringify(payload),
-      signature,
-      decodeAddress(payload.joystreamAccountId, false, JOYSTREAM_ADDRESS_PREFIX)
-    )
-  ) {
+  const signatureVerifyResult = signatureVerify(
+    JSON.stringify(payload),
+    signature,
+    decodeAddress(payload.joystreamAccountId, false, JOYSTREAM_ADDRESS_PREFIX)
+  )
+  if (!signatureVerifyResult.isValid || signatureVerifyResult.crypto !== 'sr25519') {
     throw new BadRequestError('Payload signature is invalid.')
   }
 
