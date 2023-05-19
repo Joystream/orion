@@ -2,6 +2,7 @@ process: migrate
 	@SQD_DEBUG=sqd:processor:mapping node -r dotenv-expand/config lib/processor.js
 
 install:
+	@rm -rf node_modules # clean up node_modules to avoid issues with patch-package
 	@npm install
 
 build:
