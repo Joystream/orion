@@ -302,7 +302,7 @@ The server itself is implemented using Express.js with [`express-openapi-validat
 
 - `npm run generate:types:auth-api` - generates TypeScript types based on the OpenAPI schema. Those types are saved in `src/auth-server/generated/api-types.ts`.
 - `npm run generate:docs:auth-api` - generates the markdown documentation based on the OpenAPI schema. The documentation is saved in `src/auth-server/docs`.
-- `npm run tests:auth-api` - runs the auth API unit tests.
+- `npm run tests:auth-api` - runs the auth API unit tests. WARNING: it runs `docker-compose down -v` before running the tests in order to ensure clean state!
 
 ## Making changes to the API
 
