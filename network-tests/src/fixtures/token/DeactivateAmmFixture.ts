@@ -6,7 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 import { assert } from 'chai'
-import { TokenStatus } from 'graphql/generated/schema'
+import { TokenStatus } from '../../../graphql/generated/schema'
 import BN from 'bn.js'
 
 type AmmDeactivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmDeactivated'>>
