@@ -66,7 +66,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     const qAccounts = await Promise.all(
       initialMembers.map(async (memberId) => {
         return await this.query.retryQuery(() =>
-          this.query.getTokenAccountById(tokenId + memberId.toString())
+          this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
         )
       })
     )
