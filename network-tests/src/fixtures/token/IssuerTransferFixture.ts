@@ -4,10 +4,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import {
-  PalletContentPermissionsContentActor,
-  PalletProjectTokenTransfersPaymentWithVesting,
-} from '@polkadot/types/lookup'
+import { PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import BN from 'bn.js'
 
@@ -119,15 +116,18 @@ export class IssuerTransferFixture extends StandardizedFixture {
     )
     assert.deepEqual(observedAmounts, destinationsAmountPost)
 
-
     for (const transfer of validatedTransfers.values()) {
       const { payment } = transfer
       const { vestingSchedule } = payment
       if (vestingSchedule.isSome) {
-        const { blocksBeforeCliff, linearVestingDuration, cliffAmountPercentage } = vestingSchedule.unwrap()
+        const { blocksBeforeCliff, linearVestingDuration, cliffAmountPercentage } =
+          vestingSchedule.unwrap()
         const cliffBlock = blocksBeforeCliff.add(this.bestBlock!)
         const endBlock = cliffBlock.add(linearVestingDuration)
-        const vestingId = cliffBlock.toString() + linearVestingDuration.toString() + cliffAmountPercentage.toString()
+        const vestingId =
+          cliffBlock.toString() +
+          linearVestingDuration.toString() +
+          cliffAmountPercentage.toString()
         const qVesting = await this.query.retryQuery(() =>
           this.query.getVestingSchedulById(vestingId)
         )
@@ -137,11 +137,13 @@ export class IssuerTransferFixture extends StandardizedFixture {
         assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
 
         const id = accountId + vestingId
-        const qVestedAccount = await this.query.retryQuery(() => this.query.getVestedAccountById(id))
+        const qVestedAccount = await this.query.retryQuery(() =>
+          this.query.getVestedAccountById(id)
+        )
         assert.isNotNull(qVestedAccount)
       }
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
-} 
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+}

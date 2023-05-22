@@ -5,7 +5,7 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
-import { TokenStatus } from 'graphql/generated/schema'
+import { TokenStatus } from '../../../graphql/generated/schema'
 import { assert } from 'chai'
 
 type AmmActivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmActivated'>>
