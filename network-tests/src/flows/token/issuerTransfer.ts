@@ -12,9 +12,10 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   debug('Started')
   api.enableDebugTxLogs()
 
-  const tokenId = (await api.query.projectToken.nextTokenId()).toNumber() - 1
+  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
+  const tokenId = nextTokenId - 1
   const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(tokenId).gte(1)
+  expect(nextTokenId).gte(1)
   expect(channelId).gte(1)
 
   // retrieve owner info
@@ -32,7 +33,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   outputs.set(
     api.createType('u64', firstHolderMemberId),
     api.createType('PalletProjectTokenPaymentWithVesting', {
-      amount: api.createType('u128', new BN(1000)),
+      amount: api.createType('u128', new BN(1000000)),
     })
   )
   const metadata = ''
@@ -49,5 +50,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
+  const unlocFirstHolderAccess = await lock(Resource.FirstHolder)
   api.setFirstHolder(firstHolderAddress, firstHolderMemberId.toNumber())
+  unlockCreatorAccess()
 }

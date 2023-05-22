@@ -11,7 +11,6 @@ import {
   DataObjectId,
   StorageBucketId,
 } from '@joystream/types/primitives'
-
 import {
   AccountId,
   AccountInfo,

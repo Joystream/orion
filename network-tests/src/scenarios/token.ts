@@ -7,6 +7,7 @@ import { scenario } from '../Scenario'
 import issueCreatorToken from '../flows/token/issueCreatorToken'
 import createChannel from '../flows/content/createChannel'
 import burnTokens from '../flows/token/burnTokens'
+import issuerTransfer from '../flows/token/issuerTransfer'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Creator Token Test Suite', async ({ job }) => {
@@ -19,6 +20,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   )
   const requiredBasicSetup = job('create Channel', createChannel).requires(storage)
 
-  const issueToken = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
-  job('Burn Tokens From Holder', burnTokens).requires(issueToken)
+  const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
+  const issuerTransferJob = job('Issuer Transfer', issuerTransfer).requires(issueTokenJob)
+  job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
 })

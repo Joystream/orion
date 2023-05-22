@@ -6,6 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
 import { assert } from 'chai'
+import { Utils } from '../../utils'
 import BN from 'bn.js'
 
 type IssuerTransferEventDetails = EventDetails<
@@ -72,6 +73,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const accountId = tokenId.toString() + this.sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
     assert.isNotNull(qAccount)
+    this.sourceAmountPre = new BN(qAccount!.totalAmount)
     this.destinationsAmountPre = await Promise.all(
       [...this.outputs.entries()].map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
@@ -89,6 +91,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
+    await Utils.wait(20000)
     const accountId = tokenId.toString() + sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
 
@@ -145,5 +148,5 @@ export class IssuerTransferFixture extends StandardizedFixture {
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }
