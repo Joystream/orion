@@ -16,15 +16,6 @@ async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u6
   return storageBuckets
 }
 
-// async function getDistributionBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
-//   const { families }  = await api.query.storage.dynamicBagCreationPolicies('Channel')
-//   const storageBuckets = api.createType('BTreeSet<u64>')
-//   for (let i = 0; numberOfStorageBuckets.toBn().gtn(i); ++i) {
-//     storageBuckets.add(api.createType('u64', 0))
-//   }
-//   return storageBuckets
-// }
-
 export default async function createChannel({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:elect-council')
   debug('Started')
