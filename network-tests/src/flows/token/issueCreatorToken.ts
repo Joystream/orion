@@ -26,25 +26,11 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   expect(channelOwnerMembership.isSome, 'Not possible to retrieve channel owner membership')
   const channelOwnerAddress = channelOwnerMembership.unwrap().controllerAccount.toString()
 
-  // first holder membership
-  const firstHolderBalance = new BN(100_000_000)
-  const firstHolderAccountId = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
-  await api.treasuryTransferBalance(firstHolderAccountId, firstHolderBalance)
-  const buyFirstHolderMembershipFixture = new BuyMembershipHappyCaseFixture(api, query, [firstHolderAccountId])
-  await new FixtureRunner(buyFirstHolderMembershipFixture).run()
-  const [firstHolderMemberId,] = buyFirstHolderMembershipFixture.getCreatedMembers()
-
   const initialAllocation = api.createType('BTreeMap<u64, PalletProjectTokenTokenAllocation>')
   initialAllocation.set(
     channelOwnerMemberId,
     api.createType('PalletProjectTokenTokenAllocation', {
       'amount': new BN(100000000),
-    })
-  )
-  initialAllocation.set(
-    firstHolderMemberId,
-    api.createType('PalletProjectTokenTokenAllocation', {
-      'amount': new BN(100000),
     })
   )
   const symbol = blake2AsHex('test')
@@ -77,10 +63,6 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   const unlockCreatorAccess = await lock(Resource.Creator)
   api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
   unlockCreatorAccess()
-
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
-  api.setFirstHolder(firstHolderAccountId, firstHolderMemberId.toNumber())
-  unlockFirstHolderAccess()
 
   debug('Done')
 }
