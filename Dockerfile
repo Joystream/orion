@@ -12,6 +12,7 @@ RUN npm ci
 ADD tsconfig.json .
 ADD src src
 ADD schema schema
+ADD scripts scripts
 RUN npx squid-typeorm-codegen
 RUN npm run build
 
