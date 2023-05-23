@@ -13,14 +13,14 @@ import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { uniqueId } from '../../utils/crypto'
 import { ScryptOptions, createCipheriv, createDecipheriv, scrypt } from 'crypto'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
-import { SimpleRateLimit } from '../rateLimits'
+import { SimpleRateLimit, resetAllLimits } from '../rateLimits'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
 export type LoggedInAccountInfo = {
   sessionId: string
   sessionIdRaw: string
-  accountId: string
+  account: Account
 }
 
 export async function scryptHash(
@@ -142,6 +142,7 @@ export async function createAccountAndSignIn(
     },
     keypair
   )
+  console.log('Login request data:', loginReqData)
   const loginResp = await request(app)
     .post('/api/v1/login')
     .set('Content-Type', 'application/json')
@@ -153,7 +154,7 @@ export async function createAccountAndSignIn(
   return {
     sessionId: extractSessionId(loginResp),
     sessionIdRaw,
-    accountId: account.id,
+    account,
   }
 }
 
@@ -176,7 +177,8 @@ export async function anonymousAuth(): Promise<string> {
 
 export async function verifyRateLimit(
   requestGenerator: (i: number) => { req: request.Test; status: number },
-  rateLimit: SimpleRateLimit | undefined
+  rateLimit: SimpleRateLimit | undefined,
+  resetAfterwards = true
 ) {
   assert(rateLimit, 'Rate limit not set')
   let remaining = rateLimit.limit
@@ -206,4 +208,8 @@ export async function verifyRateLimit(
   }
   const { req } = requestGenerator(i)
   await req.expect(429)
+  if (resetAfterwards) {
+    resetAllLimits('::ffff:127.0.0.1')
+    resetAllLimits('127.0.0.1')
+  }
 }

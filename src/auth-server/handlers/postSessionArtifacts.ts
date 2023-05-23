@@ -4,7 +4,7 @@ import { globalEm } from '../../utils/globalEm'
 import { components } from '../generated/api-types'
 import { SessionEncryptionArtifacts } from '../../model'
 import { uniqueId } from '../../utils/crypto'
-import { BadRequestError, UnauthorizedError } from '../errors'
+import { ConflictError, UnauthorizedError } from '../errors'
 
 type ReqParams = Record<string, string>
 type ReqBody = components['schemas']['SessionEncryptionArtifacts']
@@ -28,7 +28,7 @@ export const postSessionArtifacts: (
       throw new UnauthorizedError('Cannot save session artifacts for anonymous session')
     }
     if (existingArtifacts) {
-      throw new BadRequestError('Session artifacts already saved')
+      throw new ConflictError('Session artifacts already saved')
     }
     const { cipherKey, cipherIv } = req.body
     const sessionEncryptionArtifacts = new SessionEncryptionArtifacts({

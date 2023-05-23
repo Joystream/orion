@@ -59,6 +59,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: email
+          in: query
+          description: The user's email address.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/GetArtifactsResponse'
@@ -73,7 +79,9 @@ paths:
     post:
       operationId: postArtifacts
       x-eov-operation-handler: postArtifacts
-      description: Save wallet seed encryption artifacts on the server.
+      description: Save wallet seed encryption artifacts associated with the account (if not already saved).
+      security:
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/PostArtifactsRequestBody'
       responses:
@@ -81,6 +89,27 @@ paths:
           $ref: '#/components/responses/GenericOkResponse'
         '400':
           $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '409':
+          $ref: '#/components/responses/PostArtifactsConflictResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+    delete:
+      operationId: deleteArtifacts
+      x-eov-operation-handler: deleteArtifacts
+      description: Delete wallet seed encryption artifacts in case they are no longer needed.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/DeleteArtifactsNotFoundResponse'
         '429':
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
@@ -118,6 +147,8 @@ paths:
           $ref: '#/components/responses/GenericBadRequestResponse'
         '401':
           $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '409':
+          $ref: '#/components/responses/PostSessionArtifactsConflictResponse'
         '429':
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
@@ -139,6 +170,8 @@ paths:
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         '400':
           $ref: '#/components/responses/CreateAccountBadRequestResponse'
+        '409':
+          $ref: '#/components/responses/CreateAccountConflictResponse'
         '429':
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
@@ -401,6 +434,30 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
+    DeleteArtifactsNotFoundResponse:
+      description: No encryption artifacts associated with the current account found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    PostArtifactsConflictResponse:
+      description: Encryption artifacts already exist for the current account or with the provided id.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    CreateAccountConflictResponse:
+      description: Account with the provided e-mail address or encryptionArtifacts.id already exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    PostSessionArtifactsConflictResponse:
+      description: Session encryption artifacts for the current session already saved.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
   schemas:
     ActionExecutionPayload:
       type: object
@@ -445,6 +502,17 @@ components:
     LoginRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'
+        - type: object
+          properties:
+            payload:
+              allOf:
+                - $ref: '#/components/schemas/ActionExecutionPayload'
+                - type: object
+                  properties:
+                    action:
+                      type: string
+                      enum:
+                        - login
     LoginResponseData:
       type: object
       required:
@@ -472,6 +540,8 @@ components:
                       type: string
                       pattern: ^\S+@\S+\.\S+$
                       maxLength: 255
+                    encryptionArtifacts:
+                      $ref: '#/components/schemas/EncryptionArtifacts'
     ConnectAccountRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'

@@ -1,4 +1,4 @@
-import rateLimit, { Options as RateLimitOptions } from 'express-rate-limit'
+import rateLimit, { Options as RateLimitOptions, RateLimitRequestHandler } from 'express-rate-limit'
 import { paths } from './generated/api-types'
 import { Express } from 'express'
 
@@ -46,10 +46,6 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
       windowMinutes: 5,
       limit: 10,
     },
-    post: {
-      windowMinutes: 30,
-      limit: 10,
-    },
   },
   '/account': {
     post: {
@@ -81,6 +77,14 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
   },
 }
 
+const limiters: RateLimitRequestHandler[] = []
+
+export function resetAllLimits(key: string) {
+  limiters.forEach((limiter) => {
+    limiter.resetKey(key)
+  })
+}
+
 export function applyRateLimits(
   app: Express,
   globalLimit: SimpleRateLimit,
@@ -91,6 +95,7 @@ export function applyRateLimits(
     windowMs: globalLimit.windowMinutes * 60 * 1000,
     max: globalLimit.limit,
   })
+  limiters.push(globalLimiter)
   app.use('/', globalLimiter)
   for (const [path, pathConfig] of Object.entries(limitsPerRoute)) {
     for (const [method, config] of Object.entries(pathConfig)) {
@@ -99,6 +104,7 @@ export function applyRateLimits(
         windowMs: config.windowMinutes * 60 * 1000,
         max: config.limit,
       })
+      limiters.push(limiter)
       app[method as 'post' | 'get'](`/api/v1${path}`, limiter)
     }
   }

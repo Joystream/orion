@@ -1,8 +1,8 @@
 import express from 'express'
-import { BadRequestError } from '../errors'
+import { BadRequestError, ConflictError } from '../errors'
 import { components } from '../generated/api-types'
 import { globalEm } from '../../utils/globalEm'
-import { Account, NextEntityId } from '../../model'
+import { Account, EncryptionArtifacts, NextEntityId } from '../../model'
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
 import { connectAccount, verifyActionExecutionRequest } from '../utils'
@@ -34,17 +34,20 @@ export const createAccount: (
 
     await em.transaction(async (em) => {
       // Get and lock next account id
-      const nextAccountId =
+      // FIXME: For some reason this doesn't work as expected without the parseInt!
+      // (returns `nextId` as a string instead of a number)
+      const nextAccountId = parseInt(
         (
           await em
             .getRepository(NextEntityId)
             .findOne({ where: { entityName: 'Account' }, lock: { mode: 'pessimistic_write' } })
-        )?.nextId || 1
+        )?.nextId.toString() || '1'
+      )
 
       const existingAcc = await em.getRepository(Account).findOneBy({ email })
 
       if (existingAcc) {
-        throw new BadRequestError('Account with the provided e-mail address already exists.')
+        throw new ConflictError('Account with the provided e-mail address already exists.')
       }
 
       const account = new Account({
@@ -60,6 +63,24 @@ export const createAccount: (
         account,
         new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }),
       ])
+
+      if (req.body.payload.encryptionArtifacts) {
+        const { cipherIv, encryptedSeed, id: lookupKey } = req.body.payload.encryptionArtifacts
+        const exisitingEncryptionArtifacts = await em
+          .getRepository(EncryptionArtifacts)
+          .findOneBy({ id: lookupKey })
+        if (exisitingEncryptionArtifacts) {
+          throw new ConflictError('Encryption artifacts with the provided id already exist.')
+        }
+        const encryptionArtifacts = new EncryptionArtifacts({
+          id: lookupKey,
+          accountId: account.id,
+          cipherIv,
+          encryptedSeed,
+        })
+        await em.save(encryptionArtifacts)
+      }
+
       await connectAccount(em, account, req.body)
     })
     res.status(200).json({ success: true })

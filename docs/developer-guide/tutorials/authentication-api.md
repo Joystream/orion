@@ -157,7 +157,29 @@ POST /api/v1/anonymous-auth
 
 1. Authenticate as anonymous user first (see [Anonymous auth](#anonymous-auth))
 
-2. Create encryption artifacts using user's credentials (e-mail, password). For reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L39) (the `seed` and `cipherIv` should be randomly generated)
+2. Create encryption artifacts using user's credentials (e-mail, password). For reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L41), ie.:
+    ```typescript
+      // The `encryptionArtifacts.id` is deterministic:
+      // It's an scrypt hash of the combination of user's e-mail and password
+      // salted with some hardcoded `lookupKeySalt` value.
+      const id = (
+        await scryptHash(`lookupKey:${account.email}:${password}`, 'lookupKeySalt')
+      ).toString('hex')
+      // The `encryptionArtifacts.cipherIv` is a random 16-byte value.
+      const cipherIv = randomBytes(16)
+      // The `cipherKey` is derived using a combination of user's e-mail and password.
+      // `cipherIv` is used as an scrypt hash salt in this case.
+      const cipherKey = await scryptHash(`cipherKey:${account.email}:${password}`, cipherIv)
+      // The `seed` should be a random 32-byte value.
+      // `encryptedSeed` is the result of encrypting the `seed` using `cipherKey` and `cipherIv`
+      // with AES-256-CBC algorithm.
+      const encryptedSeed = aes256CbcEncrypt(seed, cipherKey, cipherIv)
+      // All artifacts should be hex-encoded.
+      artifacts = {
+        id,
+        cipherIv: cipherIv.toString('hex'),
+        encryptedSeed,
+      }
 
 3. Make request to create a new account:
     ```
@@ -169,7 +191,12 @@ POST /api/v1/anonymous-auth
         "gatewayName": "Gleev",
         "timestamp": 1682624588376,
         "action": "createAccount",
-        "email": "user@example.com"
+        "email": "user@example.com",
+        "encryptionArtifacts": {
+          "id": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "cipherIv": "0xffffffffffffffffffffffffffffffff"
+        }
       }
     }
     ```
@@ -180,16 +207,7 @@ POST /api/v1/anonymous-auth
     - `timestamp` must be current timestamp in miliseconds
     - `action` must be `createAccount`
     - `email` must be unique
-
-4. Store encryption artifacts:
-    ```
-    POST /api/v1/artifacts
-    {
-      "id": "hex-encoded-id",
-      "encryptedSeed": "hex-encoded-encrypted-seed",
-      "cipherIv": "hex-encoded-iv"
-    }
-    ```
+    - `encryptionArtifacts` must be the same as the ones generated in step _2._
 
 ### Log-in to user account using e-mail and password
 
@@ -197,10 +215,33 @@ POST /api/v1/anonymous-auth
 2. Compute `id` of the _artifacts_ using the provided e-mail and password as described in [_Create user account_](#create-user-account) (point _2._)
 3. Get the _artifacts_:
     ```
-    GET /api/v1/artifacts?id={id}
+    GET /api/v1/artifacts?id={id}&email={email}
     ```
+    Where:
+    - `id` is the `id` of the _artifacts_ computed in step _2._
+    - `email` is the e-mail provided by the user in step _1._
+
     In response you get the stored `cipherIv` and `encryptedSeed`.
-4. You can now decrypt user's seed using those artifacts, for reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L88)
+4. You can now decrypt user's seed using those artifacts, for reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L131), ie.:
+    ```typescript
+      const urlParms = new URLSearchParams({
+        email: account.email,
+        id: artifacts.id,
+      })
+      const response = await request(app)
+        .get(`/api/v1/artifacts?${urlParms.toString()}`)
+        .expect(200)
+      // The server returns the `cipherIv` and `encryptedSeed` in the response body.
+      const { cipherIv, encryptedSeed } =
+        response.body as components['schemas']['EncryptionArtifacts']
+      // The `cipherKey` can be derived using a combination of user's e-mail, password and `cipherIv`.
+      const cipherKey = await scryptHash(
+        `cipherKey:${account.email}:${password}`,
+        Buffer.from(cipherIv, 'hex')
+      )
+      // The `seed` can be decrypted using `cipherKey` and `cipherIv` with AES-256-CBC algorithm.
+      const decryptedSeed = aes256CbcDecrypt(encryptedSeed, cipherKey, Buffer.from(cipherIv, 'hex'))
+      ```
 5. Make login request:
     ```
     POST /api/v1/login
@@ -245,7 +286,7 @@ In order to do this:
 
 ### Connect _external_ accounts
 
-You can connect other Joystream accounts (for example, from an extension) to an existing Orion account in order to be able to use them when signing in.
+You can connect other Joystream accounts (for example, from an extension) to an existing Gateway account in order to be able to use them when signing in.
 
 ```
 POST /api/v1/connect-account
@@ -282,6 +323,56 @@ POST /api/v1/disconnect-account
 Where:
 - `joystreamAccountId` is the address of the account to be disconnected
 
+### Opt-out of password authentication and migrate to external signer
+
+In a scenario where a _Gateway account owner_ wishes to opt-out of password authentication and start using external signer with a brand new account, a flow may look like this:
+
+1. Connect the new external account provided by the user as described in [_Connect external accounts_](#connect-external-accounts)
+2. Migrate all assets and memberships to the new account using `balances.transferAll` and `members.updateAccounts` extrinsics. **Important:** staked assets will not be migrated, and may be lost if not unstaked before migration.
+3. Disconnect the old account as described in [_Disconnect Joystream accounts_](#disconnect-joystream-accounts)
+4. Remove encryption artifacts associated with the old account by calling:
+    ```
+    DELETE /api/v1/artifacts
+    ```
+    (requires the user to be logged in)
+
+### Change password when user knows the seed
+
+In case the _Gateway Account Owner_ knows the seed of a connected account, but forgot the password, a password can be changed by following these steps:
+1. User provides `email`, `seed` and `newPassword`
+2. Knowing seed, you can log the user in via [`POST /login`](../../../src/auth-server/docs/Apis/DefaultApi.md#login) endpoint.
+3. Generate new encryption artifacts for the `newPassword` as described in [_Create user account_](#create-user-account) (point _2._)
+4. Remove the old encryption artifacts by calling:
+    ```
+    DELETE /api/v1/artifacts
+    ```
+    (user needs to be logged in)
+5. Store the new encryption artifacts by calling:
+    ```
+    POST /api/v1/artifacts
+    {
+      "id": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "cipherIv": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+    ```
+
+### Retrieve _Gateway Account_'s e-mail and a list of connected accounts and memberships
+
+Although this is not strictly done through the Auth API, it is worth mentioning that you can retrieve the _Gateway Account_'s e-mail address, along with a list of connected accounts and memberships by executing the following GraphQL query once logged in:
+```graphql
+{
+  accountData {
+    email
+    connectedAccounts {
+      address
+      isLoginAllowed
+      membershipIds
+    }
+  }
+}
+```
+
 ### Logout
 
 ```
@@ -302,7 +393,7 @@ The server itself is implemented using Express.js with [`express-openapi-validat
 
 - `npm run generate:types:auth-api` - generates TypeScript types based on the OpenAPI schema. Those types are saved in `src/auth-server/generated/api-types.ts`.
 - `npm run generate:docs:auth-api` - generates the markdown documentation based on the OpenAPI schema. The documentation is saved in `src/auth-server/docs`.
-- `npm run tests:auth-api` - runs the auth API unit tests. WARNING: it runs `docker-compose down -v` before running the tests in order to ensure clean state!
+- `npm run tests:auth-api` - runs the auth API unit tests.
 
 ## Making changes to the API
 
