@@ -364,7 +364,7 @@ describe('artifacts', () => {
           .set('Content-Type', 'application/json')
           .set('Cookie', `${SESSION_COOKIE_NAME}=${loggedInAccountInfo.sessionId}`)
           .send({ cipherIv, cipherKey })
-        return { req, status: 400 }
+        return { req, status: 409 }
       }, rateLimitsPerRoute['/session-artifacts']?.post)
     })
 
