@@ -8,7 +8,7 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { EntityManager } from 'typeorm'
-import { LoggedInAccountInfo, anonymousAuth, createAccountAndSignIn, keyring } from './common'
+import { anonymousAuth, createAccountAndSignIn, keyring } from './common'
 import { cryptoWaitReady, randomAsU8a } from '@polkadot/util-crypto'
 import { components } from '../generated/api-types'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
@@ -79,14 +79,15 @@ async function disconnectAccount({
 }
 
 describe('connectAndDisconnectAccount', () => {
-  let accountInfo: LoggedInAccountInfo
+  let accountInfo: { accountId: string; sessionId: string }
   let gatewayName: string
   let em: EntityManager
   let alice: KeyringPair, bob: KeyringPair
 
   before(async () => {
     await cryptoWaitReady()
-    accountInfo = await createAccountAndSignIn()
+    const { account, sessionId } = await createAccountAndSignIn()
+    accountInfo = { accountId: account.id, sessionId }
     em = await globalEm
     gatewayName = await config.get(ConfigVariable.AppName, em)
     alice = keyring.addFromUri('//Alice')

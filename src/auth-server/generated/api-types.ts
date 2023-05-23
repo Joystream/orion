@@ -15,8 +15,10 @@ export interface paths {
   '/artifacts': {
     /** @description Get wallet seed encryption artifacts. */
     get: operations['getArtifacts']
-    /** @description Save wallet seed encryption artifacts on the server. */
+    /** @description Save wallet seed encryption artifacts associated with the account (if not already saved). */
     post: operations['postArtifacts']
+    /** @description Delete wallet seed encryption artifacts in case they are no longer needed. */
+    delete: operations['deleteArtifacts']
   }
   '/session-artifacts': {
     /** @description Get wallet seed encryption artifacts for the current session. */
@@ -70,7 +72,12 @@ export interface components {
     AnonymousUserAuthResponseData: components['schemas']['GenericOkResponseData'] & {
       userId: string
     }
-    LoginRequestData: components['schemas']['ActionExecutionRequestData']
+    LoginRequestData: components['schemas']['ActionExecutionRequestData'] & {
+      payload?: components['schemas']['ActionExecutionPayload'] & {
+        /** @enum {string} */
+        action?: 'login'
+      }
+    }
     LoginResponseData: {
       accountId: string
     }
@@ -79,6 +86,7 @@ export interface components {
         /** @enum {string} */
         action?: 'createAccount'
         email: string
+        encryptionArtifacts?: components['schemas']['EncryptionArtifacts']
       }
     }
     ConnectAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
@@ -225,6 +233,12 @@ export interface components {
         'application/json': components['schemas']['GenericErrorResponseData']
       }
     }
+    /** @description No encryption artifacts associated with the current account found. */
+    DeleteArtifactsNotFoundResponse: {
+      content: {
+        'application/json': components['schemas']['GenericErrorResponseData']
+      }
+    }
   }
   parameters: never
   requestBodies: {
@@ -309,6 +323,8 @@ export interface operations {
       query: {
         /** @description The lookup key derived from user's credentials. */
         id: string
+        /** @description The user's email address. */
+        email: string
       }
     }
     responses: {
@@ -319,12 +335,22 @@ export interface operations {
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
-  /** @description Save wallet seed encryption artifacts on the server. */
+  /** @description Save wallet seed encryption artifacts associated with the account (if not already saved). */
   postArtifacts: {
     requestBody: components['requestBodies']['PostArtifactsRequestBody']
     responses: {
       200: components['responses']['GenericOkResponse']
       400: components['responses']['GenericBadRequestResponse']
+      429: components['responses']['GenericTooManyRequestsResponse']
+      default: components['responses']['GenericInternalServerErrorResponse']
+    }
+  }
+  /** @description Delete wallet seed encryption artifacts in case they are no longer needed. */
+  deleteArtifacts: {
+    responses: {
+      200: components['responses']['GenericOkResponse']
+      401: components['responses']['GenericUnauthorizedResponse']
+      404: components['responses']['DeleteArtifactsNotFoundResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }

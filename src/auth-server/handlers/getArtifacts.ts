@@ -18,12 +18,23 @@ export const getArtifacts: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const em = await globalEm
-    const { id } = req.query
-    const artifacts = await em.getRepository(EncryptionArtifacts).findOneBy({ id })
+    const { id, email } = req.query
+    const artifacts = await em
+      .getRepository(EncryptionArtifacts)
+      .createQueryBuilder('ea')
+      .select('ea')
+      .innerJoin('ea.account', 'a', 'a.email = :email', { email })
+      .where('ea.id = :id', { id })
+      .getOne()
     if (!artifacts) {
       throw new NotFoundError('Artifacts not found by provided id (lookupKey)')
     }
-    res.status(200).json(artifacts)
+    const { cipherIv, encryptedSeed } = artifacts
+    res.status(200).json({
+      id,
+      cipherIv,
+      encryptedSeed,
+    })
   } catch (e) {
     next(e)
   }

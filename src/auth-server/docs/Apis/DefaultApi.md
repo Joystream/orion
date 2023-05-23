@@ -8,6 +8,7 @@ All URIs are relative to *http://localhost:4074/api/v1*
 | [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
 | [**connectAccount**](DefaultApi.md#connectAccount) | **POST** /connect-account |  |
 | [**createAccount**](DefaultApi.md#createAccount) | **POST** /account |  |
+| [**deleteArtifacts**](DefaultApi.md#deleteArtifacts) | **DELETE** /artifacts |  |
 | [**disconnectAccount**](DefaultApi.md#disconnectAccount) | **POST** /disconnect-account |  |
 | [**getArtifacts**](DefaultApi.md#getArtifacts) | **GET** /artifacts |  |
 | [**getSessionArtifacts**](DefaultApi.md#getSessionArtifacts) | **GET** /session-artifacts |  |
@@ -126,6 +127,30 @@ No authorization required
 - **Content-Type**: application/json
 - **Accept**: application/json
 
+<a name="deleteArtifacts"></a>
+# **deleteArtifacts**
+> GenericOkResponseData deleteArtifacts()
+
+
+
+    Delete wallet seed encryption artifacts in case they are no longer needed.
+
+### Parameters
+This endpoint does not need any parameter.
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
 <a name="disconnectAccount"></a>
 # **disconnectAccount**
 > GenericOkResponseData disconnectAccount(DisconnectAccountRequestData)
@@ -155,7 +180,7 @@ No authorization required
 
 <a name="getArtifacts"></a>
 # **getArtifacts**
-> EncryptionArtifacts getArtifacts(id)
+> EncryptionArtifacts getArtifacts(id, email)
 
 
 
@@ -166,6 +191,7 @@ No authorization required
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **id** | **String**| The lookup key derived from user&#39;s credentials. | [default to null] |
+| **email** | **String**| The user&#39;s email address. | [default to null] |
 
 ### Return type
 
@@ -261,7 +287,7 @@ This endpoint does not need any parameter.
 
 
 
-    Save wallet seed encryption artifacts on the server.
+    Save wallet seed encryption artifacts associated with the account (if not already saved).
 
 ### Parameters
 
@@ -275,7 +301,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 

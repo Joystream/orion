@@ -24,6 +24,12 @@ export class NotFoundError extends AuthApiError {
   }
 }
 
+export class ConflictError extends AuthApiError {
+  constructor(message = 'Conflict') {
+    super(message, 409)
+  }
+}
+
 export class TooManyRequestsError extends AuthApiError {
   constructor(message = 'Too many requests') {
     super(message, 429)
