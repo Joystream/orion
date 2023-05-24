@@ -1108,7 +1108,7 @@ export class ProjectTokenAmmActivatedEvent {
      * - params for the bonding curve
      */
     get isV2002(): boolean {
-        return this._chain.getEventHash('ProjectToken.AmmActivated') === 'd05b62f4ff4c6616fab2b54d9fb6f68004ac80b667e32dc5e060f79cf5ebdb0f'
+        return this._chain.getEventHash('ProjectToken.AmmActivated') === '5d454faccb3c909f667f0fc5ebe8e60e00b95c937542ae2dc56162b62178426c'
     }
 
     /**
@@ -1266,6 +1266,27 @@ export class ProjectTokenPatronageRateDecreasedToEvent {
      */
     get asV1000(): [bigint, bigint] {
         assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.PatronageRateDecreasedTo') === 'b57e136df7099b4d95c82d61169a7dca2b6b7da2952d6383cedc8494d541669a'
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get asV2002(): [bigint, number] {
+        assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
 }
