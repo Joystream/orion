@@ -53,8 +53,8 @@ export interface ChannelUpdateParametersRecord {
 }
 
 export interface AmmCurve {
-    slope: number
-    intercept: number
+    slope: bigint
+    intercept: bigint
     providedSupply: bigint
 }
 
