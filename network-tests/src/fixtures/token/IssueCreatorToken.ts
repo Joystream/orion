@@ -13,6 +13,7 @@ import { TokenFieldsFragment } from '../../../graphql/generated/queries'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
+import { Utils } from '../../utils'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -55,6 +56,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
+    Utils.wait(20000)
     const [
       tokenId,
       { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },

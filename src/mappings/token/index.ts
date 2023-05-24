@@ -270,12 +270,11 @@ export async function processTokenSaleInitializedEvent({
 
 export async function processPatronageRateDecreasedToEvent({
   overlay,
-  event: {
-    asV1000: [tokenId, newRate],
-  },
+  event,
 }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
+  const [tokenId, newRate] = event.isV1000 ? event.asV1000 : event.asV2002
   const token = await overlay.getTokenOrFail(tokenId)
-  token.annualCreatorReward = newRate
+  token.annualCreatorReward = BigInt(newRate)
 }
 
 export async function processPatronageCreditClaimedEvent({

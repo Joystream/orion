@@ -8,6 +8,8 @@ import issueCreatorToken from '../flows/token/issueCreatorToken'
 import createChannel from '../flows/content/createChannel'
 import burnTokens from '../flows/token/burnTokens'
 import issuerTransfer from '../flows/token/issuerTransfer'
+import patronageFlow from '../flows/token/patronage'
+import revenueShareFlow from '../flows/token/revenueShare'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Creator Token Test Suite', async ({ job }) => {
@@ -22,5 +24,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
 
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   const issuerTransferJob = job('Issuer Transfer', issuerTransfer).requires(issueTokenJob)
-  job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
+  // job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
+  // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
+  // const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(patronageJob)
 })

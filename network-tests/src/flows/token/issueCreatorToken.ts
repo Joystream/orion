@@ -36,7 +36,7 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   const symbol = blake2AsHex('test')
   const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', 'Permissioned')
   const revenueSplitRate = api.createType('Permill', new BN(10))
-  const patronageRate = api.createType('Perquintill', new BN(10))
+  const patronageRate = api.createType('Perquintill', new BN(15))
   const contentActor: PalletContentPermissionsContentActor = api.createType(
     'PalletContentPermissionsContentActor',
     { Member: channelOwnerMemberId }
@@ -50,6 +50,7 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
     patronageRate,
     revenueSplitRate,
   })
+
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(
     api,
     query,

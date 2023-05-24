@@ -4,10 +4,11 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import BN from 'bn.js'
+import { u64 } from '@polkadot/types/primitive'
+import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 
 type IssuerTransferEventDetails = EventDetails<
   EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
@@ -17,7 +18,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
   protected sourceMemberId: number
   protected creatorAddress: string
   protected channelId: number
-  protected outputs: PalletProjectTokenTransfersPaymentWithVesting
+  protected outputs: [number, PalletProjectTokenPaymentWithVesting][]
   protected metadata: string
   protected events: IssuerTransferEventDetails[] = []
   protected sourceAmountPre: BN | undefined
@@ -30,7 +31,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     creatorAddress: string,
     sourceMemberId: number,
     channelId: number,
-    outputs: PalletProjectTokenTransfersPaymentWithVesting,
+    outputs: [number, PalletProjectTokenPaymentWithVesting][],
     metadata: string
   ) {
     super(api, query)
@@ -75,7 +76,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     assert.isNotNull(qAccount)
     this.sourceAmountPre = new BN(qAccount!.totalAmount)
     this.destinationsAmountPre = await Promise.all(
-      [...this.outputs.entries()].map(async ([memberId]) => {
+      this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -95,8 +96,8 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const accountId = tokenId.toString() + sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
 
-    const total = [...this.outputs.values()]
-      .map((payment) => payment.amount)
+    const total = this.outputs
+      .map(([, payment]) => payment.amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
     const sourceAmountPost = this.sourceAmountPre!.sub(total)
 
@@ -104,7 +105,8 @@ export class IssuerTransferFixture extends StandardizedFixture {
     assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
 
     const observedAmounts = await Promise.all(
-      [...this.outputs.entries()].map(async ([memberId]) => {
+      this.outputs.map(async ([memberId]) => {
+        console.log(`destination ${memberId}`)
         const destAccountId = tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -148,5 +150,5 @@ export class IssuerTransferFixture extends StandardizedFixture {
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

@@ -4,17 +4,18 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletProjectTokenTransfersPaymentWithVesting } from '@polkadot/types/lookup'
+import { PalletProjectTokenTransfers } from '@polkadot/types/lookup'
 import BN from 'bn.js'
 import { assert } from 'chai'
+import { u128 } from '@polkadot/types/primitive'
 
 type TransferEventDetails = EventDetails<EventType<'projectToken', 'TokenAmountTransferred'>>
 
 export class TransferFixture extends StandardizedFixture {
   protected creatorAddress: string
   protected tokenId: number
-  protected srcMemberId: number
-  protected outputs: PalletProjectTokenTransfersPaymentWithVesting
+  protected creatorMemberId: number
+  protected outputs: [number, BN | u128][]
   protected metadata: string
   protected events: TransferEventDetails[] = []
   protected destinationsAmountPre: BN[] | undefined
@@ -24,13 +25,13 @@ export class TransferFixture extends StandardizedFixture {
     api: Api,
     query: OrionApi,
     creatorAddress: string,
-    srcMemberId: number,
+    creatorMemberId: number,
     tokenId: number,
-    outputs: PalletProjectTokenTransfersPaymentWithVesting,
+    outputs: [number, BN][],
     metadata: string
   ) {
     super(api, query)
-    this.srcMemberId = srcMemberId
+    this.creatorMemberId = creatorMemberId
     this.tokenId = tokenId
     this.outputs = outputs
     this.metadata = metadata
@@ -44,7 +45,7 @@ export class TransferFixture extends StandardizedFixture {
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     return [
       this.api.tx.projectToken.transfer(
-        this.srcMemberId,
+        this.creatorMemberId,
         this.tokenId,
         this.outputs,
         this.metadata
@@ -57,7 +58,7 @@ export class TransferFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const accountId = this.tokenId.toString() + this.srcMemberId.toString()
+    const accountId = this.tokenId.toString() + this.creatorMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
     assert.isNotNull(qAccount)
     this.destinationsAmountPre = await Promise.all(
@@ -80,8 +81,8 @@ export class TransferFixture extends StandardizedFixture {
     const accountId = tokenId.toString() + sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
 
-    const total = [...this.outputs.values()]
-      .map((payment) => payment.amount)
+    const total = this.outputs
+      .map(([, amount]) => amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
     const sourceAmountPost = this.srcAmountPre!.sub(total)
 
