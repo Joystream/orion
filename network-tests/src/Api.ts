@@ -237,7 +237,6 @@ export class Api {
   // source of funds for all new accounts
   private readonly treasuryAccount: string
 
-
   constructor(
     factory: ApiFactory,
     api: ApiPromise,
@@ -250,7 +249,6 @@ export class Api {
     this.treasuryAccount = treasuryAccount
     this.sender = new Sender(api, keyring, label)
   }
-
 
   public get query(): ApiPromise['query'] {
     return this.api.query
@@ -595,8 +593,8 @@ export class Api {
   ): EventType<S, M>[] {
     const events = Array.isArray(result)
       ? result
-        .filter(({ event }) => event.section === section && event.method === method)
-        .map(({ event }) => event)
+          .filter(({ event }) => event.section === section && event.method === method)
+          .map(({ event }) => event)
       : result.filterRecords(section, method).map((r) => r.event)
     if (expectedCount && events.length !== expectedCount) {
       throw new Error(
@@ -786,9 +784,9 @@ export class Api {
           : (currentCouncilStage.stage.type as 'Announcing' | 'Idle')
         const currentStageStartedAt = currentCouncilStage.stage.isElection
           ? (currentElectionStage.isVoting
-            ? currentElectionStage.asVoting
-            : currentElectionStage.asRevealing
-          ).started // TODO: check no panic
+              ? currentElectionStage.asVoting
+              : currentElectionStage.asRevealing
+            ).started // TODO: check no panic
           : currentCouncilStage.changedAt
 
         const currentBlock = await this.getBestBlock()
@@ -1441,7 +1439,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-        auctionParams.hasOwnProperty('bidLockDuration')
+          auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }
@@ -1545,7 +1543,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-        auctionParams.hasOwnProperty('bidLockDuration')
+          auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }

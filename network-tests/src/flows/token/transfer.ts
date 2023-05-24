@@ -4,6 +4,7 @@ import { FixtureRunner } from '../../Fixture'
 import { TransferFixture } from '../../fixtures/token'
 import { expect } from 'chai'
 import { BN } from 'bn.js'
+import { u128 } from '@polkadot/types/primitive'
 import { Resource } from '../../Resources'
 
 export default async function burnTokens({ api, query, lock }: FlowProps): Promise<void> {
@@ -25,13 +26,8 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const [, firstHolderMemberId] = api.firstHolder
   unlockFirstHolderAccess()
 
-  const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
-  outputs.set(
-    api.createType('u64', firstHolderMemberId),
-    api.createType('PalletProjectTokenPaymentWithVesting', {
-      amount: api.createType('u128', new BN(1000)),
-    })
-  )
+  // tuple with first member id and amount
+  const outputs: [number, u128][] = [[firstHolderMemberId, api.createType('u128', new BN(1000))]]
   const metadata = ''
 
   const transferFixture = new TransferFixture(

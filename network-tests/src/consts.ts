@@ -97,6 +97,7 @@ export const proposalTypeToProposalParamsKey = {
   'VetoProposal': 'vetoProposalProposalParameters',
   'UpdateGlobalNftLimit': 'updateGlobalNftLimitProposalParameters',
   'UpdateChannelPayouts': 'updateChannelPayoutsProposalParameters',
+  'UpdateMaxYearlyPatronageRate': 'updateMaxYearlyPatronageRate',
 } as const
 
 type ProposalTypeToProposalParamsKeyMap = {
