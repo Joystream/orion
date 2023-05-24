@@ -18,7 +18,6 @@ export enum ConfigVariable {
   EmailConfirmationTokenExpiryTimeHours = 'EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS',
   EmailConfirmationTokenRateLimit = 'EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT',
   AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
-  MaxConnectedAccountsPerUser = 'MAX_CONNECTED_ACCOUNTS_PER_USER',
 }
 
 const boolType = {
@@ -57,7 +56,6 @@ export const configVariables = {
   [ConfigVariable.EmailConfirmationRoute]: stringType,
   [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
   [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
-  [ConfigVariable.MaxConnectedAccountsPerUser]: intType,
   [ConfigVariable.EmailConfirmationTokenRateLimit]: intType,
 } as const
 

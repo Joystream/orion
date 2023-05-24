@@ -1,5 +1,5 @@
 import express from 'express'
-import { ConnectedAccount } from '../../model'
+import { Account } from '../../model'
 import { globalEm } from '../../utils/globalEm'
 import { UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
@@ -26,20 +26,12 @@ export const login: (
     await verifyActionExecutionRequest(em, req.body)
 
     const [sessionData, account] = await em.transaction(async (em) => {
-      const connectedAccount = await em.getRepository(ConnectedAccount).findOne({
-        where: {
-          id: joystreamAccountId,
-          isLoginAllowed: true,
-        },
-        relations: {
-          account: { user: true },
-        },
-      })
-      if (!connectedAccount) {
+      const account = await em
+        .getRepository(Account)
+        .findOneBy({ joystreamAccount: joystreamAccountId })
+      if (!account) {
         throw new UnauthorizedError('Invalid credentials')
       }
-
-      const { account } = connectedAccount
 
       const sessionData = await getOrCreateSession(em, req, account.userId, account.id)
 

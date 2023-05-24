@@ -16,8 +16,6 @@ const exportedStateMap = {
   VideoFeaturedInCategory: true,
   EncryptionArtifacts: true,
   SessionEncryptionArtifacts: true,
-  ConnectedAccount: true,
-  ConnectedAccountProof: true,
   Session: true,
   User: true,
   Account: true,

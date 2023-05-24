@@ -3,7 +3,7 @@ import { decodeAddress, cryptoWaitReady, signatureVerify } from '@polkadot/util-
 import { BadRequestError } from './errors'
 import { config, ConfigVariable } from '../utils/config'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-import { Account, ConnectedAccount, ConnectedAccountProof, Token, TokenType } from '../model'
+import { Account, Token, TokenType } from '../model'
 import { EntityManager } from 'typeorm'
 import { uniqueId } from '../utils/crypto'
 import { sendMail } from '../utils/mail'
@@ -43,34 +43,6 @@ export async function verifyActionExecutionRequest(
   if (payload.timestamp > Date.now()) {
     throw new BadRequestError('Payload timestamp is in the future.')
   }
-}
-
-export async function connectAccount(
-  em: EntityManager,
-  account: Account,
-  {
-    payload: { gatewayName, timestamp, joystreamAccountId },
-    signature,
-  }:
-    | components['schemas']['ConnectAccountRequestData']
-    | components['schemas']['CreateAccountRequestData']
-): Promise<[ConnectedAccountProof, ConnectedAccount]> {
-  const proof = new ConnectedAccountProof({
-    id: uniqueId(),
-    gatewayAppName: gatewayName,
-    signature,
-    timestamp: new Date(timestamp),
-  })
-
-  const connectedAccount = new ConnectedAccount({
-    id: joystreamAccountId,
-    accountId: account.id,
-    connectedAt: new Date(),
-    isLoginAllowed: true,
-    proofId: proof.id,
-  })
-
-  return (await em.save([proof, connectedAccount])) as [ConnectedAccountProof, ConnectedAccount]
 }
 
 export async function issueEmailConfirmationToken(
