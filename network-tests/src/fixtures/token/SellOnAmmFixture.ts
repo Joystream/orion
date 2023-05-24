@@ -46,7 +46,6 @@ export class SellOnAmmFixture extends StandardizedFixture {
         this.tokenId,
         this.memberId,
         this.amount,
-        deadline,
         slippageTolerance
       ),
     ]

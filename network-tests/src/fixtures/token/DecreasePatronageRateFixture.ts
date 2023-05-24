@@ -5,6 +5,7 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
+import { Utils } from '../../utils'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageRateDecreasedTo'>
@@ -50,16 +51,13 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'PatronageRateDecreasedTo')
   }
 
-  public async tryQuery(): Promise<void> {
-    const token = await this.query.getTokenById(this.api.createType('u64', 0))
-    console.log(`Query result:\n ${token}`)
-  }
-
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, newRate] = this.events[0].event.data
+    Utils.wait(60000)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
+    console.log('new Rate vs orion rate', newRate.toString(), qToken!.annualCreatorReward)
     assert.equal(qToken!.annualCreatorReward, newRate.toString())
   }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

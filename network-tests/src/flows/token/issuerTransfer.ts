@@ -6,9 +6,10 @@ import { expect } from 'chai'
 import { BN } from 'bn.js'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { Resource } from '../../Resources'
+import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 
 export default async function burnTokens({ api, query, lock }: FlowProps): Promise<void> {
-  const debug = extendDebug('flow:issue-creatorToken')
+  const debug = extendDebug('flow:issuer-transfer')
   debug('Started')
   api.enableDebugTxLogs()
 
@@ -27,15 +28,16 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const firstHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [firstHolderAddress])
   await new FixtureRunner(buyMembershipsFixture).run()
-  const firstHolderMemberId = buyMembershipsFixture.getCreatedMembers()[0]
+  const firstHolderMemberId = buyMembershipsFixture.getCreatedMembers()[0].toNumber()
 
-  const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
-  outputs.set(
-    api.createType('u64', firstHolderMemberId),
-    api.createType('PalletProjectTokenPaymentWithVesting', {
-      amount: api.createType('u128', new BN(1000000)),
-    })
-  )
+  const outputs: [number, PalletProjectTokenPaymentWithVesting][] = [
+    [
+      firstHolderMemberId,
+      api.createType('PalletProjectTokenPaymentWithVesting', {
+        amount: api.createType('u128', new BN(1000000)),
+      }),
+    ],
+  ]
   const metadata = ''
 
   const issuerTransferFixture = new IssuerTransferFixture(
@@ -50,7 +52,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
-  const unlocFirstHolderAccess = await lock(Resource.FirstHolder)
-  api.setFirstHolder(firstHolderAddress, firstHolderMemberId.toNumber())
-  unlockCreatorAccess()
+  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
+  api.setFirstHolder(firstHolderAddress, firstHolderMemberId)
+  unlockFirstHolderAccess()
 }

@@ -17,7 +17,6 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   expect(nextTokenId).gte(1) // make sure token has been issued
   expect(channelId).gte(1) // make sure channel has been created
 
-
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAccountId, firstHolderMemberId] = api.firstHolder
   unlockFirstHolderAccess()
