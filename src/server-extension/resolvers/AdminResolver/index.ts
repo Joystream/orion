@@ -6,14 +6,14 @@ import {
   ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
+  FeaturedNftsActionInput,
+  FeaturedNftsActionResult,
   GeneratedSignature,
   KillSwitch,
   RestoreContentArgs,
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
-  SetFeaturedNftsInput,
-  SetFeaturedNftsResult,
   SetKillSwitchInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -236,12 +236,12 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
-  @Mutation(() => SetFeaturedNftsResult)
+  @Mutation(() => FeaturedNftsActionResult)
   async setFeaturedNfts(
-    @Args() { featuredNftsIds }: SetFeaturedNftsInput
-  ): Promise<SetFeaturedNftsResult> {
+    @Args() { nftsIds }: FeaturedNftsActionInput
+  ): Promise<FeaturedNftsActionResult> {
     const em = await this.em()
-    let newNumberOfNftsFeatured = 0
+    let nftsAffected = 0
 
     await em
       .createQueryBuilder()
@@ -250,18 +250,64 @@ export class AdminResolver {
       .where({ is_featured: true })
       .execute()
 
-    if (featuredNftsIds.length) {
+    if (nftsIds.length) {
       const result = await em
         .createQueryBuilder()
         .update(`processor.owned_nft`)
         .set({ is_featured: true })
-        .where({ id: In(featuredNftsIds) })
+        .where({ id: In(nftsIds) })
         .execute()
-      newNumberOfNftsFeatured = result.affected || 0
+      nftsAffected = result.affected || 0
     }
 
     return {
-      newNumberOfNftsFeatured,
+      nftsAffected,
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => FeaturedNftsActionResult)
+  async addFeaturedNfs(
+    @Args() { nftsIds }: FeaturedNftsActionInput
+  ): Promise<FeaturedNftsActionResult> {
+    const em = await this.em()
+    let nftsAffected = 0
+
+    if (nftsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update(`processor.owned_nft`)
+        .set({ is_featured: true })
+        .where({ id: In(nftsIds) })
+        .execute()
+      nftsAffected = result.affected || 0
+    }
+
+    return {
+      nftsAffected,
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => FeaturedNftsActionResult)
+  async removeFeaturedNfs(
+    @Args() { nftsIds }: FeaturedNftsActionInput
+  ): Promise<FeaturedNftsActionResult> {
+    const em = await this.em()
+    let nftsAffected = 0
+
+    if (nftsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update(`processor.owned_nft`)
+        .set({ is_featured: false })
+        .where({ id: In(nftsIds) })
+        .execute()
+      nftsAffected = result.affected || 0
+    }
+
+    return {
+      nftsAffected,
     }
   }
 
