@@ -33,7 +33,7 @@ paths:
     post:
       operationId: login
       x-eov-operation-handler: login
-      description: Login to user's account by providing a message signed by one of the user's connected accounts.
+      description: Login to user's account by providing a message signed by the associated blockchain account.
       requestBody:
         $ref: '#/components/requestBodies/LoginRequestBody'
       responses:
@@ -72,44 +72,6 @@ paths:
           $ref: '#/components/responses/GenericBadRequestResponse'
         '404':
           $ref: '#/components/responses/GetArtifactsNotFoundResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-    post:
-      operationId: postArtifacts
-      x-eov-operation-handler: postArtifacts
-      description: Save wallet seed encryption artifacts associated with the account (if not already saved).
-      security:
-        - cookieAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/PostArtifactsRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/GenericBadRequestResponse'
-        '401':
-          $ref: '#/components/responses/GenericUnauthorizedResponse'
-        '409':
-          $ref: '#/components/responses/PostArtifactsConflictResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-    delete:
-      operationId: deleteArtifacts
-      x-eov-operation-handler: deleteArtifacts
-      description: Delete wallet seed encryption artifacts in case they are no longer needed.
-      security:
-        - cookieAuth: []
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '401':
-          $ref: '#/components/responses/GenericUnauthorizedResponse'
-        '404':
-          $ref: '#/components/responses/DeleteArtifactsNotFoundResponse'
         '429':
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
@@ -170,6 +132,8 @@ paths:
           $ref: '#/components/responses/GenericUnauthorizedResponse'
         '400':
           $ref: '#/components/responses/CreateAccountBadRequestResponse'
+        '404':
+          $ref: '#/components/responses/CreateAccountNotFoundResponse'
         '409':
           $ref: '#/components/responses/CreateAccountConflictResponse'
         '429':
@@ -211,15 +175,16 @@ paths:
           $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /connect-account:
+  /change-account:
     post:
-      operationId: connectAccount
-      x-eov-operation-handler: connectAccount
-      description: Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership.
+      operationId: changeAccount
+      x-eov-operation-handler: changeAccount
+      description: Change the blockchain (Joystream) account associated with the Gateway account.
+        Delete the old account's encryption artifacts and optionally set new ones.
       security:
         - cookieAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/ConnectAccountRequestBody'
+        $ref: '#/components/requestBodies/ChangeAccountRequestBody'
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
@@ -227,28 +192,8 @@ paths:
           $ref: '#/components/responses/GenericBadRequestResponse'
         '401':
           $ref: '#/components/responses/GenericUnauthorizedResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /disconnect-account:
-    post:
-      operationId: disconnectAccount
-      x-eov-operation-handler: disconnectAccount
-      description: Disconnect a Joystream account (key) from the Gateway acount.
-      security:
-        - cookieAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/DisconnectAccountRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/GenericBadRequestResponse'
-        '401':
-          $ref: '#/components/responses/GenericUnauthorizedResponse'
-        '404':
-          $ref: '#/components/responses/DisconnectAccountNotFoundResponse'
+        '409':
+          $ref: '#/components/responses/ChangeAccountConflictResponse'
         '429':
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
@@ -300,31 +245,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ConfirmEmailRequestData'
-    ConnectAccountRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ConnectAccountRequestData'
-    DisconnectAccountRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DisconnectAccountRequestData'
     RequestTokenRequestBody:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/RequestTokenRequestData'
-    PostArtifactsRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/EncryptionArtifacts'
     PostSessionArtifactsRequestBody:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SessionEncryptionArtifacts'
+    ChangeAccountRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChangeAccountRequestData'
   responses:
     AnonymousUserAuthOkResponse:
       description: Ok
@@ -404,12 +339,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
-    DisconnectAccountNotFoundResponse:
-      description: Provided key is not connected to the account.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
     RequestEmailConfirmationAccountNotFoundResponse:
       description: Provided e-mail address is not associated with any account.
       content:
@@ -434,26 +363,26 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
-    DeleteArtifactsNotFoundResponse:
-      description: No encryption artifacts associated with the current account found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    PostArtifactsConflictResponse:
-      description: Encryption artifacts already exist for the current account or with the provided id.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
     CreateAccountConflictResponse:
-      description: Account with the provided e-mail address or encryptionArtifacts.id already exists.
+      description: Account with the provided e-mail address already exists.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericErrorResponseData'
     PostSessionArtifactsConflictResponse:
       description: Session encryption artifacts for the current session already saved.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    ChangeAccountConflictResponse:
+      description: Provided blockchain (Joystream) account is already assigned to another user account.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    CreateAccountNotFoundResponse:
+      description: On-chain membership not found by the provided memberId.
       content:
         application/json:
           schema:
@@ -469,6 +398,7 @@ components:
       properties:
         joystreamAccountId:
           type: string
+          maxLength: 50
         gatewayName:
           type: string
         timestamp:
@@ -531,18 +461,21 @@ components:
                 - type: object
                   required:
                     - email
+                    - memberId
                   properties:
                     action:
                       type: string
                       enum:
                         - createAccount
+                    memberId:
+                      type: string
                     email:
                       type: string
                       pattern: ^\S+@\S+\.\S+$
                       maxLength: 255
                     encryptionArtifacts:
                       $ref: '#/components/schemas/EncryptionArtifacts'
-    ConnectAccountRequestData:
+    ChangeAccountRequestData:
       allOf:
         - $ref: '#/components/schemas/ActionExecutionRequestData'
         - type: object
@@ -557,16 +490,11 @@ components:
                     action:
                       type: string
                       enum:
-                        - connect
+                        - changeAccount
                     gatewayAccountId:
                       type: string
-    DisconnectAccountRequestData:
-      type: object
-      required:
-        - joystreamAccountId
-      properties:
-        joystreamAccountId:
-          type: string
+                    newArtifacts:
+                      $ref: '#/components/schemas/EncryptionArtifacts'
     ConfirmEmailRequestData:
       type: object
       required:
@@ -611,7 +539,7 @@ components:
           maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
         encryptedSeed:
           type: string
-          maxLength: 66 # 32 bytes, hex-encoded + 2 bytes for optional 0x prefix
+          maxLength: 98 # 48 bytes (32-byte input + 16-byte padding), hex-encoded + 2 bytes for optional 0x prefix
         cipherIv:
           type: string
           maxLength: 34 # 16 bytes, hex-encoded + 2 bytes for optional 0x prefix

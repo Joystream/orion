@@ -1,11 +1,11 @@
 import express from 'express'
-import { BadRequestError, ConflictError } from '../errors'
+import { BadRequestError, ConflictError, NotFoundError } from '../errors'
 import { components } from '../generated/api-types'
 import { globalEm } from '../../utils/globalEm'
-import { Account, EncryptionArtifacts, NextEntityId } from '../../model'
+import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../model'
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
-import { connectAccount, verifyActionExecutionRequest } from '../utils'
+import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -21,7 +21,7 @@ export const createAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      payload: { email },
+      payload: { email, memberId, joystreamAccountId },
     } = req.body
     const { authContext } = res.locals
     const em = await globalEm
@@ -44,10 +44,36 @@ export const createAccount: (
         )?.nextId.toString() || '1'
       )
 
-      const existingAcc = await em.getRepository(Account).findOneBy({ email })
-
-      if (existingAcc) {
+      const existingByEmail = await em.getRepository(Account).findOneBy({ email })
+      if (existingByEmail) {
         throw new ConflictError('Account with the provided e-mail address already exists.')
+      }
+
+      const existingByMemberId = await em
+        .getRepository(Account)
+        .findOneBy({ membershipId: memberId })
+      if (existingByMemberId) {
+        throw new ConflictError('Account with the provided member id already exists.')
+      }
+
+      const existingByJoystreamAccountId = await em
+        .getRepository(Account)
+        .findOneBy({ joystreamAccount: joystreamAccountId })
+      if (existingByJoystreamAccountId) {
+        throw new ConflictError(
+          'Account with the provided joystream account address already exists.'
+        )
+      }
+
+      const membership = await em.getRepository(Membership).findOneBy({ id: memberId })
+      if (!membership) {
+        throw new NotFoundError(`Membership not found by id: ${memberId}`)
+      }
+
+      if (membership.controllerAccount !== joystreamAccountId) {
+        throw new BadRequestError(
+          `Provided joystream account address doesn't match the controller account of the provided membership.`
+        )
       }
 
       const account = new Account({
@@ -57,6 +83,8 @@ export const createAccount: (
         registeredAt: new Date(),
         isBlocked: false,
         userId: authContext.user.id,
+        joystreamAccount: joystreamAccountId,
+        membershipId: memberId.toString(),
       })
 
       await em.save([
@@ -66,12 +94,9 @@ export const createAccount: (
 
       if (req.body.payload.encryptionArtifacts) {
         const { cipherIv, encryptedSeed, id: lookupKey } = req.body.payload.encryptionArtifacts
-        const exisitingEncryptionArtifacts = await em
-          .getRepository(EncryptionArtifacts)
-          .findOneBy({ id: lookupKey })
-        if (exisitingEncryptionArtifacts) {
-          throw new ConflictError('Encryption artifacts with the provided id already exist.')
-        }
+        // We don't check if artifacts already exist by this id, becasue that opens up
+        // a brute-force attack vector. Instead, in this case the existing artifacts will
+        // be overwritten.
         const encryptionArtifacts = new EncryptionArtifacts({
           id: lookupKey,
           accountId: account.id,
@@ -80,8 +105,6 @@ export const createAccount: (
         })
         await em.save(encryptionArtifacts)
       }
-
-      await connectAccount(em, account, req.body)
     })
     res.status(200).json({ success: true })
   } catch (e) {

@@ -2,7 +2,7 @@ import './config'
 import request from 'supertest'
 import { app } from '../index'
 import { globalEm } from '../../utils/globalEm'
-import { Account } from '../../model'
+import { Account, Membership } from '../../model'
 import assert from 'assert'
 import { components } from '../generated/api-types'
 import { Keyring } from '@polkadot/keyring'
@@ -11,17 +11,26 @@ import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { uniqueId } from '../../utils/crypto'
-import { ScryptOptions, createCipheriv, createDecipheriv, scrypt } from 'crypto'
+import { ScryptOptions, createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { SimpleRateLimit, resetAllLimits } from '../rateLimits'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
-export type LoggedInAccountInfo = {
+export type AccountAccessData = {
+  accountId: string
+  joystreamAccountId: string
+  email: string
+  password: string
+  seed: string
+}
+
+export type LoggedInAccountInfo = AccountAccessData & {
   sessionId: string
   sessionIdRaw: string
-  account: Account
 }
+
+export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
 
 export async function scryptHash(
   data: string,
@@ -40,7 +49,7 @@ export async function scryptHash(
   })
 }
 
-export function aes256CbcEncrypt(data: string, key: Buffer | string, iv: Buffer | string): string {
+export function aes256CbcEncrypt(data: string, key: Buffer, iv: Buffer): string {
   const cipher = createCipheriv('aes-256-cbc', key, iv)
   let encrypted = cipher.update(data, 'utf8', 'hex')
   encrypted += cipher.final('hex')
@@ -56,6 +65,36 @@ export function aes256CbcDecrypt(
   let decrypted = decipher.update(encryptedData, 'hex', 'utf8')
   decrypted += decipher.final('utf8')
   return decrypted
+}
+
+export async function calculateLookupKey(email: string, password: string): Promise<string> {
+  return (await scryptHash(`lookupKey:${email}:${password}`, 'lookupKeySalt')).toString('hex')
+}
+
+export async function prepareEncryptionArtifacts(
+  seed: string,
+  email: string,
+  password: string
+): Promise<EncryptionArtifacts> {
+  const id = await calculateLookupKey(email, password)
+  const cipherIv = randomBytes(16)
+  const cipherKey = await scryptHash(`cipherKey:${email}:${password}`, cipherIv)
+  const encryptedSeed = aes256CbcEncrypt(seed, cipherKey, cipherIv)
+  return {
+    id,
+    cipherIv: cipherIv.toString('hex'),
+    encryptedSeed,
+  }
+}
+
+export async function decryptSeed(
+  email: string,
+  password: string,
+  { cipherIv, encryptedSeed }: EncryptionArtifacts
+): Promise<string> {
+  const cipherIvBuf = Buffer.from(cipherIv, 'hex')
+  const cipherKey = await scryptHash(`cipherKey:${email}:${password}`, cipherIvBuf)
+  return aes256CbcDecrypt(encryptedSeed, cipherKey, cipherIvBuf)
 }
 
 export const DEFAULT_PASSWORD = 'TestPassword123!'
@@ -80,14 +119,28 @@ export async function signedAction<T extends components['schemas']['ActionExecut
   } as T
 }
 
+async function insertFakeMember(controllerAccount: string) {
+  const em = await globalEm
+  return em.getRepository(Membership).save({
+    createdAt: new Date(),
+    id: uniqueId(),
+    controllerAccount,
+    handle: uniqueId(),
+    totalChannelsCreated: 0,
+  })
+}
+
 export async function createAccount(
   email = `test.${uniqueId()}@example.com`,
-  keypair?: KeyringPair
-): Promise<Account> {
-  if (!keypair) {
-    keypair = keyring.addFromUri(`//${email}`)
-  }
+  password = DEFAULT_PASSWORD,
+  seed?: string
+): Promise<AccountAccessData> {
+  seed = seed || uniqueId()
+  const keypair = keyring.addFromUri(`//${seed}`)
   const em = await globalEm
+
+  const membership = await insertFakeMember(keypair.address)
+
   const anonSessionId = await anonymousAuth()
   const createAccountReqData = await signedAction<
     components['schemas']['CreateAccountRequestData']
@@ -95,6 +148,8 @@ export async function createAccount(
     {
       action: 'createAccount',
       email,
+      memberId: membership.id,
+      encryptionArtifacts: await prepareEncryptionArtifacts(seed, email, password),
     },
     keypair
   )
@@ -106,7 +161,7 @@ export async function createAccount(
     .expect(200)
   const account = await em.getRepository(Account).findOneBy({ email })
   assert(account, 'Account not found')
-  return account
+  return { accountId: account.id, joystreamAccountId: keypair.address, email, password, seed }
 }
 
 export async function confirmEmail(token: string, expectedStatus: number): Promise<void> {
@@ -130,12 +185,11 @@ export async function requestEmailConfirmationToken(
 
 export async function createAccountAndSignIn(
   email = `test.${uniqueId()}@example.com`,
-  keypair?: KeyringPair
+  password = DEFAULT_PASSWORD,
+  seed?: string
 ): Promise<LoggedInAccountInfo> {
-  if (!keypair) {
-    keypair = keyring.addFromUri(`//${email}`)
-  }
-  const account = await createAccount(email, keypair)
+  const accountData = await createAccount(email, password, seed)
+  const keypair = keyring.addFromUri(`//${accountData.seed}`)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {
       action: 'login',
@@ -154,7 +208,7 @@ export async function createAccountAndSignIn(
   return {
     sessionId: extractSessionId(loginResp),
     sessionIdRaw,
-    account,
+    ...accountData,
   }
 }
 
@@ -176,7 +230,9 @@ export async function anonymousAuth(): Promise<string> {
 }
 
 export async function verifyRateLimit(
-  requestGenerator: (i: number) => { req: request.Test; status: number },
+  requestGenerator:
+    | ((i: number) => { req: request.Test; status: number })
+    | ((i: number) => Promise<{ req: request.Test; status: number }>),
   rateLimit: SimpleRateLimit | undefined,
   resetAfterwards = true
 ) {
@@ -185,7 +241,7 @@ export async function verifyRateLimit(
   let reset = rateLimit.windowMinutes * 60
   let i = 0
   while (remaining > 0) {
-    const { req, status } = requestGenerator(i++)
+    const { req, status } = await requestGenerator(i++)
     const resp = await req.expect(status)
     const limitInHeader = resp.get('ratelimit-limit')
     const resetInHeader = resp.get('ratelimit-reset')
@@ -206,7 +262,7 @@ export async function verifyRateLimit(
     remaining = parseInt(remainingInHeader)
     reset = parseInt(resetInHeader)
   }
-  const { req } = requestGenerator(i)
+  const { req } = await requestGenerator(i)
   await req.expect(429)
   if (resetAfterwards) {
     resetAllLimits('::ffff:127.0.0.1')

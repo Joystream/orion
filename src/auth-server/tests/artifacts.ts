@@ -10,9 +10,10 @@ import {
   aes256CbcDecrypt,
   aes256CbcEncrypt,
   anonymousAuth,
+  calculateLookupKey,
   createAccount,
   createAccountAndSignIn,
-  scryptHash,
+  decryptSeed,
   verifyRateLimit,
 } from './common'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
@@ -23,8 +24,6 @@ import { rateLimitsPerRoute } from '../rateLimits'
 
 describe('artifacts', () => {
   let em: EntityManager
-  const password = 'secret'
-  const seed = 'secretseed'
 
   before(async () => {
     await cryptoWaitReady()
@@ -32,127 +31,30 @@ describe('artifacts', () => {
   })
 
   describe('encryptionArtifacts', () => {
-    let artifacts: components['schemas']['EncryptionArtifacts']
-    let loggedInAccountInfo: LoggedInAccountInfo
+    const email = 'encryption.artifacts.test@example.com'
+    const password = 'SomeSuperSecurePassword123!'
+    const seed = randomBytes(16).toString('hex')
 
     before(async () => {
-      loggedInAccountInfo = await createAccountAndSignIn()
-      const { account } = loggedInAccountInfo
-      const id = (
-        await scryptHash(`lookupKey:${account.email}:${password}`, 'lookupKeySalt')
-      ).toString('hex')
-      const cipherIv = randomBytes(16)
-      const cipherKey = await scryptHash(`cipherKey:${account.email}:${password}`, cipherIv)
-      const encryptedSeed = aes256CbcEncrypt(seed, cipherKey, cipherIv)
-      artifacts = {
-        id,
-        cipherIv: cipherIv.toString('hex'),
-        encryptedSeed,
-      }
-    })
-
-    it('should not be possible to post empty encryption artifacts', async () => {
-      const { sessionId } = loggedInAccountInfo
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send()
-        .expect(400)
-    })
-
-    for (const field of ['id', 'cipherIv', 'encryptedSeed'] as const) {
-      it(`should not be possible to post encryption artifacts without ${field}`, async () => {
-        const { sessionId } = loggedInAccountInfo
-        const { [field]: _, ...artifactsWithoutField } = artifacts
-        await request(app)
-          .post('/api/v1/artifacts')
-          .set('Content-Type', 'application/json')
-          .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-          .send(artifactsWithoutField)
-          .expect(400)
-      })
-    }
-
-    it('should not be possible to post encryption artifacts when not logged in', async () => {
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .send(artifacts)
-        .expect(401)
-    })
-
-    it('should not be possible to post encryption artifacts when authenticated anonymously', async () => {
-      const anonymousAuthSessionId = await anonymousAuth()
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${anonymousAuthSessionId}`)
-        .send(artifacts)
-        .expect(401)
-    })
-
-    it('should be possible to post valid encryption artifacts', async () => {
-      const { sessionId } = loggedInAccountInfo
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send(artifacts)
-        .expect(200)
-      const savedArtifacts = await em.getRepository(EncryptionArtifacts).findOneBy({
-        id: artifacts.id,
-      })
-      assert(savedArtifacts, 'Encryption artifacts not saved')
-    })
-
-    it('should not be possible to post encryption artifacts if already exist for account', async () => {
-      const { sessionId } = loggedInAccountInfo
-      const id = randomBytes(32).toString('hex')
-      const cipherIv = randomBytes(16).toString('hex')
-      const encryptedSeed = randomBytes(32).toString('hex')
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send({ id, cipherIv, encryptedSeed })
-        .expect(409)
-    })
-
-    it('should not be possible to post encryption artifacts if already exist by id', async () => {
-      const { sessionId } = await createAccountAndSignIn()
-      await request(app)
-        .post('/api/v1/artifacts')
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send(artifacts)
-        .expect(409)
+      await createAccountAndSignIn(email, password, seed)
     })
 
     it('should be possible to retrieve saved encryption artifacts and decrypt the seed', async () => {
-      const { account } = loggedInAccountInfo
       const urlParms = new URLSearchParams({
-        email: account.email,
-        id: artifacts.id,
+        email,
+        id: await calculateLookupKey(email, password),
       })
       const response = await request(app)
         .get(`/api/v1/artifacts?${urlParms.toString()}`)
         .expect(200)
-      const { cipherIv, encryptedSeed } =
-        response.body as components['schemas']['EncryptionArtifacts']
-      const cipherKey = await scryptHash(
-        `cipherKey:${account.email}:${password}`,
-        Buffer.from(cipherIv, 'hex')
-      )
-      const decryptedSeed = aes256CbcDecrypt(encryptedSeed, cipherKey, Buffer.from(cipherIv, 'hex'))
+      const decryptedSeed = await decryptSeed(email, password, response.body as EncryptionArtifacts)
       assert(decryptedSeed === seed, 'Decrypted seed does not match')
     })
 
     it('should not be possible to retrieve enecryption artifacts by invalid id', async () => {
-      const { account } = loggedInAccountInfo
       const urlParms = new URLSearchParams({
-        email: account.email,
-        id: 'invalid',
+        email,
+        id: await calculateLookupKey(email, 'invalid password'),
       })
       await request(app).get(`/api/v1/artifacts?${urlParms.toString()}`).expect(404)
     })
@@ -161,20 +63,19 @@ describe('artifacts', () => {
       const otherAccount = await createAccount()
       const urlParms = new URLSearchParams({
         email: otherAccount.email,
-        id: artifacts.id,
+        id: await calculateLookupKey(email, password),
       })
       await request(app).get(`/api/v1/artifacts?${urlParms.toString()}`).expect(404)
     })
 
     it('should not be possible to retrieve enecryption artifacts if no email was provided', async () => {
-      await request(app).get(`/api/v1/artifacts?id=${artifacts.id}`).expect(400)
+      await request(app)
+        .get(`/api/v1/artifacts?id=${await calculateLookupKey(email, password)}`)
+        .expect(400)
     })
 
     it('should not be possible to retrieve enecryption artifacts if no id was provided', async () => {
-      const { account } = loggedInAccountInfo
-      const urlParms = new URLSearchParams({
-        email: account.email,
-      })
+      const urlParms = new URLSearchParams({ email })
       await request(app).get(`/api/v1/artifacts?${urlParms.toString()}`).expect(400)
     })
 
@@ -183,12 +84,9 @@ describe('artifacts', () => {
     })
 
     it('should not be possible to exceed rate limit when retrieving artifacts (brute-force)', async () => {
-      await verifyRateLimit(() => {
+      await verifyRateLimit(async (i) => {
         // We speficially test 404 status, as this would be the typical brute-force scenario
-        const id = randomBytes(32).toString('hex')
-        const {
-          account: { email },
-        } = loggedInAccountInfo
+        const id = await calculateLookupKey(email, `Attempt${i}`)
         const urlParms = new URLSearchParams({
           email,
           id,
@@ -199,57 +97,18 @@ describe('artifacts', () => {
         }
       }, rateLimitsPerRoute['/artifacts']?.get)
     })
-
-    it('should not be possible to delete artifacts when not authenticated', async () => {
-      await request(app)
-        .delete(`/api/v1/artifacts`)
-        .set('Content-Type', 'application/json')
-        .send()
-        .expect(401)
-    })
-
-    it('should not be possible to delete artifacts when authenticated anonymously', async () => {
-      const anonSessionId = await anonymousAuth()
-      await request(app)
-        .delete(`/api/v1/artifacts`)
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${anonSessionId}`)
-        .send()
-        .expect(401)
-    })
-
-    it('should not be possible to delete artifacts when not set', async () => {
-      const { sessionId } = await createAccountAndSignIn()
-      await request(app)
-        .delete(`/api/v1/artifacts`)
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send()
-        .expect(404)
-    })
-
-    it('should be possible to delete artifacts when set', async () => {
-      const { sessionId } = loggedInAccountInfo
-      await request(app)
-        .delete(`/api/v1/artifacts`)
-        .set('Content-Type', 'application/json')
-        .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
-        .send()
-        .expect(200)
-    })
   })
 
   describe('sessionEncryptionArtifacts', () => {
     let loggedInAccountInfo: LoggedInAccountInfo
     let sessionEncryptedSeed: string
-    let cipherIv: Buffer
-    let cipherKey: Buffer
+    const seed = randomBytes(16).toString('hex')
     let artifacts: components['schemas']['SessionEncryptionArtifacts']
 
     before(async () => {
-      loggedInAccountInfo = await createAccountAndSignIn()
-      cipherIv = randomBytes(16)
-      cipherKey = randomBytes(32)
+      loggedInAccountInfo = await createAccountAndSignIn(undefined, undefined, seed)
+      const cipherIv = randomBytes(16)
+      const cipherKey = randomBytes(32)
       artifacts = { cipherIv: cipherIv.toString('hex'), cipherKey: cipherKey.toString('hex') }
       sessionEncryptedSeed = aes256CbcEncrypt(seed, cipherKey, cipherIv)
     })

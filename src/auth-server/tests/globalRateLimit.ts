@@ -9,8 +9,7 @@ describe('global rate limit', () => {
     await verifyRateLimit((i) => {
       const requestsWithoutSpecificRateLimit = [
         { req: request(app).post('/api/v1/logout'), status: 401 },
-        { req: request(app).post('/api/v1/connect-account'), status: 401 },
-        { req: request(app).post('/api/v1/disconnect-account'), status: 401 },
+        { req: request(app).post('/api/v1/change-account'), status: 401 },
       ]
 
       return requestsWithoutSpecificRateLimit[i % requestsWithoutSpecificRateLimit.length]

@@ -4,13 +4,14 @@
 - **_Auth API_** - Orion's authentication REST API, separate from the Orion GraphQL API
 - **_GraphQL API_** - Orion's GraphQL API, exposing all the GraphQL queries and mutations, accessible only by authenticated users, 
 - **_User_** - any user of the _Client App_ / Orion, regarldess of whether they have a registered Gateway account or not,
-- **_Anonymous user_** - a user who either doesn't have a Gateway account or is not logged in to a Gateway account and therefore uses [anonymous authentication](#anonymous-authentication).
+- **_Anonymous user_** - a user who either doesn't have a Gateway account or is not logged in to a Gateway account and therefore uses [anonymous authentication](#anonymous-auth).
 - **_Root user_** - a special kind of a user, typically a gateway operator, with extra privileges to execute certain _GraphQL API_ queries and mutations. It is initially created during database migration step based on the environment variables provided by the gateway administrator.
 - **_Gateway account owner_** - _User_ that has registered and owns a Gateway account.
 - **_Authenticated request_** - a request which inlcudes a valid session cookie (as described [here](#sessions-and-authenticated-requests)) and can therefore be associated with an existing, active session (stored in Orion's database).
 - **_Authentication request_** - a request to perform the authentication and start a new session (either `POST /login` or `POST /anonymous-auth`).
-- **_Gateway account_** - an account that exists in Orion's database and can be logged in to, not to be confused with _Blockchain account_. Many _Blockchain accounts_ can be associated with a single _Gateway account_.
-- **_Blockchain account_** - an account that exists on the Joystream blockchain and can be identified with an address, such as `j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf` for example. A _Blockchain account_ can be associated with a _Gateway account_ and a valid signature from a _Blockchain account_ can be used to authenticate as _Gateway account owner_.
+- **_Gateway account_** - an account that exists in Orion's database and can be logged in to, not to be confused with _Blockchain account_ or _Blockchain membership_. Each _Gateway account_ is associated with exactly one _Blockchain account_ (which can be chnaged via `POST /change-account` endpoint) and exactly one _Blockchain membership_ (which is immutable).
+- **_Blockchain account_** - an account that exists on the Joystream blockchain and can be identified with an address, such as `j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf` for example. A _Blockchain account_ can be associated with exactly one _Gateway account_.
+- **_Blockchain membership_** - a [membership created on a Joystream blockchain](https://handbook.joystream.org/system/memberships), which can be identified with a `handle`. A _Blockchain membership_ can be associated with exactly one _Gateway account_.
 
 # Auth API overview
 
@@ -18,7 +19,7 @@ Orion's auth API is a REST API, separate from the GraphQL API (the main Orion AP
 
 This approach can also be called [_out-of-band_ authenticaiton](https://cloudcity.io/blog/2021/08/22/GraphQL-Authentication-Why-out-of-band-authentication-is-better-than-in-band/), to distinguish it from _in-band_ authentiation, which would be an authentication implemented as part of the same GraphQL api that is being secured by it. 
 
-The Auth API implementation can be found in the [`src/auth-server`](../../../src/auth-server) directory.
+The Auth API implementation can be found in the [`src/auth-server`](../../../src/auth-server/) directory.
 
 The implementation is based on the [OpenAPI schema](https://swagger.io/specification/) which can be found **[here](../../../src/auth-server/openapi.yml)**.
 
@@ -49,25 +50,27 @@ We may choose not to provide all of those features to _anonymous_ Users, but it 
 
 ### `Session` entity
 
-`Session` represents a period of activity of a `User` that interacts with the Client App or Orion API directly, during which the user can perform [authenticated requests](#sessions-and-authenticated-requests) (either as _anonymous user_ or _gateway account owner_) and [access the GraphQL API](#accessing-graphql-api).
+`Session` represents a period of activity of a `User` that interacts with the Client App or Orion API directly, during which the user can perform [authenticated requests](#sessions-and-authenticated-requests) (either as _anonymous user_ or _gateway account owner_) and [access the GraphQL API](#accessing-the-graphql-api).
 
 For more information about sessions see _[Sessions and authenticated requests](#sessions-and-authenticated-requests)_.
 
 ### `Account` entity
 
-An `Account` represents a _Gateway account_ which can be accessed by the _Gateway account owner_ by providing a signed log-in message. The log-in message must be signed by one of the _Blockchain accounts_ associated with the _Gateway account_.
+An `Account` represents a _Gateway account_ which can be accessed by the _Gateway account owner_ by providing a signed [_login message_](../../../src/auth-server/docs/Models/LoginRequestData.md). The _login message_ must be signed by the _Blockchain account_ associated with the _Gateway account_, see: [`POST /login`](../../../src/auth-server/docs/Apis/DefaultApi.md#login) endpoint.
 
-### `ConnectedAccount` entity
+The current _Blockchain account_ of a _Gateway account_ is stored in the `joystreamAccount` field of the `Account` entity. It can be changed via [`POST /change-account`](../../../src/auth-server/docs/Apis/DefaultApi.md#change-account) endpoint.
 
-A `ConnectedAccount` represents a _Blockchain account_ that is associated with a _Gateway account_ and can be used to authenticate as the _Gateway account owner_ through a signed message posted to the [`POST /login`](../../../src/auth-server/docs/Apis/DefaultApi.md#login) endpoint. New _Blockchain accounts_ can be connected to a _Gateway account_ via [`POST /connect-account`](#connect-external-accounts) endpoint. _Blockchain accounts_ can also be disconnected from a _Gateway account_ via [`POST /disconnect-account`](#disconnect-joystream-accounts) endpoint.
+The _Blockchain membership_ associated with the _Gateway account_ is stored in the `membership` field of the `Account` entity. It is assigned on account creation and cannot be changed.
 
 ### `EncryptionArtifacts` entity
 
-`EncryptionArtifacts` represents a set of encryption artifacts (`cipherIv` and `encryptedSeed`) which can be used by the _Client app_ to decrypt the `seed` of a _Blockchain account_ based on the user's login credentials. For details, see: [Authentication API interactions](#authentication-api-interactions) (specifically [_Create user account_](#create-user-account) and [_Login using e-mail and password_](#log-in-to-user-account-using-e-mail-and-password) flows).
+`EncryptionArtifacts` represents a set of encryption artifacts (`cipherIv` and `encryptedSeed`) which can be used by the _Client app_ to decrypt the `seed` of a _Blockchain account_ based on the account's login credentials (`email` and `password`). For details, see: [Authentication API interactions](#authentication-api-interactions) (specifically [_Create user account_](#create-emailpassword-authenticated-user-account) and [_Login using e-mail and password_](#log-in-to-user-account-using-e-mail-and-password) flows).
+
+The `EncryptionArtifacts` can be changed together with the _Blockchain account_ associated with the _Gateway account_, see _[Change blockchain account & encryption artifacts associated with the gateway account](#change-blockchain-account--encryptionartifacts-associated-with-the-gateway-account)_ flow.
 
 ### `SessionEncryptionArtifacts` entity
 
-`SessionEncryptionArtifacts` represents a set of encryption artifacts (`cipherIv` and `cipherKey`) associated with a given session, allowing the _Client app_ to more securely store user's seed throughout the session. For details, see _[Store encrypted seed for the duration of the session](#store-encrypted-seed-for-the-duration-of-the-session)_ flow.
+`SessionEncryptionArtifacts` represents a set of encryption artifacts (`cipherIv` and `cipherKey`) associated with a given session, allowing the _Client app_ to more securely store _Blockchain account's_ seed throughout the session. For details, see _[Store encrypted seed for the duration of the session](#store-encrypted-seed-for-the-duration-of-the-session)_ flow.
 
 ### `Token` entity
 
@@ -89,7 +92,6 @@ Those configuration variables can be set as part of the environment, for more de
 - `EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS` - self-explainatory
 - `EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT` - how many requests for a new e-mail confirmation token can be made within `EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS` for a given e-mail address
 - `ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS` - how many seconds have to pass since the timestamp included in a signed message that proves the ownership of a _Blockchain account_ (ie. [`ActionExecutionRequestData`](../../../src/auth-server/docs/Models/ActionExecutionRequestData.md)) in order for that message to be considered expired.
-- `MAX_CONNECTED_ACCOUNTS_PER_USER` - how many _Blockchain accounts_ can be associated with a single _Gateway account_.
 - `COOKIE_SECRET` - secret used to sign cookies, to make sure they come from Orion and have not been tampered with.
 
 ## Sessions and authenticated requests
@@ -153,48 +155,60 @@ POST /api/v1/anonymous-auth
 
 (where `operator-secret` must be the value of `OPERATOR_SECRET` environment variable)
 
-### Create user account:
+### Create email+password authenticated user account:
 
 1. Authenticate as anonymous user first (see [Anonymous auth](#anonymous-auth))
 
-2. Create encryption artifacts using user's credentials (e-mail, password). For reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L41), ie.:
+2. Generate a random wallet seed and create encryption artifacts using user's credentials (e-mail, password). For reference code see the `prepareEncryptionArtifacts` implementation inside [`src/auth-server/tests/common.ts`](../../../src/auth-server/tests/common.ts), ie.:
     ```typescript
+    export async function calculateLookupKey(email: string, password: string): Promise<string> {
+      return (await scryptHash(`lookupKey:${email}:${password}`, 'lookupKeySalt')).toString('hex')
+    }
+
+    export async function prepareEncryptionArtifacts(
+      seed: string,
+      email: string,
+      password: string
+    ): Promise<EncryptionArtifacts> {
       // The `encryptionArtifacts.id` is deterministic:
       // It's an scrypt hash of the combination of user's e-mail and password
       // salted with some hardcoded `lookupKeySalt` value.
-      const id = (
-        await scryptHash(`lookupKey:${account.email}:${password}`, 'lookupKeySalt')
-      ).toString('hex')
+      const id = await calculateLookupKey(email, password)
       // The `encryptionArtifacts.cipherIv` is a random 16-byte value.
       const cipherIv = randomBytes(16)
       // The `cipherKey` is derived using a combination of user's e-mail and password.
       // `cipherIv` is used as an scrypt hash salt in this case.
-      const cipherKey = await scryptHash(`cipherKey:${account.email}:${password}`, cipherIv)
-      // The `seed` should be a random 32-byte value.
+      const cipherKey = await scryptHash(`cipherKey:${email}:${password}`, cipherIv)
+      // The `seed` should be a random 16/32-byte value.
+      // In this case we're using a string value, but you could also use a Buffer.
       // `encryptedSeed` is the result of encrypting the `seed` using `cipherKey` and `cipherIv`
       // with AES-256-CBC algorithm.
       const encryptedSeed = aes256CbcEncrypt(seed, cipherKey, cipherIv)
-      // All artifacts should be hex-encoded.
-      artifacts = {
+      return {
         id,
         cipherIv: cipherIv.toString('hex'),
         encryptedSeed,
       }
+    }
+    ```
 
-3. Make request to create a new account:
+3. Create an [on-chain membership](https://handbook.joystream.org/system/memberships) using the address derived from the seed generated in the previous step as both `controllerAccount` and `rootAccount`. The easiest way to do that would be to use the [Joystream membership faucet service](https://github.com/Joystream/membership-faucet).
+
+4. Make request to create a new account:
     ```
     POST /api/v1/account
     {
-      "signature": "signatureOverPayload",
+      "signature": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "payload": {
-        "joystreamAccountId": "ss58Address",
+        "joystreamAccountId": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
+        "memberId": "123",
         "gatewayName": "Gleev",
         "timestamp": 1682624588376,
         "action": "createAccount",
         "email": "user@example.com",
         "encryptionArtifacts": {
           "id": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           "cipherIv": "0xffffffffffffffffffffffffffffffff"
         }
       }
@@ -202,17 +216,23 @@ POST /api/v1/anonymous-auth
     ```
     Where:
     - `signature` is a signature over `JSON.stringify(pyaload)`
-    - `joystreamAccountId` must be unique (this is the address of the keypair generated from `seed`)
+    - `joystreamAccountId` is the address of the keypair generated from `seed` (see step _2._)
+    - `memberId` must be the id of the on-chain membership created in step _3._ (the membership must be already processed by Orion)
     - `gatewayName` must match the `APP_NAME` environment variable
     - `timestamp` must be current timestamp in miliseconds
     - `action` must be `createAccount`
-    - `email` must be unique
+    - `email` must be the e-mail provided by the user in step _2._
     - `encryptionArtifacts` must be the same as the ones generated in step _2._
 
 ### Log-in to user account using e-mail and password
 
 1. User provides email and password
-2. Compute `id` of the _artifacts_ using the provided e-mail and password as described in [_Create user account_](#create-user-account) (point _2._)
+2. Compute `id` of the _artifacts_ using the provided e-mail and password (see `calculateLookupKey` implementation in [`src/auth-server/tests/common.ts`](../../../src/auth-server/tests/common.ts)), ie.:
+    ```typescript
+    export async function calculateLookupKey(email: string, password: string): Promise<string> {
+      return (await scryptHash(`lookupKey:${email}:${password}`, 'lookupKeySalt')).toString('hex')
+    }
+    ```
 3. Get the _artifacts_:
     ```
     GET /api/v1/artifacts?id={id}&email={email}
@@ -222,33 +242,28 @@ POST /api/v1/anonymous-auth
     - `email` is the e-mail provided by the user in step _1._
 
     In response you get the stored `cipherIv` and `encryptedSeed`.
-4. You can now decrypt user's seed using those artifacts, for reference code see: [`src/auth-server/tests/artifacts.ts`](../../../src/auth-server/tests/artifacts.ts#L131), ie.:
+4. You can now decrypt user's seed using those artifacts, for reference code see `decryptSeed` implementation in [`src/auth-server/tests/common.ts`](../../../src/auth-server/tests/common.ts), ie.:
     ```typescript
-      const urlParms = new URLSearchParams({
-        email: account.email,
-        id: artifacts.id,
-      })
-      const response = await request(app)
-        .get(`/api/v1/artifacts?${urlParms.toString()}`)
-        .expect(200)
-      // The server returns the `cipherIv` and `encryptedSeed` in the response body.
-      const { cipherIv, encryptedSeed } =
-        response.body as components['schemas']['EncryptionArtifacts']
+    export async function decryptSeed(
+      email: string,
+      password: string,
+      // Those are the values provided by the server as a response to `GET /api/v1/artifacts`:
+      { cipherIv, encryptedSeed }: EncryptionArtifacts
+    ): Promise<string> {
+      const cipherIvBuf = Buffer.from(cipherIv, 'hex')
       // The `cipherKey` can be derived using a combination of user's e-mail, password and `cipherIv`.
-      const cipherKey = await scryptHash(
-        `cipherKey:${account.email}:${password}`,
-        Buffer.from(cipherIv, 'hex')
-      )
+      const cipherKey = await scryptHash(`cipherKey:${email}:${password}`, cipherIvBuf)
       // The `seed` can be decrypted using `cipherKey` and `cipherIv` with AES-256-CBC algorithm.
-      const decryptedSeed = aes256CbcDecrypt(encryptedSeed, cipherKey, Buffer.from(cipherIv, 'hex'))
-      ```
-5. Make login request:
+      return aes256CbcDecrypt(encryptedSeed, cipherKey, cipherIvBuf)
+    }
+    ```
+5. Make the login request:
     ```
     POST /api/v1/login
     {
-      "signature": "signatureOverPayload",
+      "signature": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "payload": {
-        "joystreamAccountId": "ss58Address",
+        "joystreamAccountId": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
         "gatewayName": "Gleev",
         "timestamp": 1682624588376,
         "action": "login"
@@ -262,7 +277,7 @@ POST /api/v1/anonymous-auth
     - `timestamp` must be current timestamp in miliseconds
     - `action` must be `login`
 
-    In response you'll get `accountId` which you should store locally (for example, in local storage)
+    In response you'll get the `accountId` of the logged in account. You can always check the data associated with the logged in account using the [`accountData` GraphQL query](#retrieve-logged-in-gateway-account-data).  
 
 ### Store encrypted seed for the duration of the session
 
@@ -275,8 +290,8 @@ In order to do this:
     ```
     POST /api/v1/session-artifacts
     {
-      "cipherKey": "generatedRandomKey",
-      "cipherIv": "generatedRandomIv"
+      "cipherKey": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "cipherIv": "0xffffffffffffffffffffffffffffffff"
     }
     ```
 4. You can retrieve the stored _session artifacts_ later in order to decrypt the locally stored, encrypted seed:
@@ -284,91 +299,52 @@ In order to do this:
     GET /api/v1/session-artifacts
     ```
 
-### Connect _external_ accounts
+### Change _Blockchain account_ / _EncryptionArtifacts_ associated with the _Gateway account_
 
-You can connect other Joystream accounts (for example, from an extension) to an existing Gateway account in order to be able to use them when signing in.
+You can change the _Blockchain account_ and remove or update _EncryptionArtifacts_ associated with the _Gateway account_ at the same time using [`POST /change-account`](../../../src/auth-server/docs/Apis/DefaultApi.md#change-account) endpoint.
+
+There are 2 main use-cases for this:
+1. **Migrating from password-based authentication to a more secure external signer authentication**: In this case you usually change the _Blockchain account_ and remove the _EncryptionArtifacts_ (ie. not provide the `newArtifacts` field in the request)
+2. **Changing the account's password**: In this case you can either change the _EncryptionArtifacts_, but keep the old _Blockchain account_ or change both (in which case you need to migrate the assets and the membership to the new account first)
 
 ```
-POST /api/v1/connect-account
+POST /api/v1/change-account
 {
-  "signature": "signatureOverPayload",
+  "signature": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
   "payload": {
-    "joystreamAccountId": "ss58Address",
+    "joystreamAccountId": "j4UYhDYJ4pz2ihhDDzu69v2JTVeGaGmTebmBdWaX2ANVinXyE",
     "gatewayName": "Gleev",
     "timestamp": 1682624588376,
-    "action": "connect",
-    "gatewayAccountId": "accountId"
+    "action": "changeAccount",
+    "gatewayAccountId": "00000001",
+    "newArtifacts": {
+      "id": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "cipherIv": "0xffffffffffffffffffffffffffffffff"
+    }
   }
 }
 ```
 Where:
-- `signature` is a signature over `JSON.stringify(pyaload)`
-- `joystreamAccountId` is the address of the account to be connected
+- `signature` is a signature over `JSON.stringify(pyaload)` (from the **new** _Blockchain account_)
+- `joystreamAccountId` is the address of the new _Blockchain account_ (can be the same as the currently used one)
 - `gatewayName` must match the `APP_NAME` environment variable
 - `timestamp` must be current timestamp in miliseconds
-- `action` must be `connect`
-- `gatewayAccountId` must be `accountId` as provided during `POST /login`
+- `action` must be `changeAccount`
+- `gatewayAccountId` must be the `accountId` of the logged in _Gateway account_ (as provided by the server in response to `POST /api/v1/login` or `accountData` GraphQL query)
+- `newArtifacts` optionally, the new _EncryptionArtifacts_ if password-authentication is still being used
 
-### Disconnect Joystream accounts
+### Retrieve logged-in _Gateway Account_ data
 
-To disconnect Joystream account from an Orion account you must be logged in (have na active session).
-Once logged in, you can simply call:
-
-```
-POST /api/v1/disconnect-account
-{
-  "joystreamAccountId": "ss58Address",
-}
-```
-Where:
-- `joystreamAccountId` is the address of the account to be disconnected
-
-### Opt-out of password authentication and migrate to external signer
-
-In a scenario where a _Gateway account owner_ wishes to opt-out of password authentication and start using external signer with a brand new account, a flow may look like this:
-
-1. Connect the new external account provided by the user as described in [_Connect external accounts_](#connect-external-accounts)
-2. Migrate all assets and memberships to the new account using `balances.transferAll` and `members.updateAccounts` extrinsics. **Important:** staked assets will not be migrated, and may be lost if not unstaked before migration.
-3. Disconnect the old account as described in [_Disconnect Joystream accounts_](#disconnect-joystream-accounts)
-4. Remove encryption artifacts associated with the old account by calling:
-    ```
-    DELETE /api/v1/artifacts
-    ```
-    (requires the user to be logged in)
-
-### Change password when user knows the seed
-
-In case the _Gateway Account Owner_ knows the seed of a connected account, but forgot the password, a password can be changed by following these steps:
-1. User provides `email`, `seed` and `newPassword`
-2. Knowing seed, you can log the user in via [`POST /login`](../../../src/auth-server/docs/Apis/DefaultApi.md#login) endpoint.
-3. Generate new encryption artifacts for the `newPassword` as described in [_Create user account_](#create-user-account) (point _2._)
-4. Remove the old encryption artifacts by calling:
-    ```
-    DELETE /api/v1/artifacts
-    ```
-    (user needs to be logged in)
-5. Store the new encryption artifacts by calling:
-    ```
-    POST /api/v1/artifacts
-    {
-      "id": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-      "encryptedSeed": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-      "cipherIv": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    }
-    ```
-
-### Retrieve _Gateway Account_'s e-mail and a list of connected accounts and memberships
-
-Although this is not strictly done through the Auth API, it is worth mentioning that you can retrieve the _Gateway Account_'s e-mail address, along with a list of connected accounts and memberships by executing the following GraphQL query once logged in:
+Although this is not strictly done through the Auth API, it is worth mentioning that you can always retrieve the data of the currently logged-in _Gateway Account_ by executing the following GraphQL query:
 ```graphql
 {
   accountData {
+    id
     email
-    connectedAccounts {
-      address
-      isLoginAllowed
-      membershipIds
-    }
+    joystreamAccount
+    isEmailConfirmed
+    membershipId
   }
 }
 ```

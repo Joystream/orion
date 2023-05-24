@@ -9,14 +9,12 @@ export interface paths {
     post: operations['anonymousAuth']
   }
   '/login': {
-    /** @description Login to user's account by providing a message signed by one of the user's connected accounts. */
+    /** @description Login to user's account by providing a message signed by the associated blockchain account. */
     post: operations['login']
   }
   '/artifacts': {
     /** @description Get wallet seed encryption artifacts. */
     get: operations['getArtifacts']
-    /** @description Save wallet seed encryption artifacts associated with the account (if not already saved). */
-    post: operations['postArtifacts']
     /** @description Delete wallet seed encryption artifacts in case they are no longer needed. */
     delete: operations['deleteArtifacts']
   }
@@ -38,13 +36,9 @@ export interface paths {
     /** @description Request a token to be sent to account's e-mail address, which will allow confirming the ownership of the e-mail by the user. */
     post: operations['requestEmailConfirmationToken']
   }
-  '/connect-account': {
-    /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
-    post: operations['connectAccount']
-  }
-  '/disconnect-account': {
-    /** @description Disconnect a Joystream account (key) from the Gateway acount. */
-    post: operations['disconnectAccount']
+  '/change-account': {
+    /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally save new ones. */
+    post: operations['changeAccount']
   }
   '/logout': {
     /** @description Terminate the current session. */
@@ -85,19 +79,18 @@ export interface components {
       payload?: components['schemas']['ActionExecutionPayload'] & {
         /** @enum {string} */
         action?: 'createAccount'
+        memberId: string
         email: string
         encryptionArtifacts?: components['schemas']['EncryptionArtifacts']
       }
     }
-    ConnectAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
+    ChangeAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
       payload?: components['schemas']['ActionExecutionPayload'] & {
         /** @enum {string} */
-        action?: 'connect'
+        action?: 'changeAccount'
         gatewayAccountId: string
+        newArtifacts?: components['schemas']['EncryptionArtifacts']
       }
-    }
-    DisconnectAccountRequestData: {
-      joystreamAccountId: string
     }
     ConfirmEmailRequestData: {
       /** @description Confirmation token recieved by the user via an e-mail. */
@@ -203,12 +196,6 @@ export interface components {
         'application/json': components['schemas']['GenericErrorResponseData']
       }
     }
-    /** @description Provided key is not connected to the account. */
-    DisconnectAccountNotFoundResponse: {
-      content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
     /** @description Provided e-mail address is not associated with any account. */
     RequestEmailConfirmationAccountNotFoundResponse: {
       content: {
@@ -239,6 +226,30 @@ export interface components {
         'application/json': components['schemas']['GenericErrorResponseData']
       }
     }
+    /** @description Account with the provided e-mail address or encryptionArtifacts.id already exists. */
+    CreateAccountConflictResponse: {
+      content: {
+        'application/json': components['schemas']['GenericErrorResponseData']
+      }
+    }
+    /** @description Session encryption artifacts for the current session already saved. */
+    PostSessionArtifactsConflictResponse: {
+      content: {
+        'application/json': components['schemas']['GenericErrorResponseData']
+      }
+    }
+    /** @description Provided blockchain (Joystream) account is already assigned to another user account. */
+    ChangeAccountConflictResponse: {
+      content: {
+        'application/json': components['schemas']['GenericErrorResponseData']
+      }
+    }
+    /** @description On-chain membership not found by the provided memberId. */
+    CreateAccountNotFoundResponse: {
+      content: {
+        'application/json': components['schemas']['GenericErrorResponseData']
+      }
+    }
   }
   parameters: never
   requestBodies: {
@@ -262,29 +273,19 @@ export interface components {
         'application/json': components['schemas']['ConfirmEmailRequestData']
       }
     }
-    ConnectAccountRequestBody?: {
-      content: {
-        'application/json': components['schemas']['ConnectAccountRequestData']
-      }
-    }
-    DisconnectAccountRequestBody?: {
-      content: {
-        'application/json': components['schemas']['DisconnectAccountRequestData']
-      }
-    }
     RequestTokenRequestBody?: {
       content: {
         'application/json': components['schemas']['RequestTokenRequestData']
       }
     }
-    PostArtifactsRequestBody?: {
-      content: {
-        'application/json': components['schemas']['EncryptionArtifacts']
-      }
-    }
     PostSessionArtifactsRequestBody?: {
       content: {
         'application/json': components['schemas']['SessionEncryptionArtifacts']
+      }
+    }
+    ChangeAccountRequestBody?: {
+      content: {
+        'application/json': components['schemas']['ChangeAccountRequestData']
       }
     }
   }
@@ -306,7 +307,7 @@ export interface operations {
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
-  /** @description Login to user's account by providing a message signed by one of the user's connected accounts. */
+  /** @description Login to user's account by providing a message signed by the associated blockchain account. */
   login: {
     requestBody: components['requestBodies']['LoginRequestBody']
     responses: {
@@ -331,16 +332,6 @@ export interface operations {
       200: components['responses']['GetArtifactsResponse']
       400: components['responses']['GenericBadRequestResponse']
       404: components['responses']['GetArtifactsNotFoundResponse']
-      429: components['responses']['GenericTooManyRequestsResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
-  /** @description Save wallet seed encryption artifacts associated with the account (if not already saved). */
-  postArtifacts: {
-    requestBody: components['requestBodies']['PostArtifactsRequestBody']
-    responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['GenericBadRequestResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }
@@ -372,6 +363,7 @@ export interface operations {
       200: components['responses']['GenericOkResponse']
       400: components['responses']['GenericBadRequestResponse']
       401: components['responses']['GenericUnauthorizedResponse']
+      409: components['responses']['PostSessionArtifactsConflictResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }
@@ -383,6 +375,8 @@ export interface operations {
       200: components['responses']['GenericOkResponse']
       400: components['responses']['CreateAccountBadRequestResponse']
       401: components['responses']['GenericUnauthorizedResponse']
+      404: components['responses']['CreateAccountNotFoundResponse']
+      409: components['responses']['CreateAccountConflictResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }
@@ -408,25 +402,14 @@ export interface operations {
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
-  /** @description Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership. */
-  connectAccount: {
-    requestBody: components['requestBodies']['ConnectAccountRequestBody']
+  /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally save new ones. */
+  changeAccount: {
+    requestBody: components['requestBodies']['ChangeAccountRequestBody']
     responses: {
       200: components['responses']['GenericOkResponse']
       400: components['responses']['GenericBadRequestResponse']
       401: components['responses']['GenericUnauthorizedResponse']
-      429: components['responses']['GenericTooManyRequestsResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
-  /** @description Disconnect a Joystream account (key) from the Gateway acount. */
-  disconnectAccount: {
-    requestBody: components['requestBodies']['DisconnectAccountRequestBody']
-    responses: {
-      200: components['responses']['GenericOkResponse']
-      400: components['responses']['GenericBadRequestResponse']
-      401: components['responses']['GenericUnauthorizedResponse']
-      404: components['responses']['DisconnectAccountNotFoundResponse']
+      409: components['responses']['ChangeAccountConflictResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }

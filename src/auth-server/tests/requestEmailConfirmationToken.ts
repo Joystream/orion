@@ -1,16 +1,21 @@
 import './config'
 import { globalEm } from '../../utils/globalEm'
 import { EntityManager, MoreThan } from 'typeorm'
-import { confirmEmail, createAccount, requestEmailConfirmationToken } from './common'
-import { Account, Token, TokenType } from '../../model'
+import {
+  AccountAccessData,
+  confirmEmail,
+  createAccount,
+  requestEmailConfirmationToken,
+} from './common'
+import { Token, TokenType } from '../../model'
 import assert from 'assert'
 import { ConfigVariable, config } from '../../utils/config'
 import { cryptoWaitReady } from '@polkadot/util-crypto'
 
-async function findActiveToken(em: EntityManager, account: Account): Promise<Token | null> {
+async function findActiveToken(em: EntityManager, accountId: string): Promise<Token | null> {
   return em.getRepository(Token).findOneBy({
     type: TokenType.EMAIL_CONFIRMATION,
-    issuedForId: account.id,
+    issuedForId: accountId,
     expiry: MoreThan(new Date()),
   })
 }
@@ -21,12 +26,12 @@ async function reloadToken(em: EntityManager, token: Token): Promise<Token> {
 
 describe('requestEmailConfirmationToken', () => {
   let em: EntityManager
-  let account: Account
+  let accountInfo: AccountAccessData
 
   before(async () => {
     await cryptoWaitReady()
     em = await globalEm
-    account = await createAccount()
+    accountInfo = await createAccount()
   })
 
   it('should fail if account does not exist', async () => {
@@ -34,27 +39,27 @@ describe('requestEmailConfirmationToken', () => {
   })
 
   it('should succeed if account exists', async () => {
-    await requestEmailConfirmationToken(account.email, 200)
-    const token = await findActiveToken(em, account)
+    await requestEmailConfirmationToken(accountInfo.email, 200)
+    const token = await findActiveToken(em, accountInfo.accountId)
     assert(token, 'Token not found')
   })
 
   it('should fail if account is already confirmed', async () => {
-    let oldToken = await findActiveToken(em, account)
+    let oldToken = await findActiveToken(em, accountInfo.accountId)
     assert(oldToken, 'Pre-existing token not found')
     await confirmEmail(oldToken.id, 200)
     oldToken = await reloadToken(em, oldToken)
     assert(oldToken.expiry.getTime() <= Date.now(), 'Pre-existing token is not expired')
-    await requestEmailConfirmationToken(account.email, 400)
+    await requestEmailConfirmationToken(accountInfo.email, 400)
   })
 
   it('should fail if rate limit is exceeded', async () => {
-    const account = await createAccount()
+    const { email, accountId } = await createAccount()
     const rateLimit = await config.get(ConfigVariable.EmailConfirmationTokenRateLimit, em)
     let previousToken: Token | null = null
     for (let i = 0; i < rateLimit; i++) {
-      await requestEmailConfirmationToken(account.email, 200)
-      const newToken = await findActiveToken(em, account)
+      await requestEmailConfirmationToken(email, 200)
+      const newToken = await findActiveToken(em, accountId)
       assert(newToken, 'Token not found')
       if (previousToken) {
         previousToken = await reloadToken(em, previousToken)
@@ -63,6 +68,6 @@ describe('requestEmailConfirmationToken', () => {
       }
       previousToken = newToken
     }
-    await requestEmailConfirmationToken(account.email, 429)
+    await requestEmailConfirmationToken(email, 429)
   })
 })
