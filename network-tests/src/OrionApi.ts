@@ -23,6 +23,9 @@ import {
   GetVestedAccountById,
   AmmCurvFieldsFragment,
   GetAmmById,
+  ChannelFieldsFragment,
+  GetChannelById,
+  GetRevenueShareParticipationById
 } from '../graphql/generated/queries'
 
 export class OrionApi {
@@ -50,8 +53,8 @@ export class OrionApi {
       result = await query()
 
       if (result === null) {
-        // Wait for 10 seconds before trying again
-        await new Promise((resolve) => setTimeout(resolve, 10000))
+        // Wait for 6 seconds before trying again
+        await new Promise((resolve) => setTimeout(resolve, 6000))
         attempts++
       }
     }
@@ -125,7 +128,7 @@ export class OrionApi {
     this.debugQuery(query, variables)
     return (
       (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
-        resultKey
+      resultKey
       ] || null
     )
   }
@@ -170,26 +173,24 @@ export class OrionApi {
   }
 
   public async getRevenueShareById(
-    revenueShareNonce: number,
-    tokenId: TokenId
+    id: string
   ): Promise<RevenueShareFieldsFragment> {
     return this.firstEntityQuery(
       GetRevenueShareById,
-      { id: revenueShareNonce.toString() + tokenId.toString() },
+      { id },
       'revenueShareById'
     )
   }
 
   public async getRevenueShareParticpationById(
-    revenueShareNonce: number,
+    shareId: string,
     tokenId: TokenId,
     memberId: u64
   ): Promise<RevenueShareParticipationFieldsFragment> {
-    const revenueShareId = tokenId.toString() + revenueShareNonce.toString()
-    const accountId = tokenId.toString() + memberId
+    const accountId = tokenId.toString() + memberId.toString()
     return this.firstEntityQuery(
-      GetRevenueShareById,
-      { id: accountId + revenueShareId },
+      GetRevenueShareParticipationById,
+      { id: accountId + shareId.toString() },
       'revenueShareParticipationById'
     )
   }
@@ -208,5 +209,9 @@ export class OrionApi {
 
   public async getAmmById(id: string): Promise<AmmCurvFieldsFragment> {
     return this.firstEntityQuery(GetAmmById, { id }, 'ammCurveId')
+  }
+
+  public async getChannelById(id: number): Promise<ChannelFieldsFragment> {
+    return this.firstEntityQuery(GetChannelById, { id: id.toString() }, 'channelById')
   }
 }

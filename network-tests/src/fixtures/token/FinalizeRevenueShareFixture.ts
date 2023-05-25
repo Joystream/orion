@@ -4,6 +4,7 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
+import { Utils } from '../../utils'
 import { assert } from 'chai'
 
 type RevenueShareFinalizedEventDetails = EventDetails<
@@ -28,6 +29,7 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     this.creatorMemberId = creatorMemberId
     this.channelId = channelId
   }
+
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
@@ -52,25 +54,27 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
-    const revenueShareNonce = qToken!.revenueShareNonce
+    const [{ id: revenueShareId }] = qToken!.revenueShare
     const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareNonce, tokenId)
+      this.query.getRevenueShareById(revenueShareId)
     )
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.finalized, false)
   }
+
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId] = this.events[0].event.data
+    Utils.wait(30000)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
-    const revenueShareNonce = qToken!.revenueShareNonce
+    const [{ id: revenueShareId }] = qToken!.revenueShare
     const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareNonce, tokenId)
+      this.query.getRevenueShareById(revenueShareId)
     )
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.finalized, true)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

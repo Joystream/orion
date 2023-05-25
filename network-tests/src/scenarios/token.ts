@@ -10,6 +10,7 @@ import burnTokens from '../flows/token/burnTokens'
 import issuerTransfer from '../flows/token/issuerTransfer'
 import patronageFlow from '../flows/token/patronage'
 import revenueShareFlow from '../flows/token/revenueShare'
+import ammFlow from '../flows/token/amm'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Creator Token Test Suite', async ({ job }) => {
@@ -26,5 +27,6 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const issuerTransferJob = job('Issuer Transfer', issuerTransfer).requires(issueTokenJob)
   // job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
   // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  // const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(patronageJob)
+  const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(issuerTransferJob)
+  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(revenueShareJob)
 })

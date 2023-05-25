@@ -11,8 +11,8 @@ import {
   SellOnAmmFixture,
 } from '../../fixtures/token'
 
-export default async function amm({ api, query, lock }: FlowProps): Promise<void> {
-  const debug = extendDebug('flow:token-sale')
+export default async function ammFlow({ api, query, lock }: FlowProps): Promise<void> {
+  const debug = extendDebug('flow:amm')
   debug('Started')
   api.enableDebugTxLogs()
 
@@ -30,7 +30,7 @@ export default async function amm({ api, query, lock }: FlowProps): Promise<void
   const [firstHolderAddress, firstHolderId] = api.firstHolder
   unlockFirstHolderAccess()
 
-  // sale params
+  // amm params
   debug('activate amm')
   const ammParams = api.createType('PalletProjectTokenAmmParams', {
     slope: api.createType('Permill', new BN(10)),
