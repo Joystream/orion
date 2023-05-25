@@ -28,6 +28,7 @@ import {
   tokenSaleId,
   ammId,
   VestingScheduleData,
+  issuedRevenueShareForToken,
 } from './utils'
 import { deserializeMetadata } from '../utils'
 import { TokenMetadata, SaleMetadata } from '@joystream/metadata-protobuf'
@@ -421,10 +422,11 @@ export async function processRevenueSplitIssuedEvent({
   const endsAt = startBlock + duration
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  token.revenueShareNonce += 1
+  const revenueShareNonce = token.revenueShareNonce
+  const id = revenueShareId(tokenId, revenueShareNonce)
 
   overlay.getRepository(RevenueShare).new({
-    id: revenueShareId(tokenId, token.revenueShareNonce),
+    id,
     duration,
     allocation: joyAllocation,
     tokenId: tokenId.toString(),
@@ -435,6 +437,8 @@ export async function processRevenueSplitIssuedEvent({
     startingAt: startBlock,
     endsAt,
   })
+
+  token.revenueShareNonce += 1
 }
 
 export async function processMemberJoinedWhitelistEvent({
@@ -513,6 +517,14 @@ export async function processRevenueSplitLeftEvent({
     asV1000: [tokenId, memberId, unstakedAmount],
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitLeft'>) {
+  const token = await overlay.getTokenOrFail(tokenId)
+  const accountId = tokenAccountId(tokenId, memberId)
+  const _revenueShareId = issuedRevenueShareForToken(token)
+
+  const id = accountId + _revenueShareId
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(_revenueShareId)
+  revenueShare.participantsNum -= 1
+
   const account = await overlay.getTokenAccountOrFail(tokenId, memberId)
   account.stakedAmount -= unstakedAmount
 }
@@ -526,7 +538,7 @@ export async function processRevenueSplitFinalizedEvent({
   const token = await overlay.getTokenOrFail(tokenId)
   const revenueShare = await overlay
     .getRepository(RevenueShare)
-    .getByIdOrFail(revenueShareId(tokenId, token.revenueShareNonce))
+    .getByIdOrFail(issuedRevenueShareForToken(token))
   revenueShare.finalized = true
 }
 
@@ -538,10 +550,18 @@ export async function processUserParticipatedInSplitEvent({
   },
 }: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
   const token = await overlay.getTokenOrFail(tokenId)
+  const accountId = tokenAccountId(tokenId, memberId)
+  const _revenueShareId = issuedRevenueShareForToken(token)
+  const id = accountId + _revenueShareId
+
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(_revenueShareId)
+  revenueShare.claimed += joyDividend
+  revenueShare.participantsNum += 1
+
   overlay.getRepository(RevenueShareParticipation).new({
-    id: tokenAccountId(tokenId, memberId) + revenueShareId(tokenId, token.revenueShareNonce),
-    accountId: tokenAccountId(tokenId, memberId),
-    revenueShareId: revenueShareId(tokenId, token.revenueShareNonce),
+    id,
+    accountId,
+    revenueShareId: _revenueShareId,
     stakedAmount,
     earnings: joyDividend,
     createdIn: block.height,

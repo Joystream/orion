@@ -11,6 +11,9 @@ fragment TokenFields on Token {
   ammNonce
   revenueShareRatioPercent
   revenueShareNonce
+  revenueShare {
+    id
+  }
   description
 }
 
@@ -123,6 +126,33 @@ fragment AmmCurvFields on AmmCurve {
   ammInitPrice
 }
 
+fragment ChannelFields on Channel {
+    id
+    rewardAccount
+    revenueShareRatioPercent
+    language
+    isPublic
+    isExcluded
+    isCensored
+    followsNum
+    description
+    createdAt
+    channelStateBloatBond
+    videoViewsNum
+    totalVideosCreated
+    title
+    videos {
+      id
+    }
+    ownerMember {
+      id
+    }
+    createdInBlock
+    creatorToken {
+      id
+    }
+}
+
 query getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
@@ -170,3 +200,10 @@ query getAmmById($id: String!) {
     ...AmmCurvFields
   }
 }
+
+query getChannelById($id: String!) {
+  channelById(id: $id) {
+    ...ChannelFields
+  }
+}
+
