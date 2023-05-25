@@ -58,8 +58,14 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
 }
 
 export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
-  return tokenId.toString() + revenueNonce.toString
+  return tokenId.toString() + revenueNonce.toString()
 }
+
+export function issuedRevenueShareForToken(token: Flat<Token>): string {
+  const _revId = token.revenueShareNonce - 1
+  return revenueShareId(BigInt(token.id), _revId)
+}
+
 
 export async function burnFromVesting(
   overlay: EntityManagerOverlay,
