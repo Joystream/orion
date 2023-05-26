@@ -108,6 +108,17 @@ export async function processVideoCreatedEvent({
 
   channel.totalVideosCreated += 1
 
+  if (video.publishedBeforeJoystream) {
+    const ytPublishDate = new Date(video.publishedBeforeJoystream)
+    const averageTimestamp = (7 * video.createdAt.getTime() + 3 * ytPublishDate.getTime()) / 10
+    video.videoRelevance = +(
+      (30 -
+        (Date.now() - new Date(averageTimestamp).getTime()) / (1000 * NEWNESS_SECONDS_DIVIDER)) *
+        newnessWeight +
+      viewsNum * viewsWeight
+    )
+  }
+
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
