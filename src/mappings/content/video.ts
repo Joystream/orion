@@ -28,10 +28,8 @@ export async function processVideoCreatedEvent({
 
   const videoId = contentId.toString()
   const viewsNum = await overlay.getEm().getRepository(VideoViewEvent).countBy({ videoId })
-  const [newnessWeight, viewsWeight] = await config.get(
-    ConfigVariable.RelevanceWeights,
-    overlay.getEm()
-  )
+  const [newnessWeight, viewsWeight, , , [joystreamTimestampWeight, ytTimestampWeight]] =
+    await config.get(ConfigVariable.RelevanceWeights, overlay.getEm())
   const video = overlay.getRepository(Video).new({
     id: videoId,
     createdAt: new Date(block.timestamp),
@@ -110,7 +108,10 @@ export async function processVideoCreatedEvent({
 
   if (video.publishedBeforeJoystream) {
     const ytPublishDate = new Date(video.publishedBeforeJoystream)
-    const averageTimestamp = (7 * video.createdAt.getTime() + 3 * ytPublishDate.getTime()) / 10
+    const averageTimestamp =
+      (joystreamTimestampWeight * video.createdAt.getTime() +
+        ytTimestampWeight * ytPublishDate.getTime()) /
+      10
     video.videoRelevance = +(
       (30 -
         (Date.now() - new Date(averageTimestamp).getTime()) / (1000 * NEWNESS_SECONDS_DIVIDER)) *

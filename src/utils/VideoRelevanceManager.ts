@@ -25,15 +25,20 @@ export class VideoRelevanceManager {
 
   async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {
     if (this.videosToUpdate.size || forceUpdateAll) {
-      const [newnessWeight, viewsWeight, commentsWeight, reactionsWeight] = await config.get(
-        ConfigVariable.RelevanceWeights,
-        em
-      )
+      const [
+        newnessWeight,
+        viewsWeight,
+        commentsWeight,
+        reactionsWeight,
+        [joystreamTimestampWeight, ytTimestampWeight],
+      ] = await config.get(ConfigVariable.RelevanceWeights, em)
       await em.query(`
         WITH weighted_timestamp AS (
     SELECT 
         id,
-        (TIMESTAMP WITH TIME ZONE 'epoch' + ((extract(epoch from created_at)*7 + COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*3) / 10) * INTERVAL '1 second') as wt
+        (TIMESTAMP WITH TIME ZONE 'epoch' + ((extract(epoch from created_at)*${joystreamTimestampWeight} + COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*${ytTimestampWeight}) / ${
+        joystreamTimestampWeight + ytTimestampWeight
+      }) * INTERVAL '1 second') as wt
     FROM 
         "video" 
         ${
