@@ -30,24 +30,34 @@ export class VideoRelevanceManager {
         em
       )
       await em.query(`
-        UPDATE "video"
-        SET
-          "video_relevance" = ROUND(
-          ((30 - (extract(epoch from now() - created_at) / ${NEWNESS_SECONDS_DIVIDER})) * ${newnessWeight}) +
-          (views_num * ${viewsWeight}) +
-          (
-            comments_count * ${commentsWeight} 
-          ) +
-          (
-            reactions_count * ${reactionsWeight} 
-          ), 2)
+        WITH weighted_timestamp AS (
+    SELECT 
+        id,
+        (TIMESTAMP WITH TIME ZONE 'epoch' + ((extract(epoch from created_at)*7 + COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*3) / 10) * INTERVAL '1 second') as wt
+    FROM 
+        "video" 
         ${
           forceUpdateAll
             ? ''
             : `WHERE "id" IN (${[...this.videosToUpdate.values()]
                 .map((id) => `'${id}'`)
                 .join(', ')})`
-        }`)
+        }
+        )
+    UPDATE 
+        "video"
+    SET
+        "video_relevance" = ROUND(
+        (30 - (extract(epoch from now()) - extract(epoch from wt)) / (60 * 60 * 24)) * ${newnessWeight} +
+        (views_num * ${viewsWeight}) +
+        (comments_count * ${commentsWeight}) +
+        (reactions_count * ${reactionsWeight}), 
+            2)
+    FROM
+        weighted_timestamp
+    WHERE
+        "video".id = weighted_timestamp.id;
+        `)
       this.videosToUpdate.clear()
     }
   }
