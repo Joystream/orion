@@ -16,9 +16,10 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   debug('Started')
   api.enableDebugTxLogs()
 
-  const tokenId = (await api.query.projectToken.nextTokenId()).toNumber() - 1
+  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
+  const tokenId  = nextTokenId - 1
   const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(tokenId).gte(1)
+  expect(nextTokenId).gte(1)
   expect(channelId).gte(1)
 
   // retrieve owner info
@@ -33,7 +34,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   // amm params
   debug('activate amm')
   const ammParams = api.createType('PalletProjectTokenAmmParams', {
-    slope: api.createType('Permill', new BN(10)),
+    slope: api.createType('Permill', new BN(1000)),
     intercept: api.createType('Permill', new BN(10000)),
   })
   const activateAmmFixture = new ActivateAmmFixture(
@@ -61,7 +62,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   await new FixtureRunner(buyOnAmmFixture).runWithQueryNodeChecks()
 
   debug('sell on amm')
-  const amountSold = new BN(1000)
+  const amountSold = new BN(100)
   const sellOnAmmFixture = new SellOnAmmFixture(
     api,
     query,

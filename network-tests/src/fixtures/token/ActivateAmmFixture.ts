@@ -7,6 +7,7 @@ import { Api } from '../../Api'
 import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { assert } from 'chai'
+import { Utils } from '../../utils'
 
 type AmmActivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmActivated'>>
 
@@ -47,21 +48,27 @@ export class ActivateAmmFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
+    this.debug('PRE-ExecHook')
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     assert.isNotNull(qToken)
-    assert.equal(qToken!.status, TokenStatus.Idle)
+    assert.equal(qToken!.status, TokenStatus.Idle, 'preExecHook: token.status assertion')
   }
 
   public async runQueryNodeChecks(): Promise<void> {
+    this.debug('POST-ExecHook')
     const [tokenId, , { slope, intercept }] = this.events[0].event.data
-
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     assert.isNotNull(qToken)
+
+    await Utils.until('waiting for token to be saved', async ({ debug }) => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      return qToken!.status === TokenStatus.Market
+    })
     assert.equal(qToken!.status, TokenStatus.Market)
-    const ammId = tokenId.toString() + qToken!.ammNonce.toString()
+    const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
     const qAmm = await this.query.retryQuery(() => this.query.getAmmById(ammId))
     assert.isNotNull(qAmm)
     assert.equal(qAmm!.ammInitPrice, intercept.toString())
@@ -71,5 +78,5 @@ export class ActivateAmmFixture extends StandardizedFixture {
     assert.equal(qAmm!.finalized, false)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

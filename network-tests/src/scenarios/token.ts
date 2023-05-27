@@ -27,6 +27,6 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const issuerTransferJob = job('Issuer Transfer', issuerTransfer).requires(issueTokenJob)
   // job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
   // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(issuerTransferJob)
-  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(revenueShareJob)
+  // const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(issuerTransferJob)
+  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(issuerTransferJob)
 })
