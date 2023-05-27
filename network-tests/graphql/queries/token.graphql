@@ -124,33 +124,49 @@ fragment AmmCurvFields on AmmCurve {
   burnedByAmm
   ammSlopeParameter
   ammInitPrice
+  transactions {
+    id
+    transactionType
+    pricePerUnit
+    quantity
+    pricePaid
+  }
 }
 
 fragment ChannelFields on Channel {
+  id
+  rewardAccount
+  revenueShareRatioPercent
+  language
+  isPublic
+  isExcluded
+  isCensored
+  followsNum
+  description
+  createdAt
+  channelStateBloatBond
+  videoViewsNum
+  totalVideosCreated
+  title
+  videos {
     id
-    rewardAccount
-    revenueShareRatioPercent
-    language
-    isPublic
-    isExcluded
-    isCensored
-    followsNum
-    description
-    createdAt
-    channelStateBloatBond
-    videoViewsNum
-    totalVideosCreated
-    title
-    videos {
-      id
-    }
-    ownerMember {
-      id
-    }
-    createdInBlock
-    creatorToken {
-      id
-    }
+  }
+  ownerMember {
+    id
+  }
+  createdInBlock
+  creatorToken {
+    id
+  }
+}
+
+fragment AmmTranactionFields on AmmTransaction {
+  id
+  createdIn
+  pricePaid
+  pricePerUnit
+  quantity
+  transactionType
 }
 
 query getTokenById($id: String!) {
@@ -207,3 +223,8 @@ query getChannelById($id: String!) {
   }
 }
 
+query getAmmTransactionById($id: String!) {
+  ammTransactionById(id: $id) {
+    ...AmmTranactionFields
+  }
+}

@@ -8,6 +8,7 @@ import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import BN from 'bn.js'
+import { Utils } from '../../utils'
 
 type AmmDeactivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmDeactivated'>>
 
@@ -55,17 +56,20 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     this.supplyPre = new BN(qToken!.totalSupply)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, burnedAmount] = this.events[0].event.data
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    await Utils.until('waiting for token to be saved', async ({ debug }) => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      return qToken!.status === TokenStatus.Idle
+    })
     const supplyPost = this.supplyPre!.sub(burnedAmount)
 
     assert.isNotNull(qToken)
-    assert.equal(qToken!.status, TokenStatus.Idle)
     assert.equal(qToken!.totalSupply, supplyPost.toString())
 
-    const ammId = tokenId.toString() + qToken!.ammNonce.toString()
+    const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
     const qAmm = await this.query.retryQuery(() => this.query.getAmmById(ammId))
     assert.isNotNull(qAmm)
     assert.equal(qAmm!.finalized, true)

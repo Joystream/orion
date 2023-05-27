@@ -72,7 +72,7 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
-    const [{ id: revenueShareId }, ] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShare
     const qRevenueShare = await this.query.retryQuery(() =>
       this.query.getRevenueShareById(revenueShareId)
     )
@@ -88,5 +88,5 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     assert.equal(qRevenueShare!.allocation, joyAllocation.toString())
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
