@@ -48,7 +48,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
-    const [{ id: revenueShareId },] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShare
     const qRevenueShare = await this.query.retryQuery(() =>
       this.query.getRevenueShareById(revenueShareId)
     )
@@ -56,16 +56,18 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     this.participantsNumPre = qRevenueShare!.participantsNum
     this.stakedAmountPre = new BN(qAccount!.stakedAmount)
-    await Utils.until('waiting for revenue share to end', async () => {
-      const block = await this.api.getBestBlock()
-      const qRev = await this.query.retryQuery(() =>
-        this.query.getRevenueShareById(revenueShareId)
-      )
-      const end = new BN(qRev!.endsAt)
-      return end.lte(block)
-    },
+    await Utils.until(
+      'waiting for revenue share to end',
+      async () => {
+        const block = await this.api.getBestBlock()
+        const qRev = await this.query.retryQuery(() =>
+          this.query.getRevenueShareById(revenueShareId)
+        )
+        const end = new BN(qRev!.endsAt)
+        return end.lte(block)
+      },
       10000,
-      10000 * 20,
+      10000 * 20
     )
   }
 
@@ -75,7 +77,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitLeft')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
@@ -89,7 +91,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
-    const [{ id: revenueShareId },] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShare
     const qRevenueShare = await this.query.retryQuery(() =>
       this.query.getRevenueShareById(revenueShareId)
     )

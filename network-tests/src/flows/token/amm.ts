@@ -17,7 +17,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   api.enableDebugTxLogs()
 
   const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId  = nextTokenId - 1
+  const tokenId = nextTokenId - 1
   const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
   expect(nextTokenId).gte(1)
   expect(channelId).gte(1)
@@ -62,7 +62,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   await new FixtureRunner(buyOnAmmFixture).runWithQueryNodeChecks()
 
   debug('sell on amm')
-  const amountSold = new BN(100)
+  const amountSold = new BN(1000)
   const sellOnAmmFixture = new SellOnAmmFixture(
     api,
     query,

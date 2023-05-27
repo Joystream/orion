@@ -32,7 +32,7 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
   debug('Issue revenue share')
   const duration = 35
   const allocation = new BN(100000000000)
-  const start = (await api.getBestBlock()).toNumber() 
+  const start = (await api.getBestBlock()).toNumber()
   const issueRevenueShare = new IssueRevenueShareFixture(
     api,
     query,
