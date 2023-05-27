@@ -38,8 +38,7 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     return [this.memberAddress]
   }
 
-  public async preExecHook(): Promise<void> {
-  }
+  public async preExecHook(): Promise<void> {}
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     return [this.api.tx.projectToken.participateInSplit(this.tokenId, this.memberId, this.amount)]
@@ -51,7 +50,7 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'UserParticipatedInSplit')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, stakedAmount, joyDividend] = this.events[0].event.data
@@ -60,7 +59,9 @@ export class ParticipateInShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShareParticipation = await this.query.retryQuery(() => this.query.getRevenueShareParticpationById(revenueShareId, tokenId, memberId))
+    const qRevenueShareParticipation = await this.query.retryQuery(() =>
+      this.query.getRevenueShareParticpationById(revenueShareId, tokenId, memberId)
+    )
 
     assert.isNotNull(qRevenueShareParticipation)
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())

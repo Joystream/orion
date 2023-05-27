@@ -32,6 +32,7 @@ export class ActivateAmmFixture extends StandardizedFixture {
     this.channelId = channelId
     this.parameters = parameters
   }
+
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
@@ -78,5 +79,5 @@ export class ActivateAmmFixture extends StandardizedFixture {
     assert.equal(qAmm!.finalized, false)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

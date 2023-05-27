@@ -76,5 +76,5 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     // assert.equal(qRevenueShare!.finalized, true)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

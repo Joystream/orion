@@ -25,7 +25,9 @@ import {
   GetAmmById,
   ChannelFieldsFragment,
   GetChannelById,
-  GetRevenueShareParticipationById
+  GetRevenueShareParticipationById,
+  AmmTranactionFieldsFragment,
+  GetAmmTransactionById,
 } from '../graphql/generated/queries'
 
 export class OrionApi {
@@ -128,7 +130,7 @@ export class OrionApi {
     this.debugQuery(query, variables)
     return (
       (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
-      resultKey
+        resultKey
       ] || null
     )
   }
@@ -172,14 +174,8 @@ export class OrionApi {
     return this.firstEntityQuery(GetTokenAccountById, { id: id }, 'tokenAccountById')
   }
 
-  public async getRevenueShareById(
-    id: string
-  ): Promise<RevenueShareFieldsFragment> {
-    return this.firstEntityQuery(
-      GetRevenueShareById,
-      { id },
-      'revenueShareById'
-    )
+  public async getRevenueShareById(id: string): Promise<RevenueShareFieldsFragment> {
+    return this.firstEntityQuery(GetRevenueShareById, { id }, 'revenueShareById')
   }
 
   public async getRevenueShareParticpationById(
@@ -213,5 +209,9 @@ export class OrionApi {
 
   public async getChannelById(id: number): Promise<ChannelFieldsFragment> {
     return this.firstEntityQuery(GetChannelById, { id: id.toString() }, 'channelById')
+  }
+
+  public async getAmmTransactionById(id: string): Promise<AmmTranactionFieldsFragment> {
+    return this.firstEntityQuery(GetAmmTransactionById, { id }, 'ammTransactionById')
   }
 }
