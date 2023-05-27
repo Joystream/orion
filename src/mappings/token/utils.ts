@@ -71,7 +71,6 @@ export function issuedRevenueShareForToken(token: Flat<Token>): string {
   return revenueShareId(BigInt(token.id), _revId)
 }
 
-
 export async function burnFromVesting(
   overlay: EntityManagerOverlay,
   accountId: string,

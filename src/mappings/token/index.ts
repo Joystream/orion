@@ -316,7 +316,7 @@ export async function processTokensBoughtOnAmmEvent({
   overlay.getRepository(AmmTransaction).new({
     ammId: ammId.toString(),
     accountId: tokenAccountId(tokenId, memberId),
-    id: ammId.toString() + tokenAccountId(tokenId, memberId),
+    id: overlay.getRepository(AmmTransaction).getNextIdNumber().toString(),
     transactionType: AmmTransactionType.BUY,
     createdIn: block.height,
     quantity: crtMinted,
@@ -345,7 +345,7 @@ export async function processTokensSoldOnAmmEvent({
   overlay.getRepository(AmmTransaction).new({
     ammId,
     accountId: tokenAccountId(tokenId, memberId),
-    id: ammId + tokenAccountId(tokenId, memberId),
+    id: overlay.getRepository(AmmTransaction).getNextIdNumber().toString(),
     transactionType: AmmTransactionType.SELL,
     createdIn: block.height,
     quantity: crtBurned,
@@ -464,7 +464,7 @@ export async function processAmmDeactivatedEvent({
 
   const ammCurve = await overlay
     .getRepository(AmmCurve)
-    .getByIdOrFail(tokenAmmId(tokenId, token.ammNonce))
+    .getByIdOrFail(ammIdForToken(token))
   ammCurve.finalized = true
 }
 
