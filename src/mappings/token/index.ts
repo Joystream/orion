@@ -26,7 +26,7 @@ import {
   tokenAccountId,
   tokenAmmId,
   tokenSaleId,
-  ammId,
+  ammIdForToken,
   VestingScheduleData,
   issuedRevenueShareForToken,
 } from './utils'
@@ -310,7 +310,7 @@ export async function processTokensBoughtOnAmmEvent({
     buyerAccount!.totalAmount += crtMinted
   }
 
-  const ammId = tokenAmmId(tokenId, token.ammNonce)
+  const ammId = ammIdForToken(token)
   const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId)
   amm.mintedByAmm += crtMinted
   overlay.getRepository(AmmTransaction).new({
@@ -334,15 +334,16 @@ export async function processTokensSoldOnAmmEvent({
 }: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= crtBurned
+  const ammId = ammIdForToken(token)
 
   const sellerAccount = await overlay.getTokenAccountOrFail(tokenId, memberId)
   sellerAccount.totalAmount -= crtBurned
 
-  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId(token))
+  const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId)
   amm.burnedByAmm += crtBurned
 
   overlay.getRepository(AmmTransaction).new({
-    ammId: ammId(token),
+    ammId,
     accountId: tokenAccountId(tokenId, memberId),
     id: ammId + tokenAccountId(tokenId, memberId),
     transactionType: AmmTransactionType.SELL,

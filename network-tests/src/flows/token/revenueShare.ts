@@ -74,9 +74,9 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
   const finalizeRevenueShareFixture = new FinalizeRevenueShareFixture(
     api,
     query,
-    firstHolderAddress,
-    firstHolderMemberId,
-    tokenId
+    creatorAddress,
+    creatorMemberId,
+    channelId
   )
   await finalizeRevenueShareFixture.preExecHook()
   await new FixtureRunner(finalizeRevenueShareFixture).runWithQueryNodeChecks()

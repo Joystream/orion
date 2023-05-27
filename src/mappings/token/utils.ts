@@ -57,6 +57,11 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
   return tokenId.toString() + ammNonce.toString()
 }
 
+export function ammIdForToken(token: Flat<Token>): string {
+  const _ammNonce = token.ammNonce - 1
+  return tokenAmmId(BigInt(token.id), _ammNonce)
+}
+
 export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
   return tokenId.toString() + revenueNonce.toString()
 }

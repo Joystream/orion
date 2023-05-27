@@ -208,7 +208,7 @@ export class OrionApi {
   }
 
   public async getAmmById(id: string): Promise<AmmCurvFieldsFragment> {
-    return this.firstEntityQuery(GetAmmById, { id }, 'ammCurveId')
+    return this.firstEntityQuery(GetAmmById, { id }, 'ammCurveById')
   }
 
   public async getChannelById(id: number): Promise<ChannelFieldsFragment> {
