@@ -6,6 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
+import { Utils } from '../../utils'
 
 type TokensBoughtOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensBoughtOnAmm'>>
 
@@ -57,6 +58,7 @@ export class BuyOnAmmFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
+    await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
     const qAccount = await this.query.retryQuery(() =>
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
     )
@@ -73,6 +75,7 @@ export class BuyOnAmmFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, crtMinted] = this.events[0].event.data
+    Utils.wait(20000)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     const qAccount = await this.query.retryQuery(() =>
       this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
@@ -88,5 +91,5 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qAccount!.totalAmount, amountPost.toString())
     // TODO: check transaction
   }
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }
