@@ -25,14 +25,18 @@ export class DirectChannelPaymentFixture extends StandardizedFixture {
     this.paymentParams = paymentParams
   }
 
-  protected async getEventFromResult(result: ISubmittableResult): Promise<MemberRemarkedEventDetails> {
+  protected async getEventFromResult(
+    result: ISubmittableResult
+  ): Promise<MemberRemarkedEventDetails> {
     return this.api.getEventDetails(result, 'members', 'MemberRemarked')
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return await Promise.all(
       this.paymentParams.map(async ({ asMember }) =>
-        (await this.api.query.members.membershipById(asMember)).unwrap().controllerAccount.toString()
+        (await this.api.query.members.membershipById(asMember))
+          .unwrap()
+          .controllerAccount.toString()
       )
     )
   }
@@ -50,10 +54,7 @@ export class DirectChannelPaymentFixture extends StandardizedFixture {
     })
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {
-    
-  }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
-  async runQueryNodeChecks(): Promise<void> {
-  }
+  async runQueryNodeChecks(): Promise<void> {}
 }
