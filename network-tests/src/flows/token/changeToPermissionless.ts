@@ -5,7 +5,11 @@ import { expect } from 'chai'
 import { Resource } from '../../Resources'
 import { ChangeToPermissionlessFixture } from '../../fixtures/token/ChangeToPermissionlessFixture'
 
-export default async function changeToPermissionlessFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function changeToPermissionlessFlow({
+  api,
+  query,
+  lock,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:change to Permissionless')
   debug('Started')
   api.enableDebugTxLogs()

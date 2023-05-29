@@ -26,7 +26,7 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     query: OrionApi,
     memberAddress: string,
     memberId: number,
-    tokenId: number,
+    tokenId: number
   ) {
     super(api, query)
     this.memberId = memberId
@@ -54,11 +54,9 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     this.tokenAccountNumberPre = qToken!.accountsNum
     const commit = blake2AsHex(this.memberId.toString()).toString()
-    this.proof = this.api.createType('PalletProjectTokenMerkleProof', [[ 
-      commit,
-      this.api.createType('PalletProjectTokenMerkleSide', 'Left')
-    ]])
-
+    this.proof = this.api.createType('PalletProjectTokenMerkleProof', [
+      [commit, this.api.createType('PalletProjectTokenMerkleSide', 'Left')],
+    ])
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

@@ -21,7 +21,9 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   const [firstHolderAccountId, firstHolderMemberId] = api.firstHolder
   unlockFirstHolderAccess()
 
-  const firstHolderTokenBalance = (await api.query.projectToken.accountInfoByTokenAndMember(tokenId, firstHolderMemberId)).amount.toBn()
+  const firstHolderTokenBalance = (
+    await api.query.projectToken.accountInfoByTokenAndMember(tokenId, firstHolderMemberId)
+  ).amount.toBn()
   const burnTokenFixture = new BurnTokensFixture(
     api,
     query,
