@@ -7,6 +7,7 @@ import { Api } from '../../Api'
 import { u32 } from '@polkadot/types/primitive'
 import { BN } from 'bn.js'
 import { assert } from 'chai'
+import { Utils } from '../../Utils'
 
 type TokenSaleUpdatedEventDetails = EventDetails<
   EventType<'projectToken', 'UpcomingTokenSaleUpdated'>
@@ -61,12 +62,18 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'UpcomingTokenSaleUpdated')
   }
 
-  public async preExecHook(): Promise<void> {}
+  public async preExecHook(): Promise<void> { }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, newStart, newDuration] = this.events[0].event.data
     const saleId = tokenId.toString() + saleNonce.toString()
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+    await Utils.until('wait for sale to be updated', async ({ debug }) => {
+      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+
+      assert.isNotNull(qSale)
+      return qSale!.startBlock === this.newStartBlock!.toNumber()
+    })
 
     assert.isNotNull(qSale)
     if (newStart.isSome) {
@@ -78,5 +85,5 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.endsAt, qSale!.durationInBlocks + qSale!.startBlock)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

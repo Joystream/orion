@@ -5,26 +5,22 @@ import { TransferFixture } from '../../fixtures/token'
 import { expect } from 'chai'
 import { BN } from 'bn.js'
 import { u128 } from '@polkadot/types/primitive'
-import { Resource } from '../../Resources'
 
-export default async function burnTokens({ api, query, lock }: FlowProps): Promise<void> {
-  const debug = extendDebug('flow:issue-creatorToken')
+export default async function holderTransferFlow({ api, query }: FlowProps): Promise<void> {
+  const debug = extendDebug('flow:holder transfer')
   debug('Started')
   api.enableDebugTxLogs()
 
-  const tokenId = (await api.query.projectToken.nextTokenId()).toNumber() - 1
+  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
+  const tokenId = nextTokenId - 1
   const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(tokenId).gte(1)
+  expect(nextTokenId).gte(1)
   expect(channelId).gte(1)
 
   // retrieve owner info
-  const unlockCreatorAccess = await lock(Resource.Creator)
-  const [creatorAddress] = api.creator
-  unlockCreatorAccess()
+  const [creatorAddress, creatorMemberId] = api.creator
 
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [, firstHolderMemberId] = api.firstHolder
-  unlockFirstHolderAccess()
 
   // tuple with first member id and amount
   const outputs: [number, u128][] = [[firstHolderMemberId, api.createType('u128', new BN(1000))]]
@@ -34,7 +30,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
     api,
     query,
     creatorAddress,
-    firstHolderMemberId,
+    creatorMemberId,
     tokenId,
     outputs,
     metadata

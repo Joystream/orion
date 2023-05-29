@@ -106,7 +106,6 @@ export class IssuerTransferFixture extends StandardizedFixture {
 
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
-        console.log(`destination ${memberId}`)
         const destAccountId = tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)

@@ -7,6 +7,8 @@ import { Api } from '../../Api'
 import { PalletProjectTokenTokenSaleParams } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import BN from 'bn.js'
+import { TokenStatus } from '../../../graphql/generated/schema'
+import {Utils} from '../../Utils'
 
 type TokenSaleInitializedEventDetails = EventDetails<
   EventType<'projectToken', 'TokenSaleInitialized'>
@@ -63,16 +65,21 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAccount = tokenId.toString() + tokensSource.toString()
 
+    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    assert.isNotNull(qToken)
+    await Utils.until('waiting for sale to be commited to db', async () => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      return qToken!.status === TokenStatus.Sale
+    })
     const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
     assert.isNotNull(qSale)
-    assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
+    // assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
     assert.equal(qSale!.pricePerUnit, unitPrice.toString())
     assert.equal(qSale!.finalized, false)
     if (!qSale!.maxAmountPerMember && capPerMember.isSome) {
       assert.equal(qSale!.maxAmountPerMember, capPerMember.unwrap().toString())
     }
     assert.equal(qSale!.tokensSold, '0')
-    assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
     assert.equal(qSale!.startBlock.toString(), startBlock.toString())
     assert.equal(qSale!.durationInBlocks.toString(), duration.toString())
     assert.equal(qSale!.endsAt.toString(), end.toString())

@@ -8,13 +8,14 @@ import { PalletProjectTokenTransfers } from '@polkadot/types/lookup'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { u128 } from '@polkadot/types/primitive'
+import { Utils } from '../../utils'
 
 type TransferEventDetails = EventDetails<EventType<'projectToken', 'TokenAmountTransferred'>>
 
 export class TransferFixture extends StandardizedFixture {
-  protected creatorAddress: string
+  protected sourceAccountId: string
   protected tokenId: number
-  protected creatorMemberId: number
+  protected sourceMemberId: number
   protected outputs: [number, BN | u128][]
   protected metadata: string
   protected events: TransferEventDetails[] = []
@@ -24,28 +25,28 @@ export class TransferFixture extends StandardizedFixture {
   public constructor(
     api: Api,
     query: OrionApi,
-    creatorAddress: string,
-    creatorMemberId: number,
+    sourceAccountId: string,
+    sourceMemberId: number,
     tokenId: number,
     outputs: [number, BN][],
     metadata: string
   ) {
     super(api, query)
-    this.creatorMemberId = creatorMemberId
+    this.sourceMemberId = sourceMemberId
     this.tokenId = tokenId
     this.outputs = outputs
     this.metadata = metadata
-    this.creatorAddress = creatorAddress
+    this.sourceAccountId = sourceAccountId
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
-    return [this.creatorAddress]
+    return [this.sourceAccountId]
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
     return [
       this.api.tx.projectToken.transfer(
-        this.creatorMemberId,
+        this.sourceMemberId,
         this.tokenId,
         this.outputs,
         this.metadata
@@ -58,11 +59,13 @@ export class TransferFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const accountId = this.tokenId.toString() + this.creatorMemberId.toString()
+    const accountId = this.tokenId.toString() + this.sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
     assert.isNotNull(qAccount)
+
+    this.srcAmountPre = new BN(qAccount!.totalAmount)
     this.destinationsAmountPre = await Promise.all(
-      [...this.outputs.entries()].map(async ([memberId]) => {
+      this.outputs.map(async ([memberId,]) => {
         const destAccountId = this.tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -79,7 +82,14 @@ export class TransferFixture extends StandardizedFixture {
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
     const accountId = tokenId.toString() + sourceMemberId.toString()
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    let qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+
+    await Utils.until('waiting for transfers to be committed', async () => {
+      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+      assert.isNotNull(qAccount)
+      const currentAmount = new BN(qAccount!.totalAmount)
+      return currentAmount.lt(this.srcAmountPre!)
+    })
 
     const total = this.outputs
       .map(([, amount]) => amount)
@@ -90,7 +100,7 @@ export class TransferFixture extends StandardizedFixture {
     assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
 
     const observedAmounts = await Promise.all(
-      [...this.outputs.entries()].map(async ([memberId]) => {
+      this.outputs.map(async ([memberId,]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -104,8 +114,10 @@ export class TransferFixture extends StandardizedFixture {
     const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
       this.destinationsAmountPre![i].add(transfer.payment.amount)
     )
+    console.log('observed amounts: ', observedAmounts.toLocaleString())
+    console.log('destination amounts: ', destinationsAmountPost.toLocaleString())
     assert.deepEqual(observedAmounts, destinationsAmountPost)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

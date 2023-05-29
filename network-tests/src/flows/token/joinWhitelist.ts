@@ -17,7 +17,7 @@ export default async function joinWhitelist({ api, query, lock }: FlowProps): Pr
   expect(channelId).gte(1)
 
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
-  const [, firstHolderMemberId] = api.firstHolder
+  const [firstHolderAddress, firstHolderMemberId] = api.firstHolder
   unlockFirstHolderAccess()
 
   const outputs = api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting> ')
@@ -32,7 +32,7 @@ export default async function joinWhitelist({ api, query, lock }: FlowProps): Pr
   const joinWhitelistFixture = new JoinWhitelistFixture(
     api,
     query,
-    creatorAddress,
+    firstHolderAddress,
     firstHolderMemberId,
     tokenId
   )
