@@ -20,9 +20,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   expect(channelId).gte(1)
 
   // retrieve owner info
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
 
   // create membership for first holder
   const firstHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]

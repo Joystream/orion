@@ -6,6 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
+import { Utils } from '../../Utils'
 
 type TokensPurchasedOnSaleEventDetails = EventDetails<
   EventType<'projectToken', 'TokensPurchasedOnSale'>
@@ -19,6 +20,7 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   protected events: TokensPurchasedOnSaleEventDetails[] = []
   protected amountPre: BN | undefined
   protected tokenSoldPre: BN | undefined
+  protected plaftormFeePre: BN | undefined
 
   public constructor(
     api: Api,
@@ -52,8 +54,12 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const accountId = this.tokenId.toString() + this.memberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-    assert.isNotNull(qAccount)
-    this.amountPre = new BN(qAccount!.totalAmount)
+    if (qAccount) {
+      this.amountPre = new BN(qAccount!.totalAmount)
+    } else {
+      this.amountPre = new BN(0)
+    }
+    this.plaftormFeePre = (await this.api.query.projectToken.salePlatformFee()).toBn()
 
     const saleNonce = (
       await this.api.query.projectToken.tokenInfoById(this.tokenId)
@@ -63,18 +69,36 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
 
     assert.isNotNull(qSale)
     this.tokenSoldPre = new BN(qSale!.tokensSold)
+
+    await Utils.until('waiting for sale to start', async () => {
+      const token = await this.api.query.projectToken.tokenInfoById(this.tokenId)
+      const currentBlock = await this.api.getBestBlock()
+      if (token.sale.isSome) {
+        const { startBlock } = token.sale.unwrap()
+        return currentBlock >= startBlock.toBn()
+      }
+      return false
+    })
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, amountPurchased, memberId] = this.events[0].event.data
-
     const amountPost = this.amountPre!.add(amountPurchased)
     const tokenSoldPost = this.tokenSoldPre!.add(amountPurchased)
     const saleId = tokenId.toString() + saleNonce.toString()
     const accountId = tokenId.toString() + memberId.toString()
 
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+    let qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+
+    await Utils.until('waiting for token sale to be update', async () => {
+      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+      assert.isNotNull(qAccount)
+      const currentAmount = new BN(qAccount!.totalAmount)
+      const currentTokensSold = new BN(qSale!.tokensSold)
+      return currentAmount.gt(this.amountPre!) && currentTokensSold.gt(this.tokenSoldPre!)
+    })
 
     assert.isNotNull(qAccount)
     assert.equal(qAccount!.totalAmount, amountPost.toString())
@@ -91,7 +115,9 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       assert.equal(qVestedAccount!.account.id, accountId)
       assert.equal(qVestedAccount!.vesting.id, vestingId)
     }
+
+    // TODO: sale transaction 
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

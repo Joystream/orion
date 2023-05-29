@@ -6,6 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
+import { Utils } from '../../utils'
 
 type TokenSaleFinalizedEventDetails = EventDetails<EventType<'projectToken', 'TokenSaleFinalized'>>
 
@@ -54,7 +55,7 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     const saleNonce = token.nextSaleId.subn(1)
     const { tokensSource } = token.sale.unwrap()
     const saleId = tokenId.toString() + saleNonce.toString()
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
     const qFundsSource = await this.query.retryQuery(() =>
       this.query.getTokenAccountById(tokenId.toString() + tokensSource.toString())
     )
@@ -64,22 +65,40 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     assert.isNotNull(qFundsSource)
 
     this.fundsSourceAmountPre = new BN(qFundsSource!.totalAmount)
+
+    await Utils.until('waiting for the sale to end', async ({ debug }) => {
+      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+      let endBlock = qSale!.endsAt
+      const currentBlock = (await this.api.getBestBlock()).toNumber()
+      return endBlock <= currentBlock
+    })
   }
 
   public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId, saleId, quantityLeft] = this.events[0].event.data
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
-
-    assert.isNotNull(qSale)
-    assert.equal(qSale!.finalized, true)
-
+    const [tokenId, saleNonce, quantityLeft] = this.events[0].event.data
+    const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAmountPost = this.fundsSourceAmountPre!.add(quantityLeft)
-    const qFundsSource = await this.query.retryQuery(() =>
+
+    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+    let qFundsSource = await this.query.retryQuery(() =>
       this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
     )
-    assert.isNotNull(qFundsSource)
+    await Utils.until('waiting for the sale to end', async () => {
+      qFundsSource = await this.query.retryQuery(() =>
+        this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
+      )
+      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+
+      assert.isNotNull(qFundsSource)
+      assert.isNotNull(qSale)
+
+      const currFundsSourceAmount = new BN(qFundsSource!.totalAmount)
+      return qSale!.finalized && currFundsSourceAmount > this.fundsSourceAmountPre!
+    })
+
+    assert.equal(qSale!.finalized, true)
     assert.equal(qFundsSource!.totalAmount, fundsSourceAmountPost.toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

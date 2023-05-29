@@ -6,6 +6,8 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
+import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import BN from 'bn.js'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageRateDecreasedTo'>
@@ -17,6 +19,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
   protected channelId: number
   protected targetRate: number
   protected events: PatronageRateDecreasedToEventDetails[] = []
+  protected previousRate: BN | undefined
 
   public constructor(
     api: Api,
@@ -51,14 +54,25 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'PatronageRateDecreasedTo')
   }
 
+  public async preExecHook(): Promise<void> {
+    const tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    assert.isNotNull(qToken)
+    this.previousRate = new BN(qToken!.annualCreatorReward)
+  }
+
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, newRate] = this.events[0].event.data
-    Utils.wait(60000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    let qToken: TokenFieldsFragment | null = null
+    await Utils.until('waiting for patronage rate to be updated in DB', async () => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      assert.isNotNull(qToken)
+      const currentRate = new BN(qToken!.annualCreatorReward)
+      return !currentRate.eq(this.previousRate!)
+    })
 
     assert.isNotNull(qToken)
-    console.log('new Rate vs orion rate', newRate.toString(), qToken!.annualCreatorReward)
     assert.equal(qToken!.annualCreatorReward, newRate.toString())
   }
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

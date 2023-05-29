@@ -11,6 +11,10 @@ import issuerTransfer from '../flows/token/issuerTransfer'
 import patronageFlow from '../flows/token/patronage'
 import revenueShareFlow from '../flows/token/revenueShare'
 import ammFlow from '../flows/token/amm'
+import saleFlow from '../flows/token/tokenSale'
+import changeToPermissionlessFlow from '../flows/token/changeToPermissionless'
+import holderTransferFlow from '../flows/token/transfer'
+import dustAccountFlow from '../flows/token/dustAccount'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Creator Token Test Suite', async ({ job }) => {
@@ -25,8 +29,14 @@ scenario('Creator Token Test Suite', async ({ job }) => {
 
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   const issuerTransferJob = job('Issuer Transfer', issuerTransfer).requires(issueTokenJob)
-  // job('Burn Tokens From Holder', burnTokens).requires(issuerTransferJob)
-  // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  // const revenueShareJob = job('Revenue Share', revenueShareFlow).requires(issuerTransferJob)
-  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(issuerTransferJob)
+  job('Transfer', holderTransferFlow).after(issuerTransferJob)
+  const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
+  // const changeToPermissionlessJob = job('Change To Permissionless', changeToPermissionlessFlow).requires(issuerTransferJob)
+  // const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
+  // const saleJob = job('Sales', saleFlow).after(ammJob)
+  // const revenueShareJob = job('Revenue Share', revenueShareFlow)
+  //   .after(saleJob)
+  //   .after(patronageJob)
+  // const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
+  // job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
 })
