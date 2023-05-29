@@ -97,8 +97,6 @@ export class ApiFactory {
   private creatorMemberId: undefined | number
   private firstHolderAddress: undefined | string
   private firstHolderMemberId: undefined | number
-  private secondHolderAddress: undefined | string
-  private secondHolderMemberId: undefined | number
 
   // getter & setters for creator token actors
   public get creator(): [string, number] {
@@ -107,9 +105,6 @@ export class ApiFactory {
   public get firstHolder(): [string, number] {
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
   }
-  public get secondHolder(): [string, number] {
-    return [this.secondHolderAddress!, this.secondHolderMemberId!]
-  }
   public setCreator(address: string, memberId: number) {
     this.creatorAddress = address
     this.creatorMemberId = memberId
@@ -117,10 +112,6 @@ export class ApiFactory {
   public setFirstHolder(address: string, memberId: number) {
     this.firstHolderAddress = address
     this.firstHolderMemberId = memberId
-  }
-  public setSecondHolder(address: string, memberId: number) {
-    this.secondHolderAddress = address
-    this.secondHolderMemberId = memberId
   }
 
   public static async create(
@@ -353,17 +344,11 @@ export class Api {
   public get firstHolder(): [string, number] {
     return this.factory.firstHolder
   }
-  public get secondHolder(): [string, number] {
-    return this.factory.secondHolder
-  }
   public setCreator(address: string, memberId: number) {
     this.factory.setCreator(address, memberId)
   }
   public setFirstHolder(address: string, memberId: number) {
     this.factory.setFirstHolder(address, memberId)
-  }
-  public setSecondHolder(address: string, memberId: number) {
-    this.factory.setSecondHolder(address, memberId)
   }
 
   public keyGenInfo(): KeyGenInfo {
@@ -593,8 +578,8 @@ export class Api {
   ): EventType<S, M>[] {
     const events = Array.isArray(result)
       ? result
-          .filter(({ event }) => event.section === section && event.method === method)
-          .map(({ event }) => event)
+        .filter(({ event }) => event.section === section && event.method === method)
+        .map(({ event }) => event)
       : result.filterRecords(section, method).map((r) => r.event)
     if (expectedCount && events.length !== expectedCount) {
       throw new Error(
@@ -784,9 +769,9 @@ export class Api {
           : (currentCouncilStage.stage.type as 'Announcing' | 'Idle')
         const currentStageStartedAt = currentCouncilStage.stage.isElection
           ? (currentElectionStage.isVoting
-              ? currentElectionStage.asVoting
-              : currentElectionStage.asRevealing
-            ).started // TODO: check no panic
+            ? currentElectionStage.asVoting
+            : currentElectionStage.asRevealing
+          ).started // TODO: check no panic
           : currentCouncilStage.changedAt
 
         const currentBlock = await this.getBestBlock()
@@ -1439,7 +1424,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-          auctionParams.hasOwnProperty('bidLockDuration')
+        auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }
@@ -1543,7 +1528,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-          auctionParams.hasOwnProperty('bidLockDuration')
+        auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }

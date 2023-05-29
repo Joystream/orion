@@ -9,6 +9,7 @@ import { Utils } from '../../utils'
 import BN from 'bn.js'
 import { u64 } from '@polkadot/types/primitive'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
+import { TokenAccountFieldsFragment } from 'graphql/generated/queries'
 
 type IssuerTransferEventDetails = EventDetails<
   EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
@@ -92,14 +93,22 @@ export class IssuerTransferFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
-    await Utils.wait(20000)
+
     const accountId = tokenId.toString() + sourceMemberId.toString()
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    let qAccount: TokenAccountFieldsFragment | null = null
+    await Utils.until('waiting for issuer tranfer handler to be completed', async () => {
+      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+      assert.isNotNull(qAccount)
+      const currentAmount = new BN(qAccount!.totalAmount)
+      return currentAmount.lt(this.sourceAmountPre!)
+
+    })
 
     const total = this.outputs
       .map(([, payment]) => payment.amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
-    const sourceAmountPost = this.sourceAmountPre!.sub(total)
+
+    const sourceAmountPost = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)).amount.toString()
 
     assert.isNotNull(qAccount)
     assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
@@ -149,5 +158,5 @@ export class IssuerTransferFixture extends StandardizedFixture {
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

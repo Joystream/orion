@@ -104,7 +104,9 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     })
 
     const supplyPost = this.supplyPre!.add(crtMinted)
-    const amountPost = this.amountPre!.add(new BN(1000000).sub(this.ammTransactionFees!.toBn()).div(new BN(1000000)).mul(crtMinted))
+    const amountPost = this.amountPre!.add(
+      new BN(1000000).sub(this.ammTransactionFees!.toBn()).div(new BN(1000000)).mul(crtMinted)
+    )
 
     assert.isNotNull(qAccount)
     assert.isNotNull(qToken)
@@ -116,8 +118,8 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Buy)
     assert.equal(qTransaction!.quantity, crtMinted.toString())
     assert.equal(qTransaction!.pricePaid, joysDeposited.toString())
-    assert.equal(qTransaction!.pricePerUnit, (crtMinted.div(joysDeposited)).toString())
+    assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

@@ -94,10 +94,11 @@ export class TransferFixture extends StandardizedFixture {
     const total = this.outputs
       .map(([, amount]) => amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
-    const sourceAmountPost = this.srcAmountPre!.sub(total)
+
+    const sourceAmountPost = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)).amount.toString()
 
     assert.isNotNull(qAccount)
-    assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
+    assert.equal(qAccount!.totalAmount, sourceAmountPost)
 
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId,]) => {
@@ -114,8 +115,6 @@ export class TransferFixture extends StandardizedFixture {
     const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
       this.destinationsAmountPre![i].add(transfer.payment.amount)
     )
-    console.log('observed amounts: ', observedAmounts.toLocaleString())
-    console.log('destination amounts: ', destinationsAmountPost.toLocaleString())
     assert.deepEqual(observedAmounts, destinationsAmountPost)
   }
 

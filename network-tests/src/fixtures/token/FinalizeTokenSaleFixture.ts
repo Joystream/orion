@@ -100,5 +100,5 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     assert.equal(qFundsSource!.totalAmount, fundsSourceAmountPost.toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
