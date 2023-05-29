@@ -116,8 +116,8 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       assert.equal(qVestedAccount!.vesting.id, vestingId)
     }
 
-    // TODO: sale transaction 
+    // TODO: sale transaction
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

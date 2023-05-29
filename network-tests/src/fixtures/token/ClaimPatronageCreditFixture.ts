@@ -51,14 +51,17 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
-    const qToken = (await this.query.retryQuery(() => this.query.getTokenById(tokenId)))
-    const qAccount = (await this.query.retryQuery(() => this.query.getTokenAccountById(tokenId.toString() + this.creatorMemberId.toString())))
+    const tokenId = (
+      await this.api.query.content.channelById(this.channelId)
+    ).creatorTokenId.unwrap()
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qAccount = await this.query.retryQuery(() =>
+      this.query.getTokenAccountById(tokenId.toString() + this.creatorMemberId.toString())
+    )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
     this.supplyPre = new BN(qToken!.totalSupply)
     this.amountPre = new BN(qAccount!.totalAmount)
-
   }
 
   public async runQueryNodeChecks(): Promise<void> {
@@ -81,12 +84,16 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
       return currentSupply.gt(this.supplyPre!) && currentAmount.gt(this.amountPre!)
     })
 
-    const supplyPost = (await this.api.query.projectToken.tokenInfoById(tokenId)).totalSupply.toString()
-    const accountAmountPost = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+    const supplyPost = (
+      await this.api.query.projectToken.tokenInfoById(tokenId)
+    ).totalSupply.toString()
+    const accountAmountPost = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+    ).amount.toString()
 
     assert.equal(qToken!.totalSupply, supplyPost)
     assert.equal(qAccount!.totalAmount, accountAmountPost)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

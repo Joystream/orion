@@ -21,7 +21,7 @@ export default async function dustAccountFlow({ api, query, lock }: FlowProps): 
     query,
     firstHolderAddress,
     tokenId,
-    firstHolderMemberId,
+    firstHolderMemberId
   )
   await new FixtureRunner(dustAccountFixture).run()
 }

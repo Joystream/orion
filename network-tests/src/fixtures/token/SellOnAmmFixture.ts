@@ -111,8 +111,8 @@ export class SellOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Sell)
     assert.equal(qTransaction!.quantity, crtBurned.toString())
     assert.equal(qTransaction!.pricePaid, joysRecovered.toString())
-    assert.equal(qTransaction!.pricePerUnit, (crtBurned.div(joysRecovered)).toString())
+    assert.equal(qTransaction!.pricePerUnit, crtBurned.div(joysRecovered).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

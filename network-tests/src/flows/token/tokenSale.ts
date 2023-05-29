@@ -26,13 +26,9 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
   expect(CREATOR_BALANCE > SALE_ALLOCATION.add(FIRST_HOLDER_BALANCE))
 
   // retrieve owner info
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
 
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderId] = api.firstHolder
-  unlockFirstHolderAccess()
 
   // sale params
   debug('issue token sale')
@@ -88,10 +84,6 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [secondHolderAddress])
   await new FixtureRunner(buyMembershipsFixture).run()
   const secondHolderMemberId = buyMembershipsFixture.getCreatedMembers()[0].toNumber()
-
-  const unlockSecondHolderAccess = await lock(Resource.SecondHolder)
-  api.setSecondHolder(secondHolderAddress, secondHolderMemberId)
-  unlockSecondHolderAccess()
 
   await api.treasuryTransferBalance(secondHolderAddress, SALE_ALLOCATION)
   const purchaseTokensOnSaleFixtureWithAccountCreation = new PurchaseTokensOnSaleFixture(

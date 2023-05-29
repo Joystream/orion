@@ -55,7 +55,9 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
+    const tokenId = (
+      await this.api.query.content.channelById(this.channelId)
+    ).creatorTokenId.unwrap()
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
     assert.isNotNull(qToken)
     this.previousRate = new BN(qToken!.annualCreatorReward)
@@ -74,5 +76,5 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert.equal(qToken!.annualCreatorReward, newRate.toString())
   }
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

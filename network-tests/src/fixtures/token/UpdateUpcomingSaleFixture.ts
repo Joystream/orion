@@ -62,7 +62,7 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'UpcomingTokenSaleUpdated')
   }
 
-  public async preExecHook(): Promise<void> { }
+  public async preExecHook(): Promise<void> {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, newStart, newDuration] = this.events[0].event.data
@@ -85,5 +85,5 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.endsAt, qSale!.durationInBlocks + qSale!.startBlock)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

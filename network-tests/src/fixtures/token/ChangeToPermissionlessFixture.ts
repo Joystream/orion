@@ -47,7 +47,9 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const _tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
+    const _tokenId = (
+      await this.api.query.content.channelById(this.channelId)
+    ).creatorTokenId.unwrap()
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
     assert.equal(qToken!.isInviteOnly, true)
@@ -65,5 +67,5 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
     assert.equal(qToken!.isInviteOnly, false)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

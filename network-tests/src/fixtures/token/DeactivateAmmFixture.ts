@@ -56,7 +56,7 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     this.supplyPre = new BN(qToken!.totalSupply)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, burnedAmount] = this.events[0].event.data
     let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
