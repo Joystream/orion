@@ -462,9 +462,7 @@ export async function processAmmDeactivatedEvent({
   token.totalSupply -= burnedAmount
   token.status = TokenStatus.IDLE
 
-  const ammCurve = await overlay
-    .getRepository(AmmCurve)
-    .getByIdOrFail(ammIdForToken(token))
+  const ammCurve = await overlay.getRepository(AmmCurve).getByIdOrFail(ammIdForToken(token))
   ammCurve.finalized = true
 }
 
