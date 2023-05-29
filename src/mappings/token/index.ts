@@ -110,7 +110,7 @@ export async function processTokenAmountTransferredEvent({
         tokenId,
         validatedMemberId.value
       )
-      destinationAccount.totalAmount -= validatedPayment.payment.amount
+      destinationAccount.totalAmount += validatedPayment.payment.amount
     } else {
       const token = await overlay.getTokenOrFail(tokenId)
       createAccount(overlay, token, validatedMemberId.value, validatedPayment.payment.amount)
@@ -386,7 +386,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const vestingForSale = await overlay
     .getRepository(VestedSale)
     .getOneByRelation('saleId', tokenSaleId(tokenId, saleId))
-  if (!vestingForSale) {
+  if (vestingForSale !== undefined) {
     overlay.getRepository(VestedAccount).new({
       id: tokenAccountId(tokenId, memberId) + vestingForSale!.id,
       accountId: tokenAccountId(tokenId, memberId),

@@ -5,6 +5,7 @@ import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
+import { Utils } from '../../utils'
 
 type ChangeToPermissionlessEventDetails = EventDetails<
   EventType<'projectToken', 'TransferPolicyChangedToPermissionless'>
@@ -45,13 +46,24 @@ export class ChangeToPermissionlessFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TransferPolicyChangedToPermissionless')
   }
 
-  public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId] = this.events[0].event.data
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-
+  public async preExecHook(): Promise<void> {
+    const _tokenId = (await this.api.query.content.channelById(this.channelId)).creatorTokenId.unwrap()
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
-    const revenueShareId = qToken!.revenueShareNonce.toString() + tokenId.toString()
+    assert.equal(qToken!.isInviteOnly, true)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public async runQueryNodeChecks(): Promise<void> {
+    const [tokenId] = this.events[0].event.data
+    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    await Utils.until('waiting for token to be permissionless', async () => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      return qToken!.isInviteOnly === false
+    })
+
+    assert.isNotNull(qToken)
+    assert.equal(qToken!.isInviteOnly, false)
+  }
+
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

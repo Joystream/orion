@@ -42,7 +42,6 @@ export class BuyOnAmmFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const deadline = null
     const slippageTolerance = null
     return [
       this.api.tx.projectToken.buyOnAmm(
@@ -99,8 +98,8 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
     const qAmmCurve = await this.query.retryQuery(() => this.query.getAmmById(ammId))
 
-    assert.isNotNull(qAmmCurve)
     const qTransaction = qAmmCurve!.transactions.find((qTx) => {
+      assert.isNotNull(qAmmCurve)
       return qTx !== null && qTx.transactionType === AmmTransactionType.Buy
     })
 

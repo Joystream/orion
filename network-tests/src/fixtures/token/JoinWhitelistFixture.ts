@@ -4,9 +4,10 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletProjectTokenMerkleProof } from '@polkadot/types/lookup'
+import { PalletProjectTokenMerkleProof, PalletProjectTokenMerkleSide } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import BN from 'bn.js'
+import { blake2AsHex } from '@polkadot/util-crypto'
 
 type MemberJoinedWhitelistEventDetails = EventDetails<
   EventType<'projectToken', 'MemberJoinedWhitelist'>
@@ -17,7 +18,7 @@ export class JoinWhitelistFixture extends StandardizedFixture {
   protected memberAddress: string
   protected tokenId: number
   protected events: MemberJoinedWhitelistEventDetails[] = []
-  protected proof: PalletProjectTokenMerkleProof
+  protected proof: PalletProjectTokenMerkleProof | undefined
   protected tokenAccountNumberPre: number | undefined
 
   public constructor(
@@ -26,13 +27,11 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     memberAddress: string,
     memberId: number,
     tokenId: number,
-    proof: PalletProjectTokenMerkleProof
   ) {
     super(api, query)
     this.memberId = memberId
     this.memberAddress = memberAddress
     this.tokenId = tokenId
-    this.proof = proof
   }
 
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
@@ -40,7 +39,7 @@ export class JoinWhitelistFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [this.api.tx.projectToken.joinWhitelist(this.memberId, this.tokenId, this.proof)]
+    return [this.api.tx.projectToken.joinWhitelist(this.memberId, this.tokenId, this.proof!)]
   }
 
   protected async getEventFromResult(
@@ -54,6 +53,12 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
     this.tokenAccountNumberPre = qToken!.accountsNum
+    const commit = blake2AsHex(this.memberId.toString()).toString()
+    this.proof = this.api.createType('PalletProjectTokenMerkleProof', [[ 
+      commit,
+      this.api.createType('PalletProjectTokenMerkleSide', 'Left')
+    ]])
+
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

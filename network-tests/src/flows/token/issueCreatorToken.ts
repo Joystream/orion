@@ -8,6 +8,7 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { Resource } from '../../Resources'
+import { CREATOR_BALANCE } from '../../consts'
 
 export default async function issueCreatorToken({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -30,7 +31,7 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   initialAllocation.set(
     channelOwnerMemberId,
     api.createType('PalletProjectTokenTokenAllocation', {
-      'amount': new BN(100000000),
+      'amount': CREATOR_BALANCE,
     })
   )
   const symbol = blake2AsHex('test')
