@@ -61,9 +61,12 @@ export class TransferFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const accountId = this.tokenId.toString() + this.sourceMemberId.toString()
     const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-    assert.isNotNull(qAccount)
 
-    this.srcAmountPre = new BN(qAccount!.totalAmount)
+    if (qAccount === null) {
+      this.srcAmountPre = new BN(0)
+    } else {
+      this.srcAmountPre = new BN(qAccount!.totalAmount)
+    }
     this.destinationsAmountPre = await Promise.all(
       this.outputs.map(async ([memberId,]) => {
         const destAccountId = this.tokenId.toString() + memberId.toString()

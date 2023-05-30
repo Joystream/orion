@@ -3,18 +3,17 @@ import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { IssuerTransferFixture } from '../../fixtures/token'
 import { expect } from 'chai'
-import { BN } from 'bn.js'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { Resource } from '../../Resources'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
+import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 
-export default async function burnTokens({ api, query, lock }: FlowProps): Promise<void> {
-  const debug = extendDebug('flow:issuer-transfer')
+export default async function issuerTransferWithAccountCreationAndNoVestingFlow({ api, query, lock }: FlowProps): Promise<void> {
+  const debug = extendDebug(':issuer-transfer with account creation and no vesting')
   debug('Started')
   api.enableDebugTxLogs()
 
   const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
   const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
   expect(nextTokenId).gte(1)
   expect(channelId).gte(1)
@@ -32,7 +31,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
     [
       firstHolderMemberId,
       api.createType('PalletProjectTokenPaymentWithVesting', {
-        amount: api.createType('u128', new BN(1000000)),
+        amount: api.createType('u128', DEFAULT_TRANSFER_AMOUNT),
       }),
     ],
   ]
