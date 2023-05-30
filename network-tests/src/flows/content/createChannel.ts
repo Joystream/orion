@@ -7,7 +7,7 @@ import { BTreeSet, u64 } from '@polkadot/types-codec'
 import { BN } from 'bn.js'
 import { Api } from '../../Api'
 
-async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
+export async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
   const { numberOfStorageBuckets } = await api.query.storage.dynamicBagCreationPolicies('Channel')
   const storageBuckets = api.createType('BTreeSet<u64>')
   for (let i = 0; numberOfStorageBuckets.toBn().gtn(i); ++i) {

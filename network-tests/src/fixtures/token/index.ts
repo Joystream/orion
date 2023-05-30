@@ -1,4 +1,5 @@
 export { IssueCreatorTokenFixture } from './IssueCreatorToken'
+export { DeissueCreatorTokenFixture } from './DeissueCreatorTokenFixture'
 export { BurnTokensFixture } from './BurnTokensFixture'
 export { IssuerTransferFixture } from './IssuerTransferFixture'
 export { TransferFixture } from './TransferFixture'

@@ -68,7 +68,7 @@ export class TransferFixture extends StandardizedFixture {
       this.srcAmountPre = new BN(qAccount!.totalAmount)
     }
     this.destinationsAmountPre = await Promise.all(
-      this.outputs.map(async ([memberId,]) => {
+      this.outputs.map(async ([memberId]) => {
         const destAccountId = this.tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -98,13 +98,15 @@ export class TransferFixture extends StandardizedFixture {
       .map(([, amount]) => amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
 
-    const sourceAmountPost = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)).amount.toString()
+    const sourceAmountPost = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)
+    ).amount.toString()
 
     assert.isNotNull(qAccount)
     assert.equal(qAccount!.totalAmount, sourceAmountPost)
 
     const observedAmounts = await Promise.all(
-      this.outputs.map(async ([memberId,]) => {
+      this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
         const qDestAccount = await this.query.retryQuery(() =>
           this.query.getTokenAccountById(destAccountId)
@@ -121,5 +123,5 @@ export class TransferFixture extends StandardizedFixture {
     assert.deepEqual(observedAmounts, destinationsAmountPost)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
