@@ -15,7 +15,7 @@ export default async function issuerTransferWithExistingAccountAndNoVestingFlow(
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
+  const channelId = api.channel
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator

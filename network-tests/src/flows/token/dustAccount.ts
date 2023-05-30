@@ -9,7 +9,7 @@ export default async function dustAccountFlow({ api, query, lock }: FlowProps): 
   debug('Started')
   api.enableDebugTxLogs()
 
-  const tokenId = (await api.query.projectToken.nextTokenId()).toNumber() - 1
+  const tokenId = api.token
 
   const unlockFirstHolderaccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderMemberId] = api.firstHolder

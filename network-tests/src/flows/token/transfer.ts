@@ -12,11 +12,8 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1)
-  expect(channelId).gte(1)
+  const channelId = api.channel
+  const tokenId = api.token
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator

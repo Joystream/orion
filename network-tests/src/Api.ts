@@ -39,6 +39,7 @@ import BN from 'bn.js'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Sender, LogLevel } from './sender'
 import { Utils } from './utils'
+import { assert } from 'chai'
 
 import { extendDebug } from './Debugger'
 import { DispatchError } from '@polkadot/types/interfaces/system'
@@ -97,12 +98,32 @@ export class ApiFactory {
   private creatorMemberId: undefined | number
   private firstHolderAddress: undefined | string
   private firstHolderMemberId: undefined | number
+  private tokenId: undefined | number
+  private channelId: undefined | number
+
+  // getter and setters for channel and tokenId
+  public get channel(): number {
+    assert(this.channelId !== undefined)
+    return this.channelId!
+  }
+  public get token(): number {
+    assert(this.tokenId !== undefined)
+    return this.tokenId!
+  }
+  public setChannel(channelId: number) {
+    this.channelId = channelId
+  }
+  public setToken(tokenId: number) {
+    this.tokenId = tokenId
+  }
 
   // getter & setters for creator token actors
   public get creator(): [string, number] {
+    assert(this.creatorAddress !== undefined)
     return [this.creatorAddress!, this.creatorMemberId!]
   }
   public get firstHolder(): [string, number] {
+    assert(this.firstHolderAddress !== undefined)
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
   }
   public setCreator(address: string, memberId: number) {
@@ -350,6 +371,18 @@ export class Api {
   public setFirstHolder(address: string, memberId: number) {
     this.factory.setFirstHolder(address, memberId)
   }
+  public setToken(tokenId: number) {
+    this.factory.setToken(tokenId)
+  }
+  public setChannel(channelId: number) {
+    this.factory.setChannel(channelId)
+  }
+  public get channel(): number {
+    return this.factory.channel
+  }
+  public get token(): number {
+    return this.factory.token
+  }
 
   public keyGenInfo(): KeyGenInfo {
     return this.factory.keyGenInfo()
@@ -578,8 +611,8 @@ export class Api {
   ): EventType<S, M>[] {
     const events = Array.isArray(result)
       ? result
-          .filter(({ event }) => event.section === section && event.method === method)
-          .map(({ event }) => event)
+        .filter(({ event }) => event.section === section && event.method === method)
+        .map(({ event }) => event)
       : result.filterRecords(section, method).map((r) => r.event)
     if (expectedCount && events.length !== expectedCount) {
       throw new Error(
@@ -769,9 +802,9 @@ export class Api {
           : (currentCouncilStage.stage.type as 'Announcing' | 'Idle')
         const currentStageStartedAt = currentCouncilStage.stage.isElection
           ? (currentElectionStage.isVoting
-              ? currentElectionStage.asVoting
-              : currentElectionStage.asRevealing
-            ).started // TODO: check no panic
+            ? currentElectionStage.asVoting
+            : currentElectionStage.asRevealing
+          ).started // TODO: check no panic
           : currentCouncilStage.changedAt
 
         const currentBlock = await this.getBestBlock()
@@ -1424,7 +1457,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-          auctionParams.hasOwnProperty('bidLockDuration')
+        auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }
@@ -1528,7 +1561,7 @@ export class Api {
       'PalletContentNftTypesInitTransactionalStatusRecord',
       auctionParams
         ? // eslint-disable-next-line no-prototype-builtins
-          auctionParams.hasOwnProperty('bidLockDuration')
+        auctionParams.hasOwnProperty('bidLockDuration')
           ? { OpenAuction: auctionParams as OpenAuctionParams }
           : { EnglishAuction: auctionParams as EnglishAuctionParams }
         : { Idle: null }
