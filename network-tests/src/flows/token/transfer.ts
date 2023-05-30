@@ -43,7 +43,6 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
   const token = await api.query.projectToken.tokenInfoById(tokenId)
   expect(token.transferPolicy.isPermissionless)
 
-
   const newHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [newHolderAddress])
   await new FixtureRunner(buyMembershipsFixture).run()
