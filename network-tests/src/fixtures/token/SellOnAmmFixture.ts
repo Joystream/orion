@@ -8,7 +8,6 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { AmmTransactionType } from '../../../graphql/generated/schema'
-import { Permill } from '@polkadot/types/interfaces/runtime'
 
 type TokensSoldOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensSoldOnAmm'>>
 
@@ -20,6 +19,7 @@ export class SellOnAmmFixture extends StandardizedFixture {
   protected events: TokensSoldOnAmmEventDetails[] = []
   protected amountPre: BN | undefined
   protected supplyPre: BN | undefined
+  protected burnedByAmmPre: BN | undefined
 
   public constructor(
     api: Api,
@@ -65,12 +65,17 @@ export class SellOnAmmFixture extends StandardizedFixture {
     const qAccount = await this.query.retryQuery(() =>
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
     )
+
+
     assert.isNotNull(qAccount)
     this.amountPre = new BN(qAccount!.totalAmount)
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
+    const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
+    const qAmmCurve = await this.query.retryQuery(() => this.query.getAmmById(ammId))
+    this.burnedByAmmPre = new BN(qAmmCurve!.burnedByAmm)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
@@ -98,16 +103,17 @@ export class SellOnAmmFixture extends StandardizedFixture {
       return qTx !== null && qTx!.transactionType === AmmTransactionType.Sell
     })
 
-    const supplyPost = this.supplyPre!.sub(crtBurned)
-    const amountPost = this.amountPre!.sub(crtBurned)
-
     assert.isNotNull(qAccount)
     assert.isNotNull(qToken)
     assert(qTransaction !== undefined, 'transaction not found')
 
-    assert.equal(qAmmCurve!.burnedByAmm, crtBurned.toString())
-    assert.equal(qToken!.totalSupply, supplyPost.toString())
-    assert.equal(qAccount!.totalAmount, amountPost.toString())
+    const nodeSupply = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).totalSupply.toString()
+    const nodeAmount = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+    const burnedByAmmPost = this.burnedByAmmPre!.add(crtBurned).toString()
+
+    assert.equal(qAmmCurve!.burnedByAmm, burnedByAmmPost)
+    assert.equal(qToken!.totalSupply, nodeSupply)
+    assert.equal(qAccount!.totalAmount, nodeAmount)
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Sell)
     assert.equal(qTransaction!.quantity, crtBurned.toString())
     assert.equal(qTransaction!.pricePaid, joysRecovered.toString())
