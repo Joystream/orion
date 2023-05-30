@@ -8,7 +8,7 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { Resource } from '../../Resources'
-import { CREATOR_BALANCE } from '../../consts'
+import { CREATOR_BALANCE, FIRST_HOLDER_BALANCE } from '../../consts'
 
 export default async function issueCreatorToken({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -27,11 +27,28 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   expect(channelOwnerMembership.isSome, 'Not possible to retrieve channel owner membership')
   const channelOwnerAddress = channelOwnerMembership.unwrap().controllerAccount.toString()
 
+  // create membership for vested holder
+  const vestedHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
+  const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [vestedHolderAddress])
+  await new FixtureRunner(buyMembershipsFixture).run()
+  const vestedHolderMemberId = buyMembershipsFixture.getCreatedMembers()[0]
+
   const initialAllocation = api.createType('BTreeMap<u64, PalletProjectTokenTokenAllocation>')
   initialAllocation.set(
     channelOwnerMemberId,
     api.createType('PalletProjectTokenTokenAllocation', {
-      'amount': CREATOR_BALANCE,
+      amount: CREATOR_BALANCE,
+    })
+  )
+  initialAllocation.set(
+    vestedHolderMemberId,
+    api.createType('PalletProjectTokenTokenAllocation', {
+      amount: FIRST_HOLDER_BALANCE,
+      vesting: api.createType('Option<VestingSchedule>', {
+        linearVestingDuration: api.createType('u32', new BN(100)),
+        blocksBeforeCliff: api.createType('u32', new BN(10)),
+        cliffAmountPercentage: api.createType('Permill', new BN(100)),
+      })
     })
   )
   const symbol = blake2AsHex('test')
