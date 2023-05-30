@@ -20,7 +20,6 @@ export class BuyOnAmmFixture extends StandardizedFixture {
   protected events: TokensBoughtOnAmmEventDetails[] = []
   protected amountPre: BN | undefined
   protected supplyPre: BN | undefined
-  protected ammTransactionFees: Permill | undefined
 
   public constructor(
     api: Api,
@@ -73,8 +72,6 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
-
-    this.ammTransactionFees = await this.api.query.projectToken.ammBuyTxFees()
   }
 
   public async runQueryNodeChecks(): Promise<void> {
@@ -103,23 +100,22 @@ export class BuyOnAmmFixture extends StandardizedFixture {
       return qTx !== null && qTx.transactionType === AmmTransactionType.Buy
     })
 
-    const supplyPost = this.supplyPre!.add(crtMinted)
-    const amountPost = this.amountPre!.add(
-      new BN(1000000).sub(this.ammTransactionFees!.toBn()).div(new BN(1000000)).mul(crtMinted)
-    )
-
     assert.isNotNull(qAccount)
     assert.isNotNull(qToken)
     assert(qTransaction !== undefined, 'transaction not found')
 
-    assert.equal(qAmmCurve!.mintedByAmm, crtMinted.toString())
-    assert.equal(qToken!.totalSupply, supplyPost.toString())
-    assert.equal(qAccount!.totalAmount, amountPost.toString())
+    const nodeMintedByAmm = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).ammCurve.unwrap().providedSupply.toString()
+    const nodeSupply = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).totalSupply.toString()
+    const nodeAmount = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+
+    assert.equal(qAmmCurve!.mintedByAmm, nodeMintedByAmm)
+    assert.equal(qToken!.totalSupply, nodeSupply)
+    assert.equal(qAccount!.totalAmount, nodeAmount)
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Buy)
     assert.equal(qTransaction!.quantity, crtMinted.toString())
     assert.equal(qTransaction!.pricePaid, joysDeposited.toString())
     assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

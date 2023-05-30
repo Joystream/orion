@@ -31,17 +31,18 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const requiredBasicSetup = job('create Channel', createChannel).requires(storage)
 
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
-  const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
-    job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
-      job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithAccountCreationAndVestingFlow).after(
-        job('Issuer Transfer With Account Creation And No Vesting', issuerTransferWithAccountCreationAndNoVestingFlow).requires(issueTokenJob)
-      )
-    )
-  )
+  const issuerTransferJob = job('Issuer Transfer With Account Creation And No Vesting', issuerTransferWithAccountCreationAndNoVestingFlow).requires(issueTokenJob)
+  // const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
+  //   job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
+  //     job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithAccountCreationAndVestingFlow).after(
+  //       job('Issuer Transfer With Account Creation And No Vesting', issuerTransferWithAccountCreationAndNoVestingFlow).requires(issueTokenJob)
+  //     )
+  //   )
+  // )
   const changeToPermissionlessJob = job('Change To Permissionless', changeToPermissionlessFlow).requires(issuerTransferJob)
-  job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
+  // job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
   // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  // const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
+  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
   // const saleJob = job('Sales', saleFlow).after(ammJob)
   // const revenueShareJob = job('Revenue Share', revenueShareFlow)
   //   .after(saleJob)
