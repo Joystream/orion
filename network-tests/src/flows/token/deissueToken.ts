@@ -42,9 +42,7 @@ export default async function deissueCreatorTokenFlow({ api, query, lock }: Flow
     channelOwnerAddress
   )
   await new FixtureRunner(createChannelFixture).run()
-
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(channelId).gte(1)
+  const channelId = createChannelFixture.getChannelId().toNumber()
 
   // issuer membership
   const initialAllocation = api.createType('BTreeMap<u64, PalletProjectTokenTokenAllocation>')
@@ -76,15 +74,12 @@ export default async function deissueCreatorTokenFlow({ api, query, lock }: Flow
   )
   await new FixtureRunner(issueCreatorTokenFixture).run()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber() 
-  const tokenId = nextTokenId - 1
-  expect(nextTokenId).gte(1)
   const deissueCreatorTokenFixture = new DeissueCreatorTokenFixture(
     api,
     query,
     channelOwnerAddress,
     contentActor,
-    tokenId
+    channelId
   )
   await new FixtureRunner(deissueCreatorTokenFixture).runWithQueryNodeChecks()
 
