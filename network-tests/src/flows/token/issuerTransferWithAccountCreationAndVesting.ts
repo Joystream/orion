@@ -11,13 +11,12 @@ import { BN } from 'bn.js'
 export default async function issuerTransferWithAccountCreationAndVestingFlow({
   api,
   query,
-  lock,
 }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issuer transfer with account creation and vesting')
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
+  const channelId = api.channel
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator

@@ -11,11 +11,7 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1) // make sure token has been issued
-  expect(channelId).gte(1) // make sure channel has been created
+  const tokenId = api.token
 
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAccountId, firstHolderMemberId] = api.firstHolder

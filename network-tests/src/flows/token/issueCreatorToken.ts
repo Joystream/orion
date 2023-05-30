@@ -15,8 +15,7 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(channelId).gte(1)
+  const channelId = api.channel
 
   // retrieve owner info
   const channel = await api.query.content.channelById(new BN(channelId))

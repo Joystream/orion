@@ -31,8 +31,8 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   )
   const requiredBasicSetup = job('create Channel', createChannel).requires(storage)
 
+  const deissueTokenJob = job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
-  job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
     job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
       job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithAccountCreationAndVestingFlow).after(
@@ -46,7 +46,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   ).requires(issuerTransferJob)
   job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
   const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
+  job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
   const saleJob = job('Sales', saleFlow).after(changeToPermissionlessJob)
   const revenueShareJob = job('Revenue Share', revenueShareFlow)
     .after(saleJob)
