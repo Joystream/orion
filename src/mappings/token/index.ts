@@ -115,16 +115,7 @@ export async function processTokenAmountTransferredEvent({
       const token = await overlay.getTokenOrFail(tokenId)
       createAccount(overlay, token, validatedMemberId.value, validatedPayment.payment.amount)
     }
-
-    if (validatedPayment.payment.vestingSchedule) {
-      addVestingSchedule(
-        overlay,
-        validatedPayment.payment.vestingSchedule!,
-        block.height,
-        tokenId,
-        validatedMemberId.value
-      )
-    }
+    // no vesting schedule for transfers as the parameter TransferVestingOf has no vesting options
   }
 }
 
@@ -147,7 +138,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
         tokenId,
         validatedMemberId.value
       )
-      destinationAccount.totalAmount -= validatedPaymentWithVesting.payment.amount
+      destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
     } else {
       const token = await overlay.getTokenOrFail(tokenId)
       createAccount(
@@ -236,7 +227,6 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
-  // TODO: enable the following code below
   const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, fundsSourceMemberId)
   sourceAccount.totalAmount -= tokenSale.quantityLeft
 
