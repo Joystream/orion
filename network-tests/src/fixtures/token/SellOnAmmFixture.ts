@@ -66,7 +66,6 @@ export class SellOnAmmFixture extends StandardizedFixture {
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
     )
 
-
     assert.isNotNull(qAccount)
     this.amountPre = new BN(qAccount!.totalAmount)
     const _tokenId = this.api.createType('u64', this.tokenId)
@@ -107,8 +106,12 @@ export class SellOnAmmFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert(qTransaction !== undefined, 'transaction not found')
 
-    const nodeSupply = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).totalSupply.toString()
-    const nodeAmount = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+    const nodeSupply = (
+      await this.api.query.projectToken.tokenInfoById(this.tokenId)
+    ).totalSupply.toString()
+    const nodeAmount = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+    ).amount.toString()
     const burnedByAmmPost = this.burnedByAmmPre!.add(crtBurned).toString()
 
     assert.equal(qAmmCurve!.burnedByAmm, burnedByAmmPost)

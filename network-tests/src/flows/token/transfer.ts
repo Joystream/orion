@@ -50,7 +50,9 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
 
   const bloatBond = await api.query.projectToken.bloatBond()
   await api.treasuryTransferBalance(firstHolderAddress, bloatBond)
-  const outputsToNewAccount: [number, u128][] = [[newHolderMemberId.toNumber(), api.createType('u128', new BN(1000))]]
+  const outputsToNewAccount: [number, u128][] = [
+    [newHolderMemberId.toNumber(), api.createType('u128', new BN(1000))],
+  ]
 
   const transferFixtureToNewAccount = new TransferFixture(
     api,
@@ -63,5 +65,4 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
   )
   await transferFixtureToNewAccount.preExecHook()
   await new FixtureRunner(transferFixtureToNewAccount).runWithQueryNodeChecks()
-
 }

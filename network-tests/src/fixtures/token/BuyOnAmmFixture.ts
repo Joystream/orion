@@ -104,9 +104,15 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert(qTransaction !== undefined, 'transaction not found')
 
-    const nodeMintedByAmm = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).ammCurve.unwrap().providedSupply.toString()
-    const nodeSupply = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).totalSupply.toString()
-    const nodeAmount = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+    const nodeMintedByAmm = (await this.api.query.projectToken.tokenInfoById(this.tokenId)).ammCurve
+      .unwrap()
+      .providedSupply.toString()
+    const nodeSupply = (
+      await this.api.query.projectToken.tokenInfoById(this.tokenId)
+    ).totalSupply.toString()
+    const nodeAmount = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+    ).amount.toString()
 
     assert.equal(qAmmCurve!.mintedByAmm, nodeMintedByAmm)
     assert.equal(qToken!.totalSupply, nodeSupply)
@@ -117,5 +123,5 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

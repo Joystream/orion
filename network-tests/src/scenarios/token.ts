@@ -18,6 +18,7 @@ import issuerTransferWithAccountCreationAndNoVestingFlow from '../flows/token/is
 import issuerTransferWithAccountCreationAndVestingFlow from '../flows/token/issuerTransferWithAccountCreationAndVesting'
 import issuerTransferWithExistingAccountAndVestingFlow from '../flows/token/issuerTransferWithExistingAccountAndVesting'
 import issuerTransferWithExistingAccountAndNoVestingFlow from '../flows/token/issuerTransferWithExistingAccountAndNoVesting'
+import deissueCreatorTokenFlow from '../flows/token/deissueToken'
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 scenario('Creator Token Test Suite', async ({ job }) => {
@@ -30,8 +31,12 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   )
   const requiredBasicSetup = job('create Channel', createChannel).requires(storage)
 
-  const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
-  const issuerTransferJob = job('Issuer Transfer With Account Creation And No Vesting', issuerTransferWithAccountCreationAndNoVestingFlow).requires(issueTokenJob)
+  // const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
+  // job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
+  // const issuerTransferJob = job(
+  //   'Issuer Transfer With Account Creation And No Vesting',
+  //   issuerTransferWithAccountCreationAndNoVestingFlow
+  // ).requires(issueTokenJob)
   // const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
   //   job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
   //     job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithAccountCreationAndVestingFlow).after(
@@ -39,14 +44,18 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   //     )
   //   )
   // )
-  const changeToPermissionlessJob = job('Change To Permissionless', changeToPermissionlessFlow).requires(issuerTransferJob)
+  // const changeToPermissionlessJob = job(
+  //   'Change To Permissionless',
+  //   changeToPermissionlessFlow
+  // ).requires(issuerTransferJob)
   // job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
   // const patronageJob = job('Patronage', patronageFlow).requires(issueTokenJob)
-  const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
-  // const saleJob = job('Sales', saleFlow).after(ammJob)
+  // const ammJob = job('Bonding Curve (Amm)', ammFlow).requires(changeToPermissionlessJob)
+  // const saleJob = job('Sales', saleFlow).after(changeToPermissionlessJob)
   // const revenueShareJob = job('Revenue Share', revenueShareFlow)
   //   .after(saleJob)
   //   .after(patronageJob)
   // const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
   // job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
+ 
 })

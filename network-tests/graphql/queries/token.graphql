@@ -105,6 +105,15 @@ fragment SaleFields on Sale {
   fundsSourceAccount {
     id
   }
+  transactions {
+    createdIn
+    id
+    pricePaid
+    quantity
+    account {
+      id
+    }
+  }
 }
 
 fragment VestedAccountFields on VestedAccount {

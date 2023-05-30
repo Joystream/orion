@@ -8,7 +8,11 @@ import { Resource } from '../../Resources'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 
-export default async function issuerTransferWithAccountCreationAndNoVestingFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function issuerTransferWithAccountCreationAndNoVestingFlow({
+  api,
+  query,
+  lock,
+}: FlowProps): Promise<void> {
   const debug = extendDebug(':issuer-transfer with account creation and no vesting')
   debug('Started')
   api.enableDebugTxLogs()

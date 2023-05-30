@@ -48,7 +48,7 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
         linearVestingDuration: api.createType('u32', new BN(100)),
         blocksBeforeCliff: api.createType('u32', new BN(10)),
         cliffAmountPercentage: api.createType('Permill', new BN(100)),
-      })
+      }),
     })
   )
   const symbol = blake2AsHex('test')
