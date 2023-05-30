@@ -9,11 +9,11 @@ import {
   PalletProjectTokenTokenIssuanceParameters,
   PalletProjectTokenTokenAllocation,
 } from '@polkadot/types/lookup'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
+import { u64 } from '@polkadot/types/primitive'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -39,6 +39,11 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     this.crtParams = crtParams
   }
 
+  public getTokenId(): u64 {
+    const [tokenId,] = this.events[0].event.data
+    return tokenId
+  }
+
   protected async getSignerAccountOrAccounts(): Promise<string[]> {
     return [this.creatorAddress]
   }
@@ -53,7 +58,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   public async runQueryNodeChecks(): Promise<void> {
     Utils.wait(20000)

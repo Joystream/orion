@@ -49,6 +49,7 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
   )
   await new FixtureRunner(createChannelFixture).run()
   const channelId = createChannelFixture.getChannelId().toNumber()
+  api.setChannel(channelId)
 
   debug('Done')
 }
