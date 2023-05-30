@@ -10,11 +10,8 @@ export default async function patronageFlow({ api, query, lock }: FlowProps): Pr
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1)
-  expect(channelId).gte(1)
+  const channelId = await api.channel
+  const tokenId = await api.token
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator

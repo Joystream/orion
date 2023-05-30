@@ -122,7 +122,6 @@ export async function processCreatorTokenIssuedEvent({
 
 export async function processTokenAmountTransferredEvent({
   overlay,
-  block,
   event: {
     asV2001: [tokenId, sourceMemberId, validatedTransfers],
   },

@@ -7,6 +7,26 @@ fragment TokenFields on Token {
   symbol
   totalSupply
   accountsNum
+  avatar {
+    ... on TokenAvatarObject {
+      __typename
+      avatarObject {
+        id
+      }
+    }
+    ... on TokenAvatarUri {
+      __typename
+    }
+  }
+  trailerVideo {
+    id
+  }
+  benefits {
+    emojiCode
+    title
+    description
+    displayOrder
+  }
   annualCreatorReward
   ammNonce
   revenueShareRatioPercent
@@ -104,6 +124,15 @@ fragment SaleFields on Sale {
   }
   fundsSourceAccount {
     id
+  }
+  transactions {
+    createdIn
+    id
+    pricePaid
+    quantity
+    account {
+      id
+    }
   }
 }
 

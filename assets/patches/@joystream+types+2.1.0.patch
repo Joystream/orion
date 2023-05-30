@@ -2602,7 +2602,13 @@ index 7e3d672..05ca518 100644
              /**
               * The origin filter prevent the call to be dispatched.
 diff --git a/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts b/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
+<<<<<<< HEAD
 index 557e0b3..b7c95d3 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index 557e0b3..947a413 100644
+=======
+index 557e0b3..b41f0d8 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
 @@ -2,7 +2,7 @@ import type { ApiTypes } from '@polkadot/api-base/types';
@@ -2669,7 +2675,72 @@ index 557e0b3..b7c95d3 100644
              /**
               * Member joined whitelist
               * Params:
+<<<<<<< HEAD
 @@ -2249,6 +2265,15 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2172,7 +2194,7 @@ declare module '@polkadot/api-base/types/events' {
+              * - token identifier
+              * - new patronage rate
+              **/
+-            PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Perquintill]>;
++            PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Permill]>;
+             /**
+              * Revenue Split finalized
+              * Params:
+@@ -2206,7 +2228,7 @@ declare module '@polkadot/api-base/types/events' {
+              * - map containing validated outputs (amount indexed by (member_id + account existance))
+              * - transfer's metadata
+              **/
+-            TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++            TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+             /**
+              * Token amount transferred by issuer
+              * Params:
+@@ -2217,7 +2239,7 @@ declare module '@polkadot/api-base/types/events' {
+              * (account_id + account existance)
+              * - transfer's metadata
+              **/
+-            TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++            TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+             /**
+              * Token Deissued
+              * Params:
+@@ -2245,10 +2267,20 @@ declare module '@polkadot/api-base/types/events' {
+              * Params:
+              * - token id
+              * - token sale id
++             * - funds source member id
+              * - token sale data
+=======
+@@ -2172,7 +2194,7 @@ declare module '@polkadot/api-base/types/events' {
+              * - token identifier
+              * - new patronage rate
+              **/
+-            PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Perquintill]>;
++            PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Permill]>;
+             /**
+              * Revenue Split finalized
+              * Params:
+@@ -2206,7 +2228,7 @@ declare module '@polkadot/api-base/types/events' {
+              * - map containing validated outputs (amount indexed by (member_id + account existance))
+              * - transfer's metadata
+              **/
+-            TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++            TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+             /**
+              * Token amount transferred by issuer
+              * Params:
+@@ -2217,7 +2239,7 @@ declare module '@polkadot/api-base/types/events' {
+              * (account_id + account existance)
+              * - transfer's metadata
+              **/
+-            TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++            TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+             /**
+              * Token Deissued
+              * Params:
+@@ -2249,6 +2271,15 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
               * - token sale metadata
               **/
              TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
@@ -2685,7 +2756,13 @@ index 557e0b3..b7c95d3 100644
              /**
               * Tokens Burned
               * Params:
+<<<<<<< HEAD
 @@ -2266,6 +2291,15 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2266,6 +2298,15 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2266,6 +2297,15 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
               * - buyer's member id
               **/
              TokensPurchasedOnSale: AugmentedEvent<ApiType, [u64, u32, u128, u64]>;
@@ -2701,7 +2778,13 @@ index 557e0b3..b7c95d3 100644
              /**
               * Transfer Policy Changed To Permissionless
               * Params:
+<<<<<<< HEAD
 @@ -2372,6 +2406,10 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2372,6 +2413,10 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2372,6 +2412,10 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
              Voted: AugmentedEvent<ApiType, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
          };
          referendum: {
@@ -2712,7 +2795,13 @@ index 557e0b3..b7c95d3 100644
              /**
               * Referendum ended and winning option was selected
               **/
+<<<<<<< HEAD
 @@ -2956,26 +2994,6 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2956,26 +3001,6 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2956,26 +3000,6 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
               **/
              WorkingGroupBudgetFunded: AugmentedEvent<ApiType, [u64, u128, Bytes]>;
          };
@@ -3668,7 +3757,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenVestingScheduleParams: {
          linearVestingDuration: string;
-@@ -1223,7 +1211,7 @@ declare const _default: {
+@@ -1223,7 +1212,7 @@ declare const _default: {
          cliffAmountPercentage: string;
      };
      /**
@@ -3677,7 +3766,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenTransferPolicyParams: {
          _enum: {
-@@ -1232,14 +1220,14 @@ declare const _default: {
+@@ -1232,14 +1221,14 @@ declare const _default: {
          };
      };
      /**
@@ -4553,7 +4642,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3364,9 +3356,6 @@ declare const _default: {
+@@ -3364,9 +3362,6 @@ declare const _default: {
                  bucketId: string;
                  metadata: string;
              };
@@ -4563,7 +4652,7 @@ index ae9bbdb..f2cdcd0 100644
              storage_operator_remark: {
                  workerId: string;
                  storageBucketId: string;
-@@ -3380,7 +3369,7 @@ declare const _default: {
+@@ -3380,7 +3375,7 @@ declare const _default: {
          };
      };
      /**
@@ -5719,7 +5808,13 @@ index a1514a1..3c7a54b 100644
          PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
          PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
+<<<<<<< HEAD
 index 3896f19..f8d0aa5 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index 3896f19..46beb10 100644
+=======
+index 3896f19..2b243b0 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 @@ -360,23 +360,7 @@ declare module '@polkadot/types/lookup' {
@@ -6027,7 +6122,8 @@ index 3896f19..f8d0aa5 100644
          readonly isDeissueCreatorToken: boolean;
 -        readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken';
 +        readonly isAmmControl: boolean;
-+        readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken' | 'AmmControl';
++        readonly isCreatorTokenRemarks: boolean;
++        readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken' | 'AmmControl' | 'CreatorTokenRemarks';
      }
 -    /** @name PalletContentPermissionsCuratorGroupIterableEnumsPausableChannelFeature (110) */
 +    /** @name PalletContentPermissionsCuratorGroupIterableEnumsPausableChannelFeature (111) */
@@ -6295,8 +6391,45 @@ index 3896f19..f8d0aa5 100644
 +    /** @name PalletProjectTokenEventsRawEvent (170) */
      interface PalletProjectTokenEventsRawEvent extends Enum {
          readonly isTokenAmountTransferred: boolean;
+<<<<<<< HEAD
          readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
 @@ -1304,53 +1290,61 @@ declare module '@polkadot/types/lookup' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+-        readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++        readonly asTokenAmountTransferred: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+         readonly isTokenAmountTransferredByIssuer: boolean;
+-        readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++        readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+         readonly isPatronageRateDecreasedTo: boolean;
+-        readonly asPatronageRateDecreasedTo: ITuple<[u64, Perquintill]>;
++        readonly asPatronageRateDecreasedTo: ITuple<[u64, Permill]>;
+         readonly isPatronageCreditClaimed: boolean;
+         readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
+         readonly isRevenueSplitIssued: boolean;
+@@ -1293,7 +1280,7 @@ declare module '@polkadot/types/lookup' {
+         readonly isTokenIssued: boolean;
+         readonly asTokenIssued: ITuple<[u64, PalletProjectTokenTokenIssuanceParameters]>;
+         readonly isTokenSaleInitialized: boolean;
+-        readonly asTokenSaleInitialized: ITuple<[u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
++        readonly asTokenSaleInitialized: ITuple<[u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
+         readonly isUpcomingTokenSaleUpdated: boolean;
+         readonly asUpcomingTokenSaleUpdated: ITuple<[u64, u32, Option<u32>, Option<u32>]>;
+         readonly isTokensPurchasedOnSale: boolean;
+@@ -1304,16 +1291,26 @@ declare module '@polkadot/types/lookup' {
+=======
+-        readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++        readonly asTokenAmountTransferred: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+         readonly isTokenAmountTransferredByIssuer: boolean;
+-        readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++        readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+         readonly isPatronageRateDecreasedTo: boolean;
+-        readonly asPatronageRateDecreasedTo: ITuple<[u64, Perquintill]>;
++        readonly asPatronageRateDecreasedTo: ITuple<[u64, Permill]>;
+         readonly isPatronageCreditClaimed: boolean;
+         readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
+         readonly isRevenueSplitIssued: boolean;
+@@ -1304,16 +1291,26 @@ declare module '@polkadot/types/lookup' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
          readonly asTransferPolicyChangedToPermissionless: u64;
          readonly isTokensBurned: boolean;
          readonly asTokensBurned: ITuple<[u64, u64, u128]>;
@@ -8121,7 +8254,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineProposal extends Struct {
          readonly parameters: PalletProposalsEngineProposalParameters;
          readonly proposerId: u64;
-@@ -5098,7 +5113,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5098,7 +5122,7 @@ declare module '@polkadot/types/lookup' {
          readonly nrOfCouncilConfirmations: u32;
          readonly stakingAccountId: Option<AccountId32>;
      }
@@ -8130,7 +8263,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineProposalParameters extends Struct {
          readonly votingPeriod: u32;
          readonly gracePeriod: u32;
-@@ -5109,14 +5124,14 @@ declare module '@polkadot/types/lookup' {
+@@ -5109,14 +5133,14 @@ declare module '@polkadot/types/lookup' {
          readonly requiredStake: Option<u128>;
          readonly constitutionality: u32;
      }
@@ -8147,7 +8280,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isEmptyTitleProvided: boolean;
-@@ -5143,26 +5158,26 @@ declare module '@polkadot/types/lookup' {
+@@ -5143,26 +5167,26 @@ declare module '@polkadot/types/lookup' {
          readonly isMaxDispatchableCallCodeSizeExceeded: boolean;
          readonly type: 'ArithmeticError' | 'EmptyTitleProvided' | 'EmptyDescriptionProvided' | 'TitleIsTooLong' | 'DescriptionIsTooLong' | 'ProposalNotFound' | 'ProposalFinalized' | 'AlreadyVoted' | 'NotAuthor' | 'MaxActiveProposalNumberExceeded' | 'EmptyStake' | 'StakeShouldBeEmpty' | 'StakeDiffersFromRequired' | 'InvalidParameterApprovalThreshold' | 'InvalidParameterSlashingThreshold' | 'RequireRootOrigin' | 'ProposalHasVotes' | 'ZeroExactExecutionBlock' | 'InvalidExactExecutionBlock' | 'InsufficientBalanceForStake' | 'ConflictingStakes' | 'InvalidStakingAccountForMember' | 'MaxDispatchableCallCodeSizeExceeded';
      }
@@ -8178,7 +8311,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsDiscussionError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isThreadDoesntExist: boolean;
-@@ -5176,7 +5191,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5176,7 +5200,7 @@ declare module '@polkadot/types/lookup' {
          readonly isCannotDeletePost: boolean;
          readonly type: 'ArithmeticError' | 'ThreadDoesntExist' | 'PostDoesntExist' | 'RequireRootOrigin' | 'CannotPostOnClosedThread' | 'NotAuthorOrCouncilor' | 'MaxWhiteListSizeExceeded' | 'WhitelistedMemberDoesNotExist' | 'InsufficientBalanceForPost' | 'CannotDeletePost';
      }
@@ -8268,7 +8401,13 @@ index 3896f19..f8d0aa5 100644
      type JoystreamNodeRuntimeRuntime = Null;
  }
 diff --git a/node_modules/@joystream/types/lib/cjs/augment/lookup.js b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
+<<<<<<< HEAD
 index b6fcc72..322ddcf 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index b6fcc72..128f8e5 100644
+=======
+index b6fcc72..4846482 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 @@ -368,23 +368,7 @@ exports.default = {
@@ -8582,7 +8721,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentIterableEnumsChannelActionPermission: {
 -        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken']
-+        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl']
++        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl', 'CreatorTokenRemarks']
      },
      /**
 -     * Lookup110: pallet_content::permissions::curator_group::iterable_enums::PausableChannelFeature
@@ -8876,7 +9015,37 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenEventsRawEvent: {
          _enum: {
+<<<<<<< HEAD
 @@ -1190,11 +1174,15 @@ exports.default = {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+-            TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            PatronageRateDecreasedTo: '(u64,Perquintill)',
++            TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            PatronageRateDecreasedTo: '(u64,Permill)',
+             PatronageCreditClaimed: '(u64,u128,u64)',
+             RevenueSplitIssued: '(u64,u32,u32,u128)',
+             RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1185,16 +1169,21 @@ exports.default = {
+             AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
+             TokenDeissued: 'u64',
+             TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
+-            TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
++            TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
+             UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+=======
+-            TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            PatronageRateDecreasedTo: '(u64,Perquintill)',
++            TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            PatronageRateDecreasedTo: '(u64,Permill)',
+             PatronageCreditClaimed: '(u64,u128,u64)',
+             RevenueSplitIssued: '(u64,u32,u32,u128)',
+             RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1190,11 +1174,16 @@ exports.default = {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
              TokensPurchasedOnSale: '(u64,u32,u128,u64)',
              TokenSaleFinalized: '(u64,u32,u128,u128)',
              TransferPolicyChangedToPermissionless: 'u64',
@@ -8924,7 +9093,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenVestingScheduleParams: {
          linearVestingDuration: 'u32',
-@@ -1228,7 +1216,7 @@ exports.default = {
+@@ -1228,7 +1217,7 @@ exports.default = {
          cliffAmountPercentage: 'Permill'
      },
      /**
@@ -8933,7 +9102,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenTransferPolicyParams: {
          _enum: {
-@@ -1237,14 +1225,14 @@ exports.default = {
+@@ -1237,14 +1226,14 @@ exports.default = {
          }
      },
      /**
@@ -9813,7 +9982,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3369,9 +3361,6 @@ exports.default = {
+@@ -3369,9 +3367,6 @@ exports.default = {
                  bucketId: 'PalletStorageDistributionBucketIdRecord',
                  metadata: 'Bytes',
              },
@@ -10958,7 +11127,13 @@ index b6fcc72..322ddcf 100644
      JoystreamNodeRuntimeRuntime: 'Null'
  };
 diff --git a/node_modules/@joystream/types/lib/mjs/augment/lookup.js b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
+<<<<<<< HEAD
 index b7d08da..26905d1 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index b7d08da..119e6d7 100644
+=======
+index b7d08da..d49dbc8 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 @@ -366,23 +366,7 @@ export default {
@@ -11272,7 +11447,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentIterableEnumsChannelActionPermission: {
 -        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken']
-+        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl']
++        _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl', 'CreatorTokenRemarks']
      },
      /**
 -     * Lookup110: pallet_content::permissions::curator_group::iterable_enums::PausableChannelFeature
@@ -11566,7 +11741,37 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenEventsRawEvent: {
          _enum: {
+<<<<<<< HEAD
 @@ -1188,11 +1172,15 @@ export default {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+-            TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            PatronageRateDecreasedTo: '(u64,Perquintill)',
++            TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            PatronageRateDecreasedTo: '(u64,Permill)',
+             PatronageCreditClaimed: '(u64,u128,u64)',
+             RevenueSplitIssued: '(u64,u32,u32,u128)',
+             RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1183,16 +1167,21 @@ export default {
+             AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
+             TokenDeissued: 'u64',
+             TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
+-            TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
++            TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
+             UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+=======
+-            TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-            PatronageRateDecreasedTo: '(u64,Perquintill)',
++            TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++            PatronageRateDecreasedTo: '(u64,Permill)',
+             PatronageCreditClaimed: '(u64,u128,u64)',
+             RevenueSplitIssued: '(u64,u32,u32,u128)',
+             RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1188,11 +1172,16 @@ export default {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
              TokensPurchasedOnSale: '(u64,u32,u128,u64)',
              TokenSaleFinalized: '(u64,u32,u128,u128)',
              TransferPolicyChangedToPermissionless: 'u64',
@@ -11614,7 +11819,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenVestingScheduleParams: {
          linearVestingDuration: 'u32',
-@@ -1226,7 +1214,7 @@ export default {
+@@ -1226,7 +1215,7 @@ export default {
          cliffAmountPercentage: 'Permill'
      },
      /**
@@ -11623,7 +11828,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenTransferPolicyParams: {
          _enum: {
-@@ -1235,14 +1223,14 @@ export default {
+@@ -1235,14 +1224,14 @@ export default {
          }
      },
      /**
@@ -12503,7 +12708,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3367,9 +3359,6 @@ export default {
+@@ -3367,9 +3365,6 @@ export default {
                  bucketId: 'PalletStorageDistributionBucketIdRecord',
                  metadata: 'Bytes',
              },
@@ -13808,7 +14013,13 @@ index 465e8ae..2ee4560 100644
        /**
         * The origin filter prevent the call to be dispatched.
 diff --git a/node_modules/@joystream/types/src/augment/augment-api-events.ts b/node_modules/@joystream/types/src/augment/augment-api-events.ts
+<<<<<<< HEAD
 index bdddefb..9773d59 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index bdddefb..b63af2e 100644
+=======
+index bdddefb..8228b40 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/src/augment/augment-api-events.ts
 +++ b/node_modules/@joystream/types/src/augment/augment-api-events.ts
 @@ -5,7 +5,7 @@ import type { ApiTypes } from '@polkadot/api-base/types';
@@ -13875,7 +14086,72 @@ index bdddefb..9773d59 100644
        /**
         * Member joined whitelist
         * Params:
+<<<<<<< HEAD
 @@ -2168,6 +2184,15 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2091,7 +2113,7 @@ declare module '@polkadot/api-base/types/events' {
+        * - token identifier
+        * - new patronage rate
+        **/
+-      PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Perquintill]>;
++      PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Permill]>;
+       /**
+        * Revenue Split finalized
+        * Params:
+@@ -2125,7 +2147,7 @@ declare module '@polkadot/api-base/types/events' {
+        * - map containing validated outputs (amount indexed by (member_id + account existance))
+        * - transfer's metadata
+        **/
+-      TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++      TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+       /**
+        * Token amount transferred by issuer
+        * Params:
+@@ -2136,7 +2158,7 @@ declare module '@polkadot/api-base/types/events' {
+        * (account_id + account existance)
+        * - transfer's metadata
+        **/
+-      TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++      TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+       /**
+        * Token Deissued
+        * Params:
+@@ -2164,10 +2186,20 @@ declare module '@polkadot/api-base/types/events' {
+        * Params:
+        * - token id
+        * - token sale id
++       * - funds source member id
+        * - token sale data
+=======
+@@ -2091,7 +2113,7 @@ declare module '@polkadot/api-base/types/events' {
+        * - token identifier
+        * - new patronage rate
+        **/
+-      PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Perquintill]>;
++      PatronageRateDecreasedTo: AugmentedEvent<ApiType, [u64, Permill]>;
+       /**
+        * Revenue Split finalized
+        * Params:
+@@ -2125,7 +2147,7 @@ declare module '@polkadot/api-base/types/events' {
+        * - map containing validated outputs (amount indexed by (member_id + account existance))
+        * - transfer's metadata
+        **/
+-      TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++      TokenAmountTransferred: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+       /**
+        * Token amount transferred by issuer
+        * Params:
+@@ -2136,7 +2158,7 @@ declare module '@polkadot/api-base/types/events' {
+        * (account_id + account existance)
+        * - transfer's metadata
+        **/
+-      TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++      TokenAmountTransferredByIssuer: AugmentedEvent<ApiType, [u64, u64, PalletProjectTokenTransfers, Bytes]>;
+       /**
+        * Token Deissued
+        * Params:
+@@ -2168,6 +2190,15 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
         * - token sale metadata
         **/
        TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
@@ -13891,7 +14167,13 @@ index bdddefb..9773d59 100644
        /**
         * Tokens Burned
         * Params:
+<<<<<<< HEAD
 @@ -2185,6 +2210,15 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2185,6 +2217,15 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2185,6 +2216,15 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
         * - buyer's member id
         **/
        TokensPurchasedOnSale: AugmentedEvent<ApiType, [u64, u32, u128, u64]>;
@@ -13907,7 +14189,13 @@ index bdddefb..9773d59 100644
        /**
         * Transfer Policy Changed To Permissionless
         * Params:
+<<<<<<< HEAD
 @@ -2291,6 +2325,10 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2291,6 +2332,10 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2291,6 +2331,10 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
        Voted: AugmentedEvent<ApiType, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
      };
      referendum: {
@@ -13918,7 +14206,13 @@ index bdddefb..9773d59 100644
        /**
         * Referendum ended and winning option was selected
         **/
+<<<<<<< HEAD
 @@ -2873,20 +2911,6 @@ declare module '@polkadot/api-base/types/events' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+@@ -2873,20 +2918,6 @@ declare module '@polkadot/api-base/types/events' {
+=======
+@@ -2873,20 +2917,6 @@ declare module '@polkadot/api-base/types/events' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
         **/
        WorkingGroupBudgetFunded: AugmentedEvent<ApiType, [u64, u128, Bytes]>;
      };
@@ -14041,7 +14335,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Issue NFT
         * 
-@@ -1289,7 +1297,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -1289,7 +1298,7 @@ declare module '@polkadot/api-base/types/submittable' {
         * - O(1)
         * # </weight>
         **/
@@ -14050,7 +14344,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Extrinsic for updating channel privilege level (requires lead access)
         * 
-@@ -2748,7 +2756,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -2748,7 +2757,7 @@ declare module '@polkadot/api-base/types/submittable' {
         * - O(1) doesn't depend on the state or parameters
         * # </weight>
         **/
@@ -14211,7 +14505,13 @@ index d9b72b5..fdc8238 100644
        /**
         * A dispatch that will fill the block weight up to the given ratio.
 diff --git a/node_modules/@joystream/types/src/augment/lookup.ts b/node_modules/@joystream/types/src/augment/lookup.ts
+<<<<<<< HEAD
 index 58896db..f0594ca 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index 58896db..6d615af 100644
+=======
+index 58896db..4e8b5cf 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/src/augment/lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/lookup.ts
 @@ -368,23 +368,7 @@ export default {
@@ -14525,7 +14825,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentIterableEnumsChannelActionPermission: {
 -    _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken']
-+    _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl']
++    _enum: ['UpdateChannelMetadata', 'ManageNonVideoChannelAssets', 'ManageChannelCollaborators', 'UpdateVideoMetadata', 'AddVideo', 'ManageVideoAssets', 'DeleteChannel', 'DeleteVideo', 'ManageVideoNfts', 'AgentRemark', 'TransferChannel', 'ClaimChannelReward', 'WithdrawFromChannelBalance', 'IssueCreatorToken', 'ClaimCreatorTokenPatronage', 'InitAndManageCreatorTokenSale', 'CreatorTokenIssuerTransfer', 'MakeCreatorTokenPermissionless', 'ReduceCreatorTokenPatronageRate', 'ManageRevenueSplits', 'DeissueCreatorToken', 'AmmControl', 'CreatorTokenRemarks']
    },
    /**
 -   * Lookup110: pallet_content::permissions::curator_group::iterable_enums::PausableChannelFeature
@@ -14819,7 +15119,37 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenEventsRawEvent: {
      _enum: {
+<<<<<<< HEAD
 @@ -1190,11 +1174,15 @@ export default {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+-      TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-      TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-      PatronageRateDecreasedTo: '(u64,Perquintill)',
++      TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++      TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++      PatronageRateDecreasedTo: '(u64,Permill)',
+       PatronageCreditClaimed: '(u64,u128,u64)',
+       RevenueSplitIssued: '(u64,u32,u32,u128)',
+       RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1185,16 +1169,21 @@ export default {
+       AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
+       TokenDeissued: 'u64',
+       TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
+-      TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
++      TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
+       UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+=======
+-      TokenAmountTransferred: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-      TokenAmountTransferredByIssuer: '(u64,u64,BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>,Bytes)',
+-      PatronageRateDecreasedTo: '(u64,Perquintill)',
++      TokenAmountTransferred: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++      TokenAmountTransferredByIssuer: '(u64,u64,PalletProjectTokenTransfers,Bytes)',
++      PatronageRateDecreasedTo: '(u64,Permill)',
+       PatronageCreditClaimed: '(u64,u128,u64)',
+       RevenueSplitIssued: '(u64,u32,u32,u128)',
+       RevenueSplitFinalized: '(u64,AccountId32,u128)',
+@@ -1190,11 +1174,16 @@ export default {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
        TokensPurchasedOnSale: '(u64,u32,u128,u64)',
        TokenSaleFinalized: '(u64,u32,u128,u128)',
        TransferPolicyChangedToPermissionless: 'u64',
@@ -14867,7 +15197,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenVestingScheduleParams: {
      linearVestingDuration: 'u32',
-@@ -1228,7 +1216,7 @@ export default {
+@@ -1228,7 +1217,7 @@ export default {
      cliffAmountPercentage: 'Permill'
    },
    /**
@@ -14876,7 +15206,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenTransferPolicyParams: {
      _enum: {
-@@ -1237,14 +1225,14 @@ export default {
+@@ -1237,14 +1226,14 @@ export default {
      }
    },
    /**
@@ -15756,7 +16086,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageCall: {
      _enum: {
-@@ -3369,9 +3361,6 @@ export default {
+@@ -3369,9 +3367,6 @@ export default {
          bucketId: 'PalletStorageDistributionBucketIdRecord',
          metadata: 'Bytes',
        },
@@ -16933,7 +17263,13 @@ index cdcf544..28ad10d 100644
      PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
      PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/src/augment/types-lookup.ts b/node_modules/@joystream/types/src/augment/types-lookup.ts
+<<<<<<< HEAD
 index c035e7d..0769a00 100644
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+index c035e7d..29076e1 100644
+=======
+index c035e7d..fd687a8 100644
+>>>>>>> 492de0aa3 (fix: correct sale event data)
 --- a/node_modules/@joystream/types/src/augment/types-lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/types-lookup.ts
 @@ -392,24 +392,7 @@ declare module '@polkadot/types/lookup' {
@@ -17254,7 +17590,8 @@ index c035e7d..0769a00 100644
      readonly isDeissueCreatorToken: boolean;
 -    readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken';
 +    readonly isAmmControl: boolean;
-+    readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken' | 'AmmControl';
++    readonly isCreatorTokenRemarks: boolean;
++    readonly type: 'UpdateChannelMetadata' | 'ManageNonVideoChannelAssets' | 'ManageChannelCollaborators' | 'UpdateVideoMetadata' | 'AddVideo' | 'ManageVideoAssets' | 'DeleteChannel' | 'DeleteVideo' | 'ManageVideoNfts' | 'AgentRemark' | 'TransferChannel' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'IssueCreatorToken' | 'ClaimCreatorTokenPatronage' | 'InitAndManageCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRate' | 'ManageRevenueSplits' | 'DeissueCreatorToken' | 'AmmControl' | 'CreatorTokenRemarks';
    }
  
 -  /** @name PalletContentPermissionsCuratorGroupIterableEnumsPausableChannelFeature (110) */
@@ -17540,8 +17877,45 @@ index c035e7d..0769a00 100644
 +  /** @name PalletProjectTokenEventsRawEvent (170) */
    export interface PalletProjectTokenEventsRawEvent extends Enum {
      readonly isTokenAmountTransferred: boolean;
+<<<<<<< HEAD
      readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
 @@ -1400,10 +1385,18 @@ declare module '@polkadot/types/lookup' {
+||||||| parent of 492de0aa3 (fix: correct sale event data)
+-    readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++    readonly asTokenAmountTransferred: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+     readonly isTokenAmountTransferredByIssuer: boolean;
+-    readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++    readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+     readonly isPatronageRateDecreasedTo: boolean;
+-    readonly asPatronageRateDecreasedTo: ITuple<[u64, Perquintill]>;
++    readonly asPatronageRateDecreasedTo: ITuple<[u64, Permill]>;
+     readonly isPatronageCreditClaimed: boolean;
+     readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
+     readonly isRevenueSplitIssued: boolean;
+@@ -1389,7 +1375,7 @@ declare module '@polkadot/types/lookup' {
+     readonly isTokenIssued: boolean;
+     readonly asTokenIssued: ITuple<[u64, PalletProjectTokenTokenIssuanceParameters]>;
+     readonly isTokenSaleInitialized: boolean;
+-    readonly asTokenSaleInitialized: ITuple<[u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
++    readonly asTokenSaleInitialized: ITuple<[u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
+     readonly isUpcomingTokenSaleUpdated: boolean;
+     readonly asUpcomingTokenSaleUpdated: ITuple<[u64, u32, Option<u32>, Option<u32>]>;
+     readonly isTokensPurchasedOnSale: boolean;
+@@ -1400,10 +1386,20 @@ declare module '@polkadot/types/lookup' {
+=======
+-    readonly asTokenAmountTransferred: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++    readonly asTokenAmountTransferred: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+     readonly isTokenAmountTransferredByIssuer: boolean;
+-    readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, BTreeMap<PalletProjectTokenValidated, PalletProjectTokenValidatedPayment>, Bytes]>;
++    readonly asTokenAmountTransferredByIssuer: ITuple<[u64, u64, PalletProjectTokenTransfers, Bytes]>;
+     readonly isPatronageRateDecreasedTo: boolean;
+-    readonly asPatronageRateDecreasedTo: ITuple<[u64, Perquintill]>;
++    readonly asPatronageRateDecreasedTo: ITuple<[u64, Permill]>;
+     readonly isPatronageCreditClaimed: boolean;
+     readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
+     readonly isRevenueSplitIssued: boolean;
+@@ -1400,10 +1386,20 @@ declare module '@polkadot/types/lookup' {
+>>>>>>> 492de0aa3 (fix: correct sale event data)
      readonly asTransferPolicyChangedToPermissionless: u64;
      readonly isTokensBurned: boolean;
      readonly asTokensBurned: ITuple<[u64, u64, u128]>;
@@ -19567,7 +19941,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupOpening extends Struct {
      readonly openingType: PalletWorkingGroupOpeningType;
      readonly created: u32;
-@@ -5549,7 +5563,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5549,7 +5572,7 @@ declare module '@polkadot/types/lookup' {
      readonly creationStake: u128;
    }
  
@@ -19576,7 +19950,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupJobApplication extends Struct {
      readonly roleAccountId: AccountId32;
      readonly rewardAccountId: AccountId32;
-@@ -5559,7 +5573,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5559,7 +5582,7 @@ declare module '@polkadot/types/lookup' {
      readonly openingId: u64;
    }
  
@@ -19585,7 +19959,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupGroupWorker extends Struct {
      readonly memberId: u64;
      readonly roleAccountId: AccountId32;
-@@ -5572,7 +5586,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5572,7 +5595,7 @@ declare module '@polkadot/types/lookup' {
      readonly createdAt: u32;
    }
  
@@ -19594,7 +19968,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupErrorsError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isStakeBalanceCannotBeZero: boolean;
-@@ -5609,7 +5623,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5609,7 +5632,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'StakeBalanceCannotBeZero' | 'OpeningDoesNotExist' | 'CannotHireMultipleLeaders' | 'WorkerApplicationDoesNotExist' | 'MaxActiveWorkerNumberExceeded' | 'SuccessfulWorkerApplicationDoesNotExist' | 'CannotHireLeaderWhenLeaderExists' | 'IsNotLeadAccount' | 'CurrentLeadNotSet' | 'WorkerDoesNotExist' | 'InvalidMemberOrigin' | 'SignerIsNotWorkerRoleAccount' | 'BelowMinimumStakes' | 'InsufficientBalanceToCoverStake' | 'ApplicationStakeDoesntMatchOpening' | 'OriginIsNotApplicant' | 'WorkerIsLeaving' | 'CannotRewardWithZero' | 'InvalidStakingAccountForMember' | 'ConflictStakesOnAccount' | 'WorkerHasNoReward' | 'UnstakingPeriodLessThanMinimum' | 'CannotSpendZero' | 'InsufficientBudgetForSpending' | 'NoApplicationsProvided' | 'CannotDecreaseStakeDeltaGreaterThanStake' | 'ApplicationsNotForOpening' | 'WorkerStorageValueTooLong' | 'InsufficientTokensForFunding' | 'ZeroTokensFunding' | 'InsufficientBalanceForTransfer';
    }
  
@@ -19603,7 +19977,7 @@ index c035e7d..0769a00 100644
    export interface SpRuntimeMultiSignature extends Enum {
      readonly isEd25519: boolean;
      readonly asEd25519: SpCoreEd25519Signature;
-@@ -5620,31 +5634,31 @@ declare module '@polkadot/types/lookup' {
+@@ -5620,31 +5643,31 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
    }
  

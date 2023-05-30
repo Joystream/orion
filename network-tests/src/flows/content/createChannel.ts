@@ -7,7 +7,7 @@ import { BTreeSet, u64 } from '@polkadot/types-codec'
 import { BN } from 'bn.js'
 import { Api } from '../../Api'
 
-async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
+export async function getStorageBucketsAccordingToPolicy(api: Api): Promise<BTreeSet<u64>> {
   const { numberOfStorageBuckets } = await api.query.storage.dynamicBagCreationPolicies('Channel')
   const storageBuckets = api.createType('BTreeSet<u64>')
   for (let i = 0; numberOfStorageBuckets.toBn().gtn(i); ++i) {
@@ -28,7 +28,7 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
 
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [channelOwnerAddress])
   await new FixtureRunner(buyMembershipsFixture).run()
-  const channelOwnerMemberId = buyMembershipsFixture.getCreatedMembers()
+  const [channelOwnerMemberId,] = buyMembershipsFixture.getCreatedMembers()
 
   // create sample ChannelOwner and Parameters
   const storageBuckets = await getStorageBucketsAccordingToPolicy(api)
@@ -48,6 +48,10 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
     channelOwnerAddress
   )
   await new FixtureRunner(createChannelFixture).run()
+  const channelId = createChannelFixture.getChannelId().toNumber()
+  api.setChannel(channelId)
+
+  api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
 
   debug('Done')
 }

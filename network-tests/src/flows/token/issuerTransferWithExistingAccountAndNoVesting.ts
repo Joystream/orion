@@ -6,12 +6,16 @@ import { Resource } from '../../Resources'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 
-export default async function issuerTransferWithExistingAccountAndNoVestingFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function issuerTransferWithExistingAccountAndNoVestingFlow({
+  api,
+  query,
+  lock,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issuer transfer with existing account and no vesting')
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
+  const channelId = api.channel
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator

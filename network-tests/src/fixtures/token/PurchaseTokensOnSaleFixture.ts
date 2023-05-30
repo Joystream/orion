@@ -116,7 +116,13 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       assert.equal(qVestedAccount!.vesting.id, vestingId)
     }
 
-    // TODO: sale transaction
+    const qSaleTx = qSale!.transactions.find((tx) => {
+      return tx.account.id === accountId
+    })
+
+    assert(qSaleTx !== undefined)
+    assert.equal(qSaleTx!.quantity, amountPurchased.toString())
+    assert.equal(qSaleTx!.pricePaid, qSale!.pricePerUnit)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

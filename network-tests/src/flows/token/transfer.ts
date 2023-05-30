@@ -12,11 +12,8 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1)
-  expect(channelId).gte(1)
+  const channelId = api.channel
+  const tokenId = api.token
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator
@@ -50,7 +47,9 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
 
   const bloatBond = await api.query.projectToken.bloatBond()
   await api.treasuryTransferBalance(firstHolderAddress, bloatBond)
-  const outputsToNewAccount: [number, u128][] = [[newHolderMemberId.toNumber(), api.createType('u128', new BN(1000))]]
+  const outputsToNewAccount: [number, u128][] = [
+    [newHolderMemberId.toNumber(), api.createType('u128', new BN(1000))],
+  ]
 
   const transferFixtureToNewAccount = new TransferFixture(
     api,
@@ -63,5 +62,4 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
   )
   await transferFixtureToNewAccount.preExecHook()
   await new FixtureRunner(transferFixtureToNewAccount).runWithQueryNodeChecks()
-
 }

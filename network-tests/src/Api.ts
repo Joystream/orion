@@ -39,6 +39,7 @@ import BN from 'bn.js'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { Sender, LogLevel } from './sender'
 import { Utils } from './utils'
+import { assert } from 'chai'
 
 import { extendDebug } from './Debugger'
 import { DispatchError } from '@polkadot/types/interfaces/system'
@@ -97,13 +98,46 @@ export class ApiFactory {
   private creatorMemberId: undefined | number
   private firstHolderAddress: undefined | string
   private firstHolderMemberId: undefined | number
+  private whitelistedHolderAddress: undefined | string
+  private whitelistedHolderMemberId: undefined | number
+  private tokenId: undefined | number
+  private channelId: undefined | number
+  private videoId: undefined | number
 
+  // getter and setters for channel and tokenId
+  public get channel(): number {
+    assert(this.channelId !== undefined, 'channel not set')
+    return this.channelId!
+  }
+  public get video(): number {
+    assert(this.videoId !== undefined, 'video not set')
+    return this.videoId!
+  }
+  public get token(): number {
+    assert(this.tokenId !== undefined, 'token not set')
+    return this.tokenId!
+  }
+  public setChannel(channelId: number) {
+    this.channelId = channelId
+  }
+  public setVideo(videoId: number) {
+    this.videoId = videoId
+  }
+  public setToken(tokenId: number) {
+    this.tokenId = tokenId
+  }
   // getter & setters for creator token actors
   public get creator(): [string, number] {
+    assert(this.creatorAddress !== undefined, 'creator not set')
     return [this.creatorAddress!, this.creatorMemberId!]
   }
   public get firstHolder(): [string, number] {
+    assert(this.firstHolderAddress !== undefined, 'first Holder not set')
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
+  }
+  public get whitelistedHolder(): [string, number] {
+    assert(this.whitelistedHolderAddress !== undefined, 'whitelisted Holder not set')
+    return [this.whitelistedHolderAddress!, this.whitelistedHolderMemberId!]
   }
   public setCreator(address: string, memberId: number) {
     this.creatorAddress = address
@@ -112,6 +146,10 @@ export class ApiFactory {
   public setFirstHolder(address: string, memberId: number) {
     this.firstHolderAddress = address
     this.firstHolderMemberId = memberId
+  }
+  public setWhitelistedHolder(address: string, memberId: number) {
+    this.whitelistedHolderAddress = address
+    this.whitelistedHolderMemberId = memberId
   }
 
   public static async create(
@@ -344,11 +382,35 @@ export class Api {
   public get firstHolder(): [string, number] {
     return this.factory.firstHolder
   }
+  public get whitelistedHolder(): [string, number] {
+    return this.factory.whitelistedHolder
+  }
   public setCreator(address: string, memberId: number) {
     this.factory.setCreator(address, memberId)
   }
   public setFirstHolder(address: string, memberId: number) {
     this.factory.setFirstHolder(address, memberId)
+  }
+  public setWhitelistedHolder(address: string, memberId: number) {
+    this.factory.setWhitelistedHolder(address, memberId)
+  }
+  public setToken(tokenId: number) {
+    this.factory.setToken(tokenId)
+  }
+  public setChannel(channelId: number) {
+    this.factory.setChannel(channelId)
+  }
+  public setVideo(videoId: number) {
+    this.factory.setVideo(videoId)
+  }
+  public get channel(): number {
+    return this.factory.channel
+  }
+  public get video(): number {
+    return this.factory.video
+  }
+  public get token(): number {
+    return this.factory.token
   }
 
   public keyGenInfo(): KeyGenInfo {

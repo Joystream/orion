@@ -7,12 +7,16 @@ import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 import { BN } from 'bn.js'
 
-export default async function issuerTransferWithExistingAccountAndVestingFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function issuerTransferWithExistingAccountAndVestingFlow({
+  api,
+  query,
+  lock,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issuer transfer with existing account and no vesting')
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
+  const channelId = api.channel
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator
@@ -29,7 +33,7 @@ export default async function issuerTransferWithExistingAccountAndVestingFlow({ 
           linearVestingDuration: api.createType('u32', new BN(100)),
           blocksBeforeCliff: api.createType('u32', new BN(10)),
           cliffAmountPercentage: api.createType('Permill', new BN(100)),
-        })
+        }),
       }),
     ],
   ]

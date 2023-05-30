@@ -14,11 +14,8 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1)
-  expect(channelId).gte(1)
+  const channelId = api.channel
+  const tokenId = api.token
 
   const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator

@@ -8,12 +8,15 @@ import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { BN } from 'bn.js'
 
-export default async function issuerTransferWithAccountCreationAndVestingFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function issuerTransferWithAccountCreationAndVestingFlow({
+  api,
+  query,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issuer transfer with account creation and vesting')
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
+  const channelId = api.channel
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator
@@ -33,7 +36,7 @@ export default async function issuerTransferWithAccountCreationAndVestingFlow({ 
           linearVestingDuration: api.createType('u32', new BN(100)),
           blocksBeforeCliff: api.createType('u32', new BN(10)),
           cliffAmountPercentage: api.createType('Permill', new BN(100)),
-        })
+        }),
       }),
     ],
   ]

@@ -60,7 +60,7 @@ export class InitTokenSaleFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, tokenSale] = this.events[0].event.data
-    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
+    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource,  } = tokenSale
     const end = startBlock.add(duration)
     const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAccount = tokenId.toString() + tokensSource.toString()

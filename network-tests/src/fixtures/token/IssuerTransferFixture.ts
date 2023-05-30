@@ -101,14 +101,15 @@ export class IssuerTransferFixture extends StandardizedFixture {
       assert.isNotNull(qAccount)
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.sourceAmountPre!)
-
     })
 
     const total = this.outputs
       .map(([, payment]) => payment.amount)
       .reduce((item, acc) => acc.add(item), new BN(0))
 
-    const sourceAmountPost = (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)).amount.toString()
+    const sourceAmountPost = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)
+    ).amount.toString()
 
     assert.isNotNull(qAccount)
     assert.equal(qAccount!.totalAmount, sourceAmountPost.toString())
@@ -159,5 +160,5 @@ export class IssuerTransferFixture extends StandardizedFixture {
     }
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

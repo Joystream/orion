@@ -53,8 +53,14 @@ export async function processChannelCreatedEvent({
     rewardAccount,
   ] = event.isV1000 ? event.asV1000 : event.asV2002;
 
+<<<<<<< HEAD
   console.log(`******* channel id ${channelId}`);
 
+||||||| parent of 6e79e8a28 (fix: add join whitelist flow)
+  console.log(`******* channel id ${channelId}`)
+
+=======
+>>>>>>> 6e79e8a28 (fix: add join whitelist flow)
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)

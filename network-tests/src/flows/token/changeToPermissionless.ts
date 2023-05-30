@@ -14,11 +14,7 @@ export default async function changeToPermissionlessFlow({
   debug('Started')
   api.enableDebugTxLogs()
 
-  const nextTokenId = (await api.query.projectToken.nextTokenId()).toNumber()
-  const tokenId = nextTokenId - 1
-  const channelId = (await api.query.content.nextChannelId()).toNumber() - 1
-  expect(nextTokenId).gte(1)
-  expect(channelId).gte(1)
+  const channelId = api.channel
 
   // retrieve owner info
   const unlockCreatorAccess = await lock(Resource.Creator)
