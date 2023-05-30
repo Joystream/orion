@@ -127,6 +127,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
       this.destinationsAmountPre![i].add(transfer.payment.amount)
     )
+
     assert.deepEqual(observedAmounts, destinationsAmountPost)
 
     for (const transfer of validatedTransfers.values()) {
