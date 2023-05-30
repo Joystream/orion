@@ -77,10 +77,10 @@ export default async function issueCreatorToken({ api, query, lock }: FlowProps)
     crtParams
   )
   await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
+  const tokenId = issueCreatorTokenFixture.getTokenId()
 
-  const unlockCreatorAccess = await lock(Resource.Creator)
   api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
-  unlockCreatorAccess()
+  api.setToken(tokenId.toNumber())
 
   debug('Done')
 }

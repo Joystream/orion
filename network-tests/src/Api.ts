@@ -103,11 +103,11 @@ export class ApiFactory {
 
   // getter and setters for channel and tokenId
   public get channel(): number {
-    assert(this.channelId !== undefined)
+    assert(this.channelId !== undefined, 'channel not set')
     return this.channelId!
   }
   public get token(): number {
-    assert(this.tokenId !== undefined)
+    assert(this.tokenId !== undefined, 'token not set')
     return this.tokenId!
   }
   public setChannel(channelId: number) {
@@ -119,11 +119,11 @@ export class ApiFactory {
 
   // getter & setters for creator token actors
   public get creator(): [string, number] {
-    assert(this.creatorAddress !== undefined)
+    assert(this.creatorAddress !== undefined, 'creator not set')
     return [this.creatorAddress!, this.creatorMemberId!]
   }
   public get firstHolder(): [string, number] {
-    assert(this.firstHolderAddress !== undefined)
+    assert(this.firstHolderAddress !== undefined, 'first Holder not set')
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
   }
   public setCreator(address: string, memberId: number) {
