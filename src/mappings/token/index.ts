@@ -59,7 +59,7 @@ export async function processTokenIssuedEvent({
     accountsNum: 0, // will be uptdated as account are added
     ammNonce: 0,
     revenueShareNonce: 0,
-    deissued: false, 
+    deissued: false,
   })
 
   // create accounts for allocation
