@@ -58,6 +58,19 @@ export interface AmmCurve {
     providedSupply: bigint
 }
 
+export interface TokenSale {
+    unitPrice: bigint
+    quantityLeft: bigint
+    fundsCollected: bigint
+    tokensSource: bigint
+    earningsDestination: (Uint8Array | undefined)
+    startBlock: number
+    duration: number
+    vestingScheduleParams: (VestingScheduleParams | undefined)
+    capPerMember: (bigint | undefined)
+    autoFinalize: boolean
+}
+
 export type ChannelOwner = ChannelOwner_Member | ChannelOwner_CuratorGroup
 
 export interface ChannelOwner_Member {
@@ -70,7 +83,7 @@ export interface ChannelOwner_CuratorGroup {
     value: bigint
 }
 
-export type ChannelActionPermission = ChannelActionPermission_UpdateChannelMetadata | ChannelActionPermission_ManageNonVideoChannelAssets | ChannelActionPermission_ManageChannelCollaborators | ChannelActionPermission_UpdateVideoMetadata | ChannelActionPermission_AddVideo | ChannelActionPermission_ManageVideoAssets | ChannelActionPermission_DeleteChannel | ChannelActionPermission_DeleteVideo | ChannelActionPermission_ManageVideoNfts | ChannelActionPermission_AgentRemark | ChannelActionPermission_TransferChannel | ChannelActionPermission_ClaimChannelReward | ChannelActionPermission_WithdrawFromChannelBalance | ChannelActionPermission_IssueCreatorToken | ChannelActionPermission_ClaimCreatorTokenPatronage | ChannelActionPermission_InitAndManageCreatorTokenSale | ChannelActionPermission_CreatorTokenIssuerTransfer | ChannelActionPermission_MakeCreatorTokenPermissionless | ChannelActionPermission_ReduceCreatorTokenPatronageRate | ChannelActionPermission_ManageRevenueSplits | ChannelActionPermission_DeissueCreatorToken | ChannelActionPermission_AmmControl
+export type ChannelActionPermission = ChannelActionPermission_UpdateChannelMetadata | ChannelActionPermission_ManageNonVideoChannelAssets | ChannelActionPermission_ManageChannelCollaborators | ChannelActionPermission_UpdateVideoMetadata | ChannelActionPermission_AddVideo | ChannelActionPermission_ManageVideoAssets | ChannelActionPermission_DeleteChannel | ChannelActionPermission_DeleteVideo | ChannelActionPermission_ManageVideoNfts | ChannelActionPermission_AgentRemark | ChannelActionPermission_TransferChannel | ChannelActionPermission_ClaimChannelReward | ChannelActionPermission_WithdrawFromChannelBalance | ChannelActionPermission_IssueCreatorToken | ChannelActionPermission_ClaimCreatorTokenPatronage | ChannelActionPermission_InitAndManageCreatorTokenSale | ChannelActionPermission_CreatorTokenIssuerTransfer | ChannelActionPermission_MakeCreatorTokenPermissionless | ChannelActionPermission_ReduceCreatorTokenPatronageRate | ChannelActionPermission_ManageRevenueSplits | ChannelActionPermission_DeissueCreatorToken | ChannelActionPermission_AmmControl | ChannelActionPermission_CreatorTokenRemarks
 
 export interface ChannelActionPermission_UpdateChannelMetadata {
     __kind: 'UpdateChannelMetadata'
@@ -160,6 +173,10 @@ export interface ChannelActionPermission_AmmControl {
     __kind: 'AmmControl'
 }
 
+export interface ChannelActionPermission_CreatorTokenRemarks {
+    __kind: 'CreatorTokenRemarks'
+}
+
 export type PausableChannelFeature = PausableChannelFeature_ChannelFundsTransfer | PausableChannelFeature_CreatorCashout | PausableChannelFeature_VideoNftIssuance | PausableChannelFeature_VideoCreation | PausableChannelFeature_VideoUpdate | PausableChannelFeature_ChannelUpdate | PausableChannelFeature_CreatorTokenIssuance
 
 export interface PausableChannelFeature_ChannelFundsTransfer {
@@ -224,6 +241,12 @@ export interface StorageAssetsRecord {
 export interface DistributionBucketIdRecord {
     distributionBucketFamilyId: bigint
     distributionBucketIndex: bigint
+}
+
+export interface VestingScheduleParams {
+    linearVestingDuration: number
+    blocksBeforeCliff: number
+    cliffAmountPercentage: number
 }
 
 export interface PendingTransfer {
