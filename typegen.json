@@ -91,6 +91,7 @@
     "ProjectToken.AmmDeactivated",
     "ProjectToken.TokensBoughtOnAmm",
     "ProjectToken.TokensSoldOnAmm",
+    "Content.CreatorTokenIssuerRemarked",
     "Content.CreatorTokenIssued",
     "Members.MemberRemarked"
   ],

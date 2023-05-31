@@ -86,7 +86,6 @@ import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 import {
   processCreatorTokenIssuedEvent,
-  // processCreatorTokenIssuerRemarkedEvent,
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processTokensBoughtOnAmmEvent,
@@ -109,6 +108,7 @@ import {
   processTokenSaleFinalizedEvent,
   processUserParticipatedInSplitEvent,
   processRevenueSplitFinalizedEvent,
+  processCreatorTokenIssuerRemarkedEvent,
 } from './mappings/token'
 import { commentCountersManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
@@ -241,7 +241,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
   'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
-  // 'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
+  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
