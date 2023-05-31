@@ -16,7 +16,6 @@ import {
   RevenueShareParticipation,
   Benefit,
   TokenAvatarUri,
-  TokenAvatarObject,
 } from '../../model'
 import {
   addVestingSchedule,
@@ -24,14 +23,13 @@ import {
   createAccount,
   revenueShareId,
   tokenAccountId,
-  tokenAmmId,
   tokenSaleId,
   ammIdForToken,
-  VestingScheduleData,
   issuedRevenueShareForToken,
+  VestingScheduleData,
 } from './utils'
 import { deserializeMetadata } from '../utils'
-import { TokenMetadata, SaleMetadata } from '@joystream/metadata-protobuf'
+import { SaleMetadata, TokenMetadata } from '@joystream/metadata-protobuf'
 import { isSet } from 'lodash'
 
 export async function processTokenIssuedEvent({
@@ -61,7 +59,7 @@ export async function processTokenIssuedEvent({
     accountsNum: 0, // will be uptdated as account are added
     ammNonce: 0,
     revenueShareNonce: 0,
-    deissued: false, // trailer video: set using metadata (next PR)
+    deissued: false, 
   })
 
   // create accounts for allocation
@@ -242,7 +240,7 @@ export async function processTokenSaleInitializedEvent({
     tokenSaleAllocation: tokenSale.quantityLeft,
     pricePerUnit: tokenSale.unitPrice,
     finalized: false,
-    termsAndConditions: '', // TODO Sale metadata (next PR)
+    termsAndConditions: '',
     fundsSourceAccountId: tokenAccountId(tokenId, fundsSourceMemberId),
   })
 
@@ -579,6 +577,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (metadata!.benefits) {
     for (const benefit of metadata!.benefits!) {
       overlay.getRepository(Benefit).new({
+        id: overlay.getRepository(Benefit).getNextIdNumber().toString(),
         title: benefit.title ? benefit.title! : undefined,
         description: benefit.description ? benefit.description! : undefined,
         emojiCode: benefit.emoji ? benefit.emoji! : undefined,
@@ -599,5 +598,9 @@ export async function processCreatorTokenIssuerRemarkedEvent({
     token.avatar = metadata!.avatarUri
       ? new TokenAvatarUri({ avatarUri: metadata!.avatarUri })
       : null
+  }
+
+  if (isSet(metadata!.trailerVideoId)) {
+    token.trailerVideoId = metadata!.trailerVideoId
   }
 }

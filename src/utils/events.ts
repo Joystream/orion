@@ -133,7 +133,7 @@ export const eventConstructors = {
   'Content.ChannelFundsWithdrawn': ContentChannelFundsWithdrawnEvent,
   'Content.ChannelRewardClaimedAndWithdrawn': ContentChannelRewardClaimedAndWithdrawnEvent,
   'Content.CreatorTokenIssued': ContentCreatorTokenIssuedEvent,
-  // 'Content.CreatorTokenIssuerRemarked': ContentCreatorTokenIssuerRemarkedEvent,
+  'Content.CreatorTokenIssuerRemarked': ContentCreatorTokenIssuerRemarkedEvent,
   'Storage.StorageBucketCreated': StorageStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': StorageStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': StorageStorageBucketsUpdatedForBagEvent,
