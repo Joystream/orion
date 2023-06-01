@@ -98,6 +98,8 @@ export class ApiFactory {
   private creatorMemberId: undefined | number
   private firstHolderAddress: undefined | string
   private firstHolderMemberId: undefined | number
+  private whitelistedHolderAddress: undefined | string
+  private whitelistedHolderMemberId: undefined | number
   private tokenId: undefined | number
   private channelId: undefined | number
 
@@ -126,6 +128,10 @@ export class ApiFactory {
     assert(this.firstHolderAddress !== undefined, 'first Holder not set')
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
   }
+  public get whitelistedHolder(): [string, number] {
+    assert(this.whitelistedHolderAddress !== undefined, 'first Holder not set')
+    return [this.whitelistedHolderAddress!, this.whitelistedHolderMemberId!]
+  }
   public setCreator(address: string, memberId: number) {
     this.creatorAddress = address
     this.creatorMemberId = memberId
@@ -133,6 +139,10 @@ export class ApiFactory {
   public setFirstHolder(address: string, memberId: number) {
     this.firstHolderAddress = address
     this.firstHolderMemberId = memberId
+  }
+  public setWhitelistedHolder(address: string, memberId: number) {
+    this.whitelistedHolderAddress = address
+    this.whitelistedHolderMemberId = memberId
   }
 
   public static async create(
@@ -365,11 +375,17 @@ export class Api {
   public get firstHolder(): [string, number] {
     return this.factory.firstHolder
   }
+  public get whitelistedHolder(): [string, number] {
+    return this.factory.whitelistedHolder
+  }
   public setCreator(address: string, memberId: number) {
     this.factory.setCreator(address, memberId)
   }
   public setFirstHolder(address: string, memberId: number) {
     this.factory.setFirstHolder(address, memberId)
+  }
+  public setWhitelistedHolder(address: string, memberId: number) {
+    this.factory.setWhitelistedHolder(address, memberId)
   }
   public setToken(tokenId: number) {
     this.factory.setToken(tokenId)

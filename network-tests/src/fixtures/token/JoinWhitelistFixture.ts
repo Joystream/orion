@@ -53,9 +53,9 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
     this.tokenAccountNumberPre = qToken!.accountsNum
-    const commit = blake2AsHex(this.memberId.toString()).toString()
+    const element = blake2AsHex(this.memberId.toString()).toString()
     this.proof = this.api.createType('PalletProjectTokenMerkleProof', [
-      [commit, this.api.createType('PalletProjectTokenMerkleSide', 'Left')],
+      [element, this.api.createType('PalletProjectTokenMerkleSide', 'Left')],
     ])
   }
 

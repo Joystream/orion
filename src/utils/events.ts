@@ -89,7 +89,7 @@ import {
   ProjectTokenTokensBurnedEvent,
   ProjectTokenAmmDeactivatedEvent,
   ProjectTokenAmmActivatedEvent,
-  // ContentCreatorTokenIssuerRemarkedEvent,
+  ContentCreatorTokenIssuerRemarkedEvent,
   ProjectTokenTokensSoldOnAmmEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'

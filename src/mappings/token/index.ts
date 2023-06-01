@@ -94,7 +94,6 @@ export async function processCreatorTokenIssuedEvent({
 
 export async function processTokenAmountTransferredEvent({
   overlay,
-  block,
   event: {
     asV1000: [tokenId, sourceMemberId, validatedTransfers],
   },
@@ -562,7 +561,7 @@ export async function processUserParticipatedInSplitEvent({
 export async function processCreatorTokenIssuerRemarkedEvent({
   overlay,
   event: {
-    asV2001: [tokenId, metadataBytes],
+    asV2002: [tokenId, metadataBytes],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
   const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
