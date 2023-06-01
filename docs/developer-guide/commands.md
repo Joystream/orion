@@ -14,7 +14,7 @@
 - `make up-squid` - runs dockerized `orion_db`, `orion_processor`, `orion_graphql-server` and `orion_auth-api` services (`docker-compose up -d`)
 - `make up-archive` - runs dockerized `archive_db`, `subsquid-gateway`, `archive-ingest` and `archive-explorer` services (`docker-compose -f archive/docker-compose.yml up -d`)
 - `make up` - runs `up-squid` + `up-archive`
-- `make down-squid` - [exports the offchain state](./tutorials/preserving-offchain-state.md) and removes docker services and volumes created by `up-squid`
+- `make down-squid` - removes docker services and volumes created by `up-squid`
 - `make down-archive` - removes docker services and volumes created by `up-archive`
 - `make down` - runs `down-squid` + `down-archive`
 

@@ -1,56 +1,27 @@
 # Releasing Orion
 
-## Before releasing
-
-Make sure all those steps are completed before releasing a new version of Orion:
+When releasing new version of Orion make sure that:
 1. All pull requests you wish to include in the release are already merged into the `master` branch.
-1. Orion version has been bumped, the release has been properly tagged on GitHub and the `CHANGELOG` file has been updated acording to instructions provided in [_Versioning_](../versioning.md).
-1. In case of any changes related to environment variables or docker configuration, make sure a PR to update Orion setup in the [Joystream monorepo](https://github.com/Joystream/joystream) has been created and merged as well.
+1. Orion version has been bumped and the `CHANGELOG` file has been updated acording to instructions provided in [_Versioning_](../versioning.md).
+1. The `CHANGELOG` clearly states all changes included in the release that:
+    - could break or in some other way significantly affect the behavior of previous versions of Atlas (ie. are affecting the GraphQL API / Auth API),
+    - require additional steps to be taken by the Gateway operators that wish to upgrade to the new version. For example: 
+        - introduction of new environment variables or changes to existing environment variables,
+        - changes to database schema that would require the operators to execute non-standard migration steps,
+        - changes to default docker-compose configuration that would require the Operators make adjustments to their current setup.
+1. All other documentation has been porperly updated to reflect any significant changes introduced in the release. This includes both this documentation (the [Orion Developer Guide](../index.md)) and the [Orion Operator Guide](../../operator-guide/index.md).
+1. In case of any changes related to environment variables or docker configuration, make sure a PR to update Orion docker setup in the [Joystream monorepo](https://github.com/Joystream/joystream) has been created and merged as well (example: https://github.com/Joystream/joystream/pull/4730)
+1. In case any changes are affecting [Offchain data](../tutorials/preserving-offchain-state.md) schema in a non-backward-compatible way, make sure a proper export data migration step was added accordingly to _[Introducing breaking changes to Offchain data schema](../tutorials/preserving-offchain-state.md#introducing-breaking-changes-to-offchain-data-schema)_.
 
-## Release process
+Once all of those conditions are met, you can proceed with [creating a GitHub release](https://github.com/Joystream/orion/releases/new):
 
-The release process of Orion usually consists of the following steps:
+1. Create a new tag matching the version specified in [`package.json`](../../package.json) (for example: `2.3.0`) on the release commit.
+1. Use the same version number as the release title as well.
+1. When describing the release:
+    - Add a note about whether the upgrade of Atlas is also required/recommended for the Gateway operators. If it is, make sure to specify the version of Atlas compatible with the new Orion version.
+    - Make sure to describe any non-standard upgrading requirements / steps. By non-standard we mean any steps that are a deviation from [_Typical upgrade_](../../operator-guide/tutorials/upgrading-orion.md#typical-upgrade-process) process described in _Upgrading Orion_ tutorial inside the Orion Operator Guide.
+    - Provide a link to the related [CHANGELOG](../../CHANGELOG.md) entry.
 
-1. Turn on the _kill switch_ (maintenance mode). This will prevent the users from interactig with the Gateway during the upgrade, as this could have undesired consequences (for example, due to processor not being fully synced). To do that you should execute `setKillSwitch(isKilled: true)` operator mutation using Orion's GraphQL API (you need to be [authenticated](./authentication-api.md) as Operator).
-1. Watch out for changes in the `.env` file! The production instance of Orion should have different `.env` configuration values than the default ones. When pulling the latest `master` on the production instance make sure to:
-    1. Preserve the currently set production values of the environment variables.
-    2. Update values of any new environment variables introduced in the release to production values if needed.
-1. Backup the databse! You can do that by executing the following command:
-    ```bash
-    docker exec orion_db pg_dumpall -p 23798 -U postgres > "orion-production-$(date '+%Y-%m-%d').bak"
-    ```
-1. Execute `make down` in order to export the [_Offchain state_](./preserving-offchain-state.md) and bring down the Orion services.
-1. Execute `make prepare` to run all the install, codegen and build steps on the updated codebase.
-1. Execute `make up` to bring up the Orion services.
-1. Wait for the Orion processor to catch up with the Joystream blockchain before disabling the _kill switch_. You can follow the processor logs using:
-    ```bash
-    docker logs -f --tail 10 orion_processor
-    ```
-    You can also check the logs of other docker services to make sure they are running as expected.
-1. After the processor is synced, run some test queries to make sure the new version is working as expected.
-1. Once you're confident that the release was successful, disable the _kill switch_ by executing `setKillSwitch(isKilled: false)` operator mutation using Orion's GraphQL API.
+## Updating Orion for Gleev
 
-
-
-## Restoring the previous version
-
-In case something goes wrong during the upgrade, you can restore the database from backup created in step `5.` and switch back to the previous version of Orion by executing the following commands:
-```bash
-    # Bring down the Orion services
-    docker-compose down -v
-    # Remove the export.json file (if exists) as it may interfere with the restore process
-    rm db/export.json
-    # Switch back to the previous version
-    # git checkout ...
-    # Prepare the working directory
-    make prepare
-    # Start the db service
-    docker-compose up -d orion_db
-    # Copy the backup file to the db container
-    # Replace the YYYY-mm-dd with the date of the backup you wish to restore
-    docker cp "orion-production-YYYY-mm-dd.bak" orion_db:/tmp/orion-production.bak
-    # Restore the database
-    docker exec orion_db psql -p 23798 -f /tmp/orion-production.bak -U postgres postgres
-    # Bring up the Orion services
-    make up-squid
-```
+When updating Orion instance used by the Gleev gateway, you should generally follow _[Upgrading Orion](../../operator-guide/tutorials/upgrading-orion.md)_ tutorial from the Orion Operator Guide. If you notice that any deviations from the standard upgrade process are required, make sure they are mentioned in the release notes as described above.
