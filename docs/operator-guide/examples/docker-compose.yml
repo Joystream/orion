@@ -1,4 +1,3 @@
-
 version: '3.4'
 services:
   # PostgerSQL database for Orion
@@ -49,7 +48,7 @@ services:
     environment:
       - DB_HOST=orion-db
       - GQL_PORT=${GRAPHQL_API_PORT}
-    command: ["npm", "run", "query-node-start"]
+    command: ['npm', 'run', 'query-node-start']
     ports:
       - '127.0.0.1:${GRAPHQL_API_PORT}:${GRAPHQL_API_PORT}'
   # Orion Authentication API
@@ -76,9 +75,9 @@ services:
     env_file:
       - .env
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./atlas:/srv/atlas
