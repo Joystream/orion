@@ -25,6 +25,8 @@ module.exports = class Indexes2000000000000 {
       `CREATE INDEX "events_previous_nft_owner_channel" ON "processor"."event" USING BTREE (("data"->'previousNftOwner'->>'channel'));`
     )
     await db.query(`CREATE INDEX "events_buyer" ON "processor"."event" USING BTREE (("data"->>'buyer'));`)
+    await db.query(`CREATE INDEX "auction_type" ON "processor"."auction" USING BTREE (("auction_type" ->> 'isTypeOf'));`)
+    await db.query(`CREATE INDEX "member_metadata_avatar" ON "member_metadata" USING BTREE (("avatar" ->> 'avatarObject'));`)
   }
 
   async down(db) {
