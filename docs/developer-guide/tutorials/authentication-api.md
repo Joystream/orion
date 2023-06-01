@@ -413,7 +413,7 @@ When deploying to the staging environment, you can sidestep the `same-site: stri
 
 To do that you need to make sure to set those 2 environment variables:
 ```bash
-export NODE_ENV=development
+export ORION_ENV=development
 export DEV_DISABLE_SAME_SITE=true
 ```
 

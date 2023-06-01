@@ -103,7 +103,7 @@ docker logs --tail 10 -f orion_processor
 
 The local Orion API endpoints are going to be the same as those described in the first section ([Local Orion endpoints](#local-orion-endpoints))
 
-Once you're done with your tests, you can run `make down` to remove all Orion and Subsquid archive docker services (note that `make down` will also export/preserve the _offchain state_, for more details see the [Offchain state preservation](./tutorials/preserving-offchain-state.md) guide)
+Once you're done with your tests, you can run `make down` to remove all Orion and Subsquid archive docker services.
 
 Alternatively, since Subsquid archive and Orion services have separate `docker-compose.yml` files, you can bring them down separately by running:
 ```bash
@@ -113,8 +113,6 @@ docker-compose down -v
 # Bring down the Subsquid archive:
 docker-compose -f ./archive/docker-compose.yml down -v
 ```
-
-However, when using `docker-compose down -v`, the _offchain state_ **will not be preserved** (for more details see the [Offchain state preservation](./tutorials/preserving-offchain-state.md) guide)
 
 ## Run Orion v2 w/ remote archive
 
@@ -142,11 +140,4 @@ docker logs --tail 10 -f orion_processor
 
 Again, the local Orion API endpoints are going to be the same as those described in the first section ([Local Orion endpoints](#local-orion-endpoints))
 
-After you're done with the tests you can use one of the following commands to bring down all Orion services:
-```bash
-# With off-chain state preservation:
-make down-squid
-
-# Without off-chain state preservation:
-docker-compose down -v
-```
+After you're done with the tests you can use either `make down` or `docker-compose down -v` to bring down all Orion services.
