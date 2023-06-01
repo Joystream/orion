@@ -9,7 +9,7 @@ info:
     url: 'https://opensource.org/licenses/GPL-3.0'
   version: 1.0.0
 servers:
-  - url: 'http://localhost:4074/api/v1/'
+  - url: '/api/v1/'
 paths:
   /anonymous-auth:
     post:

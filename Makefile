@@ -44,8 +44,7 @@ up-archive:
 up: up-archive up-squid
 
 down-squid:
-	@docker-compose stop orion_processor
-	@npm run offchain-state:export && docker-compose down -v
+	@docker-compose down -v
 	
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v

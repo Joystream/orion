@@ -207,7 +207,7 @@ export async function getOrCreateSession(
 
 export function setSessionCookie(res: Response, sessionId: string, maxDurationHours: number): void {
   const sameSite =
-    process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true'
+    process.env.ORION_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true'
       ? 'none'
       : 'strict'
   res.cookie(SESSION_COOKIE_NAME, sessionId, {
@@ -215,5 +215,30 @@ export function setSessionCookie(res: Response, sessionId: string, maxDurationHo
     httpOnly: true,
     secure: true,
     sameSite,
+    domain: process.env.GATEWAY_ROOT_DOMAIN && `.${process.env.GATEWAY_ROOT_DOMAIN}`,
   })
+}
+
+export function getCorsOrigin(): (RegExp | string)[] | boolean {
+  if (process.env.ORION_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true') {
+    return true
+  }
+
+  const rootDomain = process.env.GATEWAY_ROOT_DOMAIN
+
+  if (!rootDomain) {
+    throw new Error(
+      'GATEWAY_ROOT_DOMAIN must be set unless in development mode with DEV_DISABLE_SAME_SITE set to true'
+    )
+  }
+
+  const corsOrigin = [
+    `https://${rootDomain}`,
+    new RegExp(`https://.+\\.${rootDomain.replace('.', '\\.')}$`),
+  ]
+
+  authLogger.info('Root domain: ' + rootDomain)
+  authLogger.info('CORS origin: ' + corsOrigin.toString())
+
+  return corsOrigin
 }

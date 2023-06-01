@@ -1,6 +1,5 @@
-import '../config'
-import { OffchainState } from '../../src/utils/offchainState'
-import { globalEm } from '../../src/utils/globalEm'
+import { OffchainState } from '../utils/offchainState'
+import { globalEm } from '../utils/globalEm'
 
 async function main() {
   const offchainState = new OffchainState()
