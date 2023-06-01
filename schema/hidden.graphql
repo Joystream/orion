@@ -62,3 +62,14 @@ type ChannelFollow @entity {
   "Time when user started following the channel"
   timestamp: DateTime!
 }
+
+type GatewayConfig @entity {
+  "Unique name of the configuration variable"
+  id: ID!
+
+  "Value of the configuration variable serialized to a string"
+  value: String!
+
+  "Last time the configuration variable was updated"
+  updatedAt: DateTime!
+}

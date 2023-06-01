@@ -75,6 +75,7 @@ module.exports = class Views2000000000000 {
       account: ['FALSE'],
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
+      gateway_config: ['FALSE'],
     }
   }
 

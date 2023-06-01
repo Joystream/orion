@@ -4,7 +4,7 @@ import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 
-const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export.json')
+const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
 const exportedStateMap = {
   VideoViewEvent: true,
@@ -37,53 +37,93 @@ type ExportedData = {
 type ExportedState = {
   data: ExportedData
   blockNumber: number
+  orionVersion?: string
 }
+
+type MigrationFunction = (data: ExportedData, em: EntityManager) => ExportedData
+type Migrations = Record<string, MigrationFunction>
 
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
+
+  private migrations: Migrations = {
+    // Example:
+    // '2.3.0': migrateExportDataV230,
+  }
 
   public get isImported(): boolean {
     return this._isImported
   }
 
   public async export(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
+    if (!fs.existsSync(path.dirname(exportFilePath))) {
+      this.logger.info(`Creating exports directory: ${path.dirname(exportFilePath)}`)
+      fs.mkdirSync(path.dirname(exportFilePath), { recursive: true })
+    }
+    const packageJsonPath = path.join(__dirname, '../../package.json')
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+    const orionVersion = packageJson.version
     this.logger.info('Exporting offchain state')
     const exportedState: ExportedState = await em.transaction(async (em) => {
       const blockNumberPre: number = (
         await em.query('SELECT height FROM squid_processor.status WHERE id = 0')
       )[0].height
+      this.logger.info(`Export orion version: ${orionVersion}`)
       this.logger.info(`Export block number: ${blockNumberPre}`)
       const data = Object.fromEntries(
-        await Promise.all(
-          Object.entries(exportedStateMap).map(async ([entityName, fields]) => {
-            const type = Array.isArray(fields) ? 'update' : 'insert'
-            const values = Array.isArray(fields)
-              ? await em
-                  .getRepository(entityName)
-                  .createQueryBuilder()
-                  .select(['id', ...fields])
-                  .getRawMany()
-              : await em.getRepository(entityName).find({})
-            this.logger.info(
-              `Exporting ${values.length} ${entityName} entities ` +
-                `(type: ${type}` +
-                (Array.isArray(fields) ? `, fields: ${fields.join(', ')})` : ')')
-            )
-            return [entityName, { type, values }]
-          })
-        )
+        (
+          await Promise.all(
+            Object.entries(exportedStateMap).map(async ([entityName, fields]) => {
+              const type = Array.isArray(fields) ? 'update' : 'insert'
+              const values = Array.isArray(fields)
+                ? await em
+                    .getRepository(entityName)
+                    .createQueryBuilder()
+                    .select(['id', ...fields])
+                    .getRawMany()
+                : await em.getRepository(entityName).find({})
+              if (!values.length) {
+                return []
+              }
+              this.logger.info(
+                `Exporting ${values.length} ${entityName} entities ` +
+                  `(type: ${type}` +
+                  (Array.isArray(fields) ? `, fields: ${fields.join(', ')})` : ')')
+              )
+              return [[entityName, { type, values }]]
+            })
+          )
+        ).flat()
       )
       const blockNumberPost: number = (
         await em.query('SELECT height FROM squid_processor.status WHERE id = 0')
       )[0].height
       assert(blockNumberPre === blockNumberPost, 'Block number changed during export')
-      return { data, blockNumber: blockNumberPost }
+      return { data, blockNumber: blockNumberPost, orionVersion }
     })
 
     this.logger.info(`Saving export data to ${exportFilePath}`)
     fs.writeFileSync(exportFilePath, JSON.stringify(exportedState))
     this.logger.info('Done')
+  }
+
+  private versionToNumber(version: string): number {
+    const [major = '0', minor = '0', patch = '0'] = version.split('.')
+    return parseInt(major) * (1000 * 1000) + parseInt(minor) * 1000 + parseInt(patch)
+  }
+
+  public prepareExportData(exportState: ExportedState, em: EntityManager): ExportedData {
+    let { data } = exportState
+    Object.entries(this.migrations)
+      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b))
+      .forEach(([version, fn]) => {
+        if (this.versionToNumber(exportState.orionVersion || '0') < this.versionToNumber(version)) {
+          this.logger.info(`Migrating export data to version ${version}`)
+          data = fn(data, em)
+        }
+      })
+    return data
   }
 
   public async import(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
@@ -92,7 +132,7 @@ export class OffchainState {
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
       )
     }
-    const { data }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const data = this.prepareExportData(JSON.parse(fs.readFileSync(exportFilePath, 'utf-8')), em)
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
       if (!values.length) {

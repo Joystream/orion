@@ -5,7 +5,7 @@ import { HttpError } from 'express-openapi-validator/dist/framework/types'
 import path from 'path'
 import { AuthApiError, UnauthorizedError } from './errors'
 import { createLogger } from '@subsquid/logger'
-import { authenticate } from '../utils/auth'
+import { authenticate, getCorsOrigin } from '../utils/auth'
 import cookieParser from 'cookie-parser'
 import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimits'
 import swaggerUi, { JsonObject } from 'swagger-ui-express'
@@ -34,9 +34,8 @@ app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
 app.use(
   cors({
-    origin: true,
-    credentials:
-      process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true',
+    origin: getCorsOrigin(),
+    credentials: true,
   })
 )
 applyRateLimits(app, globalRateLimit, rateLimitsPerRoute)

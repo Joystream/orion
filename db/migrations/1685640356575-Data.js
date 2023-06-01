@@ -1,5 +1,5 @@
-module.exports = class Data1684851659071 {
-    name = 'Data1684851659071'
+module.exports = class Data1685640356575 {
+    name = 'Data1685640356575'
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -112,6 +112,7 @@ module.exports = class Data1684851659071 {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "ip" text NOT NULL, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9bba17db99b72836523ab6c16f" ON "channel_follow" ("ip") `)
         await db.query(`CREATE INDEX "IDX_9bc0651dda94437ec18764a260" ON "channel_follow" ("channel_id") `)
+        await db.query(`CREATE TABLE "gateway_config" ("id" character varying NOT NULL, "value" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_db1fa5a857fb6292eee4c493e6f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "video_hero" ("id" character varying NOT NULL, "video_id" character varying, "hero_title" text NOT NULL, "hero_video_cut_url" text NOT NULL, "hero_poster_url" text NOT NULL, "activated_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_f3b63979879773378afac0b9495" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9feac5d9713a9f07e32eb8ba7a" ON "video_hero" ("video_id") `)
         await db.query(`CREATE TABLE "video_media_encoding" ("id" character varying NOT NULL, "codec_name" text, "container" text, "mime_media_type" text, CONSTRAINT "PK_52e25874f8d8a381e154d1125e0" PRIMARY KEY ("id"))`)
@@ -135,7 +136,6 @@ module.exports = class Data1684851659071 {
         await db.query(`CREATE TABLE "token" ("id" character varying NOT NULL, "type" character varying(18) NOT NULL, "issued_at" TIMESTAMP WITH TIME ZONE NOT NULL, "expiry" TIMESTAMP WITH TIME ZONE NOT NULL, "issued_for_id" character varying, CONSTRAINT "PK_82fae97f905930df5d62a702fc9" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a6fe18c105f85a63d761ccb078" ON "token" ("issued_for_id") `)
         await db.query(`CREATE TABLE "next_entity_id" ("entity_name" character varying NOT NULL, "next_id" bigint NOT NULL, CONSTRAINT "PK_09a3b40db622a65096e7344d7ae" PRIMARY KEY ("entity_name"))`)
-        await db.query(`CREATE TABLE "gateway_config" ("id" character varying NOT NULL, "value" text NOT NULL, "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_db1fa5a857fb6292eee4c493e6f" PRIMARY KEY ("id"))`)
         await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_e7618559409a903a897164156b7" FOREIGN KEY ("bidder_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -313,6 +313,7 @@ module.exports = class Data1684851659071 {
         await db.query(`DROP TABLE "channel_follow"`)
         await db.query(`DROP INDEX "public"."IDX_9bba17db99b72836523ab6c16f"`)
         await db.query(`DROP INDEX "public"."IDX_9bc0651dda94437ec18764a260"`)
+        await db.query(`DROP TABLE "gateway_config"`)
         await db.query(`DROP TABLE "video_hero"`)
         await db.query(`DROP INDEX "public"."IDX_9feac5d9713a9f07e32eb8ba7a"`)
         await db.query(`DROP TABLE "video_media_encoding"`)
@@ -336,7 +337,6 @@ module.exports = class Data1684851659071 {
         await db.query(`DROP TABLE "token"`)
         await db.query(`DROP INDEX "public"."IDX_a6fe18c105f85a63d761ccb078"`)
         await db.query(`DROP TABLE "next_entity_id"`)
-        await db.query(`DROP TABLE "gateway_config"`)
         await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d"`)
         await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912"`)
         await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_e7618559409a903a897164156b7"`)

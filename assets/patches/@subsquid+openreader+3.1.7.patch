@@ -42,7 +42,7 @@ index da31a85..3691776 100644
      plugins?: PluginDefinition[];
      subscriptions?: boolean;
 diff --git a/node_modules/@subsquid/openreader/lib/server.js b/node_modules/@subsquid/openreader/lib/server.js
-index 6fb0711..6241758 100644
+index 6fb0711..89e3d3d 100644
 --- a/node_modules/@subsquid/openreader/lib/server.js
 +++ b/node_modules/@subsquid/openreader/lib/server.js
 @@ -17,11 +17,13 @@ const schema_1 = require("./opencrud/schema");
@@ -76,8 +76,8 @@ index 6fb0711..6241758 100644
 +    app.set('trust proxy', process.env.TRUST_PROXY || false)
 +    app.use(cookieParser(process.env.COOKIE_SECRET))
 +    app.use(cors({
-+        origin: true,
-+        credentials: process.env.NODE_ENV === 'development' && process.env.DEV_DISABLE_SAME_SITE === 'true'
++        origin: require(path_1.default.resolve(__dirname, '../../../../lib/utils/auth.js')).getCorsOrigin(),
++        credentials: true
 +    }))
 +    // CUSTOM CONFIG END
      let server = http_1.default.createServer(app);

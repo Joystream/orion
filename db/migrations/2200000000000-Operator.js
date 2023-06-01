@@ -7,7 +7,7 @@ module.exports = class Operator2300000000000 {
   
   async up(db) {
     // Support only one operator account at the moment to avoid confusion
-    const exportFilePath = path.join(__dirname, '../export.json')
+    const exportFilePath = path.join(__dirname, '../export/export.json')
     if (existsSync(exportFilePath)) {
       const exportData = require(exportFilePath)
       if (exportData.data.User) {
