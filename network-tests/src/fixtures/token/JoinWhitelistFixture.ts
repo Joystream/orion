@@ -52,14 +52,13 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
     assert.isNotNull(qToken)
+    const bloatBond = (await this.api.query.projectToken.bloatBond()).toBn()
+    await this.api.treasuryTransferBalance(this.memberAddress, bloatBond)
     this.tokenAccountNumberPre = qToken!.accountsNum
-    const element = blake2AsHex(this.memberId.toString()).toString()
-    this.proof = this.api.createType('PalletProjectTokenMerkleProof', [
-      [element, this.api.createType('PalletProjectTokenMerkleSide', 'Left')],
-    ])
+    this.proof = this.api.createType('PalletProjectTokenMerkleProof',) 
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId] = this.events[0].event.data

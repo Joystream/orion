@@ -55,9 +55,11 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
       }),
     })
   )
+
+  const whitelistCommit = blake2AsHex(whitelistedHolderMemberId.toU8a(), 256)
   const symbol = blake2AsHex('test')
   const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', {
-    Permissioned: blake2AsHex(vestedHolderMemberId.toString())
+    Permissioned: whitelistCommit  
   })
   const revenueSplitRate = api.createType('Permill', new BN(10))
   const patronageRate = api.createType('Perquintill', new BN(15))
