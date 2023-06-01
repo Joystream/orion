@@ -7,13 +7,14 @@ import { Api } from '../../Api'
 import {
   PalletContentPermissionsContentActor,
   PalletProjectTokenTokenIssuanceParameters,
-  PalletProjectTokenTokenAllocation,
 } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
+import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { blake2AsHex } from '@polkadot/util-crypto'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -61,13 +62,17 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   public async runQueryNodeChecks(): Promise<void> {
-    Utils.wait(20000)
     const [
       tokenId,
       { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },
     ] = this.events[0].event.data
-    await super.runQueryNodeChecks()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    let qToken: TokenFieldsFragment | null = null
+
+    await Utils.until('waiting for issue token handler to be completed', async () => {
+      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      return qToken !== null
+    })
+
     const initialMembers = [...initialAllocation.keys()]
     const initialBalances = [...initialAllocation.values()].map((item) => item.amount)
     const qAccounts = await Promise.all(
@@ -87,6 +92,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.id, tokenId.toString())
     assert.equal(qToken!.status, TokenStatus.Idle)
     assert.equal(qToken!.revenueShareNonce, 0)
+    assert.equal(blake2AsHex(qToken!.symbol), symbol.toString())
     assert.equal(qToken!.revenueShareRatioPercent, revenueSplitRate.toNumber())
     assert.equal(qToken!.totalSupply, totalSupply.toString())
     // assert.equal(qToken!.symbol, symbol.toString())
