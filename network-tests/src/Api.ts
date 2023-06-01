@@ -129,7 +129,7 @@ export class ApiFactory {
     return [this.firstHolderAddress!, this.firstHolderMemberId!]
   }
   public get whitelistedHolder(): [string, number] {
-    assert(this.whitelistedHolderAddress !== undefined, 'first Holder not set')
+    assert(this.whitelistedHolderAddress !== undefined, 'whitelisted Holder not set')
     return [this.whitelistedHolderAddress!, this.whitelistedHolderMemberId!]
   }
   public setCreator(address: string, memberId: number) {
