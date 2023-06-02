@@ -6,8 +6,6 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenMerkleProof, PalletProjectTokenMerkleSide } from '@polkadot/types/lookup'
 import { assert } from 'chai'
-import BN from 'bn.js'
-import { blake2AsHex } from '@polkadot/util-crypto'
 
 type MemberJoinedWhitelistEventDetails = EventDetails<
   EventType<'projectToken', 'MemberJoinedWhitelist'>
