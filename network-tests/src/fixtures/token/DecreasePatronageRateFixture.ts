@@ -6,8 +6,9 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 import BN from 'bn.js'
+import { Maybe } from 'graphql/generated/schema'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageRateDecreasedTo'>
@@ -58,19 +59,26 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    await Utils.until('waiting for patronage rate to be updated in DB', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken
+    })
     assert.isNotNull(qToken)
     this.previousRate = new BN(qToken!.annualCreatorReward)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, newRate] = this.events[0].event.data
-    let qToken: TokenFieldsFragment | null = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
     await Utils.until('waiting for patronage rate to be updated in DB', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      assert.isNotNull(qToken)
-      const currentRate = new BN(qToken!.annualCreatorReward)
-      return !currentRate.eq(this.previousRate!)
+      qToken = await this.query.getTokenById(tokenId)
+      if (!!qToken) {
+        const currentRate = new BN(qToken!.annualCreatorReward)
+        return !currentRate.eq(this.previousRate!)
+      } else {
+        return false
+      }
     })
 
     assert.isNotNull(qToken)

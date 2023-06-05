@@ -1,7 +1,11 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { CreatorRemarkFixture, DeissueCreatorTokenFixture, IssueCreatorTokenFixture } from '../../fixtures/token'
+import {
+  CreatorRemarkFixture,
+  DeissueCreatorTokenFixture,
+  IssueCreatorTokenFixture,
+} from '../../fixtures/token'
 import Long from 'long'
 
 export default async function creatorRemarkFlow({ api, query }: FlowProps): Promise<void> {
@@ -25,8 +29,8 @@ export default async function creatorRemarkFlow({ api, query }: FlowProps): Prom
         description: 'benefit description',
         emoji: '😀',
         displayOrder: 4,
-      }
-    ]
+      },
+    ],
   }
 
   const creatorRemarkFixture = new CreatorRemarkFixture(

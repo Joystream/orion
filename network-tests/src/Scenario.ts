@@ -2,7 +2,6 @@ import { WsProvider } from '@polkadot/api'
 import { ApiFactory, Api } from './Api'
 import { OrionApi } from './OrionApi'
 import { config } from 'dotenv'
-import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Debugger, extendDebug } from './Debugger'
 import { Flow } from './Flow'
 import { Job } from './Job'
@@ -12,6 +11,11 @@ import fetch from 'cross-fetch'
 import fs, { existsSync, readFileSync } from 'fs'
 import { KeyGenInfo, FaucetInfo } from './types'
 import path from 'path'
+import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { getMainDefinition } from '@apollo/client/utilities'
+import { createClient } from 'graphql-ws'
+import Websocket from 'ws'
 
 export type ScenarioProps = {
   env: NodeJS.ProcessEnv
@@ -87,9 +91,24 @@ export async function scenario(
   customKeys.forEach((k) => api.createCustomKeyPair(k))
 
   const orionUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:4350/graphql'
+  const wsLink = new GraphQLWsLink(
+    createClient({
+      url: 'ws://127.0.0.1:4350/graphql',
+      webSocketImpl: Websocket,
+    })
+  )
+  const httpLink = new HttpLink({ uri: orionUrl, fetch })
+  const splitLink = split(
+    ({ query }) => {
+      const definition = getMainDefinition(query)
+      return definition.kind === 'OperationDefinition' && definition.operation === 'subscription'
+    },
+    wsLink,
+    httpLink
+  )
 
   const apolloClient = new ApolloClient({
-    link: new HttpLink({ uri: orionUrl, fetch }),
+    link: splitLink,
     cache: new InMemoryCache(),
     defaultOptions: { query: { fetchPolicy: 'no-cache', errorPolicy: 'all' } },
   })

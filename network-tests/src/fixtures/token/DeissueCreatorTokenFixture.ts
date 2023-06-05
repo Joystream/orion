@@ -4,12 +4,11 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import {
-  PalletContentPermissionsContentActor,
-} from '@polkadot/types/lookup'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
+import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type TokenDeissuedEventDetails = EventDetails<EventType<'projectToken', 'TokenDeissued'>>
 
@@ -24,7 +23,7 @@ export class DeissueCreatorTokenFixture extends StandardizedFixture {
     query: OrionApi,
     creatorAddress: string,
     contentActor: PalletContentPermissionsContentActor,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
@@ -37,32 +36,31 @@ export class DeissueCreatorTokenFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    return [
-      this.api.tx.content.deissueCreatorToken(this.contentActor, this.channelId),
-    ]
+    return [this.api.tx.content.deissueCreatorToken(this.contentActor, this.channelId)]
   }
 
-  protected async getEventFromResult(result: SubmittableResult): Promise<TokenDeissuedEventDetails> {
+  protected async getEventFromResult(
+    result: SubmittableResult
+  ): Promise<TokenDeissuedEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'TokenDeissued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
-    const [
-      tokenId,
-    ] = this.events[0].event.data
+    const [tokenId] = this.events[0].event.data
 
-    let qToken: TokenFieldsFragment | null = null
-    await Utils.until('wait for deissue token handler effect to be written to the Store', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      assert.isNotNull(qToken)
-      return qToken!.deissued
-    })
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    qToken = await this.query.getTokenById(tokenId)
+    await Utils.until(
+      'wait for deissue token handler effect to be written to the Store',
+      async () => {
+        return !!qToken && qToken!.deissued
+      }
+    )
 
     await super.runQueryNodeChecks()
 
     assert.equal(qToken!.deissued, true)
   }
 }
-

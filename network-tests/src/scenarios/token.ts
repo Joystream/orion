@@ -36,14 +36,26 @@ scenario('Creator Token Test Suite', async ({ job }) => {
     job('create Channel', createChannel).requires(storage)
   )
 
-  job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
+  // job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
   job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)
-  const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
-    job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
-      job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithAccountCreationAndVestingFlow).after(
-        job('Issuer Transfer With Account Creation And No Vesting', issuerTransferWithAccountCreationAndNoVestingFlow).requires(issueTokenJob)
+  const issuerTransferJob = job(
+    'Issuer Transfer With Existing Account And Vesting',
+    issuerTransferWithExistingAccountAndVestingFlow
+  ).after(
+    job(
+      'Issuer Transfer With Existing Account And No Vesting',
+      issuerTransferWithExistingAccountAndNoVestingFlow
+    ).requires(
+      job(
+        'Issuer Transfer With Existing Account And Vesting',
+        issuerTransferWithAccountCreationAndVestingFlow
+      ).after(
+        job(
+          'Issuer Transfer With Account Creation And No Vesting',
+          issuerTransferWithAccountCreationAndNoVestingFlow
+        ).requires(issueTokenJob)
       )
     )
   )

@@ -2,12 +2,9 @@ import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { IssueRevenueShareFixture, ParticipateInShareFixture } from '../../fixtures/token'
-import { expect } from 'chai'
-import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
 import { ExitRevenueShareFixture } from '../../fixtures/token/ExitRevenueShareFixture'
 import { FinalizeRevenueShareFixture } from '../../fixtures/token/FinalizeRevenueShareFixture'
-import { DirectChannelPaymentFixture } from 'src/fixtures/content'
 
 export default async function revenueShareFlow({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:revenue-share')
@@ -17,13 +14,8 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
   const channelId = api.channel
   const tokenId = api.token
 
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
-
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderMemberId] = api.firstHolder
-  unlockFirstHolderAccess()
 
   // retrieve owner info
   debug('Issue revenue share')
@@ -40,7 +32,6 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
     allocation,
     start
   )
-  await issueRevenueShare.preExecHook()
   await new FixtureRunner(issueRevenueShare).runWithQueryNodeChecks()
 
   debug('User participates in revenue share')
@@ -53,7 +44,6 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
     tokenId,
     amount
   )
-  await participateInShareFixture.preExecHook()
   await new FixtureRunner(participateInShareFixture).runWithQueryNodeChecks()
 
   debug('User exists revenue share')
@@ -64,7 +54,6 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
     firstHolderMemberId,
     tokenId
   )
-  await exitRevenueShareFixture.preExecHook()
   await new FixtureRunner(exitRevenueShareFixture).runWithQueryNodeChecks()
 
   debug('revenue share finalized')
@@ -75,6 +64,5 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
     creatorMemberId,
     channelId
   )
-  await finalizeRevenueShareFixture.preExecHook()
   await new FixtureRunner(finalizeRevenueShareFixture).runWithQueryNodeChecks()
 }

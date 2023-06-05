@@ -33,7 +33,6 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
     outputs,
     metadata
   )
-  await transferFixture.preExecHook()
   await new FixtureRunner(transferFixture).runWithQueryNodeChecks()
 
   // create membership for new holder
@@ -60,6 +59,5 @@ export default async function holderTransferFlow({ api, query }: FlowProps): Pro
     outputsToNewAccount,
     metadata
   )
-  await transferFixtureToNewAccount.preExecHook()
   await new FixtureRunner(transferFixtureToNewAccount).runWithQueryNodeChecks()
 }

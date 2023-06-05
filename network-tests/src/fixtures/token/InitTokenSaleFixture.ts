@@ -9,6 +9,12 @@ import { assert } from 'chai'
 import BN from 'bn.js'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { Utils } from '../../Utils'
+import { Maybe } from '../../../graphql/generated/schema'
+import {
+  SaleFieldsFragment,
+  TokenFieldsFragment,
+  VestingScheduleFieldsFragment,
+} from '../../../graphql/generated/operations'
 
 type TokenSaleInitializedEventDetails = EventDetails<
   EventType<'projectToken', 'TokenSaleInitialized'>
@@ -60,20 +66,19 @@ export class InitTokenSaleFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, tokenSale] = this.events[0].event.data
-    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource,  } = tokenSale
+    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
     const end = startBlock.add(duration)
     const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAccount = tokenId.toString() + tokensSource.toString()
 
-    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    assert.isNotNull(qToken)
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qSale: Maybe<SaleFieldsFragment> | undefined = null
+
     await Utils.until('waiting for sale to be commited to db', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      return qToken!.status === TokenStatus.Sale
+      qToken = await this.query.getTokenById(tokenId)
+      qSale = await this.query.getSaleById(saleId.toString())
+      return qToken!.status === TokenStatus.Sale && !!qSale
     })
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
-    assert.isNotNull(qSale)
-    // assert.equal(qSale!.createdIn.toString(), this.bestBlock?.toString())
     assert.equal(qSale!.pricePerUnit, unitPrice.toString())
     assert.equal(qSale!.finalized, false)
     if (!qSale!.maxAmountPerMember && capPerMember.isSome) {
@@ -93,10 +98,12 @@ export class InitTokenSaleFixture extends StandardizedFixture {
       const endBlock = cliffBlock.add(linearVestingDuration.toBn())
       const vestingId =
         cliffBlock.toString() + linearVestingDuration.toString() + cliffAmountPercentage.toString()
-      const qVesting = await this.query.retryQuery(() =>
-        this.query.getVestingSchedulById(vestingId)
-      )
-      assert.isNotNull(qVesting)
+
+      let qVesting: Maybe<VestingScheduleFieldsFragment> | undefined = null
+      await Utils.until('waiting for vesting to be fetched', async () => {
+        qVesting = await this.query.getVestingSchedulById(vestingId)
+        return !!qVesting
+      })
       assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
       assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
       assert.equal(qVesting!.endsAt.toString(), endBlock.toString())

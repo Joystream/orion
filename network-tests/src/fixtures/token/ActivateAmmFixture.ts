@@ -8,6 +8,8 @@ import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
+import { AmmCurvFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type AmmActivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmActivated'>>
 
@@ -49,29 +51,31 @@ export class ActivateAmmFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    this.debug('PRE-ExecHook')
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qToken = await this.query.getTokenById(tokenId)
     assert.isNotNull(qToken)
     assert.equal(qToken!.status, TokenStatus.Idle, 'preExecHook: token.status assertion')
   }
 
   public async runQueryNodeChecks(): Promise<void> {
-    this.debug('POST-ExecHook')
     const [tokenId, , { slope, intercept }] = this.events[0].event.data
-    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    assert.isNotNull(qToken)
 
-    await Utils.until('waiting for token to be saved', async ({ debug }) => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      return qToken!.status === TokenStatus.Market
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAmm: Maybe<AmmCurvFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for token to be saved', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken && qToken!.status === TokenStatus.Market
     })
-    assert.equal(qToken!.status, TokenStatus.Market)
     const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
-    const qAmm = await this.query.retryQuery(() => this.query.getAmmById(ammId))
-    assert.isNotNull(qAmm)
+    await Utils.until('waiting for token to be saved', async () => {
+      qAmm = await this.query.getAmmById(ammId)
+      return !!qAmm
+    })
+
+    assert.equal(qToken!.status, TokenStatus.Market)
     assert.equal(qAmm!.ammInitPrice, intercept.toString())
     assert.equal(qAmm!.ammSlopeParameter, slope.toString())
     assert.equal(qAmm!.burnedByAmm, '0')

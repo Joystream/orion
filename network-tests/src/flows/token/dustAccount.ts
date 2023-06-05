@@ -11,9 +11,7 @@ export default async function dustAccountFlow({ api, query, lock }: FlowProps): 
 
   const tokenId = api.token
 
-  const unlockFirstHolderaccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderMemberId] = api.firstHolder
-  unlockFirstHolderaccess()
 
   // dust created account
   const dustAccountFixture = new DustAccountFixture(

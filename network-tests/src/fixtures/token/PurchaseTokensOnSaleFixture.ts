@@ -7,6 +7,12 @@ import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../Utils'
+import { Maybe } from 'graphql/generated/schema'
+import {
+  SaleFields,
+  SaleFieldsFragment,
+  TokenAccountFieldsFragment,
+} from 'graphql/generated/operations'
 
 type TokensPurchasedOnSaleEventDetails = EventDetails<
   EventType<'projectToken', 'TokensPurchasedOnSale'>
@@ -20,7 +26,6 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   protected events: TokensPurchasedOnSaleEventDetails[] = []
   protected amountPre: BN | undefined
   protected tokenSoldPre: BN | undefined
-  protected plaftormFeePre: BN | undefined
 
   public constructor(
     api: Api,
@@ -53,19 +58,17 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     const accountId = this.tokenId.toString() + this.memberId.toString()
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    const qAccount = await this.query.getTokenAccountById(accountId)
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
     } else {
       this.amountPre = new BN(0)
     }
-    this.plaftormFeePre = (await this.api.query.projectToken.salePlatformFee()).toBn()
-
     const saleNonce = (
       await this.api.query.projectToken.tokenInfoById(this.tokenId)
     ).nextSaleId.subn(1)
     const saleId = this.tokenId.toString() + saleNonce.toString()
-    const qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+    const qSale = await this.query.getSaleById(saleId)
 
     assert.isNotNull(qSale)
     this.tokenSoldPre = new BN(qSale!.tokensSold)
@@ -83,34 +86,39 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, amountPurchased, memberId] = this.events[0].event.data
-    const amountPost = this.amountPre!.add(amountPurchased)
-    const tokenSoldPost = this.tokenSoldPre!.add(amountPurchased)
+
+    const tokenSoldPost = (await this.api.query.projectToken.tokenInfoById(tokenId)).sale.unwrap()
+      .fundsCollected
+    const amountPost = (
+      await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+    ).amount
+
     const saleId = tokenId.toString() + saleNonce.toString()
     const accountId = tokenId.toString() + memberId.toString()
 
-    let qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+    let qSale: Maybe<SaleFieldsFragment> | undefined = null
 
     await Utils.until('waiting for token sale to be update', async () => {
-      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
-      assert.isNotNull(qAccount)
-      const currentAmount = new BN(qAccount!.totalAmount)
-      const currentTokensSold = new BN(qSale!.tokensSold)
-      return currentAmount.gt(this.amountPre!) && currentTokensSold.gt(this.tokenSoldPre!)
+      qAccount = await this.query.getTokenAccountById(accountId)
+      qSale = await this.query.getSaleById(saleId)
+      if (!!qAccount) {
+        const currentAmount = new BN(qAccount!.totalAmount)
+        const currentTokensSold = new BN(qSale!.tokensSold)
+        return currentAmount.gt(this.amountPre!) && currentTokensSold.gt(this.tokenSoldPre!)
+      } else {
+        return false
+      }
     })
 
-    assert.isNotNull(qAccount)
     assert.equal(qAccount!.totalAmount, amountPost.toString())
-
-    assert.isNotNull(qSale)
     assert.equal(qSale!.tokensSold, tokenSoldPost.toString())
 
     if (qSale!.vestedSale) {
       const vestingId = qSale!.vestedSale.vesting.id
       // query vested account
       const id = accountId + vestingId
-      const qVestedAccount = await this.query.retryQuery(() => this.query.getVestedAccountById(id))
+      const qVestedAccount = await this.query.getVestedAccountById(id)
       assert.isNotNull(qVestedAccount)
       assert.equal(qVestedAccount!.account.id, accountId)
       assert.equal(qVestedAccount!.vesting.id, vestingId)
@@ -125,5 +133,5 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.equal(qSaleTx!.pricePaid, qSale!.pricePerUnit)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

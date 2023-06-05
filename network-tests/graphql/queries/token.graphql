@@ -1,3 +1,10 @@
+fragment MemberFields on Membership {
+  id
+  handle
+  createdAt
+  controllerAccount
+}
+
 fragment TokenFields on Token {
   id
   createdAt
@@ -198,62 +205,68 @@ fragment AmmTranactionFields on AmmTransaction {
   transactionType
 }
 
-query getTokenById($id: String!) {
+subscription getTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
   }
 }
 
-query getTokenAccountById($id: String!) {
+subscription getTokenAccountById($id: String!) {
   tokenAccountById(id: $id) {
     ...TokenAccountFields
   }
 }
 
-query getRevenueShareById($id: String!) {
+subscription getRevenueShareById($id: String!) {
   revenueShareById(id: $id) {
     ...RevenueShareFields
   }
 }
 
-query getRevenueShareParticipationById($id: String!) {
+subscription getRevenueShareParticipationById($id: String!) {
   revenueShareParticipationById(id: $id) {
     ...RevenueShareParticipationFields
   }
 }
 
-query getVestingScheduleById($id: String!) {
+subscription getVestingScheduleById($id: String!) {
   vestingScheduleById(id: $id) {
     ...VestingScheduleFields
   }
 }
 
-query getSaleById($id: String!) {
+subscription getSaleById($id: String!) {
   saleById(id: $id) {
     ...SaleFields
   }
 }
 
-query getVestedAccountById($id: String!) {
+subscription getVestedAccountById($id: String!) {
   vestedAccountById(id: $id) {
     ...VestedAccountFields
   }
 }
 
-query getAmmById($id: String!) {
+subscription getAmmById($id: String!) {
   ammCurveById(id: $id) {
     ...AmmCurvFields
   }
 }
 
-query getChannelById($id: String!) {
+subscription getChannelById($id: String!) {
   channelById(id: $id) {
     ...ChannelFields
   }
 }
 
-query getAmmTransactionById($id: String!) {
+subscription getAmmTransactionById($id: String!) {
   ammTransactionById(id: $id) {
     ...AmmTranactionFields
+  }
+}
+
+subscription getMemberById($id: String!) {
+  membershipById(id: $id) {
+    ...MemberFields
   }
 }

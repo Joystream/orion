@@ -2,7 +2,6 @@ import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { IssuerTransferFixture } from '../../fixtures/token'
-import { Resource } from '../../Resources'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 import { DEFAULT_TRANSFER_AMOUNT } from '../../consts'
 import { BN } from 'bn.js'
@@ -48,10 +47,7 @@ export default async function issuerTransferWithExistingAccountAndVestingFlow({
     outputs,
     metadata
   )
-  await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   api.setFirstHolder(firstHolderAddress, firstHolderMemberId)
-  unlockFirstHolderAccess()
 }

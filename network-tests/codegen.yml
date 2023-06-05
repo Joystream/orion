@@ -20,7 +20,7 @@ generates:
     hooks:
       afterOneFileWrite:
         - prettier --write
-  ./graphql/generated/queries.ts:
+  ./graphql/generated/operations.ts:
     preset: import-types
     presetConfig:
       typesPath: ./schema

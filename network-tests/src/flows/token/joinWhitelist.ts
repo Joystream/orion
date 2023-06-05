@@ -18,6 +18,6 @@ export default async function joinWhitelistFlow({ api, query }: FlowProps): Prom
     whitelistedHolderMemberId,
     tokenId
   )
-  await joinWhitelistFixture.preExecHook()
+  // await joinWhitelistFixture.preExecHook()
   await new FixtureRunner(joinWhitelistFixture).run()
 }

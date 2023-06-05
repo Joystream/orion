@@ -33,7 +33,9 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
 
   // whitelisted holder
   const whitelistedHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
-  const buyMembershipsFixtureForWhitelist = new BuyMembershipHappyCaseFixture(api, query, [whitelistedHolderAddress])
+  const buyMembershipsFixtureForWhitelist = new BuyMembershipHappyCaseFixture(api, query, [
+    whitelistedHolderAddress,
+  ])
   await new FixtureRunner(buyMembershipsFixtureForWhitelist).run()
   const whitelistedHolderMemberId = buyMembershipsFixtureForWhitelist.getCreatedMembers()[0]
 
@@ -59,7 +61,7 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
   const whitelistCommit = blake2AsHex(whitelistedHolderMemberId.toU8a(), 256)
   const symbol = blake2AsHex('test')
   const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', {
-    Permissioned: whitelistCommit  
+    Permissioned: whitelistCommit,
   })
   const revenueSplitRate = api.createType('Permill', new BN(10))
   const patronageRate = api.createType('Perquintill', new BN(15))

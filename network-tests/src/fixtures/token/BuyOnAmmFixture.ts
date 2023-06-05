@@ -8,7 +8,11 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { AmmTransactionType } from '../../../graphql/generated/schema'
-import { Permill } from '@polkadot/types/interfaces/runtime'
+import {
+  TokenFieldsFragment,
+  TokenAccountFieldsFragment,
+} from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type TokensBoughtOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensBoughtOnAmm'>>
 
@@ -60,40 +64,39 @@ export class BuyOnAmmFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
-    const qAccount = await this.query.retryQuery(() =>
+    const qAccount = await
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
-    )
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
     } else {
       this.amountPre = new BN(0)
     }
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    const qToken = await this.query.getTokenById(_tokenId)
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, crtMinted, joysDeposited] = this.events[0].event.data
-    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    let qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-    )
+
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
     await Utils.until('waiting for buy on amm effects to take place', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      qAccount = await this.query.retryQuery(() =>
-        this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-      )
-      assert.isNotNull(qToken)
-      assert.isNotNull(qAccount)
-      const currSupply = new BN(qToken!.totalSupply)
-      const currAmount = new BN(qAccount!.totalAmount)
-      return currSupply > this.supplyPre! && currAmount > this.amountPre!
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      if (!!qAccount) {
+        const currSupply = new BN(qToken!.totalSupply)
+        const currAmount = new BN(qAccount!.totalAmount)
+        return currSupply > this.supplyPre! && currAmount > this.amountPre!
+      } else {
+        return false
+      }
     })
 
     const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
-    const qAmmCurve = await this.query.retryQuery(() => this.query.getAmmById(ammId))
+    const qAmmCurve = await this.query.getAmmById(ammId)
 
     const qTransaction = qAmmCurve!.transactions.find((qTx) => {
       assert.isNotNull(qAmmCurve)
@@ -123,5 +126,5 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

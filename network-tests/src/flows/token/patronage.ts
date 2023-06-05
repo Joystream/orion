@@ -10,8 +10,8 @@ export default async function patronageFlow({ api, query, lock }: FlowProps): Pr
   debug('Started')
   api.enableDebugTxLogs()
 
-  const channelId = await api.channel
-  const tokenId = await api.token
+  const channelId = api.channel
+  const tokenId = api.token
 
   // retrieve owner info
   const [creatorAddress, creatorMemberId] = api.creator
@@ -23,7 +23,6 @@ export default async function patronageFlow({ api, query, lock }: FlowProps): Pr
     creatorMemberId,
     channelId
   )
-  await claimPatronageRateFixture.preExecHook()
   await new FixtureRunner(claimPatronageRateFixture).runWithQueryNodeChecks()
 
   const newPatronageRate = 10
@@ -39,6 +38,5 @@ export default async function patronageFlow({ api, query, lock }: FlowProps): Pr
     channelId,
     newPatronageRate
   )
-  await decreasePatronageRateFixture.preExecHook()
   await new FixtureRunner(decreasePatronageRateFixture).runWithQueryNodeChecks()
 }

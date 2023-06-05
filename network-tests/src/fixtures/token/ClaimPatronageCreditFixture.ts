@@ -7,7 +7,11 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
-import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/queries'
+import {
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type PatronageCreditClaimedEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageCreditClaimed'>
@@ -54,26 +58,22 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + this.creatorMemberId.toString())
+    const qToken = await this.query.getTokenById(tokenId)
+    const qAccount = await this.query.getTokenAccountById(
+      tokenId.toString() + this.creatorMemberId.toString()
     )
-    assert.isNotNull(qToken)
-    assert.isNotNull(qAccount)
     this.supplyPre = new BN(qToken!.totalSupply)
     this.amountPre = new BN(qAccount!.totalAmount)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, , memberId] = this.events[0].event.data
-    let qToken: TokenFieldsFragment | null = null
-    let qAccount: TokenAccountFieldsFragment | null = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('claim patronage handler finalized', async () => {
-      qAccount = await this.query.retryQuery(() =>
-        this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-      )
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qToken = await this.query.getTokenById(tokenId)
 
       assert.isNotNull(qToken)
       assert.isNotNull(qAccount)

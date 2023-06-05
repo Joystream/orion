@@ -4,11 +4,12 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletProjectTokenTransfers } from '@polkadot/types/lookup'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { u128 } from '@polkadot/types/primitive'
 import { Utils } from '../../utils'
+import { TokenAccountFieldsFragment } from 'graphql/generated/operations'
+import { Maybe } from 'graphql/generated/schema'
 
 type TransferEventDetails = EventDetails<EventType<'projectToken', 'TokenAmountTransferred'>>
 
@@ -19,7 +20,6 @@ export class TransferFixture extends StandardizedFixture {
   protected outputs: [number, BN | u128][]
   protected metadata: string
   protected events: TransferEventDetails[] = []
-  protected destinationsAmountPre: BN[] | undefined
   protected srcAmountPre: BN | undefined
 
   public constructor(
@@ -60,43 +60,26 @@ export class TransferFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     const accountId = this.tokenId.toString() + this.sourceMemberId.toString()
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+    const qAccount = await this.query.getTokenAccountById(accountId)
 
     if (qAccount === null) {
       this.srcAmountPre = new BN(0)
     } else {
       this.srcAmountPre = new BN(qAccount!.totalAmount)
     }
-    this.destinationsAmountPre = await Promise.all(
-      this.outputs.map(async ([memberId]) => {
-        const destAccountId = this.tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.retryQuery(() =>
-          this.query.getTokenAccountById(destAccountId)
-        )
-        if (qDestAccount) {
-          return new BN(qDestAccount!.totalAmount)
-        } else {
-          return new BN(0)
-        }
-      })
-    )
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
     const accountId = tokenId.toString() + sourceMemberId.toString()
-    let qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
+
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('waiting for transfers to be committed', async () => {
-      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-      assert.isNotNull(qAccount)
+      qAccount = await this.query.getTokenAccountById(accountId)
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.srcAmountPre!)
     })
-
-    const total = this.outputs
-      .map(([, amount]) => amount)
-      .reduce((item, acc) => acc.add(item), new BN(0))
 
     const sourceAmountPost = (
       await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)
@@ -108,20 +91,21 @@ export class TransferFixture extends StandardizedFixture {
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.retryQuery(() =>
+        const qDestAccount = await
           this.query.getTokenAccountById(destAccountId)
-        )
         assert.isNotNull(qDestAccount)
-        return new BN(qDestAccount!.totalAmount)
+        return qDestAccount!.totalAmount
       })
     )
 
     // unpack validatedTransfers into amount, vesting
-    const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
-      this.destinationsAmountPre![i].add(transfer.payment.amount)
-    )
-    assert.deepEqual(observedAmounts, destinationsAmountPost)
+    const nodeDestinationAmounts = await Promise.all([...validatedTransfers.keys()].map(async (validated) => {
+      const memberId = validated.isExisting ? validated.asExisting : validated.asNonExisting
+      return (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
+    }))
+
+    assert.deepEqual(observedAmounts, nodeDestinationAmounts)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

@@ -6,6 +6,13 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenMerkleProof, PalletProjectTokenMerkleSide } from '@polkadot/types/lookup'
 import { assert } from 'chai'
+import {
+  TokenAccountFields,
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
+import { Utils } from '../../utils'
 
 type MemberJoinedWhitelistEventDetails = EventDetails<
   EventType<'projectToken', 'MemberJoinedWhitelist'>
@@ -17,7 +24,6 @@ export class JoinWhitelistFixture extends StandardizedFixture {
   protected tokenId: number
   protected events: MemberJoinedWhitelistEventDetails[] = []
   protected proof: PalletProjectTokenMerkleProof | undefined
-  protected tokenAccountNumberPre: number | undefined
 
   public constructor(
     api: Api,
@@ -48,15 +54,14 @@ export class JoinWhitelistFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    const qToken = await this.query.getTokenById(_tokenId)
     assert.isNotNull(qToken)
     const bloatBond = (await this.api.query.projectToken.bloatBond()).toBn()
     await this.api.treasuryTransferBalance(this.memberAddress, bloatBond)
-    this.tokenAccountNumberPre = qToken!.accountsNum
-    this.proof = this.api.createType('PalletProjectTokenMerkleProof',) 
+    this.proof = this.api.createType('PalletProjectTokenMerkleProof')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId] = this.events[0].event.data
@@ -64,14 +69,20 @@ export class JoinWhitelistFixture extends StandardizedFixture {
       tokenId,
       memberId
     )
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-    )
-    const tokenAccountNumberPost = this.tokenAccountNumberPre! + 1
 
-    assert.isNotNull(qAccount)
-    assert.isNotNull(qToken)
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for joinwhitelst handler to be finalized', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      return !!qToken && !!qAccount
+    })
+
+    const tokenAccountNumberPost = (
+      await this.api.query.projectToken.tokenInfoById(tokenId)
+    ).accountsNumber.toNumber()
+
     assert.equal(qToken!.accountsNum, tokenAccountNumberPost)
     assert.equal(qAccount!.totalAmount, nodeAccount.amount.toString())
     assert.equal(qAccount!.member.id, memberId.toString())

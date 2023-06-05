@@ -8,6 +8,8 @@ import { u32 } from '@polkadot/types/primitive'
 import { BN } from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../Utils'
+import { SaleFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type TokenSaleUpdatedEventDetails = EventDetails<
   EventType<'projectToken', 'UpcomingTokenSaleUpdated'>
@@ -66,21 +68,20 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, newStart, newDuration] = this.events[0].event.data
-    const saleId = tokenId.toString() + saleNonce.toString()
-    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
-    await Utils.until('wait for sale to be updated', async ({ debug }) => {
-      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
 
-      assert.isNotNull(qSale)
+    const saleId = tokenId.toString() + saleNonce.toString()
+    let qSale: Maybe<SaleFieldsFragment> | undefined = null
+    await Utils.until('wait for sale to be updated', async () => {
+      qSale = await this.query.getSaleById(saleId)
       return qSale!.startBlock === this.newStartBlock!.toNumber()
     })
 
     assert.isNotNull(qSale)
     if (newStart.isSome) {
-      assert.equal(qSale?.startBlock.toString(), newStart.unwrap().toString())
+      assert.equal(qSale!.startBlock.toString(), newStart.unwrap().toString())
     }
     if (newDuration.isSome) {
-      assert.equal(qSale?.durationInBlocks.toString(), newDuration.unwrap().toString())
+      assert.equal(qSale!.durationInBlocks.toString(), newDuration.unwrap().toString())
     }
     assert.equal(qSale!.endsAt, qSale!.durationInBlocks + qSale!.startBlock)
   }

@@ -7,6 +7,8 @@ import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
+import { Maybe } from '../../../graphql/generated/schema'
+import { RevenueShareFieldsFragment } from '../../../graphql/generated/operations'
 
 type RevenueShareIssuedEventDetails = EventDetails<EventType<'projectToken', 'RevenueSplitIssued'>>
 
@@ -45,7 +47,8 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const qChannel = await this.query.retryQuery(() => this.query.getChannelById(this.channelId))
+    const qChannel = await
+      this.query.getChannelById(this.channelId.toString())
     assert.isNotNull(qChannel)
     const rewardAccount = qChannel!.rewardAccount
     await this.api.treasuryTransferBalance(rewardAccount, this.allocationAmount)
@@ -68,14 +71,16 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, startBlock, duration, joyAllocation] = this.events[0].event.data
-    await Utils.wait(20000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qToken = await this.query.getTokenById(tokenId)
 
     assert.isNotNull(qToken)
+
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareId)
-    )
+    let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
+    await Utils.until('waiting for revenue share to be fetched', async () => {
+      qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
+      return !!qRevenueShare
+    })
 
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.token.id, tokenId.toString())
@@ -88,5 +93,5 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     assert.equal(qRevenueShare!.allocation, joyAllocation.toString())
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

@@ -46,7 +46,6 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
     channelId,
     saleParams
   )
-  await initTokenSaleFixture.preExecHook()
   await new FixtureRunner(initTokenSaleFixture).runWithQueryNodeChecks()
 
   debug('update upcoming token sale')
@@ -74,7 +73,6 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
     tokenId,
     purchaseAmount
   )
-  await purchaseTokensOnSaleFixture.preExecHook()
   await new FixtureRunner(purchaseTokensOnSaleFixture).runWithQueryNodeChecks()
 
   debug('purchase tokens on sale with account creation')
@@ -92,7 +90,6 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
     tokenId,
     purchaseAmount
   )
-  await purchaseTokensOnSaleFixtureWithAccountCreation.preExecHook()
   await new FixtureRunner(purchaseTokensOnSaleFixtureWithAccountCreation).runWithQueryNodeChecks()
 
   debug('finalize token sale')
@@ -103,6 +100,5 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
     creatorMemberId,
     channelId
   )
-  await finalizeTokenSaleFixture.preExecHook()
   await new FixtureRunner(finalizeTokenSaleFixture).runWithQueryNodeChecks()
 }

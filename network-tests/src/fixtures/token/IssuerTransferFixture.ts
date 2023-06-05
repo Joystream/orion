@@ -9,7 +9,8 @@ import { Utils } from '../../utils'
 import BN from 'bn.js'
 import { u64 } from '@polkadot/types/primitive'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
-import { TokenAccountFieldsFragment } from 'graphql/generated/queries'
+import { TokenAccountFieldsFragment } from 'graphql/generated/operations'
+import { Maybe } from 'graphql/generated/schema'
 
 type IssuerTransferEventDetails = EventDetails<
   EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
@@ -23,7 +24,6 @@ export class IssuerTransferFixture extends StandardizedFixture {
   protected metadata: string
   protected events: IssuerTransferEventDetails[] = []
   protected sourceAmountPre: BN | undefined
-  protected destinationsAmountPre: BN[] | undefined
   protected bestBlock: BN | undefined
 
   public constructor(
@@ -73,39 +73,21 @@ export class IssuerTransferFixture extends StandardizedFixture {
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
     const accountId = tokenId.toString() + this.sourceMemberId.toString()
-    const qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-    assert.isNotNull(qAccount)
+    const qAccount = await this.query.getTokenAccountById(accountId)
     this.sourceAmountPre = new BN(qAccount!.totalAmount)
-    this.destinationsAmountPre = await Promise.all(
-      this.outputs.map(async ([memberId]) => {
-        const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.retryQuery(() =>
-          this.query.getTokenAccountById(destAccountId)
-        )
-        if (qDestAccount) {
-          return new BN(qDestAccount!.totalAmount)
-        } else {
-          return new BN(0)
-        }
-      })
-    )
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
 
     const accountId = tokenId.toString() + sourceMemberId.toString()
-    let qAccount: TokenAccountFieldsFragment | null = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
     await Utils.until('waiting for issuer tranfer handler to be completed', async () => {
-      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-      assert.isNotNull(qAccount)
+      qAccount = await this.query.getTokenAccountById(accountId)
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.sourceAmountPre!)
     })
-
-    const total = this.outputs
-      .map(([, payment]) => payment.amount)
-      .reduce((item, acc) => acc.add(item), new BN(0))
 
     const sourceAmountPost = (
       await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, sourceMemberId)
@@ -117,19 +99,24 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.retryQuery(() =>
-          this.query.getTokenAccountById(destAccountId)
-        )
+        const qDestAccount = await this.query.getTokenAccountById(destAccountId)
         assert.isNotNull(qDestAccount)
-        return new BN(qDestAccount!.totalAmount)
+        return qDestAccount!.totalAmount
       })
     )
 
-    const destinationsAmountPost = [...validatedTransfers.values()].map((transfer, i) =>
-      this.destinationsAmountPre![i].add(transfer.payment.amount)
+    const nodeAmounts = await Promise.all(
+      [...validatedTransfers.keys()].map(async (validated) => {
+        const memberId = validated.isExisting ? validated.asExisting : validated.asNonExisting
+        const nodeAccount = await this.api.query.projectToken.accountInfoByTokenAndMember(
+          tokenId,
+          memberId
+        )
+        return nodeAccount.amount.toString()
+      })
     )
 
-    assert.deepEqual(observedAmounts, destinationsAmountPost)
+    assert.deepEqual(observedAmounts, nodeAmounts)
 
     for (const transfer of validatedTransfers.values()) {
       const { payment } = transfer
