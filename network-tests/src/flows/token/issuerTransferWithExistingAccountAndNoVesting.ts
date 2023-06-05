@@ -40,7 +40,6 @@ export default async function issuerTransferWithExistingAccountAndNoVestingFlow(
     outputs,
     metadata
   )
-  await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
   api.setFirstHolder(firstHolderAddress, firstHolderMemberId)
