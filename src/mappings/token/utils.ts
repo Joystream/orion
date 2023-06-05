@@ -330,25 +330,31 @@ export async function processTokenMetadata(
   }
 }
 
-export function addVestingSchedule(
+export async function addVestingScheduleToAccount(
   overlay: EntityManagerOverlay,
-  vestingParams: VestingScheduleParams,
-  blockHeight: number,
-  tokenId: bigint,
-  memberId: bigint
+  account: Flat<TokenAccount>,
+  vestingId: string,
+  amount: bigint,
+  vestingSource: VestingSource
 ) {
   const vestingData = new VestingScheduleData(vestingParams, blockHeight);
 
+  const vestingScheduleId = overlay
+    .getRepository(VestingSchedule)
+    .getNewEntityId();
   overlay.getRepository(VestingSchedule).new({
-    id: vestingData.id(),
+    id: vestingScheduleId,
     endsAt: vestingData.endsAt(),
     cliffBlock: vestingData.cliffBlock(),
     vestingDurationBlocks: vestingData.duration(),
     cliffPercent: vestingData.cliffPercent(),
   });
 
+  const vestedAccountId = overlay
+    .getRepository(VestingSchedule)
+    .getNewEntityId();
   overlay.getRepository(VestedAccount).new({
-    id: tokenAccountId(tokenId, memberId) + vestingData.id(),
+    id: vestedAccountId,
     accountId: tokenAccountId(tokenId, memberId),
     vestingId: vestingData.id(),
   });
@@ -358,13 +364,13 @@ export function createAccount(
   overlay: EntityManagerOverlay,
   token: Flat<Token>,
   memberId: bigint,
-  allocationAmount: bigint,
-  whitelisted?: boolean
-) {
-  overlay.getRepository(TokenAccount).new({
+  allocationAmount: bigint
+): Flat<TokenAccount> {
+  const accountId = overlay.getRepository(TokenAccount).getNewEntityId();
+  const newAccount = overlay.getRepository(TokenAccount).new({
     tokenId: token.id,
     memberId: memberId.toString(),
-    id: token.id + memberId.toString(),
+    id: accountId,
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
     whitelisted,

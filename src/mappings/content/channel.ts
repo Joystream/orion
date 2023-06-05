@@ -44,6 +44,8 @@ import { generateAppActionCommitment } from "@joystream/js/utils";
 export async function processChannelCreatedEvent({
   overlay,
   block,
+<<<<<<< HEAD
+<<<<<<< HEAD
   event,
 }: EventHandlerContext<"Content.ChannelCreated">) {
   const [
@@ -61,13 +63,86 @@ export async function processChannelCreatedEvent({
 
 =======
 >>>>>>> 6e79e8a28 (fix: add join whitelist flow)
+||||||| parent of c147aa8f1 (fix: update event versions)
+  event: {
+    asV1000: [
+      channelId,
+      { owner, dataObjects, channelStateBloatBond },
+      channelCreationParameters,
+      rewardAccount,
+    ],
+  },
+||||||| parent of 0cb414d74 (fix: event versioning)
+  event: {
+    asV2002: [
+      channelId,
+      { owner, dataObjects, channelStateBloatBond },
+      channelCreationParameters,
+      rewardAccount,
+    ],
+  },
+=======
+  event,
+>>>>>>> 0cb414d74 (fix: event versioning)
+}: EventHandlerContext<'Content.ChannelCreated'>) {
+<<<<<<< HEAD
+=======
+  event: {
+    asV2001: [
+      channelId,
+      { owner, dataObjects, channelStateBloatBond },
+      channelCreationParameters,
+      rewardAccount,
+    ],
+  },
+}: EventHandlerContext<'Content.ChannelCreated'>) {
+>>>>>>> c147aa8f1 (fix: update event versions)
+||||||| parent of 0cb414d74 (fix: event versioning)
+=======
+  const [
+    channelId,
+    { owner, dataObjects, channelStateBloatBond },
+    channelCreationParameters,
+    rewardAccount,
+  ] = event.isV1000 ? event.asV1000 : event.asV2002
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 0cb414d74 (fix: event versioning)
+||||||| parent of 2f722f3bb (fix: solve channel not being added)
+=======
+  console.log(`******* channel id ${channelId}`)
+
+>>>>>>> 2f722f3bb (fix: solve channel not being added)
+||||||| parent of 715136f3d (fix: address PR changes)
+  console.log(`******* channel id ${channelId}`)
+
+=======
+>>>>>>> 715136f3d (fix: address PR changes)
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
+<<<<<<< HEAD
     .countBy({ channelId: channelId.toString() });
 
+||||||| parent of 0cb414d74 (fix: event versioning)
+    .countBy({ channelId: channelId.toString() })
+=======
+    .countBy({ channelId: channelId.toString() })
+
+>>>>>>> 0cb414d74 (fix: event versioning)
   // create entity
+<<<<<<< HEAD
+<<<<<<< HEAD
   console.log("****** CREATE_CHANNEL");
+||||||| parent of 0cb414d74 (fix: event versioning)
+=======
+  console.log('****** CREATE_CHANNEL')
+>>>>>>> 0cb414d74 (fix: event versioning)
+||||||| parent of 2f722f3bb (fix: solve channel not being added)
+  console.log('****** CREATE_CHANNEL')
+=======
+>>>>>>> 2f722f3bb (fix: solve channel not being added)
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
@@ -81,9 +156,31 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+<<<<<<< HEAD
+<<<<<<< HEAD
   });
+||||||| parent of 0cb414d74 (fix: event versioning)
+  })
+=======
+    revenueShareRatioPercent: null,
+||||||| parent of 2f722f3bb (fix: solve channel not being added)
+    revenueShareRatioPercent: null,
+=======
+>>>>>>> 2f722f3bb (fix: solve channel not being added)
+  })
+>>>>>>> 0cb414d74 (fix: event versioning)
 
+<<<<<<< HEAD
+<<<<<<< HEAD
   console.log("****** CHANNEL CREATED");
+||||||| parent of 0cb414d74 (fix: event versioning)
+=======
+  console.log('****** CHANNEL CREATED')
+>>>>>>> 0cb414d74 (fix: event versioning)
+||||||| parent of 2f722f3bb (fix: solve channel not being added)
+  console.log('****** CHANNEL CREATED')
+=======
+>>>>>>> 2f722f3bb (fix: solve channel not being added)
   const ownerMember = channel.ownerMemberId
     ? await overlay
         .getRepository(Membership)
@@ -153,6 +250,8 @@ export async function processChannelCreatedEvent({
 export async function processChannelUpdatedEvent({
   overlay,
   block,
+<<<<<<< HEAD
+<<<<<<< HEAD
   event,
 }: EventHandlerContext<"Content.ChannelUpdated">) {
   const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002
@@ -161,6 +260,27 @@ export async function processChannelUpdatedEvent({
   const channel = await overlay
     .getRepository(Channel)
     .getByIdOrFail(channelId.toString());
+||||||| parent of c147aa8f1 (fix: update event versions)
+  event: {
+    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
+  },
+||||||| parent of 715136f3d (fix: address PR changes)
+  event: {
+    asV2002: [, channelId, channelUpdateParameters, newDataObjects],
+  },
+=======
+  event
+>>>>>>> 715136f3d (fix: address PR changes)
+}: EventHandlerContext<'Content.ChannelUpdated'>) {
+  const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002 ? event.asV2002 : event.asV1000
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+=======
+  event: {
+    asV2001: [, channelId, channelUpdateParameters, newDataObjects],
+  },
+}: EventHandlerContext<'Content.ChannelUpdated'>) {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+>>>>>>> c147aa8f1 (fix: update event versions)
 
   //  update metadata if it was changed
   if (channelUpdateParameters.newMeta) {
@@ -256,8 +376,16 @@ export async function processChannelOwnerRemarkedEvent({
         decodedMessage
       )
     : new MetaprotocolTransactionResultFailed({
+<<<<<<< HEAD
         errorMessage: "Could not decode the metadata",
       });
+||||||| parent of 0cb414d74 (fix: event versioning)
+        errorMessage: 'Could not decode the metadata',
+      })
+=======
+      errorMessage: 'Could not decode the metadata',
+    })
+>>>>>>> 0cb414d74 (fix: event versioning)
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -286,8 +414,16 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
+<<<<<<< HEAD
         errorMessage: "Could not decode the metadata",
       });
+||||||| parent of 0cb414d74 (fix: event versioning)
+        errorMessage: 'Could not decode the metadata',
+      })
+=======
+      errorMessage: 'Could not decode the metadata',
+    })
+>>>>>>> 0cb414d74 (fix: event versioning)
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({

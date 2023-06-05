@@ -96,11 +96,22 @@ import {
 import {
   processCreatorTokenIssuedEvent,
 <<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 ||||||| parent of e9064bdbf (fix: enable metadata)
   // processCreatorTokenIssuerRemarkedEvent,
 =======
   processCreatorTokenIssuerRemarkedEvent,
 >>>>>>> e9064bdbf (fix: enable metadata)
+||||||| parent of 0cb414d74 (fix: event versioning)
+  processCreatorTokenIssuerRemarkedEvent,
+=======
+  // processCreatorTokenIssuerRemarkedEvent,
+>>>>>>> 0cb414d74 (fix: event versioning)
+||||||| parent of 78d6ea5f9 (fix: metadata parsing)
+  // processCreatorTokenIssuerRemarkedEvent,
+=======
+>>>>>>> 78d6ea5f9 (fix: metadata parsing)
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processTokensBoughtOnAmmEvent,
@@ -123,6 +134,7 @@ import {
   processTokenSaleFinalizedEvent,
   processUserParticipatedInSplitEvent,
   processRevenueSplitFinalizedEvent,
+<<<<<<< HEAD
   processCreatorTokenIssuerRemarkedEvent,
 } from "./mappings/token";
 import {
@@ -131,6 +143,28 @@ import {
 } from "./mappings/utils";
 import { EntityManager } from "typeorm";
 import { OffchainState } from "./utils/offchainState";
+||||||| parent of 78d6ea5f9 (fix: metadata parsing)
+} from './mappings/token'
+import { commentCountersManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+=======
+  processCreatorTokenIssuerRemarkedEvent,
+} from './mappings/token'
+<<<<<<< HEAD
+import { commentCountersManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+>>>>>>> 78d6ea5f9 (fix: metadata parsing)
+||||||| parent of 68c542b87 (fix: add extra fields to token in order to keep track of ongoing status)
+import { commentCountersManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+import { OffchainState } from './utils/offchainState'
+=======
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+import { OffchainState } from './utils/offchainState'
+>>>>>>> 68c542b87 (fix: add extra fields to token in order to keep track of ongoing status)
 
 const defaultEventOptions = {
   data: {
@@ -152,6 +186,7 @@ const processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
   .addEvent("Content.VideoCreated", defaultEventOptions);
 
+<<<<<<< HEAD
 processor.addEvent("Content.VideoUpdated", defaultEventOptions);
 processor.addEvent("Content.VideoDeleted", defaultEventOptions);
 processor.addEvent("Content.VideoDeletedByModerator", defaultEventOptions);
@@ -305,6 +340,188 @@ processor.addEvent(
   defaultEventOptions
 );
 processor.addEvent("Content.CreatorTokenIssuerRemarked", defaultEventOptions);
+||||||| parent of 715136f3d (fix: address PR changes)
+processor.addEvent('Content.VideoUpdated', defaultEventOptions)
+processor.addEvent('Content.VideoDeleted', defaultEventOptions)
+processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
+processor.addEvent('Content.VideoVisibilitySetByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelCreated', defaultEventOptions)
+processor.addEvent('Content.ChannelUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelDeleted', defaultEventOptions)
+processor.addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
+processor.addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssued', defaultEventOptions)
+processor.addEvent('Content.OpenAuctionStarted', defaultEventOptions)
+processor.addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
+processor.addEvent('Content.NftIssued', defaultEventOptions)
+processor.addEvent('Content.AuctionBidMade', defaultEventOptions)
+processor.addEvent('Content.AuctionBidCanceled', defaultEventOptions)
+processor.addEvent('Content.AuctionCanceled', defaultEventOptions)
+processor.addEvent('Content.EnglishAuctionSettled', defaultEventOptions)
+processor.addEvent('Content.BidMadeCompletingAuction', defaultEventOptions)
+processor.addEvent('Content.OpenAuctionBidAccepted', defaultEventOptions)
+processor.addEvent('Content.OfferStarted', defaultEventOptions)
+processor.addEvent('Content.OfferAccepted', defaultEventOptions)
+processor.addEvent('Content.OfferCanceled', defaultEventOptions)
+processor.addEvent('Content.NftSellOrderMade', defaultEventOptions)
+processor.addEvent('Content.NftBought', defaultEventOptions)
+processor.addEvent('Content.BuyNowCanceled', defaultEventOptions)
+processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
+processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
+processor.addEvent('Storage.StorageOperatorMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketVoucherLimitsSet', defaultEventOptions)
+processor.addEvent('Storage.PendingDataObjectsAccepted', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketInvitationCancelled', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketOperatorInvited', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketOperatorRemoved', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketStatusUpdated', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketDeleted', defaultEventOptions)
+processor.addEvent('Storage.VoucherChanged', defaultEventOptions)
+processor.addEvent('Storage.DynamicBagCreated', defaultEventOptions)
+processor.addEvent('Storage.DynamicBagDeleted', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsUploaded', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsUpdated', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsMoved', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsDeleted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketCreated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketStatusUpdated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketDeleted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketsUpdatedForBag', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketModeUpdated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketOperatorInvited', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketInvitationCancelled', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketInvitationAccepted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketOperatorRemoved', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyCreated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyDeleted', defaultEventOptions)
+processor.addEvent('Members.MemberCreated', defaultEventOptions)
+processor.addEvent('Members.MembershipBought', defaultEventOptions)
+processor.addEvent('Members.MembershipGifted', defaultEventOptions)
+processor.addEvent('Members.MemberInvited', defaultEventOptions)
+processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
+processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions)
+processor.addEvent('Members.MemberRemarked', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferredByIssuer', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitLeft', defaultEventOptions)
+processor.addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
+processor.addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions)
+processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssuerRemarked', defaultEventOptions)
+=======
+processor.addEvent('Content.VideoUpdated', defaultEventOptions)
+processor.addEvent('Content.VideoDeleted', defaultEventOptions)
+processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
+processor.addEvent('Content.VideoVisibilitySetByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelCreated', defaultEventOptions)
+processor.addEvent('Content.ChannelUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelDeleted', defaultEventOptions)
+processor.addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
+processor.addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
+processor.addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssued', defaultEventOptions)
+processor.addEvent('Content.OpenAuctionStarted', defaultEventOptions)
+processor.addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
+processor.addEvent('Content.NftIssued', defaultEventOptions)
+processor.addEvent('Content.AuctionBidMade', defaultEventOptions)
+processor.addEvent('Content.AuctionBidCanceled', defaultEventOptions)
+processor.addEvent('Content.AuctionCanceled', defaultEventOptions)
+processor.addEvent('Content.EnglishAuctionSettled', defaultEventOptions)
+processor.addEvent('Content.BidMadeCompletingAuction', defaultEventOptions)
+processor.addEvent('Content.OpenAuctionBidAccepted', defaultEventOptions)
+processor.addEvent('Content.OfferStarted', defaultEventOptions)
+processor.addEvent('Content.OfferAccepted', defaultEventOptions)
+processor.addEvent('Content.OfferCanceled', defaultEventOptions)
+processor.addEvent('Content.NftSellOrderMade', defaultEventOptions)
+processor.addEvent('Content.NftBought', defaultEventOptions)
+processor.addEvent('Content.BuyNowCanceled', defaultEventOptions)
+processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
+processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
+processor.addEvent('Storage.StorageOperatorMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketVoucherLimitsSet', defaultEventOptions)
+processor.addEvent('Storage.PendingDataObjectsAccepted', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketInvitationCancelled', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketOperatorInvited', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketOperatorRemoved', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketStatusUpdated', defaultEventOptions)
+processor.addEvent('Storage.StorageBucketDeleted', defaultEventOptions)
+processor.addEvent('Storage.VoucherChanged', defaultEventOptions)
+processor.addEvent('Storage.DynamicBagCreated', defaultEventOptions)
+processor.addEvent('Storage.DynamicBagDeleted', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsUploaded', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsUpdated', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsMoved', defaultEventOptions)
+processor.addEvent('Storage.DataObjectsDeleted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketCreated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketStatusUpdated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketDeleted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketsUpdatedForBag', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketModeUpdated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketOperatorInvited', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketInvitationCancelled', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketInvitationAccepted', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketOperatorRemoved', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyCreated', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyMetadataSet', defaultEventOptions)
+processor.addEvent('Storage.DistributionBucketFamilyDeleted', defaultEventOptions)
+processor.addEvent('Members.MemberCreated', defaultEventOptions)
+processor.addEvent('Members.MembershipBought', defaultEventOptions)
+processor.addEvent('Members.MembershipGifted', defaultEventOptions)
+processor.addEvent('Members.MemberInvited', defaultEventOptions)
+processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
+processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions)
+processor.addEvent('Members.MemberRemarked', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferredByIssuer', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.AccountDustedBy', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitLeft', defaultEventOptions)
+processor.addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
+processor.addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions)
+processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssuerRemarked', defaultEventOptions)
+>>>>>>> 715136f3d (fix: address PR changes)
 
 type Item = BatchProcessorItem<typeof processor>;
 type Ctx = BatchContext<Store, Item>;
@@ -403,7 +620,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
   'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
-  // 'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
+  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -460,7 +677,7 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
   'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
-  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
+  // 'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -550,8 +767,18 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
     processTransferPolicyChangedToPermissionlessEvent,
 };
 
+<<<<<<< HEAD
 const offchainState = new OffchainState();
 const exportBlockNumber = offchainState.getExportBlockNumber();
+||||||| parent of 68c542b87 (fix: add extra fields to token in order to keep track of ongoing status)
+}
+
+const offchainState = new OffchainState()
+const exportBlockNumber = offchainState.getExportBlockNumber()
+=======
+const offchainState = new OffchainState()
+const exportBlockNumber = offchainState.getExportBlockNumber()
+>>>>>>> 68c542b87 (fix: add extra fields to token in order to keep track of ongoing status)
 
 async function processEvent<EventName extends EventNames>(
   ctx: Ctx,

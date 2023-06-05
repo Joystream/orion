@@ -91,21 +91,24 @@ export class TransferFixture extends StandardizedFixture {
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await
-          this.query.getTokenAccountById(destAccountId)
+        const qDestAccount = await this.query.getTokenAccountById(destAccountId)
         assert.isNotNull(qDestAccount)
         return qDestAccount!.totalAmount
       })
     )
 
     // unpack validatedTransfers into amount, vesting
-    const nodeDestinationAmounts = await Promise.all([...validatedTransfers.keys()].map(async (validated) => {
-      const memberId = validated.isExisting ? validated.asExisting : validated.asNonExisting
-      return (await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)).amount.toString()
-    }))
+    const nodeDestinationAmounts = await Promise.all(
+      [...validatedTransfers.keys()].map(async (validated) => {
+        const memberId = validated.isExisting ? validated.asExisting : validated.asNonExisting
+        return (
+          await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
+        ).amount.toString()
+      })
+    )
 
     assert.deepEqual(observedAmounts, nodeDestinationAmounts)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

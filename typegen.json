@@ -97,7 +97,6 @@
     "ProjectToken.TokensSoldOnAmm",
     "Content.CreatorTokenIssuerRemarked",
     "Content.CreatorTokenIssued",
-    "Content.CreatorTokenIssuerRemarked",
     "Members.MemberRemarked"
   ],
   "calls": [],

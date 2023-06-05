@@ -38,6 +38,8 @@ import {
 } from "@joystream/metadata-protobuf";
 import { isSet } from "lodash";
 
+export const MAX_NUMBER_OF_BENEFITS = 10
+
 export async function processTokenIssuedEvent({
   overlay,
   block,
@@ -408,21 +410,61 @@ export async function processTokensPurchasedOnSaleEvent({
   event: {
     asV1000: [tokenId, , amountPurchased, memberId],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.TokensPurchasedOnSale">) {
   let buyerAccount = await getTokenAccountByMemberByToken(
     overlay,
     memberId,
     tokenId
   );
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+}: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
+<<<<<<< HEAD
+<<<<<<< HEAD
+  let buyerAccount = await overlay
+    .getRepository(TokenAccount)
+    .getById(tokenAccountId(tokenId, memberId))
+=======
+}: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
+
+  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
+||||||| parent of 5be047255 (fix: purchase token on sale)
+  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
+=======
+  const buyerAccounts =
+    (
+      await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
+    ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+  let buyerAccount = buyerAccounts.length > 0 ? buyerAccounts[0] : undefined
+
+>>>>>>> 5be047255 (fix: purchase token on sale)
+||||||| parent of 35f17bf30 (fix: address PR)
+  const buyerAccounts =
+    (
+      await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
+    ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+  let buyerAccount = buyerAccounts.length > 0 ? buyerAccounts[0] : undefined
+
+=======
+  let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
+>>>>>>> 35f17bf30 (fix: address PR)
   if (buyerAccount === undefined) {
     const token = await overlay
       .getRepository(CreatorToken)
       .getByIdOrFail(tokenId.toString());
     buyerAccount = createAccount(overlay, token, memberId, amountPurchased);
   } else {
+<<<<<<< HEAD
     buyerAccount.totalAmount += amountPurchased;
+||||||| parent of 35f17bf30 (fix: address PR)
+    buyerAccount!.totalAmount += amountPurchased
+=======
+    buyerAccount.totalAmount += amountPurchased
+>>>>>>> 35f17bf30 (fix: address PR)
   }
 
+<<<<<<< HEAD
   const token = await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString());
@@ -430,6 +472,14 @@ export async function processTokensPurchasedOnSaleEvent({
     .getRepository(Sale)
     .getByIdOrFail(token.currentSaleId!);
   sale.tokensSold += amountPurchased;
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  sale.tokensSold += amountPurchased
+=======
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
+  sale.tokensSold += amountPurchased
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
 
   overlay.getRepository(SaleTransaction).new({
     id: overlay.getRepository(SaleTransaction).getNewEntityId(),
@@ -442,17 +492,26 @@ export async function processTokensPurchasedOnSaleEvent({
   overlay.getRepository(SaleTransaction).new({
     id: overlay.getRepository(SaleTransaction).getNewEntityId(),
     quantity: amountPurchased,
-    pricePaid: sale.pricePerUnit,
     saleId: sale.id,
-    accountId: tokenAccountId(tokenId, memberId),
+    accountId: buyerAccount.id,
     createdIn: block.height,
   });
 
   const vestingForSale = await overlay
     .getRepository(VestedSale)
+<<<<<<< HEAD
     .getOneByRelation("saleId", sale.id);
 
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+    .getOneByRelation('saleId', tokenSaleId(tokenId, saleId))
+=======
+    .getOneByRelation('saleId', sale.id)
+
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
   if (vestingForSale !== undefined) {
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
     await addVestingScheduleToAccount(
       overlay,
       buyerAccount,
@@ -460,6 +519,33 @@ export async function processTokensPurchasedOnSaleEvent({
       amountPurchased,
       new SaleVestingSource()
     );
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+    const id = overlay.getRepository(VestedAccount).getNewEntityId()
+    overlay.getRepository(VestedAccount).new({
+      id,
+      accountId: buyerAccount.id,
+      vestingId: vestingForSale.vestingId,
+      totalVestingAmount: amountPurchased,
+    })
+=======
+    // add vesting to account
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
+||||||| parent of 35f17bf30 (fix: address PR)
+    // add vesting to account
+=======
+    addVestingScheduleToAccount(
+||||||| parent of 098a31664 (fix: migration ok)
+    addVestingScheduleToAccount(
+=======
+    await addVestingScheduleToAccount(
+>>>>>>> 098a31664 (fix: migration ok)
+      overlay,
+      buyerAccount,
+      vestingForSale.vestingId,
+      amountPurchased,
+      new SaleVestingSource()
+    )
+>>>>>>> 35f17bf30 (fix: address PR)
   }
 }
 
@@ -468,6 +554,7 @@ export async function processUpcomingTokenSaleUpdatedEvent({
   event: {
     asV1000: [tokenId, , newStart, newDuration],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.UpcomingTokenSaleUpdated">) {
   const token = await overlay
     .getRepository(CreatorToken)
@@ -475,6 +562,14 @@ export async function processUpcomingTokenSaleUpdatedEvent({
   const sale = await overlay
     .getRepository(Sale)
     .getByIdOrFail(token.currentSaleId!);
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+}: EventHandlerContext<'ProjectToken.UpcomingTokenSaleUpdated'>) {
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+=======
+}: EventHandlerContext<'ProjectToken.UpcomingTokenSaleUpdated'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
 
   if (newStart) {
     sale.startBlock = newStart;
@@ -529,19 +624,44 @@ export async function processAmmDeactivatedEvent({
   event: {
     asV2002: [tokenId, , burnedAmount],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.AmmDeactivated">) {
   const token = await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString());
   token.totalSupply -= burnedAmount;
   token.status = TokenStatus.IDLE;
+||||||| parent of 35f17bf30 (fix: address PR)
+}: EventHandlerContext<'ProjectToken.AmmDeactivated'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply -= burnedAmount
+  token.status = TokenStatus.IDLE
+  token.currentAmmSaleId = null
+=======
+}: EventHandlerContext<'ProjectToken.AmmDeactivated'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.totalSupply -= burnedAmount
+  token.status = TokenStatus.IDLE
+>>>>>>> 35f17bf30 (fix: address PR)
 
+<<<<<<< HEAD
   const activeAmm = await overlay
     .getRepository(AmmCurve)
     .getByIdOrFail(token.currentAmmSaleId!);
   activeAmm.finalized = true;
 
   token.currentAmmSaleId = null;
+||||||| parent of 35f17bf30 (fix: address PR)
+  const activeAmm = (
+    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
+  ).filter((amm) => !amm.finalized)[0]
+  activeAmm.finalized = true
+=======
+  const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
+  activeAmm.finalized = true
+
+  token.currentAmmSaleId = null
+>>>>>>> 35f17bf30 (fix: address PR)
 }
 
 export async function processTokensBurnedEvent({
@@ -566,8 +686,16 @@ export async function processTokensBurnedEvent({
         ? account.stakedAmount - amountBurned
         : BigInt(0);
   }
+<<<<<<< HEAD
   account.totalAmount -= amountBurned;
   await burnFromVesting(overlay, account.id, amountBurned);
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+  account.totalAmount -= amountBurned
+  await burnFromVesting(overlay, tokenAccountId(tokenId, memberId), amountBurned)
+=======
+  account.totalAmount -= amountBurned
+  await burnFromVesting(overlay, account.id, amountBurned)
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
 }
 
 export async function processTransferPolicyChangedToPermissionlessEvent({
@@ -585,6 +713,7 @@ export async function processTokenSaleFinalizedEvent({
   event: {
     asV1000: [tokenId, , quantityLeft, ,],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.TokenSaleFinalized">) {
   const token = await overlay
     .getRepository(CreatorToken)
@@ -593,14 +722,33 @@ export async function processTokenSaleFinalizedEvent({
     .getRepository(Sale)
     .getByIdOrFail(token.currentSaleId!);
   sale.finalized = true;
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+}: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  sale.finalized = true
+=======
+}: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
+  sale.finalized = true
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
 
   const sourceAccount = await overlay
     .getRepository(TokenAccount)
     .getByIdOrFail(sale.fundsSourceAccountId!);
   sourceAccount.totalAmount += quantityLeft;
 
+<<<<<<< HEAD
   token.status = TokenStatus.IDLE;
   token.currentSaleId = null;
+||||||| parent of 2f0acc3d5 (fix: vesting schedule schema & mappings)
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  token.status = TokenStatus.IDLE
+  token.currentSaleId = null
+=======
+  token.status = TokenStatus.IDLE
+  token.currentSaleId = null
+>>>>>>> 2f0acc3d5 (fix: vesting schedule schema & mappings)
 }
 
 export async function processRevenueSplitLeftEvent({
@@ -622,6 +770,7 @@ export async function processRevenueSplitFinalizedEvent({
   event: {
     asV2001: [tokenId, ,], // leftover JOYs not processed in orion
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.RevenueSplitFinalized">) {
   const token = await overlay
     .getRepository(CreatorToken)
@@ -631,6 +780,23 @@ export async function processRevenueSplitFinalizedEvent({
     .getByIdOrFail(token.currentRenvenueShareId!);
   revenueShare.finalized = true;
   token.currentRenvenueShareId = null;
+||||||| parent of 35f17bf30 (fix: address PR)
+}: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const revenueShare = (
+    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
+  ).filter((share) => !share.finalized)[0]
+  revenueShare.finalized = true
+  token.currentRenvenueShareId = null
+=======
+}: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const revenueShare = await overlay
+    .getRepository(RevenueShare)
+    .getByIdOrFail(token.currentRenvenueShareId!)
+  revenueShare.finalized = true
+  token.currentRenvenueShareId = null
+>>>>>>> 35f17bf30 (fix: address PR)
 }
 
 export async function processUserParticipatedInSplitEvent({
@@ -639,6 +805,7 @@ export async function processUserParticipatedInSplitEvent({
   event: {
     asV2001: [tokenId, memberId, stakedAmount, joyDividend],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"ProjectToken.UserParticipatedInSplit">) {
   const token = await overlay
     .getRepository(CreatorToken)
@@ -648,12 +815,43 @@ export async function processUserParticipatedInSplitEvent({
     memberId,
     tokenId
   );
+||||||| parent of 35f17bf30 (fix: address PR)
+}: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const account = (
+    await overlay.getRepository(TokenAccount).getManyByRelation('tokenId', token.id)
+  ).filter((account) => account.memberId === memberId.toString() && !account.deleted)[0]
+=======
+}: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
+>>>>>>> 35f17bf30 (fix: address PR)
 
+<<<<<<< HEAD
+<<<<<<< HEAD
   const revenueShare = await overlay
     .getRepository(RevenueShare)
     .getByIdOrFail(token.currentRenvenueShareId!);
   revenueShare.claimed += joyDividend;
   revenueShare.participantsNum += 1;
+||||||| parent of 35f17bf30 (fix: address PR)
+  const revenueShare = (
+    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
+  ).filter((share) => !share.finalized)[0]
+  revenueShare.claimed += joyDividend
+  revenueShare.participantsNum += 1
+=======
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
+||||||| parent of 74cc6a90a (fix: hidden entities)
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
+=======
+  const revenueShare = await overlay
+    .getRepository(RevenueShare)
+    .getByIdOrFail(token.currentRenvenueShareId!)
+>>>>>>> 74cc6a90a (fix: hidden entities)
+  revenueShare.claimed += joyDividend
+  revenueShare.participantsNum += 1
+>>>>>>> 35f17bf30 (fix: address PR)
 
   overlay.getRepository(RevenueShareParticipation).new({
     id: overlay.getRepository(RevenueShareParticipation).getNewEntityId(),
@@ -671,6 +869,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   event: {
     asV2002: [tokenId, _, metadataBytes],
   },
+<<<<<<< HEAD
 }: EventHandlerContext<"Content.CreatorTokenIssuerRemarked">) {
   const creatorRemarked = deserializeMetadata(
     CreatorTokenIssuerRemarked,
@@ -682,11 +881,139 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   const metadata = creatorRemarked.updateTokenMetadata;
   if (metadata === null && metadata!.newMetadata === null) {
     return;
+||||||| parent of 35f17bf30 (fix: address PR)
+}: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
+  const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+
+  if (!metadata) {
+    return
+=======
+}: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
+  const creatorRemarked = deserializeMetadata(CreatorTokenIssuerRemarked, metadataBytes)
+  if (creatorRemarked === null) {
+    return
+  }
+  const metadata = creatorRemarked.updateTokenMetadata
+  if (metadata === null && metadata!.newMetadata === null) {
+    return
+>>>>>>> 35f17bf30 (fix: address PR)
   }
 
+<<<<<<< HEAD
   const newMetadata = metadata!.newMetadata!;
   const token = await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString());
   await processTokenMetadata(token, newMetadata, overlay);
+||||||| parent of 35f17bf30 (fix: address PR)
+  if (isSet(metadata.description)) {
+    token.description = metadata.description
+  }
+
+  if (isSet(metadata.benefits)) {
+    for (const benefit of metadata!.benefits!) {
+      overlay.getRepository(Benefit).new({
+        id: overlay.getRepository(Benefit).getNewEntityId(),
+        title: benefit.title ? benefit.title! : undefined,
+        description: benefit.description ? benefit.description! : undefined,
+        emojiCode: benefit.emoji ? benefit.emoji! : undefined,
+        displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
+        tokenId: token.id,
+      })
+    }
+  }
+
+  if (isSet(metadata.whitelistApplicationNote)) {
+    token.whitelistApplicantNote = metadata.whitelistApplicationNote || null
+  }
+
+  if (isSet(metadata.whitelistApplicationApplyLink)) {
+    token.whitelistApplicantLink = metadata.whitelistApplicationApplyLink || null
+  }
+
+  if (isSet(metadata.avatarUri)) {
+    token.avatar = metadata!.avatarUri
+      ? new TokenAvatarUri({ avatarUri: metadata.avatarUri })
+      : null
+  }
+
+  if (isSet(metadata.trailerVideoId)) {
+    const video = await overlay.getRepository(Video).getByIdOrFail(metadata.trailerVideoId)
+    if (video) {
+      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
+      overlay.getRepository(TrailerVideo).new({
+        id,
+        tokenId: token.id,
+        videoId: video.id,
+      })
+      token.trailerVideoId = id
+    }
+  }
+=======
+  const newMetadata = metadata!.newMetadata!
+
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  if (isSet(newMetadata.description)) {
+    token.description = newMetadata.description
+  }
+
+  if (isSet(newMetadata.benefits)) {
+    for (const benefit of newMetadata.benefits) {
+      if (benefit.displayOrder !== null && benefit.displayOrder < MAX_NUMBER_OF_BENEFITS) {
+        // remove existing benefit with the same display order (if exists)
+        const existingBenefit = (
+          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
+        ).find((b) => b.displayOrder === benefit.displayOrder)
+
+        if (existingBenefit !== undefined) {
+          overlay.getRepository(Benefit).remove(existingBenefit)
+        }
+
+        // if the benefit title is null, it means we want to remove the benefit
+        if (benefit.title !== null) {
+          overlay.getRepository(Benefit).new({
+            id: overlay.getRepository(Benefit).getNewEntityId(),
+            title: benefit.title,
+            description: benefit.description,
+            emojiCode: benefit.emoji,
+            displayOrder: benefit.displayOrder,
+            tokenId: token.id,
+          })
+        }
+      }
+    }
+  }
+
+  if (isSet(newMetadata.whitelistApplicationNote)) {
+    token.whitelistApplicantNote = newMetadata.whitelistApplicationNote || null
+  }
+
+  if (isSet(newMetadata.whitelistApplicationApplyLink)) {
+    token.whitelistApplicantLink = newMetadata.whitelistApplicationApplyLink || null
+  }
+
+  if (isSet(newMetadata.avatarUri)) {
+    token.avatar = newMetadata.avatarUri
+      ? new TokenAvatarUri({ avatarUri: newMetadata.avatarUri })
+      : null
+  }
+
+  if (isSet(newMetadata.trailerVideoId)) {
+    const video = await overlay.getRepository(Video).getById(newMetadata.trailerVideoId)
+    if (video) {
+      const trailerVideoRepository = overlay.getRepository(TrailerVideo)
+      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
+      trailerVideoRepository.remove(oldTrailer)
+
+      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
+      overlay.getRepository(TrailerVideo).new({
+        id,
+        tokenId: token.id,
+        videoId: video.id,
+      })
+      token.trailerVideoId = id
+    }
+  }
+>>>>>>> 35f17bf30 (fix: address PR)
 }

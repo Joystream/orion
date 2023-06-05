@@ -6,8 +6,8 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
-import { Utils } from '../../Utils'
-import { Maybe } from 'graphql/generated/schema'
+import { Utils } from '../../utils'
+import { Maybe } from '../../../graphql/generated/schema'
 import {
   SaleFields,
   SaleFieldsFragment,
@@ -133,5 +133,5 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.equal(qSaleTx!.pricePaid, qSale!.pricePerUnit)
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

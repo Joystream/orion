@@ -60,13 +60,26 @@ type Channel @entity {
   totalVideosCreated: Int!
 
   "% of channel balance that the creator devotes to revenue shares"
+<<<<<<< HEAD
   revenueShareRatioPercent: Int
 
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
+<<<<<<< HEAD
 
   "Token issued by channel if any"
   creatorToken: TokenChannel @derivedFrom(field: "channel")
+||||||| parent of 0cb414d74 (fix: event versioning)
+  revenueShareRatioPercent: Int!
+=======
+  revenueShareRatioPercent: Int
+>>>>>>> 0cb414d74 (fix: event versioning)
+||||||| parent of 35f17bf30 (fix: address PR)
+=======
+
+  "Token issued by channel if any"
+  creatorToken: TokenChannel @derivedFrom(field: "channel")
+>>>>>>> 35f17bf30 (fix: address PR)
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

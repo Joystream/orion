@@ -107,6 +107,17 @@ type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
   token: CreatorToken! @unique
 }
 
+type TrailerVideo @entity @index(fields: ["token", "video"]) {
+  "counter"
+  id: ID!
+
+  "video reference"
+  video: Video!
+
+  "token reference, unique as one token cannot have multiple trailers"
+  token: Token! @unique
+}
+
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
   "counter"
   id: ID!

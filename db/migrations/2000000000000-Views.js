@@ -68,13 +68,13 @@ module.exports = class Views2000000000000 {
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       trailer_video: [
         `EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`,
-        `EXISTS(SELECT 1 FROM "video" WHERE "id="video_id")`
+        `EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`
       ],
       token: [`EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`],
       revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       benefit: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       amm_curve: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      amm_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "amm" WHERE "id"="amm_id")`],
       sale: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       vested_sale: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
       sale_transaction: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],

@@ -210,7 +210,6 @@ export class FixtureRunner {
     await this.fixture.runQueryNodeChecks()
   }
 
-
   public async runWithQueryNodeChecks(): Promise<void> {
     await this.run()
     await this.runQueryNodeChecks()
