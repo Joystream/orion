@@ -102,11 +102,16 @@ export class ApiFactory {
   private whitelistedHolderMemberId: undefined | number
   private tokenId: undefined | number
   private channelId: undefined | number
+  private videoId: undefined | number
 
   // getter and setters for channel and tokenId
   public get channel(): number {
     assert(this.channelId !== undefined, 'channel not set')
     return this.channelId!
+  }
+  public get video(): number {
+    assert(this.videoId !== undefined, 'video not set')
+    return this.videoId!
   }
   public get token(): number {
     assert(this.tokenId !== undefined, 'token not set')
@@ -115,10 +120,12 @@ export class ApiFactory {
   public setChannel(channelId: number) {
     this.channelId = channelId
   }
+  public setVideo(videoId: number) {
+    this.videoId = videoId
+  }
   public setToken(tokenId: number) {
     this.tokenId = tokenId
   }
-
   // getter & setters for creator token actors
   public get creator(): [string, number] {
     assert(this.creatorAddress !== undefined, 'creator not set')
@@ -393,8 +400,14 @@ export class Api {
   public setChannel(channelId: number) {
     this.factory.setChannel(channelId)
   }
+  public setVideo(videoId: number) {
+    this.factory.setVideo(videoId)
+  }
   public get channel(): number {
     return this.factory.channel
+  }
+  public get video(): number {
+    return this.factory.video
   }
   public get token(): number {
     return this.factory.token

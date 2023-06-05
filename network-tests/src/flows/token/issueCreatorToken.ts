@@ -88,7 +88,6 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
   await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
   const tokenId = issueCreatorTokenFixture.getTokenId()
 
-  api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
   api.setWhitelistedHolder(whitelistedHolderAddress, whitelistedHolderMemberId.toNumber())
   api.setToken(tokenId.toNumber())
 
