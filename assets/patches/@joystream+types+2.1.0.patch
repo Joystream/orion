@@ -2642,7 +2642,7 @@ index 7e3d672..fb7f6f4 100644
              /**
               * The origin filter prevent the call to be dispatched.
 diff --git a/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts b/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
-index 557e0b3..947a413 100644
+index 557e0b3..b41f0d8 100644
 --- a/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/augment-api-events.d.ts
 @@ -1,8 +1,8 @@
@@ -2744,16 +2744,10 @@ index 557e0b3..947a413 100644
              /**
               * Token Deissued
               * Params:
-@@ -2245,10 +2267,20 @@ declare module '@polkadot/api-base/types/events' {
-              * Params:
-              * - token id
-              * - token sale id
-+             * - funds source member id
-              * - token sale data
+@@ -2249,6 +2271,15 @@ declare module '@polkadot/api-base/types/events' {
               * - token sale metadata
               **/
--            TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
-+            TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
+             TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
 +            /**
 +             * Tokens Bought on AMM
 +             * Params:
@@ -2766,7 +2760,7 @@ index 557e0b3..947a413 100644
              /**
               * Tokens Burned
               * Params:
-@@ -2266,6 +2298,15 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2266,6 +2297,15 @@ declare module '@polkadot/api-base/types/events' {
               * - buyer's member id
               **/
              TokensPurchasedOnSale: AugmentedEvent<ApiType, [u64, u32, u128, u64]>;
@@ -2782,7 +2776,7 @@ index 557e0b3..947a413 100644
              /**
               * Transfer Policy Changed To Permissionless
               * Params:
-@@ -2372,6 +2413,10 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2372,6 +2412,10 @@ declare module '@polkadot/api-base/types/events' {
              Voted: AugmentedEvent<ApiType, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
          };
          referendum: {
@@ -2793,7 +2787,7 @@ index 557e0b3..947a413 100644
              /**
               * Referendum ended and winning option was selected
               **/
-@@ -2956,26 +3001,6 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2956,26 +3000,6 @@ declare module '@polkadot/api-base/types/events' {
               **/
              WorkingGroupBudgetFunded: AugmentedEvent<ApiType, [u64, u128, Bytes]>;
          };
@@ -5808,7 +5802,7 @@ index a1514a1..65b6fcd 100644
          PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
          PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
-index 3896f19..46beb10 100644
+index 3896f19..2b243b0 100644
 --- a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 @@ -1,7 +1,7 @@
@@ -6405,15 +6399,6 @@ index 3896f19..46beb10 100644
          readonly isPatronageCreditClaimed: boolean;
          readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
          readonly isRevenueSplitIssued: boolean;
-@@ -1293,7 +1280,7 @@ declare module '@polkadot/types/lookup' {
-         readonly isTokenIssued: boolean;
-         readonly asTokenIssued: ITuple<[u64, PalletProjectTokenTokenIssuanceParameters]>;
-         readonly isTokenSaleInitialized: boolean;
--        readonly asTokenSaleInitialized: ITuple<[u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
-+        readonly asTokenSaleInitialized: ITuple<[u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
-         readonly isUpcomingTokenSaleUpdated: boolean;
-         readonly asUpcomingTokenSaleUpdated: ITuple<[u64, u32, Option<u32>, Option<u32>]>;
-         readonly isTokensPurchasedOnSale: boolean;
 @@ -1304,16 +1291,26 @@ declare module '@polkadot/types/lookup' {
          readonly asTransferPolicyChangedToPermissionless: u64;
          readonly isTokensBurned: boolean;
@@ -8384,7 +8369,7 @@ index 3896f19..46beb10 100644
      type JoystreamNodeRuntimeRuntime = Null;
  }
 diff --git a/node_modules/@joystream/types/lib/cjs/augment/lookup.js b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
-index b6fcc72..128f8e5 100644
+index b6fcc72..4846482 100644
 --- a/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 @@ -368,23 +368,7 @@ exports.default = {
@@ -9001,13 +8986,7 @@ index b6fcc72..128f8e5 100644
              PatronageCreditClaimed: '(u64,u128,u64)',
              RevenueSplitIssued: '(u64,u32,u32,u128)',
              RevenueSplitFinalized: '(u64,AccountId32,u128)',
-@@ -1185,16 +1169,21 @@ exports.default = {
-             AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
-             TokenDeissued: 'u64',
-             TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
--            TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
-+            TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
-             UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+@@ -1190,11 +1174,16 @@ exports.default = {
              TokensPurchasedOnSale: '(u64,u32,u128,u64)',
              TokenSaleFinalized: '(u64,u32,u128,u128)',
              TransferPolicyChangedToPermissionless: 'u64',
@@ -11077,7 +11056,7 @@ index b6fcc72..128f8e5 100644
      JoystreamNodeRuntimeRuntime: 'Null'
  };
 diff --git a/node_modules/@joystream/types/lib/mjs/augment/lookup.js b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
-index b7d08da..119e6d7 100644
+index b7d08da..d49dbc8 100644
 --- a/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 @@ -366,23 +366,7 @@ export default {
@@ -11694,13 +11673,7 @@ index b7d08da..119e6d7 100644
              PatronageCreditClaimed: '(u64,u128,u64)',
              RevenueSplitIssued: '(u64,u32,u32,u128)',
              RevenueSplitFinalized: '(u64,AccountId32,u128)',
-@@ -1183,16 +1167,21 @@ export default {
-             AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
-             TokenDeissued: 'u64',
-             TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
--            TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
-+            TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
-             UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+@@ -1188,11 +1172,16 @@ export default {
              TokensPurchasedOnSale: '(u64,u32,u128,u64)',
              TokenSaleFinalized: '(u64,u32,u128,u128)',
              TransferPolicyChangedToPermissionless: 'u64',
@@ -13970,7 +13943,7 @@ index 465e8ae..f5734c7 100644
        /**
         * The origin filter prevent the call to be dispatched.
 diff --git a/node_modules/@joystream/types/src/augment/augment-api-events.ts b/node_modules/@joystream/types/src/augment/augment-api-events.ts
-index bdddefb..b63af2e 100644
+index bdddefb..8228b40 100644
 --- a/node_modules/@joystream/types/src/augment/augment-api-events.ts
 +++ b/node_modules/@joystream/types/src/augment/augment-api-events.ts
 @@ -4,8 +4,8 @@
@@ -14072,16 +14045,10 @@ index bdddefb..b63af2e 100644
        /**
         * Token Deissued
         * Params:
-@@ -2164,10 +2186,20 @@ declare module '@polkadot/api-base/types/events' {
-        * Params:
-        * - token id
-        * - token sale id
-+       * - funds source member id
-        * - token sale data
+@@ -2168,6 +2190,15 @@ declare module '@polkadot/api-base/types/events' {
         * - token sale metadata
         **/
--      TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
-+      TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
+       TokenSaleInitialized: AugmentedEvent<ApiType, [u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
 +      /**
 +       * Tokens Bought on AMM
 +       * Params:
@@ -14094,7 +14061,7 @@ index bdddefb..b63af2e 100644
        /**
         * Tokens Burned
         * Params:
-@@ -2185,6 +2217,15 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2185,6 +2216,15 @@ declare module '@polkadot/api-base/types/events' {
         * - buyer's member id
         **/
        TokensPurchasedOnSale: AugmentedEvent<ApiType, [u64, u32, u128, u64]>;
@@ -14110,7 +14077,7 @@ index bdddefb..b63af2e 100644
        /**
         * Transfer Policy Changed To Permissionless
         * Params:
-@@ -2291,6 +2332,10 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2291,6 +2331,10 @@ declare module '@polkadot/api-base/types/events' {
        Voted: AugmentedEvent<ApiType, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
      };
      referendum: {
@@ -14121,7 +14088,7 @@ index bdddefb..b63af2e 100644
        /**
         * Referendum ended and winning option was selected
         **/
-@@ -2873,20 +2918,6 @@ declare module '@polkadot/api-base/types/events' {
+@@ -2873,20 +2917,6 @@ declare module '@polkadot/api-base/types/events' {
         **/
        WorkingGroupBudgetFunded: AugmentedEvent<ApiType, [u64, u128, Bytes]>;
      };
@@ -14433,7 +14400,7 @@ index d9b72b5..186547f 100644
        /**
         * A dispatch that will fill the block weight up to the given ratio.
 diff --git a/node_modules/@joystream/types/src/augment/lookup.ts b/node_modules/@joystream/types/src/augment/lookup.ts
-index 58896db..6d615af 100644
+index 58896db..4e8b5cf 100644
 --- a/node_modules/@joystream/types/src/augment/lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/lookup.ts
 @@ -368,23 +368,7 @@ export default {
@@ -15050,13 +15017,7 @@ index 58896db..6d615af 100644
        PatronageCreditClaimed: '(u64,u128,u64)',
        RevenueSplitIssued: '(u64,u32,u32,u128)',
        RevenueSplitFinalized: '(u64,AccountId32,u128)',
-@@ -1185,16 +1169,21 @@ export default {
-       AccountDustedBy: '(u64,u64,AccountId32,PalletProjectTokenTransferPolicy)',
-       TokenDeissued: 'u64',
-       TokenIssued: '(u64,PalletProjectTokenTokenIssuanceParameters)',
--      TokenSaleInitialized: '(u64,u32,PalletProjectTokenTokenSale,Option<Bytes>)',
-+      TokenSaleInitialized: '(u64,u32,u64,PalletProjectTokenTokenSale,Option<Bytes>)',
-       UpcomingTokenSaleUpdated: '(u64,u32,Option<u32>,Option<u32>)',
+@@ -1190,11 +1174,16 @@ export default {
        TokensPurchasedOnSale: '(u64,u32,u128,u64)',
        TokenSaleFinalized: '(u64,u32,u128,u128)',
        TransferPolicyChangedToPermissionless: 'u64',
@@ -17175,7 +17136,7 @@ index cdcf544..a882fb3 100644
      PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
      PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/src/augment/types-lookup.ts b/node_modules/@joystream/types/src/augment/types-lookup.ts
-index c035e7d..29076e1 100644
+index c035e7d..fd687a8 100644
 --- a/node_modules/@joystream/types/src/augment/types-lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/types-lookup.ts
 @@ -4,7 +4,7 @@
@@ -17803,15 +17764,6 @@ index c035e7d..29076e1 100644
      readonly isPatronageCreditClaimed: boolean;
      readonly asPatronageCreditClaimed: ITuple<[u64, u128, u64]>;
      readonly isRevenueSplitIssued: boolean;
-@@ -1389,7 +1375,7 @@ declare module '@polkadot/types/lookup' {
-     readonly isTokenIssued: boolean;
-     readonly asTokenIssued: ITuple<[u64, PalletProjectTokenTokenIssuanceParameters]>;
-     readonly isTokenSaleInitialized: boolean;
--    readonly asTokenSaleInitialized: ITuple<[u64, u32, PalletProjectTokenTokenSale, Option<Bytes>]>;
-+    readonly asTokenSaleInitialized: ITuple<[u64, u32, u64, PalletProjectTokenTokenSale, Option<Bytes>]>;
-     readonly isUpcomingTokenSaleUpdated: boolean;
-     readonly asUpcomingTokenSaleUpdated: ITuple<[u64, u32, Option<u32>, Option<u32>]>;
-     readonly isTokensPurchasedOnSale: boolean;
 @@ -1400,10 +1386,20 @@ declare module '@polkadot/types/lookup' {
      readonly asTransferPolicyChangedToPermissionless: u64;
      readonly isTokensBurned: boolean;
