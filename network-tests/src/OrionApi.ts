@@ -1,4 +1,4 @@
-import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client/core'
+import { ApolloClient, DocumentNode, NormalizedCacheObject, OperationVariables } from '@apollo/client/core'
 import { extendDebug, Debugger } from './Debugger'
 import { Maybe } from './graphql/generated/schema'
 import { OperationDefinitionNode } from 'graphql'
@@ -28,30 +28,44 @@ import {
   GetRevenueShareParticipationById,
   AmmTranactionFieldsFragment,
   GetAmmTransactionById,
-  SubTokenById,
-} from '../graphql/generated/operations'
+} from '../graphql/generated/queries'
 import { useQuery, useSubscription } from '@apollo/client'
+import { GetMemberById } from 'graphql/generated/operations'
+import { Subscription } from 'graphql/generated/schema'
 
 export class OrionApi {
-  private readonly queryNodeProvider: ApolloClient<NormalizedCacheObject>
+  private readonly apolloClient: ApolloClient<NormalizedCacheObject>
   private readonly debug: Debugger.Debugger
   private readonly queryDebug: Debugger.Debugger
   private readonly tryDebug: Debugger.Debugger
 
-  constructor(queryNodeProvider: ApolloClient<NormalizedCacheObject>) {
-    this.queryNodeProvider = queryNodeProvider
+  constructor(apolloClient: ApolloClient<NormalizedCacheObject>) {
+    this.apolloClient = apolloClient
     this.debug = extendDebug('query-node-api')
     this.queryDebug = this.debug.extend('query')
     this.tryDebug = this.debug.extend('try')
   }
 
-  public async subscribe<
-    QueryResultT,
-    QueryT extends { [k: string]: any[] },
-    VariablesT extends Record<string, any>
-  >(query: QueryT, variables: VariablesT): Promise<QueryResultT | null> {
-    // useSubscription()
-    return null
+  /**
+   * Get entity from subscription
+   *
+   * @param query - actual query
+   * @param variables - query parameters
+   * @param resultKey - helps result parsing
+   */
+  protected async uniqueEntitySubscription<
+    SubscriptionT extends { [k: string]: Maybe<Record<string, unknown>> | undefined },
+    VariablesT extends Record<string, unknown>
+  >(
+    query: DocumentNode,
+    variables: VariablesT,
+    resultKey: keyof SubscriptionT
+  ): Promise<SubscriptionT[keyof SubscriptionT] | null> {
+    return new Promise((resolve) => {
+      this.apolloClient.subscribe<SubscriptionT, VariablesT>({ query, variables }).subscribe(({ data }) => {
+        resolve(data ? data[resultKey] : null)
+      })
+    })
   }
 
   public async retryQuery<QueryResultT>(
@@ -140,7 +154,7 @@ export class OrionApi {
   ): Promise<Required<QueryT>[keyof QueryT] | null> {
     this.debugQuery(query, variables)
     return (
-      (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
+      (await this.apolloClient.query<QueryT, VariablesT>({ query, variables })).data[
       resultKey
       ] || null
     )
@@ -156,7 +170,7 @@ export class OrionApi {
     resultKey: keyof QueryT
   ): Promise<QueryT[keyof QueryT][number] | null> {
     this.debugQuery(query, variables)
-    const _qResult = (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables }))
+    const _qResult = (await this.apolloClient.query<QueryT, VariablesT>({ query, variables }))
       .data[resultKey]
     const qResult = Array.isArray(_qResult) ? _qResult[0] : _qResult
     return qResult || null
@@ -172,7 +186,7 @@ export class OrionApi {
     resultKey: keyof QueryT
   ): Promise<QueryT[keyof QueryT]> {
     this.debugQuery(query, variables)
-    return (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
+    return (await this.apolloClient.query<QueryT, VariablesT>({ query, variables })).data[
       resultKey
     ]
   }
@@ -224,24 +238,5 @@ export class OrionApi {
 
   public async getAmmTransactionById(id: string): Promise<AmmTranactionFieldsFragment> {
     return this.firstEntityQuery(GetAmmTransactionById, { id }, 'ammTransactionById')
-  }
-
-  public async subTokenById(tokenId: string) {
-    this.queryNodeProvider.subscribe(
-      { query: GetTokenById, variables: { id: tokenId } }
-    )
-      // re fetch data until address is available
-      .subscribe({ next: (data) => {
-          console.log('data', JSON.stringify(data))
-        },
-        error: (err) => {
-          console.log('err', JSON.stringify(err))
-        },
-        complete: () => {
-          console.log('completion')
-        }
-      })
-    // const { data, loading} = useSubscription(SubTokenById, { variables: { id: tokenId } })
-    // continue to re fetch data until address is available
   }
 }
