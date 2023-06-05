@@ -257,3 +257,10 @@ query getAmmTransactionById($id: String!) {
     ...AmmTranactionFields
   }
 }
+
+subscription subTokenById($id: String!) {
+  tokenById(id: $id) {
+    ...TokenFields
+  }
+}
+

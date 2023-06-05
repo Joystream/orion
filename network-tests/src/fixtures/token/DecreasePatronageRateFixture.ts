@@ -6,7 +6,7 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 import BN from 'bn.js'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<

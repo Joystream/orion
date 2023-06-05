@@ -28,7 +28,9 @@ import {
   GetRevenueShareParticipationById,
   AmmTranactionFieldsFragment,
   GetAmmTransactionById,
-} from '../graphql/generated/queries'
+  SubTokenById,
+} from '../graphql/generated/operations'
+import { useQuery, useSubscription } from '@apollo/client'
 
 export class OrionApi {
   private readonly queryNodeProvider: ApolloClient<NormalizedCacheObject>
@@ -41,6 +43,15 @@ export class OrionApi {
     this.debug = extendDebug('query-node-api')
     this.queryDebug = this.debug.extend('query')
     this.tryDebug = this.debug.extend('try')
+  }
+
+  public async subscribe<
+    QueryResultT,
+    QueryT extends { [k: string]: any[] },
+    VariablesT extends Record<string, any>
+  >(query: QueryT, variables: VariablesT): Promise<QueryResultT | null> {
+    // useSubscription()
+    return null
   }
 
   public async retryQuery<QueryResultT>(
@@ -130,7 +141,7 @@ export class OrionApi {
     this.debugQuery(query, variables)
     return (
       (await this.queryNodeProvider.query<QueryT, VariablesT>({ query, variables })).data[
-        resultKey
+      resultKey
       ] || null
     )
   }
@@ -213,5 +224,24 @@ export class OrionApi {
 
   public async getAmmTransactionById(id: string): Promise<AmmTranactionFieldsFragment> {
     return this.firstEntityQuery(GetAmmTransactionById, { id }, 'ammTransactionById')
+  }
+
+  public async subTokenById(tokenId: string) {
+    this.queryNodeProvider.subscribe(
+      { query: GetTokenById, variables: { id: tokenId } }
+    )
+      // re fetch data until address is available
+      .subscribe({ next: (data) => {
+          console.log('data', JSON.stringify(data))
+        },
+        error: (err) => {
+          console.log('err', JSON.stringify(err))
+        },
+        complete: () => {
+          console.log('completion')
+        }
+      })
+    // const { data, loading} = useSubscription(SubTokenById, { variables: { id: tokenId } })
+    // continue to re fetch data until address is available
   }
 }

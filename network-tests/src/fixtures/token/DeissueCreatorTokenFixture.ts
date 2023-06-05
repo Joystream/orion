@@ -7,7 +7,7 @@ import { Api } from '../../Api'
 import {
   PalletContentPermissionsContentActor,
 } from '@polkadot/types/lookup'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 

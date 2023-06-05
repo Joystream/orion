@@ -9,7 +9,7 @@ import { Utils } from '../../utils'
 import BN from 'bn.js'
 import { u64 } from '@polkadot/types/primitive'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
-import { TokenAccountFieldsFragment } from 'graphql/generated/queries'
+import { TokenAccountFieldsFragment } from 'graphql/generated/operations'
 
 type IssuerTransferEventDetails = EventDetails<
   EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
