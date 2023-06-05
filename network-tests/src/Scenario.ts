@@ -15,6 +15,7 @@ import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { createClient } from 'graphql-ws';
+import Websocket from 'ws'
 
 export type ScenarioProps = {
   env: NodeJS.ProcessEnv
@@ -92,6 +93,7 @@ export async function scenario(
   const orionUrl: string = env.QUERY_NODE_URL || 'http://127.0.0.1:4350/graphql'
   const wsLink = new GraphQLWsLink(createClient({
     url: 'ws://127.0.0.1:4350/subscriptions',
+    webSocketImpl: Websocket,
   }));
   const httpLink = new HttpLink({ uri: orionUrl, fetch })
   const splitLink = split(
