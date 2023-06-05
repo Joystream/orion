@@ -38,7 +38,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
 
   job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
-  const creatorRemarked = job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
+  job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
   job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)
   const issuerTransferJob = job('Issuer Transfer With Existing Account And Vesting', issuerTransferWithExistingAccountAndVestingFlow).after(
     job('Issuer Transfer With Existing Account And No Vesting', issuerTransferWithExistingAccountAndNoVestingFlow).requires(
@@ -61,5 +61,4 @@ scenario('Creator Token Test Suite', async ({ job }) => {
     .after(saleJob)
   const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
   job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
-
 })
