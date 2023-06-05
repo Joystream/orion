@@ -51,6 +51,5 @@ export default async function issuerTransferWithAccountCreationAndVestingFlow({
     outputs,
     metadata
   )
-  await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 }

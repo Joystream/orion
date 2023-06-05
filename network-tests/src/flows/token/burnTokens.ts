@@ -23,6 +23,5 @@ export default async function burnTokens({ api, query }: FlowProps): Promise<voi
     firstHolderMemberId,
     firstHolderTokenBalance
   )
-  await burnTokenFixture.preExecHook()
   await new FixtureRunner(burnTokenFixture).runWithQueryNodeChecks()
 }

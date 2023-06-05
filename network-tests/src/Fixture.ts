@@ -19,6 +19,8 @@ export abstract class BaseFixture {
     this.debug = extendDebug(`fixture:${this.constructor.name}`)
   }
 
+  public abstract preExecHook(): Promise<void>
+
   // Derviced classes must not override this
   public async runner(): Promise<void> {
     await this.execute()
@@ -87,6 +89,8 @@ export abstract class BaseQueryNodeFixture extends BaseFixture {
     this.query = query
     this.queryNodeChecksEnabled = !process.env.SKIP_QUERY_NODE_CHECKS
   }
+
+  public async preExecHook(): Promise<void> {}
 
   public async runQueryNodeChecks(): Promise<void> {
     if (!this.executed) {
@@ -182,6 +186,8 @@ export class FixtureRunner {
 
     // TODO: record starting block
 
+    await this.fixture.preExecHook()
+
     await this.fixture.runner()
     // TODO: record ending block
     const err = this.fixture.executionError()
@@ -203,6 +209,7 @@ export class FixtureRunner {
 
     await this.fixture.runQueryNodeChecks()
   }
+
 
   public async runWithQueryNodeChecks(): Promise<void> {
     await this.run()
