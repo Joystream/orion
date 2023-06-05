@@ -28,6 +28,5 @@ export default async function burnTokens({ api, query, lock }: FlowProps): Promi
     firstHolderMemberId,
     firstHolderTokenBalance
   )
-  await burnTokenFixture.preExecHook()
   await new FixtureRunner(burnTokenFixture).runWithQueryNodeChecks()
 }

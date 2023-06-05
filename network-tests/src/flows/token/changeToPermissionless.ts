@@ -28,6 +28,5 @@ export default async function changeToPermissionlessFlow({
     creatorMemberId,
     channelId
   )
-  await changeToPerissionlessFixture.preExecHook()
   await new FixtureRunner(changeToPerissionlessFixture).runWithQueryNodeChecks()
 }

@@ -48,7 +48,6 @@ export default async function issuerTransferWithExistingAccountAndVestingFlow({
     outputs,
     metadata
   )
-  await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
   const unlockFirstHolderAccess = await lock(Resource.FirstHolder)

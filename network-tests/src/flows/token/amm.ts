@@ -50,7 +50,6 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     channelId,
     ammParams
   )
-  await activateAmmFixture.preExecHook()
   await new FixtureRunner(activateAmmFixture).runWithQueryNodeChecks()
 
   debug('buy on amm with existing account')
@@ -63,7 +62,6 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     tokenId,
     amountBought
   )
-  await buyOnAmmFixture.preExecHook()
   await new FixtureRunner(buyOnAmmFixture).runWithQueryNodeChecks()
 
   debug('buy on amm with non existing account')
@@ -75,7 +73,6 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     tokenId,
     amountBought
   )
-  await buyOnAmmFixtureWithAccountCreation.preExecHook()
   await new FixtureRunner(buyOnAmmFixtureWithAccountCreation).runWithQueryNodeChecks()
 
   debug('sell on amm')
@@ -88,7 +85,6 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     tokenId,
     amountSold
   )
-  await sellOnAmmFixture.preExecHook()
   await new FixtureRunner(sellOnAmmFixture).runWithQueryNodeChecks()
 
   const sellOnAmmFixtureFromCreatedAccount = new SellOnAmmFixture(
@@ -99,7 +95,6 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     tokenId,
     amountSold
   )
-  await sellOnAmmFixtureFromCreatedAccount.preExecHook()
   await new FixtureRunner(sellOnAmmFixtureFromCreatedAccount).runWithQueryNodeChecks()
 
   debug('deactivate amm')
@@ -110,6 +105,5 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
     creatorMemberId,
     channelId
   )
-  await deactivateAmmFixture.preExecHook()
   await new FixtureRunner(deactivateAmmFixture).runWithQueryNodeChecks()
 }
