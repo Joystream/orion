@@ -14,7 +14,7 @@ source ../.env
 DATA_PATH=$PWD/data
 mkdir -p ${DATA_PATH}
 
-RUNTIME=${RUNTIME:=crt_release_new}
+RUNTIME=${RUNTIME:=crt_release}
 RUNTIME_PROFILE=${RUNTIME_PROFILE:=TESTING}
 
 # Source of funds for all new accounts that are created in the tests.
