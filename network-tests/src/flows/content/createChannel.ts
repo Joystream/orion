@@ -28,7 +28,7 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
 
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [channelOwnerAddress])
   await new FixtureRunner(buyMembershipsFixture).run()
-  const channelOwnerMemberId = buyMembershipsFixture.getCreatedMembers()
+  const [channelOwnerMemberId,] = buyMembershipsFixture.getCreatedMembers()
 
   // create sample ChannelOwner and Parameters
   const storageBuckets = await getStorageBucketsAccordingToPolicy(api)
@@ -50,6 +50,8 @@ export default async function createChannel({ api, query }: FlowProps): Promise<
   await new FixtureRunner(createChannelFixture).run()
   const channelId = createChannelFixture.getChannelId().toNumber()
   api.setChannel(channelId)
+
+  api.setCreator(channelOwnerAddress, channelOwnerMemberId.toNumber())
 
   debug('Done')
 }
