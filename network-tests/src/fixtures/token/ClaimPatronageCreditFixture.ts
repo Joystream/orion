@@ -7,7 +7,7 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
-import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
 
 type PatronageCreditClaimedEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageCreditClaimed'>

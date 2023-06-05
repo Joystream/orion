@@ -13,8 +13,8 @@ import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
-import { blake2AsHex } from '@polkadot/util-crypto'
+import { SubTokenById, TokenFieldsFragment, GetTokenById } from '../../../graphql/generated/operations'
+import { useQuery, useSubscription } from '@apollo/client'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -68,10 +68,12 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     ] = this.events[0].event.data
     let qToken: TokenFieldsFragment | null = null
 
-    await Utils.until('waiting for issue token handler to be completed', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      return qToken !== null
-    })
+    await this.query.subTokenById(tokenId.toString())
+
+    // await Utils.until('waiting for issue token handler to be completed', async () => {
+    //   qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    //   return qToken !== null
+    // })
 
     const initialMembers = [...initialAllocation.keys()]
     const initialBalances = [...initialAllocation.values()].map((item) => item.amount)

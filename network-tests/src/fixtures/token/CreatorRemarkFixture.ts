@@ -11,7 +11,7 @@ import {
 } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
-import { TokenFieldsFragment } from '../../../graphql/generated/queries'
+import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 
 type CreatorRemarkEventDetails = EventDetails<EventType<'content', 'CreatorTokenIssuerRemarked'>>
 
