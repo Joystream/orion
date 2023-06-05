@@ -126,11 +126,11 @@ export async function processTokenAmountTransferredByIssuerEvent({
   },
 }: EventHandlerContext<'ProjectToken.TokenAmountTransferredByIssuer'>) {
   const sourceAccount = await overlay.getTokenAccountOrFail(tokenId, sourceMemberId)
-  sourceAccount.totalAmount -= validatedTransfers.reduce(
+  const totalAmount = validatedTransfers.reduce(
     (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
     BigInt(0)
   )
-
+  sourceAccount.totalAmount -= totalAmount
   for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
     if (validatedMemberId.__kind === 'Existing') {
       const destinationAccount = await overlay.getTokenAccountOrFail(
@@ -578,6 +578,8 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (metadata!.benefits) {
     for (const benefit of metadata!.benefits!) {
       overlay.getRepository(Benefit).new({
+        id: overlay.getRepository(Benefit).getNextIdNumber().toString(),
+        tokenId: tokenId.toString(),
         title: benefit.title ? benefit.title! : undefined,
         description: benefit.description ? benefit.description! : undefined,
         emojiCode: benefit.emoji ? benefit.emoji! : undefined,
@@ -586,15 +588,19 @@ export async function processCreatorTokenIssuerRemarkedEvent({
     }
   }
 
-  if (isSet(metadata!.whitelistApplicationNote)) {
-    token.whitelistApplicantNote = metadata!.whitelistApplicationNote || null
+  if (metadata!.whitelistApplicationNote) {
+    token.whitelistApplicantNote = metadata!.whitelistApplicationNote
   }
 
-  if (isSet(metadata!.whitelistApplicationApplyLink)) {
-    token.whitelistApplicantLink = metadata!.whitelistApplicationApplyLink || null
+  if (metadata!.whitelistApplicationApplyLink) {
+    token.whitelistApplicantLink = metadata!.whitelistApplicationApplyLink
   }
 
-  if (isSet(metadata!.avatarUri)) {
+  if (metadata!.trailerVideoId) {
+    token.trailerVideoId = metadata!.trailerVideoId!.toString()
+  }
+
+  if (metadata!.avatarUri) {
     token.avatar = metadata!.avatarUri
       ? new TokenAvatarUri({ avatarUri: metadata!.avatarUri })
       : null

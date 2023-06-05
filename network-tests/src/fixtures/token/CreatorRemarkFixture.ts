@@ -65,11 +65,10 @@ export class CreatorRemarkFixture extends StandardizedFixture {
     await Utils.until('waiting for creator token remark handle to be completed', async () => {
       qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
       assert.isNotNull(qToken)
-      return qToken!.description !== undefined
+      return qToken!.description !== null
     })
     assert.isNotNull(qToken!.benefits)
     const [benefit] = qToken!.benefits!
-    console.log('token: ----> ', qToken)
     assert.equal(qToken!.description, this.metadata.description)
     assert.equal(qToken!.trailerVideo!.id, this.metadata.trailerVideoId!.toString())
     assert.equal(benefit!.title, this.metadata.benefits![0].title)
