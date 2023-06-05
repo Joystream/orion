@@ -36,9 +36,10 @@ export class VideoRelevanceManager {
         WITH weighted_timestamp AS (
     SELECT 
         id,
-        (TIMESTAMP WITH TIME ZONE 'epoch' + ((extract(epoch from created_at)*${joystreamTimestampWeight} + COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*${ytTimestampWeight}) / ${
-        joystreamTimestampWeight + ytTimestampWeight
-      }) * INTERVAL '1 second') as wt
+        (
+          extract(epoch from created_at)*${joystreamTimestampWeight} +
+          COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*${ytTimestampWeight}
+        ) / ${joystreamTimestampWeight + ytTimestampWeight} as wtEpoch
     FROM 
         "video" 
         ${
@@ -53,7 +54,7 @@ export class VideoRelevanceManager {
         "video"
     SET
         "video_relevance" = ROUND(
-        (30 - (extract(epoch from now()) - extract(epoch from wt)) / (60 * 60 * 24)) * ${newnessWeight} +
+        (extract(epoch from now()) - wtEpoch) / (60 * 60 * 24) * ${newnessWeight * -1} +
         (views_num * ${viewsWeight}) +
         (comments_count * ${commentsWeight}) +
         (reactions_count * ${reactionsWeight}), 
