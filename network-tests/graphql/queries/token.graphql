@@ -1,3 +1,10 @@
+fragment MemberFields on Membership {
+  id 
+  handle
+  createdAt
+  controllerAccount
+}
+
 fragment TokenFields on Token {
   id
   createdAt
@@ -258,6 +265,16 @@ query getAmmTransactionById($id: String!) {
   }
 }
 
+query getMemberById($id: String!) {
+  membershipById(id: $id) {
+    ...MemberFields
+  }
+}
+subscription subMemberById($id: String!) {
+  membershipById(id: $id) {
+    ...MemberFields
+  }
+}
 subscription subTokenById($id: String!) {
   tokenById(id: $id) {
     ...TokenFields
