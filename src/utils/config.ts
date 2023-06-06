@@ -37,7 +37,7 @@ export const configVariables = {
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerIpTimeLimit]: numberType,
   [ConfigVariable.VideoRelevanceViewsTick]: numberType,
-  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number]>(),
+  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number, [number, number]]>(),
   [ConfigVariable.AppPrivateKey]: stringType,
 } as const
 
