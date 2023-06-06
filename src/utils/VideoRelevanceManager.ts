@@ -25,29 +25,45 @@ export class VideoRelevanceManager {
 
   async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {
     if (this.videosToUpdate.size || forceUpdateAll) {
-      const [newnessWeight, viewsWeight, commentsWeight, reactionsWeight] = await config.get(
-        ConfigVariable.RelevanceWeights,
-        em
-      )
+      const [
+        newnessWeight,
+        viewsWeight,
+        commentsWeight,
+        reactionsWeight,
+        [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
+      ] = await config.get(ConfigVariable.RelevanceWeights, em)
       await em.query(`
-        UPDATE "video"
-        SET
-          "video_relevance" = ROUND(
-          ((30 - (extract(epoch from now() - created_at) / ${NEWNESS_SECONDS_DIVIDER})) * ${newnessWeight}) +
-          (views_num * ${viewsWeight}) +
-          (
-            comments_count * ${commentsWeight} 
-          ) +
-          (
-            reactions_count * ${reactionsWeight} 
-          ), 2)
+        WITH weighted_timestamp AS (
+    SELECT 
+        id,
+        (
+          extract(epoch from created_at)*${joystreamTimestampWeight} +
+          COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*${ytTimestampWeight}
+        ) / ${joystreamTimestampWeight + ytTimestampWeight} as wtEpoch
+    FROM 
+        "video" 
         ${
           forceUpdateAll
             ? ''
             : `WHERE "id" IN (${[...this.videosToUpdate.values()]
                 .map((id) => `'${id}'`)
                 .join(', ')})`
-        }`)
+        }
+        )
+    UPDATE 
+        "video"
+    SET
+        "video_relevance" = ROUND(
+        (extract(epoch from now()) - wtEpoch) / (60 * 60 * 24) * ${newnessWeight * -1} +
+        (views_num * ${viewsWeight}) +
+        (comments_count * ${commentsWeight}) +
+        (reactions_count * ${reactionsWeight}), 
+            2)
+    FROM
+        weighted_timestamp
+    WHERE
+        "video".id = weighted_timestamp.id;
+        `)
       this.videosToUpdate.clear()
     }
   }

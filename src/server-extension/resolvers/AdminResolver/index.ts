@@ -59,7 +59,13 @@ export class AdminResolver {
     const em = await this.em()
     await config.set(
       ConfigVariable.RelevanceWeights,
-      [args.newnessWeight, args.viewsWeight, args.commentsWeight, args.reactionsWeight],
+      [
+        args.newnessWeight,
+        args.viewsWeight,
+        args.commentsWeight,
+        args.reactionsWeight,
+        [args.joysteamTimestampSubWeight, args.ytTimestampSubWeight],
+      ],
       em
     )
     await videoRelevanceManager.updateVideoRelevanceValue(em, true)
