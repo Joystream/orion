@@ -8,6 +8,7 @@ import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { TokenFieldsFragment } from '../../../graphql/generated/operations'
 import BN from 'bn.js'
+import { Maybe } from 'graphql/generated/schema'
 
 type PatronageRateDecreasedToEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageRateDecreasedTo'>
@@ -65,7 +66,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, newRate] = this.events[0].event.data
-    let qToken: TokenFieldsFragment | null = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
     await Utils.until('waiting for patronage rate to be updated in DB', async () => {
       qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
       assert.isNotNull(qToken)

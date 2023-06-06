@@ -7,7 +7,11 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
-import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
+import {
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
+import { Maybe } from 'graphql/generated/schema'
 
 type PatronageCreditClaimedEventDetails = EventDetails<
   EventType<'projectToken', 'PatronageCreditClaimed'>
@@ -66,8 +70,8 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, , memberId] = this.events[0].event.data
-    let qToken: TokenFieldsFragment | null = null
-    let qAccount: TokenAccountFieldsFragment | null = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('claim patronage handler finalized', async () => {
       qAccount = await this.query.retryQuery(() =>

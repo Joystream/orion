@@ -6,6 +6,9 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { PalletProjectTokenMerkleProof, PalletProjectTokenMerkleSide } from '@polkadot/types/lookup'
 import { assert } from 'chai'
+import { TokenAccountFields, TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
+import { Utils } from '../../utils'
 
 type MemberJoinedWhitelistEventDetails = EventDetails<
   EventType<'projectToken', 'MemberJoinedWhitelist'>
@@ -53,7 +56,7 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     const bloatBond = (await this.api.query.projectToken.bloatBond()).toBn()
     await this.api.treasuryTransferBalance(this.memberAddress, bloatBond)
     this.tokenAccountNumberPre = qToken!.accountsNum
-    this.proof = this.api.createType('PalletProjectTokenMerkleProof',) 
+    this.proof = this.api.createType('PalletProjectTokenMerkleProof')
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
@@ -64,14 +67,19 @@ export class JoinWhitelistFixture extends StandardizedFixture {
       tokenId,
       memberId
     )
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-    )
+
+    let qToken : Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount : Maybe<TokenAccountFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for joinwhitelst handler to be finalized', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await
+        this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      return !!qToken && !!qAccount
+    })
+
     const tokenAccountNumberPost = this.tokenAccountNumberPre! + 1
 
-    assert.isNotNull(qAccount)
-    assert.isNotNull(qToken)
     assert.equal(qToken!.accountsNum, tokenAccountNumberPost)
     assert.equal(qAccount!.totalAmount, nodeAccount.amount.toString())
     assert.equal(qAccount!.member.id, memberId.toString())

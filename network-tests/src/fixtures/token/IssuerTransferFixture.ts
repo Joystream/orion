@@ -10,6 +10,7 @@ import BN from 'bn.js'
 import { u64 } from '@polkadot/types/primitive'
 import { PalletProjectTokenPaymentWithVesting } from '@polkadot/types/lookup'
 import { TokenAccountFieldsFragment } from 'graphql/generated/operations'
+import { Maybe } from 'graphql/generated/schema'
 
 type IssuerTransferEventDetails = EventDetails<
   EventType<'projectToken', 'TokenAmountTransferredByIssuer'>
@@ -95,10 +96,9 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
 
     const accountId = tokenId.toString() + sourceMemberId.toString()
-    let qAccount: TokenAccountFieldsFragment | null = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
     await Utils.until('waiting for issuer tranfer handler to be completed', async () => {
-      qAccount = await this.query.retryQuery(() => this.query.getTokenAccountById(accountId))
-      assert.isNotNull(qAccount)
+      qAccount = await this.query.getTokenAccountById(accountId)
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.sourceAmountPre!)
     })

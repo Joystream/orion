@@ -1,37 +1,27 @@
 import { ApolloClient, DocumentNode, NormalizedCacheObject, OperationVariables } from '@apollo/client/core'
 import { extendDebug, Debugger } from './Debugger'
 import { Maybe } from './graphql/generated/schema'
-import { OperationDefinitionNode } from 'graphql'
-import { BLOCKTIME } from './consts'
-import { Utils } from './utils'
 import { TokenId } from './consts'
 import { u64 } from '@polkadot/types/primitive'
-
 import {
-  GetTokenById,
-  TokenFieldsFragment,
-  GetTokenAccountById,
-  TokenAccountFieldsFragment,
-  RevenueShareFieldsFragment,
-  RevenueShareParticipationFieldsFragment,
-  GetRevenueShareById,
-  GetVestingScheduleById,
-  VestingScheduleFieldsFragment,
-  GetSaleById,
-  SaleFieldsFragment,
-  VestedAccountFieldsFragment,
-  GetVestedAccountById,
-  AmmCurvFieldsFragment,
-  GetAmmById,
-  ChannelFieldsFragment,
-  GetChannelById,
-  GetRevenueShareParticipationById,
+  GetChannelByIdSubscription,
   AmmTranactionFieldsFragment,
   GetAmmTransactionById,
-} from '../graphql/generated/queries'
-import { useQuery, useSubscription } from '@apollo/client'
-import { GetMemberById } from 'graphql/generated/operations'
-import { Subscription } from 'graphql/generated/schema'
+  GetAmmById,
+  AmmCurvFieldsFragment,
+  GetAmmByIdSubscription,
+  GetVestedAccountByIdSubscription,
+  VestedAccountFieldsFragment,
+  GetSaleByIdSubscription,
+  GetSaleByIdSubscriptionVariables,
+  GetVestingScheduleById,
+  VestingScheduleFieldsFragment,
+  GetVestingScheduleByIdSubscription,
+  GetRevenueShareParticipationById,
+  RevenueShareParticipationFieldsFragment,
+  GetRevenueShareByIdSubscription, GetRevenueShareById, GetRevenueShareByIdSubscriptionVariables, GetRevenueShareParticipationByIdSubscription, GetRevenueShareParticipationByIdSubscriptionVariables, GetTokenAccountById, GetTokenById, RevenueShareFieldsFragment, TokenAccountFieldsFragment,
+  GetTokenAccountByIdSubscription, GetTokenByIdSubscription, GetTokenByIdSubscriptionVariables, TokenFieldsFragment, GetVestedAccountByIdSubscriptionVariables, GetVestingScheduleByIdSubscriptionVariables, GetSaleById, SaleFieldsFragment, GetVestedAccountById, GetAmmTransactionByIdSubscriptionVariables, GetAmmTransactionByIdSubscription, ChannelFieldsFragment, GetChannelByIdSubscriptionVariables
+} from '../graphql/generated/operations'
 
 export class OrionApi {
   private readonly apolloClient: ApolloClient<NormalizedCacheObject>
@@ -53,8 +43,8 @@ export class OrionApi {
    * @param variables - query parameters
    * @param resultKey - helps result parsing
    */
-  protected async uniqueEntitySubscription<
-    SubscriptionT extends { [k: string]: Maybe<Record<string, unknown>> | undefined },
+  public async uniqueEntitySubscription<
+    SubscriptionT extends { [k: string]: Maybe<Record<string, unknown>> },
     VariablesT extends Record<string, unknown>
   >(
     query: DocumentNode,
@@ -62,26 +52,28 @@ export class OrionApi {
     resultKey: keyof SubscriptionT
   ): Promise<SubscriptionT[keyof SubscriptionT] | null> {
     return new Promise((resolve) => {
-      this.apolloClient.subscribe<SubscriptionT, VariablesT>({ query, variables }).subscribe(({ data }) => {
+      this.apolloClient.subscribe({ query, variables }).subscribe(({ data }) => {
         resolve(data ? data[resultKey] : null)
       })
     })
   }
 
   public async retryQuery<QueryResultT>(
-    query: () => Promise<QueryResultT>
+    query: () => Promise<QueryResultT>,
+    attempts = 6,
+    timeout = 6000,
   ): Promise<QueryResultT | null> {
     const label = query.toString().replace(/^.*\.([A-za-z0-9]+\(.*\))$/g, '$1')
     const debug = this.tryDebug.extend(label)
-    let attempts = 0
     let result = null
 
     while (attempts < 6 && result === null) {
+      debug(`trying subscription: ${label}`)
       result = await query()
 
       if (result === null) {
         // Wait for 6 seconds before trying again
-        await new Promise((resolve) => setTimeout(resolve, 6000))
+        await new Promise((resolve) => setTimeout(resolve, timeout))
         attempts++
       }
     }
@@ -93,150 +85,52 @@ export class OrionApi {
     return result
   }
 
-  // Refactor to use graphql subscription (stateSubscription.lastCompleteBlock) instead
-  public async tryQueryWithTimeout<QueryResultT>(
-    query: () => Promise<QueryResultT>,
-    assertResultIsValid: (res: QueryResultT) => void,
-    retryTimeMs = BLOCKTIME * 9,
-    retries = 6
-  ): Promise<QueryResultT> {
-    const label = query.toString().replace(/^.*\.([A-za-z0-9]+\(.*\))$/g, '$1')
-    const debug = this.tryDebug.extend(label)
-    let retryCounter = 0
-    const retry = async (error: unknown) => {
-      if (retryCounter === retries) {
-        debug(`Max number of query retries (${retries}) reached!`)
-        throw error
-      }
-      debug(`Retrying query in ${retryTimeMs}ms...`)
-      ++retryCounter
-      await Utils.wait(retryTimeMs)
-    }
-    while (true) {
-      let result: QueryResultT
-      try {
-        result = await query()
-      } catch (e) {
-        debug(`Query node unreachable`)
-        await retry(e)
-        continue
-      }
-
-      try {
-        assertResultIsValid(result)
-      } catch (e) {
-        debug(
-          `Unexpected query result${e && (e as Error).message ? ` (${(e as Error).message})` : ''}`
-        )
-        await retry(e)
-        continue
-      }
-
-      return result
-    }
+  public async getTokenById(id: TokenId): Promise<Maybe<TokenFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetTokenByIdSubscription, GetTokenByIdSubscriptionVariables>(GetTokenById, { id: id.toString() }, 'tokenById')
   }
 
-  private debugQuery(query: DocumentNode, args: Record<string, unknown>): void {
-    const queryDef = query.definitions.find(
-      (d) => d.kind === 'OperationDefinition'
-    ) as OperationDefinitionNode
-    this.queryDebug(`${queryDef.name?.value}(${JSON.stringify(args)})`)
+  public async getTokenAccountById(id: string): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetTokenAccountByIdSubscription, GetTokenByIdSubscriptionVariables>(GetTokenAccountById, { id: id }, 'tokenAccountById')
   }
 
-  // Query entity by unique input
-  private async uniqueEntityQuery<
-    QueryT extends { [k: string]: Maybe<Record<string, unknown>> | undefined },
-    VariablesT extends Record<string, unknown>
-  >(
-    query: DocumentNode,
-    variables: VariablesT,
-    resultKey: keyof QueryT
-  ): Promise<Required<QueryT>[keyof QueryT] | null> {
-    this.debugQuery(query, variables)
-    return (
-      (await this.apolloClient.query<QueryT, VariablesT>({ query, variables })).data[
-      resultKey
-      ] || null
-    )
-  }
-
-  // Query entities by "non-unique" input and return first result
-  private async firstEntityQuery<
-    QueryT extends { [k: string]: any[] },
-    VariablesT extends Record<string, any>
-  >(
-    query: DocumentNode,
-    variables: VariablesT,
-    resultKey: keyof QueryT
-  ): Promise<QueryT[keyof QueryT][number] | null> {
-    this.debugQuery(query, variables)
-    const _qResult = (await this.apolloClient.query<QueryT, VariablesT>({ query, variables }))
-      .data[resultKey]
-    const qResult = Array.isArray(_qResult) ? _qResult[0] : _qResult
-    return qResult || null
-  }
-
-  // Query multiple entities
-  private async multipleEntitiesQuery<
-    QueryT extends { [k: string]: unknown[] },
-    VariablesT extends Record<string, unknown>
-  >(
-    query: DocumentNode,
-    variables: VariablesT,
-    resultKey: keyof QueryT
-  ): Promise<QueryT[keyof QueryT]> {
-    this.debugQuery(query, variables)
-    return (await this.apolloClient.query<QueryT, VariablesT>({ query, variables })).data[
-      resultKey
-    ]
-  }
-
-  public async getTokenById(id: TokenId): Promise<TokenFieldsFragment> {
-    return this.firstEntityQuery(GetTokenById, { id: id.toString() }, 'tokenById')
-  }
-
-  public async getTokenAccountById(id: string): Promise<TokenAccountFieldsFragment> {
-    return this.firstEntityQuery(GetTokenAccountById, { id: id }, 'tokenAccountById')
-  }
-
-  public async getRevenueShareById(id: string): Promise<RevenueShareFieldsFragment> {
-    return this.firstEntityQuery(GetRevenueShareById, { id }, 'revenueShareById')
+  public async getRevenueShareById(id: string): Promise<Maybe<RevenueShareFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetRevenueShareByIdSubscription, GetRevenueShareByIdSubscriptionVariables>(GetRevenueShareById, { id }, 'revenueShareById')
   }
 
   public async getRevenueShareParticpationById(
     shareId: string,
     tokenId: TokenId,
     memberId: u64
-  ): Promise<RevenueShareParticipationFieldsFragment> {
+  ): Promise<Maybe<RevenueShareParticipationFieldsFragment> | undefined> {
     const accountId = tokenId.toString() + memberId.toString()
-    return this.firstEntityQuery(
+    return this.uniqueEntitySubscription<GetRevenueShareParticipationByIdSubscription, GetRevenueShareParticipationByIdSubscriptionVariables>(
       GetRevenueShareParticipationById,
       { id: accountId + shareId.toString() },
       'revenueShareParticipationById'
     )
   }
 
-  public async getVestingSchedulById(id: string): Promise<VestingScheduleFieldsFragment> {
-    return this.firstEntityQuery(GetVestingScheduleById, { id }, 'vestingScheduleById')
+  public async getVestingSchedulById(id: string): Promise<Maybe<VestingScheduleFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetVestingScheduleByIdSubscription, GetVestingScheduleByIdSubscriptionVariables>(GetVestingScheduleById, { id }, 'vestingScheduleById')
   }
 
-  public async getSaleById(id: string): Promise<SaleFieldsFragment> {
-    return this.firstEntityQuery(GetSaleById, { id }, 'saleById')
+  public async getSaleById(id: string): Promise<Maybe<SaleFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetSaleByIdSubscription, GetSaleByIdSubscriptionVariables>(GetSaleById, { id }, 'saleById')
   }
 
-  public async getVestedAccountById(id: string): Promise<VestedAccountFieldsFragment> {
-    return this.firstEntityQuery(GetVestedAccountById, { id }, 'vestedAccountById')
+  public async getVestedAccountById(id: string): Promise<Maybe<VestedAccountFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetVestedAccountByIdSubscription, GetVestedAccountByIdSubscriptionVariables>(GetVestedAccountById, { id }, 'vestedAccountById')
   }
 
-  public async getAmmById(id: string): Promise<AmmCurvFieldsFragment> {
-    return this.firstEntityQuery(GetAmmById, { id }, 'ammCurveById')
+  public async getAmmById(id: string): Promise<Maybe<AmmCurvFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetAmmByIdSubscription, GetAmmTransactionByIdSubscriptionVariables>(GetAmmById, { id }, 'ammCurveById')
   }
 
-  public async getChannelById(id: number): Promise<ChannelFieldsFragment> {
-    return this.firstEntityQuery(GetChannelById, { id: id.toString() }, 'channelById')
+  public async getAmmTransactionById(id: string): Promise<Maybe<AmmTranactionFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetAmmTransactionByIdSubscription, GetAmmTransactionByIdSubscriptionVariables>(GetAmmTransactionById, { id }, 'ammTransactionById')
   }
 
-  public async getAmmTransactionById(id: string): Promise<AmmTranactionFieldsFragment> {
-    return this.firstEntityQuery(GetAmmTransactionById, { id }, 'ammTransactionById')
+  public async getChannelById(id: string): Promise<Maybe<ChannelFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<GetChannelByIdSubscription, GetChannelByIdSubscriptionVariables>(GetAmmTransactionById, { id }, 'channelById')
   }
 }

@@ -45,7 +45,7 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const qChannel = await this.query.retryQuery(() => this.query.getChannelById(this.channelId))
+    const qChannel = await this.query.retryQuery(() => this.query.getChannelById(this.channelId.toString()))
     assert.isNotNull(qChannel)
     const rewardAccount = qChannel!.rewardAccount
     await this.api.treasuryTransferBalance(rewardAccount, this.allocationAmount)

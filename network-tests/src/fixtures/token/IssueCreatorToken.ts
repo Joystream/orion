@@ -13,8 +13,8 @@ import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
-import { SubTokenById, TokenFieldsFragment, GetTokenById } from '../../../graphql/generated/operations'
-import { useQuery, useSubscription } from '@apollo/client'
+import { TokenFieldsFragment, GetTokenById, TokenAccountFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from 'src/graphql/generated/schema'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -66,24 +66,24 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       tokenId,
       { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },
     ] = this.events[0].event.data
-    let qToken: TokenFieldsFragment | null = null
-
-    await this.query.subTokenById(tokenId.toString())
-
-    // await Utils.until('waiting for issue token handler to be completed', async () => {
-    //   qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    //   return qToken !== null
-    // })
-
     const initialMembers = [...initialAllocation.keys()]
     const initialBalances = [...initialAllocation.values()].map((item) => item.amount)
-    const qAccounts = await Promise.all(
+
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccounts: (Maybe<TokenAccountFieldsFragment> | undefined)[] = []
+
+    await Utils.until('waiting for issue token handler to be finalize token creation', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken
+    })
+    await Utils.until('waiting for issue token handler to finalize accounts', async () => {
+     qAccounts = await Promise.all(
       initialMembers.map(async (memberId) => {
-        return await this.query.retryQuery(() =>
+        return await 
           this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-        )
-      })
-    )
+      }))
+      return qAccounts.every((qAccount) => !!qAccount)
+    })
 
     let totalSupply = new BN(0)
     initialAllocation.forEach((item) => {
