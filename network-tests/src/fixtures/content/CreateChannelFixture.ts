@@ -8,7 +8,7 @@ import {
   PalletContentChannelOwner,
   PalletContentChannelCreationParametersRecord,
 } from '@polkadot/types/lookup'
-import  {u64} from '@polkadot/types/primitive'
+import { u64 } from '@polkadot/types/primitive'
 
 type ChannelCreatedEventDetails = EventDetails<EventType<'content', 'ChannelCreated'>>
 
@@ -51,9 +51,8 @@ export class CreateChannelFixture extends StandardizedFixture {
   }
 
   public getChannelId(): u64 {
-    const [channelId, ] = this.events[0].event.data
+    const [channelId] = this.events[0].event.data
     return channelId
-
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

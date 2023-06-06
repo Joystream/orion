@@ -53,15 +53,15 @@ export class DeissueCreatorTokenFixture extends StandardizedFixture {
       tokenId,
     ] = this.events[0].event.data
 
-    let qToken: TokenFieldsFragment | null = null
-    await Utils.until('wait for deissue token handler effect to be written to the Store', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      assert.isNotNull(qToken)
-      return qToken!.deissued
-    })
+    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    // let qToken: TokenFieldsFragment | null = null
+    // await Utils.until('wait for deissue token handler effect to be written to the Store', async () => {
+    //   return qToken!.deissued
+    // })
 
     await super.runQueryNodeChecks()
 
+    assert.isNotNull(qToken)
     assert.equal(qToken!.deissued, true)
   }
 }

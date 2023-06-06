@@ -4,13 +4,10 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import {
-  PalletContentVideoCreationParametersRecord,
-} from '@polkadot/types/lookup'
+import { PalletContentVideoCreationParametersRecord } from '@polkadot/types/lookup'
 import { u64 } from '@polkadot/types/primitive'
 
 type VideoCreatedEventDetails = EventDetails<EventType<'content', 'VideoCreated'>>
-
 
 export class CreateVideoFixture extends StandardizedFixture {
   protected params: PalletContentVideoCreationParametersRecord
@@ -25,7 +22,7 @@ export class CreateVideoFixture extends StandardizedFixture {
     memberId: number,
     address: string,
     params: PalletContentVideoCreationParametersRecord,
-    channelId: number,
+    channelId: number
   ) {
     super(api, query)
     this.channelId = channelId
@@ -39,22 +36,20 @@ export class CreateVideoFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const actor = this.api.createType('PalletContentPermissionsContentActor', { Member: this.creatorMemberId })
+    const actor = this.api.createType('PalletContentPermissionsContentActor', {
+      Member: this.creatorMemberId,
+    })
     return [this.api.tx.content.createVideo(actor, this.channelId, this.params)]
   }
 
-  protected async getEventFromResult(
-    result: SubmittableResult
-  ): Promise<VideoCreatedEventDetails> {
+  protected async getEventFromResult(result: SubmittableResult): Promise<VideoCreatedEventDetails> {
     return this.api.getEventDetails(result, 'content', 'VideoCreated')
   }
 
   public getVideoId(): u64 {
-    const [,,videoId,] = this.events[0].event.data
+    const [, , videoId] = this.events[0].event.data
     return videoId
-
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
-

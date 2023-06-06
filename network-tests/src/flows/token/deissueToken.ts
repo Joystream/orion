@@ -10,7 +10,11 @@ import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { CreateChannelFixture } from '../../fixtures/content'
 import { getStorageBucketsAccordingToPolicy } from '../content/createChannel'
 
-export default async function deissueCreatorTokenFlow({ api, query, lock }: FlowProps): Promise<void> {
+export default async function deissueCreatorTokenFlow({
+  api,
+  query,
+  lock,
+}: FlowProps): Promise<void> {
   const debug = extendDebug('flow:deissue-creatorToken')
   debug('Started')
   api.enableDebugTxLogs()
@@ -85,4 +89,3 @@ export default async function deissueCreatorTokenFlow({ api, query, lock }: Flow
 
   debug('Done')
 }
-

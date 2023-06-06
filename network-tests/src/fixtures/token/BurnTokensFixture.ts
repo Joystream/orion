@@ -6,6 +6,8 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
+import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 import { Utils } from '../../utils'
 
 type TokensBurnedEventDetails = EventDetails<EventType<'projectToken', 'TokensBurned'>>
@@ -59,16 +61,20 @@ export class BurnTokensFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   // add a general key-map record to the runQueryNodeChecks as a parameter
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, amountBurned] = this.events[0].event.data
-    await Utils.wait(15000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-    )
+
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for burn token fixture to be finalized', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      return new BN(qAccount!.totalAmount).lt(this.accountAmountPre!)
+    })
 
     const supplyPost = this.supplyPre!.sub(amountBurned.toBn()).toString()
     const accountAmountPost = this.accountAmountPre!.sub(amountBurned.toBn()).toString()
