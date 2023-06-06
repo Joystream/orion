@@ -92,6 +92,9 @@ export class OffchainState {
     const { data }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
+      if (!values.length) {
+        continue
+      }
       this.logger.info(
         `${type === 'update' ? 'Updating' : 'Inserting'} ${values.length} ${entityName} entities...`
       )
@@ -99,7 +102,7 @@ export class OffchainState {
         // We're using "batched" updates, because otherwise the process becomes extremely slow
         const meta = em.connection.getMetadata(entityName)
         const batchSize = 1000
-        let batchNumber = 1
+        let batchNumber = 0
         const fieldNames = Object.keys(values[0])
         const fieldTypes = Object.fromEntries(
           fieldNames.map((fieldName) => {
@@ -110,10 +113,11 @@ export class OffchainState {
           })
         )
         while (values.length) {
-          ++batchNumber
           const batch = values.splice(0, batchSize)
           this.logger.info(
-            `Executing batch #${batchNumber} of ${batch.length} entities (${values.length} entities left)...`
+            `Executing batch #${++batchNumber} of ${batch.length} entities (${
+              values.length
+            } entities left)...`
           )
           let paramCounter = 1
           await em.query(
@@ -139,12 +143,13 @@ export class OffchainState {
         // For inserts we also use batches, but this is because otherwise the query may fail
         // if the number of entities is very large
         const batchSize = 1000
-        let batchNumber = 1
+        let batchNumber = 0
         while (values.length) {
-          ++batchNumber
           const batch = values.splice(0, batchSize)
           this.logger.info(
-            `Executing batch #${batchNumber} of ${batch.length} entities (${values.length} entities left)...`
+            `Executing batch #${++batchNumber} of ${batch.length} entities (${
+              values.length
+            } entities left)...`
           )
           await em.getRepository(entityName).insert(batch)
         }
