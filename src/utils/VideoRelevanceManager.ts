@@ -30,7 +30,7 @@ export class VideoRelevanceManager {
         viewsWeight,
         commentsWeight,
         reactionsWeight,
-        [joystreamTimestampWeight, ytTimestampWeight],
+        [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
       ] = await config.get(ConfigVariable.RelevanceWeights, em)
       await em.query(`
         WITH weighted_timestamp AS (
