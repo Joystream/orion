@@ -1,3 +1,47 @@
+# 2.3.0
+
+### Features:
+- **Change:**  The video relevance score formula has been updated. Now `Video.publishedBeforeJoystream` can be taken into account when calculating the value of the `newness` parameter. The new formula for `newness` is:
+    ```
+    -(dsPOJ * jcw + dsPBJ * ycw) / (jcw + ycw)
+
+    Where:
+    dsPOJ - days since published on Joystream (Video.createdAt)
+    jcw - joystream creation weight
+    dsPBJ - days since published before Joystream (Video.publishedBeforeJoystream)
+    ycw - YouTube creation weight
+    ```
+
+### Config values:
+- **Change:** `RELEVANCE_WEIGHTS` config value now has a new format:
+    ```diff
+    [
+        1, # newness weight,
+        0.03, # views weight
+        0.3, # comments weight
+        0.5, # reactions weight
+    +   [7,3] # [joystream creation weight, YouTube creation weight]
+    ]
+    ```
+    If the value of `[joystream creation weight, YouTube creation weight]` is not provided, it is set to `[7,3]` by default.
+
+### Schema/API changes:
+- **Change:** `setVideoWeights` operator mutation now accepts 2 new arguments: `joysteamTimestampSubWeight` and `ytTimestampSubWeight`
+
+### Mappings:
+- `videoRelevanceManager` is now used in `processVideoCreatedEvent` to calculate `videoRelevance` (to avoid code duplication)
+
+### DB Optimalizations:
+- Changes in `postgres.conf` to improve query execution time in current production deployments:
+    - Turn off JIT compilation which was usually uneffective
+    - Lower `random_page_cost` to `1.0`, as the database still fits into the memory
+    - Increase `shared_buffers` to `2GB` 
+- New indexes added to `db/migrations/2100000000000-Indexes.js` (`auction_type`, `member_metadata_avatar`, `owned_nft_auction`)
+
+### Fixes:
+- `scripts/generate-schema-file.sh` has been made executable w/o bash to avoid error during docker build
+- The issue w/ _Offchain State_ not being imported if the `export.json` contained empty `update` tables (an error was thrown in this case) has been fixed
+
 # 2.2.0
 
 ### Features:
