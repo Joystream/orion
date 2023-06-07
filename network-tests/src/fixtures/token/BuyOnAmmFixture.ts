@@ -64,8 +64,9 @@ export class BuyOnAmmFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
-    const qAccount = await
-      this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
+    const qAccount = await this.query.getTokenAccountById(
+      this.tokenId.toString() + this.memberId.toString()
+    )
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
     } else {
@@ -126,5 +127,5 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

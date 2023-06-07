@@ -65,4 +65,3 @@ jobs:
           RUNTIME: ${{ needs.get_shasum.outputs.shasum }}
         run: |
           network-tests/run-tests.sh
-

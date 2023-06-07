@@ -61,8 +61,9 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     const { tokensSource } = token.sale.unwrap()
     const saleId = tokenId.toString() + saleNonce.toString()
     let qSale = await this.query.getSaleById(saleId.toString())
-    const qFundsSource = await
-      this.query.getTokenAccountById(tokenId.toString() + tokensSource.toString())
+    const qFundsSource = await this.query.getTokenAccountById(
+      tokenId.toString() + tokensSource.toString()
+    )
 
     assert.isNotNull(qSale)
     assert.equal(qSale!.finalized, false)
@@ -98,5 +99,5 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     assert.equal(qFundsSource!.totalAmount, fundsSourceAmountPost.toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
