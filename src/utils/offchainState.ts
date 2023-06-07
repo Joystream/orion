@@ -15,7 +15,7 @@ const exportedStateMap = {
   NftFeaturingRequest: true,
   VideoHero: true,
   VideoFeaturedInCategory: true,
-  Channel: ['is_excluded', 'video_views_num'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
