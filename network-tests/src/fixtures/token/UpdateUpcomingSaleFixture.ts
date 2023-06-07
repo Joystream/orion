@@ -7,7 +7,7 @@ import { Api } from '../../Api'
 import { u32 } from '@polkadot/types/primitive'
 import { BN } from 'bn.js'
 import { assert } from 'chai'
-import { Utils } from '../../Utils'
+import { Utils } from '../../utils'
 import { SaleFieldsFragment } from '../../../graphql/generated/operations'
 import { Maybe } from '../../../graphql/generated/schema'
 
