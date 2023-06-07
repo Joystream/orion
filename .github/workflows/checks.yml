@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: Joystream/joystream
-          ref: ephesus
+          ref: crt_release # TODO: change to appropriate branch once CRT work is finalized
 
       - id: compute_shasum
         env:
@@ -54,6 +54,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Generate queries
+        run: |
+          cd network-tests
+          npm run codegen
 
       - name: run tests
         env:
