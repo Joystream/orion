@@ -31,8 +31,8 @@ jobs:
       - name: check out master repo
         uses: actions/checkout@v3
         with:
-          repository: Joystream/joystream
-          ref: crt_release # TODO: change to appropriate branch once CRT work is finalized
+          repository: ignazio-bovo/joystrea # TODO: change to appropriate branch once CRT work is finalizedm
+          ref: crt_release_fixes_for_orionv2
 
       - id: compute_shasum
         env:
