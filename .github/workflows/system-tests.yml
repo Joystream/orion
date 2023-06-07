@@ -22,22 +22,8 @@ jobs:
           export RUNTIME_CODE_SHASUM=`scripts/runtime-code-shasum.sh`
           echo "::set-output name=shasum::${RUNTIME_CODE_SHASUM}"
 
-  cleanup:
-    runs-on: ubuntu-latest
-    needs: run_tests
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: perform cleanup
-        run: |
-          rm -rf network-tests/data
-          docker-compose -f network-tests/docker-compose.node.yml down -v
-          docker-compose down -v
-          docker-compose -f archive/docker-compose.yml down -v
-
   tsc_checks:
     runs-on: ubuntu-latest
-    needs: basic_setup
     steps:
       - uses: actions/checkout@v2
 
@@ -48,7 +34,7 @@ jobs:
 
   run_tests:
     runs-on: ubuntu-latest
-    needs: [get_shasum, tc_checks]
+    needs: [get_shasum, tsc_checks]
     steps:
       - uses: actions/checkout@v2
 
@@ -65,3 +51,16 @@ jobs:
           RUNTIME: ${{ needs.get_shasum.outputs.shasum }}
         run: |
           network-tests/run-tests.sh
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: run_tests
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: perform cleanup
+        run: |
+          rm -rf network-tests/data
+          docker-compose -f network-tests/docker-compose.node.yml down -v
+          docker-compose down -v
+          docker-compose -f archive/docker-compose.yml down -v
