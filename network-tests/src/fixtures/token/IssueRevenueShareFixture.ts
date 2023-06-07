@@ -47,9 +47,8 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const qChannel = await this.query.retryQuery(() =>
+    const qChannel = await
       this.query.getChannelById(this.channelId.toString())
-    )
     assert.isNotNull(qChannel)
     const rewardAccount = qChannel!.rewardAccount
     await this.api.treasuryTransferBalance(rewardAccount, this.allocationAmount)
@@ -94,5 +93,5 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     assert.equal(qRevenueShare!.allocation, joyAllocation.toString())
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

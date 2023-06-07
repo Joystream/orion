@@ -174,7 +174,10 @@ export async function processAccountDustedByEvent({
     asV1000: [tokenId, dustedAccountId, , ,],
   },
 }: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
+  const token = await overlay.getTokenOrFail(tokenId)
   const account = await overlay.getTokenAccountOrFail(tokenId, dustedAccountId)
+
+  token.accountsNum -= 1
   account.deleted = true
 }
 
