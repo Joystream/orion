@@ -16,7 +16,6 @@ import {
   RevenueShareParticipation,
   Benefit,
   TokenAvatarUri,
-  TokenAvatarObject,
 } from '../../model'
 import {
   addVestingSchedule,
@@ -24,7 +23,6 @@ import {
   createAccount,
   revenueShareId,
   tokenAccountId,
-  tokenAmmId,
   tokenSaleId,
   ammIdForToken,
   VestingScheduleData,
