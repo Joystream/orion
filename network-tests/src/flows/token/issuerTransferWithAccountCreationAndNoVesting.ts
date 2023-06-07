@@ -50,7 +50,5 @@ export default async function issuerTransferWithAccountCreationAndNoVestingFlow(
   await issuerTransferFixture.preExecHook()
   await new FixtureRunner(issuerTransferFixture).runWithQueryNodeChecks()
 
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   api.setFirstHolder(firstHolderAddress, firstHolderMemberId)
-  unlockFirstHolderAccess()
 }

@@ -4,11 +4,12 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import { PalletProjectTokenAmmParams } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { TokenStatus } from '../../../graphql/generated/schema'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
+import { AmmCurvFieldsFragment, TokenFieldsFragment } from 'graphql/generated/operations'
+import { Maybe } from 'src/graphql/generated/schema'
 
 type AmmDeactivatedEventDetails = EventDetails<EventType<'projectToken', 'AmmDeactivated'>>
 
@@ -51,27 +52,38 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    assert.isNotNull(qToken)
+
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for token to be fetched', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken
+    })
+
     this.supplyPre = new BN(qToken!.totalSupply)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, burnedAmount] = this.events[0].event.data
-    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    await Utils.until('waiting for token to be saved', async ({ debug }) => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      return qToken!.status === TokenStatus.Idle
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAmm: Maybe<AmmCurvFieldsFragment> | undefined = null
+
+    await Utils.until('waiting for token to be fetched', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken && qToken.status === TokenStatus.Idle
     })
+
     const supplyPost = this.supplyPre!.sub(burnedAmount)
 
     assert.isNotNull(qToken)
     assert.equal(qToken!.totalSupply, supplyPost.toString())
 
     const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
-    const qAmm = await this.query.retryQuery(() => this.query.getAmmById(ammId))
-    assert.isNotNull(qAmm)
+    await Utils.until('waiting for token to be fetched', async () => {
+      qAmm = await this.query.getAmmById(ammId)
+      return !!qAmm
+    })
     assert.equal(qAmm!.finalized, true)
   }
 }

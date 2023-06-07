@@ -7,6 +7,8 @@ import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
+import { RevenueShareParticipationFieldsFragment } from '../../../graphql/generated/operations'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type UserParticipatedInSplitEventDetails = EventDetails<
   EventType<'projectToken', 'UserParticipatedInSplit'>
@@ -54,16 +56,22 @@ export class ParticipateInShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, stakedAmount, joyDividend] = this.events[0].event.data
-    Utils.wait(20000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qToken = await this.query.getTokenById(tokenId)
 
     assert.isNotNull(qToken)
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShareParticipation = await this.query.retryQuery(() =>
-      this.query.getRevenueShareParticpationById(revenueShareId, tokenId, memberId)
-    )
 
-    assert.isNotNull(qRevenueShareParticipation)
+    let qRevenueShareParticipation: Maybe<RevenueShareParticipationFieldsFragment> | undefined =
+      null
+    await Utils.until('waiting to fetch revenue share participation', async () => {
+      qRevenueShareParticipation = await this.query.getRevenueShareParticpationById(
+        revenueShareId,
+        tokenId,
+        memberId
+      )
+      return !!qRevenueShareParticipation
+    })
+
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())
     assert.equal(qRevenueShareParticipation!.earnings, joyDividend.toString())
     assert.equal(qRevenueShareParticipation!.stakedAmount, stakedAmount.toString())

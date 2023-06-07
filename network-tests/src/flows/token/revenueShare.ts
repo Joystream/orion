@@ -2,12 +2,9 @@ import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
 import { IssueRevenueShareFixture, ParticipateInShareFixture } from '../../fixtures/token'
-import { expect } from 'chai'
-import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
 import { ExitRevenueShareFixture } from '../../fixtures/token/ExitRevenueShareFixture'
 import { FinalizeRevenueShareFixture } from '../../fixtures/token/FinalizeRevenueShareFixture'
-import { DirectChannelPaymentFixture } from 'src/fixtures/content'
 
 export default async function revenueShareFlow({ api, query, lock }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:revenue-share')
@@ -17,13 +14,8 @@ export default async function revenueShareFlow({ api, query, lock }: FlowProps):
   const channelId = api.channel
   const tokenId = api.token
 
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
-
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderMemberId] = api.firstHolder
-  unlockFirstHolderAccess()
 
   // retrieve owner info
   debug('Issue revenue share')

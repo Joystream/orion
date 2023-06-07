@@ -7,6 +7,12 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
+import { Maybe } from 'graphql/generated/schema'
+import {
+  RevenueShareFieldsFragment,
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
 
 type RevenueShareLeftEventDetails = EventDetails<EventType<'projectToken', 'RevenueSplitLeft'>>
 
@@ -81,23 +87,25 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
-    Utils.wait(60000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    const qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + this.memberId.toString())
-    )
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+    const accountId = tokenId.toString() + memberId.toString()
+    await Utils.until('waiting for exit revenue split handler to be finalized', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await this.query.getTokenAccountById(accountId)
+      return !!qToken && !!qAccount
+    })
+
     const participantsNumPost = this.participantsNumPre! - 1
     const stakedAmountPost = this.stakedAmountPre!.sub(unstakedAmount.toBn())
 
-    assert.isNotNull(qToken)
-    assert.isNotNull(qAccount)
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareId)
-    )
-    assert.isNotNull(qRevenueShare)
-    // TODO re enable after subscription
-    // assert.equal(qRevenueShare!.participantsNum, participantsNumPost)
-    // assert.equal(qAccount!.stakedAmount, stakedAmountPost.toString())
+    let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
+    await Utils.until('waiting for revenue share to be fetched', async () => {
+      qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
+      return !!qRevenueShare
+    })
+    assert.equal(qRevenueShare!.participantsNum, participantsNumPost)
+    assert.equal(qAccount!.stakedAmount, stakedAmountPost.toString())
   }
 }

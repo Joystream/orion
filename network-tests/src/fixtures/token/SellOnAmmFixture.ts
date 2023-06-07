@@ -8,6 +8,11 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { AmmTransactionType } from '../../../graphql/generated/schema'
+import { Maybe } from '../../../graphql/generated/schema'
+import {
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
 
 type TokensSoldOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensSoldOnAmm'>>
 
@@ -41,7 +46,6 @@ export class SellOnAmmFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const deadline = null
     const slippageTolerance = null
     return [
       this.api.tx.projectToken.sellOnAmm(
@@ -62,41 +66,35 @@ export class SellOnAmmFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
     assert.notEqual(this.amount, new BN(0))
-    const qAccount = await this.query.retryQuery(() =>
+    const qAccount = await 
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
-    )
 
     assert.isNotNull(qAccount)
     this.amountPre = new BN(qAccount!.totalAmount)
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    const qToken = await this.query.getTokenById(_tokenId)
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
     const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
-    const qAmmCurve = await this.query.retryQuery(() => this.query.getAmmById(ammId))
+    const qAmmCurve = await this.query.getAmmById(ammId)
     this.burnedByAmmPre = new BN(qAmmCurve!.burnedByAmm)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, crtBurned, joysRecovered] = this.events[0].event.data
-    let qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-    let qAccount = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-    )
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
     await Utils.until('waiting for sell on amm effects to take place', async () => {
-      qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-      qAccount = await this.query.retryQuery(() =>
-        this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-      )
-      assert.isNotNull(qToken)
-      assert.isNotNull(qAccount)
+      qToken = await this.query.getTokenById(tokenId)
+      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
       const currSupply = new BN(qToken!.totalSupply)
       const currAmount = new BN(qAccount!.totalAmount)
       return currSupply < this.supplyPre! && currAmount < this.amountPre!
     })
 
     const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
-    const qAmmCurve = await this.query.retryQuery(() => this.query.getAmmById(ammId))
+    const qAmmCurve = await this.query.getAmmById(ammId)
     assert.isNotNull(qAmmCurve)
     const qTransaction = qAmmCurve!.transactions.find((qTx) => {
       return qTx !== null && qTx!.transactionType === AmmTransactionType.Sell

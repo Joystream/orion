@@ -1,4 +1,9 @@
-import { ApolloClient, DocumentNode, NormalizedCacheObject, OperationVariables } from '@apollo/client/core'
+import {
+  ApolloClient,
+  DocumentNode,
+  NormalizedCacheObject,
+  OperationVariables,
+} from '@apollo/client/core'
 import { extendDebug, Debugger } from './Debugger'
 import { Maybe } from './graphql/generated/schema'
 import { TokenId } from './consts'
@@ -19,8 +24,28 @@ import {
   GetVestingScheduleByIdSubscription,
   GetRevenueShareParticipationById,
   RevenueShareParticipationFieldsFragment,
-  GetRevenueShareByIdSubscription, GetRevenueShareById, GetRevenueShareByIdSubscriptionVariables, GetRevenueShareParticipationByIdSubscription, GetRevenueShareParticipationByIdSubscriptionVariables, GetTokenAccountById, GetTokenById, RevenueShareFieldsFragment, TokenAccountFieldsFragment,
-  GetTokenAccountByIdSubscription, GetTokenByIdSubscription, GetTokenByIdSubscriptionVariables, TokenFieldsFragment, GetVestedAccountByIdSubscriptionVariables, GetVestingScheduleByIdSubscriptionVariables, GetSaleById, SaleFieldsFragment, GetVestedAccountById, GetAmmTransactionByIdSubscriptionVariables, GetAmmTransactionByIdSubscription, ChannelFieldsFragment, GetChannelByIdSubscriptionVariables
+  GetRevenueShareByIdSubscription,
+  GetRevenueShareById,
+  GetRevenueShareByIdSubscriptionVariables,
+  GetRevenueShareParticipationByIdSubscription,
+  GetRevenueShareParticipationByIdSubscriptionVariables,
+  GetTokenAccountById,
+  GetTokenById,
+  RevenueShareFieldsFragment,
+  TokenAccountFieldsFragment,
+  GetTokenAccountByIdSubscription,
+  GetTokenByIdSubscription,
+  GetTokenByIdSubscriptionVariables,
+  TokenFieldsFragment,
+  GetVestedAccountByIdSubscriptionVariables,
+  GetVestingScheduleByIdSubscriptionVariables,
+  GetSaleById,
+  SaleFieldsFragment,
+  GetVestedAccountById,
+  GetAmmTransactionByIdSubscriptionVariables,
+  GetAmmTransactionByIdSubscription,
+  ChannelFieldsFragment,
+  GetChannelByIdSubscriptionVariables,
 } from '../graphql/generated/operations'
 
 export class OrionApi {
@@ -61,7 +86,7 @@ export class OrionApi {
   public async retryQuery<QueryResultT>(
     query: () => Promise<QueryResultT>,
     attempts = 6,
-    timeout = 6000,
+    timeout = 6000
   ): Promise<QueryResultT | null> {
     const label = query.toString().replace(/^.*\.([A-za-z0-9]+\(.*\))$/g, '$1')
     const debug = this.tryDebug.extend(label)
@@ -86,15 +111,28 @@ export class OrionApi {
   }
 
   public async getTokenById(id: TokenId): Promise<Maybe<TokenFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetTokenByIdSubscription, GetTokenByIdSubscriptionVariables>(GetTokenById, { id: id.toString() }, 'tokenById')
+    return this.uniqueEntitySubscription<
+      GetTokenByIdSubscription,
+      GetTokenByIdSubscriptionVariables
+    >(GetTokenById, { id: id.toString() }, 'tokenById')
   }
 
-  public async getTokenAccountById(id: string): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetTokenAccountByIdSubscription, GetTokenByIdSubscriptionVariables>(GetTokenAccountById, { id: id }, 'tokenAccountById')
+  public async getTokenAccountById(
+    id: string
+  ): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<
+      GetTokenAccountByIdSubscription,
+      GetTokenByIdSubscriptionVariables
+    >(GetTokenAccountById, { id: id }, 'tokenAccountById')
   }
 
-  public async getRevenueShareById(id: string): Promise<Maybe<RevenueShareFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetRevenueShareByIdSubscription, GetRevenueShareByIdSubscriptionVariables>(GetRevenueShareById, { id }, 'revenueShareById')
+  public async getRevenueShareById(
+    id: string
+  ): Promise<Maybe<RevenueShareFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<
+      GetRevenueShareByIdSubscription,
+      GetRevenueShareByIdSubscriptionVariables
+    >(GetRevenueShareById, { id }, 'revenueShareById')
   }
 
   public async getRevenueShareParticpationById(
@@ -103,34 +141,62 @@ export class OrionApi {
     memberId: u64
   ): Promise<Maybe<RevenueShareParticipationFieldsFragment> | undefined> {
     const accountId = tokenId.toString() + memberId.toString()
-    return this.uniqueEntitySubscription<GetRevenueShareParticipationByIdSubscription, GetRevenueShareParticipationByIdSubscriptionVariables>(
+    return this.uniqueEntitySubscription<
+      GetRevenueShareParticipationByIdSubscription,
+      GetRevenueShareParticipationByIdSubscriptionVariables
+    >(
       GetRevenueShareParticipationById,
       { id: accountId + shareId.toString() },
       'revenueShareParticipationById'
     )
   }
 
-  public async getVestingSchedulById(id: string): Promise<Maybe<VestingScheduleFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetVestingScheduleByIdSubscription, GetVestingScheduleByIdSubscriptionVariables>(GetVestingScheduleById, { id }, 'vestingScheduleById')
+  public async getVestingSchedulById(
+    id: string
+  ): Promise<Maybe<VestingScheduleFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<
+      GetVestingScheduleByIdSubscription,
+      GetVestingScheduleByIdSubscriptionVariables
+    >(GetVestingScheduleById, { id }, 'vestingScheduleById')
   }
 
   public async getSaleById(id: string): Promise<Maybe<SaleFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetSaleByIdSubscription, GetSaleByIdSubscriptionVariables>(GetSaleById, { id }, 'saleById')
+    return this.uniqueEntitySubscription<GetSaleByIdSubscription, GetSaleByIdSubscriptionVariables>(
+      GetSaleById,
+      { id },
+      'saleById'
+    )
   }
 
-  public async getVestedAccountById(id: string): Promise<Maybe<VestedAccountFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetVestedAccountByIdSubscription, GetVestedAccountByIdSubscriptionVariables>(GetVestedAccountById, { id }, 'vestedAccountById')
+  public async getVestedAccountById(
+    id: string
+  ): Promise<Maybe<VestedAccountFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<
+      GetVestedAccountByIdSubscription,
+      GetVestedAccountByIdSubscriptionVariables
+    >(GetVestedAccountById, { id }, 'vestedAccountById')
   }
 
   public async getAmmById(id: string): Promise<Maybe<AmmCurvFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetAmmByIdSubscription, GetAmmTransactionByIdSubscriptionVariables>(GetAmmById, { id }, 'ammCurveById')
+    return this.uniqueEntitySubscription<
+      GetAmmByIdSubscription,
+      GetAmmTransactionByIdSubscriptionVariables
+    >(GetAmmById, { id }, 'ammCurveById')
   }
 
-  public async getAmmTransactionById(id: string): Promise<Maybe<AmmTranactionFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetAmmTransactionByIdSubscription, GetAmmTransactionByIdSubscriptionVariables>(GetAmmTransactionById, { id }, 'ammTransactionById')
+  public async getAmmTransactionById(
+    id: string
+  ): Promise<Maybe<AmmTranactionFieldsFragment> | undefined> {
+    return this.uniqueEntitySubscription<
+      GetAmmTransactionByIdSubscription,
+      GetAmmTransactionByIdSubscriptionVariables
+    >(GetAmmTransactionById, { id }, 'ammTransactionById')
   }
 
   public async getChannelById(id: string): Promise<Maybe<ChannelFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<GetChannelByIdSubscription, GetChannelByIdSubscriptionVariables>(GetAmmTransactionById, { id }, 'channelById')
+    return this.uniqueEntitySubscription<
+      GetChannelByIdSubscription,
+      GetChannelByIdSubscriptionVariables
+    >(GetAmmTransactionById, { id }, 'channelById')
   }
 }
