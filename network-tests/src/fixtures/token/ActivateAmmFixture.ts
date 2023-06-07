@@ -54,7 +54,7 @@ export class ActivateAmmFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qToken = await this.query.getTokenById(tokenId)
     assert.isNotNull(qToken)
     assert.equal(qToken!.status, TokenStatus.Idle, 'preExecHook: token.status assertion')
   }
@@ -72,7 +72,7 @@ export class ActivateAmmFixture extends StandardizedFixture {
     const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
     await Utils.until('waiting for token to be saved', async () => {
       qAmm = await this.query.getAmmById(ammId)
-      return !!qAmm 
+      return !!qAmm
     })
 
     assert.equal(qToken!.status, TokenStatus.Market)

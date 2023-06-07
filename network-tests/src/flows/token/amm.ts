@@ -21,13 +21,9 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   const tokenId = api.token
 
   // retrieve owner info
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
 
-  const unlockFirstHolderAccess = await lock(Resource.FirstHolder)
   const [firstHolderAddress, firstHolderId] = api.firstHolder
-  unlockFirstHolderAccess()
 
   const newHolderAddress = (await api.createKeyPairs(1)).map(({ key }) => key.address)[0]
   const buyMembershipsFixture = new BuyMembershipHappyCaseFixture(api, query, [newHolderAddress])

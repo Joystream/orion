@@ -13,7 +13,11 @@ import { TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
-import { TokenFieldsFragment, GetTokenById, TokenAccountFieldsFragment } from '../../../graphql/generated/operations'
+import {
+  TokenFieldsFragment,
+  GetTokenById,
+  TokenAccountFieldsFragment,
+} from '../../../graphql/generated/operations'
 import { Maybe } from 'src/graphql/generated/schema'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
@@ -41,7 +45,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
   }
 
   public getTokenId(): u64 {
-    const [tokenId,] = this.events[0].event.data
+    const [tokenId] = this.events[0].event.data
     return tokenId
   }
 
@@ -59,7 +63,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [
@@ -77,11 +81,11 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       return !!qToken
     })
     await Utils.until('waiting for issue token handler to finalize accounts', async () => {
-     qAccounts = await Promise.all(
-      initialMembers.map(async (memberId) => {
-        return await 
-          this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-      }))
+      qAccounts = await Promise.all(
+        initialMembers.map(async (memberId) => {
+          return await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+        })
+      )
       return qAccounts.every((qAccount) => !!qAccount)
     })
 

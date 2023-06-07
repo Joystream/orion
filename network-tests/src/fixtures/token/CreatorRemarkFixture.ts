@@ -5,14 +5,10 @@ import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
-import {
-  PalletContentPermissionsContentActor,
-  PalletProjectTokenTokenIssuanceParameters,
-} from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { TokenFieldsFragment } from '../../../graphql/generated/operations'
-import { Maybe } from 'graphql/generated/schema'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type CreatorRemarkEventDetails = EventDetails<EventType<'content', 'CreatorTokenIssuerRemarked'>>
 

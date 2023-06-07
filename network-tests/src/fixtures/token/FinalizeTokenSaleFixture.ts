@@ -7,6 +7,11 @@ import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { Utils } from '../../utils'
+import { Maybe } from '../../../graphql/generated/schema'
+import {
+  SaleFieldsFragment,
+  TokenAccountFieldsFragment,
+} from '../../../graphql/generated/operations'
 
 type TokenSaleFinalizedEventDetails = EventDetails<EventType<'projectToken', 'TokenSaleFinalized'>>
 
@@ -55,10 +60,9 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     const saleNonce = token.nextSaleId.subn(1)
     const { tokensSource } = token.sale.unwrap()
     const saleId = tokenId.toString() + saleNonce.toString()
-    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
-    const qFundsSource = await this.query.retryQuery(() =>
+    let qSale = await this.query.getSaleById(saleId.toString())
+    const qFundsSource = await
       this.query.getTokenAccountById(tokenId.toString() + tokensSource.toString())
-    )
 
     assert.isNotNull(qSale)
     assert.equal(qSale!.finalized, false)
@@ -67,7 +71,7 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     this.fundsSourceAmountPre = new BN(qFundsSource!.totalAmount)
 
     await Utils.until('waiting for the sale to end', async ({ debug }) => {
-      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+      qSale = await this.query.getSaleById(saleId.toString())
       let endBlock = qSale!.endsAt
       const currentBlock = (await this.api.getBestBlock()).toNumber()
       return endBlock <= currentBlock
@@ -79,18 +83,12 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAmountPost = this.fundsSourceAmountPre!.add(quantityLeft)
 
-    let qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId))
-    let qFundsSource = await this.query.retryQuery(() =>
-      this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
-    )
-    await Utils.until('waiting for the sale to end', async () => {
-      qFundsSource = await this.query.retryQuery(() =>
-        this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
-      )
-      qSale = await this.query.retryQuery(() => this.query.getSaleById(saleId.toString()))
+    let qSale: Maybe<SaleFieldsFragment> | undefined = null
+    let qFundsSource: Maybe<TokenAccountFieldsFragment> | undefined = null
 
-      assert.isNotNull(qFundsSource)
-      assert.isNotNull(qSale)
+    await Utils.until('waiting for the sale to end', async () => {
+      qSale = await this.query.getSaleById(saleId.toString())
+      qFundsSource = await this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
 
       const currFundsSourceAmount = new BN(qFundsSource!.totalAmount)
       return qSale!.finalized && currFundsSourceAmount > this.fundsSourceAmountPre!
@@ -100,5 +98,5 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     assert.equal(qFundsSource!.totalAmount, fundsSourceAmountPost.toString())
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 }

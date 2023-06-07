@@ -6,6 +6,8 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { Utils } from '../../utils'
 import { assert } from 'chai'
+import { Maybe } from 'graphql/generated/schema'
+import { RevenueShareFieldsFragment, TokenFieldsFragment } from 'graphql/generated/operations'
 
 type RevenueShareFinalizedEventDetails = EventDetails<
   EventType<'projectToken', 'RevenueSplitFinalized'>
@@ -64,16 +66,18 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId] = this.events[0].event.data
-    Utils.wait(130000)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
-
-    assert.isNotNull(qToken)
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+    let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
+    await Utils.until('waiting for for token to be fetched', async () => {
+      qToken = await this.query.getTokenById(tokenId)
+      return !!qToken
+    })
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareId)
-    )
-    assert.isNotNull(qRevenueShare)
-    // assert.equal(qRevenueShare!.finalized, true)
+    await Utils.until('waiting for revenue share to be fetched', async () => {
+      qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
+      return !!qRevenueShare
+    })
+    assert.equal(qRevenueShare!.finalized, true)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

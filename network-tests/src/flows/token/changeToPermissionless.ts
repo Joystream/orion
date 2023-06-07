@@ -8,7 +8,6 @@ import { ChangeToPermissionlessFixture } from '../../fixtures/token/ChangeToPerm
 export default async function changeToPermissionlessFlow({
   api,
   query,
-  lock,
 }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:change to Permissionless')
   debug('Started')
@@ -17,9 +16,7 @@ export default async function changeToPermissionlessFlow({
   const channelId = api.channel
 
   // retrieve owner info
-  const unlockCreatorAccess = await lock(Resource.Creator)
   const [creatorAddress, creatorMemberId] = api.creator
-  unlockCreatorAccess()
 
   const changeToPerissionlessFixture = new ChangeToPermissionlessFixture(
     api,

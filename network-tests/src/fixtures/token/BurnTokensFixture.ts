@@ -6,7 +6,10 @@ import { OrionApi } from '../../OrionApi'
 import { Api } from '../../Api'
 import { assert } from 'chai'
 import BN from 'bn.js'
-import { TokenAccountFieldsFragment, TokenFieldsFragment } from '../../../graphql/generated/operations'
+import {
+  TokenAccountFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
 import { Maybe } from '../../../graphql/generated/schema'
 import { Utils } from '../../utils'
 
@@ -38,10 +41,9 @@ export class BurnTokensFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
-    const qAccount = await this.query.retryQuery(() =>
+    const qToken = await this.query.getTokenById(_tokenId)
+    const qAccount = await 
       this.query.getTokenAccountById(this.tokenId.toString() + this.fromMemberId.toString())
-    )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
 
@@ -61,7 +63,7 @@ export class BurnTokensFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   // add a general key-map record to the runQueryNodeChecks as a parameter
   public async runQueryNodeChecks(): Promise<void> {

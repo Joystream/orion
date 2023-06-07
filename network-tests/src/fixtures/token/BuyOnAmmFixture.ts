@@ -8,7 +8,10 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { AmmTransactionType } from '../../../graphql/generated/schema'
-import { AmmTranactionFieldsFragment, TokenFieldsFragment, TokenAccountFieldsFragment } from '../../../graphql/generated/operations'
+import {
+  TokenFieldsFragment,
+  TokenAccountFieldsFragment,
+} from '../../../graphql/generated/operations'
 import { Maybe } from '../../../graphql/generated/schema'
 
 type TokensBoughtOnAmmEventDetails = EventDetails<EventType<'projectToken', 'TokensBoughtOnAmm'>>
@@ -61,16 +64,15 @@ export class BuyOnAmmFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
-    const qAccount = await this.query.retryQuery(() =>
+    const qAccount = await
       this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
-    )
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
     } else {
       this.amountPre = new BN(0)
     }
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
+    const qToken = await this.query.getTokenById(_tokenId)
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
   }
@@ -84,9 +86,13 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     await Utils.until('waiting for buy on amm effects to take place', async () => {
       qToken = await this.query.getTokenById(tokenId)
       qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-      const currSupply = new BN(qToken!.totalSupply)
-      const currAmount = new BN(qAccount!.totalAmount)
-      return currSupply > this.supplyPre! && currAmount > this.amountPre!
+      if (!!qAccount) {
+        const currSupply = new BN(qToken!.totalSupply)
+        const currAmount = new BN(qAccount!.totalAmount)
+        return currSupply > this.supplyPre! && currAmount > this.amountPre!
+      } else {
+        return false
+      }
     })
 
     const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
