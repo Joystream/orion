@@ -42,8 +42,9 @@ export class BurnTokensFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.getTokenById(_tokenId)
-    const qAccount = await 
-      this.query.getTokenAccountById(this.tokenId.toString() + this.fromMemberId.toString())
+    const qAccount = await this.query.getTokenAccountById(
+      this.tokenId.toString() + this.fromMemberId.toString()
+    )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
 

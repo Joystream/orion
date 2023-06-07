@@ -66,8 +66,9 @@ export class SellOnAmmFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
     assert.notEqual(this.amount, new BN(0))
-    const qAccount = await 
-      this.query.getTokenAccountById(this.tokenId.toString() + this.memberId.toString())
+    const qAccount = await this.query.getTokenAccountById(
+      this.tokenId.toString() + this.memberId.toString()
+    )
 
     assert.isNotNull(qAccount)
     this.amountPre = new BN(qAccount!.totalAmount)
