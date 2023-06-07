@@ -24,7 +24,7 @@ jobs:
 
   cleanup:
     runs-on: ubuntu-latest
-    needs: basic_setup
+    needs: run_tests
     steps:
       - uses: actions/checkout@v2
 
@@ -48,7 +48,7 @@ jobs:
 
   run_tests:
     runs-on: ubuntu-latest
-    needs: get_shasum
+    needs: [get_shasum, tc_checks]
     steps:
       - uses: actions/checkout@v2
 
