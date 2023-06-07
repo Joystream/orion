@@ -29,11 +29,11 @@ jobs:
       use_artifact: ${{ steps.compute_shasum.outputs.shasum }}-joystream-node-docker-image.tar.gz
       runtime: ${{ steps.compute_shasum.outputs.shasum }}
     steps:
-      - name: check out master repo
+      - name: check out relevant repo
         uses: actions/checkout@v3
         with:
           repository: ignazio-bovo/joystream
-          ref: crt_release
+          ref: crt_release_fixes_for_orionv2
 
       - name: setup node
         uses: actions/setup-node@v3
