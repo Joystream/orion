@@ -1,7 +1,7 @@
 name: 'System Tests'
 on:
   workflow_run:
-    workflows: ['checks']
+    workflows: ['Checks']
     types:
       - completed
 
