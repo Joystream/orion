@@ -47,17 +47,15 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(_tokenId))
-    const qAccount = await this.query.retryQuery(() =>
+    const qToken = await this.query.getTokenById(_tokenId)
+    const qAccount = await
       this.query.getTokenAccountById(_tokenId.toString() + this.memberId.toString())
-    )
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
     const [{ id: revenueShareId }] = qToken!.revenueShare
-    const qRevenueShare = await this.query.retryQuery(() =>
+    const qRevenueShare = await
       this.query.getRevenueShareById(revenueShareId)
-    )
     assert.isNotNull(qRevenueShare)
 
     this.participantsNumPre = qRevenueShare!.participantsNum
@@ -66,9 +64,8 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
       'waiting for revenue share to end',
       async () => {
         const block = await this.api.getBestBlock()
-        const qRev = await this.query.retryQuery(() =>
+        const qRev = await
           this.query.getRevenueShareById(revenueShareId)
-        )
         const end = new BN(qRev!.endsAt)
         return end.lte(block)
       },
@@ -83,7 +80,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'RevenueSplitLeft')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
