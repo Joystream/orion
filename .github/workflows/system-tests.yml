@@ -1,5 +1,9 @@
 name: 'System Tests'
-on: [push, pull_request]
+on:
+  workflow_run:
+    workflows: ['checks']
+    types:
+      - completed
 
 jobs:
   get_shasum:
