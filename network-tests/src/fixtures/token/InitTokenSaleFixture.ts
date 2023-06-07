@@ -8,7 +8,7 @@ import { PalletProjectTokenTokenSaleParams } from '@polkadot/types/lookup'
 import { assert } from 'chai'
 import BN from 'bn.js'
 import { TokenStatus } from '../../../graphql/generated/schema'
-import { Utils } from '../../Utils'
+import { Utils } from '../../utils'
 import { Maybe } from '../../../graphql/generated/schema'
 import {
   SaleFieldsFragment,
