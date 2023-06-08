@@ -11,12 +11,12 @@ jobs:
     - name: Build Docker image
       run: make build-docker
     - name: Save Docker image
-      run: docker save joystream/orion:latest | gzip > orion-{{ github.sha }}.tar.gz
+      run: docker save joystream/orion:latest | gzip > orion-${{ github.sha }}.tar.gz
     - name: Upload Docker image
       uses: actions/upload-artifact@v3
       with:
         name: joystream-orion-docker
-        path: orion-{{ github.sha }}.tar.gz
+        path: orion-${{ github.sha }}.tar.gz
     - name: Trigger tests
       uses: peter-evans/repository-dispatch@v2
       with:
