@@ -1,0 +1,29 @@
+name: External integration tests
+
+on:
+  push:
+
+jobs:
+  trigger-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Docker image
+      run: make build-docker
+    - name: Save Docker image
+      run: docker save joystream/orion:latest | gzip > orion-{{ github.sha }}.tar.gz
+    - name: Upload Docker image
+      uses: actions/upload-artifact@v3
+      with:
+        name: joystream-orion-docker
+        path: orion-{{ github.sha }}.tar.gz
+    - name: Trigger tests
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.TIGGER_TESTS_TOKEN }}
+        repository: Lezek123/substrate-runtime-joystream
+        event-type: run-network-tests
+        client-payload: > 
+          {
+            "sha": "${{ github.sha }}"
+          }
