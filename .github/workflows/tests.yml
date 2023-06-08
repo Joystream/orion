@@ -28,3 +28,10 @@ jobs:
             {
               "orion_sha": "${{ github.sha }}"
             }
+      - name: Set pending status
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/${{ github.repository }}/statuses/${{ github.sha }}
+          state: pending
+          description: Integration tests result
+          context: integration-tests
