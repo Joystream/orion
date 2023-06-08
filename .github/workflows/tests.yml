@@ -20,7 +20,7 @@ jobs:
     - name: Trigger tests
       uses: peter-evans/repository-dispatch@v2
       with:
-        token: ${{ secrets.TIGGER_TESTS_TOKEN }}
+        token: ${{ secrets.TRIGGER_TESTS_TOKEN }}
         repository: Lezek123/substrate-runtime-joystream
         event-type: run-network-tests
         client-payload: > 
