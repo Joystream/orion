@@ -1,6 +1,8 @@
+import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
 import { Token, TokenAccount, VestedAccount, VestingSchedule } from '../../model'
-import { VestingScheduleParams } from '../../types/v1000'
+import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
+import { Block } from '../../types/support'
 
 export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
   return tokenId.toString() + memberId.toString()
@@ -57,19 +59,11 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
   return tokenId.toString() + ammNonce.toString()
 }
 
-export function ammIdForToken(token: Flat<Token>): string {
-  const _ammNonce = token.ammNonce - 1
-  return tokenAmmId(BigInt(token.id), _ammNonce)
-}
 
 export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
   return tokenId.toString() + revenueNonce.toString()
 }
 
-export function issuedRevenueShareForToken(token: Flat<Token>): string {
-  const _revId = token.revenueShareNonce - 1
-  return revenueShareId(BigInt(token.id), _revId)
-}
 
 export async function burnFromVesting(
   overlay: EntityManagerOverlay,
@@ -84,9 +78,9 @@ export async function burnFromVesting(
     if (tallyBurnedAmount === BigInt(0)) {
       return
     }
-    if (vesting.amount <= tallyBurnedAmount) {
+    if (vesting.totalVestingAmount <= tallyBurnedAmount) {
       await removeVesting(overlay, vesting.id)
-      tallyBurnedAmount -= vesting.amount
+      tallyBurnedAmount -= vesting.totalVestingAmount
     }
   }
 }
@@ -96,7 +90,8 @@ export function addVestingSchedule(
   vestingParams: VestingScheduleParams,
   blockHeight: number,
   tokenId: bigint,
-  memberId: bigint
+  memberId: bigint,
+  amount: bigint
 ) {
   const vestingData = new VestingScheduleData(vestingParams, blockHeight)
 
@@ -106,12 +101,14 @@ export function addVestingSchedule(
     cliffBlock: vestingData.cliffBlock(),
     vestingDurationBlocks: vestingData.duration(),
     cliffPercent: vestingData.cliffPercent(),
+    cliffDurationBlocks: vestingData.cliffDuration(),
   })
 
   overlay.getRepository(VestedAccount).new({
     id: tokenAccountId(tokenId, memberId) + vestingData.id(),
     accountId: tokenAccountId(tokenId, memberId),
     vestingId: vestingData.id(),
+    totalVestingAmount: amount,
   })
 }
 
@@ -120,20 +117,64 @@ export function createAccount(
   token: Flat<Token>,
   memberId: bigint,
   allocationAmount: bigint,
-  whitelisted?: boolean
-) {
-  overlay.getRepository(TokenAccount).new({
+): Flat<TokenAccount> {
+  const newAccount = overlay.getRepository(TokenAccount).new({
     tokenId: token.id,
     memberId: memberId.toString(),
     id: token.id + memberId.toString(),
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
-    whitelisted,
     deleted: false,
   })
   token.accountsNum += 1
+  return newAccount
 }
 
-export function ammId(token: Flat<Token>): string {
-  return token.id + token.ammNonce.toString()
+export async function getTokenAccountByMemberByTokenOrFail(overlay: EntityManagerOverlay,
+  memberId: bigint, tokenId: bigint): Promise<Flat<TokenAccount>> {
+  const results = (await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString()))
+    .filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+  if (results.length === 0) {
+    criticalError("Token account not found")
+  }
+  return results[0]
+}
+
+export async function processValidatedTransfers(
+  overlay: EntityManagerOverlay,
+  token: Flat<Token>,
+  validatedTransfers: [Validated, ValidatedPayment][],
+  blockHeight: number
+): Promise<void> {
+  const tokenId = BigInt(token.id)
+  for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
+    if (validatedMemberId.__kind === 'Existing') {
+      const destinationAccount = await getTokenAccountByMemberByTokenOrFail(
+        overlay,
+        validatedMemberId.value,
+        tokenId,
+      )
+      destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
+    } else {
+      const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+      createAccount(
+        overlay,
+        token,
+        validatedMemberId.value,
+        validatedPaymentWithVesting.payment.amount
+      )
+    }
+
+    if (validatedPaymentWithVesting.payment.vestingSchedule) {
+      addVestingSchedule(
+        overlay,
+        validatedPaymentWithVesting.payment.vestingSchedule,
+        blockHeight,
+        tokenId,
+        validatedMemberId.value,
+        validatedPaymentWithVesting.payment.amount
+      )
+    }
+  }
+
 }
