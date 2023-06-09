@@ -25,6 +25,7 @@ jobs:
             if [[ "$CONCLUSION" == "null" ]]
             then
               echo "Waiting for build-docker-image workflow to finish..."
+              sleep 30
             fi
           done
           if [[ "$CONCLUSION" != "success" ]]
