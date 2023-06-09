@@ -6241,6 +6241,10 @@ export type Channel = BaseGraphQlObject & {
   bannedMembers: Array<Membership>
   channelNftCollectors: Array<ChannelNftCollectors>
   channelStateBloatBond: Scalars['BigInt']
+  channelfundswithdrawneventchannel?: Maybe<Array<ChannelFundsWithdrawnEvent>>
+  channelpaymentmadeeventpayeeChannel?: Maybe<Array<ChannelPaymentMadeEvent>>
+  channelrewardclaimedandwithdrawneventchannel?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEvent>>
+  claimedRewards: Array<ChannelRewardClaimedEvent>
   collaborators: Array<Collaborator>
   commentcreatedeventvideoChannel?: Maybe<Array<CommentCreatedEvent>>
   commentdeletedeventvideoChannel?: Maybe<Array<CommentDeletedEvent>>
@@ -6253,6 +6257,7 @@ export type Channel = BaseGraphQlObject & {
   createdAt: Scalars['DateTime']
   createdById: Scalars['ID']
   createdInBlock: Scalars['Int']
+  cumulativeRewardClaimed?: Maybe<Scalars['BigInt']>
   deletedAt?: Maybe<Scalars['DateTime']>
   deletedById?: Maybe<Scalars['ID']>
   description?: Maybe<Scalars['String']>
@@ -6435,6 +6440,7 @@ export type ChannelCreateInput = {
   channelStateBloatBond: Scalars['String']
   coverPhoto?: Maybe<Scalars['ID']>
   createdInBlock: Scalars['Float']
+  cumulativeRewardClaimed?: Maybe<Scalars['String']>
   description?: Maybe<Scalars['String']>
   entryApp?: Maybe<Scalars['ID']>
   isCensored: Scalars['Boolean']
@@ -6593,6 +6599,150 @@ export type ChannelFollowsInfo = {
   id: Scalars['ID']
 }
 
+export type ChannelFundsWithdrawnEvent = BaseGraphQlObject &
+  Event & {
+    account?: Maybe<Scalars['String']>
+    actor: ContentActor
+    amount: Scalars['BigInt']
+    channel: Channel
+    channelId: Scalars['String']
+    createdAt: Scalars['DateTime']
+    createdById: Scalars['ID']
+    deletedAt?: Maybe<Scalars['DateTime']>
+    deletedById?: Maybe<Scalars['ID']>
+    id: Scalars['ID']
+    inBlock: Scalars['Int']
+    inExtrinsic?: Maybe<Scalars['String']>
+    indexInBlock: Scalars['Int']
+    network: Network
+    type?: Maybe<EventTypeOptions>
+    updatedAt?: Maybe<Scalars['DateTime']>
+    updatedById?: Maybe<Scalars['ID']>
+    version: Scalars['Int']
+  }
+
+export type ChannelFundsWithdrawnEventConnection = {
+  edges: Array<ChannelFundsWithdrawnEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type ChannelFundsWithdrawnEventCreateInput = {
+  account?: Maybe<Scalars['String']>
+  actor: Scalars['JSONObject']
+  amount: Scalars['String']
+  channel: Scalars['ID']
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  network: Network
+}
+
+export type ChannelFundsWithdrawnEventEdge = {
+  cursor: Scalars['String']
+  node: ChannelFundsWithdrawnEvent
+}
+
+export enum ChannelFundsWithdrawnEventOrderByInput {
+  AccountAsc = 'account_ASC',
+  AccountDesc = 'account_DESC',
+  AmountAsc = 'amount_ASC',
+  AmountDesc = 'amount_DESC',
+  ChannelAsc = 'channel_ASC',
+  ChannelDesc = 'channel_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type ChannelFundsWithdrawnEventUpdateInput = {
+  account?: Maybe<Scalars['String']>
+  actor?: Maybe<Scalars['JSONObject']>
+  amount?: Maybe<Scalars['String']>
+  channel?: Maybe<Scalars['ID']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  network?: Maybe<Network>
+}
+
+export type ChannelFundsWithdrawnEventWhereInput = {
+  AND?: Maybe<Array<ChannelFundsWithdrawnEventWhereInput>>
+  NOT?: Maybe<Array<ChannelFundsWithdrawnEventWhereInput>>
+  OR?: Maybe<Array<ChannelFundsWithdrawnEventWhereInput>>
+  account_contains?: Maybe<Scalars['String']>
+  account_endsWith?: Maybe<Scalars['String']>
+  account_eq?: Maybe<Scalars['String']>
+  account_in?: Maybe<Array<Scalars['String']>>
+  account_startsWith?: Maybe<Scalars['String']>
+  actor_json?: Maybe<Scalars['JSONObject']>
+  amount_eq?: Maybe<Scalars['BigInt']>
+  amount_gt?: Maybe<Scalars['BigInt']>
+  amount_gte?: Maybe<Scalars['BigInt']>
+  amount_in?: Maybe<Array<Scalars['BigInt']>>
+  amount_lt?: Maybe<Scalars['BigInt']>
+  amount_lte?: Maybe<Scalars['BigInt']>
+  channel?: Maybe<ChannelWhereInput>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type ChannelFundsWithdrawnEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
 export type ChannelNftCollectors = BaseGraphQlObject & {
   amount: Scalars['Int']
   channel: Channel
@@ -6719,6 +6869,8 @@ export enum ChannelOrderByInput {
   CreatedAtDesc = 'createdAt_DESC',
   CreatedInBlockAsc = 'createdInBlock_ASC',
   CreatedInBlockDesc = 'createdInBlock_DESC',
+  CumulativeRewardClaimedAsc = 'cumulativeRewardClaimed_ASC',
+  CumulativeRewardClaimedDesc = 'cumulativeRewardClaimed_DESC',
   DeletedAtAsc = 'deletedAt_ASC',
   DeletedAtDesc = 'deletedAt_DESC',
   DescriptionAsc = 'description_ASC',
@@ -6747,6 +6899,332 @@ export enum ChannelOrderByInput {
   UpdatedAtDesc = 'updatedAt_DESC',
 }
 
+export type ChannelPaymentMadeEvent = BaseGraphQlObject & {
+  amount: Scalars['BigInt']
+  createdAt: Scalars['DateTime']
+  createdById: Scalars['ID']
+  deletedAt?: Maybe<Scalars['DateTime']>
+  deletedById?: Maybe<Scalars['ID']>
+  id: Scalars['ID']
+  inBlock: Scalars['Int']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Int']
+  network: Network
+  payeeChannel?: Maybe<Channel>
+  payeeChannelId?: Maybe<Scalars['String']>
+  payer: Membership
+  payerId: Scalars['String']
+  paymentContext?: Maybe<PaymentContext>
+  rationale?: Maybe<Scalars['String']>
+  updatedAt?: Maybe<Scalars['DateTime']>
+  updatedById?: Maybe<Scalars['ID']>
+  version: Scalars['Int']
+}
+
+export type ChannelPaymentMadeEventConnection = {
+  edges: Array<ChannelPaymentMadeEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type ChannelPaymentMadeEventCreateInput = {
+  amount: Scalars['String']
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  network: Network
+  payeeChannel?: Maybe<Scalars['ID']>
+  payer: Scalars['ID']
+  paymentContext: Scalars['JSONObject']
+  rationale?: Maybe<Scalars['String']>
+}
+
+export type ChannelPaymentMadeEventEdge = {
+  cursor: Scalars['String']
+  node: ChannelPaymentMadeEvent
+}
+
+export enum ChannelPaymentMadeEventOrderByInput {
+  AmountAsc = 'amount_ASC',
+  AmountDesc = 'amount_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  PayeeChannelAsc = 'payeeChannel_ASC',
+  PayeeChannelDesc = 'payeeChannel_DESC',
+  PayerAsc = 'payer_ASC',
+  PayerDesc = 'payer_DESC',
+  RationaleAsc = 'rationale_ASC',
+  RationaleDesc = 'rationale_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type ChannelPaymentMadeEventUpdateInput = {
+  amount?: Maybe<Scalars['String']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  network?: Maybe<Network>
+  payeeChannel?: Maybe<Scalars['ID']>
+  payer?: Maybe<Scalars['ID']>
+  paymentContext?: Maybe<Scalars['JSONObject']>
+  rationale?: Maybe<Scalars['String']>
+}
+
+export type ChannelPaymentMadeEventWhereInput = {
+  AND?: Maybe<Array<ChannelPaymentMadeEventWhereInput>>
+  NOT?: Maybe<Array<ChannelPaymentMadeEventWhereInput>>
+  OR?: Maybe<Array<ChannelPaymentMadeEventWhereInput>>
+  amount_eq?: Maybe<Scalars['BigInt']>
+  amount_gt?: Maybe<Scalars['BigInt']>
+  amount_gte?: Maybe<Scalars['BigInt']>
+  amount_in?: Maybe<Array<Scalars['BigInt']>>
+  amount_lt?: Maybe<Scalars['BigInt']>
+  amount_lte?: Maybe<Scalars['BigInt']>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  payeeChannel?: Maybe<ChannelWhereInput>
+  payer?: Maybe<MembershipWhereInput>
+  paymentContext_json?: Maybe<Scalars['JSONObject']>
+  rationale_contains?: Maybe<Scalars['String']>
+  rationale_endsWith?: Maybe<Scalars['String']>
+  rationale_eq?: Maybe<Scalars['String']>
+  rationale_in?: Maybe<Array<Scalars['String']>>
+  rationale_startsWith?: Maybe<Scalars['String']>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type ChannelPaymentMadeEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
+export type ChannelPayoutsUpdatedEvent = BaseGraphQlObject & {
+  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>
+  commitment?: Maybe<Scalars['String']>
+  createdAt: Scalars['DateTime']
+  createdById: Scalars['ID']
+  deletedAt?: Maybe<Scalars['DateTime']>
+  deletedById?: Maybe<Scalars['ID']>
+  id: Scalars['ID']
+  inBlock: Scalars['Int']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Int']
+  maxCashoutAllowed?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed?: Maybe<Scalars['BigInt']>
+  network: Network
+  payloadDataObject?: Maybe<StorageDataObject>
+  payloadDataObjectId?: Maybe<Scalars['String']>
+  payloadHash?: Maybe<Scalars['String']>
+  payloadSize?: Maybe<Scalars['BigInt']>
+  updatedAt?: Maybe<Scalars['DateTime']>
+  updatedById?: Maybe<Scalars['ID']>
+  version: Scalars['Int']
+}
+
+export type ChannelPayoutsUpdatedEventConnection = {
+  edges: Array<ChannelPayoutsUpdatedEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type ChannelPayoutsUpdatedEventCreateInput = {
+  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>
+  commitment?: Maybe<Scalars['String']>
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  maxCashoutAllowed?: Maybe<Scalars['String']>
+  minCashoutAllowed?: Maybe<Scalars['String']>
+  network: Network
+  payloadDataObject?: Maybe<Scalars['ID']>
+  payloadHash?: Maybe<Scalars['String']>
+  payloadSize?: Maybe<Scalars['String']>
+}
+
+export type ChannelPayoutsUpdatedEventEdge = {
+  cursor: Scalars['String']
+  node: ChannelPayoutsUpdatedEvent
+}
+
+export enum ChannelPayoutsUpdatedEventOrderByInput {
+  ChannelCashoutsEnabledAsc = 'channelCashoutsEnabled_ASC',
+  ChannelCashoutsEnabledDesc = 'channelCashoutsEnabled_DESC',
+  CommitmentAsc = 'commitment_ASC',
+  CommitmentDesc = 'commitment_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  MaxCashoutAllowedAsc = 'maxCashoutAllowed_ASC',
+  MaxCashoutAllowedDesc = 'maxCashoutAllowed_DESC',
+  MinCashoutAllowedAsc = 'minCashoutAllowed_ASC',
+  MinCashoutAllowedDesc = 'minCashoutAllowed_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  PayloadDataObjectAsc = 'payloadDataObject_ASC',
+  PayloadDataObjectDesc = 'payloadDataObject_DESC',
+  PayloadHashAsc = 'payloadHash_ASC',
+  PayloadHashDesc = 'payloadHash_DESC',
+  PayloadSizeAsc = 'payloadSize_ASC',
+  PayloadSizeDesc = 'payloadSize_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type ChannelPayoutsUpdatedEventUpdateInput = {
+  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>
+  commitment?: Maybe<Scalars['String']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  maxCashoutAllowed?: Maybe<Scalars['String']>
+  minCashoutAllowed?: Maybe<Scalars['String']>
+  network?: Maybe<Network>
+  payloadDataObject?: Maybe<Scalars['ID']>
+  payloadHash?: Maybe<Scalars['String']>
+  payloadSize?: Maybe<Scalars['String']>
+}
+
+export type ChannelPayoutsUpdatedEventWhereInput = {
+  AND?: Maybe<Array<ChannelPayoutsUpdatedEventWhereInput>>
+  NOT?: Maybe<Array<ChannelPayoutsUpdatedEventWhereInput>>
+  OR?: Maybe<Array<ChannelPayoutsUpdatedEventWhereInput>>
+  channelCashoutsEnabled_eq?: Maybe<Scalars['Boolean']>
+  channelCashoutsEnabled_in?: Maybe<Array<Scalars['Boolean']>>
+  commitment_contains?: Maybe<Scalars['String']>
+  commitment_endsWith?: Maybe<Scalars['String']>
+  commitment_eq?: Maybe<Scalars['String']>
+  commitment_in?: Maybe<Array<Scalars['String']>>
+  commitment_startsWith?: Maybe<Scalars['String']>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  maxCashoutAllowed_eq?: Maybe<Scalars['BigInt']>
+  maxCashoutAllowed_gt?: Maybe<Scalars['BigInt']>
+  maxCashoutAllowed_gte?: Maybe<Scalars['BigInt']>
+  maxCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>
+  maxCashoutAllowed_lt?: Maybe<Scalars['BigInt']>
+  maxCashoutAllowed_lte?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed_eq?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed_gt?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed_gte?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed_in?: Maybe<Array<Scalars['BigInt']>>
+  minCashoutAllowed_lt?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed_lte?: Maybe<Scalars['BigInt']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  payloadDataObject?: Maybe<StorageDataObjectWhereInput>
+  payloadHash_contains?: Maybe<Scalars['String']>
+  payloadHash_endsWith?: Maybe<Scalars['String']>
+  payloadHash_eq?: Maybe<Scalars['String']>
+  payloadHash_in?: Maybe<Array<Scalars['String']>>
+  payloadHash_startsWith?: Maybe<Scalars['String']>
+  payloadSize_eq?: Maybe<Scalars['BigInt']>
+  payloadSize_gt?: Maybe<Scalars['BigInt']>
+  payloadSize_gte?: Maybe<Scalars['BigInt']>
+  payloadSize_in?: Maybe<Array<Scalars['BigInt']>>
+  payloadSize_lt?: Maybe<Scalars['BigInt']>
+  payloadSize_lte?: Maybe<Scalars['BigInt']>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type ChannelPayoutsUpdatedEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
 export type ChannelReportInfo = {
   channelId: Scalars['ID']
   createdAt: Scalars['DateTime']
@@ -6767,12 +7245,287 @@ export type ChannelReportsWhereInput = {
   reporterIp?: Maybe<Scalars['String']>
 }
 
+export type ChannelRewardClaimedAndWithdrawnEvent = BaseGraphQlObject &
+  Event & {
+    account?: Maybe<Scalars['String']>
+    actor: ContentActor
+    amount: Scalars['BigInt']
+    channel: Channel
+    channelId: Scalars['String']
+    createdAt: Scalars['DateTime']
+    createdById: Scalars['ID']
+    deletedAt?: Maybe<Scalars['DateTime']>
+    deletedById?: Maybe<Scalars['ID']>
+    id: Scalars['ID']
+    inBlock: Scalars['Int']
+    inExtrinsic?: Maybe<Scalars['String']>
+    indexInBlock: Scalars['Int']
+    network: Network
+    type?: Maybe<EventTypeOptions>
+    updatedAt?: Maybe<Scalars['DateTime']>
+    updatedById?: Maybe<Scalars['ID']>
+    version: Scalars['Int']
+  }
+
+export type ChannelRewardClaimedAndWithdrawnEventConnection = {
+  edges: Array<ChannelRewardClaimedAndWithdrawnEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type ChannelRewardClaimedAndWithdrawnEventCreateInput = {
+  account?: Maybe<Scalars['String']>
+  actor: Scalars['JSONObject']
+  amount: Scalars['String']
+  channel: Scalars['ID']
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  network: Network
+}
+
+export type ChannelRewardClaimedAndWithdrawnEventEdge = {
+  cursor: Scalars['String']
+  node: ChannelRewardClaimedAndWithdrawnEvent
+}
+
+export enum ChannelRewardClaimedAndWithdrawnEventOrderByInput {
+  AccountAsc = 'account_ASC',
+  AccountDesc = 'account_DESC',
+  AmountAsc = 'amount_ASC',
+  AmountDesc = 'amount_DESC',
+  ChannelAsc = 'channel_ASC',
+  ChannelDesc = 'channel_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type ChannelRewardClaimedAndWithdrawnEventUpdateInput = {
+  account?: Maybe<Scalars['String']>
+  actor?: Maybe<Scalars['JSONObject']>
+  amount?: Maybe<Scalars['String']>
+  channel?: Maybe<Scalars['ID']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  network?: Maybe<Network>
+}
+
+export type ChannelRewardClaimedAndWithdrawnEventWhereInput = {
+  AND?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEventWhereInput>>
+  NOT?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEventWhereInput>>
+  OR?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEventWhereInput>>
+  account_contains?: Maybe<Scalars['String']>
+  account_endsWith?: Maybe<Scalars['String']>
+  account_eq?: Maybe<Scalars['String']>
+  account_in?: Maybe<Array<Scalars['String']>>
+  account_startsWith?: Maybe<Scalars['String']>
+  actor_json?: Maybe<Scalars['JSONObject']>
+  amount_eq?: Maybe<Scalars['BigInt']>
+  amount_gt?: Maybe<Scalars['BigInt']>
+  amount_gte?: Maybe<Scalars['BigInt']>
+  amount_in?: Maybe<Array<Scalars['BigInt']>>
+  amount_lt?: Maybe<Scalars['BigInt']>
+  amount_lte?: Maybe<Scalars['BigInt']>
+  channel?: Maybe<ChannelWhereInput>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type ChannelRewardClaimedAndWithdrawnEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
+export type ChannelRewardClaimedEvent = BaseGraphQlObject &
+  Event & {
+    amount: Scalars['BigInt']
+    channel: Channel
+    channelId: Scalars['String']
+    createdAt: Scalars['DateTime']
+    createdById: Scalars['ID']
+    deletedAt?: Maybe<Scalars['DateTime']>
+    deletedById?: Maybe<Scalars['ID']>
+    id: Scalars['ID']
+    inBlock: Scalars['Int']
+    inExtrinsic?: Maybe<Scalars['String']>
+    indexInBlock: Scalars['Int']
+    network: Network
+    type?: Maybe<EventTypeOptions>
+    updatedAt?: Maybe<Scalars['DateTime']>
+    updatedById?: Maybe<Scalars['ID']>
+    version: Scalars['Int']
+  }
+
+export type ChannelRewardClaimedEventConnection = {
+  edges: Array<ChannelRewardClaimedEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type ChannelRewardClaimedEventCreateInput = {
+  amount: Scalars['String']
+  channel: Scalars['ID']
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  network: Network
+}
+
+export type ChannelRewardClaimedEventEdge = {
+  cursor: Scalars['String']
+  node: ChannelRewardClaimedEvent
+}
+
+export enum ChannelRewardClaimedEventOrderByInput {
+  AmountAsc = 'amount_ASC',
+  AmountDesc = 'amount_DESC',
+  ChannelAsc = 'channel_ASC',
+  ChannelDesc = 'channel_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type ChannelRewardClaimedEventUpdateInput = {
+  amount?: Maybe<Scalars['String']>
+  channel?: Maybe<Scalars['ID']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  network?: Maybe<Network>
+}
+
+export type ChannelRewardClaimedEventWhereInput = {
+  AND?: Maybe<Array<ChannelRewardClaimedEventWhereInput>>
+  NOT?: Maybe<Array<ChannelRewardClaimedEventWhereInput>>
+  OR?: Maybe<Array<ChannelRewardClaimedEventWhereInput>>
+  amount_eq?: Maybe<Scalars['BigInt']>
+  amount_gt?: Maybe<Scalars['BigInt']>
+  amount_gte?: Maybe<Scalars['BigInt']>
+  amount_in?: Maybe<Array<Scalars['BigInt']>>
+  amount_lt?: Maybe<Scalars['BigInt']>
+  amount_lte?: Maybe<Scalars['BigInt']>
+  channel?: Maybe<ChannelWhereInput>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type ChannelRewardClaimedEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
 export type ChannelUpdateInput = {
   activeVideosCounter?: Maybe<Scalars['Float']>
   avatarPhoto?: Maybe<Scalars['ID']>
   channelStateBloatBond?: Maybe<Scalars['String']>
   coverPhoto?: Maybe<Scalars['ID']>
   createdInBlock?: Maybe<Scalars['Float']>
+  cumulativeRewardClaimed?: Maybe<Scalars['String']>
   description?: Maybe<Scalars['String']>
   entryApp?: Maybe<Scalars['ID']>
   isCensored?: Maybe<Scalars['Boolean']>
@@ -6951,6 +7704,18 @@ export type ChannelWhereInput = {
   channelStateBloatBond_in?: Maybe<Array<Scalars['BigInt']>>
   channelStateBloatBond_lt?: Maybe<Scalars['BigInt']>
   channelStateBloatBond_lte?: Maybe<Scalars['BigInt']>
+  channelfundswithdrawneventchannel_every?: Maybe<ChannelFundsWithdrawnEventWhereInput>
+  channelfundswithdrawneventchannel_none?: Maybe<ChannelFundsWithdrawnEventWhereInput>
+  channelfundswithdrawneventchannel_some?: Maybe<ChannelFundsWithdrawnEventWhereInput>
+  channelpaymentmadeeventpayeeChannel_every?: Maybe<ChannelPaymentMadeEventWhereInput>
+  channelpaymentmadeeventpayeeChannel_none?: Maybe<ChannelPaymentMadeEventWhereInput>
+  channelpaymentmadeeventpayeeChannel_some?: Maybe<ChannelPaymentMadeEventWhereInput>
+  channelrewardclaimedandwithdrawneventchannel_every?: Maybe<ChannelRewardClaimedAndWithdrawnEventWhereInput>
+  channelrewardclaimedandwithdrawneventchannel_none?: Maybe<ChannelRewardClaimedAndWithdrawnEventWhereInput>
+  channelrewardclaimedandwithdrawneventchannel_some?: Maybe<ChannelRewardClaimedAndWithdrawnEventWhereInput>
+  claimedRewards_every?: Maybe<ChannelRewardClaimedEventWhereInput>
+  claimedRewards_none?: Maybe<ChannelRewardClaimedEventWhereInput>
+  claimedRewards_some?: Maybe<ChannelRewardClaimedEventWhereInput>
   collaborators_every?: Maybe<CollaboratorWhereInput>
   collaborators_none?: Maybe<CollaboratorWhereInput>
   collaborators_some?: Maybe<CollaboratorWhereInput>
@@ -6986,6 +7751,12 @@ export type ChannelWhereInput = {
   createdInBlock_in?: Maybe<Array<Scalars['Int']>>
   createdInBlock_lt?: Maybe<Scalars['Int']>
   createdInBlock_lte?: Maybe<Scalars['Int']>
+  cumulativeRewardClaimed_eq?: Maybe<Scalars['BigInt']>
+  cumulativeRewardClaimed_gt?: Maybe<Scalars['BigInt']>
+  cumulativeRewardClaimed_gte?: Maybe<Scalars['BigInt']>
+  cumulativeRewardClaimed_in?: Maybe<Array<Scalars['BigInt']>>
+  cumulativeRewardClaimed_lt?: Maybe<Scalars['BigInt']>
+  cumulativeRewardClaimed_lte?: Maybe<Scalars['BigInt']>
   deletedAt_all?: Maybe<Scalars['Boolean']>
   deletedAt_eq?: Maybe<Scalars['DateTime']>
   deletedAt_gt?: Maybe<Scalars['DateTime']>
@@ -8452,6 +9223,150 @@ export enum Continent {
   Sa = 'SA',
 }
 
+export type CouncilBudgetFundedEvent = BaseGraphQlObject &
+  Event & {
+    amount: Scalars['BigInt']
+    createdAt: Scalars['DateTime']
+    createdById: Scalars['ID']
+    deletedAt?: Maybe<Scalars['DateTime']>
+    deletedById?: Maybe<Scalars['ID']>
+    id: Scalars['ID']
+    inBlock: Scalars['Int']
+    inExtrinsic?: Maybe<Scalars['String']>
+    indexInBlock: Scalars['Int']
+    memberId: Scalars['Int']
+    network: Network
+    rationale: Scalars['String']
+    type?: Maybe<EventTypeOptions>
+    updatedAt?: Maybe<Scalars['DateTime']>
+    updatedById?: Maybe<Scalars['ID']>
+    version: Scalars['Int']
+  }
+
+export type CouncilBudgetFundedEventConnection = {
+  edges: Array<CouncilBudgetFundedEventEdge>
+  pageInfo: PageInfo
+  totalCount: Scalars['Int']
+}
+
+export type CouncilBudgetFundedEventCreateInput = {
+  amount: Scalars['String']
+  inBlock: Scalars['Float']
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock: Scalars['Float']
+  memberId: Scalars['Float']
+  network: Network
+  rationale: Scalars['String']
+}
+
+export type CouncilBudgetFundedEventEdge = {
+  cursor: Scalars['String']
+  node: CouncilBudgetFundedEvent
+}
+
+export enum CouncilBudgetFundedEventOrderByInput {
+  AmountAsc = 'amount_ASC',
+  AmountDesc = 'amount_DESC',
+  CreatedAtAsc = 'createdAt_ASC',
+  CreatedAtDesc = 'createdAt_DESC',
+  DeletedAtAsc = 'deletedAt_ASC',
+  DeletedAtDesc = 'deletedAt_DESC',
+  InBlockAsc = 'inBlock_ASC',
+  InBlockDesc = 'inBlock_DESC',
+  InExtrinsicAsc = 'inExtrinsic_ASC',
+  InExtrinsicDesc = 'inExtrinsic_DESC',
+  IndexInBlockAsc = 'indexInBlock_ASC',
+  IndexInBlockDesc = 'indexInBlock_DESC',
+  MemberIdAsc = 'memberId_ASC',
+  MemberIdDesc = 'memberId_DESC',
+  NetworkAsc = 'network_ASC',
+  NetworkDesc = 'network_DESC',
+  RationaleAsc = 'rationale_ASC',
+  RationaleDesc = 'rationale_DESC',
+  UpdatedAtAsc = 'updatedAt_ASC',
+  UpdatedAtDesc = 'updatedAt_DESC',
+}
+
+export type CouncilBudgetFundedEventUpdateInput = {
+  amount?: Maybe<Scalars['String']>
+  inBlock?: Maybe<Scalars['Float']>
+  inExtrinsic?: Maybe<Scalars['String']>
+  indexInBlock?: Maybe<Scalars['Float']>
+  memberId?: Maybe<Scalars['Float']>
+  network?: Maybe<Network>
+  rationale?: Maybe<Scalars['String']>
+}
+
+export type CouncilBudgetFundedEventWhereInput = {
+  AND?: Maybe<Array<CouncilBudgetFundedEventWhereInput>>
+  NOT?: Maybe<Array<CouncilBudgetFundedEventWhereInput>>
+  OR?: Maybe<Array<CouncilBudgetFundedEventWhereInput>>
+  amount_eq?: Maybe<Scalars['BigInt']>
+  amount_gt?: Maybe<Scalars['BigInt']>
+  amount_gte?: Maybe<Scalars['BigInt']>
+  amount_in?: Maybe<Array<Scalars['BigInt']>>
+  amount_lt?: Maybe<Scalars['BigInt']>
+  amount_lte?: Maybe<Scalars['BigInt']>
+  createdAt_eq?: Maybe<Scalars['DateTime']>
+  createdAt_gt?: Maybe<Scalars['DateTime']>
+  createdAt_gte?: Maybe<Scalars['DateTime']>
+  createdAt_lt?: Maybe<Scalars['DateTime']>
+  createdAt_lte?: Maybe<Scalars['DateTime']>
+  createdById_eq?: Maybe<Scalars['ID']>
+  createdById_in?: Maybe<Array<Scalars['ID']>>
+  deletedAt_all?: Maybe<Scalars['Boolean']>
+  deletedAt_eq?: Maybe<Scalars['DateTime']>
+  deletedAt_gt?: Maybe<Scalars['DateTime']>
+  deletedAt_gte?: Maybe<Scalars['DateTime']>
+  deletedAt_lt?: Maybe<Scalars['DateTime']>
+  deletedAt_lte?: Maybe<Scalars['DateTime']>
+  deletedById_eq?: Maybe<Scalars['ID']>
+  deletedById_in?: Maybe<Array<Scalars['ID']>>
+  id_eq?: Maybe<Scalars['ID']>
+  id_in?: Maybe<Array<Scalars['ID']>>
+  inBlock_eq?: Maybe<Scalars['Int']>
+  inBlock_gt?: Maybe<Scalars['Int']>
+  inBlock_gte?: Maybe<Scalars['Int']>
+  inBlock_in?: Maybe<Array<Scalars['Int']>>
+  inBlock_lt?: Maybe<Scalars['Int']>
+  inBlock_lte?: Maybe<Scalars['Int']>
+  inExtrinsic_contains?: Maybe<Scalars['String']>
+  inExtrinsic_endsWith?: Maybe<Scalars['String']>
+  inExtrinsic_eq?: Maybe<Scalars['String']>
+  inExtrinsic_in?: Maybe<Array<Scalars['String']>>
+  inExtrinsic_startsWith?: Maybe<Scalars['String']>
+  indexInBlock_eq?: Maybe<Scalars['Int']>
+  indexInBlock_gt?: Maybe<Scalars['Int']>
+  indexInBlock_gte?: Maybe<Scalars['Int']>
+  indexInBlock_in?: Maybe<Array<Scalars['Int']>>
+  indexInBlock_lt?: Maybe<Scalars['Int']>
+  indexInBlock_lte?: Maybe<Scalars['Int']>
+  memberId_eq?: Maybe<Scalars['Int']>
+  memberId_gt?: Maybe<Scalars['Int']>
+  memberId_gte?: Maybe<Scalars['Int']>
+  memberId_in?: Maybe<Array<Scalars['Int']>>
+  memberId_lt?: Maybe<Scalars['Int']>
+  memberId_lte?: Maybe<Scalars['Int']>
+  network_eq?: Maybe<Network>
+  network_in?: Maybe<Array<Network>>
+  rationale_contains?: Maybe<Scalars['String']>
+  rationale_endsWith?: Maybe<Scalars['String']>
+  rationale_eq?: Maybe<Scalars['String']>
+  rationale_in?: Maybe<Array<Scalars['String']>>
+  rationale_startsWith?: Maybe<Scalars['String']>
+  updatedAt_eq?: Maybe<Scalars['DateTime']>
+  updatedAt_gt?: Maybe<Scalars['DateTime']>
+  updatedAt_gte?: Maybe<Scalars['DateTime']>
+  updatedAt_lt?: Maybe<Scalars['DateTime']>
+  updatedAt_lte?: Maybe<Scalars['DateTime']>
+  updatedById_eq?: Maybe<Scalars['ID']>
+  updatedById_in?: Maybe<Array<Scalars['ID']>>
+}
+
+export type CouncilBudgetFundedEventWhereUniqueInput = {
+  id: Scalars['ID']
+}
+
 export type CouncilMember = BaseGraphQlObject & {
   accumulatedReward: Scalars['BigInt']
   createdAt: Scalars['DateTime']
@@ -9199,6 +10114,7 @@ export type CuratorWhereUniqueInput = {
 export type DataObjectType =
   | DataObjectTypeChannelAvatar
   | DataObjectTypeChannelCoverPhoto
+  | DataObjectTypeChannelPayoutsPayload
   | DataObjectTypeUnknown
   | DataObjectTypeVideoMedia
   | DataObjectTypeVideoSubtitle
@@ -9210,6 +10126,10 @@ export type DataObjectTypeChannelAvatar = {
 
 export type DataObjectTypeChannelCoverPhoto = {
   channel?: Maybe<Channel>
+}
+
+export type DataObjectTypeChannelPayoutsPayload = {
+  phantom?: Maybe<Scalars['Int']>
 }
 
 export type DataObjectTypeUnknown = {
@@ -10503,12 +11423,16 @@ export enum EventTypeOptions {
   CategoryDeletedEvent = 'CategoryDeletedEvent',
   CategoryMembershipOfModeratorUpdatedEvent = 'CategoryMembershipOfModeratorUpdatedEvent',
   CategoryStickyThreadUpdateEvent = 'CategoryStickyThreadUpdateEvent',
+  ChannelFundsWithdrawnEvent = 'ChannelFundsWithdrawnEvent',
+  ChannelRewardClaimedAndWithdrawnEvent = 'ChannelRewardClaimedAndWithdrawnEvent',
+  ChannelRewardClaimedEvent = 'ChannelRewardClaimedEvent',
   CommentCreatedEvent = 'CommentCreatedEvent',
   CommentDeletedEvent = 'CommentDeletedEvent',
   CommentModeratedEvent = 'CommentModeratedEvent',
   CommentPinnedEvent = 'CommentPinnedEvent',
   CommentReactedEvent = 'CommentReactedEvent',
   CommentTextUpdatedEvent = 'CommentTextUpdatedEvent',
+  CouncilBudgetFundedEvent = 'CouncilBudgetFundedEvent',
   CouncilorRewardUpdatedEvent = 'CouncilorRewardUpdatedEvent',
   EnglishAuctionSettledEvent = 'EnglishAuctionSettledEvent',
   EnglishAuctionStartedEvent = 'EnglishAuctionStartedEvent',
@@ -12985,6 +13909,7 @@ export type MemberInvitedEvent = BaseGraphQlObject &
     inBlock: Scalars['Int']
     inExtrinsic?: Maybe<Scalars['String']>
     indexInBlock: Scalars['Int']
+    initialBalance: Scalars['BigInt']
     invitingMember: Membership
     invitingMemberId: Scalars['String']
     metadata: MemberMetadata
@@ -13011,6 +13936,7 @@ export type MemberInvitedEventCreateInput = {
   inBlock: Scalars['Float']
   inExtrinsic?: Maybe<Scalars['String']>
   indexInBlock: Scalars['Float']
+  initialBalance: Scalars['String']
   invitingMember: Scalars['ID']
   metadata: Scalars['ID']
   network: Network
@@ -13038,6 +13964,8 @@ export enum MemberInvitedEventOrderByInput {
   InExtrinsicDesc = 'inExtrinsic_DESC',
   IndexInBlockAsc = 'indexInBlock_ASC',
   IndexInBlockDesc = 'indexInBlock_DESC',
+  InitialBalanceAsc = 'initialBalance_ASC',
+  InitialBalanceDesc = 'initialBalance_DESC',
   InvitingMemberAsc = 'invitingMember_ASC',
   InvitingMemberDesc = 'invitingMember_DESC',
   MetadataAsc = 'metadata_ASC',
@@ -13058,6 +13986,7 @@ export type MemberInvitedEventUpdateInput = {
   inBlock?: Maybe<Scalars['Float']>
   inExtrinsic?: Maybe<Scalars['String']>
   indexInBlock?: Maybe<Scalars['Float']>
+  initialBalance?: Maybe<Scalars['String']>
   invitingMember?: Maybe<Scalars['ID']>
   metadata?: Maybe<Scalars['ID']>
   network?: Maybe<Network>
@@ -13113,6 +14042,12 @@ export type MemberInvitedEventWhereInput = {
   indexInBlock_in?: Maybe<Array<Scalars['Int']>>
   indexInBlock_lt?: Maybe<Scalars['Int']>
   indexInBlock_lte?: Maybe<Scalars['Int']>
+  initialBalance_eq?: Maybe<Scalars['BigInt']>
+  initialBalance_gt?: Maybe<Scalars['BigInt']>
+  initialBalance_gte?: Maybe<Scalars['BigInt']>
+  initialBalance_in?: Maybe<Array<Scalars['BigInt']>>
+  initialBalance_lt?: Maybe<Scalars['BigInt']>
+  initialBalance_lte?: Maybe<Scalars['BigInt']>
   invitingMember?: Maybe<MembershipWhereInput>
   metadata?: Maybe<MemberMetadataWhereInput>
   network_eq?: Maybe<Network>
@@ -13557,6 +14492,7 @@ export type Membership = BaseGraphQlObject & {
   budgetfundedeventmember?: Maybe<Array<BudgetFundedEvent>>
   buynowcanceledeventownerMember?: Maybe<Array<BuyNowCanceledEvent>>
   buynowpriceupdatedeventownerMember?: Maybe<Array<BuyNowPriceUpdatedEvent>>
+  channelpaymentmadeeventpayer?: Maybe<Array<ChannelPaymentMadeEvent>>
   channels: Array<Channel>
   collaboratorInChannels: Array<Collaborator>
   commentauthor?: Maybe<Array<Comment>>
@@ -14374,6 +15310,9 @@ export type MembershipWhereInput = {
   buynowpriceupdatedeventownerMember_every?: Maybe<BuyNowPriceUpdatedEventWhereInput>
   buynowpriceupdatedeventownerMember_none?: Maybe<BuyNowPriceUpdatedEventWhereInput>
   buynowpriceupdatedeventownerMember_some?: Maybe<BuyNowPriceUpdatedEventWhereInput>
+  channelpaymentmadeeventpayer_every?: Maybe<ChannelPaymentMadeEventWhereInput>
+  channelpaymentmadeeventpayer_none?: Maybe<ChannelPaymentMadeEventWhereInput>
+  channelpaymentmadeeventpayer_some?: Maybe<ChannelPaymentMadeEventWhereInput>
   channels_every?: Maybe<ChannelWhereInput>
   channels_none?: Maybe<ChannelWhereInput>
   channels_some?: Maybe<ChannelWhereInput>
@@ -14753,6 +15692,7 @@ export type MetaprotocolTransactionStatusEventWhereUniqueInput = {
 }
 
 export type MetaprotocolTransactionSuccessful = {
+  channelPaid?: Maybe<Channel>
   commentCreated?: Maybe<Comment>
   commentDeleted?: Maybe<Comment>
   commentEdited?: Maybe<Comment>
@@ -17608,6 +18548,16 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']>
 }
 
+export type PaymentContext = PaymentContextChannel | PaymentContextVideo
+
+export type PaymentContextChannel = {
+  channel?: Maybe<Channel>
+}
+
+export type PaymentContextVideo = {
+  video?: Maybe<Video>
+}
+
 export type PostAddedEvent = BaseGraphQlObject &
   Event & {
     createdAt: Scalars['DateTime']
@@ -18631,6 +19581,7 @@ export type ProposalDetails =
   | SignalProposalDetails
   | SlashWorkingGroupLeadProposalDetails
   | TerminateWorkingGroupLeadProposalDetails
+  | UpdateChannelPayoutsProposalDetails
   | UpdateWorkingGroupBudgetProposalDetails
   | VetoProposalDetails
 
@@ -20247,9 +21198,24 @@ export type Query = {
   channelDeletedByModeratorEventByUniqueInput?: Maybe<ChannelDeletedByModeratorEvent>
   channelDeletedByModeratorEvents: Array<ChannelDeletedByModeratorEvent>
   channelDeletedByModeratorEventsConnection: ChannelDeletedByModeratorEventConnection
+  channelFundsWithdrawnEventByUniqueInput?: Maybe<ChannelFundsWithdrawnEvent>
+  channelFundsWithdrawnEvents: Array<ChannelFundsWithdrawnEvent>
+  channelFundsWithdrawnEventsConnection: ChannelFundsWithdrawnEventConnection
   channelNftCollectors: Array<ChannelNftCollectors>
   channelNftCollectorsByUniqueInput?: Maybe<ChannelNftCollectors>
   channelNftCollectorsConnection: ChannelNftCollectorsConnection
+  channelPaymentMadeEventByUniqueInput?: Maybe<ChannelPaymentMadeEvent>
+  channelPaymentMadeEvents: Array<ChannelPaymentMadeEvent>
+  channelPaymentMadeEventsConnection: ChannelPaymentMadeEventConnection
+  channelPayoutsUpdatedEventByUniqueInput?: Maybe<ChannelPayoutsUpdatedEvent>
+  channelPayoutsUpdatedEvents: Array<ChannelPayoutsUpdatedEvent>
+  channelPayoutsUpdatedEventsConnection: ChannelPayoutsUpdatedEventConnection
+  channelRewardClaimedAndWithdrawnEventByUniqueInput?: Maybe<ChannelRewardClaimedAndWithdrawnEvent>
+  channelRewardClaimedAndWithdrawnEvents: Array<ChannelRewardClaimedAndWithdrawnEvent>
+  channelRewardClaimedAndWithdrawnEventsConnection: ChannelRewardClaimedAndWithdrawnEventConnection
+  channelRewardClaimedEventByUniqueInput?: Maybe<ChannelRewardClaimedEvent>
+  channelRewardClaimedEvents: Array<ChannelRewardClaimedEvent>
+  channelRewardClaimedEventsConnection: ChannelRewardClaimedEventConnection
   channelVisibilitySetByModeratorEventByUniqueInput?: Maybe<ChannelVisibilitySetByModeratorEvent>
   channelVisibilitySetByModeratorEvents: Array<ChannelVisibilitySetByModeratorEvent>
   channelVisibilitySetByModeratorEventsConnection: ChannelVisibilitySetByModeratorEventConnection
@@ -20286,6 +21252,9 @@ export type Query = {
   commentTextUpdatedEventsConnection: CommentTextUpdatedEventConnection
   comments: Array<Comment>
   commentsConnection: CommentConnection
+  councilBudgetFundedEventByUniqueInput?: Maybe<CouncilBudgetFundedEvent>
+  councilBudgetFundedEvents: Array<CouncilBudgetFundedEvent>
+  councilBudgetFundedEventsConnection: CouncilBudgetFundedEventConnection
   councilMemberByUniqueInput?: Maybe<CouncilMember>
   councilMembers: Array<CouncilMember>
   councilMembersConnection: CouncilMemberConnection
@@ -21699,6 +22668,26 @@ export type QueryChannelDeletedByModeratorEventsConnectionArgs = {
   where?: Maybe<ChannelDeletedByModeratorEventWhereInput>
 }
 
+export type QueryChannelFundsWithdrawnEventByUniqueInputArgs = {
+  where: ChannelFundsWithdrawnEventWhereUniqueInput
+}
+
+export type QueryChannelFundsWithdrawnEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelFundsWithdrawnEventOrderByInput>>
+  where?: Maybe<ChannelFundsWithdrawnEventWhereInput>
+}
+
+export type QueryChannelFundsWithdrawnEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelFundsWithdrawnEventOrderByInput>>
+  where?: Maybe<ChannelFundsWithdrawnEventWhereInput>
+}
+
 export type QueryChannelNftCollectorsArgs = {
   limit?: Maybe<Scalars['Int']>
   offset?: Maybe<Scalars['Int']>
@@ -21717,6 +22706,86 @@ export type QueryChannelNftCollectorsConnectionArgs = {
   last?: Maybe<Scalars['Int']>
   orderBy?: Maybe<Array<ChannelNftCollectorsOrderByInput>>
   where?: Maybe<ChannelNftCollectorsWhereInput>
+}
+
+export type QueryChannelPaymentMadeEventByUniqueInputArgs = {
+  where: ChannelPaymentMadeEventWhereUniqueInput
+}
+
+export type QueryChannelPaymentMadeEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelPaymentMadeEventOrderByInput>>
+  where?: Maybe<ChannelPaymentMadeEventWhereInput>
+}
+
+export type QueryChannelPaymentMadeEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelPaymentMadeEventOrderByInput>>
+  where?: Maybe<ChannelPaymentMadeEventWhereInput>
+}
+
+export type QueryChannelPayoutsUpdatedEventByUniqueInputArgs = {
+  where: ChannelPayoutsUpdatedEventWhereUniqueInput
+}
+
+export type QueryChannelPayoutsUpdatedEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelPayoutsUpdatedEventOrderByInput>>
+  where?: Maybe<ChannelPayoutsUpdatedEventWhereInput>
+}
+
+export type QueryChannelPayoutsUpdatedEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelPayoutsUpdatedEventOrderByInput>>
+  where?: Maybe<ChannelPayoutsUpdatedEventWhereInput>
+}
+
+export type QueryChannelRewardClaimedAndWithdrawnEventByUniqueInputArgs = {
+  where: ChannelRewardClaimedAndWithdrawnEventWhereUniqueInput
+}
+
+export type QueryChannelRewardClaimedAndWithdrawnEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEventOrderByInput>>
+  where?: Maybe<ChannelRewardClaimedAndWithdrawnEventWhereInput>
+}
+
+export type QueryChannelRewardClaimedAndWithdrawnEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelRewardClaimedAndWithdrawnEventOrderByInput>>
+  where?: Maybe<ChannelRewardClaimedAndWithdrawnEventWhereInput>
+}
+
+export type QueryChannelRewardClaimedEventByUniqueInputArgs = {
+  where: ChannelRewardClaimedEventWhereUniqueInput
+}
+
+export type QueryChannelRewardClaimedEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelRewardClaimedEventOrderByInput>>
+  where?: Maybe<ChannelRewardClaimedEventWhereInput>
+}
+
+export type QueryChannelRewardClaimedEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<ChannelRewardClaimedEventOrderByInput>>
+  where?: Maybe<ChannelRewardClaimedEventWhereInput>
 }
 
 export type QueryChannelVisibilitySetByModeratorEventByUniqueInputArgs = {
@@ -21960,6 +23029,26 @@ export type QueryCommentsConnectionArgs = {
   last?: Maybe<Scalars['Int']>
   orderBy?: Maybe<Array<CommentOrderByInput>>
   where?: Maybe<CommentWhereInput>
+}
+
+export type QueryCouncilBudgetFundedEventByUniqueInputArgs = {
+  where: CouncilBudgetFundedEventWhereUniqueInput
+}
+
+export type QueryCouncilBudgetFundedEventsArgs = {
+  limit?: Maybe<Scalars['Int']>
+  offset?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<CouncilBudgetFundedEventOrderByInput>>
+  where?: Maybe<CouncilBudgetFundedEventWhereInput>
+}
+
+export type QueryCouncilBudgetFundedEventsConnectionArgs = {
+  after?: Maybe<Scalars['String']>
+  before?: Maybe<Scalars['String']>
+  first?: Maybe<Scalars['Int']>
+  last?: Maybe<Scalars['Int']>
+  orderBy?: Maybe<Array<CouncilBudgetFundedEventOrderByInput>>
+  where?: Maybe<CouncilBudgetFundedEventWhereInput>
 }
 
 export type QueryCouncilMemberByUniqueInputArgs = {
@@ -27867,6 +28956,7 @@ export type StorageBucketWhereUniqueInput = {
 export type StorageDataObject = BaseGraphQlObject & {
   channelavatarPhoto?: Maybe<Array<Channel>>
   channelcoverPhoto?: Maybe<Array<Channel>>
+  channelpayoutsupdatedeventpayloadDataObject?: Maybe<Array<ChannelPayoutsUpdatedEvent>>
   createdAt: Scalars['DateTime']
   createdById: Scalars['ID']
   deletedAt?: Maybe<Scalars['DateTime']>
@@ -27950,6 +29040,9 @@ export type StorageDataObjectWhereInput = {
   channelcoverPhoto_every?: Maybe<ChannelWhereInput>
   channelcoverPhoto_none?: Maybe<ChannelWhereInput>
   channelcoverPhoto_some?: Maybe<ChannelWhereInput>
+  channelpayoutsupdatedeventpayloadDataObject_every?: Maybe<ChannelPayoutsUpdatedEventWhereInput>
+  channelpayoutsupdatedeventpayloadDataObject_none?: Maybe<ChannelPayoutsUpdatedEventWhereInput>
+  channelpayoutsupdatedeventpayloadDataObject_some?: Maybe<ChannelPayoutsUpdatedEventWhereInput>
   createdAt_eq?: Maybe<Scalars['DateTime']>
   createdAt_gt?: Maybe<Scalars['DateTime']>
   createdAt_gte?: Maybe<Scalars['DateTime']>
@@ -29254,6 +30347,14 @@ export type UpcomingWorkingGroupOpeningWhereInput = {
 
 export type UpcomingWorkingGroupOpeningWhereUniqueInput = {
   id: Scalars['ID']
+}
+
+export type UpdateChannelPayoutsProposalDetails = {
+  channelCashoutsEnabled?: Maybe<Scalars['Boolean']>
+  commitment?: Maybe<Scalars['String']>
+  maxCashoutAllowed?: Maybe<Scalars['BigInt']>
+  minCashoutAllowed?: Maybe<Scalars['BigInt']>
+  payloadHash?: Maybe<Scalars['String']>
 }
 
 export type UpdateWorkingGroupBudgetProposalDetails = {

@@ -13,6 +13,18 @@ export class ExtendedChannel {
 }
 
 @ObjectType()
+export class TopSellingChannelsResult {
+  @Field(() => Channel, { nullable: false })
+  channel!: Channel
+
+  @Field(() => String, { nullable: false })
+  amount!: string
+
+  @Field(() => Int, { nullable: false })
+  nftSold!: number
+}
+
+@ObjectType()
 export class ChannelNftCollector {
   @Field(() => Membership, { nullable: false })
   member!: Membership
@@ -55,6 +67,18 @@ export class MostRecentChannelsArgs {
 
   @Field(() => Int, { nullable: true })
   resultsLimit?: number
+}
+
+@ArgsType()
+export class TopSellingChannelsArgs {
+  @Field(() => ExtendedChannelWhereInput, { nullable: true })
+  where?: ExtendedChannelWhereInput
+
+  @Field(() => Int, { nullable: false })
+  limit!: number
+
+  @Field(() => Int, { nullable: false })
+  periodDays!: number
 }
 
 export enum ChannelNftCollectorsOrderByInput {

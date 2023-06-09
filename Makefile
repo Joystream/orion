@@ -7,13 +7,8 @@ install:
 build:
 	@npm run build
 
-build-processor-image:
-	@docker build . --target processor -t orion-processor
-
-build-query-node-image:
-	@docker build . --target query-node -t orion-api
-
-build-images: build-processor-image build-query-node-image
+build-docker:
+	@docker build . -t joystream/orion
 
 serve:
 	@npx squid-graphql-server --subscriptions
@@ -33,7 +28,6 @@ typegen:
 	@npx squid-substrate-typegen typegen.json
 
 prepare: install codegen build
-	@mkdir db/persisted || true
 
 up-squid:
 	@docker network create joystream_default || true
@@ -46,8 +40,8 @@ up-archive:
 up: up-archive up-squid
 
 down-squid:
-	@./db/export.sh
-	@docker-compose down -v
+	@docker-compose stop orion_processor
+	@npm run offchain-state:export && docker-compose down -v
 	
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v

@@ -244,4 +244,3 @@ Example mutation: `addVideoView` inside [`src/server-extension/resolvers/VideosR
 
 Because of [a patch](/patches/@subsquid+graphql-server+3.2.3.patch) that was added to `@subsquid/graphql-server`, the HTTP request data (like ip address, headers etc.) is accessible through GraphQL context, making it possible to introduce reusable authentication middleware.
 
-Currently in Orion v2 there is only one middleware called [`OperatorOnly`](../src/server-extension/resolvers/middleware.ts), which can be used to secure endpoints that should only be accessible for the gateway operator. Those endpoints will require the `OPERATOR_SECRET` (defined in [`.env`](.env)) to be provided in `x-operator-secret` http header.

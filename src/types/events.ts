@@ -243,6 +243,29 @@ export class ContentChannelDeletedByModeratorEvent {
     }
 }
 
+export class ContentChannelFundsWithdrawnEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.ChannelFundsWithdrawn')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.ChannelFundsWithdrawn') === '7dca80457bf01f2cc037aae08e74e23bbe427f74ec7529d9dbd569314f36d7a3'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint, v1000.ChannelFundsDestination] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class ContentChannelOwnerRemarkedEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -268,6 +291,93 @@ export class ContentChannelOwnerRemarkedEvent {
      */
     get asV1000(): [bigint, Uint8Array] {
         assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentChannelPayoutsUpdatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.ChannelPayoutsUpdated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.ChannelPayoutsUpdated') === '43f24894d83a34bdba24e7c8b702850c31fdfd305d0c16c1422595219a8036ad'
+    }
+
+    get asV1000(): [v1000.UpdateChannelPayoutsParametersRecord, (bigint | undefined)] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    get isV2001(): boolean {
+        return this._chain.getEventHash('Content.ChannelPayoutsUpdated') === '6567c63f09efa37dc8a93882508851cb70d29e50fe45f52683626235bf1ca4b7'
+    }
+
+    get asV2001(): [v2001.UpdateChannelPayoutsParametersRecord, (bigint | undefined), Uint8Array] {
+        assert(this.isV2001)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentChannelRewardClaimedAndWithdrawnEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.ChannelRewardClaimedAndWithdrawn')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.ChannelRewardClaimedAndWithdrawn') === '7dca80457bf01f2cc037aae08e74e23bbe427f74ec7529d9dbd569314f36d7a3'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint, v1000.ChannelFundsDestination] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentChannelRewardUpdatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.ChannelRewardUpdated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.ChannelRewardUpdated') === '2bd477437892e2d50fa06bf72436226e2c75b8369c9a637d70237478ef09abe2'
+    }
+
+    get asV1000(): [bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    get isV2001(): boolean {
+        return this._chain.getEventHash('Content.ChannelRewardUpdated') === '2cb4802d5a072bd911a6f8ed2359f802db328fdf5e5f157925b0871831b3193c'
+    }
+
+    get asV2001(): [bigint, bigint, bigint] {
+        assert(this.isV2001)
         return this._chain.decodeEvent(this.event)
     }
 }
