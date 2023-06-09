@@ -13,8 +13,8 @@ export class CommentCountersManager {
     id && this.videosToUpdate.add(id)
   }
 
-  async updateVideoCommentsCounters(em: EntityManager) {
-    if (this.videosToUpdate.size) {
+  async updateVideoCommentsCounters(em: EntityManager, forceUpdateAll = false) {
+    if (this.videosToUpdate.size || forceUpdateAll) {
       await em.query(`
         UPDATE "video"
         SET
@@ -25,13 +25,20 @@ export class CommentCountersManager {
               AND "comment"."status" = '${CommentStatus.VISIBLE}'
               AND "comment"."is_excluded" = '0'
           )
-        WHERE "id" IN (${[...this.videosToUpdate.values()].map((id) => `'${id}'`).join(', ')})`)
+        ${
+          forceUpdateAll
+            ? ''
+            : `WHERE "id" IN (${[...this.videosToUpdate.values()]
+                .map((id) => `'${id}'`)
+                .join(', ')})`
+        }
+      `)
       this.videosToUpdate.clear()
     }
   }
 
-  async updateParentRepliesCounters(em: EntityManager) {
-    if (this.commentsToUpdate.size) {
+  async updateParentRepliesCounters(em: EntityManager, forceUpdateAll = false) {
+    if (this.commentsToUpdate.size || forceUpdateAll) {
       await em.query(`
         UPDATE "comment"
         SET
@@ -53,8 +60,14 @@ export class CommentCountersManager {
               WHERE "comment_reaction"."comment_id" = "comment"."id"
             ) AS "reactions_and_replies"
           )
-          WHERE "id" IN (${[...this.commentsToUpdate.values()].map((id) => `'${id}'`).join(', ')})
-        `)
+        ${
+          forceUpdateAll
+            ? ''
+            : `WHERE "id" IN (${[...this.commentsToUpdate.values()]
+                .map((id) => `'${id}'`)
+                .join(', ')})`
+        }
+      `)
       this.commentsToUpdate.clear()
     }
   }
