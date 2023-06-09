@@ -387,16 +387,4 @@ export class EntityManagerOverlay {
     await this.afterDbUpdte(this.em)
   }
 
-  // helper getters
-  async getTokenAccountOrFail(tokenId: bigint, memberId: bigint): Promise<Flat<TokenAccount>> {
-    const account = await this.getRepository(TokenAccount).getByIdOrFail(
-      tokenAccountId(tokenId, memberId)
-    )
-    return account
-  }
-
-  async getTokenOrFail(tokenId: bigint): Promise<Flat<Token>> {
-    const token = this.getRepository(Token).getByIdOrFail(tokenId.toString())
-    return token
-  }
 }

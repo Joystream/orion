@@ -29,28 +29,28 @@ type Token @entity {
   "total supply"
   totalSupply: BigInt!
 
-  "Whether a sale is ongoing"
+  "sales issued for this token"
   sale: [Sale!] @derivedFrom(field: "token")
 
   "symbol for the token uniqueness guaranteed by runtime"
-  symbol: String! @index @unique
+  symbol: String! @index
 
   "access status invite only vs anyone"
   isInviteOnly: Boolean!
 
-  "creator annual revenue percent (minted)"
-  annualCreatorReward: BigInt!
+  "creator annual revenue permill (minted)"
+  annualCreatorReward: Int!
 
   "revenue share ratio between creator and holder"
   revenueShareRatioPercent: Int!
 
-  "current revenue share id if any"
+  "revenue shares issued for this token"
   revenueShare: [RevenueShare!] @derivedFrom(field: "token")
 
-  "amm curve setup for token"
+  "amm curves issued for this token"
   ammCurve: [AmmCurve!] @derivedFrom(field: "token")
 
-  "block in which this token was created"
+  "dat in which this token was created"
   createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
@@ -77,18 +77,18 @@ type Token @entity {
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
 
-  "number of completed Amm Sales"
-  ammNonce: Int!
+  "number of activated Amm Sales"
+  numberOfAmmActivations: Int!
 
   "number of revenue shares issued"
-  revenueShareNonce: Int!
+  numberOfRevenueShareActivations: Int!
 
   "whether it has been deissued or not"
   deissued: Boolean!
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
-  "tokenId ++ channelId"
+  "counter"
   id: ID!
 
   "token reference"
@@ -99,7 +99,7 @@ type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
 }
 
 type RevenueShare @entity {
-  "tokenId ++ runtime id for revenue split"
+  "counter"
   id: ID!
 
   "token which this revenue share is for"
@@ -114,13 +114,10 @@ type RevenueShare @entity {
   "starting block"
   startingAt: Int!
 
-  "duration"
-  duration: Int!
-
   "ending block"
   endsAt: Int!
 
-  "Number of participant to aggregating COUNT on stackers"
+  "Number of participants (stackers)"
   participantsNum: Int!
 
   "total number of HAPI allocated"
@@ -154,7 +151,7 @@ type Benefit @entity {
 }
 
 type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
-  "runtime TokenId ++ runtime sale nonce"
+  "counter"
   id: ID!
 
   "token for which the sale is issued"
@@ -174,9 +171,6 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 
   "sale start block"
   startBlock: Int!
-
-  "sale duration"
-  durationInBlocks: Int!
 
   "ending block"
   endsAt: Int!
@@ -201,7 +195,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
 }
 
 type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {
-  "Sale.id ++ VestingSchedule.id"
+  "counter"
   id: ID!
 
   "Sale reference"
@@ -211,15 +205,12 @@ type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {
   vesting: VestingSchedule! @unique
 }
 
-type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
+type SaleTransaction @entity @index(fields: ["sale", "account"]) {
   "counter"
   id: ID!
 
   "amount of token bought"
   quantity: BigInt!
-
-  "total HAPI paid for the quantity"
-  pricePaid: BigInt!
 
   "sale"
   sale: Sale!
@@ -232,7 +223,7 @@ type SaleTransaction @entity @index(fields: ["sale", "account"], unique: true) {
 }
 
 type AmmCurve @entity {
-  "token.ammNonce"
+  "counter"
   id: ID!
 
   "token this Amm is for"
@@ -257,17 +248,17 @@ type AmmCurve @entity {
   finalized: Boolean!
 }
 
-type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
+type AmmTransaction @entity @index(fields: ["account", "amm"]) {
   "counter"
   id: ID!
 
-  "amount of token bought"
+  "amount of token bought/sold"
   quantity: BigInt!
 
-  "total HAPI paid for the quantity"
+  "total HAPI paid/received for the quantity"
   pricePaid: BigInt!
 
-  "sale"
+  "Reference to the Amm Sale"
   amm: AmmCurve!
 
   "buyer account"
@@ -276,7 +267,7 @@ type AmmTransaction @entity @index(fields: ["account", "amm"], unique: true) {
   "price per unit in HAPI"
   pricePerUnit: BigInt!
 
-  "was it bought (or sold)"
+  "was it bought/sold"
   transactionType: AmmTransactionType!
 
   "block"
@@ -288,8 +279,8 @@ enum AmmTransactionType {
   SELL
 }
 
-type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
-  "runtime token id ++ runtime member id"
+type TokenAccount @entity @index(fields: ["token", "member"]) {
+  "counter"
   id: ID!
 
   "member id ref"
@@ -310,14 +301,11 @@ type TokenAccount @entity @index(fields: ["token", "member"], unique: true) {
   "amm transactions for this account"
   ammTransactions: [AmmTransaction!] @derivedFrom(field: "account")
 
-  "information for token accounts participating in revenue share"
+  "information about token account's participation in revenue shares"
   revenueShareParticipation: [RevenueShareParticipation!] @derivedFrom(field: "account")
 
   "vesting schedule info, it can be empty if no vesting schedules are pending"
   vestingSchedules: [VestedAccount!]! @derivedFrom(field: "account")
-
-  "whether the account belongs to the account whitelist (if mode is invite only)"
-  whitelisted: Boolean
 
   "has been deleted or not"
   deleted: Boolean!
@@ -333,12 +321,12 @@ type VestedAccount @entity {
   "account reference"
   account: TokenAccount!
 
-  "amount vested"
-  amount: BigInt!
+  "total amount the schedule is vested"
+  totalVestingAmount: BigInt!
 }
 
-type VestingSchedule @entity {
-  "cliffBlock++vestingduration++cliffPercent is enough to identify a schedule"
+type VestingSchedule @entity @index(fields: ["cliffBlock", "vestingDurationBlocks", "cliffPercent"]) {
+  "counter"
   id: ID!
 
   "% of amount vested immediately after cliff period"
