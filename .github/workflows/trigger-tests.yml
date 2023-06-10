@@ -2,6 +2,9 @@ name: Trigger external integration tests
 
 on: [push, pull_request_target]
 
+env:
+  INTEGRATION_TESTS_BRANCH: ${{ vars.INTEGRATION_TESTS_BRANCH }}
+
 jobs:
   trigger-tests:
     runs-on: ubuntu-latest
@@ -33,23 +36,74 @@ jobs:
             echo "build-docker-image workflow failed"
             exit 1
           fi
+      - name: Fetch integration tests branch from PR comment if provided
+        if: github.event_name == 'pull_request_target'
+        run: |
+          BRANCH=$(
+            curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+              | jq '
+                .[]
+                | select(
+                  (.author_association = "OWNER") or
+                  (.author_association = "MEMBER") or
+                  (.author_association = "CONTRIBUTOR")
+                )
+                | select (.body | test("/set-integration-tests-branch +"))
+                | .body'
+              | cut -d ' ' -f 2
+          )
+          echo "INTEGRATION_TESTS_BRANCH=$BRANCH" >> $GITHUB_ENV
       - name: Trigger tests
         uses: benc-uk/workflow-dispatch@v1
         with:
-          token: ${{ secrets.TRIGGER_TESTS_TOKEN }}
+          token: ${{ secrets.INTEGRATION_TESTS_TOKEN }}
           repo: ${{ vars.INTEGRATION_TESTS_REPO }}
-          ref: ${{ vars.INTEGRATION_TESTS_BRANCH }}
+          ref: ${{ env.INTEGRATION_TESTS_BRANCH }}
           workflow: run-network-tests.yml
           inputs: >
             {
-              "orion_sha": "${{ github.sha }}"
+              "orion_sha": "${{ github.sha }}",
+              "attempt": "${{ github.run_attempt }}"
             }
-      - name: Set pending status
-        uses: octokit/request-action@v2.x
-        with:
-          route: POST /repos/${{ github.repository }}/statuses/${{ github.sha }}
-          state: pending
-          description: Integration tests result
-          context: integration-tests
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get tests run result
+        run: |
+          ARTIFACT_URL="null"
+          while [[ "$ARTIFACT_URL" == "null" ]]
+          do
+            ARTIFACT_URL=$(
+              curl -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.INTEGRATION_TESTS_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ vars.INTEGRATION_TESTS_REPO }}/actions/artifacts?name=orion-tests-${{ github.sha }}-${{ github.run_attempt }} \
+              | jq -r '.artifacts[0].archive_download_url'
+            if [[ "$ARTIFACT_URL" != "null" ]]
+            then
+              # Download artifact
+              curl -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.INTEGRATION_TESTS_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                $ARTIFACT_URL \
+                -o artifact.zip
+              # Unzip artifact
+              unzip artifact.zip
+              # Get result
+              RESULT=$(cat result.txt)
+              if [[ "$RESULT" == "success" ]]
+              then
+                echo "Tests passed"
+                exit 0
+              else
+                echo "Tests failed"
+                exit 1
+              fi
+            else
+              echo "Waiting for test results to be uploaded..."
+              sleep 30
+            fi
+          done
