@@ -4,6 +4,7 @@ on: [push, pull_request_target]
 
 env:
   INTEGRATION_TESTS_BRANCH: ${{ vars.INTEGRATION_TESTS_BRANCH }}
+  SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   trigger-tests:
@@ -21,7 +22,7 @@ jobs:
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-docker-image.yml/runs?head_sha=${{ github.sha }} \
+                https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-docker-image.yml/runs?head_sha=${{ env.SHA }} \
                 | jq -r '.workflow_runs[0].conclusion'
             )
             echo "build-docker-image workflow conclusion: $CONCLUSION"
@@ -66,7 +67,7 @@ jobs:
           workflow: run-network-tests.yml
           inputs: >
             {
-              "orion_sha": "${{ github.sha }}",
+              "orion_sha": "${{ env.SHA }}",
               "attempt": "${{ github.run_attempt }}"
             }
       - name: Get tests run result
@@ -79,7 +80,7 @@ jobs:
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${{ secrets.INTEGRATION_TESTS_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ vars.INTEGRATION_TESTS_REPO }}/actions/artifacts?name=orion-tests-${{ github.sha }}-${{ github.run_attempt }} \
+                https://api.github.com/repos/${{ vars.INTEGRATION_TESTS_REPO }}/actions/artifacts?name=orion-tests-${{ env.SHA }}-${{ github.run_attempt }} \
               | jq -r '.artifacts[0].archive_download_url'
             )
             if [[ "$ARTIFACT_URL" != "null" ]]
