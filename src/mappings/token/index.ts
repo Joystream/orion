@@ -3,7 +3,6 @@ import {
   Token,
   TokenAccount,
   TokenStatus,
-  VestedAccount,
   VestingSchedule,
   TokenChannel,
   AmmCurve,
@@ -18,15 +17,14 @@ import {
   TokenAvatarUri,
   Video,
   TrailerVideo,
+  InitialIssuanceVestingSource,
 } from '../../model'
 import {
-  addVestingSchedule,
+  addVestingScheduleToAccount,
   burnFromVesting,
   createAccount,
   getTokenAccountByMemberByTokenOrFail,
   processValidatedTransfers,
-  tokenAccountId,
-  tokenSaleId,
   VestingScheduleData,
 } from './utils'
 import { deserializeMetadata } from '../utils'
@@ -59,19 +57,23 @@ export async function processTokenIssuedEvent({
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
+    numberOfVestedTransferIssued: 0
   })
 
   // create accounts for allocation
   for (const [memberId, allocation] of initialAllocation) {
-    createAccount(overlay, token, memberId, allocation.amount)
+    const newAccount = createAccount(overlay, token, memberId, allocation.amount)
     if (allocation.vestingScheduleParams) {
-      addVestingSchedule(
+      const vestingData = new VestingScheduleData(allocation.vestingScheduleParams, block.height)
+      overlay.getRepository(VestingSchedule).new({
+        ...vestingData
+      })
+      await addVestingScheduleToAccount(
         overlay,
-        allocation.vestingScheduleParams,
-        block.height,
-        tokenId,
-        memberId,
-        allocation.amount
+        newAccount,
+        vestingData.id,
+        allocation.amount,
+        new InitialIssuanceVestingSource
       )
     }
   }
@@ -122,6 +124,7 @@ export async function processTokenAmountTransferredByIssuerEvent({
     (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
     BigInt(0)
   )
+  token.numberOfVestedTransferIssued += 1
   await processValidatedTransfers(overlay, token, validatedTransfers, block.height)
 }
 
@@ -152,7 +155,6 @@ export async function processAmmActivatedEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.MARKET
   const id = overlay.getRepository(AmmCurve).getNewEntityId()
-  token.numberOfAmmActivations++
   overlay.getRepository(AmmCurve).new({
     burnedByAmm: BigInt(0),
     mintedByAmm: BigInt(0),
@@ -169,7 +171,7 @@ export async function processTokenSaleInitializedEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, saleNonce, tokenSale, metadataBytes],
+    asV1000: [tokenId, , tokenSale, metadataBytes],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   const fundsSourceMemberId = tokenSale.tokensSource
@@ -178,18 +180,18 @@ export async function processTokenSaleInitializedEvent({
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams, block.height)
 
     const vesting = overlay.getRepository(VestingSchedule).new({
-      id: overlay.getRepository(VestingSchedule).getNewEntityId(),
-      endsAt: vestingData.endsAt(),
-      cliffBlock: vestingData.cliffBlock(),
-      vestingDurationBlocks: vestingData.duration(),
-      cliffPercent: vestingData.cliffPercent(),
-      cliffDurationBlocks: vestingData.cliffDuration(),
+      id: vestingData.id,
+      endsAt: vestingData.endsAt,
+      cliffBlock: vestingData.cliffBlock,
+      vestingDurationBlocks: vestingData.duration,
+      cliffPercent: vestingData.cliffPercent,
+      cliffDurationBlocks: vestingData.cliffDuration,
     })
 
     overlay.getRepository(VestedSale).new({
-      id: overlay.getRepository(VestedSale).getNewEntityId(),
+      id: vestingData.id,
       saleId: tokenId.toString(),
-      vestingId: vesting.id, 
+      vestingId: vesting.id,
     })
   }
 
@@ -265,10 +267,7 @@ export async function processTokensBoughtOnAmmEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply += crtMinted
 
-  let buyerAccount = await overlay
-    .getRepository(TokenAccount)
-    .getById(tokenAccountId(tokenId, memberId))
-
+  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     buyerAccount = createAccount(overlay, token, memberId, crtMinted)
   } else {
@@ -327,12 +326,11 @@ export async function processTokensPurchasedOnSaleEvent({
   overlay,
   block,
   event: {
-    asV1000: [tokenId, saleId, amountPurchased, memberId],
+    asV1000: [tokenId, , amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
-  let buyerAccount = await overlay
-    .getRepository(TokenAccount)
-    .getById(tokenAccountId(tokenId, memberId))
+
+  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
     buyerAccount = createAccount(overlay, token, memberId, amountPurchased)
@@ -340,7 +338,8 @@ export async function processTokensPurchasedOnSaleEvent({
     buyerAccount!.totalAmount += amountPurchased
   }
 
-  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
   sale.tokensSold += amountPurchased
 
   overlay.getRepository(SaleTransaction).new({
@@ -353,25 +352,21 @@ export async function processTokensPurchasedOnSaleEvent({
 
   const vestingForSale = await overlay
     .getRepository(VestedSale)
-    .getOneByRelation('saleId', tokenSaleId(tokenId, saleId))
+    .getOneByRelation('saleId', sale.id)
+
   if (vestingForSale !== undefined) {
-    const id = overlay.getRepository(VestedAccount).getNewEntityId()
-    overlay.getRepository(VestedAccount).new({
-      id,
-      accountId: buyerAccount.id,
-      vestingId: vestingForSale.vestingId,
-      totalVestingAmount: amountPurchased,
-    })
+    // add vesting to account
   }
 }
 
 export async function processUpcomingTokenSaleUpdatedEvent({
   overlay,
   event: {
-    asV1000: [tokenId, saleId, newStart, newDuration],
+    asV1000: [tokenId, , newStart, newDuration],
   },
 }: EventHandlerContext<'ProjectToken.UpcomingTokenSaleUpdated'>) {
-  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
 
   if (newStart) {
     sale.startBlock = newStart
@@ -448,7 +443,7 @@ export async function processTokensBurnedEvent({
       account.stakedAmount > amountBurned ? account.stakedAmount - amountBurned : BigInt(0)
   }
   account.totalAmount -= amountBurned
-  await burnFromVesting(overlay, tokenAccountId(tokenId, memberId), amountBurned)
+  await burnFromVesting(overlay, account.id, amountBurned)
 }
 
 export async function processTransferPolicyChangedToPermissionlessEvent({
@@ -462,10 +457,11 @@ export async function processTransferPolicyChangedToPermissionlessEvent({
 export async function processTokenSaleFinalizedEvent({
   overlay,
   event: {
-    asV1000: [tokenId, saleId, quantityLeft, ,],
+    asV1000: [tokenId, , quantityLeft, ,],
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleFinalized'>) {
-  const sale = await overlay.getRepository(Sale).getByIdOrFail(tokenSaleId(tokenId, saleId))
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
   sale.finalized = true
 
   const sourceAccount = await overlay
@@ -473,7 +469,6 @@ export async function processTokenSaleFinalizedEvent({
     .getByIdOrFail(sale.fundsSourceAccountId!)
   sourceAccount.totalAmount += quantityLeft
 
-  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.IDLE
   token.currentSaleId = null
 }
