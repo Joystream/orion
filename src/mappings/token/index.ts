@@ -177,7 +177,7 @@ export async function processTokenSaleInitializedEvent({
   if (tokenSale.vestingScheduleParams !== undefined) {
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams, block.height)
 
-    overlay.getRepository(VestingSchedule).new({
+    const vesting = overlay.getRepository(VestingSchedule).new({
       id: overlay.getRepository(VestingSchedule).getNewEntityId(),
       endsAt: vestingData.endsAt(),
       cliffBlock: vestingData.cliffBlock(),
@@ -189,7 +189,7 @@ export async function processTokenSaleInitializedEvent({
     overlay.getRepository(VestedSale).new({
       id: overlay.getRepository(VestedSale).getNewEntityId(),
       saleId: tokenId.toString(),
-      vestingId: vestingData.id(),
+      vestingId: vesting.id, 
     })
   }
 

@@ -48,19 +48,6 @@ export class VestingScheduleData {
     return this._params.cliffAmountPercentage
   }
 
-  public id(): string {
-    return (
-      this.cliffBlock().toString() + this.duration().toString() + this.cliffPercent().toString()
-    )
-  }
-}
-
-export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
-  return tokenId.toString() + ammNonce.toString()
-}
-
-export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
-  return tokenId.toString() + revenueNonce.toString()
 }
 
 export async function burnFromVesting(
@@ -93,8 +80,9 @@ export function addVestingSchedule(
 ) {
   const vestingData = new VestingScheduleData(vestingParams, blockHeight)
 
+  const vestingScheduleId = overlay.getRepository(VestingSchedule).getNewEntityId()
   overlay.getRepository(VestingSchedule).new({
-    id: vestingData.id(),
+    id: vestingScheduleId,
     endsAt: vestingData.endsAt(),
     cliffBlock: vestingData.cliffBlock(),
     vestingDurationBlocks: vestingData.duration(),
@@ -102,10 +90,11 @@ export function addVestingSchedule(
     cliffDurationBlocks: vestingData.cliffDuration(),
   })
 
+  const vestedAccountId = overlay.getRepository(VestingSchedule).getNewEntityId()
   overlay.getRepository(VestedAccount).new({
-    id: tokenAccountId(tokenId, memberId) + vestingData.id(),
+    id: vestedAccountId,
     accountId: tokenAccountId(tokenId, memberId),
-    vestingId: vestingData.id(),
+    vestingId: vestingScheduleId,
     totalVestingAmount: amount,
   })
 }
@@ -116,10 +105,11 @@ export function createAccount(
   memberId: bigint,
   allocationAmount: bigint
 ): Flat<TokenAccount> {
+  const accountId = overlay.getRepository(TokenAccount).getNewEntityId()
   const newAccount = overlay.getRepository(TokenAccount).new({
     tokenId: token.id,
     memberId: memberId.toString(),
-    id: token.id + memberId.toString(),
+    id: accountId,
     stakedAmount: BigInt(0),
     totalAmount: allocationAmount,
     deleted: false,
