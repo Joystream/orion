@@ -17,6 +17,7 @@ import {
   Benefit,
   TokenAvatarUri,
   Video,
+  TrailerVideo,
 } from '../../model'
 import {
   addVestingSchedule,
@@ -577,7 +578,13 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (isSet(metadata.trailerVideoId)) {
     const video = await overlay.getRepository(Video).getByIdOrFail(metadata.trailerVideoId)
     if (video) {
-      token.trailerVideoId = metadata.trailerVideoId
+      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
+      overlay.getRepository(TrailerVideo).new({
+        id,
+        tokenId: token.id,
+        videoId: video.id,
+      })
+      token.trailerVideoId = id
     }
   }
 }
