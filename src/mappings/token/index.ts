@@ -150,7 +150,7 @@ export async function processAmmActivatedEvent({
 }: EventHandlerContext<'ProjectToken.AmmActivated'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.MARKET
-  const id = overlay.getRepository(Token).getNewEntityId()
+  const id = overlay.getRepository(AmmCurve).getNewEntityId()
   token.numberOfAmmActivations++
   overlay.getRepository(AmmCurve).new({
     burnedByAmm: BigInt(0),
@@ -161,6 +161,7 @@ export async function processAmmActivatedEvent({
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
+  token.currentAmmSaleId = id
 }
 
 export async function processTokenSaleInitializedEvent({
@@ -211,6 +212,7 @@ export async function processTokenSaleInitializedEvent({
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.SALE
+  token.currentSaleId = sale.id
 
   if (metadataBytes) {
     const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
@@ -220,6 +222,7 @@ export async function processTokenSaleInitializedEvent({
       }
     }
   }
+
 }
 
 export async function processPatronageRateDecreasedToEvent({
@@ -261,7 +264,7 @@ export async function processTokensBoughtOnAmmEvent({
   let buyerAccount = await overlay
     .getRepository(TokenAccount)
     .getById(tokenAccountId(tokenId, memberId))
-  
+
   if (buyerAccount === undefined) {
     buyerAccount = createAccount(overlay, token, memberId, crtMinted)
   } else {
@@ -378,6 +381,7 @@ export async function processRevenueSplitIssuedEvent({
 }: EventHandlerContext<'ProjectToken.RevenueSplitIssued'>) {
   const endsAt = startBlock + duration
   const id = overlay.getRepository(RevenueShare).getNewEntityId()
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
   overlay.getRepository(RevenueShare).new({
     id,
@@ -390,6 +394,8 @@ export async function processRevenueSplitIssuedEvent({
     startingAt: startBlock,
     endsAt,
   })
+
+  token.currentRenvenueShareId = id
 }
 
 export async function processMemberJoinedWhitelistEvent({
@@ -411,6 +417,7 @@ export async function processAmmDeactivatedEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= burnedAmount
   token.status = TokenStatus.IDLE
+  token.currentAmmSaleId = null
 
   const activeAmm = (await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)).filter((amm) => !amm.finalized)[0]
   activeAmm.finalized = true
@@ -458,6 +465,7 @@ export async function processTokenSaleFinalizedEvent({
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.IDLE
+  token.currentSaleId = null
 }
 
 export async function processRevenueSplitLeftEvent({
@@ -483,6 +491,7 @@ export async function processRevenueSplitFinalizedEvent({
     .getManyByRelation('tokenId', token.id)
   ).filter((share) => !share.finalized)[0]
   revenueShare.finalized = true
+  token.currentRenvenueShareId = null
 }
 
 export async function processUserParticipatedInSplitEvent({
