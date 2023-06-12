@@ -55,11 +55,13 @@ export async function burnFromVesting(
   let tallyBurnedAmount = burnedAmount
   for (const vesting of vestingSchedulesForAccount) {
     if (tallyBurnedAmount === BigInt(0)) {
-      return
+      return // no-op
     }
     if (vesting.totalVestingAmount <= tallyBurnedAmount) {
       await removeVesting(overlay, vesting.id)
       tallyBurnedAmount -= vesting.totalVestingAmount
+    } else {
+      vesting.totalVestingAmount -= tallyBurnedAmount
     }
   }
 }
