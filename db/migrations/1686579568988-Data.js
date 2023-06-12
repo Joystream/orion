@@ -1,3 +1,6 @@
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
+<<<<<<< HEAD:db/migrations/1683652751170-Data.js
+<<<<<<< HEAD:db/migrations/1683649157251-Data.js
 <<<<<<<< HEAD:db/migrations/1686758014971-Data.js
 module.exports = class Data1686758014971 {
     name = 'Data1686758014971'
@@ -8,6 +11,27 @@ module.exports = class Data1680797388456 {
 module.exports = class Data1683649157251 {
     name = 'Data1683649157251'
 >>>>>>>> 0cf12751 (fix: mignations):db/migrations/1683649157251-Data.js
+||||||| parent of 2f722f3b (fix: solve channel not being added):db/migrations/1683649157251-Data.js
+module.exports = class Data1683649157251 {
+    name = 'Data1683649157251'
+=======
+module.exports = class Data1683652751170 {
+    name = 'Data1683652751170'
+>>>>>>> 2f722f3b (fix: solve channel not being added):db/migrations/1683652751170-Data.js
+||||||| parent of e4294433 (fix: add id to TokenChannel):db/migrations/1683652751170-Data.js
+module.exports = class Data1683652751170 {
+    name = 'Data1683652751170'
+=======
+module.exports = class Data1683711249318 {
+    name = 'Data1683711249318'
+>>>>>>> e4294433 (fix: add id to TokenChannel):db/migrations/1683711249318-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+module.exports = class Data1683711249318 {
+    name = 'Data1683711249318'
+=======
+module.exports = class Data1686579568988 {
+    name = 'Data1686579568988'
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
@@ -45,6 +69,7 @@ module.exports = class Data1683649157251 {
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
 <<<<<<<< HEAD:db/migrations/1686758014971-Data.js
         await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
 |||||||| parent of 0cf12751 (fix: mignations):db/migrations/1680797388456-Data.js
@@ -52,6 +77,11 @@ module.exports = class Data1683649157251 {
 ========
         await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "revenue_share_ratio_percent" integer, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
 >>>>>>>> 0cf12751 (fix: mignations):db/migrations/1683649157251-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "revenue_share_ratio_percent" integer, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+=======
+        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`CREATE INDEX "IDX_25c85bc448b5e236a4c1a5f789" ON "channel" ("owner_member_id") `)
         await db.query(`CREATE INDEX "IDX_a77e12f3d8c6ced020e179a5e9" ON "channel" ("cover_photo_id") `)
         await db.query(`CREATE INDEX "IDX_6997e94413b3f2f25a84e4a96f" ON "channel" ("avatar_photo_id") `)
@@ -89,8 +119,24 @@ module.exports = class Data1683649157251 {
         await db.query(`CREATE INDEX "IDX_2db879ed42e3308fe65e679672" ON "video" ("media_id") `)
         await db.query(`CREATE INDEX "IDX_54f88a7decf7d22fd9bd9fa439" ON "video" ("pinned_comment_id") `)
         await db.query(`CREATE INDEX "IDX_6c49ad08c44d36d11f77c426e4" ON "video" ("entry_app_id") `)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`CREATE INDEX "IDX_6dc75395a44fcd8e046d890f50" ON "video" ("trailer_video_for_token_id") `)
+        await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_9e594e5a61c0f3cb25679f6ba8" ON "bid" ("auction_id") `)
+        await db.query(`CREATE INDEX "IDX_3caf2d6b31d2fe45a2b85b8191" ON "bid" ("nft_id") `)
+        await db.query(`CREATE INDEX "IDX_e7618559409a903a897164156b" ON "bid" ("bidder_id") `)
+        await db.query(`CREATE INDEX "IDX_32cb73025ec49c87f4c594a265" ON "bid" ("previous_top_bid_id") `)
+=======
+        await db.query(`CREATE TABLE "bid" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "auction_id" character varying, "nft_id" character varying, "bidder_id" character varying, "amount" numeric NOT NULL, "is_canceled" boolean NOT NULL, "created_in_block" integer NOT NULL, "index_in_block" integer NOT NULL, "previous_top_bid_id" character varying, CONSTRAINT "PK_ed405dda320051aca2dcb1a50bb" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_9e594e5a61c0f3cb25679f6ba8" ON "bid" ("auction_id") `)
+        await db.query(`CREATE INDEX "IDX_3caf2d6b31d2fe45a2b85b8191" ON "bid" ("nft_id") `)
+        await db.query(`CREATE INDEX "IDX_e7618559409a903a897164156b" ON "bid" ("bidder_id") `)
+        await db.query(`CREATE INDEX "IDX_32cb73025ec49c87f4c594a265" ON "bid" ("previous_top_bid_id") `)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`CREATE TABLE "owned_nft" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "video_id" character varying NOT NULL, "owner" jsonb NOT NULL, "transactional_status" jsonb, "creator_royalty" numeric, "last_sale_price" numeric, "last_sale_date" TIMESTAMP WITH TIME ZONE, "is_featured" boolean NOT NULL, CONSTRAINT "OwnedNft_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_466896e39b9ec953f4f2545622" UNIQUE ("video_id"), CONSTRAINT "PK_5e0c289b350e863668fff44bb56" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_466896e39b9ec953f4f2545622" ON "owned_nft" ("video_id") `)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
         await db.query(`CREATE TABLE "storage_bucket_operator_metadata" ("id" character varying NOT NULL, "storage_bucket_id" character varying NOT NULL, "node_endpoint" text, "node_location" jsonb, "extra" text, CONSTRAINT "StorageBucketOperatorMetadata_storageBucket" UNIQUE ("storage_bucket_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_7beffc9530b3f307bc1169cb52" UNIQUE ("storage_bucket_id"), CONSTRAINT "PK_9846a397400ae1a39b21fbd02d4" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7beffc9530b3f307bc1169cb52" ON "storage_bucket_operator_metadata" ("storage_bucket_id") `)
         await db.query(`CREATE TABLE "distribution_bucket_family_metadata" ("id" character varying NOT NULL, "family_id" character varying NOT NULL, "region" text, "description" text, "areas" jsonb, "latency_test_targets" text array, CONSTRAINT "DistributionBucketFamilyMetadata_family" UNIQUE ("family_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_dd93ca0ea24f3e7a02f11c4c14" UNIQUE ("family_id"), CONSTRAINT "PK_df7a270835bb313d3ef17bdee2f" PRIMARY KEY ("id"))`)
@@ -100,6 +146,63 @@ module.exports = class Data1683649157251 {
         await db.query(`CREATE INDEX "IDX_69ec9bdc975b95f7dff94a7106" ON "distribution_bucket_operator_metadata" ("distirbution_bucket_operator_id") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`CREATE TABLE "auction" ("id" character varying NOT NULL, "nft_id" character varying, "winning_member_id" character varying, "starting_price" numeric NOT NULL, "buy_now_price" numeric, "auction_type" jsonb NOT NULL, "top_bid_id" character varying, "starts_at_block" integer NOT NULL, "ended_at_block" integer, "is_canceled" boolean NOT NULL, "is_completed" boolean NOT NULL, CONSTRAINT "PK_9dc876c629273e71646cf6dfa67" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_cfb47e97e60c9d1462576f85a8" ON "auction" ("nft_id") `)
+        await db.query(`CREATE INDEX "IDX_a3127ec87cccc5696b92cac4e0" ON "auction" ("winning_member_id") `)
+        await db.query(`CREATE INDEX "IDX_1673ad4b059742fbabfc40b275" ON "auction" ("top_bid_id") `)
+        await db.query(`CREATE TABLE "auction_whitelisted_member" ("id" character varying NOT NULL, "auction_id" character varying, "member_id" character varying, CONSTRAINT "AuctionWhitelistedMember_auction_member" UNIQUE ("auction_id", "member_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_f20264ca8e878696fbc25f11bd5" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_d5ae4854487c7658b64225be30" ON "auction_whitelisted_member" ("member_id") `)
+        await db.query(`CREATE INDEX "IDX_5468573a96fa51c03743de5912" ON "auction_whitelisted_member" ("auction_id", "member_id") `)
+        await db.query(`CREATE TABLE "membership" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "handle" text NOT NULL, "controller_account" text NOT NULL, "total_channels_created" integer NOT NULL, CONSTRAINT "Membership_handle" UNIQUE ("handle") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_83c1afebef3059472e7c37e8de8" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_1298811c0de5f11198fd43df72" ON "membership" ("handle") `)
+=======
+        await db.query(`CREATE TABLE "auction" ("id" character varying NOT NULL, "nft_id" character varying, "winning_member_id" character varying, "starting_price" numeric NOT NULL, "buy_now_price" numeric, "auction_type" jsonb NOT NULL, "top_bid_id" character varying, "starts_at_block" integer NOT NULL, "ended_at_block" integer, "is_canceled" boolean NOT NULL, "is_completed" boolean NOT NULL, CONSTRAINT "PK_9dc876c629273e71646cf6dfa67" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_cfb47e97e60c9d1462576f85a8" ON "auction" ("nft_id") `)
+        await db.query(`CREATE INDEX "IDX_a3127ec87cccc5696b92cac4e0" ON "auction" ("winning_member_id") `)
+        await db.query(`CREATE INDEX "IDX_1673ad4b059742fbabfc40b275" ON "auction" ("top_bid_id") `)
+        await db.query(`CREATE TABLE "auction_whitelisted_member" ("id" character varying NOT NULL, "auction_id" character varying, "member_id" character varying, CONSTRAINT "AuctionWhitelistedMember_auction_member" UNIQUE ("auction_id", "member_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_f20264ca8e878696fbc25f11bd5" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_d5ae4854487c7658b64225be30" ON "auction_whitelisted_member" ("member_id") `)
+        await db.query(`CREATE INDEX "IDX_5468573a96fa51c03743de5912" ON "auction_whitelisted_member" ("auction_id", "member_id") `)
+        await db.query(`CREATE TABLE "sale_transaction" ("id" character varying NOT NULL, "quantity" numeric NOT NULL, "sale_id" character varying, "account_id" character varying, "created_in" integer NOT NULL, CONSTRAINT "PK_06470e015a427563408e7e3661e" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_cfd7aa41d364144e6bbf677a48" ON "sale_transaction" ("account_id") `)
+        await db.query(`CREATE INDEX "IDX_b538792bd801ca0a1c77c03eff" ON "sale_transaction" ("sale_id", "account_id") `)
+        await db.query(`CREATE TABLE "sale" ("id" character varying NOT NULL, "token_id" character varying, "price_per_unit" numeric NOT NULL, "token_sale_allocation" numeric NOT NULL, "tokens_sold" numeric NOT NULL, "created_in" integer NOT NULL, "start_block" integer NOT NULL, "ends_at" integer NOT NULL, "terms_and_conditions" text NOT NULL, "max_amount_per_member" numeric, "finalized" boolean NOT NULL, "funds_source_account_id" character varying, CONSTRAINT "Sale_token_createdIn" UNIQUE ("token_id", "created_in") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_d03891c457cbcd22974732b5de2" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_00468ff9c85265853384de0e1d" ON "sale" ("funds_source_account_id") `)
+        await db.query(`CREATE INDEX "IDX_5c5d611ec29439dc91eeea287b" ON "sale" ("token_id", "created_in") `)
+        await db.query(`CREATE TABLE "revenue_share_participation" ("id" character varying NOT NULL, "account_id" character varying, "revenue_share_id" character varying, "staked_amount" numeric NOT NULL, "earnings" numeric NOT NULL, "created_in" integer NOT NULL, CONSTRAINT "RevenueShareParticipation_account_revenueShare" UNIQUE ("account_id", "revenue_share_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_a6931d06b217f8055611ea26fc7" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_018b86600c0c1228ada1c928be" ON "revenue_share_participation" ("revenue_share_id") `)
+        await db.query(`CREATE INDEX "IDX_9ca49e1effab0c3543ae0839cf" ON "revenue_share_participation" ("account_id", "revenue_share_id") `)
+        await db.query(`CREATE TABLE "revenue_share" ("id" character varying NOT NULL, "token_id" character varying, "created_in" integer NOT NULL, "starting_at" integer NOT NULL, "ends_at" integer NOT NULL, "participants_num" integer NOT NULL, "allocation" numeric NOT NULL, "claimed" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_6ef7c4be56b9290db1462885163" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_4e8bfc2037cececc86ba5192ea" ON "revenue_share" ("token_id") `)
+        await db.query(`CREATE TABLE "amm_transaction" ("id" character varying NOT NULL, "quantity" numeric NOT NULL, "price_paid" numeric NOT NULL, "amm_id" character varying, "account_id" character varying, "price_per_unit" numeric NOT NULL, "transaction_type" character varying(4) NOT NULL, "created_in" integer NOT NULL, CONSTRAINT "PK_783093757a6f260c72ded36d409" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_135d9555d7ea3e45dd78d8aede" ON "amm_transaction" ("amm_id") `)
+        await db.query(`CREATE INDEX "IDX_9109e9ce696736e0dd51d90fa7" ON "amm_transaction" ("account_id", "amm_id") `)
+        await db.query(`CREATE TABLE "amm_curve" ("id" character varying NOT NULL, "token_id" character varying, "burned_by_amm" numeric NOT NULL, "minted_by_amm" numeric NOT NULL, "amm_slope_parameter" numeric NOT NULL, "amm_init_price" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_477b83cf84964aa40f38edf1db1" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_97bee00638822978784362d19f" ON "amm_curve" ("token_id") `)
+        await db.query(`CREATE TABLE "trailer_video" ("id" character varying NOT NULL, "video_id" character varying, "token_id" character varying NOT NULL, CONSTRAINT "TrailerVideo_token" UNIQUE ("token_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_0151a0342b10afcd1933f10656" UNIQUE ("token_id"), CONSTRAINT "PK_06ed751f0ca8164994ff327cacc" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_c73677538ef22a243568edac74" ON "trailer_video" ("video_id") `)
+        await db.query(`CREATE INDEX "IDX_0151a0342b10afcd1933f10656" ON "trailer_video" ("token_id") `)
+        await db.query(`CREATE INDEX "IDX_7eb550061f81d70d7c14b9368a" ON "trailer_video" ("token_id", "video_id") `)
+        await db.query(`CREATE TABLE "benefit" ("id" character varying NOT NULL, "token_id" character varying, "emoji_code" text, "title" text NOT NULL, "description" text NOT NULL, "display_order" integer NOT NULL, CONSTRAINT "PK_c024dccb30e6f4702adffe884d1" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_b484e2182fc7a1910e84a5ae7a" ON "benefit" ("token_id") `)
+        await db.query(`CREATE TABLE "token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "symbol" text NOT NULL, "is_invite_only" boolean NOT NULL, "annual_creator_reward" integer NOT NULL, "revenue_share_ratio_percent" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "trailer_video_id" character varying, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, CONSTRAINT "PK_82fae97f905930df5d62a702fc9" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_e31c0ee2b8847dc76f3646ecc7" ON "token" ("symbol") `)
+        await db.query(`CREATE INDEX "IDX_c4e2d9651b0f8e6386d3f3317a" ON "token" ("trailer_video_id") `)
+        await db.query(`CREATE INDEX "IDX_be6a7b0a061462b667f380b9af" ON "token" ("current_amm_sale_id") `)
+        await db.query(`CREATE INDEX "IDX_139c0d38584ebed1e3cc8fb835" ON "token" ("current_sale_id") `)
+        await db.query(`CREATE INDEX "IDX_edec5898344e41ee41447dfd3a" ON "token" ("current_renvenue_share_id") `)
+        await db.query(`CREATE TABLE "vesting_schedule" ("id" character varying NOT NULL, "cliff_percent" integer NOT NULL, "vesting_duration_blocks" integer NOT NULL, "cliff_duration_blocks" integer NOT NULL, "ends_at" integer NOT NULL, "cliff_block" integer NOT NULL, CONSTRAINT "PK_4818b05532ed9058110ed5b5b13" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_168af2ac5924163198deeb2345" ON "vesting_schedule" ("cliff_block", "vesting_duration_blocks", "cliff_percent") `)
+        await db.query(`CREATE TABLE "vested_account" ("id" character varying NOT NULL, "vesting_id" character varying, "account_id" character varying, "total_vesting_amount" numeric NOT NULL, "vesting_source" jsonb NOT NULL, CONSTRAINT "PK_23d64323d1b1b14ccbdb6ed2a64" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_745ee4e6a2dfd5de65fb8b9f44" ON "vested_account" ("vesting_id") `)
+        await db.query(`CREATE INDEX "IDX_6a0600f53023dca2c43b99a097" ON "vested_account" ("account_id") `)
+        await db.query(`CREATE TABLE "token_account" ("id" character varying NOT NULL, "member_id" character varying, "token_id" character varying, "staked_amount" numeric NOT NULL, "total_amount" numeric NOT NULL, "deleted" boolean NOT NULL, CONSTRAINT "PK_6121d7a5eafbe71fba146a98fd3" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_dc32b6b2efa86183e6329909e7" ON "token_account" ("member_id") `)
+        await db.query(`CREATE INDEX "IDX_b44e36e5b6093947ec28580a84" ON "token_account" ("token_id", "member_id") `)
+        await db.query(`CREATE TABLE "membership" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "handle" text NOT NULL, "controller_account" text NOT NULL, "total_channels_created" integer NOT NULL, CONSTRAINT "Membership_handle" UNIQUE ("handle") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_83c1afebef3059472e7c37e8de8" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_1298811c0de5f11198fd43df72" ON "membership" ("handle") `)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`CREATE TABLE "notification" ("id" character varying NOT NULL, "member_id" character varying, "event_id" character varying, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_ac8de39626657d3c0e909d9d82" ON "notification" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_122be1f0696e0255acf95f9e33" ON "notification" ("event_id") `)
@@ -193,10 +296,58 @@ module.exports = class Data1683649157251 {
         await db.query(`ALTER TABLE "video" ADD CONSTRAINT "FK_2db879ed42e3308fe65e6796729" FOREIGN KEY ("media_id") REFERENCES "storage_data_object"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video" ADD CONSTRAINT "FK_54f88a7decf7d22fd9bd9fa439a" FOREIGN KEY ("pinned_comment_id") REFERENCES "comment"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video" ADD CONSTRAINT "FK_6c49ad08c44d36d11f77c426e43" FOREIGN KEY ("entry_app_id") REFERENCES "app"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`ALTER TABLE "video" ADD CONSTRAINT "FK_6dc75395a44fcd8e046d890f509" FOREIGN KEY ("trailer_video_for_token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_e7618559409a903a897164156b7" FOREIGN KEY ("bidder_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_32cb73025ec49c87f4c594a265f" FOREIGN KEY ("previous_top_bid_id") REFERENCES "bid"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+=======
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_e7618559409a903a897164156b7" FOREIGN KEY ("bidder_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "bid" ADD CONSTRAINT "FK_32cb73025ec49c87f4c594a265f" FOREIGN KEY ("previous_top_bid_id") REFERENCES "bid"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`ALTER TABLE "owned_nft" ADD CONSTRAINT "FK_466896e39b9ec953f4f2545622d" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
         await db.query(`ALTER TABLE "storage_bucket_operator_metadata" ADD CONSTRAINT "FK_7beffc9530b3f307bc1169cb524" FOREIGN KEY ("storage_bucket_id") REFERENCES "storage_bucket"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "distribution_bucket_family_metadata" ADD CONSTRAINT "FK_dd93ca0ea24f3e7a02f11c4c149" FOREIGN KEY ("family_id") REFERENCES "distribution_bucket_family"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "distribution_bucket_operator_metadata" ADD CONSTRAINT "FK_69ec9bdc975b95f7dff94a71069" FOREIGN KEY ("distirbution_bucket_operator_id") REFERENCES "distribution_bucket_operator"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_cfb47e97e60c9d1462576f85a88" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_a3127ec87cccc5696b92cac4e09" FOREIGN KEY ("winning_member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_1673ad4b059742fbabfc40b275c" FOREIGN KEY ("top_bid_id") REFERENCES "bid"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" ADD CONSTRAINT "FK_aad797677bc7c7c7dc1f1d397f5" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" ADD CONSTRAINT "FK_d5ae4854487c7658b64225be305" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+=======
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_cfb47e97e60c9d1462576f85a88" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_a3127ec87cccc5696b92cac4e09" FOREIGN KEY ("winning_member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction" ADD CONSTRAINT "FK_1673ad4b059742fbabfc40b275c" FOREIGN KEY ("top_bid_id") REFERENCES "bid"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" ADD CONSTRAINT "FK_aad797677bc7c7c7dc1f1d397f5" FOREIGN KEY ("auction_id") REFERENCES "auction"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" ADD CONSTRAINT "FK_d5ae4854487c7658b64225be305" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "sale_transaction" ADD CONSTRAINT "FK_7c477ad14796b65a8e47214adc9" FOREIGN KEY ("sale_id") REFERENCES "sale"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "sale_transaction" ADD CONSTRAINT "FK_cfd7aa41d364144e6bbf677a488" FOREIGN KEY ("account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "sale" ADD CONSTRAINT "FK_53aae73a92bcdefd80d4bb94e7f" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "sale" ADD CONSTRAINT "FK_00468ff9c85265853384de0e1dd" FOREIGN KEY ("funds_source_account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "revenue_share_participation" ADD CONSTRAINT "FK_7549dc863632b065f111a532551" FOREIGN KEY ("account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "revenue_share_participation" ADD CONSTRAINT "FK_018b86600c0c1228ada1c928be7" FOREIGN KEY ("revenue_share_id") REFERENCES "revenue_share"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "revenue_share" ADD CONSTRAINT "FK_4e8bfc2037cececc86ba5192ea9" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "amm_transaction" ADD CONSTRAINT "FK_135d9555d7ea3e45dd78d8aedec" FOREIGN KEY ("amm_id") REFERENCES "amm_curve"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "amm_transaction" ADD CONSTRAINT "FK_51f006dbc040d62dc479adbee78" FOREIGN KEY ("account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "amm_curve" ADD CONSTRAINT "FK_97bee00638822978784362d19fc" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_c73677538ef22a243568edac74b" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_0151a0342b10afcd1933f106564" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "benefit" ADD CONSTRAINT "FK_b484e2182fc7a1910e84a5ae7ad" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_c4e2d9651b0f8e6386d3f3317a6" FOREIGN KEY ("trailer_video_id") REFERENCES "trailer_video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_be6a7b0a061462b667f380b9aff" FOREIGN KEY ("current_amm_sale_id") REFERENCES "amm_curve"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_139c0d38584ebed1e3cc8fb8354" FOREIGN KEY ("current_sale_id") REFERENCES "sale"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_edec5898344e41ee41447dfd3ad" FOREIGN KEY ("current_renvenue_share_id") REFERENCES "revenue_share"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "vested_account" ADD CONSTRAINT "FK_745ee4e6a2dfd5de65fb8b9f44a" FOREIGN KEY ("vesting_id") REFERENCES "vesting_schedule"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "vested_account" ADD CONSTRAINT "FK_6a0600f53023dca2c43b99a0974" FOREIGN KEY ("account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token_account" ADD CONSTRAINT "FK_dc32b6b2efa86183e6329909e73" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "token_account" ADD CONSTRAINT "FK_02862fa18dececb99dd81a6a6a9" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`ALTER TABLE "notification" ADD CONSTRAINT "FK_ac8de39626657d3c0e909d9d82f" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "notification" ADD CONSTRAINT "FK_122be1f0696e0255acf95f9e336" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_history_entry" ADD CONSTRAINT "FK_57f51d35ecab042478fe2e31c19" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -294,8 +445,24 @@ module.exports = class Data1683649157251 {
         await db.query(`DROP INDEX "public"."IDX_2db879ed42e3308fe65e679672"`)
         await db.query(`DROP INDEX "public"."IDX_54f88a7decf7d22fd9bd9fa439"`)
         await db.query(`DROP INDEX "public"."IDX_6c49ad08c44d36d11f77c426e4"`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`DROP INDEX "public"."IDX_6dc75395a44fcd8e046d890f50"`)
+        await db.query(`DROP TABLE "bid"`)
+        await db.query(`DROP INDEX "public"."IDX_9e594e5a61c0f3cb25679f6ba8"`)
+        await db.query(`DROP INDEX "public"."IDX_3caf2d6b31d2fe45a2b85b8191"`)
+        await db.query(`DROP INDEX "public"."IDX_e7618559409a903a897164156b"`)
+        await db.query(`DROP INDEX "public"."IDX_32cb73025ec49c87f4c594a265"`)
+=======
+        await db.query(`DROP TABLE "bid"`)
+        await db.query(`DROP INDEX "public"."IDX_9e594e5a61c0f3cb25679f6ba8"`)
+        await db.query(`DROP INDEX "public"."IDX_3caf2d6b31d2fe45a2b85b8191"`)
+        await db.query(`DROP INDEX "public"."IDX_e7618559409a903a897164156b"`)
+        await db.query(`DROP INDEX "public"."IDX_32cb73025ec49c87f4c594a265"`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`DROP TABLE "owned_nft"`)
         await db.query(`DROP INDEX "public"."IDX_466896e39b9ec953f4f2545622"`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
         await db.query(`DROP TABLE "storage_bucket_operator_metadata"`)
         await db.query(`DROP INDEX "public"."IDX_7beffc9530b3f307bc1169cb52"`)
         await db.query(`DROP TABLE "distribution_bucket_family_metadata"`)
@@ -305,6 +472,63 @@ module.exports = class Data1683649157251 {
         await db.query(`DROP INDEX "public"."IDX_69ec9bdc975b95f7dff94a7106"`)
         await db.query(`DROP TABLE "event"`)
         await db.query(`DROP INDEX "public"."IDX_8f3f220c4e717207d841d4e6d4"`)
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`DROP TABLE "auction"`)
+        await db.query(`DROP INDEX "public"."IDX_cfb47e97e60c9d1462576f85a8"`)
+        await db.query(`DROP INDEX "public"."IDX_a3127ec87cccc5696b92cac4e0"`)
+        await db.query(`DROP INDEX "public"."IDX_1673ad4b059742fbabfc40b275"`)
+        await db.query(`DROP TABLE "auction_whitelisted_member"`)
+        await db.query(`DROP INDEX "public"."IDX_d5ae4854487c7658b64225be30"`)
+        await db.query(`DROP INDEX "public"."IDX_5468573a96fa51c03743de5912"`)
+        await db.query(`DROP TABLE "membership"`)
+        await db.query(`DROP INDEX "public"."IDX_1298811c0de5f11198fd43df72"`)
+=======
+        await db.query(`DROP TABLE "auction"`)
+        await db.query(`DROP INDEX "public"."IDX_cfb47e97e60c9d1462576f85a8"`)
+        await db.query(`DROP INDEX "public"."IDX_a3127ec87cccc5696b92cac4e0"`)
+        await db.query(`DROP INDEX "public"."IDX_1673ad4b059742fbabfc40b275"`)
+        await db.query(`DROP TABLE "auction_whitelisted_member"`)
+        await db.query(`DROP INDEX "public"."IDX_d5ae4854487c7658b64225be30"`)
+        await db.query(`DROP INDEX "public"."IDX_5468573a96fa51c03743de5912"`)
+        await db.query(`DROP TABLE "sale_transaction"`)
+        await db.query(`DROP INDEX "public"."IDX_cfd7aa41d364144e6bbf677a48"`)
+        await db.query(`DROP INDEX "public"."IDX_b538792bd801ca0a1c77c03eff"`)
+        await db.query(`DROP TABLE "sale"`)
+        await db.query(`DROP INDEX "public"."IDX_00468ff9c85265853384de0e1d"`)
+        await db.query(`DROP INDEX "public"."IDX_5c5d611ec29439dc91eeea287b"`)
+        await db.query(`DROP TABLE "revenue_share_participation"`)
+        await db.query(`DROP INDEX "public"."IDX_018b86600c0c1228ada1c928be"`)
+        await db.query(`DROP INDEX "public"."IDX_9ca49e1effab0c3543ae0839cf"`)
+        await db.query(`DROP TABLE "revenue_share"`)
+        await db.query(`DROP INDEX "public"."IDX_4e8bfc2037cececc86ba5192ea"`)
+        await db.query(`DROP TABLE "amm_transaction"`)
+        await db.query(`DROP INDEX "public"."IDX_135d9555d7ea3e45dd78d8aede"`)
+        await db.query(`DROP INDEX "public"."IDX_9109e9ce696736e0dd51d90fa7"`)
+        await db.query(`DROP TABLE "amm_curve"`)
+        await db.query(`DROP INDEX "public"."IDX_97bee00638822978784362d19f"`)
+        await db.query(`DROP TABLE "trailer_video"`)
+        await db.query(`DROP INDEX "public"."IDX_c73677538ef22a243568edac74"`)
+        await db.query(`DROP INDEX "public"."IDX_0151a0342b10afcd1933f10656"`)
+        await db.query(`DROP INDEX "public"."IDX_7eb550061f81d70d7c14b9368a"`)
+        await db.query(`DROP TABLE "benefit"`)
+        await db.query(`DROP INDEX "public"."IDX_b484e2182fc7a1910e84a5ae7a"`)
+        await db.query(`DROP TABLE "token"`)
+        await db.query(`DROP INDEX "public"."IDX_e31c0ee2b8847dc76f3646ecc7"`)
+        await db.query(`DROP INDEX "public"."IDX_c4e2d9651b0f8e6386d3f3317a"`)
+        await db.query(`DROP INDEX "public"."IDX_be6a7b0a061462b667f380b9af"`)
+        await db.query(`DROP INDEX "public"."IDX_139c0d38584ebed1e3cc8fb835"`)
+        await db.query(`DROP INDEX "public"."IDX_edec5898344e41ee41447dfd3a"`)
+        await db.query(`DROP TABLE "vesting_schedule"`)
+        await db.query(`DROP INDEX "public"."IDX_168af2ac5924163198deeb2345"`)
+        await db.query(`DROP TABLE "vested_account"`)
+        await db.query(`DROP INDEX "public"."IDX_745ee4e6a2dfd5de65fb8b9f44"`)
+        await db.query(`DROP INDEX "public"."IDX_6a0600f53023dca2c43b99a097"`)
+        await db.query(`DROP TABLE "token_account"`)
+        await db.query(`DROP INDEX "public"."IDX_dc32b6b2efa86183e6329909e7"`)
+        await db.query(`DROP INDEX "public"."IDX_b44e36e5b6093947ec28580a84"`)
+        await db.query(`DROP TABLE "membership"`)
+        await db.query(`DROP INDEX "public"."IDX_1298811c0de5f11198fd43df72"`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`DROP TABLE "notification"`)
         await db.query(`DROP INDEX "public"."IDX_ac8de39626657d3c0e909d9d82"`)
         await db.query(`DROP INDEX "public"."IDX_122be1f0696e0255acf95f9e33"`)
@@ -398,10 +622,58 @@ module.exports = class Data1683649157251 {
         await db.query(`ALTER TABLE "video" DROP CONSTRAINT "FK_2db879ed42e3308fe65e6796729"`)
         await db.query(`ALTER TABLE "video" DROP CONSTRAINT "FK_54f88a7decf7d22fd9bd9fa439a"`)
         await db.query(`ALTER TABLE "video" DROP CONSTRAINT "FK_6c49ad08c44d36d11f77c426e43"`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`ALTER TABLE "video" DROP CONSTRAINT "FK_6dc75395a44fcd8e046d890f509"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_e7618559409a903a897164156b7"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_32cb73025ec49c87f4c594a265f"`)
+=======
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_9e594e5a61c0f3cb25679f6ba8d"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_3caf2d6b31d2fe45a2b85b81912"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_e7618559409a903a897164156b7"`)
+        await db.query(`ALTER TABLE "bid" DROP CONSTRAINT "FK_32cb73025ec49c87f4c594a265f"`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`ALTER TABLE "owned_nft" DROP CONSTRAINT "FK_466896e39b9ec953f4f2545622d"`)
+<<<<<<< HEAD:db/migrations/1683711249318-Data.js
         await db.query(`ALTER TABLE "storage_bucket_operator_metadata" DROP CONSTRAINT "FK_7beffc9530b3f307bc1169cb524"`)
         await db.query(`ALTER TABLE "distribution_bucket_family_metadata" DROP CONSTRAINT "FK_dd93ca0ea24f3e7a02f11c4c149"`)
         await db.query(`ALTER TABLE "distribution_bucket_operator_metadata" DROP CONSTRAINT "FK_69ec9bdc975b95f7dff94a71069"`)
+||||||| parent of 3be1c048 (fix: generate migrations):db/migrations/1683711249318-Data.js
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_cfb47e97e60c9d1462576f85a88"`)
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_a3127ec87cccc5696b92cac4e09"`)
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_1673ad4b059742fbabfc40b275c"`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" DROP CONSTRAINT "FK_aad797677bc7c7c7dc1f1d397f5"`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" DROP CONSTRAINT "FK_d5ae4854487c7658b64225be305"`)
+=======
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_cfb47e97e60c9d1462576f85a88"`)
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_a3127ec87cccc5696b92cac4e09"`)
+        await db.query(`ALTER TABLE "auction" DROP CONSTRAINT "FK_1673ad4b059742fbabfc40b275c"`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" DROP CONSTRAINT "FK_aad797677bc7c7c7dc1f1d397f5"`)
+        await db.query(`ALTER TABLE "auction_whitelisted_member" DROP CONSTRAINT "FK_d5ae4854487c7658b64225be305"`)
+        await db.query(`ALTER TABLE "sale_transaction" DROP CONSTRAINT "FK_7c477ad14796b65a8e47214adc9"`)
+        await db.query(`ALTER TABLE "sale_transaction" DROP CONSTRAINT "FK_cfd7aa41d364144e6bbf677a488"`)
+        await db.query(`ALTER TABLE "sale" DROP CONSTRAINT "FK_53aae73a92bcdefd80d4bb94e7f"`)
+        await db.query(`ALTER TABLE "sale" DROP CONSTRAINT "FK_00468ff9c85265853384de0e1dd"`)
+        await db.query(`ALTER TABLE "revenue_share_participation" DROP CONSTRAINT "FK_7549dc863632b065f111a532551"`)
+        await db.query(`ALTER TABLE "revenue_share_participation" DROP CONSTRAINT "FK_018b86600c0c1228ada1c928be7"`)
+        await db.query(`ALTER TABLE "revenue_share" DROP CONSTRAINT "FK_4e8bfc2037cececc86ba5192ea9"`)
+        await db.query(`ALTER TABLE "amm_transaction" DROP CONSTRAINT "FK_135d9555d7ea3e45dd78d8aedec"`)
+        await db.query(`ALTER TABLE "amm_transaction" DROP CONSTRAINT "FK_51f006dbc040d62dc479adbee78"`)
+        await db.query(`ALTER TABLE "amm_curve" DROP CONSTRAINT "FK_97bee00638822978784362d19fc"`)
+        await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_c73677538ef22a243568edac74b"`)
+        await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_0151a0342b10afcd1933f106564"`)
+        await db.query(`ALTER TABLE "benefit" DROP CONSTRAINT "FK_b484e2182fc7a1910e84a5ae7ad"`)
+        await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_c4e2d9651b0f8e6386d3f3317a6"`)
+        await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_be6a7b0a061462b667f380b9aff"`)
+        await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_139c0d38584ebed1e3cc8fb8354"`)
+        await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_edec5898344e41ee41447dfd3ad"`)
+        await db.query(`ALTER TABLE "vested_account" DROP CONSTRAINT "FK_745ee4e6a2dfd5de65fb8b9f44a"`)
+        await db.query(`ALTER TABLE "vested_account" DROP CONSTRAINT "FK_6a0600f53023dca2c43b99a0974"`)
+        await db.query(`ALTER TABLE "token_account" DROP CONSTRAINT "FK_dc32b6b2efa86183e6329909e73"`)
+        await db.query(`ALTER TABLE "token_account" DROP CONSTRAINT "FK_02862fa18dececb99dd81a6a6a9"`)
+>>>>>>> 3be1c048 (fix: generate migrations):db/migrations/1686579568988-Data.js
         await db.query(`ALTER TABLE "notification" DROP CONSTRAINT "FK_ac8de39626657d3c0e909d9d82f"`)
         await db.query(`ALTER TABLE "notification" DROP CONSTRAINT "FK_122be1f0696e0255acf95f9e336"`)
         await db.query(`ALTER TABLE "nft_history_entry" DROP CONSTRAINT "FK_57f51d35ecab042478fe2e31c19"`)
