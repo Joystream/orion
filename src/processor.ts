@@ -114,8 +114,6 @@ import {
   processRevenueSplitFinalizedEvent,
   processCreatorTokenIssuerRemarkedEvent,
 } from './mappings/token'
-import { commentCountersManager } from './mappings/utils'
-import { EntityManager } from 'typeorm'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
@@ -338,8 +336,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'ProjectToken.UserParticipatedInSplit': processUserParticipatedInSplitEvent,
   'ProjectToken.TransferPolicyChangedToPermissionless':
     processTransferPolicyChangedToPermissionlessEvent,
-}
-
 }
 
 const offchainState = new OffchainState()
