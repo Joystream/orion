@@ -1,22 +1,13 @@
 import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
-import { Token, TokenAccount, VestedAccount, VestingSchedule } from '../../model'
+import { IssuerTransferVestingSource, Token, TokenAccount, VestedAccount, VestingSchedule, VestingSource } from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
-import { Block } from '../../types/support'
-
-export function tokenAccountId(tokenId: bigint, memberId: bigint): string {
-  return tokenId.toString() + memberId.toString()
-}
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
   const vestedAccountRepository = overlay.getRepository(VestedAccount)
   const vestedAccountToRemove = await vestedAccountRepository.getByIdOrFail(vestedAccountId)
   vestedAccountRepository.remove(vestedAccountToRemove)
-}
-
-export function tokenSaleId(tokenId: bigint, saleId: number): string {
-  return tokenId.toString() + saleId.toString()
 }
 
 export class VestingScheduleData {
@@ -28,23 +19,26 @@ export class VestingScheduleData {
     this._block = block
   }
 
-  public cliffBlock(): number {
+  public get id(): string {
+    return this.cliffBlock + '-' + this.duration + '-' + this.cliffPercent
+  }
+  public get cliffBlock(): number {
     return this._params.blocksBeforeCliff + this._block
   }
 
-  public cliffDuration(): number {
+  public get cliffDuration(): number {
     return this._params.blocksBeforeCliff
   }
 
-  public duration(): number {
+  public get duration(): number {
     return this._params.linearVestingDuration
   }
 
-  public endsAt(): number {
-    return this.cliffBlock() + this.duration()
+  public get endsAt(): number {
+    return this.cliffBlock + this.duration
   }
 
-  public cliffPercent(): number {
+  public get cliffPercent(): number {
     return this._params.cliffAmountPercentage
   }
 
@@ -70,33 +64,33 @@ export async function burnFromVesting(
   }
 }
 
-export function addVestingSchedule(
+export async function addVestingScheduleToAccount(
   overlay: EntityManagerOverlay,
-  vestingParams: VestingScheduleParams,
-  blockHeight: number,
-  tokenId: bigint,
-  memberId: bigint,
-  amount: bigint
+  account: Flat<TokenAccount>,
+  vestingId: string,
+  amount: bigint,
+  vestingSource: VestingSource
 ) {
-  const vestingData = new VestingScheduleData(vestingParams, blockHeight)
+  const existingVestingSchedulesForAccount = await overlay.getRepository(VestedAccount)
+    .getManyByRelation('accountId', account.id)
 
-  const vestingScheduleId = overlay.getRepository(VestingSchedule).getNewEntityId()
-  overlay.getRepository(VestingSchedule).new({
-    id: vestingScheduleId,
-    endsAt: vestingData.endsAt(),
-    cliffBlock: vestingData.cliffBlock(),
-    vestingDurationBlocks: vestingData.duration(),
-    cliffPercent: vestingData.cliffPercent(),
-    cliffDurationBlocks: vestingData.cliffDuration(),
+  const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter((vestedAccount) => {
+    return vestedAccount.vestingSource === vestingSource
   })
-
-  const vestedAccountId = overlay.getRepository(VestingSchedule).getNewEntityId()
-  overlay.getRepository(VestedAccount).new({
-    id: vestedAccountId,
-    accountId: tokenAccountId(tokenId, memberId),
-    vestingId: vestingScheduleId,
-    totalVestingAmount: amount,
-  })
+  if (vestedAccountToBeUpdated.length > 0) {
+    vestedAccountToBeUpdated.map((vestedAccount) => {
+      vestedAccount.totalVestingAmount += amount
+      account.totalAmount += amount
+    })
+  } else {
+    const vestedAccountId = overlay.getRepository(VestedAccount).getNewEntityId()
+    overlay.getRepository(VestedAccount).new({
+      id: vestedAccountId,
+      accountId: account.id,
+      vestingId,
+      totalVestingAmount: amount,
+    })
+  }
 }
 
 export function createAccount(
@@ -140,8 +134,9 @@ export async function processValidatedTransfers(
 ): Promise<void> {
   const tokenId = BigInt(token.id)
   for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
+    let destinationAccount: Flat<TokenAccount>
     if (validatedMemberId.__kind === 'Existing') {
-      const destinationAccount = await getTokenAccountByMemberByTokenOrFail(
+      destinationAccount = await getTokenAccountByMemberByTokenOrFail(
         overlay,
         validatedMemberId.value,
         tokenId
@@ -149,7 +144,7 @@ export async function processValidatedTransfers(
       destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
     } else {
       const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-      createAccount(
+      destinationAccount = createAccount(
         overlay,
         token,
         validatedMemberId.value,
@@ -158,13 +153,16 @@ export async function processValidatedTransfers(
     }
 
     if (validatedPaymentWithVesting.payment.vestingSchedule) {
-      addVestingSchedule(
+      const vestingData = new VestingScheduleData(validatedPaymentWithVesting.payment.vestingSchedule, blockHeight)
+      const { id: vestingScheduleId, } = overlay.getRepository(VestingSchedule).new({
+        ...vestingData
+      })
+      addVestingScheduleToAccount(
         overlay,
-        validatedPaymentWithVesting.payment.vestingSchedule,
-        blockHeight,
-        tokenId,
-        validatedMemberId.value,
-        validatedPaymentWithVesting.payment.amount
+        destinationAccount,
+        vestingScheduleId,
+        validatedPaymentWithVesting.payment.amount,
+        new IssuerTransferVestingSource
       )
     }
   }
