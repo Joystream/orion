@@ -89,7 +89,6 @@ module.exports = class Views2000000000000 {
       vested_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       vesting_schedule: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       revenue_share_participation: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
     }
   }
 
