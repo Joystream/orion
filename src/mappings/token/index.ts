@@ -189,7 +189,7 @@ export async function processTokenSaleInitializedEvent({
     })
 
     overlay.getRepository(VestedSale).new({
-      id: vestingData.id,
+      id: overlay.getRepository(VestedSale).getNewEntityId(),
       saleId: tokenId.toString(),
       vestingId: vesting.id,
     })
