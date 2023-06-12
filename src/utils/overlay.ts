@@ -10,7 +10,6 @@ import { NextEntityId } from '../model/NextEntityId'
 import { criticalError } from './misc'
 import { Logger } from '../logger'
 import { Token, TokenAccount } from '../model'
-import { tokenAccountId } from '../mappings/token/utils'
 
 // A stub which can represent any entity type
 export type AnyEntity = { id: string }

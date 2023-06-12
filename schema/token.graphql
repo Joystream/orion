@@ -77,9 +77,6 @@ type Token @entity {
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
 
-  "number of activated Amm Sales"
-  numberOfAmmActivations: Int!
-
   "number of revenue shares issued"
   numberOfRevenueShareActivations: Int!
 
@@ -94,6 +91,9 @@ type Token @entity {
 
   "current revenue share if ongoing"
   currentRenvenueShare: RevenueShare
+
+  "number of vested transfer completed"
+  numberOfVestedTransferIssued: Int!
 }
 
 type TrailerVideo @entity @index(fields: ["token", "video"]) {
@@ -343,7 +343,22 @@ type VestedAccount @entity {
 
   "total amount the schedule is vested"
   totalVestingAmount: BigInt!
+
+  "vesting source"
+  vestingSource: VestingSource!
 }
+
+type SaleVestingSource @variant {
+  sale: Sale!
+}
+type IssuerTransferVestingSource @variant {
+  phantom: Int
+}
+type InitialIssuanceVestingSource @variant {
+  phantom: Int
+}
+
+union VestingSource = InitialIssuanceVestingSource | IssuerTransferVestingSource | SaleVestingSource
 
 type VestingSchedule
   @entity
