@@ -10,3 +10,4 @@ then
     echo "Done"
 else
     echo "Schema directory is empty, skipping schema file generation..."
+fi
