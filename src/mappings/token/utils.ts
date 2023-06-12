@@ -1,6 +1,13 @@
 import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
-import { IssuerTransferVestingSource, Token, TokenAccount, VestedAccount, VestingSchedule, VestingSource } from '../../model'
+import {
+  IssuerTransferVestingSource,
+  Token,
+  TokenAccount,
+  VestedAccount,
+  VestingSchedule,
+  VestingSource,
+} from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
@@ -22,6 +29,7 @@ export class VestingScheduleData {
   public get id(): string {
     return this.cliffBlock + '-' + this.duration + '-' + this.cliffPercent
   }
+
   public get cliffBlock(): number {
     return this._params.blocksBeforeCliff + this._block
   }
@@ -41,7 +49,6 @@ export class VestingScheduleData {
   public get cliffPercent(): number {
     return this._params.cliffAmountPercentage
   }
-
 }
 
 export async function burnFromVesting(
@@ -73,14 +80,16 @@ export async function addVestingScheduleToAccount(
   amount: bigint,
   vestingSource: VestingSource
 ) {
-  const existingVestingSchedulesForAccount = await overlay.getRepository(VestedAccount)
+  const existingVestingSchedulesForAccount = await overlay
+    .getRepository(VestedAccount)
     .getManyByRelation('accountId', account.id)
 
   const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter((vestedAccount) => {
     return vestedAccount.vestingSource === vestingSource
   })
+
   if (vestedAccountToBeUpdated.length > 0) {
-    vestedAccountToBeUpdated.map((vestedAccount) => {
+    vestedAccountToBeUpdated.forEach((vestedAccount) => {
       vestedAccount.totalVestingAmount += amount
       account.totalAmount += amount
     })
@@ -155,16 +164,19 @@ export async function processValidatedTransfers(
     }
 
     if (validatedPaymentWithVesting.payment.vestingSchedule) {
-      const vestingData = new VestingScheduleData(validatedPaymentWithVesting.payment.vestingSchedule, blockHeight)
-      const { id: vestingScheduleId, } = overlay.getRepository(VestingSchedule).new({
-        ...vestingData
+      const vestingData = new VestingScheduleData(
+        validatedPaymentWithVesting.payment.vestingSchedule,
+        blockHeight
+      )
+      const { id: vestingScheduleId } = overlay.getRepository(VestingSchedule).new({
+        ...vestingData,
       })
-      addVestingScheduleToAccount(
+      await addVestingScheduleToAccount(
         overlay,
         destinationAccount,
         vestingScheduleId,
         validatedPaymentWithVesting.payment.amount,
-        new IssuerTransferVestingSource
+        new IssuerTransferVestingSource()
       )
     }
   }

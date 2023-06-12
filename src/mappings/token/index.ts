@@ -57,7 +57,7 @@ export async function processTokenIssuedEvent({
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
-    numberOfVestedTransferIssued: 0
+    numberOfVestedTransferIssued: 0,
   })
 
   // create accounts for allocation
@@ -66,14 +66,14 @@ export async function processTokenIssuedEvent({
     if (allocation.vestingScheduleParams) {
       const vestingData = new VestingScheduleData(allocation.vestingScheduleParams, block.height)
       overlay.getRepository(VestingSchedule).new({
-        ...vestingData
+        ...vestingData,
       })
       await addVestingScheduleToAccount(
         overlay,
         newAccount,
         vestingData.id,
         allocation.amount,
-        new InitialIssuanceVestingSource
+        new InitialIssuanceVestingSource()
       )
     }
   }
@@ -329,7 +329,6 @@ export async function processTokensPurchasedOnSaleEvent({
     asV1000: [tokenId, , amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
-
   let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -350,9 +349,7 @@ export async function processTokensPurchasedOnSaleEvent({
     createdIn: block.height,
   })
 
-  const vestingForSale = await overlay
-    .getRepository(VestedSale)
-    .getOneByRelation('saleId', sale.id)
+  const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', sale.id)
 
   if (vestingForSale !== undefined) {
     // add vesting to account
