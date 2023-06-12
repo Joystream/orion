@@ -59,11 +59,9 @@ export function tokenAmmId(tokenId: bigint, ammNonce: number): string {
   return tokenId.toString() + ammNonce.toString()
 }
 
-
 export function revenueShareId(tokenId: bigint, revenueNonce: number): string {
   return tokenId.toString() + revenueNonce.toString()
 }
-
 
 export async function burnFromVesting(
   overlay: EntityManagerOverlay,
@@ -116,7 +114,7 @@ export function createAccount(
   overlay: EntityManagerOverlay,
   token: Flat<Token>,
   memberId: bigint,
-  allocationAmount: bigint,
+  allocationAmount: bigint
 ): Flat<TokenAccount> {
   const newAccount = overlay.getRepository(TokenAccount).new({
     tokenId: token.id,
@@ -130,12 +128,16 @@ export function createAccount(
   return newAccount
 }
 
-export async function getTokenAccountByMemberByTokenOrFail(overlay: EntityManagerOverlay,
-  memberId: bigint, tokenId: bigint): Promise<Flat<TokenAccount>> {
-  const results = (await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString()))
-    .filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+export async function getTokenAccountByMemberByTokenOrFail(
+  overlay: EntityManagerOverlay,
+  memberId: bigint,
+  tokenId: bigint
+): Promise<Flat<TokenAccount>> {
+  const results = (
+    await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
+  ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
   if (results.length === 0) {
-    criticalError("Token account not found")
+    criticalError('Token account not found')
   }
   return results[0]
 }
@@ -152,7 +154,7 @@ export async function processValidatedTransfers(
       const destinationAccount = await getTokenAccountByMemberByTokenOrFail(
         overlay,
         validatedMemberId.value,
-        tokenId,
+        tokenId
       )
       destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
     } else {
@@ -176,5 +178,4 @@ export async function processValidatedTransfers(
       )
     }
   }
-
 }

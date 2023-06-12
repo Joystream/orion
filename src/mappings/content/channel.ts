@@ -106,9 +106,11 @@ export async function processChannelCreatedEvent({
 export async function processChannelUpdatedEvent({
   overlay,
   block,
-  event
+  event,
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
-  const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002 ? event.asV2002 : event.asV1000
+  const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002
+    ? event.asV2002
+    : event.asV1000
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
   //  update metadata if it was changed
