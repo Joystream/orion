@@ -54,7 +54,7 @@ jobs:
                   (.author_association = "CONTRIBUTOR")
                 )
                 | select (.body | test("/set-integration-tests-branch +"))
-                | .body'
+                | .body' \
               | cut -d ' ' -f 2
           )
           echo "INTEGRATION_TESTS_BRANCH=$BRANCH" >> $GITHUB_ENV
