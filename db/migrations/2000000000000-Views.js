@@ -66,7 +66,10 @@ module.exports = class Views2000000000000 {
       notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
-      nft_featuring_request: ['FALSE'],
+      trailer_video: [
+        `EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`,
+        `EXISTS(SELECT 1 FROM "video" WHERE "id="video_id")`
+      ],
       token: [`EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`],
       revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       benefit: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
@@ -83,6 +86,7 @@ module.exports = class Views2000000000000 {
       revenue_share_participation: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       // HIDDEN entities
+      nft_featuring_request: ['FALSE'],
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],

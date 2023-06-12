@@ -114,6 +114,9 @@ import {
   processRevenueSplitFinalizedEvent,
   processCreatorTokenIssuerRemarkedEvent,
 } from './mappings/token'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import { EntityManager } from 'typeorm'
+import { OffchainState } from './utils/offchainState'
 
 const defaultEventOptions = {
   data: {
@@ -262,7 +265,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
-  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
   'Content.ChannelPayoutsUpdated': processChannelPayoutsUpdatedEvent,
   'Content.ChannelRewardUpdated': processChannelRewardUpdatedEvent,
   'Content.ChannelFundsWithdrawn': processChannelFundsWithdrawnEvent,
