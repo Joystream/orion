@@ -329,7 +329,12 @@ export async function processTokensPurchasedOnSaleEvent({
     asV1000: [tokenId, , amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
-  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
+  const buyerAccounts =
+    (
+      await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
+    ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+  let buyerAccount = buyerAccounts.length > 0 ? buyerAccounts[0] : undefined
+
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
     buyerAccount = createAccount(overlay, token, memberId, amountPurchased)
