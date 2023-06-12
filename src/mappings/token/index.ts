@@ -192,7 +192,11 @@ export async function processTokenSaleInitializedEvent({
     })
   }
 
-  const sourceAccount = await getTokenAccountByMemberByTokenOrFail(overlay, fundsSourceMemberId, tokenId)
+  const sourceAccount = await getTokenAccountByMemberByTokenOrFail(
+    overlay,
+    fundsSourceMemberId,
+    tokenId
+  )
   sourceAccount.totalAmount -= tokenSale.quantityLeft
 
   const sale = overlay.getRepository(Sale).new({
@@ -222,7 +226,6 @@ export async function processTokenSaleInitializedEvent({
       }
     }
   }
-
 }
 
 export async function processPatronageRateDecreasedToEvent({
@@ -271,7 +274,9 @@ export async function processTokensBoughtOnAmmEvent({
     buyerAccount.totalAmount += crtMinted
   }
 
-  const activeAmm = (await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)).filter((amm) => !amm.finalized)[0]
+  const activeAmm = (
+    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
+  ).filter((amm) => !amm.finalized)[0]
   activeAmm.mintedByAmm += crtMinted
   overlay.getRepository(AmmTransaction).new({
     ammId: activeAmm.id,
@@ -294,7 +299,9 @@ export async function processTokensSoldOnAmmEvent({
 }: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= crtBurned
-  const activeAmm = (await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)).filter((amm) => !amm.finalized)[0]
+  const activeAmm = (
+    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
+  ).filter((amm) => !amm.finalized)[0]
   const ammId = activeAmm.id
 
   const sellerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
@@ -419,7 +426,9 @@ export async function processAmmDeactivatedEvent({
   token.status = TokenStatus.IDLE
   token.currentAmmSaleId = null
 
-  const activeAmm = (await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)).filter((amm) => !amm.finalized)[0]
+  const activeAmm = (
+    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
+  ).filter((amm) => !amm.finalized)[0]
   activeAmm.finalized = true
 }
 
@@ -474,7 +483,6 @@ export async function processRevenueSplitLeftEvent({
     asV1000: [tokenId, memberId, unstakedAmount],
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitLeft'>) {
-
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   account.stakedAmount -= unstakedAmount
 }
@@ -486,9 +494,8 @@ export async function processRevenueSplitFinalizedEvent({
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  const revenueShare = (await overlay
-    .getRepository(RevenueShare)
-    .getManyByRelation('tokenId', token.id)
+  const revenueShare = (
+    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
   ).filter((share) => !share.finalized)[0]
   revenueShare.finalized = true
   token.currentRenvenueShareId = null
@@ -502,10 +509,13 @@ export async function processUserParticipatedInSplitEvent({
   },
 }: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  const account = (await overlay.getRepository(TokenAccount).getManyByRelation('tokenId', token.id))
-    .filter((account) => (account.memberId == memberId.toString()) && !account.deleted)[0]
+  const account = (
+    await overlay.getRepository(TokenAccount).getManyByRelation('tokenId', token.id)
+  ).filter((account) => account.memberId == memberId.toString() && !account.deleted)[0]
 
-  const revenueShare = (await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)).filter((share) => !share.finalized)[0]
+  const revenueShare = (
+    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
+  ).filter((share) => !share.finalized)[0]
   revenueShare.claimed += joyDividend
   revenueShare.participantsNum += 1
 
@@ -545,7 +555,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
         description: benefit.description ? benefit.description! : undefined,
         emojiCode: benefit.emoji ? benefit.emoji! : undefined,
         displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
-        tokenId: token.id
+        tokenId: token.id,
       })
     }
   }

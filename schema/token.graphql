@@ -90,10 +90,10 @@ type Token @entity {
   currentAmmSale: AmmCurve
 
   "current sale if ongoing"
-  currentSale: Sale 
-  
+  currentSale: Sale
+
   "current revenue share if ongoing"
-  currentRenvenueShare: RevenueShare 
+  currentRenvenueShare: RevenueShare
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
@@ -334,7 +334,9 @@ type VestedAccount @entity {
   totalVestingAmount: BigInt!
 }
 
-type VestingSchedule @entity @index(fields: ["cliffBlock", "vestingDurationBlocks", "cliffPercent"]) {
+type VestingSchedule
+  @entity
+  @index(fields: ["cliffBlock", "vestingDurationBlocks", "cliffPercent"]) {
   "counter"
   id: ID!
 
