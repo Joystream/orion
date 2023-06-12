@@ -512,7 +512,7 @@ export async function processUserParticipatedInSplitEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   const account = (
     await overlay.getRepository(TokenAccount).getManyByRelation('tokenId', token.id)
-  ).filter((account) => account.memberId == memberId.toString() && !account.deleted)[0]
+  ).filter((account) => account.memberId === memberId.toString() && !account.deleted)[0]
 
   const revenueShare = (
     await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
