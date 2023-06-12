@@ -57,7 +57,7 @@ type Token @entity {
   channel: TokenChannel @derivedFrom(field: "token")
 
   "video for the token presentation page"
-  trailerVideo: TrailerVideo 
+  trailerVideo: TrailerVideo
 
   "about information displayed under the presentation video"
   description: String
@@ -96,7 +96,7 @@ type Token @entity {
   currentRenvenueShare: RevenueShare
 }
 
-type TrailerVideo @entity @index(fields: ["token", "video"]){
+type TrailerVideo @entity @index(fields: ["token", "video"]) {
   "counter"
   id: ID!
 
