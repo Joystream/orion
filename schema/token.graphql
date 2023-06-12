@@ -85,6 +85,15 @@ type Token @entity {
 
   "whether it has been deissued or not"
   deissued: Boolean!
+
+  "current amm sale if ongoing"
+  currentAmmSale: AmmCurve
+
+  "current sale if ongoing"
+  currentSale: Sale 
+  
+  "current revenue share if ongoing"
+  currentRenvenueShare: RevenueShare 
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
