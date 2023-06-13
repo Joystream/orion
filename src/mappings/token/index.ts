@@ -351,7 +351,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', sale.id)
 
   if (vestingForSale !== undefined) {
-    addVestingScheduleToAccount(
+    await addVestingScheduleToAccount(
       overlay,
       buyerAccount,
       vestingForSale.vestingId,

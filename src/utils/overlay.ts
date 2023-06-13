@@ -9,7 +9,6 @@ import _, { isObject } from 'lodash'
 import { NextEntityId } from '../model/NextEntityId'
 import { criticalError, idStringFromNumber } from './misc'
 import { Logger } from '../logger'
-import { Token, TokenAccount } from '../model'
 
 // A stub which can represent any entity type
 export type AnyEntity = { id: string }
