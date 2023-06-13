@@ -50,7 +50,7 @@ type Token @entity {
   "amm curves issued for this token"
   ammCurve: [AmmCurve!] @derivedFrom(field: "token")
 
-  "dat in which this token was created"
+  "date at which this token was created"
   createdAt: DateTime!
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
