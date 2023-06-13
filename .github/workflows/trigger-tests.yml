@@ -70,7 +70,7 @@ jobs:
       - name: Check-out the integration tests branch
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.INTEGRATION_TESTS_REPO }}
+          repository: ${{ vars.INTEGRATION_TESTS_REPO }}
           ref: ${{ env.INTEGRATION_TESTS_BRANCH }}
       - name: Get SHA of the checked-out commit
         run: |
