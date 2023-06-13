@@ -77,7 +77,7 @@ make down
 ## Commands
 
 - `make typegen` - generates event types (`src/types`) based on `typegen.json` (the archive endpoint provided in `specVersions` must be pointing to a running archive)
-- `make codegen` - granetes TypeORM models based on the [input schema](#input-schema)
+- `make codegen` - generates TypeORM models based on the [input schema](#input-schema)
 - `make dbgen` - generates database migration in `db/migrations` (PostgreSQL service must be running) based on the difference between current database schema and TypeORM models
 - `make build` - builds the code
 - `make prepare` - runs `npm install + codegen + build`

@@ -56,9 +56,11 @@ export async function burnFromVesting(
   accountId: string,
   burnedAmount: bigint
 ) {
-  const vestingSchedulesForAccount = await overlay
+  const vestingSchedulesForAccount = (await overlay
     .getRepository(VestedAccount)
-    .getManyByRelation('accountId', accountId)
+    .getManyByRelation('accountId', accountId)).sort((a, b) =>  {
+      return BigInt(a.id) - BigInt(b.id) > 0 ? 1 : -1
+    })
   let tallyBurnedAmount = burnedAmount
   for (const vesting of vestingSchedulesForAccount) {
     if (tallyBurnedAmount === BigInt(0)) {
@@ -85,7 +87,9 @@ export async function addVestingScheduleToAccount(
     .getManyByRelation('accountId', account.id)
 
   const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter((vestedAccount) => {
-    return vestedAccount.vestingSource === vestingSource
+    return vestedAccount.vestingSource.isTypeOf === 'SaleVestingSource' &&
+      vestingSource.isTypeOf === 'SaleVestingSource' &&
+      vestedAccount.vestingSource.sale === vestingSource.sale
   })
 
   if (vestedAccountToBeUpdated.length > 0) {
@@ -100,6 +104,7 @@ export async function addVestingScheduleToAccount(
       accountId: account.id,
       vestingId,
       totalVestingAmount: amount,
+      vestingSource: vestingSource,
     })
   }
 }
@@ -123,26 +128,47 @@ export function createAccount(
   return newAccount
 }
 
+
+export async function getTokenAccountByMemberByToken(
+  overlay: EntityManagerOverlay,
+  memberId: bigint,
+  tokenId: bigint
+): Promise<Flat<TokenAccount> | undefined> {
+  const results = (
+    await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
+  ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
+  if (results.length === 0) {
+    return undefined
+  }
+  return results[0]
+}
+
 export async function getTokenAccountByMemberByTokenOrFail(
   overlay: EntityManagerOverlay,
   memberId: bigint,
   tokenId: bigint
 ): Promise<Flat<TokenAccount>> {
-  const results = (
-    await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
-  ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
-  if (results.length === 0) {
-    criticalError('Token account not found')
+  const result = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
+  if (result === undefined) {
+    criticalError(
+      `Token account for member ${memberId} and token ${tokenId} does not exist.`
+    )
+  } else {
+    return result
   }
-  return results[0]
 }
 
 export async function processValidatedTransfers(
   overlay: EntityManagerOverlay,
   token: Flat<Token>,
+  sourceAccount: Flat<TokenAccount>,
   validatedTransfers: [Validated, ValidatedPayment][],
   blockHeight: number
 ): Promise<void> {
+  sourceAccount.totalAmount -= validatedTransfers.reduce(
+    (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
+    BigInt(0)
+  )
   const tokenId = BigInt(token.id)
   for (const [validatedMemberId, validatedPaymentWithVesting] of validatedTransfers) {
     let destinationAccount: Flat<TokenAccount>
