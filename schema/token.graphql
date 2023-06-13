@@ -96,7 +96,7 @@ type Token @entity {
   numberOfVestedTransferIssued: Int!
 }
 
-type TrailerVideo @entity @index(fields: ["token", "video"]) {
+type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
   "counter"
   id: ID!
 
