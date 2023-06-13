@@ -67,6 +67,9 @@ type Channel @entity {
 
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
+
+  "Token issued by channel if any"
+  creatorToken: TokenChannel @derivedFrom(field: "channel")
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

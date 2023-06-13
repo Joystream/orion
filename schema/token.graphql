@@ -30,10 +30,10 @@ type Token @entity {
   totalSupply: BigInt!
 
   "sales issued for this token"
-  sale: [Sale!] @derivedFrom(field: "token")
+  sales: [Sale!] @derivedFrom(field: "token")
 
   "symbol for the token uniqueness guaranteed by runtime"
-  symbol: String! @index
+  symbol: String @index
 
   "access status invite only vs anyone"
   isInviteOnly: Boolean!
@@ -42,13 +42,13 @@ type Token @entity {
   annualCreatorReward: Int!
 
   "revenue share ratio between creator and holder"
-  revenueShareRatioPercent: Int!
+  revenueShareRatioPermill: Int!
 
   "revenue shares issued for this token"
-  revenueShare: [RevenueShare!] @derivedFrom(field: "token")
+  revenueShares: [RevenueShare!] @derivedFrom(field: "token")
 
   "amm curves issued for this token"
-  ammCurve: [AmmCurve!] @derivedFrom(field: "token")
+  ammCurves: [AmmCurve!] @derivedFrom(field: "token")
 
   "date at which this token was created"
   createdAt: DateTime!
@@ -150,7 +150,7 @@ type RevenueShare @entity {
   finalized: Boolean!
 }
 
-type Benefit @entity {
+type Benefit @entity @index(fields: ["token", "displayOrder"], unique: true) {
   "counter"
   id: ID!
 
@@ -360,9 +360,7 @@ type InitialIssuanceVestingSource @variant {
 
 union VestingSource = InitialIssuanceVestingSource | IssuerTransferVestingSource | SaleVestingSource
 
-type VestingSchedule
-  @entity
-  @index(fields: ["cliffBlock", "vestingDurationBlocks", "cliffPercent"]) {
+type VestingSchedule @entity {
   "counter"
   id: ID!
 

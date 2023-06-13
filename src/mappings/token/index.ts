@@ -18,18 +18,22 @@ import {
   Video,
   TrailerVideo,
   InitialIssuanceVestingSource,
+  SaleVestingSource,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
   burnFromVesting,
   createAccount,
+  getTokenAccountByMemberByToken,
   getTokenAccountByMemberByTokenOrFail,
   processValidatedTransfers,
   VestingScheduleData,
 } from './utils'
 import { deserializeMetadata } from '../utils'
-import { SaleMetadata, TokenMetadata } from '@joystream/metadata-protobuf'
+import { SaleMetadata, CreatorTokenIssuerRemarked } from '@joystream/metadata-protobuf'
 import { isSet } from 'lodash'
+
+export const MAX_NUMBER_OF_BENEFITS = 10
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -51,13 +55,14 @@ export async function processTokenIssuedEvent({
     status: TokenStatus.IDLE,
     createdAt: new Date(block.timestamp),
     totalSupply,
-    revenueShareRatioPercent: revenueSplitRate,
+    revenueShareRatioPermill: revenueSplitRate,
     symbol: symbol.toString(),
     annualCreatorReward: patronageRate,
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
     numberOfVestedTransferIssued: 0,
+    numberOfRevenueShareActivations: 0,
   })
 
   // create accounts for allocation
@@ -66,7 +71,12 @@ export async function processTokenIssuedEvent({
     if (allocation.vestingScheduleParams) {
       const vestingData = new VestingScheduleData(allocation.vestingScheduleParams, block.height)
       overlay.getRepository(VestingSchedule).new({
-        ...vestingData,
+        id: vestingData.id,
+        cliffBlock: vestingData.cliffBlock,
+        cliffDurationBlocks: vestingData.cliffDuration,
+        cliffPercent: vestingData.cliffPercent,
+        endsAt: vestingData.endsAt,
+        vestingDurationBlocks: vestingData.duration,
       })
       await addVestingScheduleToAccount(
         overlay,
@@ -103,12 +113,8 @@ export async function processTokenAmountTransferredEvent({
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(overlay, sourceMemberId, tokenId)
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
-  sourceAccount.totalAmount -= validatedTransfers.reduce(
-    (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
-    BigInt(0)
-  )
 
-  await processValidatedTransfers(overlay, token, validatedTransfers, block.height)
+  await processValidatedTransfers(overlay, token, sourceAccount, validatedTransfers, block.height)
 }
 
 export async function processTokenAmountTransferredByIssuerEvent({
@@ -120,12 +126,8 @@ export async function processTokenAmountTransferredByIssuerEvent({
 }: EventHandlerContext<'ProjectToken.TokenAmountTransferredByIssuer'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(overlay, sourceMemberId, tokenId)
-  sourceAccount.totalAmount -= validatedTransfers.reduce(
-    (acc, [, validatedPayment]) => acc + validatedPayment.payment.amount,
-    BigInt(0)
-  )
   token.numberOfVestedTransferIssued += 1
-  await processValidatedTransfers(overlay, token, validatedTransfers, block.height)
+  await processValidatedTransfers(overlay, token, sourceAccount, validatedTransfers, block.height)
 }
 
 export async function processTokenDeissuedEvent({
@@ -142,8 +144,10 @@ export async function processAccountDustedByEvent({
     asV1000: [tokenId, dustedAccountId, , ,],
   },
 }: EventHandlerContext<'ProjectToken.AccountDustedBy'>) {
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, dustedAccountId, tokenId)
   account.deleted = true
+  token.accountsNum -= 1
 }
 
 export async function processAmmActivatedEvent({
@@ -176,25 +180,6 @@ export async function processTokenSaleInitializedEvent({
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   const fundsSourceMemberId = tokenSale.tokensSource
 
-  if (tokenSale.vestingScheduleParams !== undefined) {
-    const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams, block.height)
-
-    const vesting = overlay.getRepository(VestingSchedule).new({
-      id: vestingData.id,
-      endsAt: vestingData.endsAt,
-      cliffBlock: vestingData.cliffBlock,
-      vestingDurationBlocks: vestingData.duration,
-      cliffPercent: vestingData.cliffPercent,
-      cliffDurationBlocks: vestingData.cliffDuration,
-    })
-
-    overlay.getRepository(VestedSale).new({
-      id: overlay.getRepository(VestedSale).getNewEntityId(),
-      saleId: tokenId.toString(),
-      vestingId: vesting.id,
-    })
-  }
-
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(
     overlay,
     fundsSourceMemberId,
@@ -217,6 +202,25 @@ export async function processTokenSaleInitializedEvent({
     fundsSourceAccountId: sourceAccount.id,
   })
 
+
+  if (tokenSale.vestingScheduleParams !== undefined) {
+    const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams, block.height)
+
+    const vesting = overlay.getRepository(VestingSchedule).new({
+      id: vestingData.id,
+      endsAt: vestingData.endsAt,
+      cliffBlock: vestingData.cliffBlock,
+      vestingDurationBlocks: vestingData.duration,
+      cliffPercent: vestingData.cliffPercent,
+      cliffDurationBlocks: vestingData.cliffDuration,
+    })
+
+    overlay.getRepository(VestedSale).new({
+      id: overlay.getRepository(VestedSale).getNewEntityId(),
+      saleId: sale.id.toString(),
+      vestingId: vesting.id,
+    })
+  }
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.SALE
   token.currentSaleId = sale.id
@@ -224,8 +228,8 @@ export async function processTokenSaleInitializedEvent({
   if (metadataBytes) {
     const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
     if (metadata) {
-      if (isSet(metadata!.termsAndConditions)) {
-        sale.termsAndConditions = metadata!.termsAndConditions.toString()
+      if (isSet(metadata.termsAndConditions)) {
+        sale.termsAndConditions = metadata.termsAndConditions.toString()
       }
     }
   }
@@ -267,16 +271,15 @@ export async function processTokensBoughtOnAmmEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply += crtMinted
 
-  let buyerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
+  let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     buyerAccount = createAccount(overlay, token, memberId, crtMinted)
   } else {
     buyerAccount.totalAmount += crtMinted
   }
 
-  const activeAmm = (
-    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
-  ).filter((amm) => !amm.finalized)[0]
+  const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
+
   activeAmm.mintedByAmm += crtMinted
   overlay.getRepository(AmmTransaction).new({
     ammId: activeAmm.id,
@@ -286,7 +289,7 @@ export async function processTokensBoughtOnAmmEvent({
     createdIn: block.height,
     quantity: crtMinted,
     pricePaid: joysDeposited,
-    pricePerUnit: crtMinted / joysDeposited, // truncates decimal values
+    pricePerUnit: joysDeposited / crtMinted, // truncates decimal values
   })
 }
 
@@ -299,9 +302,7 @@ export async function processTokensSoldOnAmmEvent({
 }: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= crtBurned
-  const activeAmm = (
-    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
-  ).filter((amm) => !amm.finalized)[0]
+  const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
   const ammId = activeAmm.id
 
   const sellerAccount = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
@@ -329,17 +330,12 @@ export async function processTokensPurchasedOnSaleEvent({
     asV1000: [tokenId, , amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
-  const buyerAccounts =
-    (
-      await overlay.getRepository(TokenAccount).getManyByRelation('memberId', memberId.toString())
-    ).filter((account) => account.tokenId === tokenId.toString() && !account.deleted)
-  let buyerAccount = buyerAccounts.length > 0 ? buyerAccounts[0] : undefined
-
+  let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
     buyerAccount = createAccount(overlay, token, memberId, amountPurchased)
   } else {
-    buyerAccount!.totalAmount += amountPurchased
+    buyerAccount.totalAmount += amountPurchased
   }
 
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
@@ -357,7 +353,13 @@ export async function processTokensPurchasedOnSaleEvent({
   const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', sale.id)
 
   if (vestingForSale !== undefined) {
-    // add vesting to account
+    addVestingScheduleToAccount(
+      overlay,
+      buyerAccount,
+      vestingForSale.vestingId,
+      amountPurchased,
+      new SaleVestingSource
+    )
   }
 }
 
@@ -422,12 +424,11 @@ export async function processAmmDeactivatedEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   token.totalSupply -= burnedAmount
   token.status = TokenStatus.IDLE
-  token.currentAmmSaleId = null
 
-  const activeAmm = (
-    await overlay.getRepository(AmmCurve).getManyByRelation('tokenId', token.id)
-  ).filter((amm) => !amm.finalized)[0]
+  const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
   activeAmm.finalized = true
+
+  token.currentAmmSaleId = null
 }
 
 export async function processTokensBurnedEvent({
@@ -492,9 +493,7 @@ export async function processRevenueSplitFinalizedEvent({
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  const revenueShare = (
-    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
-  ).filter((share) => !share.finalized)[0]
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
   revenueShare.finalized = true
   token.currentRenvenueShareId = null
 }
@@ -507,13 +506,9 @@ export async function processUserParticipatedInSplitEvent({
   },
 }: EventHandlerContext<'ProjectToken.UserParticipatedInSplit'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  const account = (
-    await overlay.getRepository(TokenAccount).getManyByRelation('tokenId', token.id)
-  ).filter((account) => account.memberId === memberId.toString() && !account.deleted)[0]
+  const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
 
-  const revenueShare = (
-    await overlay.getRepository(RevenueShare).getManyByRelation('tokenId', token.id)
-  ).filter((share) => !share.finalized)[0]
+  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
   revenueShare.claimed += joyDividend
   revenueShare.participantsNum += 1
 
@@ -534,47 +529,72 @@ export async function processCreatorTokenIssuerRemarkedEvent({
     asV2002: [tokenId, metadataBytes],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
-  const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
-  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-
-  if (!metadata) {
+  const creatorRemarked = deserializeMetadata(CreatorTokenIssuerRemarked, metadataBytes)
+  if (creatorRemarked === null) {
+    return
+  }
+  const metadata = creatorRemarked.updateTokenMetadata
+  if (metadata === null && metadata!.newMetadata === null) {
     return
   }
 
-  if (isSet(metadata.description)) {
-    token.description = metadata.description
+  const newMetadata = metadata!.newMetadata!
+
+  const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+  if (isSet(newMetadata.description)) {
+    token.description = newMetadata.description
   }
 
-  if (isSet(metadata.benefits)) {
-    for (const benefit of metadata!.benefits!) {
-      overlay.getRepository(Benefit).new({
-        id: overlay.getRepository(Benefit).getNewEntityId(),
-        title: benefit.title ? benefit.title! : undefined,
-        description: benefit.description ? benefit.description! : undefined,
-        emojiCode: benefit.emoji ? benefit.emoji! : undefined,
-        displayOrder: benefit.displayOrder ? benefit.displayOrder! : undefined,
-        tokenId: token.id,
-      })
+  if (isSet(newMetadata.benefits)) {
+    for (const benefit of newMetadata.benefits) {
+      if (benefit.displayOrder !== null && benefit.displayOrder < MAX_NUMBER_OF_BENEFITS) {
+        
+        // remove existing benefit with the same display order (if exists)
+        const existingBenefit = (await overlay
+          .getRepository(Benefit)
+          .getManyByRelation('tokenId', token.id)).find((b) => b.displayOrder === benefit.displayOrder)
+
+        if (existingBenefit !== undefined) {
+          overlay.getRepository(Benefit).remove(existingBenefit)
+        }
+
+        // if the benefit title is null, it means we want to remove the benefit
+        if (benefit.title !== null) {
+          overlay.getRepository(Benefit).new({
+            id: overlay.getRepository(Benefit).getNewEntityId(),
+            title: benefit.title,
+            description: benefit.description,
+            emojiCode: benefit.emoji,
+            displayOrder: benefit.displayOrder,
+            tokenId: token.id,
+          })
+        }
+      }
     }
   }
 
-  if (isSet(metadata.whitelistApplicationNote)) {
-    token.whitelistApplicantNote = metadata.whitelistApplicationNote || null
+  if (isSet(newMetadata.whitelistApplicationNote)) {
+    token.whitelistApplicantNote = newMetadata.whitelistApplicationNote || null
   }
 
-  if (isSet(metadata.whitelistApplicationApplyLink)) {
-    token.whitelistApplicantLink = metadata.whitelistApplicationApplyLink || null
+  if (isSet(newMetadata.whitelistApplicationApplyLink)) {
+    token.whitelistApplicantLink = newMetadata.whitelistApplicationApplyLink || null
   }
 
-  if (isSet(metadata.avatarUri)) {
-    token.avatar = metadata!.avatarUri
-      ? new TokenAvatarUri({ avatarUri: metadata.avatarUri })
+  if (isSet(newMetadata.avatarUri)) {
+    token.avatar = newMetadata.avatarUri
+      ? new TokenAvatarUri({ avatarUri: newMetadata.avatarUri })
       : null
   }
 
-  if (isSet(metadata.trailerVideoId)) {
-    const video = await overlay.getRepository(Video).getByIdOrFail(metadata.trailerVideoId)
+  if (isSet(newMetadata.trailerVideoId)) {
+    const video = await overlay.getRepository(Video).getById(newMetadata.trailerVideoId)
     if (video) {
+
+      const trailerVideoRepository = overlay.getRepository(TrailerVideo)
+      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
+      trailerVideoRepository.remove(oldTrailer)
+
       const id = overlay.getRepository(TrailerVideo).getNewEntityId()
       overlay.getRepository(TrailerVideo).new({
         id,
