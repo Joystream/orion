@@ -1,13 +1,17 @@
-name: Trigger external integration tests
+name: Run Orion integration tests
 
-on: [push, pull_request_target]
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request_target:
 
 env:
   INTEGRATION_TESTS_BRANCH: ${{ vars.INTEGRATION_TESTS_BRANCH }}
   SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  trigger-tests:
+  run-tests:
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref_name }}
