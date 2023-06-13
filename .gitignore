@@ -7,7 +7,8 @@
 # IDE files
 /.idea
 src/model/generated
-src/model/generated/index
+src/model/generated/index.ts
+src/model/generated/.DS_STORE
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data

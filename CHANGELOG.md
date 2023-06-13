@@ -264,3 +264,4 @@ For detailed overview of the new architecture, see the [developer guide](docs/de
 - `setVideoViewPerIpTimeLimit` - allows specifying the time after which a video view triggered from the same ip address will be counted again (see: `addVideoView`)
 - `excludeContent` - allows excluding specified channels/videos/comments from all query results. Can be used as a gateway-level mechanism to censor some of the content. Comments are the only entities that don't get completely filtered-out from query results when excluded. Instead, their `text` becomes hidden and `isExcluded` property is set to `true`.
 - `restoreContent` - effectively the opposite of `excludeContent`, can be used to make content appear in the query results again (if previously excluded).
+- `setFeaturedNfts` - allows the operator to provide the list of nfts (ids) that are currently featured by the Gateway. This will affect the `isFeatured` propety of the `OwnedNft` entity.
