@@ -33,8 +33,6 @@ import { deserializeMetadata } from '../utils'
 import { SaleMetadata, CreatorTokenIssuerRemarked } from '@joystream/metadata-protobuf'
 import { isSet } from 'lodash'
 
-export const MAX_NUMBER_OF_BENEFITS = 10
-
 export async function processTokenIssuedEvent({
   overlay,
   block,
@@ -549,7 +547,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
 
   if (isSet(newMetadata.benefits)) {
     for (const benefit of newMetadata.benefits) {
-      if (benefit.displayOrder !== null && benefit.displayOrder < MAX_NUMBER_OF_BENEFITS) {
+      if (benefit.displayOrder !== null) {
         // remove existing benefit with the same display order (if exists)
         const existingBenefit = (
           await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
