@@ -87,9 +87,9 @@ jobs:
           workflow: run-network-tests.yml
       - name: Load Joystream node docker image
         run: |
-          DOCKER_IMAGE_FILE=$(ls | grep joystream-node-docker-image.tar.gz)
-          JOYSTREAM_RUNTIME_SHA=$(echo $DOCKER_IMAGE_FILE | cut -d '-' -f1)
-          docker load -i $DOCKER_IMAGE_FILE
+          DOCKER_IMAGE_DIR=$(ls | grep joystream-node-docker-image.tar.gz)
+          JOYSTREAM_RUNTIME_SHA=$(echo $DOCKER_IMAGE_DIR | cut -d '-' -f1)
+          docker load -i "$DOCKER_IMAGE_DIR/joystream-node-docker-image.tar.gz"
           echo "JOYSTREAM_RUNTIME_SHA=$JOYSTREAM_RUNTIME_SHA" >> $GITHUB_ENV
       - name: Install packages and dependencies
         run: yarn build:packages
