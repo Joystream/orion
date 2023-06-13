@@ -83,13 +83,13 @@ module.exports = class Views2000000000000 {
       amm_transaction: [`EXISTS(SELECT 1 FROM "amm" WHERE "id"="amm_id")`],
       sale: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       vested_sale: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
-      sale_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="sale_id")`],
-      amm_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="amm_id")`],
+      sale_transaction: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "amm" WHERE "id"="amm_id")`],
       token_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       token_channel: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      vested_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      vesting_schedule: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      revenue_share_participation: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      vested_account: [`EXISTS(SELECT 1 FROM "account" WHERE "id"="account_id")`],
+      vesting_schedule: [`EXISTS(SELECT 1 FROM "token")`], // hide vesting if there is at least one token
+      revenue_share_participation: [`EXISTS(SELECT 1 FROM "revenue_share" WHERE "id"="revenue_share_id")`],
     }
   }
 

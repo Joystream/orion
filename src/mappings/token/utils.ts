@@ -56,11 +56,11 @@ export async function burnFromVesting(
   accountId: string,
   burnedAmount: bigint
 ) {
-  const vestingSchedulesForAccount = (await overlay
-    .getRepository(VestedAccount)
-    .getManyByRelation('accountId', accountId)).sort((a, b) =>  {
-      return BigInt(a.id) - BigInt(b.id) > 0 ? 1 : -1
-    })
+  const vestingSchedulesForAccount = (
+    await overlay.getRepository(VestedAccount).getManyByRelation('accountId', accountId)
+  ).sort((a, b) => {
+    return BigInt(a.id) - BigInt(b.id) > 0 ? 1 : -1
+  })
   let tallyBurnedAmount = burnedAmount
   for (const vesting of vestingSchedulesForAccount) {
     if (tallyBurnedAmount === BigInt(0)) {
@@ -87,9 +87,11 @@ export async function addVestingScheduleToAccount(
     .getManyByRelation('accountId', account.id)
 
   const vestedAccountToBeUpdated = existingVestingSchedulesForAccount.filter((vestedAccount) => {
-    return vestedAccount.vestingSource.isTypeOf === 'SaleVestingSource' &&
+    return (
+      vestedAccount.vestingSource.isTypeOf === 'SaleVestingSource' &&
       vestingSource.isTypeOf === 'SaleVestingSource' &&
       vestedAccount.vestingSource.sale === vestingSource.sale
+    )
   })
 
   if (vestedAccountToBeUpdated.length > 0) {
@@ -128,7 +130,6 @@ export function createAccount(
   return newAccount
 }
 
-
 export async function getTokenAccountByMemberByToken(
   overlay: EntityManagerOverlay,
   memberId: bigint,
@@ -150,9 +151,7 @@ export async function getTokenAccountByMemberByTokenOrFail(
 ): Promise<Flat<TokenAccount>> {
   const result = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
   if (result === undefined) {
-    criticalError(
-      `Token account for member ${memberId} and token ${tokenId} does not exist.`
-    )
+    criticalError(`Token account for member ${memberId} and token ${tokenId} does not exist.`)
   } else {
     return result
   }
