@@ -113,7 +113,6 @@ export async function processTokenAmountTransferredEvent({
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(overlay, sourceMemberId, tokenId)
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
 
-
   await processValidatedTransfers(overlay, token, sourceAccount, validatedTransfers, block.height)
 }
 
@@ -201,7 +200,6 @@ export async function processTokenSaleInitializedEvent({
     termsAndConditions: '',
     fundsSourceAccountId: sourceAccount.id,
   })
-
 
   if (tokenSale.vestingScheduleParams !== undefined) {
     const vestingData = new VestingScheduleData(tokenSale.vestingScheduleParams, block.height)
@@ -358,7 +356,7 @@ export async function processTokensPurchasedOnSaleEvent({
       buyerAccount,
       vestingForSale.vestingId,
       amountPurchased,
-      new SaleVestingSource
+      new SaleVestingSource()
     )
   }
 }
@@ -493,7 +491,9 @@ export async function processRevenueSplitFinalizedEvent({
   },
 }: EventHandlerContext<'ProjectToken.RevenueSplitFinalized'>) {
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
-  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
+  const revenueShare = await overlay
+    .getRepository(RevenueShare)
+    .getByIdOrFail(token.currentRenvenueShareId!)
   revenueShare.finalized = true
   token.currentRenvenueShareId = null
 }
@@ -508,7 +508,9 @@ export async function processUserParticipatedInSplitEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
 
-  const revenueShare = await overlay.getRepository(RevenueShare).getByIdOrFail(token.currentRenvenueShareId!)
+  const revenueShare = await overlay
+    .getRepository(RevenueShare)
+    .getByIdOrFail(token.currentRenvenueShareId!)
   revenueShare.claimed += joyDividend
   revenueShare.participantsNum += 1
 
@@ -548,11 +550,10 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (isSet(newMetadata.benefits)) {
     for (const benefit of newMetadata.benefits) {
       if (benefit.displayOrder !== null && benefit.displayOrder < MAX_NUMBER_OF_BENEFITS) {
-        
         // remove existing benefit with the same display order (if exists)
-        const existingBenefit = (await overlay
-          .getRepository(Benefit)
-          .getManyByRelation('tokenId', token.id)).find((b) => b.displayOrder === benefit.displayOrder)
+        const existingBenefit = (
+          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
+        ).find((b) => b.displayOrder === benefit.displayOrder)
 
         if (existingBenefit !== undefined) {
           overlay.getRepository(Benefit).remove(existingBenefit)
@@ -590,7 +591,6 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   if (isSet(newMetadata.trailerVideoId)) {
     const video = await overlay.getRepository(Video).getById(newMetadata.trailerVideoId)
     if (video) {
-
       const trailerVideoRepository = overlay.getRepository(TrailerVideo)
       const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
       trailerVideoRepository.remove(oldTrailer)

@@ -68,26 +68,23 @@ module.exports = class Views2000000000000 {
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       trailer_video: [
         `EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`,
-        `EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`
+        `EXISTS(SELECT 1 FROM "video" WHERE "id="video_id")`
       ],
-      video_view_event: ['FALSE'],
-      channel_follow: ['FALSE'],
-      report: ['FALSE'],
-      token_channel: ['EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")'],
-      token: [`EXISTS(SELECT 1 FROM "token_channel" WHERE "token_channel"."token_id"="this"."id")`],
+      token: [`EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`],
       revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       benefit: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       amm_curve: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      amm_transaction: [`EXISTS(SELECT 1 FROM "amm" WHERE "id"="amm_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       sale: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
-      vested_sale: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
-      sale_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="sale_id")`],
-      amm_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="amm_id")`],
+      vested_sale: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      sale_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       token_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       token_channel: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       vested_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       vesting_schedule: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       revenue_share_participation: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       // HIDDEN entities
       nft_featuring_request: ['FALSE'],
       video_view_event: ['FALSE'],
@@ -98,8 +95,9 @@ module.exports = class Views2000000000000 {
       account: ['FALSE'],
       token: ['FALSE'],
       gateway_config: ['FALSE'],
-    }
   }
+}
+
 
   async up(db) {
     const viewDefinitions = this.getViewDefinitions(db)
