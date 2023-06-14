@@ -7,7 +7,7 @@ If a config value is changed this way, it will be persisted in the database (eve
 For example:
 - You can change the value of `RELEVANCE_WEIGHTS` config variable via `setVideoWeights` mutation
 - You can change the value of `KILL_SWITCH_ON` config variable via `setKillSwitch` mutation
-- You can change the value of `VIDEO_VIEW_PER_IP_TIME_LIMIT` config variable via `setVideoViewPerIpTimeLimit` mutation
+- You can change the value of `VIDEO_VIEW_PER_USER_TIME_LIMIT` config variable via `setVideoViewPerUserTimeLimit` mutation
 - You can change the value of `SUPPORT_NO_CATEGORY_VIDEOS` and `SUPPORT_NEW_CATEGORIES` config variables via `setSupportedCategories` mutation
 - etc.
 

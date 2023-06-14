@@ -121,21 +121,18 @@ export class FollowChannelArgs {
 export class UnfollowChannelArgs {
   @Field(() => String, { nullable: false })
   channelId!: string
-
-  @Field(() => String, { nullable: false })
-  token!: string
 }
 
 @ObjectType()
 export class ChannelFollowResult {
   @Field(() => String, { nullable: false })
+  followId!: string
+
+  @Field(() => String, { nullable: false })
   channelId!: string
 
   @Field(() => Int, { nullable: false })
   follows!: number
-
-  @Field(() => String, { nullable: false })
-  cancelToken!: string
 
   @Field(() => Boolean, { nullable: false })
   added!: boolean

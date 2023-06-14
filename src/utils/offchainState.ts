@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import { uniqueId } from './crypto'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -20,7 +21,7 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -28,7 +29,7 @@ const exportedStateMap = {
 }
 
 type ExportedData = {
-  [K in keyof typeof exportedStateMap]: {
+  [K in keyof typeof exportedStateMap]?: {
     type: 'insert' | 'update'
     values: Record<string, unknown>[]
   }
@@ -43,13 +44,37 @@ type ExportedState = {
 type MigrationFunction = (data: ExportedData, em: EntityManager) => ExportedData
 type Migrations = Record<string, MigrationFunction>
 
+export const V2_MIGRATION_USER_PREFIX = 'v2-migration-'
+function migrateExportDataToV300(data: ExportedData): ExportedData {
+  const migrationUser = {
+    id: `${V2_MIGRATION_USER_PREFIX}${uniqueId()}`,
+    isRoot: false,
+  }
+  data.User = { type: 'insert', values: [migrationUser] }
+  const replaceIpWithUserId = (v: Record<string, unknown>) => {
+    delete v.ip
+    v.userId = migrationUser.id
+  }
+  data.VideoViewEvent?.values.forEach(replaceIpWithUserId)
+  data.Report?.values.forEach(replaceIpWithUserId)
+  data.NftFeaturingRequest?.values.forEach(replaceIpWithUserId)
+
+  // We don't migrate channel follows from v2, because in v3
+  // an account is required in order to follow a channel
+  delete data.ChannelFollow
+  data.Channel?.values.forEach((v) => {
+    v.follows_num = 0
+  })
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
-    // Example:
-    // '2.3.0': migrateExportDataV230,
+    '3.0.0': migrateExportDataToV300,
   }
 
   public get isImported(): boolean {
@@ -186,7 +211,7 @@ export class OffchainState {
         // For inserts we also use batches, but this is because otherwise the query may fail
         // if the number of entities is very large
         const batchSize = 1000
-        let batchNumber = 1
+        let batchNumber = 0
         while (values.length) {
           ++batchNumber
           const batch = values.splice(0, batchSize)

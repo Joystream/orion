@@ -19,9 +19,9 @@ import {
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
   SetVideoHeroResult,
-  SetVideoViewPerIpTimeLimitInput,
+  SetVideoViewPerUserTimeLimitInput,
   SetVideoWeightsInput,
-  VideoViewPerIpTimeLimit,
+  VideoViewPerUserTimeLimit,
   VideoWeights,
 } from './types'
 import { config, ConfigVariable } from '../../../utils/config'
@@ -81,22 +81,14 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
-  @Mutation(() => VideoViewPerIpTimeLimit)
-  async setVideoViewPerIpTimeLimit(
-    @Args() args: SetVideoViewPerIpTimeLimitInput
-  ): Promise<VideoViewPerIpTimeLimit> {
+  @Mutation(() => VideoViewPerUserTimeLimit)
+  async setVideoViewPerUserTimeLimit(
+    @Args() args: SetVideoViewPerUserTimeLimitInput
+  ): Promise<VideoViewPerUserTimeLimit> {
     const em = await this.em()
-    await config.set(ConfigVariable.VideoViewPerIpTimeLimit, args.limitInSeconds, em)
+    await config.set(ConfigVariable.VideoViewPerUserTimeLimit, args.limitInSeconds, em)
     return {
-      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
-    }
-  }
-
-  @Query(() => VideoViewPerIpTimeLimit)
-  async getVideoViewPerIpTimeLimit(): Promise<VideoViewPerIpTimeLimit> {
-    const em = await this.em()
-    return {
-      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
+      limitInSeconds: await config.get(ConfigVariable.VideoViewPerUserTimeLimit, em),
     }
   }
 

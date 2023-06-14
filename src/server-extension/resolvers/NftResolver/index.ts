@@ -5,7 +5,6 @@ import { Context } from '../../check'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { NftFeaturingRequest, OwnedNft as OwnedNftEntity } from '../../../model'
 import { OwnedNft } from '../baseTypes'
-import { randomAsHex } from '@polkadot/util-crypto'
 import { GraphQLResolveInfo } from 'graphql'
 import { model } from '../model'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
@@ -13,6 +12,7 @@ import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
+import { uniqueId } from '../../../utils/crypto'
 
 @Resolver()
 export class NftResolver {
@@ -81,7 +81,7 @@ export class NftResolver {
     @Ctx() ctx: Context
   ): Promise<NftFeaturedRequstInfo> {
     const em = await this.em()
-    const { ip } = ctx
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       const nft = await em.findOne(OwnedNftEntity, {
         where: { id: nftId },
@@ -92,7 +92,7 @@ export class NftResolver {
       }
 
       const existingRequest = await em.findOne(NftFeaturingRequest, {
-        where: { ip, nftId },
+        where: { userId: user.id, nftId },
       })
 
       if (existingRequest) {
@@ -100,18 +100,17 @@ export class NftResolver {
           id: existingRequest.id,
           nftId,
           created: false,
-          reporterIp: existingRequest.ip,
           createdAt: existingRequest.timestamp,
           rationale: existingRequest.rationale,
         }
       }
 
       const newRequest = new NftFeaturingRequest({
-        id: randomAsHex(16).replace('0x', ''),
+        id: uniqueId(8),
         nftId,
-        ip,
         rationale,
         timestamp: new Date(),
+        userId: user.id,
       })
       await em.save(newRequest)
 
@@ -121,7 +120,6 @@ export class NftResolver {
         created: true,
         createdAt: newRequest.timestamp,
         rationale,
-        reporterIp: ip,
       }
     })
   }
