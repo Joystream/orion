@@ -39,9 +39,6 @@ export class NftFeaturedRequstInfo {
   @Field(() => DateTime, { nullable: false })
   createdAt!: Date
 
-  @Field(() => String, { nullable: false })
-  reporterIp!: string
-
   @Field(() => Boolean, { nullable: false })
   created!: boolean
 }

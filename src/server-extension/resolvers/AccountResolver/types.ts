@@ -1,6 +1,15 @@
 import { Field, ObjectType } from 'type-graphql'
 
 @ObjectType()
+export class FollowedChannel {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => String, { nullable: false })
+  timestamp!: string
+}
+
+@ObjectType()
 export class AccountData {
   @Field(() => String, { nullable: false })
   id!: string
@@ -16,4 +25,7 @@ export class AccountData {
 
   @Field(() => String, { nullable: false })
   membershipId: string
+
+  @Field(() => [FollowedChannel], { nullable: false })
+  followedChannels: FollowedChannel[]
 }

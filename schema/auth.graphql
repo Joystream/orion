@@ -7,6 +7,18 @@ type User @entity {
 
   "The account associated with the user (if any)"
   account: Account @derivedFrom(field: "user")
+
+  "User's channel follows"
+  channelFollows: [ChannelFollow!]! @derivedFrom(field: "user")
+
+  "Video views associated with the user"
+  videoViewEvents: [VideoViewEvent!]! @derivedFrom(field: "user")
+
+  "Reports associated with the user"
+  reports: [Report!]! @derivedFrom(field: "user")
+
+  "NFT featuring requests associated with the user"
+  nftFeaturingRequests: [NftFeaturingRequest!]! @derivedFrom(field: "user")
 }
 
 type EncryptionArtifacts @entity {
