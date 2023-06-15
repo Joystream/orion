@@ -28,7 +28,6 @@ import {
   getTokenAccountByMemberByTokenOrFail,
   processValidatedTransfers,
   VestingScheduleData,
-  issuedRevenueShareForToken,
 } from './utils'
 import { deserializeMetadata } from '../utils'
 import { SaleMetadata, CreatorTokenIssuerRemarked } from '@joystream/metadata-protobuf'
@@ -61,7 +60,6 @@ export async function processTokenIssuedEvent({
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
     numberOfVestedTransferIssued: 0,
-    numberOfRevenueShareActivations: 0,
   })
 
   // create accounts for allocation
@@ -103,6 +101,7 @@ export async function processCreatorTokenIssuedEvent({
 
 export async function processTokenAmountTransferredEvent({
   overlay,
+  block,
   event: {
     asV1000: [tokenId, sourceMemberId, validatedTransfers],
   },
@@ -398,7 +397,7 @@ export async function processRevenueSplitIssuedEvent({
     endsAt,
   })
 
-  token.currentRenvenueShareId = id
+  token.currentRevenueShareId = id
 }
 
 export async function processMemberJoinedWhitelistEvent({
@@ -491,9 +490,9 @@ export async function processRevenueSplitFinalizedEvent({
   const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
   const revenueShare = await overlay
     .getRepository(RevenueShare)
-    .getByIdOrFail(token.currentRenvenueShareId!)
+    .getByIdOrFail(token.currentRevenueShareId!)
   revenueShare.finalized = true
-  token.currentRenvenueShareId = null
+  token.currentRevenueShareId = null
 }
 
 export async function processUserParticipatedInSplitEvent({
@@ -508,7 +507,7 @@ export async function processUserParticipatedInSplitEvent({
 
   const revenueShare = await overlay
     .getRepository(RevenueShare)
-    .getByIdOrFail(token.currentRenvenueShareId!)
+    .getByIdOrFail(token.currentRevenueShareId!)
   revenueShare.claimed += joyDividend
   revenueShare.participantsNum += 1
 

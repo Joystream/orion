@@ -77,9 +77,6 @@ type Token @entity {
   "number of accounts to avoid aggregate COUNT"
   accountsNum: Int!
 
-  "number of revenue shares issued"
-  numberOfRevenueShareActivations: Int!
-
   "whether it has been deissued or not"
   deissued: Boolean!
 
@@ -90,7 +87,7 @@ type Token @entity {
   currentSale: Sale
 
   "current revenue share if ongoing"
-  currentRenvenueShare: RevenueShare
+  currentRevenueShare: RevenueShare
 
   "number of vested transfer completed"
   numberOfVestedTransferIssued: Int!

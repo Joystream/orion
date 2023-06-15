@@ -97,14 +97,14 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert.equal(qToken!.id, tokenId.toString())
     assert.equal(qToken!.status, TokenStatus.Idle)
-    assert.equal(qToken!.revenueShareNonce, 0)
-    assert.equal(qToken!.revenueShareRatioPercent, revenueSplitRate.toNumber())
+    assert.equal(qToken!.revenueShareRatioPermill, revenueSplitRate.toNumber())
     assert.equal(qToken!.totalSupply, totalSupply.toString())
-    assert.equal(qToken!.annualCreatorReward, patronageRate.toString())
+    assert.equal(qToken!.annualCreatorReward, patronageRate.toNumber())
     // assert.equal(qToken!.createdAt, new Date(this.events[0].blockTimestamp * 1000))
     assert.equal(qToken!.isInviteOnly, transferPolicy.isPermissioned)
     assert.equal(qToken!.accountsNum, initialAllocation.size)
     assert.equal(qToken!.deissued, false)
+    assert.equal(qToken!.numberOfVestedTransferIssued, 0)
 
     qAccounts.forEach((qAccount, i) => {
       assert.isNotNull(qAccount)
