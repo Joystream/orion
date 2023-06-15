@@ -14,6 +14,12 @@ export class SetVideoWeightsInput {
 
   @Field(() => Float, { nullable: false })
   reactionsWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  joysteamTimestampSubWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  ytTimestampSubWeight!: number
 }
 
 @ObjectType()
