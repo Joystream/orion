@@ -26,6 +26,7 @@ fragment FullChannelFields on Channel {
   description
   isPublic
   isCensored
+  cumulativeRewardClaimed
   language # CHANGE: Language is no longer a separate entity
   ownerMember {
     ...BasicMembershipFields

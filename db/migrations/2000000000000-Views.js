@@ -29,10 +29,10 @@ module.exports = class Views2000000000000 {
       comment: `
         SELECT
             ${db.connection
-              .getMetadata('Comment')
-              .columns.filter((c) => c.databaseName !== 'text')
-              .map((c) => `"${c.databaseName}"`)
-              .join(',')},
+          .getMetadata('Comment')
+          .columns.filter((c) => c.databaseName !== 'text')
+          .map((c) => `"${c.databaseName}"`)
+          .join(',')},
             CASE WHEN "is_excluded" = '1' THEN '' ELSE "comment"."text" END as "text"
         FROM
             "processor"."comment"
@@ -56,6 +56,7 @@ module.exports = class Views2000000000000 {
         `("data"->>'nft' IS NULL OR EXISTS(SELECT 1 FROM "owned_nft" WHERE "id"="data"->>'nft'))`,
         `("data"->>'auction' IS NULL OR EXISTS(SELECT 1 FROM "auction" WHERE "id"="data"->>'auction'))`,
         `("data"->>'bid' IS NULL OR EXISTS(SELECT 1 FROM "bid" WHERE "id"="data"->>'bid'))`,
+        `("data"->>'winningBid' IS NULL OR EXISTS(SELECT 1 FROM "bid" WHERE "id"="data"->>'winningBid'))`,
         `("data"->>'comment' IS NULL OR EXISTS(SELECT 1 FROM "comment" WHERE "id"="data"->>'comment'))`
       ],
       storage_data_object: [
@@ -65,11 +66,30 @@ module.exports = class Views2000000000000 {
       notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
+      nft_featuring_request: ['FALSE'],
       // HIDDEN entities
+      trailer_video: [
+        `EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`,
+        `EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")`
+      ],
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
-      nft_featuring_request: ['FALSE'],
+      token_channel: ['EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")'],
+      token: [`EXISTS(SELECT 1 FROM "token_channel" WHERE "token_channel"."token_id"="this"."id")`],
+      revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      benefit: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      amm_curve: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "amm" WHERE "id"="amm_id")`],
+      sale: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      vested_sale: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
+      sale_transaction: [`EXISTS(SELECT 1 FROM "sale" WHERE "id"="sale_id")`],
+      amm_transaction: [`EXISTS(SELECT 1 FROM "amm_curve" WHERE "id"="amm_id")`],
+      token_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      token_channel: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      vested_account: [`EXISTS(SELECT 1 FROM "token_account" WHERE "id"="account_id")`],
+      vesting_schedule: [`EXISTS(SELECT 1 FROM "token")`], // hide vesting if there is at least one token
+      revenue_share_participation: [`EXISTS(SELECT 1 FROM "revenue_share" WHERE "id"="revenue_share_id")`],
     }
   }
 

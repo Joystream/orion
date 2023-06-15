@@ -1,3 +1,108 @@
+# 2.3.0
+
+### Features:
+- **Change:**  The video relevance score formula has been updated. Now `Video.publishedBeforeJoystream` can be taken into account when calculating the value of the `newness` parameter. The new formula for `newness` is:
+    ```
+    -(dsPOJ * jcw + dsPBJ * ycw) / (jcw + ycw)
+
+    Where:
+    dsPOJ - days since published on Joystream (Video.createdAt)
+    jcw - joystream creation weight
+    dsPBJ - days since published before Joystream (Video.publishedBeforeJoystream)
+    ycw - YouTube creation weight
+    ```
+
+### Config values:
+- **Change:** `RELEVANCE_WEIGHTS` config value now has a new format:
+    ```diff
+    [
+        1, # newness weight,
+        0.03, # views weight
+        0.3, # comments weight
+        0.5, # reactions weight
+    +   [7,3] # [joystream creation weight, YouTube creation weight]
+    ]
+    ```
+    If the value of `[joystream creation weight, YouTube creation weight]` is not provided, it is set to `[7,3]` by default.
+
+### Schema/API changes:
+- **Change:** `setVideoWeights` operator mutation now accepts 2 new arguments: `joysteamTimestampSubWeight` and `ytTimestampSubWeight`
+
+### Mappings:
+- `videoRelevanceManager` is now used in `processVideoCreatedEvent` to calculate `videoRelevance` (to avoid code duplication)
+
+### DB Optimalizations:
+- Changes in `postgres.conf` to improve query execution time in current production deployments:
+    - Turn off JIT compilation which was usually uneffective
+    - Lower `random_page_cost` to `1.0`, as the database still fits into the memory
+    - Increase `shared_buffers` to `2GB` 
+- New indexes added to `db/migrations/2100000000000-Indexes.js` (`auction_type`, `member_metadata_avatar`, `owned_nft_auction`)
+
+### Fixes:
+- `scripts/generate-schema-file.sh` has been made executable w/o bash to avoid error during docker build
+- The issue w/ _Offchain State_ not being imported if the `export.json` contained empty `update` tables (an error was thrown in this case) has been fixed
+
+# 2.2.0
+
+### Features:
+- New feature: Video relevance. Video relevance is a score calculated based on the age of the video (time since upload) and the number of views, comments and reactions it has. The weight of each of these factors can be configured through `VideoRelevanceWeights` config value (using the new `setVideoWeights` mutation). The relevance score is automatically recalculated for a video:
+    - every hour,
+    - in case its number of views increased and is now divisible by `VideoRelevanceViewsTick` config value,
+    - in case its number of vidoe's reactions / comments has changed.
+
+### Config values:
+- New config value: `VideoRelevanceWeights` - used to configure the weights of the factors used to calculate video relevance score.
+- New config value: `VideoRelevanceViewsTick` - used to configure the number of views after which the video relevance score should be recalculated.
+
+### Schema/API changes:
+- New field: `Video.videoRelevance` - video relevance score.
+- New mutation: `setVideoWeights` - used to set the value of `VideoRelevanceWeights` config.
+- New query: `topSellingChannels` - used to retrieve channels with highest nft sales volume in a given period of time.
+- New query: `endingAuctionsNfts` - used to retrieve nfts that are on active english auction, ordered by the time left until the auction ends.
+- Changes to `mostViewedVideosConnection` query:
+    - `INNER JOIN` to `video_view_events` table is now used, which means videos with `0` views will no longer appear in the results;
+    - in case both `periodDays` arg is provided and `viewsNum` is part of the `orderBy` clause, the videos are now ordered by the number of views in the specified period (not the number of views in general)
+- Added integration w/ the new relevance score recalculation service in terms of recalculating scores on `addVideoView`, `setVideoReactions` and `excludeContent` mutations.
+
+### Mappings:
+- Added integration w/ the new relevance score recalculation service, responsible for recalculating the score for all videos every hour, as well as in case of the following events:
+    - `ReactVideo` metaprotocol message,
+    - `CreateComment` metaprotocol message,
+    - `DeleteComment` metaprotocol message,
+    - `ModerateComment` metaprotocol message,
+
+### Other:
+- Fixed docker build and added automatic `joystream/orion` docker image publishing to docker hub.
+- Improved data migration process during deployment w/ the new `OffchainMigration` service, which can export and import database entities as well as individual field values. 
+
+
+# 2.1.0 (Ephesus release)
+
+### Schema/API changes:
+- `cumulativeRewardClaimed` field has been added to `Channel`
+- new `event.data` types are now supported:
+    - `ChannelRewardClaimedEventData`
+    - `ChannelRewardClaimedAndWithdrawnEventData`
+    - `ChannelFundsWithdrawnEventData`
+    - `ChannelPayoutsUpdatedEventData`
+    - `ChannelPaymentMadeEventData`
+- New `MetaprotocolTransactionResult` variant: `MetaprotocolTransactionResultChannelPaid`
+- New `DataObjectType` variant: `DataObjectTypeChannelPayoutsPayload`
+
+### Mappings:
+- Added support for handling both pre and post-Ephesus version of the following events updated in Ephesus:
+    - `Members.MemberInvited`
+    - `Members.MemberRemarked`
+- New mappings for the following events:
+    - `Content.ChannelPayoutsUpdated`
+    - `Content.ChannelRewardUpdated`
+    - `Content.ChannelRewardClaimedAndWithdrawn`
+    - `Content.ChannelFundsWithdrawn`
+- Support for new `MemberRemark` metaprotocol transaction type: `makeChannelPayment` (direct channel payment) 
+
+### Bug fixes:
+- Fixed: Events that had a relationship to an auction bid through `data->>'winningBid'` were not properly hidden when the bid was excluded from the visible data thorugh `excludeContent` functionality. This was causing errors such as `Cannot return null for non-nullable field OpenAuctionBidAcceptedEventData.winningBid` when querying for `OpenAuctionBidAcceptedEventData` events.
+
 # 2.0.0
 
 Orion v2 is a major architecture change compared to Orion v1:

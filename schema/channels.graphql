@@ -59,11 +59,11 @@ type Channel @entity {
   "Number of videos ever created in this channel"
   totalVideosCreated: Int!
 
-  "creator token issued for the channel"
-  creatorToken: TokenChannel @derivedFrom(field: "channel")
+  "Cumulative rewards claimed by this channel"
+  cumulativeRewardClaimed: BigInt
 
-  "% of channel balance that the creator devotes to revenue shares"
-  revenueShareRatioPercent: Int
+  "Token issued by channel if any"
+  creatorToken: TokenChannel @derivedFrom(field: "channel")
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

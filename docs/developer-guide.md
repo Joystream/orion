@@ -77,7 +77,7 @@ make down
 ## Commands
 
 - `make typegen` - generates event types (`src/types`) based on `typegen.json` (the archive endpoint provided in `specVersions` must be pointing to a running archive)
-- `make codegen` - granetes TypeORM models based on the [input schema](#input-schema)
+- `make codegen` - generates TypeORM models based on the [input schema](#input-schema)
 - `make dbgen` - generates database migration in `db/migrations` (PostgreSQL service must be running) based on the difference between current database schema and TypeORM models
 - `make build` - builds the code
 - `make prepare` - runs `npm install + codegen + build`
@@ -244,4 +244,3 @@ Example mutation: `addVideoView` inside [`src/server-extension/resolvers/VideosR
 
 Because of [a patch](/patches/@subsquid+graphql-server+3.2.3.patch) that was added to `@subsquid/graphql-server`, the HTTP request data (like ip address, headers etc.) is accessible through GraphQL context, making it possible to introduce reusable authentication middleware.
 
-Currently in Orion v2 there is only one middleware called [`OperatorOnly`](../src/server-extension/resolvers/middleware.ts), which can be used to secure endpoints that should only be accessible for the gateway operator. Those endpoints will require the `OPERATOR_SECRET` (defined in [`.env`](.env)) to be provided in `x-operator-secret` http header.

@@ -14,13 +14,15 @@ import {
   ChannelFollowResult,
   ChannelUnfollowResult,
   ChannelNftCollectorsOrderByInput,
+  TopSellingChannelsArgs,
+  TopSellingChannelsResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow, Report } from '../../../model'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
-import { buildExtendedChannelsQuery } from './utils'
+import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
@@ -73,6 +75,18 @@ export class ChannelsResolver {
     const result = await ctx.openreader.executeQuery(listQuery)
     console.log('Result', result)
 
+    return result
+  }
+
+  @Query(() => [TopSellingChannelsResult])
+  async topSellingChannels(
+    @Args() args: TopSellingChannelsArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<TopSellingChannelsResult[]> {
+    const listQuery = buildTopSellingChannelsQuery(args, info, ctx)
+
+    const result = await ctx.openreader.executeQuery(listQuery)
     return result
   }
 

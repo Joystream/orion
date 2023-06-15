@@ -47,6 +47,10 @@ import {
   processChannelVisibilitySetByModeratorEvent,
   processChannelOwnerRemarkedEvent,
   processChannelAgentRemarkedEvent,
+  processChannelPayoutsUpdatedEvent,
+  processChannelRewardUpdatedEvent,
+  processChannelFundsWithdrawnEvent,
+  processChannelRewardClaimedAndWithdrawnEvent,
 } from './mappings/content/channel'
 import {
   processVideoCreatedEvent,
@@ -86,7 +90,6 @@ import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 import {
   processCreatorTokenIssuedEvent,
-  processCreatorTokenIssuerRemarkedEvent,
   processTokenDeissuedEvent,
   processAmmActivatedEvent,
   processTokensBoughtOnAmmEvent,
@@ -109,9 +112,11 @@ import {
   processTokenSaleFinalizedEvent,
   processUserParticipatedInSplitEvent,
   processRevenueSplitFinalizedEvent,
+  processCreatorTokenIssuerRemarkedEvent,
 } from './mappings/token'
-import { commentCountersManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
+import { OffchainState } from './utils/offchainState'
 
 const defaultEventOptions = {
   data: {
@@ -131,7 +136,8 @@ const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
 const processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
   .addEvent('Content.VideoCreated', defaultEventOptions)
-
+// By adding other events separately, we sacrifice some type safety,
+// but otherwise the compilation of this file takes forever.
 processor.addEvent('Content.VideoUpdated', defaultEventOptions)
 processor.addEvent('Content.VideoDeleted', defaultEventOptions)
 processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
@@ -161,6 +167,10 @@ processor.addEvent('Content.NftBought', defaultEventOptions)
 processor.addEvent('Content.BuyNowCanceled', defaultEventOptions)
 processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
 processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
+processor.addEvent('Content.ChannelPayoutsUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelRewardUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelFundsWithdrawn', defaultEventOptions)
+processor.addEvent('Content.ChannelRewardClaimedAndWithdrawn', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -208,6 +218,7 @@ processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
 processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions)
 processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
 processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.AccountDustedBy', defaultEventOptions)
 processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
 processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
 processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
@@ -259,6 +270,10 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.BuyNowCanceled': processBuyNowCanceledEvent,
   'Content.BuyNowPriceUpdated': processBuyNowPriceUpdatedEvent,
   'Content.NftSlingedBackToTheOriginalArtist': processNftSlingedBackToTheOriginalArtistEvent,
+  'Content.ChannelPayoutsUpdated': processChannelPayoutsUpdatedEvent,
+  'Content.ChannelRewardUpdated': processChannelRewardUpdatedEvent,
+  'Content.ChannelFundsWithdrawn': processChannelFundsWithdrawnEvent,
+  'Content.ChannelRewardClaimedAndWithdrawn': processChannelRewardClaimedAndWithdrawnEvent,
   'Storage.StorageBucketCreated': processStorageBucketCreatedEvent,
   'Storage.StorageBucketInvitationAccepted': processStorageBucketInvitationAcceptedEvent,
   'Storage.StorageBucketsUpdatedForBag': processStorageBucketsUpdatedForBagEvent,
@@ -323,6 +338,9 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
     processTransferPolicyChangedToPermissionlessEvent,
 }
 
+const offchainState = new OffchainState()
+const exportBlockNumber = offchainState.getExportBlockNumber()
+
 async function processEvent<EventName extends EventNames>(
   ctx: Ctx,
   name: EventName,
@@ -341,6 +359,7 @@ async function processEvent<EventName extends EventNames>(
 async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
+  await videoRelevanceManager.updateVideoRelevanceValue(em)
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
@@ -369,6 +388,17 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
           await overlay.updateDatabase()
         }
       }
+    }
+    // Importing exported offchain state
+    if (block.header.height >= exportBlockNumber && !offchainState.isImported) {
+      ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+      await overlay.updateDatabase()
+      const em = overlay.getEm()
+      await offchainState.import(em)
+      await commentCountersManager.updateVideoCommentsCounters(em, true)
+      await commentCountersManager.updateParentRepliesCounters(em, true)
+      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      ctx.log.info(`Offchain state successfully imported!`)
     }
   }
 
