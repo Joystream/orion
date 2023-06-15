@@ -213,10 +213,11 @@ export class OffchainState {
         const batchSize = 1000
         let batchNumber = 0
         while (values.length) {
-          ++batchNumber
           const batch = values.splice(0, batchSize)
           this.logger.info(
-            `Executing batch #${batchNumber} of ${batch.length} entities (${values.length} entities left)...`
+            `Executing batch #${++batchNumber} of ${batch.length} entities (${
+              values.length
+            } entities left)...`
           )
           await em.getRepository(entityName).insert(batch)
         }
