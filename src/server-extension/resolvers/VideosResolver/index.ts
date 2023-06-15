@@ -9,14 +9,14 @@ import {
 } from './types'
 import { VideosConnection } from '../baseTypes'
 import { Context } from '@subsquid/openreader/lib/context'
-import { VideoViewEvent, Video, Report } from '../../../model'
+import { Report, Video, VideoViewEvent } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
 import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
 import {
-  RelayConnectionRequest,
   decodeRelayConnectionCursor,
+  RelayConnectionRequest,
 } from '@subsquid/openreader/lib/ir/connection'
 import { AnyFields } from '@subsquid/openreader/lib/ir/fields'
 import {
@@ -36,6 +36,7 @@ import { ContextWithIP } from '../../check'
 import { randomAsHex } from '@polkadot/util-crypto'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
+import { videoRelevanceManager } from '../../../mappings/utils'
 
 @Resolver()
 export class VideosResolver {
@@ -106,7 +107,7 @@ export class VideosResolver {
     idsQuerySql = extendClause(
       idsQuerySql,
       'FROM',
-      `LEFT JOIN "processor"."video_view_event" ` +
+      `INNER JOIN "processor"."video_view_event" ` +
         `ON "video_view_event"."video_id" = "video"."id"` +
         (args.periodDays
           ? ` AND "video_view_event"."timestamp" > '${new Date(
@@ -115,6 +116,7 @@ export class VideosResolver {
           : ''),
       ''
     )
+
     idsQuerySql = overrideClause(idsQuerySql, 'GROUP BY', '"video"."id"')
     idsQuerySql = overrideClause(idsQuerySql, 'ORDER BY', 'COUNT("video_view_event"."id") DESC')
     idsQuerySql = overrideClause(idsQuerySql, 'SELECT', '"video"."id"')
@@ -130,12 +132,35 @@ export class VideosResolver {
     }
 
     const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
-    const connectionQuerySql = extendClause(
+
+    let connectionQuerySql: string
+
+    connectionQuerySql = extendClause(
       connectionQuery.sql,
       'WHERE',
       `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       'AND'
     )
+
+    const hasPeriodDaysArgAndIsOrderedByViews =
+      args.periodDays &&
+      (args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_DESC') ||
+        args.orderBy.find((orderByArg) => orderByArg === 'viewsNum_ASC'))
+
+    if (hasPeriodDaysArgAndIsOrderedByViews) {
+      const arrayPosition = `array_position(
+        array[${ids.map((id) => `'${id}'`).join(', ')}],
+        video.id  
+      )`
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" DESC',
+        `${arrayPosition} ASC`
+      )
+      connectionQuerySql = connectionQuerySql.replace(
+        '"video"."views_num" ASC',
+        `${arrayPosition} DESC`
+      )
+    }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql
@@ -210,7 +235,13 @@ export class VideosResolver {
         timestamp: new Date(),
         videoId,
       })
+
+      const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
+      if (video.viewsNum % tick === 0) {
+        videoRelevanceManager.scheduleRecalcForVideo(videoId)
+      }
       await em.save([video, video.channel, newView])
+      await videoRelevanceManager.updateVideoRelevanceValue(em)
       return {
         videoId,
         viewsNum: video.viewsNum,

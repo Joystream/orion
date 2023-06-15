@@ -58,6 +58,19 @@ export interface AmmCurve {
     providedSupply: bigint
 }
 
+export interface TokenSale {
+    unitPrice: bigint
+    quantityLeft: bigint
+    fundsCollected: bigint
+    tokensSource: bigint
+    earningsDestination: (Uint8Array | undefined)
+    startBlock: number
+    duration: number
+    vestingScheduleParams: (VestingScheduleParams | undefined)
+    capPerMember: (bigint | undefined)
+    autoFinalize: boolean
+}
+
 export type ChannelOwner = ChannelOwner_Member | ChannelOwner_CuratorGroup
 
 export interface ChannelOwner_Member {
@@ -228,6 +241,12 @@ export interface StorageAssetsRecord {
 export interface DistributionBucketIdRecord {
     distributionBucketFamilyId: bigint
     distributionBucketIndex: bigint
+}
+
+export interface VestingScheduleParams {
+    linearVestingDuration: number
+    blocksBeforeCliff: number
+    cliffAmountPercentage: number
 }
 
 export interface PendingTransfer {

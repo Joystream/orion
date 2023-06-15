@@ -12,15 +12,14 @@ import { processMembershipMetadata, processMemberRemark } from './metadata'
 export async function processNewMember({
   overlay,
   block,
-  event: {
-    asV1000: [memberId, params],
-  },
+  event,
 }: EventHandlerContext<
   | 'Members.MemberCreated'
   | 'Members.MemberInvited'
   | 'Members.MembershipBought'
   | 'Members.MembershipGifted'
 >) {
+  const [memberId, params] = 'isV2001' in event && event.isV2001 ? event.asV2001 : event.asV1000
   const { controllerAccount, handle, metadata: metadataBytes } = params
   const metadata = deserializeMetadata(MembershipMetadata, metadataBytes)
 
@@ -74,10 +73,9 @@ export async function processMemberRemarkedEvent({
   block,
   indexInBlock,
   extrinsicHash,
-  event: {
-    asV1000: [memberId, message],
-  },
+  event,
 }: EventHandlerContext<'Members.MemberRemarked'>) {
+  const [memberId, message, payment] = event.isV2001 ? event.asV2001 : event.asV1000
   const metadata = deserializeMetadata(MemberRemarked, message)
   const result = metadata
     ? await processMemberRemark(
@@ -86,7 +84,8 @@ export async function processMemberRemarkedEvent({
         indexInBlock,
         extrinsicHash,
         memberId.toString(),
-        metadata
+        metadata,
+        payment && [toAddress(payment[0]), payment[1]]
       )
     : new MetaprotocolTransactionResultFailed({
         errorMessage: 'Could not decode the metadata',

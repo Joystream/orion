@@ -121,8 +121,8 @@ type Video @entity {
   "Video ID coming from YPP"
   ytVideoId: String
 
-  "token for which this video is trailer"
-  trailerVideoForToken: Token
+  "Video relevance score based on the views, reactions, comments and update date"
+  videoRelevance: Float!
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {

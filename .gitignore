@@ -7,10 +7,10 @@
 # IDE files
 /.idea
 src/model/generated
+src/model/generated/index.ts
+src/model/generated/.DS_STORE
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data
-/network-tests/node_modules
-/network-tests/graphql/generated
-/network-tests/data
-/network-tests/output.json
+/db/export.json*
+.DS_STORE

@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-SCRIPT_PATH="$(dirname "${BASH_SOURCE[0]}")"
+SCRIPT_PATH="$(dirname "$0")"
 cd $SCRIPT_PATH/..
 
-if [[ -d schema ]]
+if [ -d schema ]
 then
     echo "Generating schema file from schema directory..."
     find schema -type f -exec cat {} \; > schema.graphql
