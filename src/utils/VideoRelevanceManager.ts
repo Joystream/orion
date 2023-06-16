@@ -1,6 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { config, ConfigVariable } from './config'
-import { getEm } from './orm'
+import { globalEm } from './globalEm'
 
 // constant used to parse seconds from creation
 export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
@@ -69,7 +69,7 @@ export class VideoRelevanceManager {
   }
 
   private async updateLoop(intervalMs: number): Promise<void> {
-    const em = await getEm()
+    const em = await globalEm
     while (true) {
       await this.updateVideoRelevanceValue(em, true)
       await new Promise((resolve) => setTimeout(resolve, intervalMs))

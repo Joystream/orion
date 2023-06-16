@@ -1,5 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { GatewayConfig } from '../model'
+import { withHiddenEntities } from './sql'
 
 export enum ConfigVariable {
   SupportNoCategoryVideo = 'SUPPORT_NO_CATEGORY_VIDEOS',
@@ -63,7 +64,9 @@ type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['de
 
 class Config {
   async get<C extends ConfigVariable>(name: C, em: EntityManager): Promise<TypeOf<C>> {
-    const serialized = (await em.findOneBy(GatewayConfig, { id: name }))?.value ?? process.env[name]
+    const serialized = await withHiddenEntities(em, async () => {
+      return (await em.findOneBy(GatewayConfig, { id: name }))?.value ?? process.env[name]
+    })
 
     if (serialized === undefined) {
       throw new Error(`Cannot determine value of config variable ${name}`)
