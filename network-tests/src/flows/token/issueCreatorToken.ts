@@ -53,7 +53,7 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
       vesting: api.createType('Option<VestingSchedule>', {
         linearVestingDuration: api.createType('u32', new BN(100)),
         blocksBeforeCliff: api.createType('u32', new BN(10)),
-        cliffAmountPercentage: api.createType('Permill', new BN(100)),
+        cliffAmountPercentage: api.createType('Permill', new BN(80)),
       }),
     })
   )

@@ -146,8 +146,12 @@ fragment SaleFields on Sale {
 
 fragment VestedAccountFields on VestedAccount {
   id
-  vesting {
+ vesting {
+    cliffBlock
+    cliffDurationBlocks
+    cliffPercent
     id
+    endsAt
   }
   account {
     id
@@ -211,8 +215,8 @@ subscription getTokenById($id: String!) {
   }
 }
 
-subscription getTokenAccountById($id: String!) {
-  tokenAccountById(id: $id) {
+subscription getTokenAccountByMemberAndToken($memberId: String!, $tokenId: String!) {
+  tokenAccounts(where: {member: {id_eq: $memberId}, token: {id_eq: $tokenId}, deleted_eq: false}) {
     ...TokenAccountFields
   }
 }
@@ -229,21 +233,15 @@ subscription getRevenueShareParticipationById($id: String!) {
   }
 }
 
-subscription getVestingScheduleById($id: String!) {
-  vestingScheduleById(id: $id) {
-    ...VestingScheduleFields
+subscription getVestedAccountByAccountIdAndVestingSource($accountId: String!, $vestingSourceType: String!) {
+  vestedAccounts(where: {account: {id_eq: $accountId}, vestingSource: {isTypeOf_eq: $vestingSourceType}}) {
+    ...VestedAccountFields
   }
 }
 
 subscription getSaleById($id: String!) {
   saleById(id: $id) {
     ...SaleFields
-  }
-}
-
-subscription getVestedAccountById($id: String!) {
-  vestedAccountById(id: $id) {
-    ...VestedAccountFields
   }
 }
 

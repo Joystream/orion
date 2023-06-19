@@ -42,8 +42,8 @@ export class BurnTokensFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.getTokenById(_tokenId)
-    const qAccount = await this.query.getTokenAccountById(
-      this.tokenId.toString() + this.fromMemberId.toString()
+    const qAccount = await this.query.getTokenAccountByMemberAndToken(
+      this.tokenId.toString(), this.fromMemberId.toString()
     )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
@@ -64,7 +64,7 @@ export class BurnTokensFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokensBurned')
   }
 
-  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   // add a general key-map record to the runQueryNodeChecks as a parameter
   public async runQueryNodeChecks(): Promise<void> {
@@ -75,7 +75,7 @@ export class BurnTokensFixture extends StandardizedFixture {
 
     await Utils.until('waiting for burn token fixture to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qAccount = await this.query.getTokenAccountByMemberAndToken(tokenId.toString(), memberId.toString())
       return new BN(qAccount!.totalAmount).lt(this.accountAmountPre!)
     })
 

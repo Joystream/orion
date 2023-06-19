@@ -15,13 +15,10 @@ import {
   GetAmmById,
   AmmCurvFieldsFragment,
   GetAmmByIdSubscription,
-  GetVestedAccountByIdSubscription,
   VestedAccountFieldsFragment,
   GetSaleByIdSubscription,
   GetSaleByIdSubscriptionVariables,
-  GetVestingScheduleById,
   VestingScheduleFieldsFragment,
-  GetVestingScheduleByIdSubscription,
   GetRevenueShareParticipationById,
   RevenueShareParticipationFieldsFragment,
   GetRevenueShareByIdSubscription,
@@ -29,23 +26,24 @@ import {
   GetRevenueShareByIdSubscriptionVariables,
   GetRevenueShareParticipationByIdSubscription,
   GetRevenueShareParticipationByIdSubscriptionVariables,
-  GetTokenAccountById,
   GetTokenById,
   RevenueShareFieldsFragment,
   TokenAccountFieldsFragment,
-  GetTokenAccountByIdSubscription,
   GetTokenByIdSubscription,
   GetTokenByIdSubscriptionVariables,
   TokenFieldsFragment,
-  GetVestedAccountByIdSubscriptionVariables,
-  GetVestingScheduleByIdSubscriptionVariables,
   GetSaleById,
   SaleFieldsFragment,
-  GetVestedAccountById,
   GetAmmTransactionByIdSubscriptionVariables,
   GetAmmTransactionByIdSubscription,
   ChannelFieldsFragment,
   GetChannelByIdSubscriptionVariables,
+  GetTokenAccountByMemberAndTokenSubscription,
+  GetTokenAccountByMemberAndTokenSubscriptionVariables,
+  GetTokenAccountByMemberAndToken,
+  GetVestedAccountByAccountIdAndVestingSourceSubscription,
+  GetVestedAccountByAccountIdAndVestingSourceSubscriptionVariables,
+  GetVestedAccountByAccountIdAndVestingSource,
 } from '../graphql/generated/operations'
 
 export class OrionApi {
@@ -69,7 +67,9 @@ export class OrionApi {
    * @param resultKey - helps result parsing
    */
   public async uniqueEntitySubscription<
-    SubscriptionT extends { [k: string]: Maybe<Record<string, unknown>> },
+    SubscriptionT extends {
+      [k: string]: Maybe<Record<string, unknown>> | Array<Record<string, unknown>>
+    },
     VariablesT extends Record<string, unknown>
   >(
     query: DocumentNode,
@@ -117,13 +117,15 @@ export class OrionApi {
     >(GetTokenById, { id: id.toString() }, 'tokenById')
   }
 
-  public async getTokenAccountById(
-    id: string
-  ): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<
-      GetTokenAccountByIdSubscription,
-      GetTokenByIdSubscriptionVariables
-    >(GetTokenAccountById, { id: id }, 'tokenAccountById')
+  public async getTokenAccountByMemberAndToken(
+    memberId: string,
+    tokenId: string
+  ): Promise<Maybe<TokenAccountFieldsFragment>> {
+    const result = await this.uniqueEntitySubscription<
+      GetTokenAccountByMemberAndTokenSubscription,
+      GetTokenAccountByMemberAndTokenSubscriptionVariables
+    >(GetTokenAccountByMemberAndToken, { memberId, tokenId }, 'tokenAccounts')
+    return result ? result[0] : null
   }
 
   public async getRevenueShareById(
@@ -151,13 +153,18 @@ export class OrionApi {
     )
   }
 
-  public async getVestingSchedulById(
-    id: string
-  ): Promise<Maybe<VestingScheduleFieldsFragment> | undefined> {
+  public async getVestedAccountsByIdAndSource(
+    accountId: string,
+    vestingSourceType: string
+  ): Promise<Maybe<VestedAccountFieldsFragment[]> | undefined> {
     return this.uniqueEntitySubscription<
-      GetVestingScheduleByIdSubscription,
-      GetVestingScheduleByIdSubscriptionVariables
-    >(GetVestingScheduleById, { id }, 'vestingScheduleById')
+      GetVestedAccountByAccountIdAndVestingSourceSubscription,
+      GetVestedAccountByAccountIdAndVestingSourceSubscriptionVariables
+    >(
+      GetVestedAccountByAccountIdAndVestingSource,
+      { accountId, vestingSourceType },
+      'vestedAccounts'
+    )
   }
 
   public async getSaleById(id: string): Promise<Maybe<SaleFieldsFragment> | undefined> {
@@ -166,15 +173,6 @@ export class OrionApi {
       { id },
       'saleById'
     )
-  }
-
-  public async getVestedAccountById(
-    id: string
-  ): Promise<Maybe<VestedAccountFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<
-      GetVestedAccountByIdSubscription,
-      GetVestedAccountByIdSubscriptionVariables
-    >(GetVestedAccountById, { id }, 'vestedAccountById')
   }
 
   public async getAmmById(id: string): Promise<Maybe<AmmCurvFieldsFragment> | undefined> {

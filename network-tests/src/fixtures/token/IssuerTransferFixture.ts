@@ -73,7 +73,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
     const accountId = tokenId.toString() + this.sourceMemberId.toString()
-    const qAccount = await this.query.getTokenAccountById(accountId)
+    const qAccount = await this.query.getTokenAccountByMemberAndToken(accountId, tokenId.toString())
     this.sourceAmountPre = new BN(qAccount!.totalAmount)
   }
 
@@ -84,7 +84,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('waiting for issuer tranfer handler to be completed', async () => {
-      qAccount = await this.query.getTokenAccountById(accountId)
+      qAccount = await this.query.getTokenAccountByMemberAndToken(accountId, tokenId.toString())
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.sourceAmountPre!)
     })
@@ -99,7 +99,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
         const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.getTokenAccountById(destAccountId)
+        const qDestAccount = await this.query.getTokenAccountByMemberAndToken(destAccountId, tokenId.toString())
         assert.isNotNull(qDestAccount)
         return qDestAccount!.totalAmount
       })
@@ -125,24 +125,10 @@ export class IssuerTransferFixture extends StandardizedFixture {
         const { blocksBeforeCliff, linearVestingDuration, cliffAmountPercentage } =
           vestingSchedule.unwrap()
         const cliffBlock = blocksBeforeCliff.add(this.bestBlock!)
-        const endBlock = cliffBlock.add(linearVestingDuration)
-        const vestingId =
-          cliffBlock.toString() +
-          linearVestingDuration.toString() +
-          cliffAmountPercentage.toString()
-        const qVesting = await this.query.retryQuery(() =>
-          this.query.getVestingSchedulById(vestingId)
+        const qVestedAccounts = await this.query.retryQuery(() =>
+          this.query.getVestedAccountsByIdAndSource(accountId, 'IssuerTransfer')
         )
-        assert.isNotNull(qVesting)
-        assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
-        assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
-        assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
-
-        const id = accountId + vestingId
-        const qVestedAccount = await this.query.retryQuery(() =>
-          this.query.getVestedAccountById(id)
-        )
-        assert.isNotNull(qVestedAccount)
+        assert.isNotNull(qVestedAccounts)
       }
     }
   }

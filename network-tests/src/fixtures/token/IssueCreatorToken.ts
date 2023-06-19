@@ -15,8 +15,8 @@ import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
 import {
   TokenFieldsFragment,
-  GetTokenById,
   TokenAccountFieldsFragment,
+  GetVestedAccountByAccountIdAndVestingSource,
 } from '../../../graphql/generated/operations'
 import { Maybe } from 'src/graphql/generated/schema'
 
@@ -63,7 +63,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [
@@ -72,6 +72,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     ] = this.events[0].event.data
     const initialMembers = [...initialAllocation.keys()]
     const initialBalances = [...initialAllocation.values()].map((item) => item.amount)
+    const initialVesting = [...initialAllocation.values()].map((item) => item.vestingScheduleParams)
 
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qAccounts: (Maybe<TokenAccountFieldsFragment> | undefined)[] = []
@@ -83,7 +84,10 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     await Utils.until('waiting for issue token handler to finalize accounts', async () => {
       qAccounts = await Promise.all(
         initialMembers.map(async (memberId) => {
-          return await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+          return await this.query.getTokenAccountByMemberAndToken(
+            tokenId.toString(),
+            memberId.toString()
+          )
         })
       )
       return qAccounts.every((qAccount) => !!qAccount)
@@ -94,7 +98,6 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       totalSupply = totalSupply.add(item.amount)
     })
 
-    assert.isNotNull(qToken)
     assert.equal(qToken!.id, tokenId.toString())
     assert.equal(qToken!.status, TokenStatus.Idle)
     assert.equal(qToken!.revenueShareRatioPermill, revenueSplitRate.toNumber())
@@ -106,12 +109,23 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.deissued, false)
     assert.equal(qToken!.numberOfVestedTransferIssued, 0)
 
-    qAccounts.forEach((qAccount, i) => {
+    await Promise.all(qAccounts.map(async (qAccount, i) => {
       assert.isNotNull(qAccount)
-      assert.isNotNull(qAccount!.member.id, initialMembers[i].toString())
-      assert.isNotNull(qAccount!.token.id, tokenId.toString())
-      assert.isNotNull(qAccount!.stakedAmount, '0')
-      assert.isNotNull(qAccount!.totalAmount, initialBalances[i].toString())
-    })
+      assert.equal(qAccount!.member.id, initialMembers[i].toString())
+      assert.equal(qAccount!.token.id, tokenId.toString())
+      assert.equal(qAccount!.stakedAmount, '0')
+      assert.equal(qAccount!.deleted, false)
+      assert.equal(qAccount!.totalAmount, initialBalances[i].toString())
+      if (initialVesting[i].isSome) {
+        const qVestedAccounts = await this.query.getVestedAccountsByIdAndSource(qAccount!.id, 'InitialAllocation')
+        assert.isNotNull(qVestedAccounts)
+        assert(qVestedAccounts!.length > 0)
+        const vestingSchedule = qVestedAccounts![0].vesting
+        assert.equal(vestingSchedule.cliffPercent, initialVesting[i].unwrap().cliffAmountPercentage.toNumber())
+        assert.equal(vestingSchedule.cliffDurationBlocks, initialVesting[i].unwrap().blocksBeforeCliff.toNumber())
+        assert.equal(vestingSchedule.endsAt - vestingSchedule.cliffBlock, initialVesting[i].unwrap().linearVestingDuration.toNumber())
+      }
+      return
+    }))
   }
 }

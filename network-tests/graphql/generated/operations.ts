@@ -95,7 +95,13 @@ export type SaleFieldsFragment = {
 
 export type VestedAccountFieldsFragment = {
   id: string
-  vesting: { id: string }
+  vesting: {
+    cliffBlock: number
+    cliffDurationBlocks: number
+    cliffPercent: number
+    id: string
+    endsAt: number
+  }
   account: { id: string }
 }
 
@@ -150,12 +156,13 @@ export type GetTokenByIdSubscriptionVariables = Types.Exact<{
 
 export type GetTokenByIdSubscription = { tokenById?: Types.Maybe<TokenFieldsFragment> }
 
-export type GetTokenAccountByIdSubscriptionVariables = Types.Exact<{
-  id: Types.Scalars['String']
+export type GetTokenAccountByMemberAndTokenSubscriptionVariables = Types.Exact<{
+  memberId: Types.Scalars['String']
+  tokenId: Types.Scalars['String']
 }>
 
-export type GetTokenAccountByIdSubscription = {
-  tokenAccountById?: Types.Maybe<TokenAccountFieldsFragment>
+export type GetTokenAccountByMemberAndTokenSubscription = {
+  tokenAccounts: Array<TokenAccountFieldsFragment>
 }
 
 export type GetRevenueShareByIdSubscriptionVariables = Types.Exact<{
@@ -174,12 +181,13 @@ export type GetRevenueShareParticipationByIdSubscription = {
   revenueShareParticipationById?: Types.Maybe<RevenueShareParticipationFieldsFragment>
 }
 
-export type GetVestingScheduleByIdSubscriptionVariables = Types.Exact<{
-  id: Types.Scalars['String']
+export type GetVestedAccountByAccountIdAndVestingSourceSubscriptionVariables = Types.Exact<{
+  accountId: Types.Scalars['String']
+  vestingSourceType: Types.Scalars['String']
 }>
 
-export type GetVestingScheduleByIdSubscription = {
-  vestingScheduleById?: Types.Maybe<VestingScheduleFieldsFragment>
+export type GetVestedAccountByAccountIdAndVestingSourceSubscription = {
+  vestedAccounts: Array<VestedAccountFieldsFragment>
 }
 
 export type GetSaleByIdSubscriptionVariables = Types.Exact<{
@@ -187,14 +195,6 @@ export type GetSaleByIdSubscriptionVariables = Types.Exact<{
 }>
 
 export type GetSaleByIdSubscription = { saleById?: Types.Maybe<SaleFieldsFragment> }
-
-export type GetVestedAccountByIdSubscriptionVariables = Types.Exact<{
-  id: Types.Scalars['String']
-}>
-
-export type GetVestedAccountByIdSubscription = {
-  vestedAccountById?: Types.Maybe<VestedAccountFieldsFragment>
-}
 
 export type GetAmmByIdSubscriptionVariables = Types.Exact<{
   id: Types.Scalars['String']
@@ -379,7 +379,11 @@ export const VestedAccountFields = gql`
   fragment VestedAccountFields on VestedAccount {
     id
     vesting {
+      cliffBlock
+      cliffDurationBlocks
+      cliffPercent
       id
+      endsAt
     }
     account {
       id
@@ -448,9 +452,11 @@ export const GetTokenById = gql`
   }
   ${TokenFields}
 `
-export const GetTokenAccountById = gql`
-  subscription getTokenAccountById($id: String!) {
-    tokenAccountById(id: $id) {
+export const GetTokenAccountByMemberAndToken = gql`
+  subscription getTokenAccountByMemberAndToken($memberId: String!, $tokenId: String!) {
+    tokenAccounts(
+      where: { member: { id_eq: $memberId }, token: { id_eq: $tokenId }, deleted_eq: false }
+    ) {
       ...TokenAccountFields
     }
   }
@@ -472,13 +478,18 @@ export const GetRevenueShareParticipationById = gql`
   }
   ${RevenueShareParticipationFields}
 `
-export const GetVestingScheduleById = gql`
-  subscription getVestingScheduleById($id: String!) {
-    vestingScheduleById(id: $id) {
-      ...VestingScheduleFields
+export const GetVestedAccountByAccountIdAndVestingSource = gql`
+  subscription getVestedAccountByAccountIdAndVestingSource(
+    $accountId: String!
+    $vestingSourceType: String!
+  ) {
+    vestedAccounts(
+      where: { account: { id_eq: $accountId }, vestingSource: { isTypeOf_eq: $vestingSourceType } }
+    ) {
+      ...VestedAccountFields
     }
   }
-  ${VestingScheduleFields}
+  ${VestedAccountFields}
 `
 export const GetSaleById = gql`
   subscription getSaleById($id: String!) {
@@ -487,14 +498,6 @@ export const GetSaleById = gql`
     }
   }
   ${SaleFields}
-`
-export const GetVestedAccountById = gql`
-  subscription getVestedAccountById($id: String!) {
-    vestedAccountById(id: $id) {
-      ...VestedAccountFields
-    }
-  }
-  ${VestedAccountFields}
 `
 export const GetAmmById = gql`
   subscription getAmmById($id: String!) {
