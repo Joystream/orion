@@ -74,6 +74,13 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | MemberBannedFromChannelEventData
+  | ChannelCreatedEventData
+
+# for testing purposes
+type ChannelCreatedEventData {
+  "channel created"
+  channel: Channel!
+}
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentCreatedEventData {

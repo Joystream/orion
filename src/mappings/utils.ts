@@ -3,6 +3,7 @@ import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-pro
 import { Logger } from '../logger'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
 import {
+  Account,
   Event,
   MetaprotocolTransactionResultFailed,
   NftActivity,
@@ -16,6 +17,9 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
+import { Flat } from 'lodash'
+import { sendMail } from '../utils/mail'
+import { ConfigVariable, config } from '../utils/config'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
@@ -82,11 +86,28 @@ export function genericEventFields(
 export function addNotification(
   overlay: EntityManagerOverlay,
   memberIds: (string | undefined | null)[],
-  eventId: string
+  eventId: string,
 ) {
   const repository = overlay.getRepository(Notification)
   for (const memberId of memberIds.filter((m) => m)) {
     repository.new({ id: repository.getNewEntityId(), memberId, eventId })
+  }
+}
+
+export async function sendEmailNotification(
+  overlay: EntityManagerOverlay,
+  memberId: string,
+  event: Flat<Event>,
+): Promise<void> {
+  const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId)
+  const em = overlay.getEm()
+  if (account) {
+    await sendMail({
+      from: await config.get(ConfigVariable.SendgridFromEmail, em),
+      to: account.email,
+      subject: 'New notification',
+      content: JSON.stringify(event.data)
+    })
   }
 }
 
