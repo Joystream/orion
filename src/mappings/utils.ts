@@ -102,12 +102,13 @@ export async function sendEmailNotification(
   const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId)
   const em = overlay.getEm()
   if (account) {
-    await sendMail({
+    const result = await sendMail({
       from: await config.get(ConfigVariable.SendgridFromEmail, em),
       to: account.email,
       subject: 'New notification',
       content: JSON.stringify(event.data)
     })
+    console.log(JSON.stringify(result))
   }
 }
 
