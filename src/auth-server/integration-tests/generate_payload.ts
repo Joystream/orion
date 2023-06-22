@@ -71,8 +71,8 @@ prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => 
     encryptionArtifacts,
   }
   const result = {
-    payload,
     signature: u8aToHex(keypair.sign(JSON.stringify(payload))),
+    payload,
   }
   console.log(JSON.stringify(result))
 })
