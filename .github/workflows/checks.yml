@@ -59,3 +59,16 @@ jobs:
           done
       - name: Run migrations
         run: make migrate
+      - name: run orion
+        run:
+          make up
+      - name: Run tests and check logs
+        run: |
+          npm test
+          if grep -q 'error' $(docker inspect --format='{{.LogPath}}' CONTAINER_NAME); then
+            echo "Logs contain errors."
+            make down
+            exit 1
+          fi
+      - name: shut down orion
+        run: make down
