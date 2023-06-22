@@ -64,7 +64,7 @@ jobs:
           make up
       - name: Run tests and check logs
         run: |
-          if grep -q 'error' $(docker inspect --format='{{.LogPath}}' CONTAINER_NAME); then
+          if grep -q 'error' $(docker inspect --format='{{.LogPath}}' orion_processor); then
             echo "Logs contain errors."
             make down
             exit 1
