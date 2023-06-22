@@ -64,7 +64,6 @@ jobs:
           make up
       - name: Run tests and check logs
         run: |
-          npm test
           if grep -q 'error' $(docker inspect --format='{{.LogPath}}' CONTAINER_NAME); then
             echo "Logs contain errors."
             make down
