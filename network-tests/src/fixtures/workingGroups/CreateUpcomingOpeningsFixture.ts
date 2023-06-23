@@ -1,0 +1,158 @@
+import { Api } from '../../Api'
+import { OrionApi } from '../../OrionApi'
+import { EventDetails, WorkingGroupModuleName } from '../../types'
+import { SubmittableExtrinsic } from '@polkadot/api/types'
+import { Utils } from '../../utils'
+import { ISubmittableResult } from '@polkadot/types/types/'
+import {
+  StatusTextChangedEventFieldsFragment,
+  UpcomingOpeningFieldsFragment,
+} from '../../graphql/generated/queries'
+import { assert } from 'chai'
+import {
+  IUpcomingOpeningMetadata,
+  UpcomingOpeningMetadata,
+  WorkingGroupMetadataAction,
+} from '@joystream/metadata-protobuf'
+import Long from 'long'
+import { Bytes } from '@polkadot/types'
+import moment from 'moment'
+import { createDefaultOpeningParams } from './CreateOpeningsFixture'
+import { createType } from '@joystream/types'
+import { assertQueriedOpeningMetadataIsValid } from './utils'
+import { BaseWorkingGroupFixture } from './BaseWorkingGroupFixture'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { encodeDecode, isSet } from '@joystream/metadata-protobuf/utils'
+
+export const createDefaultUpcomingMeta = (api: Api): IUpcomingOpeningMetadata => {
+  return {
+    minApplicationStake: Long.fromString(createDefaultOpeningParams(api).stake.toString()),
+    rewardPerBlock: Long.fromString(createDefaultOpeningParams(api).reward.toString()),
+    expectedStart: moment().unix() + 3600,
+    metadata: createDefaultOpeningParams(api).metadata,
+  }
+}
+
+export type UpcomingOpeningParams = {
+  meta: IUpcomingOpeningMetadata | string
+  expectMetadataFailure?: boolean
+}
+
+export class CreateUpcomingOpeningsFixture extends BaseWorkingGroupFixture {
+  protected upcomingOpeningsParams: UpcomingOpeningParams[]
+  protected createdUpcomingOpeningIds: string[] = []
+
+  public constructor(
+    api: Api,
+    query: OrionApi,
+    group: WorkingGroupModuleName,
+    params?: UpcomingOpeningParams[]
+  ) {
+    super(api, query, group)
+    this.upcomingOpeningsParams = params || [{ meta: createDefaultUpcomingMeta(api) }]
+  }
+
+  protected async getSignerAccountOrAccounts(): Promise<string> {
+    return this.api.getLeadRoleKey(this.group)
+  }
+
+  protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
+    return this.upcomingOpeningsParams.map((params) =>
+      this.api.tx[this.group].setStatusText(this.getActionMetadataBytes(params))
+    )
+  }
+
+  protected async getEventFromResult(result: ISubmittableResult): Promise<EventDetails> {
+    return this.api.getEventDetails(result, this.group, 'StatusTextChanged')
+  }
+
+  public getCreatedUpcomingOpeningIds(): string[] {
+    if (!this.createdUpcomingOpeningIds.length) {
+      throw new Error('Trying to get created UpcomingOpening ids before they are known')
+    }
+    return this.createdUpcomingOpeningIds
+  }
+
+  protected getUpcomingOpeningMeta(
+    params: UpcomingOpeningParams
+  ): DecodedMetadataObject<IUpcomingOpeningMetadata> | null {
+    if (typeof params.meta === 'string') {
+      try {
+        return Utils.metadataFromBytes(UpcomingOpeningMetadata, createType('Bytes', params.meta))
+      } catch (e) {
+        if (!params.expectMetadataFailure) {
+          throw e
+        }
+        return null
+      }
+    }
+    return encodeDecode(UpcomingOpeningMetadata, params.meta)
+  }
+
+  protected getActionMetadataBytes(params: UpcomingOpeningParams): Bytes {
+    const upcomingOpeningMeta = this.getUpcomingOpeningMeta(params)
+    if (!upcomingOpeningMeta) {
+      return createType('Bytes', params.meta as Bytes)
+    }
+    return Utils.metadataToBytes(WorkingGroupMetadataAction, {
+      addUpcomingOpening: {
+        metadata: upcomingOpeningMeta as IUpcomingOpeningMetadata,
+      },
+    })
+  }
+
+  protected assertQueriedUpcomingOpeningsAreValid(
+    qUpcomingOpenings: UpcomingOpeningFieldsFragment[],
+    qEvents: StatusTextChangedEventFieldsFragment[]
+  ): void {
+    this.events.forEach((e, i) => {
+      const expectedMeta = this.getUpcomingOpeningMeta(this.upcomingOpeningsParams[i])
+      const qEvent = this.findMatchingQueryNodeEvent(e, qEvents)
+      const qUpcomingOpening = qUpcomingOpenings.find((o) => o.createdInEvent.id === qEvent.id)
+      if (expectedMeta) {
+        Utils.assert(qUpcomingOpening)
+        assert.equal(
+          qUpcomingOpening.expectedStart
+            ? moment(qUpcomingOpening.expectedStart).unix()
+            : qUpcomingOpening.expectedStart,
+          expectedMeta.expectedStart || null
+        )
+        assert.equal(qUpcomingOpening.group.name, this.group)
+        assert.equal(
+          qUpcomingOpening.rewardPerBlock,
+          isSet(expectedMeta.rewardPerBlock) && parseInt(expectedMeta.rewardPerBlock)
+            ? expectedMeta.rewardPerBlock
+            : null
+        )
+        assert.equal(
+          qUpcomingOpening.stakeAmount,
+          isSet(expectedMeta.minApplicationStake) && parseInt(expectedMeta.minApplicationStake)
+            ? expectedMeta.minApplicationStake
+            : null
+        )
+        Utils.assert(qEvent.result.__typename === 'UpcomingOpeningAdded')
+        assert.equal(qEvent.result.upcomingOpeningId, qUpcomingOpening.id)
+        assertQueriedOpeningMetadataIsValid(qUpcomingOpening.metadata, expectedMeta.metadata)
+      } else {
+        assert.isUndefined(qUpcomingOpening)
+      }
+    })
+  }
+
+  protected assertQueryNodeEventIsValid(
+    qEvent: StatusTextChangedEventFieldsFragment,
+    i: number
+  ): void {
+    const params = this.upcomingOpeningsParams[i]
+    assert.equal(qEvent.group.name, this.group)
+    assert.equal(qEvent.metadata, this.getActionMetadataBytes(params).toString())
+    assert.equal(
+      qEvent.result.__typename,
+      params.expectMetadataFailure ? 'InvalidActionMetadata' : 'UpcomingOpeningAdded'
+    )
+  }
+
+  async runQueryNodeChecks(): Promise<void> {
+    await super.runQueryNodeChecks()
+  }
+}
