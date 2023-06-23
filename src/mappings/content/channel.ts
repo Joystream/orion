@@ -33,15 +33,15 @@ export async function processChannelCreatedEvent({
   indexInBlock,
   extrinsicHash,
   block,
-  event: {
-    asV1000: [
-      channelId,
-      { owner, dataObjects, channelStateBloatBond },
-      channelCreationParameters,
-      rewardAccount,
-    ],
-  },
+  event
 }: EventHandlerContext<'Content.ChannelCreated'>) {
+  const [
+    channelId,
+    { owner, dataObjects, channelStateBloatBond },
+    channelCreationParameters,
+    rewardAccount,
+  ] = event.asV1000
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
