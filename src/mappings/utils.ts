@@ -5,6 +5,7 @@ import { SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   Account,
   Event,
+  EventData,
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
@@ -18,7 +19,7 @@ import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 import { Flat } from 'lodash'
-import { sendMail } from '../utils/mail'
+import { emailNotificationTemplate, sendMail } from '../utils/mail'
 import { ConfigVariable, config } from '../utils/config'
 
 export const commentCountersManager = new CommentCountersManager()
@@ -99,16 +100,48 @@ export async function sendEmailNotification(
   memberId: string,
   event: Flat<Event>,
 ): Promise<void> {
+  const content = emailNotificationTemplate(event.data)
   const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId)
   const em = overlay.getEm()
   if (account) {
-    const result = await sendMail({
-      from: await config.get(ConfigVariable.SendgridFromEmail, em),
-      to: account.email,
-      subject: 'New notification',
-      content: JSON.stringify(event.data)
-    })
-    console.log(JSON.stringify(result))
+    const shouldSend = getMailNotificationPreference(account, event.data)
+    if (shouldSend) {
+      const result = await sendMail({
+        from: await config.get(ConfigVariable.SendgridFromEmail, em),
+        to: account.email,
+        subject: 'New notification',
+        content,
+      })
+      console.log(JSON.stringify(result))
+    }
+  }
+}
+
+export function getMailNotificationPreference(_account: Flat<Account>, event: EventData): boolean {
+  switch (event.isTypeOf) {
+    case 'CommentCreatedEventData': return false
+    case 'CommentTextUpdatedEventData': return false
+    case 'OpenAuctionStartedEventData': return false
+    case 'EnglishAuctionStartedEventData': return false
+    case 'NftIssuedEventData': return false
+    case 'AuctionBidMadeEventData': return false
+    case 'AuctionBidCanceledEventData': return false
+    case 'AuctionCanceledEventData': return false
+    case 'EnglishAuctionSettledEventData': return false
+    case 'BidMadeCompletingAuctionEventData': return false
+    case 'OpenAuctionBidAcceptedEventData': return false
+    case 'NftSellOrderMadeEventData': return false
+    case 'NftBoughtEventData': return false
+    case 'BuyNowCanceledEventData': return false
+    case 'BuyNowPriceUpdatedEventData': return false
+    case 'MetaprotocolTransactionStatusEventData': return false
+    case 'ChannelRewardClaimedEventData': return false
+    case 'ChannelRewardClaimedAndWithdrawnEventData': return false
+    case 'ChannelFundsWithdrawnEventData': return false
+    case 'ChannelPayoutsUpdatedEventData': return false
+    case 'ChannelPaymentMadeEventData': return false
+    case 'MemberBannedFromChannelEventData': return false
+    case 'ChannelCreatedEventData': return false
   }
 }
 
