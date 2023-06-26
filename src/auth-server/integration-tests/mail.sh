@@ -19,7 +19,7 @@ RESPONSE=$(curl -i \
   --request POST \
   --url http://localhost:4074/api/v1/anonymous-auth \
   --header 'Content-Type: application/json' \
-  --data \"{	"userId": "${OPERATOR_SECRET}" }\"
+  --data "{	\"userId\": \"${OPERATOR_SECRET}\" }"
 )
 
 SESSION_ID=$(echo "$RESPONSE" | grep -o 'session_id=[^;]*' | cut -d'=' -f2)

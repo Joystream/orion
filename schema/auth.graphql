@@ -108,6 +108,28 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
+
+  "Notificatio Prefernces"
+  notificationPreferences: NotificationPreferences!
+}
+
+type NotificationPreferences {
+  councilElectionUpdates: Boolean! 
+  updatesInProposalCreated: Boolean!
+  discussionThreadPosted: Boolean!
+  postDirectMention: Boolean!
+  notificationWithRole: Boolean!
+  notificationWithoutRole: Boolean!
+  forumDirectMention: Boolean!
+  forumReplyToPost: Boolean!
+  councilElectionUpdatesMail: Boolean! 
+  updatesInProposalCreatedMail: Boolean!
+  discussionThreadPostedMail: Boolean!
+  postDirectMentionMail: Boolean!
+  notificationWithRoleMail: Boolean!
+  notificationWithoutRoleMail: Boolean!
+  forumDirectMentionMail: Boolean!
+  forumReplyToPostMail: Boolean!
 }
 
 enum TokenType {

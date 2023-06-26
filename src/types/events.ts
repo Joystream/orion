@@ -1,6 +1,7 @@
 import assert from 'assert'
 import {Chain, ChainContext, EventContext, Event, Result, Option} from './support'
 import * as v1000 from './v1000'
+import * as v2002 from './v2002'
 import * as v2001 from './v2001'
 
 export class ContentAuctionBidCanceledEvent {
@@ -183,6 +184,15 @@ export class ContentChannelCreatedEvent {
 
     get asV1000(): [bigint, v1000.ChannelRecord, v1000.ChannelCreationParametersRecord, Uint8Array] {
         assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    get isV2002(): boolean {
+        return this._chain.getEventHash('Content.ChannelCreated') === 'ed351930d72aa24b919921257fbdfbd245dfe2d7ceb5661947c33aad92fa0c6a'
+    }
+
+    get asV2002(): [bigint, v2002.ChannelRecord, v2002.ChannelCreationParametersRecord, Uint8Array] {
+        assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
 }
@@ -393,6 +403,15 @@ export class ContentChannelUpdatedEvent {
         assert(this.isV1000)
         return this._chain.decodeEvent(this.event)
     }
+
+    get isV2002(): boolean {
+        return this._chain.getEventHash('Content.ChannelUpdated') === '1cdb63f013cbfd13d8b9de0a9b55c81a84b707ceba6a94c2e2a665281048a619'
+    }
+
+    get asV2002(): [v2002.ContentActor, bigint, v2002.ChannelUpdateParametersRecord, bigint[]] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class ContentChannelVisibilitySetByModeratorEvent {
@@ -414,6 +433,52 @@ export class ContentChannelVisibilitySetByModeratorEvent {
 
     get asV1000(): [v1000.ContentActor, bigint, boolean, Uint8Array] {
         assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentCreatorTokenIssuedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.CreatorTokenIssued')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.CreatorTokenIssued') === 'a672a4ef0905fc0288a3489cc68b38efc29c7026390f5d28c3587695cb356d3d'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentCreatorTokenIssuerRemarkedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.CreatorTokenIssuerRemarked')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV2002(): boolean {
+        return this._chain.getEventHash('Content.CreatorTokenIssuerRemarked') === '455000da2c8f650044c433ea0fc69e39c5cb2db11e7a81e15e0fcba6f0757e16'
+    }
+
+    get asV2002(): [bigint, Uint8Array] {
+        assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
 }
@@ -960,6 +1025,884 @@ export class MembersMembershipGiftedEvent {
     }
 
     get asV1000(): [bigint, v1000.GiftMembershipParameters] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenAccountDustedByEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.AccountDustedBy')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Account Dusted
+     * Params:
+     * - token identifier
+     * - id of the dusted account owner member
+     * - account that called the extrinsic
+     * - ongoing policy
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.AccountDustedBy') === 'bd7819aa9cb613a462c11d1b30e1e4f8ca3b3f23bf36d559ec7960f4d05c931a'
+    }
+
+    /**
+     * Account Dusted
+     * Params:
+     * - token identifier
+     * - id of the dusted account owner member
+     * - account that called the extrinsic
+     * - ongoing policy
+     */
+    get asV1000(): [bigint, bigint, Uint8Array, v1000.TransferPolicy] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenAmmActivatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.AmmActivated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * AMM activated
+     * Params:
+     * - token id
+     * - member id
+     * - params for the bonding curve
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.AmmActivated') === '5d454faccb3c909f667f0fc5ebe8e60e00b95c937542ae2dc56162b62178426c'
+    }
+
+    /**
+     * AMM activated
+     * Params:
+     * - token id
+     * - member id
+     * - params for the bonding curve
+     */
+    get asV2002(): [bigint, bigint, v2002.AmmCurve] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenAmmDeactivatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.AmmDeactivated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * AMM deactivated
+     * Params:
+     * - token id
+     * - member id
+     * - amm treasury amount burned upon deactivation
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.AmmDeactivated') === '33de85887d3f9a3233944dd2ceb85209223f0c5a4fffc561bf8206aa91f86e34'
+    }
+
+    /**
+     * AMM deactivated
+     * Params:
+     * - token id
+     * - member id
+     * - amm treasury amount burned upon deactivation
+     */
+    get asV2002(): [bigint, bigint, bigint] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenMemberJoinedWhitelistEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.MemberJoinedWhitelist')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Member joined whitelist
+     * Params:
+     * - token identifier
+     * - member id
+     * - ongoing transfer policy
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.MemberJoinedWhitelist') === 'c09c271ffdc5a2121b272cead06fba3f54cd656c9ef296b4c15aae99dd890ce0'
+    }
+
+    /**
+     * Member joined whitelist
+     * Params:
+     * - token identifier
+     * - member id
+     * - ongoing transfer policy
+     */
+    get asV1000(): [bigint, bigint, v1000.TransferPolicy] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenPatronageCreditClaimedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.PatronageCreditClaimed')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Patronage credit claimed by creator
+     * Params:
+     * - token identifier
+     * - credit amount
+     * - member id
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.PatronageCreditClaimed') === '5792ddfc0d221590d59e9ddb6ad7093547b5b1c6f60267c380976d9b8e6ead18'
+    }
+
+    /**
+     * Patronage credit claimed by creator
+     * Params:
+     * - token identifier
+     * - credit amount
+     * - member id
+     */
+    get asV1000(): [bigint, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenPatronageRateDecreasedToEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.PatronageRateDecreasedTo')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.PatronageRateDecreasedTo') === 'a07d31c2644106aa567962b0935daed493556b5253e00c77997c3b0e46966110'
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get asV1000(): [bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.PatronageRateDecreasedTo') === 'b57e136df7099b4d95c82d61169a7dca2b6b7da2952d6383cedc8494d541669a'
+    }
+
+    /**
+     * Patronage rate decreased
+     * Params:
+     * - token identifier
+     * - new patronage rate
+     */
+    get asV2002(): [bigint, number] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenRevenueSplitFinalizedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.RevenueSplitFinalized')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Revenue Split finalized
+     * Params:
+     * - token identifier
+     * - recovery account for the leftover funds
+     * - leftover funds
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.RevenueSplitFinalized') === 'd357793d55b7a7f611ebd0d666a704245d42575af9ed4be93753feee425797a0'
+    }
+
+    /**
+     * Revenue Split finalized
+     * Params:
+     * - token identifier
+     * - recovery account for the leftover funds
+     * - leftover funds
+     */
+    get asV1000(): [bigint, Uint8Array, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenRevenueSplitIssuedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.RevenueSplitIssued')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Revenue Split issued
+     * Params:
+     * - token identifier
+     * - starting block for the split
+     * - duration of the split
+     * - JOY allocated for the split
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.RevenueSplitIssued') === '4dd4fa5df7b91356d41d12f44011c4dab6ec2f2fb1260ddd79dcfcb322a79aff'
+    }
+
+    /**
+     * Revenue Split issued
+     * Params:
+     * - token identifier
+     * - starting block for the split
+     * - duration of the split
+     * - JOY allocated for the split
+     */
+    get asV1000(): [bigint, number, number, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenRevenueSplitLeftEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.RevenueSplitLeft')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * User left revenue split
+     * Params:
+     * - token identifier
+     * - ex-participant's member id
+     * - amount unstaked
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.RevenueSplitLeft') === '33de85887d3f9a3233944dd2ceb85209223f0c5a4fffc561bf8206aa91f86e34'
+    }
+
+    /**
+     * User left revenue split
+     * Params:
+     * - token identifier
+     * - ex-participant's member id
+     * - amount unstaked
+     */
+    get asV1000(): [bigint, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenAmountTransferredEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenAmountTransferred')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Token amount is transferred from src to dst
+     * Params:
+     * - token identifier
+     * - source member id
+     * - map containing validated outputs (amount indexed by (member_id + account existance))
+     * - transfer's metadata
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenAmountTransferred') === '9d196b09c3f88c818d0e262e552075081f2c4cae7df9158da5b67b311f426b3e'
+    }
+
+    /**
+     * Token amount is transferred from src to dst
+     * Params:
+     * - token identifier
+     * - source member id
+     * - map containing validated outputs (amount indexed by (member_id + account existance))
+     * - transfer's metadata
+     */
+    get asV1000(): [bigint, bigint, [v1000.Validated, v1000.ValidatedPayment][], Uint8Array] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenAmountTransferredByIssuerEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenAmountTransferredByIssuer')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Token amount transferred by issuer
+     * Params:
+     * - token identifier
+     * - source (issuer) member id
+     * - map containing validated outputs
+     *   (amount, opt. vesting schedule, opt. vesting cleanup key) data indexed by
+     *   (account_id + account existance)
+     * - transfer's metadata
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenAmountTransferredByIssuer') === '9d196b09c3f88c818d0e262e552075081f2c4cae7df9158da5b67b311f426b3e'
+    }
+
+    /**
+     * Token amount transferred by issuer
+     * Params:
+     * - token identifier
+     * - source (issuer) member id
+     * - map containing validated outputs
+     *   (amount, opt. vesting schedule, opt. vesting cleanup key) data indexed by
+     *   (account_id + account existance)
+     * - transfer's metadata
+     */
+    get asV1000(): [bigint, bigint, [v1000.Validated, v1000.ValidatedPayment][], Uint8Array] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenDeissuedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenDeissued')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Token Deissued
+     * Params:
+     * - token id
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenDeissued') === '0e1caef0df80727d2768bc480792261a4e7615b57b3e8182c7f664f06c96a08e'
+    }
+
+    /**
+     * Token Deissued
+     * Params:
+     * - token id
+     */
+    get asV1000(): bigint {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenIssuedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenIssued')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Token Issued
+     * Params:
+     * - token id
+     * - token issuance parameters
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenIssued') === '0d2a5dee57731c031d01091868b9e74002ca30efe12fe5ab126e1e3d4c577ea3'
+    }
+
+    /**
+     * Token Issued
+     * Params:
+     * - token id
+     * - token issuance parameters
+     */
+    get asV1000(): [bigint, v1000.TokenIssuanceParameters] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenSaleFinalizedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenSaleFinalized')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Token Sale Finalized
+     * Params:
+     * - token id
+     * - token sale id
+     * - amount of unsold tokens recovered
+     * - amount of JOY collected
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenSaleFinalized') === '20a6879659a2408a98478ee2bd082c527aabc59003327071c30013c5ecc845d6'
+    }
+
+    /**
+     * Token Sale Finalized
+     * Params:
+     * - token id
+     * - token sale id
+     * - amount of unsold tokens recovered
+     * - amount of JOY collected
+     */
+    get asV1000(): [bigint, number, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokenSaleInitializedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokenSaleInitialized')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - token sale data
+     * - token sale metadata
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenSaleInitialized') === '92600f26531f83a50a07d578185c94d20151a4a60cc21a5af3bdcc7d2ed7a37b'
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - token sale data
+     * - token sale metadata
+     */
+    get asV1000(): [bigint, number, v1000.TokenSale, (Uint8Array | undefined)] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenSaleInitialized') === '67bdd3b5a8607e0a3478ca1e5e8997e2e8dc15f6bd04822216fdfcd252ab84a0'
+    }
+
+    /**
+     * Toke Sale was Initialized
+     * Params:
+     * - token id
+     * - token sale id
+     * - funds source member id
+     * - token sale data
+     * - token sale metadata
+     */
+    get asV2002(): [bigint, number, bigint, v2002.TokenSale, (Uint8Array | undefined)] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokensBoughtOnAmmEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokensBoughtOnAmm')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Tokens Bought on AMM
+     * Params:
+     * - token id
+     * - member id
+     * - amount of CRT minted
+     * - amount of JOY deposited into curve treasury
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokensBoughtOnAmm') === '19ca6ee8db29c40d73d2efe5bbc576567dc1aee84c29317caf9938cbad37db27'
+    }
+
+    /**
+     * Tokens Bought on AMM
+     * Params:
+     * - token id
+     * - member id
+     * - amount of CRT minted
+     * - amount of JOY deposited into curve treasury
+     */
+    get asV2002(): [bigint, bigint, bigint, bigint] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokensBurnedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokensBurned')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Tokens Burned
+     * Params:
+     * - token id
+     * - member id
+     * - number of tokens burned
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokensBurned') === '33de85887d3f9a3233944dd2ceb85209223f0c5a4fffc561bf8206aa91f86e34'
+    }
+
+    /**
+     * Tokens Burned
+     * Params:
+     * - token id
+     * - member id
+     * - number of tokens burned
+     */
+    get asV1000(): [bigint, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokensPurchasedOnSaleEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokensPurchasedOnSale')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Tokens Purchased On Sale
+     * Params:
+     * - token id
+     * - token sale id
+     * - amount of tokens purchased
+     * - buyer's member id
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokensPurchasedOnSale') === '35be0a430d22bae9cd8d123e52145446d7f56504d86e1b1fb6c19b8dc28a4ec8'
+    }
+
+    /**
+     * Tokens Purchased On Sale
+     * Params:
+     * - token id
+     * - token sale id
+     * - amount of tokens purchased
+     * - buyer's member id
+     */
+    get asV1000(): [bigint, number, bigint, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTokensSoldOnAmmEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TokensSoldOnAmm')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Tokens Sold on AMM
+     * Params:
+     * - token id
+     * - member id
+     * - amount of CRT burned
+     * - amount of JOY withdrawn from curve treasury
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokensSoldOnAmm') === '19ca6ee8db29c40d73d2efe5bbc576567dc1aee84c29317caf9938cbad37db27'
+    }
+
+    /**
+     * Tokens Sold on AMM
+     * Params:
+     * - token id
+     * - member id
+     * - amount of CRT burned
+     * - amount of JOY withdrawn from curve treasury
+     */
+    get asV2002(): [bigint, bigint, bigint, bigint] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenTransferPolicyChangedToPermissionlessEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.TransferPolicyChangedToPermissionless')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Transfer Policy Changed To Permissionless
+     * Params:
+     * - token id
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.TransferPolicyChangedToPermissionless') === '0e1caef0df80727d2768bc480792261a4e7615b57b3e8182c7f664f06c96a08e'
+    }
+
+    /**
+     * Transfer Policy Changed To Permissionless
+     * Params:
+     * - token id
+     */
+    get asV1000(): bigint {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenUpcomingTokenSaleUpdatedEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.UpcomingTokenSaleUpdated')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * Upcoming Token Sale was Updated
+     * Params:
+     * - token id
+     * - token sale id
+     * - new sale start block
+     * - new sale duration
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.UpcomingTokenSaleUpdated') === '9b2c6e991f6712cb1dddef8f50d6ecdc4dacdf84868eaaf07c13639fbd2b875f'
+    }
+
+    /**
+     * Upcoming Token Sale was Updated
+     * Params:
+     * - token id
+     * - token sale id
+     * - new sale start block
+     * - new sale duration
+     */
+    get asV1000(): [bigint, number, (number | undefined), (number | undefined)] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ProjectTokenUserParticipatedInSplitEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'ProjectToken.UserParticipatedInSplit')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    /**
+     * User partipated in a revenue split
+     * Params:
+     * - token identifier
+     * - participant's member id
+     * - user allocated staked balance
+     * - dividend amount (JOY) granted
+     * - revenue split identifier
+     */
+    get isV1000(): boolean {
+        return this._chain.getEventHash('ProjectToken.UserParticipatedInSplit') === '8a0d561307672bbffb736d353518b182ab4b04170d9031a8eb90d1b7d594123d'
+    }
+
+    /**
+     * User partipated in a revenue split
+     * Params:
+     * - token identifier
+     * - participant's member id
+     * - user allocated staked balance
+     * - dividend amount (JOY) granted
+     * - revenue split identifier
+     */
+    get asV1000(): [bigint, bigint, bigint, bigint, number] {
         assert(this.isV1000)
         return this._chain.decodeEvent(this.event)
     }
