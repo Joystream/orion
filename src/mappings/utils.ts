@@ -7,7 +7,10 @@ import {
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
-  Notification,
+  RuntimeNotification,
+  NotificationType,
+  RuntimeNotificationProcessed,
+  Account,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -16,6 +19,10 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
+import { Flat } from 'lodash'
+import { ConfigVariable, config } from '../utils/config'
+import { MailNotifier } from '../utils/mail'
+import { preferencesForNotification } from '../utils/notifications'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
@@ -79,14 +86,57 @@ export function genericEventFields(
   }
 }
 
-export function addNotification(
+export async function addNotificationForRuntimeData(
   overlay: EntityManagerOverlay,
   memberIds: (string | undefined | null)[],
-  eventId: string
-) {
-  const repository = overlay.getRepository(Notification)
+  event: Flat<Event>,
+  type: NotificationType
+): Promise<void> {
+  const mailNotifier = new MailNotifier()
+  mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
+  mailNotifier.setSubject(event.data.toString())
+  mailNotifier.setContentUsingTemplate('test')
+
   for (const memberId of memberIds.filter((m) => m)) {
-    repository.new({ id: repository.getNewEntityId(), memberId, eventId })
+    const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
+    if (account) {
+      const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
+        account as Account,
+        event.data
+      )
+      if (shouldSendAppNotification || shouldSendMail) {
+        const repository = overlay.getRepository(RuntimeNotification)
+        const newNotificationId = repository.getNewEntityId()
+        const notificationAlreadyProcessedInThePast = await overlay
+          .getRepository(RuntimeNotificationProcessed)
+          .getOneByRelation('runtimeNotificationId', newNotificationId)
+
+        console.log('account', JSON.stringify(account))
+        console.log('notificationId', newNotificationId)
+        console.log('event', event.id)
+        console.log('type', JSON.stringify(type))
+
+        repository.new({
+          id: newNotificationId,
+          accountId: account.id,
+          eventId: event.id,
+          type,
+        })
+        if (!notificationAlreadyProcessedInThePast) {
+          const notificationProcessed = overlay.getRepository(RuntimeNotificationProcessed).new({
+            id: overlay.getRepository(RuntimeNotificationProcessed).getNewEntityId(),
+            inAppRead: false,
+            mailSent: false,
+            runtimeNotificationId: newNotificationId,
+          })
+          if (shouldSendMail) {
+            mailNotifier.setReciever(account.email)
+            await mailNotifier.send()
+            notificationProcessed.mailSent = mailNotifier.mailHasBeenSent()
+          }
+        }
+      }
+    }
   }
 }
 

@@ -11,7 +11,6 @@ type RegisterEmailTemplateData = {
 const registerEmailContent = compile<RegisterEmailTemplateData>(
   fs.readFileSync(path.join(__dirname, './templates/register.html.mst')).toString()
 )
-
 export function registerEmailData(templateData: RegisterEmailTemplateData) {
   return {
     subject: `Welcome to ${templateData.appName}!`,

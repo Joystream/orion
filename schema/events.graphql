@@ -18,15 +18,31 @@ type Event @entity {
   data: EventData!
 }
 
-type Notification @entity {
+union NotificationType = ChannelNotification | MemberNotification
+
+type ChannelNotification @variant {
+  channel: Channel!
+}
+
+type MemberNotification @variant {
+  member: Membership!
+}
+
+type RuntimeNotification @entity {
   "Autoincremented"
   id: ID!
 
   "Member that should recieve the notification"
-  member: Membership!
+  account: Account!
 
   "The notification event"
   event: Event!
+
+  "Member Or Channel related notification"
+  type: NotificationType!
+
+  "Notification Data to be persisted over migrations"
+  notificationProcessed: RuntimeNotificationProcessed @derivedFrom(field: "runtimeNotification")
 }
 
 type NftHistoryEntry @entity {
@@ -73,6 +89,7 @@ union EventData =
   | ChannelFundsWithdrawnEventData
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
+  | ChannelCreatedEventData
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -251,6 +268,11 @@ type BuyNowPriceUpdatedEventData {
   newPrice: BigInt!
 }
 
+type ChannelCreatedEventData {
+  "channel just created"
+  channel: Channel!
+}
+
 type MetaprotocolTransactionResultCommentCreated {
   commentCreated: Comment
 }
@@ -387,4 +409,61 @@ type MemberBannedFromChannelEventData {
 
   "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
   action: Boolean!
+}
+
+type OffChainNotification @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Member that should recieve the notification"
+  account: Account!
+
+  "The notification data associated"
+  data: OffChainNotificationData!
+
+  "status read/unread if displayed in-app"
+  inAppRead: Boolean!
+
+  "email has been sent or not"
+  mailSent: Boolean!
+
+  "Member Or Channel related notification"
+  type: NotificationType!
+}
+
+union OffChainNotificationData =
+    YppSignupSuccessFullNotificationData
+  | ChannelVerifiedNotificationData
+  | ChannelSuspendedNotificationData
+  | NewChannelFollowerNotificationData
+
+type YppSignupSuccessFullNotificationData @variant {
+  phantom: Int!
+}
+
+type ChannelVerifiedNotificationData @variant {
+  phantom: Int!
+}
+
+type ChannelSuspendedNotificationData @variant {
+  phantom: Int!
+}
+
+type NewChannelFollowerNotificationData @variant {
+  channel: Channel!
+}
+
+# for migration puroposes
+type RuntimeNotificationProcessed @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Runtime Notification reference"
+  runtimeNotification: RuntimeNotification! @unique
+
+  "mail sent or not"
+  mailSent: Boolean!
+
+  "in-app read or not"
+  inAppRead: Boolean!
 }

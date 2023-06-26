@@ -108,6 +108,64 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
+
+  "runtime notifications"
+  runtimeNotifications: [RuntimeNotification!]! @derivedFrom(field: "account")
+
+  "offchain-related notifications like Orion/YPP"
+  offchainNotifications: [OffChainNotification!]! @derivedFrom(field: "account")
+
+  # preferences
+  commentCreatedInAppNotificationEnabled: Boolean!
+  commentTextUpdatedInAppNotificationEnabled: Boolean!
+  openAuctionStartedInAppNotificationEnabled: Boolean!
+  englishAuctionStartedInAppNotificationEnabled: Boolean!
+  nftIssuedInAppNotificationEnabled: Boolean!
+  auctionBidMadeInAppNotificationEnabled: Boolean!
+  auctionBidCanceledInAppNotificationEnabled: Boolean!
+  auctionCanceledInAppNotificationEnabled: Boolean!
+  englishAuctionSettledInAppNotificationEnabled: Boolean!
+  bidMadeCompletingAuctionInAppNotificationEnabled: Boolean!
+  openAuctionBidAcceptedInAppNotificationEnabled: Boolean!
+  nftSellOrderMadeInAppNotificationEnabled: Boolean!
+  nftBoughtInAppNotificationEnabled: Boolean!
+  buyNowCanceledInAppNotificationEnabled: Boolean!
+  buyNowPriceUpdatedInAppNotificationEnabled: Boolean!
+  metaprotocolTransactionStatusInAppNotificationEnabled: Boolean!
+  channelRewardClaimedInAppNotificationEnabled: Boolean!
+  channelRewardClaimedAndWithdrawnInAppNotificationEnabled: Boolean!
+  channelFundsWithdrawnInAppNotificationEnabled: Boolean!
+  channelPayoutsUpdatedInAppNotificationEnabled: Boolean!
+  channelPaymentMadeInAppNotificationEnabled: Boolean!
+  memberBannedFromChannelInAppNotificationEnabled: Boolean!
+  channelCreatedInAppNotificationEnabled: Boolean!
+  newChannelFollowerInAppNotificationPreferences: Boolean!
+
+  # mail notifications
+  commentCreatedMailNotificationEnabled: Boolean!
+  commentTextUpdatedMailNotificationEnabled: Boolean!
+  openAuctionStartedMailNotificationEnabled: Boolean!
+  englishAuctionStartedMailNotificationEnabled: Boolean!
+  nftIssuedMailNotificationEnabled: Boolean!
+  auctionBidMadeMailNotificationEnabled: Boolean!
+  auctionBidCanceledMailNotificationEnabled: Boolean!
+  auctionCanceledMailNotificationEnabled: Boolean!
+  englishAuctionSettledMailNotificationEnabled: Boolean!
+  bidMadeCompletingAuctionMailNotificationEnabled: Boolean!
+  openAuctionBidAcceptedMailNotificationEnabled: Boolean!
+  nftSellOrderMadeMailNotificationEnabled: Boolean!
+  nftBoughtMailNotificationEnabled: Boolean!
+  buyNowCanceledMailNotificationEnabled: Boolean!
+  buyNowPriceUpdatedMailNotificationEnabled: Boolean!
+  metaprotocolTransactionStatusMailNotificationEnabled: Boolean!
+  channelRewardClaimedMailNotificationEnabled: Boolean!
+  channelRewardClaimedAndWithdrawnMailNotificationEnabled: Boolean!
+  channelFundsWithdrawnMailNotificationEnabled: Boolean!
+  channelPayoutsUpdatedMailNotificationEnabled: Boolean!
+  channelPaymentMadeMailNotificationEnabled: Boolean!
+  memberBannedFromChannelMailNotificationEnabled: Boolean!
+  channelCreatedMailNotificationEnabled: Boolean!
+  newChannelFollowerMailNotificationPreferences: Boolean!
 }
 
 enum TokenType {

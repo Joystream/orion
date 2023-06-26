@@ -43,7 +43,7 @@ import {
   VideoMediaEncoding,
   App,
   BannedMember,
-  Notification,
+  RuntimeNotification,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -159,7 +159,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   const mediaMetadataRepository = overlay.getRepository(VideoMediaMetadata)
   const mediaEncodingRepository = overlay.getRepository(VideoMediaEncoding)
   const subtitlesRepository = overlay.getRepository(VideoSubtitle)
-  const notificationRepository = overlay.getRepository(Notification)
+  const notificationRepository = overlay.getRepository(RuntimeNotification)
   const em = overlay.getEm()
 
   const video = await videoRepository.getByIdOrFail(videoId.toString())
@@ -172,7 +172,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
 
   // Events to remove
   const eventsToRemove: Event[] = []
-  const notificationsToRemove: Flat<Notification>[] = []
+  const notificationsToRemove: Flat<RuntimeNotification>[] = []
   if (comments.length) {
     // FIXME: We need to persist the state to get all CommentCreated/CommentTextUpdated events,
     // as the relationship is nested inside jsonb field, so we can't use any existing RepositoryOverlay methods.
@@ -180,7 +180,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
     const relatedEvents = await em
       .getRepository(Event)
       .createQueryBuilder('e')
-      .where(`e.data->>'comment' IN (${comments.map((c, i) => `:cid_${i}`).join(', ')})`)
+      .where(`e.data->>'comment' IN (${comments.map((_, i) => `:cid_${i}`).join(', ')})`)
       .setParameters(Object.fromEntries(comments.map((c, i) => [`cid_${i}`, c.id])))
       .getMany()
     eventsToRemove.push(...relatedEvents)
