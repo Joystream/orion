@@ -163,7 +163,7 @@ export async function processAuctionBidMadeEvent({
 
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
   // Notify outbidded member and the nft owner
-  addNotification(overlay, [previousTopBid?.bidderId, nftOwnerMemberId], event.id)
+  await addNotification(overlay, [previousTopBid?.bidderId, nftOwnerMemberId], event)
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
@@ -285,10 +285,10 @@ export async function processEnglishAuctionSettledEvent({
 
   // Notfy all bidders and the (previous) nft owner
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
-  addNotification(
+  await addNotification(
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
-    event.id
+    event
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -336,10 +336,10 @@ export async function processBidMadeCompletingAuctionEvent({
 
   // Notify all bidders and the (previous) nft owner
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
-  addNotification(
+  await addNotification(
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
-    event.id
+    event
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -382,10 +382,10 @@ export async function processOpenAuctionBidAcceptedEvent({
 
   // Notify all bidders (the owner should be the one who triggered the event)
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
-  addNotification(
+  await addNotification(
     overlay,
     auctionBids.map((b) => b.bidderId),
-    event.id
+    event
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -525,7 +525,7 @@ export async function processNftBoughtEvent({
 
   // Notify (previous) nft owner
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
-  addNotification(overlay, [previousNftOwnerMemberId], event.id)
+  await addNotification(overlay, [previousNftOwnerMemberId], event)
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [previousNftOwnerMemberId, memberId.toString()], event.id)

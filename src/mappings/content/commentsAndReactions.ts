@@ -417,13 +417,13 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
-      addNotification(overlay, [parentComment.authorId], event.id)
+      await addNotification(overlay, [parentComment.authorId], event)
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
-      addNotification(overlay, [channelOwnerMemberId], event.id)
+      await addNotification(overlay, [channelOwnerMemberId], event)
     }
   }
 

@@ -13,7 +13,7 @@ import {
   ChannelFundsWithdrawnEventData,
   ChannelCreatedEventData,
 } from '../../model'
-import { addNotification, deserializeMetadata, genericEventFields, sendEmailNotification, toAddress, u8aToBytes } from '../utils'
+import { addNotification, deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -109,8 +109,7 @@ export async function processChannelCreatedEvent({
         channel: channelId.toString(),
       })
     })
-    addNotification(overlay, [ownerMember.id], event.id)
-    await sendEmailNotification(overlay, ownerMember.id, event)
+    await addNotification(overlay, [ownerMember.id], event)
   }
 
 }
