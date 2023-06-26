@@ -17,6 +17,7 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
+  ChannelNotification,
   Comment,
   CommentCreatedEventData,
   CommentReaction,
@@ -24,6 +25,7 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
+  fromJsonNotificationType,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -38,12 +40,12 @@ import {
 import { config, ConfigVariable } from '../../utils/config'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
-  addNotification,
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
   commentCountersManager,
   videoRelevanceManager,
+  addNotificationForRuntimeData,
 } from '../utils'
 import { getChannelOwnerMemberByChannelId } from './utils'
 
@@ -417,13 +419,23 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
-      addNotification(overlay, [parentComment.authorId], event.id)
+      await addNotificationForRuntimeData(
+        overlay,
+        [parentComment.authorId],
+        event,
+        new ChannelNotification()
+      )
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
-      addNotification(overlay, [channelOwnerMemberId], event.id)
+      await addNotificationForRuntimeData(
+        overlay,
+        [channelOwnerMemberId],
+        event,
+        new ChannelNotification()
+      )
     }
   }
 

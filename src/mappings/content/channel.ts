@@ -11,8 +11,16 @@ import {
   ChannelRewardClaimedEventData,
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
+  ChannelCreatedEventData,
+  ChannelNotification,
 } from '../../model'
-import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import {
+  addNotificationForRuntimeData,
+  deserializeMetadata,
+  genericEventFields,
+  toAddress,
+  u8aToBytes,
+} from '../utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -30,15 +38,17 @@ import { generateAppActionCommitment } from '@joystream/js/utils'
 export async function processChannelCreatedEvent({
   overlay,
   block,
-  event: {
-    asV1000: [
-      channelId,
-      { owner, dataObjects, channelStateBloatBond },
-      channelCreationParameters,
-      rewardAccount,
-    ],
-  },
+  extrinsicHash,
+  indexInBlock,
+  event,
 }: EventHandlerContext<'Content.ChannelCreated'>) {
+  const [
+    channelId,
+    { owner, dataObjects, channelStateBloatBond },
+    channelCreationParameters,
+    rewardAccount,
+  ] = event.asV1000
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
@@ -100,6 +110,20 @@ export async function processChannelCreatedEvent({
 
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
+    const event = overlay.getRepository(Event).new({
+      id: `${block.height}-${indexInBlock}`,
+      inBlock: block.height,
+      inExtrinsic: extrinsicHash,
+      indexInBlock,
+      timestamp: new Date(block.timestamp),
+      data: new ChannelCreatedEventData({ channel: channel.id }),
+    })
+    await addNotificationForRuntimeData(
+      overlay,
+      [ownerMember.id],
+      event,
+      new ChannelNotification({ channel: channel.id })
+    )
   }
 }
 

@@ -18,7 +18,14 @@ import {
   TopSellingChannelsResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
-import { Channel, ChannelFollow, Report } from '../../../model'
+import {
+  Account,
+  Channel,
+  ChannelFollow,
+  ChannelNotification,
+  fromJsonOffChainNotificationData,
+  Report,
+} from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
@@ -28,6 +35,7 @@ import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly } from '../middleware'
+import { addOffChainNotification } from '../../../utils/notifications'
 
 @Resolver()
 export class ChannelsResolver {
@@ -196,6 +204,22 @@ export class ChannelsResolver {
         userId: user.id,
         timestamp: new Date(),
       })
+
+      const ownerMember = channel.ownerMember
+      if (ownerMember) {
+        const account = await em.getRepository(Account).findOneBy({ membershipId: ownerMember.id })
+        if (account) {
+          await addOffChainNotification(
+            em,
+            [account.id],
+            fromJsonOffChainNotificationData({
+              _typeOf: 'NewChannelFollowerNotificationData',
+              _channel: channelId,
+            }),
+            new ChannelNotification()
+          )
+        }
+      }
 
       await em.save([channel, newFollow])
 

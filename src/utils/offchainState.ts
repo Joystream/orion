@@ -17,6 +17,8 @@ const exportedStateMap = {
   VideoFeaturedInCategory: true,
   EncryptionArtifacts: true,
   SessionEncryptionArtifacts: true,
+  OffChainNotification: true,
+  RuntimeNotificationProcessed: true,
   Session: true,
   User: true,
   Account: true,

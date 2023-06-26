@@ -1,4 +1,4 @@
-import { Field, ObjectType } from 'type-graphql'
+import { Field, ObjectType, ArgsType } from 'type-graphql'
 
 @ObjectType()
 export class FollowedChannel {
