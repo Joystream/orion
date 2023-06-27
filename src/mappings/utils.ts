@@ -6,6 +6,7 @@ import {
   Account,
   Event,
   EventData,
+  fromJsonNotificationType,
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
@@ -85,7 +86,7 @@ export function genericEventFields(
   }
 }
 
-export async function addNotification(
+export async function addNotificationForRuntimeData(
   overlay: EntityManagerOverlay,
   memberIds: (string | undefined | null)[],
   event: Flat<Event>,
@@ -97,7 +98,7 @@ export async function addNotification(
     if (account) {
       const [shouldSendAppNotification, shouldSendMail] = getMailNotificationPreference(account.notificationPreferences, event.data)
       if (shouldSendAppNotification || shouldSendMail) {
-        repository.new({ id: repository.getNewEntityId(), memberId, eventId: event.id })
+        repository.new({ id: repository.getNewEntityId(), memberId, type: fromJsonNotificationType({ eventId: event.id }), hasBeenRead: false })
       }
       if (shouldSendMail) {
         const em = overlay.getEm()
@@ -115,7 +116,7 @@ export async function addNotification(
 }
 
 // [app notification, email notification] preference
-export function getMailNotificationPreference(_notificationPreferences: NotificationPreferences , event: EventData): [boolean, boolean] {
+export function getMailNotificationPreference(_notificationPreferences: NotificationPreferences, event: EventData): [boolean, boolean] {
   switch (event.isTypeOf) {
     case 'CommentCreatedEventData': return [false, false]
     case 'CommentTextUpdatedEventData': return [false, false]

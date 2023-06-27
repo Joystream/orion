@@ -26,7 +26,28 @@ type Notification @entity {
   member: Membership!
 
   "The notification event"
+  type: NotificationType!
+
+  "status read/unread"
+  hasBeenRead: Boolean!
+}
+
+union NotificationType = RuntimeNotification | OffchainNotification
+
+type RuntimeNotification @variant {
   event: Event!
+}
+
+type OffchainNotification @variant {
+  "Timestamp of the block the event was emitted in"
+  timestamp: DateTime!
+
+  "More specific offchain data, which depends on notification"
+  data: OffChainData!
+}
+
+type OffChainData {
+  phantom: Int!
 }
 
 type NftHistoryEntry @entity {

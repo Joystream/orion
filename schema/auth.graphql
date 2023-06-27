@@ -114,22 +114,54 @@ type Account @entity {
 }
 
 type NotificationPreferences {
-  councilElectionUpdates: Boolean! 
-  updatesInProposalCreated: Boolean!
-  discussionThreadPosted: Boolean!
-  postDirectMention: Boolean!
-  notificationWithRole: Boolean!
-  notificationWithoutRole: Boolean!
-  forumDirectMention: Boolean!
-  forumReplyToPost: Boolean!
-  councilElectionUpdatesMail: Boolean! 
-  updatesInProposalCreatedMail: Boolean!
-  discussionThreadPostedMail: Boolean!
-  postDirectMentionMail: Boolean!
-  notificationWithRoleMail: Boolean!
-  notificationWithoutRoleMail: Boolean!
-  forumDirectMentionMail: Boolean!
-  forumReplyToPostMail: Boolean!
+  CommentCreatedInAppNotificationEnabled: Boolean!,
+  CommentTextUpdatedInAppNotificationEnabled: Boolean!,
+  OpenAuctionStartedInAppNotificationEnabled: Boolean!,
+  EnglishAuctionStartedInAppNotificationEnabled: Boolean!,
+  NftIssuedInAppNotificationEnabled: Boolean!,
+  AuctionBidMadeInAppNotificationEnabled: Boolean!,
+  AuctionBidCanceledInAppNotificationEnabled: Boolean!,
+  AuctionCanceledInAppNotificationEnabled: Boolean!,
+  EnglishAuctionSettledInAppNotificationEnabled: Boolean!,
+  BidMadeCompletingAuctionInAppNotificationEnabled: Boolean!,
+  OpenAuctionBidAcceptedInAppNotificationEnabled: Boolean!,
+  NftSellOrderMadeInAppNotificationEnabled: Boolean!,
+  NftBoughtInAppNotificationEnabled: Boolean!,
+  BuyNowCanceledInAppNotificationEnabled: Boolean!,
+  BuyNowPriceUpdatedInAppNotificationEnabled: Boolean!,
+  MetaprotocolTransactionStatusInAppNotificationEnabled: Boolean!,
+  ChannelRewardClaimedInAppNotificationEnabled: Boolean!,
+  ChannelRewardClaimedAndWithdrawnInAppNotificationEnabled: Boolean!,
+  ChannelFundsWithdrawnInAppNotificationEnabled: Boolean!,
+  ChannelPayoutsUpdatedInAppNotificationEnabled: Boolean!,
+  ChannelPaymentMadeInAppNotificationEnabled: Boolean!,
+  MemberBannedFromChannelInAppNotificationEnabled: Boolean!
+  ChannelCreatedInAppNotificationEnabled: Boolean!,
+
+  # mail notifications
+  CommentCreatedMailNotificationEnabled: Boolean!,
+  CommentTextUpdatedMailNotificationEnabled: Boolean!,
+  OpenAuctionStartedMailNotificationEnabled: Boolean!,
+  EnglishAuctionStartedMailNotificationEnabled: Boolean!,
+  NftIssuedMailNotificationEnabled: Boolean!,
+  AuctionBidMadeMailNotificationEnabled: Boolean!,
+  AuctionBidCanceledMailNotificationEnabled: Boolean!,
+  AuctionCanceledMailNotificationEnabled: Boolean!,
+  EnglishAuctionSettledMailNotificationEnabled: Boolean!,
+  BidMadeCompletingAuctionMailNotificationEnabled: Boolean!,
+  OpenAuctionBidAcceptedMailNotificationEnabled: Boolean!,
+  NftSellOrderMadeMailNotificationEnabled: Boolean!,
+  NftBoughtMailNotificationEnabled: Boolean!,
+  BuyNowCanceledMailNotificationEnabled: Boolean!,
+  BuyNowPriceUpdatedMailNotificationEnabled: Boolean!,
+  MetaprotocolTransactionStatusMailNotificationEnabled: Boolean!,
+  ChannelRewardClaimedMailNotificationEnabled: Boolean!,
+  ChannelRewardClaimedAndWithdrawnMailNotificationEnabled: Boolean!,
+  ChannelFundsWithdrawnMailNotificationEnabled: Boolean!,
+  ChannelPayoutsUpdatedMailNotificationEnabled: Boolean!,
+  ChannelPaymentMadeMailNotificationEnabled: Boolean!,
+  MemberBannedFromChannelMailNotificationEnabled: Boolean!
+  ChannelCreatedMailNotificationEnabled: Boolean!,
 }
 
 enum TokenType {

@@ -38,7 +38,7 @@ import {
 import { config, ConfigVariable } from '../../utils/config'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
-  addNotification,
+  addNotificationForRuntimeData,
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
@@ -417,13 +417,13 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
-      await addNotification(overlay, [parentComment.authorId], event)
+      await addNotificationForRuntimeData(overlay, [parentComment.authorId], event)
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
-      await addNotification(overlay, [channelOwnerMemberId], event)
+      await addNotificationForRuntimeData(overlay, [channelOwnerMemberId], event)
     }
   }
 
