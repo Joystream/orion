@@ -12,8 +12,9 @@ import {
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
   ChannelCreatedEventData,
+  fromJsonNotificationType,
 } from '../../model'
-import { addNotificationForRuntimeData, deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -103,13 +104,6 @@ export async function processChannelCreatedEvent({
 
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
-    const event = overlay.getRepository(Event).new({
-      ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
-      data: new ChannelCreatedEventData({
-        channel: channelId.toString(),
-      })
-    })
-    await addNotificationForRuntimeData(overlay, [ownerMember.id], event)
   }
 
 }

@@ -12,6 +12,7 @@ import {
   NftHistoryEntry,
   Notification,
   NotificationPreferences,
+  OffChainData,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -96,51 +97,52 @@ export async function addNotificationForRuntimeData(
   for (const memberId of memberIds.filter((m) => m)) {
     const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
     if (account) {
-      const [shouldSendAppNotification, shouldSendMail] = getMailNotificationPreference(account.notificationPreferences, event.data)
+      const [shouldSendAppNotification, shouldSendMail] = preferencesForNotification(account.notificationPreferences, event.data)
       if (shouldSendAppNotification || shouldSendMail) {
-        repository.new({ id: repository.getNewEntityId(), memberId, type: fromJsonNotificationType({ eventId: event.id }), hasBeenRead: false })
-      }
-      if (shouldSendMail) {
-        const em = overlay.getEm()
-        const result = await sendMail({
-          from: await config.get(ConfigVariable.SendgridFromEmail, em),
-          to: account.email,
-          subject: 'New notification',
-          content,
-        })
-        console.log('sendMail result:', result)
+        const notification = repository.new({ id: repository.getNewEntityId(), memberId, type: fromJsonNotificationType({ eventId: event.id }), inAppRead: false })
+        if (shouldSendMail) {
+          const em = overlay.getEm()
+          const result = await sendMail({
+            from: await config.get(ConfigVariable.SendgridFromEmail, em),
+            to: account.email,
+            subject: 'New notification',
+            content,
+          })
+          notification.mailSent = result ? result.statusCode === 202 : false
+          console.log('sendMail result:', result)
+        }
       }
     }
+    return
   }
-  return
 }
 
 // [app notification, email notification] preference
-export function getMailNotificationPreference(_notificationPreferences: NotificationPreferences, event: EventData): [boolean, boolean] {
-  switch (event.isTypeOf) {
-    case 'CommentCreatedEventData': return [false, false]
-    case 'CommentTextUpdatedEventData': return [false, false]
-    case 'OpenAuctionStartedEventData': return [false, false]
-    case 'EnglishAuctionStartedEventData': return [false, false]
-    case 'NftIssuedEventData': return [false, false]
-    case 'AuctionBidMadeEventData': return [false, false]
-    case 'AuctionBidCanceledEventData': return [false, false]
-    case 'AuctionCanceledEventData': return [false, false]
-    case 'EnglishAuctionSettledEventData': return [false, false]
-    case 'BidMadeCompletingAuctionEventData': return [false, false]
-    case 'OpenAuctionBidAcceptedEventData': return [false, false]
-    case 'NftSellOrderMadeEventData': return [false, false]
-    case 'NftBoughtEventData': return [false, false]
-    case 'BuyNowCanceledEventData': return [false, false]
-    case 'BuyNowPriceUpdatedEventData': return [false, false]
-    case 'MetaprotocolTransactionStatusEventData': return [false, false]
-    case 'ChannelRewardClaimedEventData': return [false, false]
-    case 'ChannelRewardClaimedAndWithdrawnEventData': return [false, false]
-    case 'ChannelFundsWithdrawnEventData': return [false, false]
-    case 'ChannelPayoutsUpdatedEventData': return [false, false]
-    case 'ChannelPaymentMadeEventData': return [false, false]
-    case 'MemberBannedFromChannelEventData': return [false, false]
-    case 'ChannelCreatedEventData': return [false, false]
+export function preferencesForNotification(np: NotificationPreferences, notificationType: EventData | OffChainData): [boolean, boolean] {
+  switch (notificationType.isTypeOf) {
+    case 'CommentCreatedEventData': return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
+    case 'CommentTextUpdatedEventData': return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
+    case 'OpenAuctionStartedEventData': return [np.openAuctionStartedInAppNotificationEnabled, np.openAuctionStartedMailNotificationEnabled]
+    case 'EnglishAuctionStartedEventData': return [np.englishAuctionStartedInAppNotificationEnabled, np.englishAuctionStartedMailNotificationEnabled]
+    case 'NftIssuedEventData': return [np.nftIssuedInAppNotificationEnabled, np.nftBoughtMailNotificationEnabled]
+    case 'AuctionBidMadeEventData': return [np.auctionBidMadeInAppNotificationEnabled, np.auctionBidMadeMailNotificationEnabled]
+    case 'AuctionBidCanceledEventData': return [np.auctionCanceledInAppNotificationEnabled, np.auctionBidCanceledMailNotificationEnabled]
+    case 'AuctionCanceledEventData': return [np.auctionCanceledInAppNotificationEnabled, np.auctionCanceledMailNotificationEnabled]
+    case 'EnglishAuctionSettledEventData': return [np.englishAuctionSettledInAppNotificationEnabled, np.englishAuctionSettledMailNotificationEnabled]
+    case 'BidMadeCompletingAuctionEventData': return [np.bidMadeCompletingAuctionInAppNotificationEnabled, np.bidMadeCompletingAuctionMailNotificationEnabled]
+    case 'OpenAuctionBidAcceptedEventData': return [np.openAuctionBidAcceptedInAppNotificationEnabled, np.openAuctionBidAcceptedMailNotificationEnabled]
+    case 'NftSellOrderMadeEventData': return [np.nftSellOrderMadeInAppNotificationEnabled, np.nftSellOrderMadeMailNotificationEnabled]
+    case 'NftBoughtEventData': return [np.nftBoughtInAppNotificationEnabled, np.nftBoughtMailNotificationEnabled]
+    case 'BuyNowCanceledEventData': return [np.buyNowCanceledInAppNotificationEnabled, np.buyNowCanceledMailNotificationEnabled]
+    case 'BuyNowPriceUpdatedEventData': return [np.buyNowPriceUpdatedInAppNotificationEnabled, np.buyNowPriceUpdatedMailNotificationEnabled]
+    case 'MetaprotocolTransactionStatusEventData': return [np.metaprotocolTransactionStatusInAppNotificationEnabled, np.metaprotocolTransactionStatusMailNotificationEnabled]
+    case 'ChannelRewardClaimedEventData': return [np.channelRewardClaimedInAppNotificationEnabled, np.channelRewardClaimedMailNotificationEnabled]
+    case 'ChannelRewardClaimedAndWithdrawnEventData': return [np.channelRewardClaimedAndWithdrawnInAppNotificationEnabled, np.channelRewardClaimedAndWithdrawnMailNotificationEnabled]
+    case 'ChannelFundsWithdrawnEventData': return [np.channelFundsWithdrawnInAppNotificationEnabled, np.channelFundsWithdrawnMailNotificationEnabled]
+    case 'ChannelPayoutsUpdatedEventData': return [np.channelPayoutsUpdatedInAppNotificationEnabled, np.channelPayoutsUpdatedMailNotificationEnabled]
+    case 'ChannelPaymentMadeEventData': return [np.channelPaymentMadeInAppNotificationEnabled, np.channelPaymentMadeMailNotificationEnabled]
+    case 'MemberBannedFromChannelEventData': return [np.memberBannedFromChannelInAppNotificationEnabled, np.memberBannedFromChannelMailNotificationEnabled]
+    default: return [false, false]
   }
 }
 

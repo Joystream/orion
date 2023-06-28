@@ -25,13 +25,14 @@ export async function sendMail({ from, to, subject, content }: SendMailArgs) {
     )
     return
   }
-  await sgMail.send({
+  const result = await sgMail.send({
     from,
     to,
     subject,
     html: content,
   })
   mailerLogger.info(`E-mail sent:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`)
+  return result[0]
 }
 
 

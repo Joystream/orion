@@ -24,6 +24,7 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
+  fromJsonNotificationType,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -38,12 +39,12 @@ import {
 import { config, ConfigVariable } from '../../utils/config'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
-  addNotificationForRuntimeData,
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
   commentCountersManager,
   videoRelevanceManager,
+  addNotificationForRuntimeData,
 } from '../utils'
 import { getChannelOwnerMemberByChannelId } from './utils'
 
