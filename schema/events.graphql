@@ -26,37 +26,13 @@ type Notification @entity {
   member: Membership!
 
   "The notification event"
-  type: NotificationType!
+  event: Event
 
   "status read/unread if displayed in-app"
   inAppRead: Boolean!
 
   "email has been sent or not"
   mailSent: Boolean!
-}
-
-union NotificationType = RuntimeNotification | OffchainNotification
-
-type RuntimeNotification @variant {
-  event: Event!
-}
-
-type OffchainNotification @variant {
-  "Timestamp of the block the event was emitted in"
-  timestamp: DateTime!
-
-  "More specific offchain data, which depends on notification"
-  data: OffChainData!
-}
-
-union OffChainData = YppEventNotificationData | ChannelFollowNotificationData 
-
-type YppEventNotificationData @variant {
-  phantom: Int!
-}
-
-type ChannelFollowNotificationData @variant {
-  channel: Channel!
 }
 
 type NftHistoryEntry @entity {

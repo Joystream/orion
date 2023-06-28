@@ -24,7 +24,6 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
-  fromJsonNotificationType,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,

@@ -6,13 +6,11 @@ import {
   Account,
   Event,
   EventData,
-  fromJsonNotificationType,
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
   Notification,
   NotificationPreferences,
-  OffChainData,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -99,7 +97,7 @@ export async function addNotificationForRuntimeData(
     if (account) {
       const [shouldSendAppNotification, shouldSendMail] = preferencesForNotification(account.notificationPreferences, event.data)
       if (shouldSendAppNotification || shouldSendMail) {
-        const notification = repository.new({ id: repository.getNewEntityId(), memberId, type: fromJsonNotificationType({ eventId: event.id }), inAppRead: false })
+        const notification = repository.new({ id: repository.getNewEntityId(), memberId, eventId: event.id, inAppRead: false })
         if (shouldSendMail) {
           const em = overlay.getEm()
           const result = await sendMail({
@@ -118,7 +116,7 @@ export async function addNotificationForRuntimeData(
 }
 
 // [app notification, email notification] preference
-export function preferencesForNotification(np: NotificationPreferences, notificationType: EventData | OffChainData): [boolean, boolean] {
+export function preferencesForNotification(np: NotificationPreferences, notificationType: EventData): [boolean, boolean] {
   switch (notificationType.isTypeOf) {
     case 'CommentCreatedEventData': return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
     case 'CommentTextUpdatedEventData': return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]

@@ -12,7 +12,6 @@ import {
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
   ChannelCreatedEventData,
-  fromJsonNotificationType,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {

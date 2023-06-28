@@ -22,7 +22,6 @@ import {
   EnglishAuctionSettledEventData,
   EnglishAuctionStartedEventData,
   Event,
-  fromJsonNotificationType,
   NftBoughtEventData,
   NftOwnerChannel,
   NftOwnerMember,
