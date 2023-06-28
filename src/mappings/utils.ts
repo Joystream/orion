@@ -20,8 +20,8 @@ import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 import { Flat } from 'lodash'
-import { emailNotificationTemplate, sendMail } from '../utils/mail'
 import { ConfigVariable, config } from '../utils/config'
+import { MailNotifier } from '../utils/mail'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
@@ -90,8 +90,13 @@ export async function addNotificationForRuntimeData(
   memberIds: (string | undefined | null)[],
   event: Flat<Event>,
 ): Promise<void> {
-  const content = emailNotificationTemplate(event.data)
   const repository = overlay.getRepository(Notification)
+
+  const mailNotifier = new MailNotifier()
+  mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
+  mailNotifier.setSubject(event.data.toString())
+  mailNotifier.setContentUsingTemplate("test")
+
   for (const memberId of memberIds.filter((m) => m)) {
     const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
     if (account) {
@@ -99,15 +104,9 @@ export async function addNotificationForRuntimeData(
       if (shouldSendAppNotification || shouldSendMail) {
         const notification = repository.new({ id: repository.getNewEntityId(), memberId, eventId: event.id, inAppRead: false })
         if (shouldSendMail) {
-          const em = overlay.getEm()
-          const result = await sendMail({
-            from: await config.get(ConfigVariable.SendgridFromEmail, em),
-            to: account.email,
-            subject: 'New notification',
-            content,
-          })
-          notification.mailSent = result ? result.statusCode === 202 : false
-          console.log('sendMail result:', result)
+          mailNotifier.setReciever(account.email)
+          const statusCode = await mailNotifier.send()
+          notification.mailSent = statusCode === 202
         }
       }
     }
