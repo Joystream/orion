@@ -127,11 +127,3 @@ export class SetNotificationPreferencesArgs {
   channelCreatedMailNotificationEnabled!: boolean
 }
 
-@ObjectType()
-export class AccountAndNotificationPreferences {
-  @Field(() => String, { nullable: false })
-  accountId: string
-
-  @Field(() => NotificationPreferences, { nullable: false })
-  preferences: NotificationPreferences
-}
