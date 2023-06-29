@@ -31,5 +31,7 @@ curl --request POST \
   --header "Cookie: session_id=${SESSION_ID}" \
   --data $(npx ts-node ./generate_payload.ts "testMail@exampl.com" ${ALICE_MEMBER_ID} "test" ${ALICE_URI})
   
-# create channel
+# create channel: on chain notification
 npx @joystream/cli content:createChannel --input ./channelInput.json
+
+# follow hannel: off chain notification

@@ -454,7 +454,7 @@ type ChannelSuspendedNotificationData @variant {
 }
 
 type NewChannelFollowerNotificationData @variant {
-  phantom: Int!
+  channel: Channel!
 }
 
 type NotificationPreferences {
@@ -507,5 +507,3 @@ type NotificationPreferences {
   memberBannedFromChannelMailNotificationEnabled: Boolean!
   channelCreatedMailNotificationEnabled: Boolean!
 }
-
-

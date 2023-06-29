@@ -2,11 +2,7 @@ import 'reflect-metadata'
 import { Query, Resolver, Mutation, UseMiddleware, Ctx, Info, Args } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
-import {
-  AccountData,
-  FollowedChannel,
-  SetNotificationPreferencesArgs,
-} from './types'
+import { AccountData, FollowedChannel, SetNotificationPreferencesArgs } from './types'
 import { Context } from '../../check'
 import { GraphQLResolveInfo } from 'graphql'
 import assert from 'assert'
@@ -16,7 +12,7 @@ import { ChannelFollow } from '../../../model'
 @Resolver()
 export class AccountResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @UseMiddleware(AccountOnly)
   @Query(() => AccountData)
@@ -210,6 +206,5 @@ export class AccountResolver {
       }
       return false
     })
-
   }
 }

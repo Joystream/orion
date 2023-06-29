@@ -15,7 +15,13 @@ import {
   Account,
   ChannelNotification,
 } from '../../model'
-import { addNotificationForRuntimeData, deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import {
+  addNotificationForRuntimeData,
+  deserializeMetadata,
+  genericEventFields,
+  toAddress,
+  u8aToBytes,
+} from '../utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -112,14 +118,9 @@ export async function processChannelCreatedEvent({
       inExtrinsic: extrinsicHash,
       indexInBlock,
       timestamp: new Date(block.timestamp),
-      data: new ChannelCreatedEventData({ channel: channel.id })
+      data: new ChannelCreatedEventData({ channel: channel.id }),
     })
-    await addNotificationForRuntimeData(
-      overlay,
-      [ownerMember.id],
-      event,
-      new ChannelNotification()
-    )
+    await addNotificationForRuntimeData(overlay, [ownerMember.id], event, new ChannelNotification())
   }
 }
 
@@ -199,8 +200,8 @@ export async function processChannelOwnerRemarkedEvent({
   const result = decodedMessage
     ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-      errorMessage: 'Could not decode the metadata',
-    })
+        errorMessage: 'Could not decode the metadata',
+      })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -224,8 +225,8 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-      errorMessage: 'Could not decode the metadata',
-    })
+        errorMessage: 'Could not decode the metadata',
+      })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({

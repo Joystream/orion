@@ -76,7 +76,7 @@ module.exports = class Views2000000000000 {
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
-      off_chain_notification: [`FALSE`], // TODO: fix visibility
+      off_chain_notification: [`FALSE`], 
     }
   }
 
