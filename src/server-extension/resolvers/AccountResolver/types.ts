@@ -126,4 +126,3 @@ export class SetNotificationPreferencesArgs {
   @Field(() => Boolean, { nullable: false })
   channelCreatedMailNotificationEnabled!: boolean
 }
-
