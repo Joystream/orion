@@ -1,4 +1,3 @@
-
 import { uniqueId } from 'lodash'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import Keyring from '@polkadot/keyring'
@@ -6,10 +5,10 @@ import { u8aToHex } from '@polkadot/util'
 import { createCipheriv, randomBytes, scrypt, ScryptOptions } from 'crypto'
 import { components } from '../generated/api-types'
 
-const email = process.argv[2] || "testMail@example.com"
-const memberId = process.argv[3] || "15"
-const password = process.argv[4] || "test"
-const addressSeed = process.argv[5] || "Alice"
+const email = process.argv[2] || 'testMail@example.com'
+const memberId = process.argv[3] || '15'
+const password = process.argv[4] || 'test'
+const addressSeed = process.argv[5] || 'Alice'
 const seed = uniqueId()
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
@@ -63,7 +62,7 @@ prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => 
   const keypair = keyring.addFromUri(`//${addressSeed}`)
   const payload = {
     joystreamAccountId: keypair.address,
-    gatewayName: "Gleev",
+    gatewayName: 'Gleev',
     timestamp: Date.now(),
     action: 'createAccount',
     email,
@@ -76,4 +75,3 @@ prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => 
   }
   console.log(JSON.stringify(result))
 })
-

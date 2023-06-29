@@ -3,12 +3,7 @@
   "id": "joy_testnet",
   "chainType": "Development",
   "bootNodes": [],
-  "telemetryEndpoints": [
-    [
-      "/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F",
-      0
-    ]
-  ],
+  "telemetryEndpoints": [["/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F", 0]],
   "protocolId": "/joy/testnet/0",
   "properties": {
     "ss58Format": 126,

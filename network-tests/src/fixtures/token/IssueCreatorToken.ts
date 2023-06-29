@@ -63,7 +63,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     return this.api.getEventDetails(result, 'projectToken', 'TokenIssued')
   }
 
-  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void { }
+  protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 
   public async runQueryNodeChecks(): Promise<void> {
     const [
@@ -109,23 +109,37 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.deissued, false)
     assert.equal(qToken!.numberOfVestedTransferIssued, 0)
 
-    await Promise.all(qAccounts.map(async (qAccount, i) => {
-      assert.isNotNull(qAccount)
-      assert.equal(qAccount!.member.id, initialMembers[i].toString())
-      assert.equal(qAccount!.token.id, tokenId.toString())
-      assert.equal(qAccount!.stakedAmount, '0')
-      assert.equal(qAccount!.deleted, false)
-      assert.equal(qAccount!.totalAmount, initialBalances[i].toString())
-      if (initialVesting[i].isSome) {
-        const qVestedAccounts = await this.query.getVestedAccountsByIdAndSource(qAccount!.id, 'InitialAllocation')
-        assert.isNotNull(qVestedAccounts)
-        assert(qVestedAccounts!.length > 0)
-        const vestingSchedule = qVestedAccounts![0].vesting
-        assert.equal(vestingSchedule.cliffPercent, initialVesting[i].unwrap().cliffAmountPercentage.toNumber())
-        assert.equal(vestingSchedule.cliffDurationBlocks, initialVesting[i].unwrap().blocksBeforeCliff.toNumber())
-        assert.equal(vestingSchedule.endsAt - vestingSchedule.cliffBlock, initialVesting[i].unwrap().linearVestingDuration.toNumber())
-      }
-      return
-    }))
+    await Promise.all(
+      qAccounts.map(async (qAccount, i) => {
+        assert.isNotNull(qAccount)
+        assert.equal(qAccount!.member.id, initialMembers[i].toString())
+        assert.equal(qAccount!.token.id, tokenId.toString())
+        assert.equal(qAccount!.stakedAmount, '0')
+        assert.equal(qAccount!.deleted, false)
+        assert.equal(qAccount!.totalAmount, initialBalances[i].toString())
+        if (initialVesting[i].isSome) {
+          const qVestedAccounts = await this.query.getVestedAccountsByIdAndSource(
+            qAccount!.id,
+            'InitialAllocation'
+          )
+          assert.isNotNull(qVestedAccounts)
+          assert(qVestedAccounts!.length > 0)
+          const vestingSchedule = qVestedAccounts![0].vesting
+          assert.equal(
+            vestingSchedule.cliffPercent,
+            initialVesting[i].unwrap().cliffAmountPercentage.toNumber()
+          )
+          assert.equal(
+            vestingSchedule.cliffDurationBlocks,
+            initialVesting[i].unwrap().blocksBeforeCliff.toNumber()
+          )
+          assert.equal(
+            vestingSchedule.endsAt - vestingSchedule.cliffBlock,
+            initialVesting[i].unwrap().linearVestingDuration.toNumber()
+          )
+        }
+        return
+      })
+    )
   }
 }

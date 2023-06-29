@@ -3,12 +3,7 @@
   "id": "joy_testnet",
   "chainType": "Development",
   "bootNodes": [],
-  "telemetryEndpoints": [
-    [
-      "/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F",
-      0
-    ]
-  ],
+  "telemetryEndpoints": [["/dns/telemetry.polkadot.io/tcp/443/x-parity-wss/%2Fsubmit%2F", 0]],
   "protocolId": "/joy/testnet/0",
   "properties": {
     "ss58Format": 126,
@@ -27,27 +22,15 @@
       "babe": {
         "authorities": [],
         "epochConfig": {
-          "c": [
-            1,
-            4
-          ],
+          "c": [1, 4],
           "allowed_slots": "PrimaryAndSecondaryPlainSlots"
         }
       },
       "balances": {
         "balances": [
-          [
-            "j4UYhDYJ4pz2ihhDDzu69v2JTVeGaGmTebmBdWaX2ANVinXyE",
-            1000000000000000000
-          ],
-          [
-            "j4VdDQVdwFYfQ2MvEdLT2EYZx4ALPQQ6yMyZopKoZEQmXcJrT",
-            166666666666000000
-          ],
-          [
-            "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
-            166666666666000000
-          ]
+          ["j4UYhDYJ4pz2ihhDDzu69v2JTVeGaGmTebmBdWaX2ANVinXyE", 1000000000000000000],
+          ["j4VdDQVdwFYfQ2MvEdLT2EYZx4ALPQQ6yMyZopKoZEQmXcJrT", 166666666666000000],
+          ["j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf", 166666666666000000]
         ]
       },
       "transactionPayment": null,
@@ -55,9 +38,7 @@
         "historyDepth": 120,
         "validatorCount": 1,
         "minimumValidatorCount": 1,
-        "invulnerables": [
-          "j4VdDQVdwFYfQ2MvEdLT2EYZx4ALPQQ6yMyZopKoZEQmXcJrT"
-        ],
+        "invulnerables": ["j4VdDQVdwFYfQ2MvEdLT2EYZx4ALPQQ6yMyZopKoZEQmXcJrT"],
         "forceEra": "ForceNone",
         "slashRewardFraction": 100000000,
         "canceledPayout": 0,

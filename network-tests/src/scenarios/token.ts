@@ -72,5 +72,4 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   //   const revenueShareJob = job('Revenue Share', revenueShareFlow).after(saleJob)
   //   const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
   //   job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
-
 })

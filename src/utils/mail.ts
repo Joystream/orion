@@ -2,7 +2,6 @@ import sgMail from '@sendgrid/mail'
 import { createLogger } from '@subsquid/logger'
 import { ChannelPaymentMadeEventData, CommentCreatedEventData, EventData } from '../model'
 
-
 type SendMailArgs = {
   from: string
   to: string
@@ -10,17 +9,17 @@ type SendMailArgs = {
   content: string
 }
 
-// create a strategy interface with a send mail method 
+// create a strategy interface with a send mail method
 export interface SendMailStrategy {
   sendMail({ from, to, subject, content }: SendMailArgs): Promise<number> // statuscode
 }
 
 export class MailNotifier {
   protected _sendMailStrategy: SendMailStrategy
-  protected _senderMail: string = ""
-  protected _recieverMail: string = ""
-  protected _content: string = ""
-  protected _subject: string = ""
+  protected _senderMail: string = ''
+  protected _recieverMail: string = ''
+  protected _content: string = ''
+  protected _subject: string = ''
 
   public setSendMailSTrategy(strategy: SendMailStrategy) {
     this._sendMailStrategy = strategy
@@ -73,7 +72,7 @@ export class MailNotifier {
   }
 }
 
-/** sample usage 
+/** sample usage
  * const mailNotifier = new MailNotifier()
  * mailNotifier.setSender("sender@gmail.com")
  * mailNotifier.setReciever("receiver@gmail.com")
@@ -81,7 +80,7 @@ export class MailNotifier {
  * mailNotifier.setSubject("")
  * mailNotifer.setSendMailSTrategy(new SendGridMailStrategy())
  * await mailNotifier.send()
-*/
+ */
 
 const mailerLogger = createLogger('mailer')
 
@@ -108,7 +107,9 @@ export class SendGridMailStrategy implements SendMailStrategy {
       subject,
       html: content,
     })
-    mailerLogger.info(`E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `)
+    mailerLogger.info(
+      `E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
+    )
     return result[0].statusCode
   }
 }
@@ -118,4 +119,3 @@ class DefaultSendMailStrategy extends SendGridMailStrategy {
     return Promise.resolve(0)
   }
 }
-

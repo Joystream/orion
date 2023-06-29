@@ -35,7 +35,12 @@ import {
   TransactionalStatusInitiatedOfferToMember,
   Video,
 } from '../../model'
-import { addNftActivity, addNftHistoryEntry, addNotificationForRuntimeData, genericEventFields } from '../utils'
+import {
+  addNftActivity,
+  addNftHistoryEntry,
+  addNotificationForRuntimeData,
+  genericEventFields,
+} from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
 
 export async function processOpenAuctionStartedEvent({
@@ -288,7 +293,7 @@ export async function processEnglishAuctionSettledEvent({
   await addNotificationForRuntimeData(
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
-    event,
+    event
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
