@@ -19,6 +19,7 @@ import {
   BidMadeCompletingAuctionEventData,
   BuyNowCanceledEventData,
   BuyNowPriceUpdatedEventData,
+  ChannelNotification,
   EnglishAuctionSettledEventData,
   EnglishAuctionStartedEventData,
   Event,
@@ -56,7 +57,7 @@ export async function processOpenAuctionStartedEvent({
   const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // create auction
-  const auction = await createAuction(overlay, block, nft, auctionParams)
+  const auction = createAuction(overlay, block, nft, auctionParams)
 
   nft.transactionalStatus = new TransactionalStatusAuction({
     auction: auction.id,
@@ -91,7 +92,7 @@ export async function processEnglishAuctionStartedEvent({
   const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
 
   // create new auction
-  const auction = await createAuction(overlay, block, nft, auctionParams)
+  const auction = createAuction(overlay, block, nft, auctionParams)
 
   nft.transactionalStatus = new TransactionalStatusAuction({
     auction: auction.id,
@@ -168,7 +169,7 @@ export async function processAuctionBidMadeEvent({
 
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
   // Notify outbidded member and the nft owner
-  await addNotificationForRuntimeData(overlay, [previousTopBid?.bidderId, nftOwnerMemberId], event)
+  await addNotificationForRuntimeData(overlay, [previousTopBid?.bidderId, nftOwnerMemberId], event, new ChannelNotification())
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
@@ -293,7 +294,8 @@ export async function processEnglishAuctionSettledEvent({
   await addNotificationForRuntimeData(
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
-    event
+    event,
+    new ChannelNotification()
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -344,7 +346,8 @@ export async function processBidMadeCompletingAuctionEvent({
   await addNotificationForRuntimeData(
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
-    event
+    event,
+    new ChannelNotification(),
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -390,7 +393,8 @@ export async function processOpenAuctionBidAcceptedEvent({
   await addNotificationForRuntimeData(
     overlay,
     auctionBids.map((b) => b.bidderId),
-    event
+    event,
+    new ChannelNotification(),
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -530,7 +534,7 @@ export async function processNftBoughtEvent({
 
   // Notify (previous) nft owner
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
-  await addNotificationForRuntimeData(overlay, [previousNftOwnerMemberId], event)
+  await addNotificationForRuntimeData(overlay, [previousNftOwnerMemberId], event, new ChannelNotification())
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [previousNftOwnerMemberId, memberId.toString()], event.id)

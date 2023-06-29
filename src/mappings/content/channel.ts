@@ -13,6 +13,7 @@ import {
   ChannelFundsWithdrawnEventData,
   ChannelCreatedEventData,
   Account,
+  ChannelNotification,
 } from '../../model'
 import { addNotificationForRuntimeData, deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -116,7 +117,8 @@ export async function processChannelCreatedEvent({
     await addNotificationForRuntimeData(
       overlay,
       [ownerMember.id],
-      event
+      event,
+      new ChannelNotification()
     )
   }
 }

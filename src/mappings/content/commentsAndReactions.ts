@@ -17,6 +17,7 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
+  ChannelNotification,
   Comment,
   CommentCreatedEventData,
   CommentReaction,
@@ -24,6 +25,7 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
+  fromJsonNotificationType,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -417,13 +419,13 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
-      await addNotificationForRuntimeData(overlay, [parentComment.authorId], event)
+      await addNotificationForRuntimeData(overlay, [parentComment.authorId], event, new ChannelNotification())
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
-      await addNotificationForRuntimeData(overlay, [channelOwnerMemberId], event)
+      await addNotificationForRuntimeData(overlay, [channelOwnerMemberId], event, new ChannelNotification())
     }
   }
 
