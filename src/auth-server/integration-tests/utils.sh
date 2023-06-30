@@ -32,6 +32,8 @@ setup() {
     --header 'Content-Type: application/json' \
     --header "Cookie: session_id=${SESSION_ID}" \
     --data $(npx ts-node ./generate_payload.ts "testMail@exampl.com" ${ALICE_MEMBER_ID} "test" ${ALICE_URI})
+
+  export SETUP=1
 }
 
 assert_equal() {
