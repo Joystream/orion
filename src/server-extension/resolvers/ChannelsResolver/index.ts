@@ -167,7 +167,7 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => ChannelFollowResult)
-  // @UseMiddleware(AccountOnly)
+  @UseMiddleware(AccountOnly)
   async followChannel(
     @Args() { channelId }: FollowChannelArgs,
     @Ctx() ctx: Context
@@ -209,7 +209,6 @@ export class ChannelsResolver {
       if (ownerMember) {
         const account = await em.getRepository(Account).findOneBy({ membershipId: ownerMember.id })
         if (account) {
-          console.log('**************** Adding off-chain notification *******')
           await addOffChainNotification(
             em,
             [account.id],

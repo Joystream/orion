@@ -86,8 +86,9 @@ export const createAccount: (
         userId: authContext.user.id,
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
-        notificationPreferences: defaultNotificationPreferences(),
       })
+
+      const notificationPreferences = defaultNotificationPreferences(account.id)
 
       await em.save([
         account,

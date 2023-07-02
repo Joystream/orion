@@ -108,9 +108,6 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
-
-  "Notification Prefernces"
-  notificationPreferences: NotificationPreferences!
 }
 
 enum TokenType {

@@ -439,7 +439,7 @@ union OffChainNotificationData =
     YppSignupSuccessFullNotificationData
   | ChannelVerifiedNotificationData
   | ChannelSuspendedNotificationData
-  | NewChannelFollowerNotificationData
+  | NewChannelFollowerNotificationData 
 
 type YppSignupSuccessFullNotificationData @variant {
   phantom: Int!
@@ -457,7 +457,9 @@ type NewChannelFollowerNotificationData @variant {
   channel: Channel!
 }
 
-type NotificationPreferences {
+type NotificationPreferences @entity {
+  account: Account!
+
   commentCreatedInAppNotificationEnabled: Boolean!
   commentTextUpdatedInAppNotificationEnabled: Boolean!
   openAuctionStartedInAppNotificationEnabled: Boolean!
@@ -481,6 +483,7 @@ type NotificationPreferences {
   channelPaymentMadeInAppNotificationEnabled: Boolean!
   memberBannedFromChannelInAppNotificationEnabled: Boolean!
   channelCreatedInAppNotificationEnabled: Boolean!
+  newChannelFollowerInAppNotificationPreferences: Boolean!
 
   # mail notifications
   commentCreatedMailNotificationEnabled: Boolean!
@@ -506,4 +509,5 @@ type NotificationPreferences {
   channelPaymentMadeMailNotificationEnabled: Boolean!
   memberBannedFromChannelMailNotificationEnabled: Boolean!
   channelCreatedMailNotificationEnabled: Boolean!
+  newChannelFollowerMailNotificationPreferences: Boolean!
 }

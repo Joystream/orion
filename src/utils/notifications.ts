@@ -2,16 +2,18 @@ import { EntityManager } from 'typeorm'
 import {
   Account,
   EventData,
-  NotificationPreferences,
+  NextEntityId,
   NotificationType,
   OffChainNotification,
   OffChainNotificationData,
 } from '../model'
+import { NotificationPreferences } from '../model/generated/notificationPreferences.model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 
-export function defaultNotificationPreferences(): NotificationPreferences {
+export function defaultNotificationPreferences(accountId: string): NotificationPreferences {
   return new NotificationPreferences({
+    accountId,
     commentCreatedInAppNotificationEnabled: true,
     commentTextUpdatedInAppNotificationEnabled: true,
     openAuctionStartedInAppNotificationEnabled: true,
@@ -58,14 +60,18 @@ export function defaultNotificationPreferences(): NotificationPreferences {
     channelPaymentMadeMailNotificationEnabled: true,
     memberBannedFromChannelMailNotificationEnabled: true,
     channelCreatedMailNotificationEnabled: true,
-  })
+    newChannelFollowerInAppNotificationPreferences: true,
+    newChannelFollowerMailNotificationPreferences: true,
+  }) // TODo: format ordinately by pairs
 }
 
 // [app notification, email notification] preference
-export function preferencesForNotification(
-  np: NotificationPreferences,
+export async function preferencesForNotification(
+  em: EntityManager,
+  accountId: string,
   notificationType: EventData | OffChainNotificationData
-): [boolean, boolean] {
+): Promise<[boolean, boolean]> {
+  const np = await em.findOneByOrFail(NotificationPreferences, { accountId: accountId })
   switch (notificationType.isTypeOf) {
     case 'CommentCreatedEventData':
       return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
@@ -161,6 +167,11 @@ export function preferencesForNotification(
         np.channelCreatedInAppNotificationEnabled,
         np.channelCreatedMailNotificationEnabled,
       ]
+    case 'NewChannelFollowerNotificationData':
+      return [
+        np.newChannelFollowerInAppNotificationPreferences,
+        np.newChannelFollowerMailNotificationPreferences,
+      ]
     default:
       return [false, false]
   }
@@ -179,13 +190,21 @@ export async function addOffChainNotification(
   for (const accountId of accountIds) {
     const account = await em.getRepository(Account).findOneById(accountId)
     if (account) {
-      const [shouldSendAppNotification, shouldSendMail] = preferencesForNotification(
-        account.notificationPreferences,
+      const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
+        em,
+        accountId,
         data
       )
       if (shouldSendAppNotification || shouldSendMail) {
+        const nextOffchainNotificationId = parseInt(
+          (
+            await em
+              .getRepository(NextEntityId)
+              .findOne({ where: { entityName: 'OffChainNotification' }, lock: { mode: 'pessimistic_write' } })
+          )?.nextId.toString() || '1'
+        )
         const notification = new OffChainNotification({
-          id: 'FIX THIS',
+          id: nextOffchainNotificationId.toString(),
           accountId,
           data,
           inAppRead: false,
@@ -197,7 +216,10 @@ export async function addOffChainNotification(
           const statusCode = await mailNotifier.send()
           notification.mailSent = statusCode === 202
         }
-        await em.save(notification)
+        await em.save([
+          notification,
+          new NextEntityId({ entityName: 'OffChainNotification', nextId: nextOffchainNotificationId + 1 })
+        ])
       }
     }
     return
