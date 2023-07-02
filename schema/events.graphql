@@ -28,7 +28,7 @@ type MemberNotification @variant {
   member: Membership!
 }
 
-type OnChainNotification @entity {
+type RuntimeNotification @entity {
   "Autoincremented"
   id: ID!
 
@@ -38,14 +38,11 @@ type OnChainNotification @entity {
   "The notification event"
   event: Event!
 
-  "status read/unread if displayed in-app"
-  inAppRead: Boolean!
-
-  "email has been sent or not"
-  mailSent: Boolean!
-
   "Member Or Channel related notification"
   type: NotificationType!
+
+  "Notification Data to be persisted over migrations"
+  notificationProcessed: RuntimeNotificationProcessed!
 }
 
 type NftHistoryEntry @entity {
@@ -510,4 +507,16 @@ type NotificationPreferences @entity {
   memberBannedFromChannelMailNotificationEnabled: Boolean!
   channelCreatedMailNotificationEnabled: Boolean!
   newChannelFollowerMailNotificationPreferences: Boolean!
+}
+
+# for migration puroposes
+type RuntimeNotificationProcessed @entity {
+  "if for the notification"
+  notificationId: ID!
+
+  "mail sent or not"
+  mailSent: Boolean!
+
+  "in-app read or not"
+  inAppRead: Boolean!
 }

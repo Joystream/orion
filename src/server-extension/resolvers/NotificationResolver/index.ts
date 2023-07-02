@@ -4,7 +4,7 @@ import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { NotificationPreferences, OffChainNotification, OnChainNotification } from '../../../model'
+import { NotificationPreferences, OffChainNotification, RuntimeNotification, RuntimeNotificationProcessed } from '../../../model'
 import { NotificationArgs, SetNotificationPreferencesArgs } from './types'
 
 @Resolver()
@@ -39,21 +39,24 @@ export class NotificationResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
-  async markOnChainNotificationAsRead(
+  async markRuntimeNotificationAsRead(
     @Args() { notificationId }: NotificationArgs,
     @Ctx() ctx: Context
   ): Promise<Boolean> {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(OnChainNotification, {
+      const notification = await em.findOne(RuntimeNotification, {
         where: { id: notificationId },
       })
-      if (notification) {
+      const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
+        where: { notificationId },
+      })
+      if (notification !== null && notificationProcessed !== null) {
         if (notification.account.id === ctx.accountId) {
-          if (!notification.inAppRead) {
-            notification.inAppRead = true
-            await em.save(notification)
+          if (!notificationProcessed.inAppRead) {
+            notificationProcessed.inAppRead = true
+            await em.save(notificationProcessed)
             return true
           }
         }
@@ -89,20 +92,23 @@ export class NotificationResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
-  async markOnChainNotificationAsUnread(
+  async markRuntimeNotificationAsUnread(
     @Args() { notificationId }: NotificationArgs,
     @Ctx() ctx: Context
   ): Promise<Boolean> {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(OnChainNotification, {
+      const notification = await em.findOne(RuntimeNotification, {
         where: { id: notificationId },
       })
-      if (notification) {
+      const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
+        where: { notificationId },
+      })
+      if (notification !== null && notificationProcessed !== null) {
         if (notification.account.id === ctx.accountId) {
-          if (notification.inAppRead) {
-            notification.inAppRead = false
-            await em.save(notification)
+          if (!notificationProcessed.inAppRead) {
+            notificationProcessed.inAppRead = true
+            await em.save(notificationProcessed)
             return true
           }
         }

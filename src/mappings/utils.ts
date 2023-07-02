@@ -8,8 +8,9 @@ import {
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
-  OnChainNotification,
+  RuntimeNotification,
   NotificationType,
+  RuntimeNotificationProcessed,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -106,23 +107,29 @@ export async function addNotificationForRuntimeData(
         event.data
       )
       if (shouldSendAppNotification || shouldSendMail) {
-        const repository = overlay.getRepository(OnChainNotification)
-        const notification = repository.new({
-          id: repository.getNewEntityId(),
+        const repository = overlay.getRepository(RuntimeNotification)
+        const notificationId = repository.getNewEntityId()
+        const notificationAlreadyProcessedInThePast = await overlay.getRepository(RuntimeNotificationProcessed).getOneBy({ notificationId })
+        repository.new({
+          id: notificationId,
           accountId: account.id,
           eventId: event.id,
-          inAppRead: false,
-          mailSent: false,
           type,
         })
-        if (shouldSendMail) {
-          mailNotifier.setReciever(account.email)
-          const statusCode = await mailNotifier.send()
-          notification.mailSent = statusCode === 200  // https://docs.sendgrid.com/api-reference/how-to-use-the-sendgrid-v3-api/responses
+        if (!notificationAlreadyProcessedInThePast) {
+          const notificationProcessed = overlay.getRepository(RuntimeNotificationProcessed).new({
+            notificationId,
+            inAppRead: false,
+            mailSent: false,
+          })
+          if (shouldSendMail) {
+            mailNotifier.setReciever(account.email)
+            const statusCode = await mailNotifier.send()
+            notificationProcessed.mailSent = statusCode === 200  // https://docs.sendgrid.com/api-reference/how-to-use-the-sendgrid-v3-api/responses
+          }
         }
       }
     }
-    return
   }
 }
 
