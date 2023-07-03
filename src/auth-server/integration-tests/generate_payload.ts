@@ -14,7 +14,6 @@ export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDR
 
 export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
 
-
 export async function prepareEncryptionArtifacts(
   seed: string,
   email: string,
@@ -88,9 +87,10 @@ prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => 
     payload: login_payload,
   }
 
-  console.log(JSON.stringify({
-    login: login_result,
-    account: account_result
-  }))
-
+  console.log(
+    JSON.stringify({
+      login: login_result,
+      account: account_result,
+    })
+  )
 })

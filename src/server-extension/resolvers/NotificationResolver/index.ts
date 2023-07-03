@@ -4,13 +4,18 @@ import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { Account, OffChainNotification, RuntimeNotification, RuntimeNotificationProcessed } from '../../../model'
+import {
+  Account,
+  OffChainNotification,
+  RuntimeNotification,
+  RuntimeNotificationProcessed,
+} from '../../../model'
 import { NotificationArgs, SetNotificationPreferencesArgs } from './types'
 
 @Resolver()
 export class NotificationResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
@@ -50,7 +55,7 @@ export class NotificationResolver {
         where: { id: notificationId },
       })
       const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
-        where: { notificationId },
+        where: { runtimeNotificationId: notificationId },
       })
       if (notification !== null && notificationProcessed !== null) {
         if (notification.account.id === ctx.accountId) {
@@ -102,7 +107,7 @@ export class NotificationResolver {
         where: { id: notificationId },
       })
       const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
-        where: { notificationId },
+        where: { runtimeNotificationId: notificationId },
       })
       if (notification !== null && notificationProcessed !== null) {
         if (notification.account.id === ctx.accountId) {
@@ -123,7 +128,6 @@ export class NotificationResolver {
     @Args() notificationPreferences: SetNotificationPreferencesArgs,
     @Ctx() ctx: Context
   ): Promise<Boolean> {
-
     const {
       commentCreatedInAppNotificationEnabled,
       commentTextUpdatedInAppNotificationEnabled,
@@ -181,36 +185,28 @@ export class NotificationResolver {
         throw new Error('Account not found')
       }
       if (notificationPreferences) {
-        account.commentCreatedInAppNotificationEnabled =
-          commentCreatedInAppNotificationEnabled
-        account.commentCreatedMailNotificationEnabled =
-          commentCreatedMailNotificationEnabled
+        account.commentCreatedInAppNotificationEnabled = commentCreatedInAppNotificationEnabled
+        account.commentCreatedMailNotificationEnabled = commentCreatedMailNotificationEnabled
         account.commentTextUpdatedInAppNotificationEnabled =
           commentTextUpdatedInAppNotificationEnabled
         account.openAuctionStartedInAppNotificationEnabled =
           openAuctionStartedInAppNotificationEnabled
         account.englishAuctionStartedInAppNotificationEnabled =
           englishAuctionStartedInAppNotificationEnabled
-        account.nftIssuedInAppNotificationEnabled =
-          nftIssuedInAppNotificationEnabled
-        account.auctionBidMadeInAppNotificationEnabled =
-          auctionBidMadeInAppNotificationEnabled
+        account.nftIssuedInAppNotificationEnabled = nftIssuedInAppNotificationEnabled
+        account.auctionBidMadeInAppNotificationEnabled = auctionBidMadeInAppNotificationEnabled
         account.auctionBidCanceledInAppNotificationEnabled =
           auctionBidCanceledInAppNotificationEnabled
-        account.auctionCanceledInAppNotificationEnabled =
-          auctionCanceledInAppNotificationEnabled
+        account.auctionCanceledInAppNotificationEnabled = auctionCanceledInAppNotificationEnabled
         account.englishAuctionSettledInAppNotificationEnabled =
           englishAuctionSettledInAppNotificationEnabled
         account.bidMadeCompletingAuctionInAppNotificationEnabled =
           bidMadeCompletingAuctionInAppNotificationEnabled
         account.openAuctionBidAcceptedInAppNotificationEnabled =
           openAuctionBidAcceptedInAppNotificationEnabled
-        account.nftSellOrderMadeInAppNotificationEnabled =
-          nftSellOrderMadeInAppNotificationEnabled
-        account.nftBoughtInAppNotificationEnabled =
-          nftBoughtInAppNotificationEnabled
-        account.buyNowCanceledInAppNotificationEnabled =
-          buyNowCanceledInAppNotificationEnabled
+        account.nftSellOrderMadeInAppNotificationEnabled = nftSellOrderMadeInAppNotificationEnabled
+        account.nftBoughtInAppNotificationEnabled = nftBoughtInAppNotificationEnabled
+        account.buyNowCanceledInAppNotificationEnabled = buyNowCanceledInAppNotificationEnabled
         account.buyNowPriceUpdatedInAppNotificationEnabled =
           buyNowPriceUpdatedInAppNotificationEnabled
         account.metaprotocolTransactionStatusInAppNotificationEnabled =
@@ -227,36 +223,28 @@ export class NotificationResolver {
           channelPaymentMadeInAppNotificationEnabled
         account.memberBannedFromChannelInAppNotificationEnabled =
           memberBannedFromChannelInAppNotificationEnabled
-        account.channelCreatedInAppNotificationEnabled =
-          channelCreatedInAppNotificationEnabled
-        account.commentCreatedMailNotificationEnabled =
-          commentCreatedMailNotificationEnabled
+        account.channelCreatedInAppNotificationEnabled = channelCreatedInAppNotificationEnabled
+        account.commentCreatedMailNotificationEnabled = commentCreatedMailNotificationEnabled
         account.commentTextUpdatedMailNotificationEnabled =
           commentTextUpdatedMailNotificationEnabled
         account.openAuctionStartedMailNotificationEnabled =
           openAuctionStartedMailNotificationEnabled
         account.englishAuctionStartedMailNotificationEnabled =
           englishAuctionStartedMailNotificationEnabled
-        account.nftIssuedMailNotificationEnabled =
-          nftIssuedMailNotificationEnabled
-        account.auctionBidMadeMailNotificationEnabled =
-          auctionBidMadeMailNotificationEnabled
+        account.nftIssuedMailNotificationEnabled = nftIssuedMailNotificationEnabled
+        account.auctionBidMadeMailNotificationEnabled = auctionBidMadeMailNotificationEnabled
         account.auctionBidCanceledMailNotificationEnabled =
           auctionBidCanceledMailNotificationEnabled
-        account.auctionCanceledMailNotificationEnabled =
-          auctionCanceledMailNotificationEnabled
+        account.auctionCanceledMailNotificationEnabled = auctionCanceledMailNotificationEnabled
         account.englishAuctionSettledMailNotificationEnabled =
           englishAuctionSettledMailNotificationEnabled
         account.bidMadeCompletingAuctionMailNotificationEnabled =
           bidMadeCompletingAuctionMailNotificationEnabled
         account.openAuctionBidAcceptedMailNotificationEnabled =
           openAuctionBidAcceptedMailNotificationEnabled
-        account.nftSellOrderMadeMailNotificationEnabled =
-          nftSellOrderMadeMailNotificationEnabled
-        account.nftBoughtMailNotificationEnabled =
-          nftBoughtMailNotificationEnabled
-        account.buyNowCanceledMailNotificationEnabled =
-          buyNowCanceledMailNotificationEnabled
+        account.nftSellOrderMadeMailNotificationEnabled = nftSellOrderMadeMailNotificationEnabled
+        account.nftBoughtMailNotificationEnabled = nftBoughtMailNotificationEnabled
+        account.buyNowCanceledMailNotificationEnabled = buyNowCanceledMailNotificationEnabled
         account.buyNowPriceUpdatedMailNotificationEnabled =
           buyNowPriceUpdatedMailNotificationEnabled
         account.metaprotocolTransactionStatusMailNotificationEnabled =
@@ -273,8 +261,7 @@ export class NotificationResolver {
           channelPaymentMadeMailNotificationEnabled
         account.memberBannedFromChannelMailNotificationEnabled =
           memberBannedFromChannelMailNotificationEnabled
-        account.channelCreatedMailNotificationEnabled =
-          channelCreatedMailNotificationEnabled
+        account.channelCreatedMailNotificationEnabled = channelCreatedMailNotificationEnabled
 
         await em.save(notificationPreferences)
         return true
@@ -282,6 +269,4 @@ export class NotificationResolver {
       return false
     })
   }
-
 }
-

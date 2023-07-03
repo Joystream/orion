@@ -417,7 +417,7 @@ type OffChainNotification @entity {
   id: ID!
 
   "Member that should recieve the notification"
-  account: Account! 
+  account: Account!
 
   "The notification data associated"
   data: OffChainNotificationData!
@@ -436,7 +436,7 @@ union OffChainNotificationData =
     YppSignupSuccessFullNotificationData
   | ChannelVerifiedNotificationData
   | ChannelSuspendedNotificationData
-  | NewChannelFollowerNotificationData 
+  | NewChannelFollowerNotificationData
 
 type YppSignupSuccessFullNotificationData @variant {
   phantom: Int!

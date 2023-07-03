@@ -12,7 +12,7 @@ import { ChannelFollow } from '../../../model'
 @Resolver()
 export class AccountResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @UseMiddleware(AccountOnly)
   @Query(() => AccountData)

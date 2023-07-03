@@ -111,12 +111,14 @@ export class SendGridMailStrategy implements SendMailStrategy {
       )
       return
     }
-    this._result = (await sgMail.send({
-      from,
-      to,
-      subject,
-      html: content,
-    }))[0]
+    this._result = (
+      await sgMail.send({
+        from,
+        to,
+        subject,
+        html: content,
+      })
+    )[0]
     mailerLogger.info(
       `E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
     )
@@ -125,8 +127,7 @@ export class SendGridMailStrategy implements SendMailStrategy {
 }
 
 class DefaultSendMailStrategy extends SendGridMailStrategy {
-  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> {
-  }
+  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> {}
 
   mailHasBeenSent(): boolean {
     return false

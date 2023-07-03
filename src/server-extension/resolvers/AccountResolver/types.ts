@@ -29,4 +29,3 @@ export class AccountData {
   @Field(() => [FollowedChannel], { nullable: false })
   followedChannels: FollowedChannel[]
 }
-

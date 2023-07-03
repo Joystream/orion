@@ -12,57 +12,57 @@ import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 
 export type NotificationPreferences = {
-    commentCreatedInAppNotificationEnabled: boolean,
-    commentTextUpdatedInAppNotificationEnabled: boolean,
-    openAuctionStartedInAppNotificationEnabled: boolean,
-    englishAuctionStartedInAppNotificationEnabled: boolean,
-    nftIssuedInAppNotificationEnabled: boolean,
-    auctionBidMadeInAppNotificationEnabled: boolean,
-    auctionBidCanceledInAppNotificationEnabled: boolean,
-    auctionCanceledInAppNotificationEnabled: boolean,
-    englishAuctionSettledInAppNotificationEnabled: boolean,
-    bidMadeCompletingAuctionInAppNotificationEnabled: boolean,
-    openAuctionBidAcceptedInAppNotificationEnabled: boolean,
-    nftSellOrderMadeInAppNotificationEnabled: boolean,
-    nftBoughtInAppNotificationEnabled: boolean,
-    buyNowCanceledInAppNotificationEnabled: boolean,
-    buyNowPriceUpdatedInAppNotificationEnabled: boolean,
-    metaprotocolTransactionStatusInAppNotificationEnabled: boolean,
-    channelRewardClaimedInAppNotificationEnabled: boolean,
-    channelRewardClaimedAndWithdrawnInAppNotificationEnabled: boolean,
-    channelFundsWithdrawnInAppNotificationEnabled: boolean,
-    channelPayoutsUpdatedInAppNotificationEnabled: boolean,
-    channelPaymentMadeInAppNotificationEnabled: boolean,
-    memberBannedFromChannelInAppNotificationEnabled: boolean,
-    channelCreatedInAppNotificationEnabled: boolean,
-    commentCreatedMailNotificationEnabled: boolean,
-    commentTextUpdatedMailNotificationEnabled: boolean,
-    openAuctionStartedMailNotificationEnabled: boolean,
-    englishAuctionStartedMailNotificationEnabled: boolean,
-    nftIssuedMailNotificationEnabled: boolean,
-    auctionBidMadeMailNotificationEnabled: boolean,
-    auctionBidCanceledMailNotificationEnabled: boolean,
-    auctionCanceledMailNotificationEnabled: boolean,
-    englishAuctionSettledMailNotificationEnabled: boolean,
-    bidMadeCompletingAuctionMailNotificationEnabled: boolean,
-    openAuctionBidAcceptedMailNotificationEnabled: boolean,
-    nftSellOrderMadeMailNotificationEnabled: boolean,
-    nftBoughtMailNotificationEnabled: boolean,
-    buyNowCanceledMailNotificationEnabled: boolean,
-    buyNowPriceUpdatedMailNotificationEnabled: boolean,
-    metaprotocolTransactionStatusMailNotificationEnabled: boolean,
-    channelRewardClaimedMailNotificationEnabled: boolean,
-    channelRewardClaimedAndWithdrawnMailNotificationEnabled: boolean,
-    channelFundsWithdrawnMailNotificationEnabled: boolean,
-    channelPayoutsUpdatedMailNotificationEnabled: boolean,
-    channelPaymentMadeMailNotificationEnabled: boolean,
-    memberBannedFromChannelMailNotificationEnabled: boolean,
-    channelCreatedMailNotificationEnabled: boolean,
-    newChannelFollowerInAppNotificationPreferences: boolean,
-    newChannelFollowerMailNotificationPreferences: boolean,
+  commentCreatedInAppNotificationEnabled: boolean
+  commentTextUpdatedInAppNotificationEnabled: boolean
+  openAuctionStartedInAppNotificationEnabled: boolean
+  englishAuctionStartedInAppNotificationEnabled: boolean
+  nftIssuedInAppNotificationEnabled: boolean
+  auctionBidMadeInAppNotificationEnabled: boolean
+  auctionBidCanceledInAppNotificationEnabled: boolean
+  auctionCanceledInAppNotificationEnabled: boolean
+  englishAuctionSettledInAppNotificationEnabled: boolean
+  bidMadeCompletingAuctionInAppNotificationEnabled: boolean
+  openAuctionBidAcceptedInAppNotificationEnabled: boolean
+  nftSellOrderMadeInAppNotificationEnabled: boolean
+  nftBoughtInAppNotificationEnabled: boolean
+  buyNowCanceledInAppNotificationEnabled: boolean
+  buyNowPriceUpdatedInAppNotificationEnabled: boolean
+  metaprotocolTransactionStatusInAppNotificationEnabled: boolean
+  channelRewardClaimedInAppNotificationEnabled: boolean
+  channelRewardClaimedAndWithdrawnInAppNotificationEnabled: boolean
+  channelFundsWithdrawnInAppNotificationEnabled: boolean
+  channelPayoutsUpdatedInAppNotificationEnabled: boolean
+  channelPaymentMadeInAppNotificationEnabled: boolean
+  memberBannedFromChannelInAppNotificationEnabled: boolean
+  channelCreatedInAppNotificationEnabled: boolean
+  commentCreatedMailNotificationEnabled: boolean
+  commentTextUpdatedMailNotificationEnabled: boolean
+  openAuctionStartedMailNotificationEnabled: boolean
+  englishAuctionStartedMailNotificationEnabled: boolean
+  nftIssuedMailNotificationEnabled: boolean
+  auctionBidMadeMailNotificationEnabled: boolean
+  auctionBidCanceledMailNotificationEnabled: boolean
+  auctionCanceledMailNotificationEnabled: boolean
+  englishAuctionSettledMailNotificationEnabled: boolean
+  bidMadeCompletingAuctionMailNotificationEnabled: boolean
+  openAuctionBidAcceptedMailNotificationEnabled: boolean
+  nftSellOrderMadeMailNotificationEnabled: boolean
+  nftBoughtMailNotificationEnabled: boolean
+  buyNowCanceledMailNotificationEnabled: boolean
+  buyNowPriceUpdatedMailNotificationEnabled: boolean
+  metaprotocolTransactionStatusMailNotificationEnabled: boolean
+  channelRewardClaimedMailNotificationEnabled: boolean
+  channelRewardClaimedAndWithdrawnMailNotificationEnabled: boolean
+  channelFundsWithdrawnMailNotificationEnabled: boolean
+  channelPayoutsUpdatedMailNotificationEnabled: boolean
+  channelPaymentMadeMailNotificationEnabled: boolean
+  memberBannedFromChannelMailNotificationEnabled: boolean
+  channelCreatedMailNotificationEnabled: boolean
+  newChannelFollowerInAppNotificationPreferences: boolean
+  newChannelFollowerMailNotificationPreferences: boolean
 }
 export function defaultNotificationPreferences(): NotificationPreferences {
-   return {
+  return {
     commentCreatedInAppNotificationEnabled: true,
     commentTextUpdatedInAppNotificationEnabled: true,
     openAuctionStartedInAppNotificationEnabled: true,
@@ -121,9 +121,15 @@ export async function preferencesForNotification(
 ): Promise<[boolean, boolean]> {
   switch (notificationType.isTypeOf) {
     case 'CommentCreatedEventData':
-      return [account.commentCreatedInAppNotificationEnabled, account.commentCreatedMailNotificationEnabled]
+      return [
+        account.commentCreatedInAppNotificationEnabled,
+        account.commentCreatedMailNotificationEnabled,
+      ]
     case 'CommentTextUpdatedEventData':
-      return [account.commentCreatedInAppNotificationEnabled, account.commentCreatedMailNotificationEnabled]
+      return [
+        account.commentCreatedInAppNotificationEnabled,
+        account.commentCreatedMailNotificationEnabled,
+      ]
     case 'OpenAuctionStartedEventData':
       return [
         account.openAuctionStartedInAppNotificationEnabled,
@@ -137,14 +143,20 @@ export async function preferencesForNotification(
     case 'NftIssuedEventData':
       return [account.nftIssuedInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
     case 'AuctionBidMadeEventData':
-      return [account.auctionBidMadeInAppNotificationEnabled, account.auctionBidMadeMailNotificationEnabled]
+      return [
+        account.auctionBidMadeInAppNotificationEnabled,
+        account.auctionBidMadeMailNotificationEnabled,
+      ]
     case 'AuctionBidCanceledEventData':
       return [
         account.auctionCanceledInAppNotificationEnabled,
         account.auctionBidCanceledMailNotificationEnabled,
       ]
     case 'AuctionCanceledEventData':
-      return [account.auctionCanceledInAppNotificationEnabled, account.auctionCanceledMailNotificationEnabled]
+      return [
+        account.auctionCanceledInAppNotificationEnabled,
+        account.auctionCanceledMailNotificationEnabled,
+      ]
     case 'EnglishAuctionSettledEventData':
       return [
         account.englishAuctionSettledInAppNotificationEnabled,
@@ -168,7 +180,10 @@ export async function preferencesForNotification(
     case 'NftBoughtEventData':
       return [account.nftBoughtInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
     case 'BuyNowCanceledEventData':
-      return [account.buyNowCanceledInAppNotificationEnabled, account.buyNowCanceledMailNotificationEnabled]
+      return [
+        account.buyNowCanceledInAppNotificationEnabled,
+        account.buyNowCanceledMailNotificationEnabled,
+      ]
     case 'BuyNowPriceUpdatedEventData':
       return [
         account.buyNowPriceUpdatedInAppNotificationEnabled,
@@ -246,7 +261,10 @@ export async function addOffChainNotification(
           (
             await em
               .getRepository(NextEntityId)
-              .findOne({ where: { entityName: 'OffChainNotification' }, lock: { mode: 'pessimistic_write' } })
+              .findOne({
+                where: { entityName: 'OffChainNotification' },
+                lock: { mode: 'pessimistic_write' },
+              })
           )?.nextId.toString() || '1'
         )
         const notification = new OffChainNotification({
@@ -264,7 +282,10 @@ export async function addOffChainNotification(
         }
         await em.save([
           notification,
-          new NextEntityId({ entityName: 'OffChainNotification', nextId: nextOffchainNotificationId + 1 })
+          new NextEntityId({
+            entityName: 'OffChainNotification',
+            nextId: nextOffchainNotificationId + 1,
+          }),
         ])
       }
     }

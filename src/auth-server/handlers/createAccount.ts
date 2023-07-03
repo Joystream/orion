@@ -90,7 +90,6 @@ export const createAccount: (
         membershipId: memberId.toString(),
       })
 
-
       await em.save([
         account,
         new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }),

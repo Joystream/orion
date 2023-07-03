@@ -92,7 +92,6 @@ export async function addNotificationForRuntimeData(
   event: Flat<Event>,
   type: NotificationType
 ): Promise<void> {
-
   const mailNotifier = new MailNotifier()
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
   mailNotifier.setSubject(event.data.toString())
@@ -102,22 +101,24 @@ export async function addNotificationForRuntimeData(
     const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
     if (account) {
       const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
-        account,
+        account as Account,
         event.data
       )
       if (shouldSendAppNotification || shouldSendMail) {
         const repository = overlay.getRepository(RuntimeNotification)
-        const notificationId = repository.getNewEntityId()
-        const notificationAlreadyProcessedInThePast = await overlay.getRepository(RuntimeNotificationProcessed).getOneBy({ notificationId })
+        const newNotificationId = repository.getNewEntityId()
+        const notificationAlreadyProcessedInThePast = await overlay
+          .getRepository(RuntimeNotificationProcessed)
+          .getOneByRelation('runtimeNotificationId', newNotificationId)
         repository.new({
-          id: notificationId,
+          id: newNotificationId,
           accountId: account.id,
           eventId: event.id,
           type,
         })
         if (!notificationAlreadyProcessedInThePast) {
           const notificationProcessed = overlay.getRepository(RuntimeNotificationProcessed).new({
-            notificationId,
+            id: newNotificationId,
             inAppRead: false,
             mailSent: false,
           })
