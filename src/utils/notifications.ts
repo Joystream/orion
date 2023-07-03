@@ -156,6 +156,11 @@ export function preferencesForNotification(
         np.memberBannedFromChannelInAppNotificationEnabled,
         np.memberBannedFromChannelMailNotificationEnabled,
       ]
+    case 'ChannelCreatedEventData':
+      return [
+        np.channelCreatedInAppNotificationEnabled,
+        np.channelCreatedMailNotificationEnabled,
+      ]
     default:
       return [false, false]
   }

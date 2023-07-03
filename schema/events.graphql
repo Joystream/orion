@@ -21,11 +21,11 @@ type Event @entity {
 union NotificationType = ChannelNotification | MemberNotification
 
 type ChannelNotification @variant {
-  phantom: Int!
+  channel: Channel!
 }
 
 type MemberNotification @variant {
-  phantom: Int!
+  member: Membership!
 }
 
 type OnChainNotification @entity {

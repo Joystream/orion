@@ -91,7 +91,6 @@ export async function addNotificationForRuntimeData(
   event: Flat<Event>,
   type: NotificationType
 ): Promise<void> {
-  const repository = overlay.getRepository(OnChainNotification)
 
   const mailNotifier = new MailNotifier()
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
@@ -106,11 +105,13 @@ export async function addNotificationForRuntimeData(
         event.data
       )
       if (shouldSendAppNotification || shouldSendMail) {
+        const repository = overlay.getRepository(OnChainNotification)
         const notification = repository.new({
           id: repository.getNewEntityId(),
           accountId: account.id,
           eventId: event.id,
           inAppRead: false,
+          mailSent: false,
           type,
         })
         if (shouldSendMail) {

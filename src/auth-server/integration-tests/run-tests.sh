@@ -7,10 +7,9 @@ cd $SCRIPT_PATH
 source ./utils.sh
 
 echo "Setting up" >&2
-setup
 
-echo "Running tests" >&2
-
+# create channel: on chain notification
+npx @joystream/cli content:createChannel --input ./channelInput.json
 
 
 

@@ -49,7 +49,7 @@ export async function processChannelCreatedEvent({
     { owner, dataObjects, channelStateBloatBond },
     channelCreationParameters,
     rewardAccount,
-  ] = event.asV1000
+  ] = event.isV1000 ? event.asV1000 : event.asV2002
 
   const followsNum = await overlay
     .getEm()
@@ -120,7 +120,7 @@ export async function processChannelCreatedEvent({
       timestamp: new Date(block.timestamp),
       data: new ChannelCreatedEventData({ channel: channel.id }),
     })
-    await addNotificationForRuntimeData(overlay, [ownerMember.id], event, new ChannelNotification())
+    await addNotificationForRuntimeData(overlay, [ownerMember.id], event, new ChannelNotification({ channel: channel.id}))
   }
 }
 
@@ -200,8 +200,8 @@ export async function processChannelOwnerRemarkedEvent({
   const result = decodedMessage
     ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -225,8 +225,8 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({

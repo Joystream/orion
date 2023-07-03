@@ -14,6 +14,7 @@ export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDR
 
 export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
 
+
 export async function prepareEncryptionArtifacts(
   seed: string,
   email: string,
@@ -60,7 +61,7 @@ export function aes256CbcEncrypt(data: string, key: Buffer, iv: Buffer): string 
 
 prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => {
   const keypair = keyring.addFromUri(`//${addressSeed}`)
-  const payload = {
+  const account_payload = {
     joystreamAccountId: keypair.address,
     gatewayName: 'Gleev',
     timestamp: Date.now(),
@@ -69,9 +70,27 @@ prepareEncryptionArtifacts(seed, email, password).then((encryptionArtifacts) => 
     memberId,
     encryptionArtifacts,
   }
-  const result = {
-    signature: u8aToHex(keypair.sign(JSON.stringify(payload))),
-    payload,
+
+  const account_result = {
+    signature: u8aToHex(keypair.sign(JSON.stringify(account_payload))),
+    payload: account_payload,
   }
-  console.log(JSON.stringify(result))
+
+  const login_payload = {
+    joystreamAccountId: keypair.address,
+    gatewayName: 'Gleev',
+    timestamp: Date.now(),
+    action: 'login',
+  }
+
+  const login_result = {
+    signature: u8aToHex(keypair.sign(JSON.stringify(login_payload))),
+    payload: login_payload,
+  }
+
+  console.log(JSON.stringify({
+    login: login_result,
+    account: account_result
+  }))
+
 })

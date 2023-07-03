@@ -110,6 +110,7 @@ export class SendGridMailStrategy implements SendMailStrategy {
     mailerLogger.info(
       `E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
     )
+    console.log(`------------> MAIL SENT !!!!!!!!`)
     return result[0].statusCode
   }
 }
