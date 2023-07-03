@@ -102,8 +102,7 @@ export async function addNotificationForRuntimeData(
     const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
     if (account) {
       const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
-        overlay.getEm(),
-        account.id,
+        account,
         event.data
       )
       if (shouldSendAppNotification || shouldSendMail) {
@@ -124,8 +123,8 @@ export async function addNotificationForRuntimeData(
           })
           if (shouldSendMail) {
             mailNotifier.setReciever(account.email)
-            const statusCode = await mailNotifier.send()
-            notificationProcessed.mailSent = statusCode === 200  // https://docs.sendgrid.com/api-reference/how-to-use-the-sendgrid-v3-api/responses
+            await mailNotifier.send()
+            notificationProcessed.mailSent = mailNotifier.mailHasBeenSent()
           }
         }
       }

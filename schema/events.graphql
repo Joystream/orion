@@ -42,7 +42,7 @@ type RuntimeNotification @entity {
   type: NotificationType!
 
   "Notification Data to be persisted over migrations"
-  notificationProcessed: RuntimeNotificationProcessed!
+  notificationProcessed: RuntimeNotificationProcessed @derivedFrom(field: "runtimeNotification")
 }
 
 type NftHistoryEntry @entity {
@@ -417,7 +417,7 @@ type OffChainNotification @entity {
   id: ID!
 
   "Member that should recieve the notification"
-  account: Account!
+  account: Account! 
 
   "The notification data associated"
   data: OffChainNotificationData!
@@ -454,65 +454,13 @@ type NewChannelFollowerNotificationData @variant {
   channel: Channel!
 }
 
-type NotificationPreferences @entity {
-  account: Account!
-
-  commentCreatedInAppNotificationEnabled: Boolean!
-  commentTextUpdatedInAppNotificationEnabled: Boolean!
-  openAuctionStartedInAppNotificationEnabled: Boolean!
-  englishAuctionStartedInAppNotificationEnabled: Boolean!
-  nftIssuedInAppNotificationEnabled: Boolean!
-  auctionBidMadeInAppNotificationEnabled: Boolean!
-  auctionBidCanceledInAppNotificationEnabled: Boolean!
-  auctionCanceledInAppNotificationEnabled: Boolean!
-  englishAuctionSettledInAppNotificationEnabled: Boolean!
-  bidMadeCompletingAuctionInAppNotificationEnabled: Boolean!
-  openAuctionBidAcceptedInAppNotificationEnabled: Boolean!
-  nftSellOrderMadeInAppNotificationEnabled: Boolean!
-  nftBoughtInAppNotificationEnabled: Boolean!
-  buyNowCanceledInAppNotificationEnabled: Boolean!
-  buyNowPriceUpdatedInAppNotificationEnabled: Boolean!
-  metaprotocolTransactionStatusInAppNotificationEnabled: Boolean!
-  channelRewardClaimedInAppNotificationEnabled: Boolean!
-  channelRewardClaimedAndWithdrawnInAppNotificationEnabled: Boolean!
-  channelFundsWithdrawnInAppNotificationEnabled: Boolean!
-  channelPayoutsUpdatedInAppNotificationEnabled: Boolean!
-  channelPaymentMadeInAppNotificationEnabled: Boolean!
-  memberBannedFromChannelInAppNotificationEnabled: Boolean!
-  channelCreatedInAppNotificationEnabled: Boolean!
-  newChannelFollowerInAppNotificationPreferences: Boolean!
-
-  # mail notifications
-  commentCreatedMailNotificationEnabled: Boolean!
-  commentTextUpdatedMailNotificationEnabled: Boolean!
-  openAuctionStartedMailNotificationEnabled: Boolean!
-  englishAuctionStartedMailNotificationEnabled: Boolean!
-  nftIssuedMailNotificationEnabled: Boolean!
-  auctionBidMadeMailNotificationEnabled: Boolean!
-  auctionBidCanceledMailNotificationEnabled: Boolean!
-  auctionCanceledMailNotificationEnabled: Boolean!
-  englishAuctionSettledMailNotificationEnabled: Boolean!
-  bidMadeCompletingAuctionMailNotificationEnabled: Boolean!
-  openAuctionBidAcceptedMailNotificationEnabled: Boolean!
-  nftSellOrderMadeMailNotificationEnabled: Boolean!
-  nftBoughtMailNotificationEnabled: Boolean!
-  buyNowCanceledMailNotificationEnabled: Boolean!
-  buyNowPriceUpdatedMailNotificationEnabled: Boolean!
-  metaprotocolTransactionStatusMailNotificationEnabled: Boolean!
-  channelRewardClaimedMailNotificationEnabled: Boolean!
-  channelRewardClaimedAndWithdrawnMailNotificationEnabled: Boolean!
-  channelFundsWithdrawnMailNotificationEnabled: Boolean!
-  channelPayoutsUpdatedMailNotificationEnabled: Boolean!
-  channelPaymentMadeMailNotificationEnabled: Boolean!
-  memberBannedFromChannelMailNotificationEnabled: Boolean!
-  channelCreatedMailNotificationEnabled: Boolean!
-  newChannelFollowerMailNotificationPreferences: Boolean!
-}
-
 # for migration puroposes
 type RuntimeNotificationProcessed @entity {
-  "if for the notification"
-  notificationId: ID!
+  "Autoincremented"
+  id: ID!
+
+  "Runtime Notification reference"
+  runtimeNotification: RuntimeNotification! @unique
 
   "mail sent or not"
   mailSent: Boolean!

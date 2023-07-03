@@ -11,7 +11,8 @@ type SendMailArgs = {
 
 // create a strategy interface with a send mail method
 export interface SendMailStrategy {
-  sendMail({ from, to, subject, content }: SendMailArgs): Promise<number> // statuscode
+  sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> // statuscode
+  mailHasBeenSent(): boolean
 }
 
 export class MailNotifier {
@@ -62,13 +63,17 @@ export class MailNotifier {
       `
   }
 
-  public async send(): Promise<number> {
+  public async send(): Promise<void> {
     return await this._sendMailStrategy.sendMail({
       from: this._senderMail,
       to: this._recieverMail,
       subject: this._subject,
       content: this._content,
     })
+  }
+
+  public mailHasBeenSent(): boolean {
+    return this._sendMailStrategy.mailHasBeenSent()
   }
 }
 
@@ -85,6 +90,7 @@ export class MailNotifier {
 const mailerLogger = createLogger('mailer')
 
 export class SendGridMailStrategy implements SendMailStrategy {
+  protected _result: sgMail.ClientResponse
   public init() {
     if (process.env.SENDGRID_API_KEY) {
       sgMail.setApiKey(process.env.SENDGRID_API_KEY)
@@ -94,29 +100,35 @@ export class SendGridMailStrategy implements SendMailStrategy {
     }
   }
 
-  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<number> {
+  mailHasBeenSent(): boolean {
+    return this._result.statusCode === 202
+  }
+
+  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> {
     if (!process.env.SENDGRID_API_KEY) {
       mailerLogger.info(
         `Skipped sending e - mail: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
       )
-      return 0
+      return
     }
-    const result = await sgMail.send({
+    this._result = (await sgMail.send({
       from,
       to,
       subject,
       html: content,
-    })
+    }))[0]
     mailerLogger.info(
       `E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
     )
     console.log(`------------> MAIL SENT !!!!!!!!`)
-    return result[0].statusCode
   }
 }
 
 class DefaultSendMailStrategy extends SendGridMailStrategy {
-  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<number> {
-    return Promise.resolve(0)
+  async sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> {
+  }
+
+  mailHasBeenSent(): boolean {
+    return false
   }
 }

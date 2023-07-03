@@ -1,3 +1,4 @@
+import { Flat } from 'lodash'
 import { EntityManager } from 'typeorm'
 import {
   Account,
@@ -7,13 +8,61 @@ import {
   OffChainNotification,
   OffChainNotificationData,
 } from '../model'
-import { NotificationPreferences } from '../model/generated/notificationPreferences.model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 
-export function defaultNotificationPreferences(accountId: string): NotificationPreferences {
-  return new NotificationPreferences({
-    accountId,
+export type NotificationPreferences = {
+    commentCreatedInAppNotificationEnabled: boolean,
+    commentTextUpdatedInAppNotificationEnabled: boolean,
+    openAuctionStartedInAppNotificationEnabled: boolean,
+    englishAuctionStartedInAppNotificationEnabled: boolean,
+    nftIssuedInAppNotificationEnabled: boolean,
+    auctionBidMadeInAppNotificationEnabled: boolean,
+    auctionBidCanceledInAppNotificationEnabled: boolean,
+    auctionCanceledInAppNotificationEnabled: boolean,
+    englishAuctionSettledInAppNotificationEnabled: boolean,
+    bidMadeCompletingAuctionInAppNotificationEnabled: boolean,
+    openAuctionBidAcceptedInAppNotificationEnabled: boolean,
+    nftSellOrderMadeInAppNotificationEnabled: boolean,
+    nftBoughtInAppNotificationEnabled: boolean,
+    buyNowCanceledInAppNotificationEnabled: boolean,
+    buyNowPriceUpdatedInAppNotificationEnabled: boolean,
+    metaprotocolTransactionStatusInAppNotificationEnabled: boolean,
+    channelRewardClaimedInAppNotificationEnabled: boolean,
+    channelRewardClaimedAndWithdrawnInAppNotificationEnabled: boolean,
+    channelFundsWithdrawnInAppNotificationEnabled: boolean,
+    channelPayoutsUpdatedInAppNotificationEnabled: boolean,
+    channelPaymentMadeInAppNotificationEnabled: boolean,
+    memberBannedFromChannelInAppNotificationEnabled: boolean,
+    channelCreatedInAppNotificationEnabled: boolean,
+    commentCreatedMailNotificationEnabled: boolean,
+    commentTextUpdatedMailNotificationEnabled: boolean,
+    openAuctionStartedMailNotificationEnabled: boolean,
+    englishAuctionStartedMailNotificationEnabled: boolean,
+    nftIssuedMailNotificationEnabled: boolean,
+    auctionBidMadeMailNotificationEnabled: boolean,
+    auctionBidCanceledMailNotificationEnabled: boolean,
+    auctionCanceledMailNotificationEnabled: boolean,
+    englishAuctionSettledMailNotificationEnabled: boolean,
+    bidMadeCompletingAuctionMailNotificationEnabled: boolean,
+    openAuctionBidAcceptedMailNotificationEnabled: boolean,
+    nftSellOrderMadeMailNotificationEnabled: boolean,
+    nftBoughtMailNotificationEnabled: boolean,
+    buyNowCanceledMailNotificationEnabled: boolean,
+    buyNowPriceUpdatedMailNotificationEnabled: boolean,
+    metaprotocolTransactionStatusMailNotificationEnabled: boolean,
+    channelRewardClaimedMailNotificationEnabled: boolean,
+    channelRewardClaimedAndWithdrawnMailNotificationEnabled: boolean,
+    channelFundsWithdrawnMailNotificationEnabled: boolean,
+    channelPayoutsUpdatedMailNotificationEnabled: boolean,
+    channelPaymentMadeMailNotificationEnabled: boolean,
+    memberBannedFromChannelMailNotificationEnabled: boolean,
+    channelCreatedMailNotificationEnabled: boolean,
+    newChannelFollowerInAppNotificationPreferences: boolean,
+    newChannelFollowerMailNotificationPreferences: boolean,
+}
+export function defaultNotificationPreferences(): NotificationPreferences {
+   return {
     commentCreatedInAppNotificationEnabled: true,
     commentTextUpdatedInAppNotificationEnabled: true,
     openAuctionStartedInAppNotificationEnabled: true,
@@ -62,115 +111,113 @@ export function defaultNotificationPreferences(accountId: string): NotificationP
     channelCreatedMailNotificationEnabled: true,
     newChannelFollowerInAppNotificationPreferences: true,
     newChannelFollowerMailNotificationPreferences: true,
-  }) // TODo: format ordinately by pairs
+  } // TODo: format ordinately by pairs
 }
 
 // [app notification, email notification] preference
 export async function preferencesForNotification(
-  em: EntityManager,
-  accountId: string,
+  account: Account,
   notificationType: EventData | OffChainNotificationData
 ): Promise<[boolean, boolean]> {
-  const np = await em.findOneByOrFail(NotificationPreferences, { accountId: accountId })
   switch (notificationType.isTypeOf) {
     case 'CommentCreatedEventData':
-      return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
+      return [account.commentCreatedInAppNotificationEnabled, account.commentCreatedMailNotificationEnabled]
     case 'CommentTextUpdatedEventData':
-      return [np.commentCreatedInAppNotificationEnabled, np.commentCreatedMailNotificationEnabled]
+      return [account.commentCreatedInAppNotificationEnabled, account.commentCreatedMailNotificationEnabled]
     case 'OpenAuctionStartedEventData':
       return [
-        np.openAuctionStartedInAppNotificationEnabled,
-        np.openAuctionStartedMailNotificationEnabled,
+        account.openAuctionStartedInAppNotificationEnabled,
+        account.openAuctionStartedMailNotificationEnabled,
       ]
     case 'EnglishAuctionStartedEventData':
       return [
-        np.englishAuctionStartedInAppNotificationEnabled,
-        np.englishAuctionStartedMailNotificationEnabled,
+        account.englishAuctionStartedInAppNotificationEnabled,
+        account.englishAuctionStartedMailNotificationEnabled,
       ]
     case 'NftIssuedEventData':
-      return [np.nftIssuedInAppNotificationEnabled, np.nftBoughtMailNotificationEnabled]
+      return [account.nftIssuedInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
     case 'AuctionBidMadeEventData':
-      return [np.auctionBidMadeInAppNotificationEnabled, np.auctionBidMadeMailNotificationEnabled]
+      return [account.auctionBidMadeInAppNotificationEnabled, account.auctionBidMadeMailNotificationEnabled]
     case 'AuctionBidCanceledEventData':
       return [
-        np.auctionCanceledInAppNotificationEnabled,
-        np.auctionBidCanceledMailNotificationEnabled,
+        account.auctionCanceledInAppNotificationEnabled,
+        account.auctionBidCanceledMailNotificationEnabled,
       ]
     case 'AuctionCanceledEventData':
-      return [np.auctionCanceledInAppNotificationEnabled, np.auctionCanceledMailNotificationEnabled]
+      return [account.auctionCanceledInAppNotificationEnabled, account.auctionCanceledMailNotificationEnabled]
     case 'EnglishAuctionSettledEventData':
       return [
-        np.englishAuctionSettledInAppNotificationEnabled,
-        np.englishAuctionSettledMailNotificationEnabled,
+        account.englishAuctionSettledInAppNotificationEnabled,
+        account.englishAuctionSettledMailNotificationEnabled,
       ]
     case 'BidMadeCompletingAuctionEventData':
       return [
-        np.bidMadeCompletingAuctionInAppNotificationEnabled,
-        np.bidMadeCompletingAuctionMailNotificationEnabled,
+        account.bidMadeCompletingAuctionInAppNotificationEnabled,
+        account.bidMadeCompletingAuctionMailNotificationEnabled,
       ]
     case 'OpenAuctionBidAcceptedEventData':
       return [
-        np.openAuctionBidAcceptedInAppNotificationEnabled,
-        np.openAuctionBidAcceptedMailNotificationEnabled,
+        account.openAuctionBidAcceptedInAppNotificationEnabled,
+        account.openAuctionBidAcceptedMailNotificationEnabled,
       ]
     case 'NftSellOrderMadeEventData':
       return [
-        np.nftSellOrderMadeInAppNotificationEnabled,
-        np.nftSellOrderMadeMailNotificationEnabled,
+        account.nftSellOrderMadeInAppNotificationEnabled,
+        account.nftSellOrderMadeMailNotificationEnabled,
       ]
     case 'NftBoughtEventData':
-      return [np.nftBoughtInAppNotificationEnabled, np.nftBoughtMailNotificationEnabled]
+      return [account.nftBoughtInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
     case 'BuyNowCanceledEventData':
-      return [np.buyNowCanceledInAppNotificationEnabled, np.buyNowCanceledMailNotificationEnabled]
+      return [account.buyNowCanceledInAppNotificationEnabled, account.buyNowCanceledMailNotificationEnabled]
     case 'BuyNowPriceUpdatedEventData':
       return [
-        np.buyNowPriceUpdatedInAppNotificationEnabled,
-        np.buyNowPriceUpdatedMailNotificationEnabled,
+        account.buyNowPriceUpdatedInAppNotificationEnabled,
+        account.buyNowPriceUpdatedMailNotificationEnabled,
       ]
     case 'MetaprotocolTransactionStatusEventData':
       return [
-        np.metaprotocolTransactionStatusInAppNotificationEnabled,
-        np.metaprotocolTransactionStatusMailNotificationEnabled,
+        account.metaprotocolTransactionStatusInAppNotificationEnabled,
+        account.metaprotocolTransactionStatusMailNotificationEnabled,
       ]
     case 'ChannelRewardClaimedEventData':
       return [
-        np.channelRewardClaimedInAppNotificationEnabled,
-        np.channelRewardClaimedMailNotificationEnabled,
+        account.channelRewardClaimedInAppNotificationEnabled,
+        account.channelRewardClaimedMailNotificationEnabled,
       ]
     case 'ChannelRewardClaimedAndWithdrawnEventData':
       return [
-        np.channelRewardClaimedAndWithdrawnInAppNotificationEnabled,
-        np.channelRewardClaimedAndWithdrawnMailNotificationEnabled,
+        account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled,
+        account.channelRewardClaimedAndWithdrawnMailNotificationEnabled,
       ]
     case 'ChannelFundsWithdrawnEventData':
       return [
-        np.channelFundsWithdrawnInAppNotificationEnabled,
-        np.channelFundsWithdrawnMailNotificationEnabled,
+        account.channelFundsWithdrawnInAppNotificationEnabled,
+        account.channelFundsWithdrawnMailNotificationEnabled,
       ]
     case 'ChannelPayoutsUpdatedEventData':
       return [
-        np.channelPayoutsUpdatedInAppNotificationEnabled,
-        np.channelPayoutsUpdatedMailNotificationEnabled,
+        account.channelPayoutsUpdatedInAppNotificationEnabled,
+        account.channelPayoutsUpdatedMailNotificationEnabled,
       ]
     case 'ChannelPaymentMadeEventData':
       return [
-        np.channelPaymentMadeInAppNotificationEnabled,
-        np.channelPaymentMadeMailNotificationEnabled,
+        account.channelPaymentMadeInAppNotificationEnabled,
+        account.channelPaymentMadeMailNotificationEnabled,
       ]
     case 'MemberBannedFromChannelEventData':
       return [
-        np.memberBannedFromChannelInAppNotificationEnabled,
-        np.memberBannedFromChannelMailNotificationEnabled,
+        account.memberBannedFromChannelInAppNotificationEnabled,
+        account.memberBannedFromChannelMailNotificationEnabled,
       ]
     case 'ChannelCreatedEventData':
       return [
-        np.channelCreatedInAppNotificationEnabled,
-        np.channelCreatedMailNotificationEnabled,
+        account.channelCreatedInAppNotificationEnabled,
+        account.channelCreatedMailNotificationEnabled,
       ]
     case 'NewChannelFollowerNotificationData':
       return [
-        np.newChannelFollowerInAppNotificationPreferences,
-        np.newChannelFollowerMailNotificationPreferences,
+        account.newChannelFollowerInAppNotificationPreferences,
+        account.newChannelFollowerMailNotificationPreferences,
       ]
     default:
       return [false, false]
@@ -191,8 +238,7 @@ export async function addOffChainNotification(
     const account = await em.getRepository(Account).findOneById(accountId)
     if (account) {
       const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
-        em,
-        accountId,
+        account,
         data
       )
       if (shouldSendAppNotification || shouldSendMail) {
@@ -213,8 +259,8 @@ export async function addOffChainNotification(
         })
         if (shouldSendMail) {
           mailNotifier.setReciever(account.email)
-          const statusCode = await mailNotifier.send()
-          notification.mailSent = statusCode === 202
+          await mailNotifier.send()
+          notification.mailSent = mailNotifier.mailHasBeenSent()
         }
         await em.save([
           notification,

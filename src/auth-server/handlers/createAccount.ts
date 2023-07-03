@@ -77,6 +77,8 @@ export const createAccount: (
         )
       }
 
+      const notificationPreferences = defaultNotificationPreferences()
+
       const account = new Account({
         id: idStringFromNumber(nextAccountId),
         email,
@@ -88,7 +90,6 @@ export const createAccount: (
         membershipId: memberId.toString(),
       })
 
-      const notificationPreferences = defaultNotificationPreferences(account.id)
 
       await em.save([
         account,
