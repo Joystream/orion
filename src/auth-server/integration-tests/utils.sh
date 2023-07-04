@@ -73,3 +73,8 @@ curl --request POST \
 
 echo "************************************************************************ " >&2
 echo "Mark Notification as read unread" >&2
+curl --request POST \
+  --url 'http://localhost:4350/graphql?=' \
+  --header 'Content-Type: application/json' \
+  --header "Cookie: session_id=${LOGIN_SESSION_ID}" \
+  --data '{"query":"mutation MarkOffChainNotificationAsRead {\n\tmarkOffChainNotificationAsRead(notificationId: \"000001\")\n}\n","operationName":"MarkOffChainNotificationAsRead"}'
