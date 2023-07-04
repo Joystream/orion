@@ -15,7 +15,7 @@ import { NotificationArgs, SetNotificationPreferencesArgs } from './types'
 @Resolver()
 export class NotificationResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) { }
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
@@ -124,7 +124,7 @@ export class NotificationResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
-  async setAccountNotificatioPreferences(
+  async setAccountNotificationPreferences(
     @Args() notificationPreferences: SetNotificationPreferencesArgs,
     @Ctx() ctx: Context
   ): Promise<Boolean> {
@@ -263,7 +263,7 @@ export class NotificationResolver {
           memberBannedFromChannelMailNotificationEnabled
         account.channelCreatedMailNotificationEnabled = channelCreatedMailNotificationEnabled
 
-        await em.save(notificationPreferences)
+        await em.save(account)
         return true
       }
       return false

@@ -8,95 +8,97 @@ export class NotificationArgs {
 @ArgsType()
 export class SetNotificationPreferencesArgs {
   @Field(() => Boolean, { nullable: false })
-  commentCreatedInAppNotificationEnabled!: boolean
+  commentCreatedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  commentTextUpdatedInAppNotificationEnabled!: boolean
+  commentTextUpdatedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  openAuctionStartedInAppNotificationEnabled!: boolean
+  openAuctionStartedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  englishAuctionStartedInAppNotificationEnabled!: boolean
+  englishAuctionStartedInAppNotificationEnabled: boolean
+  nftIssuedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftIssuedInAppNotificationEnabled!: boolean
+  auctionBidMadeInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionBidMadeInAppNotificationEnabled!: boolean
+  auctionBidCanceledInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionBidCanceledInAppNotificationEnabled!: boolean
+  auctionCanceledInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionCanceledInAppNotificationEnabled!: boolean
+  englishAuctionSettledInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  englishAuctionSettledInAppNotificationEnabled!: boolean
+  bidMadeCompletingAuctionInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  bidMadeCompletingAuctionInAppNotificationEnabled!: boolean
+  openAuctionBidAcceptedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  openAuctionBidAcceptedInAppNotificationEnabled!: boolean
+  nftSellOrderMadeInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftSellOrderMadeInAppNotificationEnabled!: boolean
+  nftBoughtInAppNotificationEnabled: boolean
+  buyNowCanceledInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftBoughtInAppNotificationEnabled!: boolean
+  buyNowPriceUpdatedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  buyNowCanceledInAppNotificationEnabled!: boolean
+  metaprotocolTransactionStatusInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  buyNowPriceUpdatedInAppNotificationEnabled!: boolean
+  channelRewardClaimedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  metaprotocolTransactionStatusInAppNotificationEnabled!: boolean
+  channelRewardClaimedAndWithdrawnInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelRewardClaimedInAppNotificationEnabled!: boolean
+  channelFundsWithdrawnInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelRewardClaimedAndWithdrawnInAppNotificationEnabled!: boolean
+  channelPayoutsUpdatedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelFundsWithdrawnInAppNotificationEnabled!: boolean
+  channelPaymentMadeInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelPayoutsUpdatedInAppNotificationEnabled!: boolean
+  memberBannedFromChannelInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelPaymentMadeInAppNotificationEnabled!: boolean
+  channelCreatedInAppNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  memberBannedFromChannelInAppNotificationEnabled!: boolean
+  commentCreatedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelCreatedInAppNotificationEnabled!: boolean
+  commentTextUpdatedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  commentCreatedMailNotificationEnabled!: boolean
+  openAuctionStartedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  commentTextUpdatedMailNotificationEnabled!: boolean
+  englishAuctionStartedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  openAuctionStartedMailNotificationEnabled!: boolean
+  nftIssuedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  englishAuctionStartedMailNotificationEnabled!: boolean
+  auctionBidMadeMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftIssuedMailNotificationEnabled!: boolean
+  auctionBidCanceledMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionBidMadeMailNotificationEnabled!: boolean
+  auctionCanceledMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionBidCanceledMailNotificationEnabled!: boolean
+  englishAuctionSettledMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  auctionCanceledMailNotificationEnabled!: boolean
+  bidMadeCompletingAuctionMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  englishAuctionSettledMailNotificationEnabled!: boolean
+  openAuctionBidAcceptedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  bidMadeCompletingAuctionMailNotificationEnabled!: boolean
+  nftSellOrderMadeMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  openAuctionBidAcceptedMailNotificationEnabled!: boolean
+  nftBoughtMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftSellOrderMadeMailNotificationEnabled!: boolean
+  buyNowCanceledMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  nftBoughtMailNotificationEnabled!: boolean
+  buyNowPriceUpdatedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  buyNowCanceledMailNotificationEnabled!: boolean
+  metaprotocolTransactionStatusMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  buyNowPriceUpdatedMailNotificationEnabled!: boolean
+  channelRewardClaimedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  metaprotocolTransactionStatusMailNotificationEnabled!: boolean
+  channelRewardClaimedAndWithdrawnMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelRewardClaimedMailNotificationEnabled!: boolean
+  channelFundsWithdrawnMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelRewardClaimedAndWithdrawnMailNotificationEnabled!: boolean
+  channelPayoutsUpdatedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelFundsWithdrawnMailNotificationEnabled!: boolean
+  channelPaymentMadeMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelPayoutsUpdatedMailNotificationEnabled!: boolean
+  memberBannedFromChannelMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  channelPaymentMadeMailNotificationEnabled!: boolean
+  channelCreatedMailNotificationEnabled: boolean
   @Field(() => Boolean, { nullable: false })
-  memberBannedFromChannelMailNotificationEnabled!: boolean
+  newChannelFollowerInAppNotificationPreferences: boolean
   @Field(() => Boolean, { nullable: false })
-  channelCreatedMailNotificationEnabled!: boolean
+  newChannelFollowerMailNotificationPreferences: boolean
 }
