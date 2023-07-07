@@ -18,100 +18,36 @@ export class NotificationResolver {
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
-  async markOffChainNotificationAsRead(
-    @Args() { notificationId }: NotificationArgs,
+  async markNotificationsAsRead(
+    @Args() { notificationIds }: NotificationArgs,
     @Ctx() ctx: Context
-  ): Promise<Boolean> {
+  ): Promise<Boolean[]> {
     const em = await this.em()
-
+    const results: Boolean[] = []
     return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(OffChainNotification, {
-        where: { id: notificationId },
-      })
-      if (notification) {
-        if (notification.account.id === ctx.accountId) {
-          if (!notification.inAppRead) {
-            notification.inAppRead = true
-            await em.save(notification)
-            return true
+      for (const notificationId of notificationIds) {
+        let notification: RuntimeNotification | OffChainNotification | null = null
+
+        notification = await em.findOne(RuntimeNotification, {
+          where: { id: notificationId },
+        })
+        if (notification === null) {
+          notification = await em.findOne(OffChainNotification, {
+            where: { id: notificationId },
+          })
+        }
+        if (notification !== null) {
+          if (notification.account.id === ctx.accountId) {
+            if (!notification.inAppRead) {
+              notification.inAppRead = true
+              await em.save(notification)
+              results.push(true)
+            }
           }
+          results.push(false)
         }
       }
-      return false
-    })
-  }
-
-  @Mutation(() => Boolean)
-  @UseMiddleware(AccountOnly)
-  async markRuntimeNotificationAsRead(
-    @Args() { notificationId }: NotificationArgs,
-    @Ctx() ctx: Context
-  ): Promise<Boolean> {
-    const em = await this.em()
-
-    return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(RuntimeNotification, {
-        where: { id: notificationId },
-      })
-      if (notification !== null) {
-        if (notification.account.id === ctx.accountId) {
-          if (!notification.inAppRead) {
-            notification.inAppRead = true
-            await em.save(notification)
-            return true
-          }
-        }
-      }
-      return false
-    })
-  }
-
-  // write complementary function for marking as unread
-  @Mutation(() => Boolean)
-  @UseMiddleware(AccountOnly)
-  async markOffChainNotificationAsUnread(
-    @Args() { notificationId }: NotificationArgs,
-    @Ctx() ctx: Context
-  ): Promise<Boolean> {
-    const em = await this.em()
-    return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(OffChainNotification, {
-        where: { id: notificationId },
-      })
-      if (notification) {
-        if (notification.account.id === ctx.accountId) {
-          if (notification.inAppRead) {
-            notification.inAppRead = false
-            await em.save(notification)
-            return true
-          }
-        }
-      }
-      return false
-    })
-  }
-
-  @Mutation(() => Boolean)
-  @UseMiddleware(AccountOnly)
-  async markRuntimeNotificationAsUnread(
-    @Args() { notificationId }: NotificationArgs,
-    @Ctx() ctx: Context
-  ): Promise<Boolean> {
-    const em = await this.em()
-    return withHiddenEntities(em, async () => {
-      const notification = await em.findOne(RuntimeNotification, {
-        where: { id: notificationId },
-      })
-      if (notification !== null && notification !== null) {
-        if (notification.account.id === ctx.accountId) {
-          if (!notification.inAppRead) {
-            notification.inAppRead = true
-            await em.save(notification)
-            return true
-          }
-        }
-      }
-      return false
+      return results
     })
   }
 
@@ -263,3 +199,4 @@ export class NotificationResolver {
     })
   }
 }
+

@@ -2,8 +2,8 @@ import { Field, ObjectType, ArgsType } from 'type-graphql'
 
 @ArgsType()
 export class NotificationArgs {
-  @Field(() => String, { nullable: false })
-  notificationId!: string
+  @Field(() => [String], { nullable: false })
+  notificationIds!: string[]
 }
 @ArgsType()
 export class SetNotificationPreferencesArgs {
