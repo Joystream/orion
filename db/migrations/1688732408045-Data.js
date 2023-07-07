@@ -1,5 +1,5 @@
-module.exports = class Data1688654307439 {
-    name = 'Data1688654307439'
+module.exports = class Data1688732408045 {
+    name = 'Data1688732408045'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -93,7 +93,7 @@ module.exports = class Data1688654307439 {
         await db.query(`CREATE INDEX "IDX_1298811c0de5f11198fd43df72" ON "membership" ("handle") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
-        await db.query(`CREATE TABLE "runtime_notification" ("id" character varying NOT NULL, "account_id" character varying, "event_id" character varying, "type" jsonb NOT NULL, CONSTRAINT "PK_386ebd5073dfbf98526a4f73218" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "runtime_notification" ("id" character varying NOT NULL, "account_id" character varying, "event_id" character varying, "type" jsonb NOT NULL, "mail_sent" boolean NOT NULL, "in_app_read" boolean NOT NULL, CONSTRAINT "PK_386ebd5073dfbf98526a4f73218" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2c5b0cbfabbb47fc390f5b1574" ON "runtime_notification" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_e1fbf907648973272e0b2d7360" ON "runtime_notification" ("event_id") `)
         await db.query(`CREATE TABLE "off_chain_notification" ("id" character varying NOT NULL, "account_id" character varying, "data" jsonb NOT NULL, "in_app_read" boolean NOT NULL, "mail_sent" boolean NOT NULL, "type" jsonb NOT NULL, CONSTRAINT "PK_079caa028b5524d617d5d6373a8" PRIMARY KEY ("id"))`)
@@ -119,8 +119,6 @@ module.exports = class Data1688654307439 {
         await db.query(`CREATE TABLE "nft_activity" ("id" character varying NOT NULL, "member_id" character varying, "event_id" character varying, CONSTRAINT "PK_1553b1bbf8000039875a6e31536" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_18a65713a9fd0715c7a980f5d5" ON "nft_activity" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_94d325a753f2c08fdd416eb095" ON "nft_activity" ("event_id") `)
-        await db.query(`CREATE TABLE "runtime_notification_processed" ("id" character varying NOT NULL, "runtime_notification_id" character varying NOT NULL, "mail_sent" boolean NOT NULL, "in_app_read" boolean NOT NULL, CONSTRAINT "RuntimeNotificationProcessed_runtimeNotification" UNIQUE ("runtime_notification_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_a52eecb2d932c8e6ec5a2663f5" UNIQUE ("runtime_notification_id"), CONSTRAINT "PK_a3f7d19f7ea5be9d194da576b31" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_a52eecb2d932c8e6ec5a2663f5" ON "runtime_notification_processed" ("runtime_notification_id") `)
         await db.query(`CREATE TABLE "video_hero" ("id" character varying NOT NULL, "video_id" character varying, "hero_title" text NOT NULL, "hero_video_cut_url" text NOT NULL, "hero_poster_url" text NOT NULL, "activated_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_f3b63979879773378afac0b9495" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_9feac5d9713a9f07e32eb8ba7a" ON "video_hero" ("video_id") `)
         await db.query(`CREATE TABLE "video_media_encoding" ("id" character varying NOT NULL, "codec_name" text, "container" text, "mime_media_type" text, CONSTRAINT "PK_52e25874f8d8a381e154d1125e0" PRIMARY KEY ("id"))`)
@@ -202,7 +200,6 @@ module.exports = class Data1688654307439 {
         await db.query(`ALTER TABLE "nft_history_entry" ADD CONSTRAINT "FK_d1a28b178f5d028d048d40ce208" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_activity" ADD CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_activity" ADD CONSTRAINT "FK_94d325a753f2c08fdd416eb095f" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "runtime_notification_processed" ADD CONSTRAINT "FK_a52eecb2d932c8e6ec5a2663f5c" FOREIGN KEY ("runtime_notification_id") REFERENCES "runtime_notification"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_hero" ADD CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0" FOREIGN KEY ("encoding_id") REFERENCES "video_media_encoding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_4dc101240e8e1536b770aee202a" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -330,8 +327,6 @@ module.exports = class Data1688654307439 {
         await db.query(`DROP TABLE "nft_activity"`)
         await db.query(`DROP INDEX "public"."IDX_18a65713a9fd0715c7a980f5d5"`)
         await db.query(`DROP INDEX "public"."IDX_94d325a753f2c08fdd416eb095"`)
-        await db.query(`DROP TABLE "runtime_notification_processed"`)
-        await db.query(`DROP INDEX "public"."IDX_a52eecb2d932c8e6ec5a2663f5"`)
         await db.query(`DROP TABLE "video_hero"`)
         await db.query(`DROP INDEX "public"."IDX_9feac5d9713a9f07e32eb8ba7a"`)
         await db.query(`DROP TABLE "video_media_encoding"`)
@@ -413,7 +408,6 @@ module.exports = class Data1688654307439 {
         await db.query(`ALTER TABLE "nft_history_entry" DROP CONSTRAINT "FK_d1a28b178f5d028d048d40ce208"`)
         await db.query(`ALTER TABLE "nft_activity" DROP CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54"`)
         await db.query(`ALTER TABLE "nft_activity" DROP CONSTRAINT "FK_94d325a753f2c08fdd416eb095f"`)
-        await db.query(`ALTER TABLE "runtime_notification_processed" DROP CONSTRAINT "FK_a52eecb2d932c8e6ec5a2663f5c"`)
         await db.query(`ALTER TABLE "video_hero" DROP CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_4dc101240e8e1536b770aee202a"`)
