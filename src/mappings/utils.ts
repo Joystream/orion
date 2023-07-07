@@ -114,7 +114,6 @@ export async function addNotificationForRuntimeData(
           type,
           inAppRead: false,
           mailSent: false,
-          runtimeNotificationId: newNotificationId,
         })
 
         if (shouldSendMail) {

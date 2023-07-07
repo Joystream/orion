@@ -41,9 +41,6 @@ type RuntimeNotification @entity {
   "Member Or Channel related notification"
   type: NotificationType!
 
-  "Runtime Notification reference"
-  runtimeNotification: RuntimeNotification! @unique
-
   "mail sent or not"
   mailSent: Boolean!
 
