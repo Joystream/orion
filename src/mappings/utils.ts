@@ -9,7 +9,6 @@ import {
   NftHistoryEntry,
   RuntimeNotification,
   NotificationType,
-  RuntimeNotificationProcessed,
   Account,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
@@ -107,33 +106,21 @@ export async function addNotificationForRuntimeData(
       if (shouldSendAppNotification || shouldSendMail) {
         const repository = overlay.getRepository(RuntimeNotification)
         const newNotificationId = repository.getNewEntityId()
-        const notificationAlreadyProcessedInThePast = await overlay
-          .getRepository(RuntimeNotificationProcessed)
-          .getOneByRelation('runtimeNotificationId', newNotificationId)
 
-        console.log('account', JSON.stringify(account))
-        console.log('notificationId', newNotificationId)
-        console.log('event', event.id)
-        console.log('type', JSON.stringify(type))
-
-        repository.new({
+        const notification = repository.new({
           id: newNotificationId,
           accountId: account.id,
           eventId: event.id,
           type,
+          inAppRead: false,
+          mailSent: false,
+          runtimeNotificationId: newNotificationId,
         })
-        if (!notificationAlreadyProcessedInThePast) {
-          const notificationProcessed = overlay.getRepository(RuntimeNotificationProcessed).new({
-            id: overlay.getRepository(RuntimeNotificationProcessed).getNewEntityId(),
-            inAppRead: false,
-            mailSent: false,
-            runtimeNotificationId: newNotificationId,
-          })
-          if (shouldSendMail) {
-            mailNotifier.setReciever(account.email)
-            await mailNotifier.send()
-            notificationProcessed.mailSent = mailNotifier.mailHasBeenSent()
-          }
+
+        if (shouldSendMail) {
+          mailNotifier.setReciever(account.email)
+          await mailNotifier.send()
+          notification.mailSent = mailNotifier.mailHasBeenSent()
         }
       }
     }

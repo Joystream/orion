@@ -8,14 +8,13 @@ import {
   Account,
   OffChainNotification,
   RuntimeNotification,
-  RuntimeNotificationProcessed,
 } from '../../../model'
 import { NotificationArgs, SetNotificationPreferencesArgs } from './types'
 
 @Resolver()
 export class NotificationResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) { }
 
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
@@ -54,14 +53,11 @@ export class NotificationResolver {
       const notification = await em.findOne(RuntimeNotification, {
         where: { id: notificationId },
       })
-      const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
-        where: { runtimeNotificationId: notificationId },
-      })
-      if (notification !== null && notificationProcessed !== null) {
+      if (notification !== null) {
         if (notification.account.id === ctx.accountId) {
-          if (!notificationProcessed.inAppRead) {
-            notificationProcessed.inAppRead = true
-            await em.save(notificationProcessed)
+          if (!notification.inAppRead) {
+            notification.inAppRead = true
+            await em.save(notification)
             return true
           }
         }
@@ -106,14 +102,11 @@ export class NotificationResolver {
       const notification = await em.findOne(RuntimeNotification, {
         where: { id: notificationId },
       })
-      const notificationProcessed = await em.findOne(RuntimeNotificationProcessed, {
-        where: { runtimeNotificationId: notificationId },
-      })
-      if (notification !== null && notificationProcessed !== null) {
+      if (notification !== null && notification !== null) {
         if (notification.account.id === ctx.accountId) {
-          if (!notificationProcessed.inAppRead) {
-            notificationProcessed.inAppRead = true
-            await em.save(notificationProcessed)
+          if (!notification.inAppRead) {
+            notification.inAppRead = true
+            await em.save(notification)
             return true
           }
         }
