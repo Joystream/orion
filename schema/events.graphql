@@ -41,8 +41,14 @@ type RuntimeNotification @entity {
   "Member Or Channel related notification"
   type: NotificationType!
 
-  "Notification Data to be persisted over migrations"
-  notificationProcessed: RuntimeNotificationProcessed @derivedFrom(field: "runtimeNotification")
+  "Runtime Notification reference"
+  runtimeNotification: RuntimeNotification! @unique
+
+  "mail sent or not"
+  mailSent: Boolean!
+
+  "in-app read or not"
+  inAppRead: Boolean!
 }
 
 type NftHistoryEntry @entity {
@@ -453,17 +459,3 @@ type NewChannelFollowerNotificationData @variant {
   channel: Channel!
 }
 
-# for migration puroposes
-type RuntimeNotificationProcessed @entity {
-  "Autoincremented"
-  id: ID!
-
-  "Runtime Notification reference"
-  runtimeNotification: RuntimeNotification! @unique
-
-  "mail sent or not"
-  mailSent: Boolean!
-
-  "in-app read or not"
-  inAppRead: Boolean!
-}

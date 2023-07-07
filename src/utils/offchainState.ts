@@ -18,7 +18,7 @@ const exportedStateMap = {
   EncryptionArtifacts: true,
   SessionEncryptionArtifacts: true,
   OffChainNotification: true,
-  RuntimeNotificationProcessed: true,
+  RuntimeNotification: ['mail_sent', 'in_app_read'],
   Session: true,
   User: true,
   Account: true,
