@@ -26,6 +26,7 @@ import {
   CommentTextUpdatedEventData,
   Event,
   fromJsonNotificationType,
+  MemberNotification,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -217,6 +218,15 @@ function processVideoReaction(
   } else {
     ++video.reactionsCount
     ++newReactionTypeCounter.count
+    const eventEntity = overlay.getRepository(Event).new({
+      id: `${block.height}-${indexInBlock}`,
+      inBlock: block.height,
+      inExtrinsic: extrinsicHash,
+      indexInBlock,
+      timestamp: new Date(block.timestamp),
+      data: new VideoReactedEventData({ channel: channel.id, video: video.id }),
+    })
+    addNotificationForRuntimeData(overlay, [memberId], new MemberNotification())
   }
 }
 
