@@ -41,6 +41,7 @@ type RuntimeNotification @entity {
   "Member Or Channel related notification"
   type: NotificationType!
 
+
   "mail sent or not"
   mailSent: Boolean!
 
@@ -93,6 +94,7 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | ChannelCreatedEventData
+  | VideoCreatedEventData 
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -274,6 +276,14 @@ type BuyNowPriceUpdatedEventData {
 type ChannelCreatedEventData {
   "channel just created"
   channel: Channel!
+}
+
+type VideoCreatedEventData {
+  "channel the video lives in"
+  channel: Channel!
+
+  "video just created"
+  video: Video!
 }
 
 type MetaprotocolTransactionResultCommentCreated {
