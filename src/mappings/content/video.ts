@@ -6,9 +6,9 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, Video, VideoViewEvent } from '../../model'
+import { Channel, ChannelFollow, MemberNotification, RuntimeNotification, Video, VideoCreatedEventData, VideoViewEvent, Event } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import { addNotificationForRuntimeData, deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -99,6 +99,25 @@ export async function processVideoCreatedEvent({
   }
 
   channel.totalVideosCreated += 1
+  const followers = (await overlay.getEm()
+    .getRepository(ChannelFollow)
+    .findBy({ channelId: channel.id })).map((follow) => follow.user.id)
+
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
+  })
+
+  await addNotificationForRuntimeData(
+    overlay,
+    followers,
+    eventEntity,
+    new MemberNotification()
+  )
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
