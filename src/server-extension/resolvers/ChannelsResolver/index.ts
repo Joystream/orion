@@ -16,6 +16,8 @@ import {
   ChannelNftCollectorsOrderByInput,
   TopSellingChannelsArgs,
   TopSellingChannelsResult,
+  VerifyChannelArgs,
+  VerifyChannelResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import {
@@ -34,13 +36,14 @@ import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly } from '../middleware'
+import { AccountOnly, OperatorOnly } from '../middleware'
 import { addOffChainNotification } from '../../../utils/notifications'
+import { middleware } from 'express-openapi-validator'
 
 @Resolver()
 export class ChannelsResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) { }
 
   @Query(() => [ExtendedChannel])
   async extendedChannels(
@@ -78,7 +81,7 @@ export class ChannelsResolver {
       `"channel"."id" IN (${mostRecentChannelsQuerySql})`,
       'AND'
     )
-    ;(listQuery as { sql: string }).sql = listQuerySql
+      ; (listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
     console.log('Result', result)
@@ -148,7 +151,7 @@ export class ChannelsResolver {
       )
     }
 
-    ;(listQuery as { sql: string }).sql = listQuerySql
+    ; (listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
@@ -313,5 +316,38 @@ export class ChannelsResolver {
         rationale,
       }
     })
+  }
+
+  @Mutation(() => ChannelReportInfo)
+  @UseMiddleware(OperatorOnly)
+  async verifyChannel(
+    @Args() { channelId }: VerifyChannelArgs,
+  ): Promise<VerifyChannelResult> {
+    const em = await this.em()
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+
+    if (!channel.isVerified) {
+      channel.isVerified = true
+      if (channel.ownerMember) {
+        const ownerAccount = await em.findOne(Account, {
+          where: { membershipId: channel.ownerMember.id }
+        })
+        if (ownerAccount) {
+          await addOffChainNotification(em, [ownerAccount.id], fromJsonOffChainNotificationData({
+            _typeOf: 'ChannelVerifiedNotificationData',
+            _channel: channelId
+          }), new ChannelNotification())
+        }
+      }
+    }
+    return {
+      channel,
+      isVerified: true
+    }
   }
 }
