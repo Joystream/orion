@@ -41,7 +41,6 @@ type RuntimeNotification @entity {
   "Member Or Channel related notification"
   type: NotificationType!
 
-
   "mail sent or not"
   mailSent: Boolean!
 
@@ -83,6 +82,8 @@ union EventData =
   | EnglishAuctionSettledEventData
   | BidMadeCompletingAuctionEventData
   | OpenAuctionBidAcceptedEventData
+  | NftOfferedEventData
+  | NftOfferAcceptedEventData
   | NftSellOrderMadeEventData
   | NftBoughtEventData
   | BuyNowCanceledEventData
@@ -115,6 +116,14 @@ type CommentTextUpdatedEventData {
   newText: String!
 
   # Only author can edit the comment, so no actor context required
+}
+
+type NftOfferedEventData {
+  phantom: Int!
+}
+
+type NftOfferAcceptedEventData {
+  phantom: Int!
 }
 
 # Atlas use-case: `GetNftActivities` and `GetNftHistory` query

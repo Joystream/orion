@@ -176,3 +176,18 @@ export class ChannelsSearchArgs {
   @Field(() => Int, { nullable: true })
   limit?: number
 }
+
+@ArgsType()
+export class VerifyChannelArgs {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+}
+
+@ObjectType()
+export class VerifyChannelResult {
+  @Field(() => Channel, { nullable: false })
+  channel!: Channel
+
+  @Field(() => Boolean, { nullable: false })
+  isVerified!: boolean
+}
