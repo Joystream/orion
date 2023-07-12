@@ -67,7 +67,7 @@ export async function processMemberRemark(
   }
 
   if (decodedMessage.reactVideo) {
-    return processReactVideoMessage(overlay, block, memberId, decodedMessage.reactVideo)
+    return processReactVideoMessage(overlay, block, indexInBlock, txHash, memberId, decodedMessage.reactVideo)
   }
 
   if (decodedMessage.reactComment) {
