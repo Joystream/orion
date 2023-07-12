@@ -73,3 +73,20 @@ type GatewayConfig @entity {
   "Last time the configuration variable was updated"
   updatedAt: DateTime!
 }
+  
+type VideoExclusion @entity {
+  "Unique identifier of the report"
+  id: ID!
+
+  "User that reported the channel / video"
+  user: User!
+
+  "If it's a video report: ID of the video being reported (the video may no longer exist)"
+  videoId: String @index
+
+  "Time of the report"
+  timestamp: DateTime!
+
+  "Rationale behind the report"
+  rationale: String!
+}
