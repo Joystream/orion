@@ -71,7 +71,7 @@ export async function processMemberRemark(
   }
 
   if (decodedMessage.reactComment) {
-    return processReactCommentMessage(overlay, memberId, decodedMessage.reactComment)
+    return processReactCommentMessage(overlay, block, indexInBlock, txHash, memberId, decodedMessage.reactComment)
   }
 
   if (decodedMessage.createComment) {

@@ -97,6 +97,7 @@ union EventData =
   | ChannelCreatedEventData
   | VideoCreatedEventData 
   | VideoReactionEventData 
+  | CommentReactionEventData 
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -117,6 +118,10 @@ type CommentTextUpdatedEventData {
   newText: String!
 
   # Only author can edit the comment, so no actor context required
+}
+
+type CommentReactionEventData {
+  commentReaction: CommentReaction!
 }
 
 type NftOfferedEventData {
