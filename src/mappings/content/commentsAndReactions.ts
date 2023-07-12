@@ -38,6 +38,7 @@ import {
   VideoReactionOptions,
   VideoReactionsCountByReactionType,
   Channel,
+  CommentReactionEventData,
 } from '../../model'
 import { VideoReactionEventData } from '../../model/generated/_videoReactionEventData'
 import { config, ConfigVariable } from '../../utils/config'
@@ -225,7 +226,7 @@ async function processVideoReaction(
     const event = overlay.getRepository(Event).new({
       ...genericEventFields(overlay, block, indexInBlock, txHash),
       // add videoreactionevent data as data 
-      data: new VideoReactionEventData ({
+      data: new VideoReactionEventData({
         video: video.id,
         reactionType,
       }),
@@ -282,6 +283,9 @@ export async function processReactVideoMessage(
 
 export async function processReactCommentMessage(
   overlay: EntityManagerOverlay,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
   memberId: string,
   message: DecodedMetadataObject<IReactComment>
 ): Promise<MetaprotocolTransactionResult> {
@@ -327,8 +331,9 @@ export async function processReactCommentMessage(
     commentReactionRepository.remove(existingReaction)
   } else {
     // new reaction
+    const id = commentReactionEntityId({ memberId, commentId, reactionId })
     commentReactionRepository.new({
-      id: commentReactionEntityId({ memberId, commentId, reactionId }),
+      id, 
       commentId: comment.id,
       reactionId,
       videoId: video.id,
@@ -338,6 +343,15 @@ export async function processReactCommentMessage(
     // increment counters
     ++reactionsCountByReactionId.count
     ++comment.reactionsCount
+
+    // create Event entity 
+    const event = overlay.getRepository(Event).new({
+      ...genericEventFields(overlay, block, indexInBlock, txHash),
+      // add commentreactionevent data as data 
+      data: new CommentReactionEventData({
+        commentReaction: id,
+      }),
+    })
   }
 
   // schedule comment counters update
