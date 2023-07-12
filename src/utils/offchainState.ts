@@ -11,6 +11,7 @@ const exportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
+  VideoExclusion: true,
   GatewayConfig: true,
   NftFeaturingRequest: true,
   VideoHero: true,

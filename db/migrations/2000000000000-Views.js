@@ -71,6 +71,7 @@ module.exports = class Views2000000000000 {
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
+      video_exclusion: ['FALSE'],
       session: ['FALSE'],
       user: ['FALSE'],
       account: ['FALSE'],

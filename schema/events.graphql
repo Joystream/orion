@@ -456,6 +456,8 @@ type OffChainNotification @entity {
 union OffChainNotificationData =
     YppSignupSuccessFullNotificationData
   | ChannelVerifiedNotificationData
+  | ChannelExcludedNotificationData
+  | VideoExcludedNotificationData 
   | ChannelSuspendedNotificationData
   | NewChannelFollowerNotificationData
 
@@ -464,6 +466,14 @@ type YppSignupSuccessFullNotificationData @variant {
 }
 
 type ChannelVerifiedNotificationData @variant {
+  phantom: Int!
+}
+
+type ChannelExcludedNotificationData @variant {
+  phantom: Int!
+}
+
+type VideoExcludedNotificationData @variant {
   phantom: Int!
 }
 
