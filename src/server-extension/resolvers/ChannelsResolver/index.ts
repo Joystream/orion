@@ -18,6 +18,8 @@ import {
   TopSellingChannelsResult,
   VerifyChannelArgs,
   VerifyChannelResult,
+  ExcludeChannelArgs,
+  ExcludeChannelResults,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import {
@@ -347,7 +349,38 @@ export class ChannelsResolver {
     }
     return {
       channel,
-      isVerified: true
+    }
+  }
+
+  @Mutation(() => ChannelReportInfo)
+  @UseMiddleware(OperatorOnly)
+  async excludeChannel(
+    @Args() { channelId }: ExcludeChannelArgs,
+  ): Promise<ExcludeChannelResults> {
+    const em = await this.em()
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+
+    if (!channel.isExcluded) {
+      channel.isVerified = true
+      if (channel.ownerMember) {
+        const ownerAccount = await em.findOne(Account, {
+          where: { membershipId: channel.ownerMember.id }
+        })
+        if (ownerAccount) {
+          await addOffChainNotification(em, [ownerAccount.id], fromJsonOffChainNotificationData({
+            _typeOf: 'ChannelExcludedNotificationData',
+            _channel: channelId
+          }), new ChannelNotification())
+        }
+      }
+    }
+    return {
+      channel,
     }
   }
 }

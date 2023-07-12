@@ -187,7 +187,16 @@ export class VerifyChannelArgs {
 export class VerifyChannelResult {
   @Field(() => Channel, { nullable: false })
   channel!: Channel
+}
 
-  @Field(() => Boolean, { nullable: false })
-  isVerified!: boolean
+@ArgsType()
+export class ExcludeChannelArgs {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+}
+
+@ObjectType()
+export class ExcludeChannelResults {
+  @Field(() => Channel, { nullable: false })
+  channel!: Channel
 }
