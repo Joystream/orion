@@ -56,9 +56,11 @@ import {
   MemberBannedFromChannelEventData,
   Membership,
   Event,
+  ChannelNotification,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
+  addNotificationForRuntimeData,
   commentCountersManager,
   genericEventFields,
   invalidMetadata,
@@ -636,7 +638,7 @@ export async function processChannelPaymentFromMember(
     paymentContext.channel = channel.id
   }
 
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new ChannelPaymentMadeEventData({
       payer: member.id,
@@ -646,6 +648,8 @@ export async function processChannelPaymentFromMember(
       amount,
     }),
   })
+
+  await addNotificationForRuntimeData(overlay, [channel.ownerMemberId], event, new ChannelNotification())
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,

@@ -1,0 +1,40 @@
+<mjml>
+  <mj-body>
+    <mj-container>
+      <!-- Blue Header -->
+      <mj-section background-color="#0324fc" padding="20px">
+        <mj-column>
+          <mj-image src="./NotificationLogo.png" alt="Logo" width="50px"></mj-image>
+        </mj-column>
+        <mj-column>
+          <mj-text color="#FFFFFF" font-size="20px" font-weight="bold">Orion</mj-text>
+        </mj-column>
+      </mj-section>
+      
+      <!-- White Background -->
+      <mj-section background-color="#FFFFFF" padding="20px">
+        <mj-column>
+          <mj-text color="#000000" font-size="16px" line-height="24px" align="center">Hey, {{ userName }} your channel with id {{ channelId }}
+          has been excluded from {{ appName }}.</mj-text>
+        </mj-column>
+      </mj-section>
+      
+       <mj-section padding="10px">
+        <mj-column width="10%"></mj-column>
+        <mj-column>
+          <mj-button background-color="#0324fc" color="#FFFFFF" font-size="14px" align="left"><a href="{{ link }}">View in {{ appName }}</a><br />
+</mj-button>
+        </mj-column>
+      </mj-section>
+      
+      <!-- Black Footer -->
+      <mj-section background-color="#000000" padding="20px">
+        <mj-column width="50%">
+          <mj-image src="./NotificationLogo.png" alt="Icon" width="20px"></mj-image>
+          <mj-text color="#FFFFFF" font-size="12px" font-weight="bold" line-height="24px" align="center"> {{ appName }} | Joystream</mj-text>
+          <mj-text color="#FFFFFF" font-size="12px" line-height="24px" align="center">You can unsubscribe at any time.</mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-container>
+  </mj-body>
+</mjml>
