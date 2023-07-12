@@ -19,7 +19,7 @@ import {
   VerifyChannelArgs,
   VerifyChannelResult,
   ExcludeChannelArgs,
-  ExcludeChannelResults,
+  ExcludeChannelResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import {
@@ -29,6 +29,7 @@ import {
   ChannelNotification,
   fromJsonOffChainNotificationData,
   Report,
+  Exclusion
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -40,7 +41,7 @@ import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
 import { addOffChainNotification } from '../../../utils/notifications'
-import { middleware } from 'express-openapi-validator'
+import { isNull } from 'lodash'
 
 @Resolver()
 export class ChannelsResolver {
@@ -352,35 +353,65 @@ export class ChannelsResolver {
     }
   }
 
-  @Mutation(() => ChannelReportInfo)
+  @Mutation(() => ExcludeChannelResult)
   @UseMiddleware(OperatorOnly)
   async excludeChannel(
-    @Args() { channelId }: ExcludeChannelArgs,
-  ): Promise<ExcludeChannelResults> {
+    @Args() { channelId, rationale }: ExcludeChannelArgs,
+  ): Promise<ExcludeChannelResult> {
     const em = await this.em()
-    const channel = await em.findOne(Channel, {
-      where: { id: channelId },
-    })
-    if (!channel) {
-      throw new Error(`Channel by id ${channelId} not found!`)
-    }
 
-    if (!channel.isExcluded) {
-      channel.isVerified = true
-      if (channel.ownerMember) {
-        const ownerAccount = await em.findOne(Account, {
-          where: { membershipId: channel.ownerMember.id }
-        })
-        if (ownerAccount) {
-          await addOffChainNotification(em, [ownerAccount.id], fromJsonOffChainNotificationData({
+    return withHiddenEntities(em, async () => {
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+      })
+
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      const existingExclusion = await em.findOne(Exclusion, {
+        where: { channelId: channel.id, videoId: IsNull() },
+      })
+      // If exclusion already exists - return its data with { created: false }
+      if (existingExclusion) {
+        return {
+          id: existingExclusion.id,
+          channelId: channel.id,
+          created: false,
+          createdAt: existingExclusion.timestamp,
+          rationale: existingExclusion.rationale,
+        }
+      }
+      // If exclusion doesn't exist, create a new one
+      const newExclusion = new Exclusion({
+        id: uniqueId(8),
+        channelId: channel.id,
+        rationale,
+        timestamp: new Date(),
+      })
+      channel.isExcluded = true
+      await em.save(newExclusion)
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const account = (await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } }))
+        if (account) {
+          await addOffChainNotification(em, [account.id], fromJsonOffChainNotificationData({
             _typeOf: 'ChannelExcludedNotificationData',
-            _channel: channelId
+            _channel: channel.id,
           }), new ChannelNotification())
         }
       }
-    }
-    return {
-      channel,
-    }
+
+      return {
+        id: newExclusion.id,
+        channelId: channel.id,
+        videoId: null,
+        created: true,
+        createdAt: newExclusion.timestamp,
+        rationale,
+      }
+    })
+
   }
 }

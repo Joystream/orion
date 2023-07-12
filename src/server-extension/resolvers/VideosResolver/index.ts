@@ -9,7 +9,7 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { VideoViewEvent, Video, Report, VideoExclusion, MemberNotification, fromJsonOffChainNotificationData, VideoExcludedNotificationData, Account } from '../../../model'
+import { VideoViewEvent, Video, Report, Exclusion, MemberNotification, fromJsonOffChainNotificationData, VideoExcludedNotificationData, Account } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -308,7 +308,6 @@ export class VideosResolver {
   @UseMiddleware(OperatorOnly)
   async excludeVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
-    @Ctx() ctx: Context
   ): Promise<ExcludeVideoInfo> {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
@@ -321,15 +320,14 @@ export class VideosResolver {
         throw new Error(`Video by id ${videoId} not found!`)
       }
 
-      const { user } = ctx
-
-      const existingExclusion = await em.findOne(VideoExclusion, {
-        where: { userId: user.id, videoId },
+      const existingExclusion = await em.findOne(Exclusion, {
+        where: { channelId: video.channel.id, videoId },
       })
       // If exclusion already exists - return its data with { created: false }
       if (existingExclusion) {
         return {
           id: existingExclusion.id,
+          channelId: video.channel.id,
           videoId,
           created: false,
           createdAt: existingExclusion.timestamp,
@@ -337,10 +335,10 @@ export class VideosResolver {
         }
       }
       // If exclusion doesn't exist, create a new one
-      const newExclusion = new VideoExclusion({
+      const newExclusion = new Exclusion({
         id: uniqueId(8),
+        channelId: video.channel.id,
         videoId,
-        userId: user.id,
         rationale,
         timestamp: new Date(),
       })

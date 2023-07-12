@@ -51,6 +51,7 @@ export class NotificationResolver {
     })
   }
 
+  // HACK: (not.v1) this is a temporary solution, refactor needed
   @Mutation(() => Boolean)
   @UseMiddleware(AccountOnly)
   async setAccountNotificationPreferences(
