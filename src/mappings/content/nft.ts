@@ -179,10 +179,10 @@ export async function processAuctionBidMadeEvent({
   })
 
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
-  // Notify outbidded member and the nft owner
+  // Notify outbidded member, nft owner and the new bidder
   await addNotificationForRuntimeData(
     overlay,
-    [previousTopBid?.bidderId, nftOwnerMemberId],
+    [previousTopBid?.bidderId, nftOwnerMemberId, memberId.toString()],
     event,
     new ChannelNotification()
   )

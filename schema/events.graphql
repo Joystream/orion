@@ -96,6 +96,7 @@ union EventData =
   | ChannelPaymentMadeEventData
   | ChannelCreatedEventData
   | VideoCreatedEventData 
+  | VideoReactionEventData 
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -295,6 +296,14 @@ type VideoCreatedEventData {
   video: Video!
 }
 
+type VideoReactionEventData {
+  "video reference"
+  video: Video!
+
+  "like/dislike"
+  reactionType: VideoReactionOptions!
+}
+
 type MetaprotocolTransactionResultCommentCreated {
   commentCreated: Comment
 }
@@ -481,6 +490,7 @@ type ChannelSuspendedNotificationData @variant {
   phantom: Int!
 }
 
+# FIXME: (not.v1) add fields for the new variants
 type NewChannelFollowerNotificationData @variant {
   channel: Channel!
 }
