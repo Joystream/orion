@@ -1,6 +1,6 @@
 {
   "outDir": "src/types",
-  "specVersions": "http://localhost:8888/graphql",
+  "specVersions": "joystream.jsonl",
   "events": [
     "Content.VideoCreated",
     "Content.VideoUpdated",

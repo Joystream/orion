@@ -6,7 +6,6 @@ import {
   IChannelModeratorRemarked,
   IChannelOwnerRemarked,
   ILicense,
-  IMakeChannelPayment,
   IMediaType,
   IModerateComment,
   IPinOrUnpinComment,
@@ -14,7 +13,6 @@ import {
   ISubtitleMetadata,
   IVideoMetadata,
   IVideoReactionsPreference,
-  MakeChannelPayment,
   ModerateComment,
   PinOrUnpinComment,
   PublishedBeforeJoystream,
@@ -23,6 +21,8 @@ import {
   VideoReactionsPreference,
   IBanOrUnbanMemberFromChannel,
   BanOrUnbanMemberFromChannel,
+  IMakeChannelPayment,
+  MakeChannelPayment,
 } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {

@@ -7,7 +7,7 @@ import { Store } from '@subsquid/typeorm-store'
 import { EntityManager, FindOptionsWhere, In, Not, Repository } from 'typeorm'
 import _, { isObject } from 'lodash'
 import { NextEntityId } from '../model/NextEntityId'
-import { criticalError } from './misc'
+import { criticalError, idStringFromNumber } from './misc'
 import { Logger } from '../logger'
 
 // A stub which can represent any entity type
@@ -71,16 +71,9 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return this.cached.size
   }
 
-  // Converts id as number to id as string (radix 36, with leading zeros)
-  private asIdString(idNum: number) {
-    const idStr = idNum.toString(36)
-    // Add leading zeros to simplify sorting
-    return _.repeat('0', 8 - idStr.length) + idStr
-  }
-
   // Get id of the new entity of given type and increment `this.nextId`
   getNewEntityId(): string {
-    return this.asIdString(this.nextId++)
+    return idStringFromNumber(this.nextId++)
   }
 
   // Get current value of `this.nextId` number
@@ -333,8 +326,8 @@ export class EntityManagerOverlay {
   public static async create(store: Store, afterDbUpdte: (em: EntityManager) => Promise<void>) {
     // FIXME: This is a little hacky, but we really need to access the underlying EntityManager
     const em = await (store as unknown as { em: () => Promise<EntityManager> }).em()
-    // Add "processor" schema to search path in order to be able to access "hidden" entities
-    await em.query('SET search_path TO processor,public')
+    // Add "admin" schema to search path in order to be able to access "hidden" entities
+    await em.query('SET search_path TO admin,public')
     const nextEntityIds = await em.find(NextEntityId, {})
     return new EntityManagerOverlay(em, nextEntityIds, afterDbUpdte)
   }

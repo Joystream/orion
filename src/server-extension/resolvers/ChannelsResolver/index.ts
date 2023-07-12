@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver, Info, Ctx } from 'type-graphql'
+import { Args, Query, Mutation, Resolver, Info, Ctx, UseMiddleware } from 'type-graphql'
 import { EntityManager, IsNull } from 'typeorm'
 import {
   ChannelNftCollector,
@@ -18,16 +18,16 @@ import {
   TopSellingChannelsResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
-import { Context } from '@subsquid/openreader/lib/context'
 import { Channel, ChannelFollow, Report } from '../../../model'
-import { randomAsHex } from '@polkadot/util-crypto'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
-import { ContextWithIP } from '../../check'
+import { Context } from '../../check'
+import { uniqueId } from '../../../utils/crypto'
+import { AccountOnly } from '../middleware'
 
 @Resolver()
 export class ChannelsResolver {
@@ -159,12 +159,13 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => ChannelFollowResult)
+  @UseMiddleware(AccountOnly)
   async followChannel(
     @Args() { channelId }: FollowChannelArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<ChannelFollowResult> {
     const em = await this.em()
-    const { ip } = ctx
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
@@ -174,26 +175,25 @@ export class ChannelsResolver {
       if (!channel) {
         throw new Error(`Channel by id ${channelId} not found!`)
       }
-      // Check if there's already an existing follow by this IP
+      // Check whether the user already follows the channel
       const existingFollow = await em.findOne(ChannelFollow, {
-        where: { channelId, ip },
+        where: { channelId, userId: user.id },
       })
       // If so - just return the result
       if (existingFollow) {
         return {
           channelId,
-          cancelToken: existingFollow.id,
+          followId: existingFollow.id,
           follows: channel.followsNum,
           added: false,
         }
       }
       // Otherwise add a new follow
-      const cancelToken = randomAsHex(16).replace('0x', '')
       channel.followsNum += 1
       const newFollow = new ChannelFollow({
-        id: cancelToken,
+        id: uniqueId(8),
         channelId,
-        ip,
+        userId: user.id,
         timestamp: new Date(),
       })
 
@@ -202,17 +202,20 @@ export class ChannelsResolver {
       return {
         channelId,
         follows: channel.followsNum,
-        cancelToken,
+        followId: newFollow.id,
         added: true,
       }
     })
   }
 
   @Mutation(() => ChannelUnfollowResult)
+  @UseMiddleware(AccountOnly)
   async unfollowChannel(
-    @Args() { channelId, token }: UnfollowChannelArgs
+    @Args() { channelId }: UnfollowChannelArgs,
+    @Ctx() ctx: Context
   ): Promise<ChannelUnfollowResult> {
     const em = await this.em()
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel and lock it for update
       const channel = await em.findOne(Channel, {
@@ -224,7 +227,7 @@ export class ChannelsResolver {
       }
       // Check if there's a follow matching the request data
       const follow = await em.findOne(ChannelFollow, {
-        where: { channelId, id: token },
+        where: { channelId, userId: user.id },
       })
       // If not - just return the current number of follows
       if (!follow) {
@@ -242,10 +245,10 @@ export class ChannelsResolver {
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<ChannelReportInfo> {
     const em = await this.em()
-    const { ip } = ctx
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the channel first
       const channel = await em.findOne(Channel, {
@@ -254,9 +257,9 @@ export class ChannelsResolver {
       if (!channel) {
         throw new Error(`Channel by id ${channelId} not found!`)
       }
-      // We allow only one report per specific entity per ip
+      // Check whether the user already reported the channel
       const existingReport = await em.findOne(Report, {
-        where: { ip, channelId, videoId: IsNull() },
+        where: { channelId, videoId: IsNull(), userId: user.id },
       })
       // If report already exists - return its data with { created: false }
       if (existingReport) {
@@ -264,16 +267,15 @@ export class ChannelsResolver {
           id: existingReport.id,
           channelId,
           created: false,
-          reporterIp: existingReport.ip,
           createdAt: existingReport.timestamp,
           rationale: existingReport.rationale,
         }
       }
       // If report doesn't exist, create a new one
       const newReport = new Report({
-        id: randomAsHex(16).replace('0x', ''),
+        id: uniqueId(8),
         channelId,
-        ip,
+        userId: user.id,
         rationale,
         timestamp: new Date(),
       })
@@ -285,7 +287,6 @@ export class ChannelsResolver {
         created: true,
         createdAt: newReport.timestamp,
         rationale,
-        reporterIp: ip,
       }
     })
   }

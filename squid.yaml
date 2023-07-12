@@ -17,7 +17,7 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      VIDEO_VIEW_PER_USER_TIME_LIMIT: 86400
       MAX_CACHED_ENTITIES: 1000
       SKIP_IMPORT: true
     cmd: ['npx', 'squid-typeorm-migration', 'apply']
@@ -29,7 +29,7 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      VIDEO_VIEW_PER_USER_TIME_LIMIT: 86400
       MAX_CACHED_ENTITIES: 1000
     cmd: ['npm', 'run', 'processor-start']
   api:
@@ -40,6 +40,6 @@ deploy:
       SUPPORT_NO_CATEGORY_VIDEOS: true
       SUPPORT_NEW_CATEGORIES: true
       KILL_SWITCH_ON: false
-      VIDEO_VIEW_PER_IP_TIME_LIMIT: 86400
+      VIDEO_VIEW_PER_USER_TIME_LIMIT: 86400
       MAX_CACHED_ENTITIES: 1000
     cmd: ['npm', 'run', 'query-node-start']
