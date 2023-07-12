@@ -23,6 +23,8 @@ import {
   EnglishAuctionSettledEventData,
   EnglishAuctionStartedEventData,
   Event,
+  Channel,
+  MemberNotification,
   NftBoughtEventData,
   NftOwnerChannel,
   NftOwnerMember,
@@ -35,6 +37,7 @@ import {
   TransactionalStatusIdle,
   TransactionalStatusInitiatedOfferToMember,
   Video,
+  ChannelFollow,
 } from '../../model'
 import {
   addNftActivity,
@@ -43,6 +46,7 @@ import {
   genericEventFields,
 } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
+import { NftOfferedEventData } from '../../model/generated/_nftOfferedEventData'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -72,6 +76,13 @@ export async function processOpenAuctionStartedEvent({
       nftOwner: nft.owner,
     }),
   })
+
+
+  const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).channelId
+  if (channelId) {
+    const followers = (await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })).map((follow) => follow.user.id)
+    await addNotificationForRuntimeData(overlay, followers, event, new MemberNotification())
+  }
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
@@ -408,6 +419,9 @@ export async function processOpenAuctionBidAcceptedEvent({
 
 export async function processOfferStartedEvent({
   overlay,
+  block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV1000: [videoId, , memberId, price],
   },
@@ -422,16 +436,25 @@ export async function processOfferStartedEvent({
   })
   nft.transactionalStatus = transactionalStatus
 
-  // FIXME: No event?
+  const event = overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new NftOfferedEventData(),
+  })
+
+  const nftOwnerId = await getNftOwnerMemberId(overlay, nft.owner)
+  await addNotificationForRuntimeData(overlay, [nftOwnerId], event, new ChannelNotification())
 }
 
 export async function processOfferAcceptedEvent({
   overlay,
   block,
+  indexInBlock,
+  extrinsicHash,
   event: { asV1000: videoId },
 }: EventHandlerContext<'Content.OfferAccepted'>): Promise<void> {
   // load NFT
   const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
+  const previousNftOwnerId = await getNftOwnerMemberId(overlay, nft.owner)
 
   // read member from offer
   const memberId = (nft.transactionalStatus as TransactionalStatusInitiatedOfferToMember).member
@@ -448,7 +471,12 @@ export async function processOfferAcceptedEvent({
   nft.transactionalStatus = new TransactionalStatusIdle()
   nft.owner = new NftOwnerMember({ member: memberId })
 
-  // FIXME: No event?
+  const event = overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new NftOfferedEventData(), // FIXME:
+  })
+
+  await addNotificationForRuntimeData(overlay, [previousNftOwnerId, memberId], event, new ChannelNotification())
 }
 
 export async function processOfferCanceledEvent({
@@ -494,6 +522,12 @@ export async function processNftSellOrderMadeEvent({
       price,
     }),
   })
+
+  const nftPreviousOwnerId = nft.owner.isTypeOf === 'NftOwnerMember' ?
+    nft.owner.member :
+    (await overlay.getRepository(Channel).getByIdOrFail(nft.owner.channel)).ownerMemberId
+
+  addNotificationForRuntimeData(overlay, [nftPreviousOwnerId], event, new MemberNotification())
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)

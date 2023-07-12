@@ -333,7 +333,7 @@ export async function processChannelFundsWithdrawnEvent({
   // load channel
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
-  overlay.getRepository(Event).new({
+  const entityEvent = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new ChannelFundsWithdrawnEventData({
       amount,
@@ -342,4 +342,6 @@ export async function processChannelFundsWithdrawnEvent({
       actor: parseContentActor(actor),
     }),
   })
+
+  await addNotificationForRuntimeData(overlay, [channel.ownerMemberId], entityEvent, new ChannelNotification())
 }
