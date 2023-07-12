@@ -193,10 +193,14 @@ export class VerifyChannelResult {
 export class ExcludeChannelArgs {
   @Field(() => String, { nullable: false })
   channelId!: string
+
+  @Field(() => String, { nullable: false })
+  @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
+  rationale!: string
 }
 
 @ObjectType()
-export class ExcludeChannelResults {
-  @Field(() => Channel, { nullable: false })
-  channel!: Channel
+export class ExcludeChannelResult extends EntityReportInfo { 
+  @Field(() => String, { nullable: false })
+  channelId!: string
 }
