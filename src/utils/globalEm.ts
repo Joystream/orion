@@ -10,6 +10,7 @@ const config = {
   entities: [path.join(__dirname, '../model/*.{ts,js}')],
   username: process.env.DB_ADMIN_USER,
   password: process.env.DB_ADMIN_PASS,
+  port: Number(process.env.DB_PORT)
 }
 
 const source = new DataSource(config)
