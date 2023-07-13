@@ -7,8 +7,8 @@ import { Account, Token, TokenType } from '../model'
 import { EntityManager } from 'typeorm'
 import { uniqueId } from '../utils/crypto'
 import { MailNotifier, SendGridMailStrategy } from '../utils/mail'
-import { registerEmailData } from './emails'
 import { formatDate } from '../utils/date'
+import { registerEmailContent } from './emails'
 
 export async function verifyActionExecutionRequest(
   em: EntityManager,
@@ -72,13 +72,13 @@ export async function sendWelcomeEmail(account: Account, em: EntityManager): Pro
   const mailNotifier = new MailNotifier()
   mailNotifier.setSendMailSTrategy(new SendGridMailStrategy())
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
-  const emailData = registerEmailData({
+  const emailContent = registerEmailContent({
     link: emailConfirmationLink,
     linkExpiryDate: formatDate(emailConfirmationToken.expiry),
     appName,
   })
-  mailNotifier.setSubject(emailData.subject)
-  mailNotifier.setContentUsingTemplate(emailData.content)
+  mailNotifier.setSubject(`Welcome to ${appName}!`)
+  mailNotifier.setContentUsingTemplate(emailContent)
 
   await mailNotifier.send()
 }
