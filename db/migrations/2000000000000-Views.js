@@ -67,11 +67,10 @@ module.exports = class Views2000000000000 {
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       // HIDDEN entities
-      runtime_notification_processed: [`FALSE`],
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
-      video_exclusion: ['FALSE'],
+      exclusion: ['FALSE'],
       session: ['FALSE'],
       user: ['FALSE'],
       account: ['FALSE'],

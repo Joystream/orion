@@ -1,6 +1,7 @@
 import { compile } from 'handlebars'
 import mjml2html from 'mjml'
 import fs from 'fs'
+import path from 'path'
 
 function getEmailTemplateData<T>(templatePath: string): (data: T) => string {
   const config = {
@@ -9,8 +10,10 @@ function getEmailTemplateData<T>(templatePath: string): (data: T) => string {
       "Roboto": "https://fonts.googleapis.com/css?family=Roboto"
     }
   }
+
+  const fullPath = path.join(__dirname, 'templates/' + templatePath)
   return (data) => {
-    const mjmlXml = compile<T>(fs.readFileSync(templatePath).toString());
+    const mjmlXml = compile<T>(fs.readFileSync(fullPath).toString());
     const { html } = mjml2html(mjmlXml(data), config);
     return html
   }
@@ -31,6 +34,6 @@ type ChannelExcludedEmailTemplateData = {
 }
 
 // function exports
-export const registerEmailContent: (data: RegisterEmailTemplateData) => string = getEmailTemplateData(fs.readFileSync('./templates/register.html.mst').toString())
-export const channelExcludedEmailContent: (data: ChannelExcludedEmailTemplateData) => string = getEmailTemplateData(fs.readFileSync('./templates/channelExcludedFromApp.xml.mst').toString())
+export const registerEmailContent: (data: RegisterEmailTemplateData) => string = getEmailTemplateData('register.xml.mst')
+export const channelExcludedEmailContent: (data: ChannelExcludedEmailTemplateData) => string = getEmailTemplateData('channelExcludedFromApp.xml.mst')
 
