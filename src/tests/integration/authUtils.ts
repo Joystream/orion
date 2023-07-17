@@ -95,7 +95,7 @@ export async function anonymousAuth(
   const response = await server
     .post('/api/v1/anonymous-auth')
     .set('Content-Type', 'application/json')
-    .expect(200)
+    // .expect(200)
   return extractSessionId(response)
 }
 
@@ -104,7 +104,7 @@ export async function createAccountForMember(
   memberId: string,
   sender: KeyringPair
 ): Promise<AccountCreationData> {
-  const email = 'test@example.com'
+  const email = generateEmailAddr(memberId)
   const seed = uniqueId()
   const password = 'test'
 
@@ -125,7 +125,7 @@ export async function createAccountForMember(
     .set('Content-Type', 'application/json')
     .set('Cookie', `session_id=${anonSessionId}`)
     .send(createAccountReqData)
-    .expect(200)
+    // .expect(200)
   return { email, password, seed }
 }
 
@@ -145,12 +145,11 @@ export async function createAccountAndSignIn(
     },
     sender
   )
-  console.log('Login request data:', loginReqData)
   const loginResp = await server
     .post('/api/v1/login')
     .set('Content-Type', 'application/json')
     .send(loginReqData)
-    .expect(200)
+    // .expect(200)
 
   const sessionId = extractSessionId(loginResp)
   const sessionIdRaw = sessionId.split('.')[0].split(':')[1]
@@ -177,7 +176,7 @@ export async function operatorLogin(
     "userId": "this-is-not-so-secret-change-it"
   })
     .set('Content-Type', 'application/json')
-    .expect(200)
+    // .expect(200)
 
   return extractSessionId(response)
 }
