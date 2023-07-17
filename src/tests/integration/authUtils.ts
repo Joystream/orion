@@ -13,6 +13,17 @@ import { config } from '../../utils/config';
 import { EntityManager } from 'typeorm'
 
 export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
+export type AccountCreationData = {
+  email: string
+  password: string
+  seed: string
+}
+
+export type AccountLoginData = AccountCreationData & {
+  sessionId: string
+  sessionIdRaw: string
+}
+
 
 export async function prepareEncryptionArtifacts(
   seed: string,
@@ -89,11 +100,10 @@ export async function anonymousAuth(
 }
 
 export async function createAccountForMember(
-  em: EntityManager,
   server: request.SuperTest<request.Test>,
   memberId: string,
   sender: KeyringPair
-): Promise<AccountAccessData> {
+): Promise<AccountCreationData> {
   const email = 'test@example.com'
   const seed = uniqueId()
   const password = 'test'
@@ -116,18 +126,19 @@ export async function createAccountForMember(
     .set('Cookie', `session_id=${anonSessionId}`)
     .send(createAccountReqData)
     .expect(200)
-  const account = await em.getRepository(Account).findOneBy({ email })
-  assert(account, 'Account not found')
-  return { accountId: account.id, joystreamAccountId: sender.address, email, password, seed }
+  return { email, password, seed }
+}
+
+export function generateEmailAddr(memberId: string): string {
+  return `${memberId}@example.com`
 }
 
 export async function createAccountAndSignIn(
-  em: EntityManager,
   server: request.SuperTest<request.Test>,
   memberId: string,
   sender: KeyringPair,
-): Promise<LoggedInAccountInfo> {
-  const accountData = await createAccountForMember(em, server, memberId, sender)
+): Promise<AccountLoginData> {
+  const accountData = await createAccountForMember(server, memberId, sender)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {
       action: 'login',

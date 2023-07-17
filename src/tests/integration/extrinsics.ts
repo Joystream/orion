@@ -12,7 +12,7 @@ export async function getStorageBucketsAccordingToPolicy(api: ApiPromise): Promi
   return storageBuckets
 }
 
-export async function createChannel(api: ApiPromise, memberId: string, sender: KeyringPair): Promise<string> {
+async function createChannel(api: ApiPromise, memberId: string, sender: KeyringPair): Promise<string> {
   const storageBuckets = await getStorageBucketsAccordingToPolicy(api)
   const expectedDataObjectStateBloatBond = await api.query.storage.dataObjectStateBloatBondValue()
   const expectedChannelStateBloatBond = await api.query.content.channelStateBloatBondValue()
@@ -40,28 +40,65 @@ export async function createChannel(api: ApiPromise, memberId: string, sender: K
   return channelId
 }
 
-export async function createMember(api: ApiPromise, sender: KeyringPair, handle?: string): Promise<string> {
-  let unsub: () => void
-  let memberId = ''
-  await new Promise<() => void>((resolve) => {
-    api.tx.members.buyMembership({
-      rootAccount: sender.address,
-      controllerAccount: sender.address,
-      handle: handle ?? sender.address.toString(),
-    }).signAndSend(sender, ({ events = [], status }) => {
-      if (status.isFinalized) {
-        events.forEach(({ event: { data, section } }) => {
-          if (section === 'members') {
-            memberId = data[0].toString();
-          }
-        })
-        resolve(unsub)
-      }
+
+
+export class TestContext {
+  private _api: ApiPromise
+  constructor(api: ApiPromise) {
+    this._api = api
+  }
+
+  public async createChannel(memberId: string, sender: KeyringPair): Promise<string> {
+    const storageBuckets = await getStorageBucketsAccordingToPolicy(this._api)
+    const expectedDataObjectStateBloatBond = await this._api.query.storage.dataObjectStateBloatBondValue()
+    const expectedChannelStateBloatBond = await this._api.query.content.channelStateBloatBondValue()
+    const channelOwner = this._api.createType('PalletContentChannelOwner', { Member: memberId })
+    const channelCreationParameters = this._api.createType('PalletContentChannelCreationParametersRecord', {
+      expectedChannelStateBloatBond,
+      expectedDataObjectStateBloatBond,
+      storageBuckets,
     })
-  })
 
-  return memberId
+    let unsub: () => void
+    let channelId = ''
+    await new Promise<() => void>((resolve) => {
+      this._api.tx.content.createChannel(channelOwner, channelCreationParameters).signAndSend(sender, ({ events = [], status }) => {
+        if (status.isFinalized) {
+          events.forEach(({ event: { data, method, section } }) => {
+            if (section === 'content' && method === 'ChannelCreated') {
+              channelId = data[0].toString()
+            }
+          })
+          resolve(unsub)
+        }
+      })
+    })
+    return channelId
+  }
 
+  public async createMember(sender: KeyringPair, handle?: string): Promise<string> {
+    let unsub: () => void
+    let memberId = ''
+    await new Promise<() => void>((resolve) => {
+      this._api.tx.members.buyMembership({
+        rootAccount: sender.address,
+        controllerAccount: sender.address,
+        handle: handle ?? sender.address.toString(),
+      }).signAndSend(sender, ({ events = [], status }) => {
+        if (status.isFinalized) {
+          events.forEach(({ event: { data, section } }) => {
+            if (section === 'members') {
+              memberId = data[0].toString();
+            }
+          })
+          resolve(unsub)
+        }
+      })
+    })
+
+    return memberId
+
+  }
 }
 
 
