@@ -14,7 +14,7 @@ export async function executeSubcription(client: ApolloClient<NormalizedCacheObj
     });
   });
 
-  return data
+  return data;
 }
 
 export const MembershipById = gql`
@@ -65,6 +65,13 @@ subscription ChannelFollowerNotification {
   }
 }
 `
+
+export const AccountByEmail = gql`
+subscription MySubscription($email_eq: String!) {
+  accounts(where: {email_eq: $email_eq})
+}
+`
+
 export const FollowChannelMutation = (channelId: string) => gql`
 mutation FollowChannel {
   followChannel(channelId: ${channelId})
