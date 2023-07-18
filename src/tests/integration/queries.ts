@@ -32,7 +32,6 @@ export async function executeQuery(client: ApolloClient<NormalizedCacheObject>, 
   return data;
 }
 
-
 export const MembershipByControllerAccountSub = gql`
 subscription MembershipById($accountId: String!) {
   memberships(where: {controllerAccount_eq: $accountId}) {
@@ -41,25 +40,22 @@ subscription MembershipById($accountId: String!) {
   }
 }
 `
+
 export const ChannelCreatedNotificationSub = gql`
 subscription ChannelCreatedNotification($channelId: String!) {
-  runtimeNotifications(where: {event: {data: {channel: {id_eq: $channelId}}}}){
-    account {
-      id
-    }
-    type
+  runtimeNotifications(where: {event: {data: {channel: {id_eq: $channelId}}}}) {
+    id
     inAppRead
     mailSent
+    type {
+      ... on ChannelNotification {
+        __typename
+      }
+    }
     event {
       data {
         ... on ChannelCreatedEventData {
           __typename
-          channel {
-            id
-            ownerMember {
-              id
-            }
-          }
         }
       }
     }
@@ -69,22 +65,24 @@ subscription ChannelCreatedNotification($channelId: String!) {
 
 export const VideoCreatedNotificationSub = gql`
 subscription VideoCreatedNotification($videoId: String!) {
-  runtimeNotifications(where: {event: {data: {video: {id_eq: $channelId}}}}){
-    account {
-      id
-    }
-    type
+  runtimeNotifications(where: {event: {data: {video: {id_eq: $videoId}}}}) {
+    id
     inAppRead
     mailSent
+    type {
+      ... on ChannelNotification {
+        __typename
+      }
+    }
     event {
       data {
         ... on VideoCreatedEventData {
           __typename
+          video {
+            id
+          }
           channel {
             id
-            ownerMember {
-              id
-            }
           }
         }
       }
@@ -113,6 +111,7 @@ subscription ChannelFollowerNotification($channelId: String!) {
   }
 }
 `
+
 export const ChannelByMemberIdSub = gql`
 subscription ChannelByMemberId($memberId: String!) {
   channels(where: {ownerMember: {id_eq: $memberId}}) {
@@ -126,6 +125,7 @@ subscription ChannelByMemberId($memberId: String!) {
   }
 }
 `
+
 export const VideoByChannelIdSub = gql`
 subscription VideosByChannelid($channelId: String!) {
   videos(where: {channel: {id_eq: $channelId}}) {
@@ -144,7 +144,7 @@ subscription VideosByChannelid($channelId: String!) {
 
 export const SetNotificationPreferencesMut = gql`
 mutation setNotificationPreferences {
-  setAccountNotificationPreferences(auctionBidCanceledInAppNotificationEnabled: true, auctionBidCanceledMailNotificationEnabled: true, auctionBidMadeInAppNotificationEnabled: true, auctionBidMadeMailNotificationEnabled: true, auctionCanceledInAppNotificationEnabled: true, auctionCanceledMailNotificationEnabled: true, bidMadeCompletingAuctionInAppNotificationEnabled: true, bidMadeCompletingAuctionMailNotificationEnabled: true, buyNowCanceledMailNotificationEnabled: true, buyNowPriceUpdatedInAppNotificationEnabled: true, buyNowPriceUpdatedMailNotificationEnabled: true, channelCreatedInAppNotificationEnabled: true, channelCreatedMailNotificationEnabled: true, channelFundsWithdrawnInAppNotificationEnabled: true, channelFundsWithdrawnMailNotificationEnabled: true, channelPaymentMadeInAppNotificationEnabled: true, channelPaymentMadeMailNotificationEnabled: true, channelPayoutsUpdatedInAppNotificationEnabled: true, channelPayoutsUpdatedMailNotificationEnabled: true, channelRewardClaimedAndWithdrawnInAppNotificationEnabled: true, channelRewardClaimedAndWithdrawnMailNotificationEnabled: true, channelRewardClaimedInAppNotificationEnabled: true, channelRewardClaimedMailNotificationEnabled: true, commentCreatedInAppNotificationEnabled: true, commentCreatedMailNotificationEnabled: true, commentTextUpdatedInAppNotificationEnabled: true, commentTextUpdatedMailNotificationEnabled: true, englishAuctionSettledInAppNotificationEnabled: true, englishAuctionSettledMailNotificationEnabled: true, englishAuctionStartedInAppNotificationEnabled: true, englishAuctionStartedMailNotificationEnabled: true, memberBannedFromChannelInAppNotificationEnabled: true, memberBannedFromChannelMailNotificationEnabled: true, metaprotocolTransactionStatusInAppNotificationEnabled: true, metaprotocolTransactionStatusMailNotificationEnabled: true, newChannelFollowerInAppNotificationPreferences: true, newChannelFollowerMailNotificationPreferences: true, nftBoughtInAppNotificationEnabled: true, nftBoughtMailNotificationEnabled: true, nftIssuedMailNotificationEnabled: true, nftSellOrderMadeInAppNotificationEnabled: true, nftSellOrderMadeMailNotificationEnabled: true, openAuctionBidAcceptedInAppNotificationEnabled: true, openAuctionBidAcceptedMailNotificationEnabled: true, openAuctionStartedInAppNotificationEnabled: true, openAuctionStartedMailNotificationEnabled: true)
+  setAccountNotificationPreferences(auctionBidCanceledInAppNotificationEnabled: true, auctionBidCanceledMailNotificationEnabled: true, auctionBidMadeInAppNotificationEnabled: true, auctionBidMadeMailNotificationEnabled: true, auctionCanceledInAppNotificationEnabled: true, auctionCanceledMailNotificationEnabled: true, bidMadeCompletingAuctionInAppNotificationEnabled: true, bidMadeCompletingAuctionMailNotificationEnabled: true, buyNowCanceledMailNotificationEnabled: true, buyNowPriceUpdatedInAppNotificationEnabled: true, buyNowPriceUpdatedMailNotificationEnabled: true, channelCreatedInAppNotificationEnabled: true, channelCreatedMailNotificationEnabled: false, channelFundsWithdrawnInAppNotificationEnabled: true, channelFundsWithdrawnMailNotificationEnabled: true, channelPaymentMadeInAppNotificationEnabled: true, channelPaymentMadeMailNotificationEnabled: true, channelPayoutsUpdatedInAppNotificationEnabled: true, channelPayoutsUpdatedMailNotificationEnabled: true, channelRewardClaimedAndWithdrawnInAppNotificationEnabled: true, channelRewardClaimedAndWithdrawnMailNotificationEnabled: true, channelRewardClaimedInAppNotificationEnabled: true, channelRewardClaimedMailNotificationEnabled: true, commentCreatedInAppNotificationEnabled: true, commentCreatedMailNotificationEnabled: true, commentTextUpdatedInAppNotificationEnabled: true, commentTextUpdatedMailNotificationEnabled: true, englishAuctionSettledInAppNotificationEnabled: true, englishAuctionSettledMailNotificationEnabled: true, englishAuctionStartedInAppNotificationEnabled: true, englishAuctionStartedMailNotificationEnabled: true, memberBannedFromChannelInAppNotificationEnabled: true, memberBannedFromChannelMailNotificationEnabled: true, metaprotocolTransactionStatusInAppNotificationEnabled: true, metaprotocolTransactionStatusMailNotificationEnabled: true, newChannelFollowerInAppNotificationPreferences: true, newChannelFollowerMailNotificationPreferences: true, nftBoughtInAppNotificationEnabled: true, nftBoughtMailNotificationEnabled: true, nftIssuedMailNotificationEnabled: true, nftSellOrderMadeInAppNotificationEnabled: true, nftSellOrderMadeMailNotificationEnabled: true, openAuctionBidAcceptedInAppNotificationEnabled: true, openAuctionBidAcceptedMailNotificationEnabled: true, openAuctionStartedInAppNotificationEnabled: true, openAuctionStartedMailNotificationEnabled: true)
 }
 `
 

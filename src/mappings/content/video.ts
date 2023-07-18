@@ -6,7 +6,7 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, ChannelFollow, MemberNotification, RuntimeNotification, Video, VideoCreatedEventData, VideoViewEvent, Event } from '../../model'
+import { Channel, ChannelFollow, RuntimeNotification, Video, VideoCreatedEventData, VideoViewEvent, Event, ChannelNotification } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { addNotificationForRuntimeData, deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
@@ -116,7 +116,7 @@ export async function processVideoCreatedEvent({
     overlay,
     followers,
     eventEntity,
-    new MemberNotification()
+    new ChannelNotification()
   )
 
   if (autoIssueNft) {
