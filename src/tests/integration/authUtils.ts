@@ -149,7 +149,7 @@ export async function createAccountAndSignIn(
     .post('/api/v1/login')
     .set('Content-Type', 'application/json')
     .send(loginReqData)
-    // .expect(200)
+    .expect(200)
 
   const sessionId = extractSessionId(loginResp)
   const sessionIdRaw = sessionId.split('.')[0].split(':')[1]

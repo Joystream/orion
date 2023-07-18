@@ -61,7 +61,7 @@ export class TestContext {
           }
           result.events.forEach(({ event: { data, method, section } }) => {
             if (section === 'content' && method === 'VideoCreated') {
-              videoId = data[0].toString()
+              videoId = data[1].toString()
             }
           })
           resolve(unsub)
