@@ -115,6 +115,10 @@ export class NotificationResolver {
         throw new Error('Account not found')
       }
       if (notificationPreferences) {
+        account = {
+          ...account,
+          ...notificationPreferences
+        }
         account.commentCreatedInAppNotificationEnabled = commentCreatedInAppNotificationEnabled
         account.commentCreatedMailNotificationEnabled = commentCreatedMailNotificationEnabled
         account.commentTextUpdatedInAppNotificationEnabled =

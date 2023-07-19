@@ -140,6 +140,8 @@ type Account @entity {
   memberBannedFromChannelInAppNotificationEnabled: Boolean!
   channelCreatedInAppNotificationEnabled: Boolean!
   newChannelFollowerInAppNotificationPreferences: Boolean!
+  channelExcludedFromAppInAppNotificationEnabled: Boolean!,
+  videoExcludedFromAppInAppNotificationEnabled: Boolean!,
 
   # mail notifications
   commentCreatedMailNotificationEnabled: Boolean!
@@ -166,6 +168,8 @@ type Account @entity {
   memberBannedFromChannelMailNotificationEnabled: Boolean!
   channelCreatedMailNotificationEnabled: Boolean!
   newChannelFollowerMailNotificationPreferences: Boolean!
+  channelExcludedFromAppMailNotificationEnabled: Boolean!,
+  videoExcludedFromAppMailNotificationEnabled: Boolean!,
 }
 
 enum TokenType {
