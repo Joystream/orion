@@ -60,6 +60,10 @@ export type NotificationPreferences = {
   channelCreatedMailNotificationEnabled: boolean
   newChannelFollowerInAppNotificationPreferences: boolean
   newChannelFollowerMailNotificationPreferences: boolean
+  channelExcludedFromAppInAppNotificationEnabled: boolean,
+  channelExcludedFromAppMailNotificationEnabled: boolean,
+  videoExcludedFromAppInAppNotificationEnabled: boolean,
+  videoExcludedFromAppMailNotificationEnabled: boolean,
 }
 export function defaultNotificationPreferences(): NotificationPreferences {
   return {
@@ -111,6 +115,10 @@ export function defaultNotificationPreferences(): NotificationPreferences {
     channelCreatedMailNotificationEnabled: true,
     newChannelFollowerInAppNotificationPreferences: true,
     newChannelFollowerMailNotificationPreferences: true,
+    channelExcludedFromAppInAppNotificationEnabled: true,
+    channelExcludedFromAppMailNotificationEnabled: true,
+    videoExcludedFromAppInAppNotificationEnabled: true,
+    videoExcludedFromAppMailNotificationEnabled: true,
   } // TODo: format ordinately by pairs
 }
 
@@ -234,6 +242,16 @@ export async function preferencesForNotification(
         account.newChannelFollowerInAppNotificationPreferences,
         account.newChannelFollowerMailNotificationPreferences,
       ]
+    case 'ChannelExcludedNotificationData':
+      return [
+        account.channelExcludedFromAppInAppNotificationEnabled,
+        account.channelExcludedFromAppMailNotificationEnabled,
+      ]
+    case 'VideoExcludedNotificationData':
+      return [
+        account.videoExcludedFromAppInAppNotificationEnabled,
+        account.videoExcludedFromAppMailNotificationEnabled,
+      ]
     default:
       return [false, false]
   }
@@ -295,98 +313,100 @@ export function setNotificationPreferences(
   account: Account,
   notificationPreferences: NotificationPreferences
 ) {
-  account.commentCreatedInAppNotificationEnabled =
-    notificationPreferences.commentCreatedInAppNotificationEnabled
-  account.commentCreatedMailNotificationEnabled =
-    notificationPreferences.commentCreatedMailNotificationEnabled
-  account.commentTextUpdatedInAppNotificationEnabled =
-    notificationPreferences.commentTextUpdatedInAppNotificationEnabled
-  account.openAuctionStartedInAppNotificationEnabled =
-    notificationPreferences.openAuctionStartedInAppNotificationEnabled
-  account.englishAuctionStartedInAppNotificationEnabled =
-    notificationPreferences.englishAuctionStartedInAppNotificationEnabled
-  account.nftIssuedInAppNotificationEnabled =
-    notificationPreferences.nftIssuedInAppNotificationEnabled
-  account.auctionBidMadeInAppNotificationEnabled =
-    notificationPreferences.auctionBidMadeInAppNotificationEnabled
-  account.auctionBidCanceledInAppNotificationEnabled =
-    notificationPreferences.auctionBidCanceledInAppNotificationEnabled
-  account.auctionCanceledInAppNotificationEnabled =
-    notificationPreferences.auctionCanceledInAppNotificationEnabled
-  account.englishAuctionSettledInAppNotificationEnabled =
-    notificationPreferences.englishAuctionSettledInAppNotificationEnabled
-  account.bidMadeCompletingAuctionInAppNotificationEnabled =
-    notificationPreferences.bidMadeCompletingAuctionInAppNotificationEnabled
-  account.openAuctionBidAcceptedInAppNotificationEnabled =
-    notificationPreferences.openAuctionBidAcceptedInAppNotificationEnabled
-  account.nftSellOrderMadeInAppNotificationEnabled =
-    notificationPreferences.nftSellOrderMadeInAppNotificationEnabled
-  account.nftBoughtInAppNotificationEnabled =
-    notificationPreferences.nftBoughtInAppNotificationEnabled
-  account.buyNowCanceledInAppNotificationEnabled =
-    notificationPreferences.buyNowCanceledInAppNotificationEnabled
-  account.buyNowPriceUpdatedInAppNotificationEnabled =
-    notificationPreferences.buyNowPriceUpdatedInAppNotificationEnabled
-  account.metaprotocolTransactionStatusInAppNotificationEnabled =
-    notificationPreferences.metaprotocolTransactionStatusInAppNotificationEnabled
-  account.channelRewardClaimedInAppNotificationEnabled =
-    notificationPreferences.channelRewardClaimedInAppNotificationEnabled
-  account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled =
-    notificationPreferences.channelRewardClaimedAndWithdrawnInAppNotificationEnabled
-  account.channelFundsWithdrawnInAppNotificationEnabled =
-    notificationPreferences.channelFundsWithdrawnInAppNotificationEnabled
-  account.channelPayoutsUpdatedInAppNotificationEnabled =
-    notificationPreferences.channelPayoutsUpdatedInAppNotificationEnabled
-  account.channelPaymentMadeInAppNotificationEnabled =
-    notificationPreferences.channelPaymentMadeInAppNotificationEnabled
-  account.memberBannedFromChannelInAppNotificationEnabled =
-    notificationPreferences.memberBannedFromChannelInAppNotificationEnabled
-  account.channelCreatedInAppNotificationEnabled =
-    notificationPreferences.channelCreatedInAppNotificationEnabled
-  account.commentCreatedMailNotificationEnabled =
-    notificationPreferences.commentCreatedMailNotificationEnabled
-  account.commentTextUpdatedMailNotificationEnabled =
-    notificationPreferences.commentTextUpdatedMailNotificationEnabled
-  account.openAuctionStartedMailNotificationEnabled =
-    notificationPreferences.openAuctionStartedMailNotificationEnabled
-  account.englishAuctionStartedMailNotificationEnabled =
-    notificationPreferences.englishAuctionStartedMailNotificationEnabled
-  account.nftIssuedMailNotificationEnabled =
-    notificationPreferences.nftIssuedMailNotificationEnabled
-  account.auctionBidMadeMailNotificationEnabled =
-    notificationPreferences.auctionBidMadeMailNotificationEnabled
-  account.auctionBidCanceledMailNotificationEnabled =
-    notificationPreferences.auctionBidCanceledMailNotificationEnabled
-  account.auctionCanceledMailNotificationEnabled =
-    notificationPreferences.auctionCanceledMailNotificationEnabled
-  account.englishAuctionSettledMailNotificationEnabled =
-    notificationPreferences.englishAuctionSettledMailNotificationEnabled
-  account.bidMadeCompletingAuctionMailNotificationEnabled =
-    notificationPreferences.bidMadeCompletingAuctionMailNotificationEnabled
-  account.openAuctionBidAcceptedMailNotificationEnabled =
-    notificationPreferences.openAuctionBidAcceptedMailNotificationEnabled
-  account.nftSellOrderMadeMailNotificationEnabled =
-    notificationPreferences.nftSellOrderMadeMailNotificationEnabled
-  account.nftBoughtMailNotificationEnabled =
-    notificationPreferences.nftBoughtMailNotificationEnabled
-  account.buyNowCanceledMailNotificationEnabled =
-    notificationPreferences.buyNowCanceledMailNotificationEnabled
-  account.buyNowPriceUpdatedMailNotificationEnabled =
-    notificationPreferences.buyNowPriceUpdatedMailNotificationEnabled
-  account.metaprotocolTransactionStatusMailNotificationEnabled =
-    notificationPreferences.metaprotocolTransactionStatusMailNotificationEnabled
-  account.channelRewardClaimedMailNotificationEnabled =
-    notificationPreferences.channelRewardClaimedMailNotificationEnabled
-  account.channelRewardClaimedAndWithdrawnMailNotificationEnabled =
-    notificationPreferences.channelRewardClaimedAndWithdrawnMailNotificationEnabled
-  account.channelFundsWithdrawnMailNotificationEnabled =
-    notificationPreferences.channelFundsWithdrawnMailNotificationEnabled
-  account.channelPayoutsUpdatedMailNotificationEnabled =
-    notificationPreferences.channelPayoutsUpdatedMailNotificationEnabled
-  account.channelPaymentMadeMailNotificationEnabled =
-    notificationPreferences.channelPaymentMadeMailNotificationEnabled
-  account.memberBannedFromChannelMailNotificationEnabled =
-    notificationPreferences.memberBannedFromChannelMailNotificationEnabled
-  account.channelCreatedMailNotificationEnabled =
-    notificationPreferences.channelCreatedMailNotificationEnabled
+  // account.commentCreatedInAppNotificationEnabled =
+  //   notificationPreferences.commentCreatedInAppNotificationEnabled
+  // account.commentCreatedMailNotificationEnabled =
+  //   notificationPreferences.commentCreatedMailNotificationEnabled
+  // account.commentTextUpdatedInAppNotificationEnabled =
+  //   notificationPreferences.commentTextUpdatedInAppNotificationEnabled
+  // account.openAuctionStartedInAppNotificationEnabled =
+  //   notificationPreferences.openAuctionStartedInAppNotificationEnabled
+  // account.englishAuctionStartedInAppNotificationEnabled =
+  //   notificationPreferences.englishAuctionStartedInAppNotificationEnabled
+  // account.nftIssuedInAppNotificationEnabled =
+  //   notificationPreferences.nftIssuedInAppNotificationEnabled
+  // account.auctionBidMadeInAppNotificationEnabled =
+  //   notificationPreferences.auctionBidMadeInAppNotificationEnabled
+  // account.auctionBidCanceledInAppNotificationEnabled =
+  //   notificationPreferences.auctionBidCanceledInAppNotificationEnabled
+  // account.auctionCanceledInAppNotificationEnabled =
+  //   notificationPreferences.auctionCanceledInAppNotificationEnabled
+  // account.englishAuctionSettledInAppNotificationEnabled =
+  //   notificationPreferences.englishAuctionSettledInAppNotificationEnabled
+  // account.bidMadeCompletingAuctionInAppNotificationEnabled =
+  //   notificationPreferences.bidMadeCompletingAuctionInAppNotificationEnabled
+  // account.openAuctionBidAcceptedInAppNotificationEnabled =
+  //   notificationPreferences.openAuctionBidAcceptedInAppNotificationEnabled
+  // account.nftSellOrderMadeInAppNotificationEnabled =
+  //   notificationPreferences.nftSellOrderMadeInAppNotificationEnabled
+  // account.nftBoughtInAppNotificationEnabled =
+  //   notificationPreferences.nftBoughtInAppNotificationEnabled
+  // account.buyNowCanceledInAppNotificationEnabled =
+  //   notificationPreferences.buyNowCanceledInAppNotificationEnabled
+  // account.buyNowPriceUpdatedInAppNotificationEnabled =
+  //   notificationPreferences.buyNowPriceUpdatedInAppNotificationEnabled
+  // account.metaprotocolTransactionStatusInAppNotificationEnabled =
+  //   notificationPreferences.metaprotocolTransactionStatusInAppNotificationEnabled
+  // account.channelRewardClaimedInAppNotificationEnabled =
+  //   notificationPreferences.channelRewardClaimedInAppNotificationEnabled
+  // account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled =
+  //   notificationPreferences.channelRewardClaimedAndWithdrawnInAppNotificationEnabled
+  // account.channelFundsWithdrawnInAppNotificationEnabled =
+  //   notificationPreferences.channelFundsWithdrawnInAppNotificationEnabled
+  // account.channelPayoutsUpdatedInAppNotificationEnabled =
+  //   notificationPreferences.channelPayoutsUpdatedInAppNotificationEnabled
+  // account.channelPaymentMadeInAppNotificationEnabled =
+  //   notificationPreferences.channelPaymentMadeInAppNotificationEnabled
+  // account.memberBannedFromChannelInAppNotificationEnabled =
+  //   notificationPreferences.memberBannedFromChannelInAppNotificationEnabled
+  // account.channelCreatedInAppNotificationEnabled =
+  //   notificationPreferences.channelCreatedInAppNotificationEnabled
+  // account.commentCreatedMailNotificationEnabled =
+  //   notificationPreferences.commentCreatedMailNotificationEnabled
+  // account.commentTextUpdatedMailNotificationEnabled =
+  //   notificationPreferences.commentTextUpdatedMailNotificationEnabled
+  // account.openAuctionStartedMailNotificationEnabled =
+  //   notificationPreferences.openAuctionStartedMailNotificationEnabled
+  // account.englishAuctionStartedMailNotificationEnabled =
+  //   notificationPreferences.englishAuctionStartedMailNotificationEnabled
+  // account.nftIssuedMailNotificationEnabled =
+  //   notificationPreferences.nftIssuedMailNotificationEnabled
+  // account.auctionBidMadeMailNotificationEnabled =
+  //   notificationPreferences.auctionBidMadeMailNotificationEnabled
+  // account.auctionBidCanceledMailNotificationEnabled =
+  //   notificationPreferences.auctionBidCanceledMailNotificationEnabled
+  // account.auctionCanceledMailNotificationEnabled =
+  //   notificationPreferences.auctionCanceledMailNotificationEnabled
+  // account.englishAuctionSettledMailNotificationEnabled =
+  //   notificationPreferences.englishAuctionSettledMailNotificationEnabled
+  // account.bidMadeCompletingAuctionMailNotificationEnabled =
+  //   notificationPreferences.bidMadeCompletingAuctionMailNotificationEnabled
+  // account.openAuctionBidAcceptedMailNotificationEnabled =
+  //   notificationPreferences.openAuctionBidAcceptedMailNotificationEnabled
+  // account.nftSellOrderMadeMailNotificationEnabled =
+  //   notificationPreferences.nftSellOrderMadeMailNotificationEnabled
+  // account.nftBoughtMailNotificationEnabled =
+  //   notificationPreferences.nftBoughtMailNotificationEnabled
+  // account.buyNowCanceledMailNotificationEnabled =
+  //   notificationPreferences.buyNowCanceledMailNotificationEnabled
+  // account.buyNowPriceUpdatedMailNotificationEnabled =
+  //   notificationPreferences.buyNowPriceUpdatedMailNotificationEnabled
+  // account.metaprotocolTransactionStatusMailNotificationEnabled =
+  //   notificationPreferences.metaprotocolTransactionStatusMailNotificationEnabled
+  // account.channelRewardClaimedMailNotificationEnabled =
+  //   notificationPreferences.channelRewardClaimedMailNotificationEnabled
+  // account.channelRewardClaimedAndWithdrawnMailNotificationEnabled =
+  //   notificationPreferences.channelRewardClaimedAndWithdrawnMailNotificationEnabled
+  // account.channelFundsWithdrawnMailNotificationEnabled =
+  //   notificationPreferences.channelFundsWithdrawnMailNotificationEnabled
+  // account.channelPayoutsUpdatedMailNotificationEnabled =
+  //   notificationPreferences.channelPayoutsUpdatedMailNotificationEnabled
+  // account.channelPaymentMadeMailNotificationEnabled =
+  //   notificationPreferences.channelPaymentMadeMailNotificationEnabled
+  // account.memberBannedFromChannelMailNotificationEnabled =
+  //   notificationPreferences.memberBannedFromChannelMailNotificationEnabled
+  // account.channelCreatedMailNotificationEnabled =
+  //   notificationPreferences.channelCreatedMailNotificationEnabled
+  // account.channelExcludedFromAppInAppNotificationEnabled = notificationPreferences.channelExcludedFromAppInAppNotificationEnabled
+  // account.channelExcludedFromAppMailNotificationEnabled = notificationPreferences.channelExcludedFromAppMailNotificationEnabled
 }

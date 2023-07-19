@@ -8,7 +8,6 @@ import { idStringFromNumber } from '../../utils/misc'
 import { verifyActionExecutionRequest } from '../utils'
 import {
   defaultNotificationPreferences,
-  setNotificationPreferences,
 } from '../../utils/notifications'
 
 type ReqParams = Record<string, string>
