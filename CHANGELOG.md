@@ -150,28 +150,7 @@ possibly account information
 
 ### Documentation
 The `/doc` folder has been improved by adding several pieces of documentation, containing explainers and tutorials for both
-developers and gateway operators. In particular the old `docs/developer-guide.md` and `docs/operator-guide.md` now have been
-superseeded by:
-
-```
-docs
-├── developer-guide
-│   ├── architecture-overview.md
-│   ├── assets
-│   ├── code-style.md
-│   ├── commands.md
-│   ├── development-setup.md
-│   ├── index.md
-│   ├── running-local-instance.md
-│   ├── tutorials
-│   └── versioning.md
-└── operator-guide
-    ├── assets
-    ├── examples
-    ├── index.md
-    └── tutorials
-```
-
+developers and gateway operators
 # 2.3.0
 
 ### Features:
