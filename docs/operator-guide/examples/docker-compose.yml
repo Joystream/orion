@@ -1,0 +1,89 @@
+version: '3.4'
+services:
+  # PostgerSQL database for Orion
+  orion-db:
+    image: postgres:14
+    container_name: orion-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
+    shm_size: 1g
+    volumes:
+      - orion-db-data:/var/lib/postgresql/data
+      - ./postgres.conf:/etc/postgresql/postgresql.conf
+  # Orion processor
+  orion-processor:
+    image: joystream/orion:latest
+    container_name: orion-processor
+    restart: unless-stopped
+    depends_on:
+      - orion-db
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=orion-db
+      - GQL_PORT=${GRAPHQL_API_PORT}
+    volumes:
+      - ./db/export:/squid/db/export
+    command: >
+      sh -c "npx squid-typeorm-migration apply && \
+             node lib/processor.js"
+    ports:
+      - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
+  # Orion GraphQL API
+  orion-graphql-api:
+    container_name: orion-graphql-api
+    image: joystream/orion:latest
+    restart: unless-stopped
+    depends_on:
+      - orion-db
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=orion-db
+      - GQL_PORT=${GRAPHQL_API_PORT}
+    command: ['npm', 'run', 'query-node-start']
+    ports:
+      - '127.0.0.1:${GRAPHQL_API_PORT}:${GRAPHQL_API_PORT}'
+  # Orion Authentication API
+  orion-auth-api:
+    container_name: orion-auth-api
+    image: joystream/orion:latest
+    restart: unless-stopped
+    depends_on:
+      - orion-db
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=orion-db
+    command: ['npm', 'run', 'auth-server-start']
+    ports:
+      - '127.0.0.1:${AUTH_API_PORT}:${AUTH_API_PORT}'
+  # Caddy
+  orion-caddy:
+    profiles:
+      - deploy
+    container_name: orion-caddy
+    image: caddy:2.6
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./atlas:/srv/atlas
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+
+volumes:
+  orion-db-data:
+    driver: local

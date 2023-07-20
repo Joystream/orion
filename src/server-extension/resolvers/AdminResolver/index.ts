@@ -19,9 +19,9 @@ import {
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
   SetVideoHeroResult,
-  SetVideoViewPerIpTimeLimitInput,
+  SetVideoViewPerUserTimeLimitInput,
   SetVideoWeightsInput,
-  VideoViewPerIpTimeLimit,
+  VideoViewPerUserTimeLimit,
   VideoWeights,
 } from './types'
 import { config, ConfigVariable } from '../../../utils/config'
@@ -87,22 +87,14 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
-  @Mutation(() => VideoViewPerIpTimeLimit)
-  async setVideoViewPerIpTimeLimit(
-    @Args() args: SetVideoViewPerIpTimeLimitInput
-  ): Promise<VideoViewPerIpTimeLimit> {
+  @Mutation(() => VideoViewPerUserTimeLimit)
+  async setVideoViewPerUserTimeLimit(
+    @Args() args: SetVideoViewPerUserTimeLimitInput
+  ): Promise<VideoViewPerUserTimeLimit> {
     const em = await this.em()
-    await config.set(ConfigVariable.VideoViewPerIpTimeLimit, args.limitInSeconds, em)
+    await config.set(ConfigVariable.VideoViewPerUserTimeLimit, args.limitInSeconds, em)
     return {
-      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
-    }
-  }
-
-  @Query(() => VideoViewPerIpTimeLimit)
-  async getVideoViewPerIpTimeLimit(): Promise<VideoViewPerIpTimeLimit> {
-    const em = await this.em()
-    return {
-      limitInSeconds: await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em),
+      limitInSeconds: await config.get(ConfigVariable.VideoViewPerUserTimeLimit, em),
     }
   }
 
@@ -215,13 +207,13 @@ export class AdminResolver {
     if (supportedCategoriesIds) {
       await em
         .createQueryBuilder()
-        .update(`processor.video_category`)
+        .update(`admin.video_category`)
         .set({ is_supported: false })
         .execute()
       if (supportedCategoriesIds.length) {
         const result = await em
           .createQueryBuilder()
-          .update(`processor.video_category`)
+          .update(`admin.video_category`)
           .set({ is_supported: true })
           .where({ id: In(supportedCategoriesIds) })
           .execute()
@@ -251,7 +243,7 @@ export class AdminResolver {
 
     await em
       .createQueryBuilder()
-      .update(`processor.owned_nft`)
+      .update(`admin.owned_nft`)
       .set({ is_featured: false })
       .where({ is_featured: true })
       .execute()
@@ -259,7 +251,7 @@ export class AdminResolver {
     if (featuredNftsIds.length) {
       const result = await em
         .createQueryBuilder()
-        .update(`processor.owned_nft`)
+        .update(`admin.owned_nft`)
         .set({ is_featured: true })
         .where({ id: In(featuredNftsIds) })
         .execute()

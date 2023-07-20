@@ -113,8 +113,9 @@ export function extendClause(
 }
 
 export async function withHiddenEntities<R>(em: EntityManager, func: () => Promise<R>): Promise<R> {
-  await em.query('SET LOCAL search_path TO processor,public')
+  const previousSearchPath = (await em.query('SHOW search_path'))[0]?.search_path || 'DEFAULT'
+  await em.query('SET LOCAL search_path TO admin,public')
   const result = await func()
-  await em.query('SET LOCAL search_path TO DEFAULT')
+  await em.query(`SET LOCAL search_path TO ${previousSearchPath}`)
   return result
 }

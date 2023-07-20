@@ -8,8 +8,7 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { Context } from '@subsquid/openreader/lib/context'
-import { Report, Video, VideoViewEvent } from '../../../model'
+import { VideoViewEvent, Video, Report } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -32,11 +31,11 @@ import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { config, ConfigVariable } from '../../../utils/config'
-import { ContextWithIP } from '../../check'
-import { randomAsHex } from '@polkadot/util-crypto'
+import { Context } from '../../check'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
+import { uniqueId } from '../../../utils/crypto'
 
 @Resolver()
 export class VideosResolver {
@@ -107,7 +106,7 @@ export class VideosResolver {
     idsQuerySql = extendClause(
       idsQuerySql,
       'FROM',
-      `INNER JOIN "processor"."video_view_event" ` +
+      `LEFT JOIN "admin"."video_view_event" ` +
         `ON "video_view_event"."video_id" = "video"."id"` +
         (args.periodDays
           ? ` AND "video_view_event"."timestamp" > '${new Date(
@@ -188,10 +187,10 @@ export class VideosResolver {
   @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<AddVideoViewResult> {
     const em = await this.em()
-    const { ip } = ctx
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       // Check if the video actually exists & lock it for update
       const video = await em.findOne(Video, {
@@ -207,11 +206,11 @@ export class VideosResolver {
       if (!video) {
         throw new Error(`Video by id ${videoId} does not exist`)
       }
-      // See if there is already a recent view of this video by this ip
-      const timeLimitInSeconds = await config.get(ConfigVariable.VideoViewPerIpTimeLimit, em)
+      // See if there is already a recent view of this video by this user
+      const timeLimitInSeconds = await config.get(ConfigVariable.VideoViewPerUserTimeLimit, em)
       const recentView = await em.findOne(VideoViewEvent, {
         where: {
-          ip,
+          userId: user.id,
           videoId,
           timestamp: MoreThan(new Date(Date.now() - timeLimitInSeconds * 1000)),
         },
@@ -231,7 +230,7 @@ export class VideosResolver {
       video.channel.videoViewsNum += 1
       const newView = new VideoViewEvent({
         id: `${videoId}-${video.viewsNum}`,
-        ip,
+        userId: user.id,
         timestamp: new Date(),
         videoId,
       })
@@ -254,10 +253,10 @@ export class VideosResolver {
   @Mutation(() => VideoReportInfo)
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
-    @Ctx() ctx: ContextWithIP
+    @Ctx() ctx: Context
   ): Promise<VideoReportInfo> {
     const em = await this.em()
-    const { ip } = ctx
+    const { user } = ctx
     return withHiddenEntities(em, async () => {
       // Try to retrieve the video+channel first
       const video = await em.findOne(Video, {
@@ -267,9 +266,9 @@ export class VideosResolver {
       if (!video) {
         throw new Error(`Video by id ${videoId} not found!`)
       }
-      // We allow only one report per specific entity per ip
+      // Check if the user has already reported this video
       const existingReport = await em.findOne(Report, {
-        where: { ip, videoId },
+        where: { userId: user.id, videoId },
       })
       // If report already exists - return its data with { created: false }
       if (existingReport) {
@@ -277,17 +276,16 @@ export class VideosResolver {
           id: existingReport.id,
           videoId,
           created: false,
-          reporterIp: existingReport.ip,
           createdAt: existingReport.timestamp,
           rationale: existingReport.rationale,
         }
       }
       // If report doesn't exist, create a new one
       const newReport = new Report({
-        id: randomAsHex(16).replace('0x', ''),
+        id: uniqueId(8),
         videoId,
         channelId: video.channel.id,
-        ip,
+        userId: user.id,
         rationale,
         timestamp: new Date(),
       })
@@ -299,7 +297,6 @@ export class VideosResolver {
         created: true,
         createdAt: newReport.timestamp,
         rationale,
-        reporterIp: ip,
       }
     })
   }

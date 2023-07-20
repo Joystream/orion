@@ -2,6 +2,7 @@ process: migrate
 	@SQD_DEBUG=sqd:processor:mapping node -r dotenv-expand/config lib/processor.js
 
 install:
+	@rm -rf node_modules # clean up node_modules to avoid issues with patch-package
 	@npm install
 
 build:
@@ -12,6 +13,9 @@ build-docker:
 
 serve:
 	@npx squid-graphql-server --subscriptions
+
+serve-auth-api:
+	@npm run auth-server-start
 
 migrate:
 	@npx squid-typeorm-migration apply
@@ -40,8 +44,7 @@ up-archive:
 up: up-archive up-squid
 
 down-squid:
-	@docker-compose stop orion_processor
-	@npm run offchain-state:export && docker-compose down -v
+	@docker-compose down -v
 	
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v

@@ -2,7 +2,7 @@ import { Resolver, Root, Subscription } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import { ProcessorState } from './types'
 import _, { isObject } from 'lodash'
-import { getEm } from '../../../utils/orm'
+import { globalEm } from '../../../utils/globalEm'
 import { has } from '../../../utils/misc'
 
 class ProcessorStateRetriever {
@@ -21,7 +21,7 @@ class ProcessorStateRetriever {
   }
 
   private async updateLoop(intervalMs: number) {
-    this.em = await getEm()
+    this.em = await globalEm
     while (true) {
       try {
         this.state = await this.getUpdatedState()

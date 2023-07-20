@@ -1,0 +1,132 @@
+type User @entity {
+  "Unique identifier (32-byte string, securely random)"
+  id: ID!
+
+  "Whether the user has root (gateway operator) privileges"
+  isRoot: Boolean!
+
+  "The account associated with the user (if any)"
+  account: Account @derivedFrom(field: "user")
+
+  "User's channel follows"
+  channelFollows: [ChannelFollow!]! @derivedFrom(field: "user")
+
+  "Video views associated with the user"
+  videoViewEvents: [VideoViewEvent!]! @derivedFrom(field: "user")
+
+  "Reports associated with the user"
+  reports: [Report!]! @derivedFrom(field: "user")
+
+  "NFT featuring requests associated with the user"
+  nftFeaturingRequests: [NftFeaturingRequest!]! @derivedFrom(field: "user")
+}
+
+type EncryptionArtifacts @entity {
+  "ID / lookupKey"
+  id: ID!
+
+  "The account the encryption artifacts are associated with"
+  account: Account! @unique
+
+  "The IV used to encrypt the wallet seed with user credentials"
+  cipherIv: String!
+
+  "Wallet seed encrypted with user credentials"
+  encryptedSeed: String!
+}
+
+type SessionEncryptionArtifacts @entity {
+  "Unique identifier"
+  id: ID!
+
+  "The session the encryption artifacts are associated with"
+  session: Session! @unique
+
+  "The IV used to encrypt the seed with cipherKey"
+  cipherIv: String!
+
+  "cipherKey used to encrypt the seed stored client-side for the duration of the session"
+  cipherKey: String!
+}
+
+type Session @entity {
+  "Unique identifier (32-byte string, securely random)"
+  id: ID!
+
+  "Browser (as deterimned based on user-agent header)"
+  browser: String!
+
+  "Operating system (as deterimned based on user-agent header)"
+  os: String!
+
+  "Device (as deterimned based on user-agent header)"
+  device: String!
+
+  "Device type (as deterimned based on user-agent header)"
+  deviceType: String
+
+  "User associated with the session"
+  user: User!
+
+  "Account associated with the session (if any)"
+  account: Account
+
+  "IP address associated with the session"
+  ip: String! @index
+
+  "Time when the session started"
+  startedAt: DateTime!
+
+  "Time when the session expires or did expire"
+  expiry: DateTime!
+}
+
+"A Gateway Account"
+type Account @entity {
+  "Unique identifier (can be sequential)"
+  id: ID!
+
+  "The user associated with the gateway account (the Gateway Account Owner)"
+  user: User! @unique
+
+  "Gateway account's e-mail address"
+  email: String! @unique
+
+  """
+  Indicates whether the gateway account's e-mail has been confirmed or not.
+  """
+  isEmailConfirmed: Boolean!
+
+  "Indicates whether the access to the gateway account is blocked"
+  isBlocked: Boolean!
+
+  "Time when the gateway account was registered"
+  registeredAt: DateTime!
+
+  "On-chain membership associated with the gateway account"
+  membership: Membership! @unique
+
+  "Blockchain (joystream) account associated with the gateway account"
+  joystreamAccount: String! @unique
+}
+
+enum TokenType {
+  EMAIL_CONFIRMATION
+}
+
+type Token @entity {
+  "The token itself (32-byte string, securely random)"
+  id: ID!
+
+  "Type of the token (its intended purpose)"
+  type: TokenType!
+
+  "When was the token issued"
+  issuedAt: DateTime!
+
+  "When does the token expire or when has it expired"
+  expiry: DateTime!
+
+  "The account the token was issued for"
+  issuedFor: Account!
+}

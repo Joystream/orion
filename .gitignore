@@ -10,4 +10,4 @@ src/model/generated
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data
-/db/export.json*
+/db/export

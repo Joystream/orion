@@ -41,13 +41,13 @@ export class KillSwitch {
 }
 
 @ArgsType()
-export class SetVideoViewPerIpTimeLimitInput {
+export class SetVideoViewPerUserTimeLimitInput {
   @Field(() => Int, { nullable: false })
   limitInSeconds!: number
 }
 
 @ObjectType()
-export class VideoViewPerIpTimeLimit {
+export class VideoViewPerUserTimeLimit {
   @Field(() => Int, { nullable: false })
   limitInSeconds!: number
 }

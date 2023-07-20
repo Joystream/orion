@@ -1,3 +1,156 @@
+# 3.0.0
+This is a major release that will contains several breaking changes due to the 
+introduction of the user account feature. Throught this release changelog the term
+"registered account","account", "gateway account" will be used interchangeably in order
+to denote a user that has registered its credential using the provided feature
+
+### Architecture
+The most prominent introduction is the new authentication api, which can be run as a docker service 
+
+#### Authentication Api
+A new authentication api in order to authenticate accounts has been introduced, based on the open-api specification
+The `docs/developer-guide/tutorials/authentication-api.md` has a detailed description about this, I will just list
+the routes provided by the api:
+
+Version 1.0.0 
+
+- Added new routes:
+  - `/anonymous-auth`: Authenticate as an anonymous user, either using an existing user identifier or creating a new one.
+  - `/login`: Login to a user's account by providing a message signed by the associated blockchain account.
+  - `/artifacts`: Get wallet seed encryption artifacts.
+  - `/session-artifacts`: Get and save wallet seed encryption artifacts for the current session.
+  - `/account`: Create a new Gateway account. Requires anonymous authentication to be performed first.
+  - `/confirm-email`: Confirm the account's email address provided during registration.
+  - `/request-email-confirmation-token`: Request a token to be sent to the account's email address for email confirmation.
+  - `/change-account`: Change the blockchain (Joystream) account associated with the Gateway account.
+  - `/logout`: Terminate the current session.
+
+- Implemented new methods:
+  - `POST /anonymous-auth`: Perform anonymous authentication.
+  - `POST /login`: Perform user login.
+  - `GET /artifacts`: Retrieve wallet seed encryption artifacts.
+  - `GET /session-artifacts`: Retrieve wallet seed encryption artifacts for the current session.
+  - `POST /session-artifacts`: Save wallet seed encryption artifacts for the current session on the server.
+  - `POST /account`: Create a new Gateway account.
+  - `POST /confirm-email`: Confirm the account's email address.
+  - `POST /request-email-confirmation-token`: Request a token for email confirmation.
+  - `POST /change-account`: Change the blockchain (Joystream) account associated with the Gateway account.
+  - `POST /logout`: Terminate the current session.
+
+- Deprecated routes/methods:
+  - None.
+
+- Added comprehensive documentation for easy integration and usage inside `src/auth-api/docs`
+- Added `src/auth-api/email` folder used for html template emails. Currently only registration email for a new gateway account is supported, 
+but more email type will be supported in future releases
+
+Note: For more detailed information about each route and method, please refer to the API documentation, inside `src/auth-api/docs`
+
+
+
+#### Config Variables changes
+- Orion archive `WS_SOURCE` default value has been changed to the public endpoint `wss://rpc.joystream.org:9944`
+(before was pointing to the local host deployment at port `9944`)
+- `ORION_ENV`: variables has been introduced to specify between `development` and `production` stages
+- `DEV_DISABLE_SAME_SITE`: disables the "SameSite" attribute for cookies is used to control how cookies are sent in cross-site requests, when `ORION_DEV` is set to `development`
+- `PROCESSOR_HOST` variable has been removed
+- `DB_ADMIN_USER` and `DB_ADMIN_PASS` in order to create the `admin` user that has access to the `admin` schema
+- `AUTH_API_PORT` for specifying port for the authentication api
+- `APP_NAME`: Gateway name, it will be used in the email sent to the account owners.
+- `VIDEO_VIEW_PER_IP_TIME_LIMIT` replaced by `VIDEO_VIEW_PER_USER_TIME_LIMIT`
+- `SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES` how much a session should last for an inactive user
+- `SESSION_MAX_DURATION_HOURS` max session duration in hours
+- `EMAIL_CONFIRMATION_ROUTE` api route for email confirmation
+- `EMAIL_CONFIRMATION_TOKEN_EXPIRY_HOURS`: how many hours does a confirmation token lasts 
+- EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT`: how many requests for a new e-mail confirmation token can be made within
+ `EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS` for a given e-mail address
+- `ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS`
+- `COOKIE_SECRET`: secret used to sign cookies, to make sure they come from Orion and have not been tampered with
+- `TRUSTED_REVERSE_PROXY` variable has been superseeded by `TRUST_PROXY`
+- `OPEN_API_PLAYGROUND` whether or not have a openapi playground on localhost
+- `SENDGRID_API_KEY` API key from sendgrid, used for sending email to the gateway account owners (for the purpose of
+email confirmation only at the moment)
+- `OPERATOR_SECRET`: string used as identifier for the root user. Despite not being a new addition to the release now it is 
+being stored in the database and it gives access to the hidden entities and `OperatorOnly` queries/mutations
+
+#### Makefile
+- A new rule for spinning up the auth api has been added as `make serve-auth-api`
+- A new `joystream.jsonl` has been added. This file contains the metadata necessary for generating correct events with respective 
+appropriate version numbers from the metadata via the `make typegen` command
+
+### Entities
+#### Changes
+- `VideoViewEvent.ip: String` replaced by `VideoViewEvent.user: User` 
+- `NftFeaturingRequest.ip: String` replaced by `NftFeaturingRequest.user: User` 
+- `ChannelFollow.ip: String` replaced by `ChannelFollow.user: User` 
+#### Additions
+The following entities have been introduced together with the new account management system, more information about
+them is provided in the developer guide
+- `User`: basic representation of a client App / Oriol user,  it can be either an anonymous user (have no related Account) or a gateway account owner.
+A User can be associated with activities such as viewing a video, or searching for specific content, 
+which can be later used to provide a personalized experience to the user once they create an account.
+- `EncryptionArtifacts`: SessionEncryptionArtifacts represents a set of encryption artifacts (cipherIv and cipherKey) 
+associated with a given session, allowing the Client app to more securely store
+Blockchain account's seed throughout the session 
+- `SessionEncryptionArtifacts`: represents a set of encryption artifacts (cipherIv and encryptedSeed) 
+which can be used by the Client app to decrypt the seed of a Blockchain account based on the account's
+login credentials (email and password)
+- `Session`: represents a specific activity period for a `User`
+- `Account`: represents a Gateway Account which can be accessed by the Gateway account owner by logging in
+- `Token`: represets a unique, securely random string generated by the Auth API for a given account, which allows
+executing a specific action on the account's behalf without authentication
+- `AccountData` short form version of `Account` displaying relevant account information
+- `FollowedChannel` entities containing information about a channel being followed by an account
+
+Furthermore:
+- `GatewayConfig` entity has been added in order to allow persisting configuration variables of different types in 
+the database. The logic of retrieving setting and updating configration variables is defined in `src/utils/config.ts`
+Each configuration variable specified in `src/utils/config.ts` has a corresponding environment variable which serves as a 
+default value in case the cnofig value is not set in the database. The information stored will be: `( config_variable_name, value, last_modified_at_timestamp)`
+
+### Middleware
+Following the introduction of user-accounts a new middleware authentication has been introduced, allowing the execution of resolvers
+only to user that have registered an account on orion. In particular a new `MiddleWareFn` has been introduced `AccountOnly` for this 
+purpose only. This means that some previously accessible queries / mutations now have been restricted to registered users only
+### Queries
+#### Additions
+- `accountData`: resolver for which a registered account can gather information such as id, mail, joystream address, joystream memberid, 
+and whether his email has been verified
+#### Changes
+- `getVideoPerIpLimit`: has been removed
+
+###  Mutations
+#### Changes
+Several changes are due to the `ContextWithIp` type being replaced by a `Context` that contains user's sesion and 
+possibly account information
+- `followChannel`:
+    - now executable only by registered account 
+    - argument `ctx: ContextWithIp` has been replaced by a `ctx: Context` containing account informations
+    - `ChannelFollowResult.cancelToken` field on the return type has been removed and `ChannelFollowResult.followId` has been added
+- `unfollowChannel`: 
+    - now executable only by registered account
+    - context argument `ctx: ContextWithIp` has been replaced by  `ctx: Context` already containing registered account informations
+    - `UnfollowChannelArgs.token` argument for the `unfollowChannel` resolver has been removed
+- `requestNftFeatured` `ctx: ContextWithIp` arg has been replaced by `ctx: Context` in order to access user information and `NftFeatureRequestInfo.reporterId` field has been dropped
+- `addVideoView` `ctx: ContextWithIp` argument has been replaced by a `ctx: Context` argument
+- `reportVideo`:
+    - `ctx: ContextWithIp` argument has been replaced by a `ctx: Context` argument
+    - `VideoReportInfo.reporterIp: string` field on the return type been dropped
+- `reportChannel`:
+    - `ctx: ContextWithIp` argument has been replaced by a `ctx: Context` argument
+    - `ChannelReportInfo.reporterIp: string` field on the return type been dropped
+- `setVideoViewPerIpLimit`: 
+    - has been renamed to `setVideoViewPerUserLimit`
+    - argument changed from `VideoViewPerIpTimeLimitInput` to `VideoViewPerUserTimeLimitInput`
+
+### Data migration
+- `VideoView`, `Report` and `NftFeaturingRequest` entities will be persisted. However, they will all be assigned to a mock
+"migration user", created during import (with `id: v2-migration-{random-id-string}`)
+- `ChannelFollows` will not be persisted. In v3, you need to have a registered account in order to follow a channel. 
+
+### Documentation
+The `/doc` folder has been improved by adding several pieces of documentation, containing explainers and tutorials for both
+developers and gateway operators
 # 2.3.0
 
 ### Features:

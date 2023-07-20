@@ -1,0 +1,83 @@
+# Architecture overview
+
+Orion is a backed node powering [Atlas](https://github.com/Joystream/atlas).
+
+It consists of multiple services and each of them has its own responsibility. Those services are managed via `docker-compose.yml` files: [docker-compose.yml](../../docker-compose.yml) and [archive/docker-compose.yml](../../archive/docker-compose.yml).
+
+Most of the services are part of the [Subsquid framework](https://subsquid.io/), so in order to better understand the project architecture you should first familiarize yourself with the [Subsquid documentation](https://docs.subsquid.io/).
+
+## Libraries, frameworks and tools used
+
+- [Subsquid](https://docs.subsquid.io) (the main framework powering Orion)
+- [Polkadot JS](https://polkadot.js.org/docs/) (a set of libraries providing common Substrate utilities)
+- [TypeORM](https://typeorm.io/#/) (ORM used for interacting with the PostgreSQL database)
+- [PostgreSQL](https://www.postgresql.org/docs/14/index.html) (database management system)
+- [TypeGraphQL](https://typegraphql.com/docs/introduction.html) (TypeScript library used for extening Subsquid's GraphQL API with [custom resolvers](https://docs.subsquid.io/develop-a-squid/graphql-api/custom-resolvers/))
+- [Apollo Server](https://www.apollographql.com/docs/apollo-server/) (GraphQL server library used by Subquid)
+- [Express.js](https://expressjs.com/en/4x/api.html) (http server library used by the [auth server](./tutorials/authentication-api.md))
+- [OpenAPI](https://swagger.io/specification/) (API speification standard used for describing the auth server API)
+- [Express OpenAPI validator](https://github.com/cdimascio/express-openapi-validator/wiki/Documentation) (express middleware used by the auth server)
+- [Handlebars](https://handlebarsjs.com/guide/) (e-mail templating engine)
+
+## Services
+
+The services can be divided into 2 main categories:
+- **[Subsquid archive services](https://docs.subsquid.io/archives/overview/)**, which are managed via [archive/docker-compose.yml](../../archive/docker-compose.yml) file and consist of:
+    - [A PostgreSQL database docker service](https://github.com/docker-library/docs/blob/master/postgres/README.md): this is the database in which the archival Joystream chain data (such as blocks, events and extrinsics) is stored.  
+    - [**Archive `ingest`** docker service](https://docs.subsquid.io/arrowsquid/archives/substrate/self-hosted/#substrate-ingest): uses a configured Joystream node websocket endpoint (must be an archive node) to fetch the archival data about blocks, events and extrinsics and store it in the PostgreSQL database.
+    - [**Archive `gateway` docker service**](https://docs.subsquid.io/arrowsquid/archives/substrate/self-hosted/#substrate-gateway): exposes the data collected by the _Archive `ingest`_ service through a GraphQL interface designed for [Squid processors](https://docs.subsquid.io/substrate-indexing/substrate-processor/).
+    - **[Archive `explorer` service](https://docs.subsquid.io/archives/substrate/self-hosted/#substrate-explorer) (optional)**: Provides a human-friendly GraphQL API interface on top of the database populated by _Archive `ingest`_ service.
+- **Main Orion services**, which include:
+    - [A PostgreSQL database docker service](https://github.com/docker-library/docs/blob/master/postgres/README.md): This is the main Orion database, it includes already processed entities, such as `Channel` or `Video`, as well as the Gateway configuration and other Gateway data which may not be a result of processing Joystream blockchain events, like user accounts, channel follows or video views.
+    - [Squid processor](https://docs.subsquid.io/basics/squid-processor/): It's responsible for processing Joystream blockchain events and creating, updating or deleting the database entities (such as `Channel` or `Video`) accordingly, so that they remain in-sync with the current Joystream chain state.
+    - [GraphQL server](https://docs.subsquid.io/graphql-api/overview/): Orion's main GraphQL server which handles all the queries and mutations.
+    - [Auth server](../../src/auth-server/docs/README.md): Orion's authentication server (REST API) responsible for handling user authentication.
+
+
+## Directory structure and important files
+
+- `/archive` - contains a [Squid archive](#squid-archive) docker setup.
+- `/assets`
+    - `/patches` - contains patch files for Orion's npm dependencies, created with the [`patch-package`](https://www.npmjs.com/package/patch-package) tool (see: [Patching dependencies](./tutorials/patching-dependencies.md)).
+- `/schema` - GraphQL API [input schema](https://docs.subsquid.io/develop-a-squid/schema-file/) files.
+- `/scripts` - contains various shell scripts (for copying files during the build process etc.)
+- `/src` - contains the source code of the project.
+    - `/auth-server` - [Orion's authentication server](./tutorials/authentication-api.md) code.
+        - `/docs` - documentation autogenerated based on the [OpenAPI](https://swagger.io/specification/) schema.
+        - `/emails` - e-mail [handlebars](https://handlebarsjs.com/) templates.
+        - `/generated` - autogenerated types based on the [OpenAPI](https://swagger.io/specification/) schema.
+        - `/handlers` - [Express](https://expressjs.com/) handler functions for each OpenAPI route.
+        - `/tests` - auth API unit tests implemented w/ [Mocha](https://mochajs.org/) and [Supertest](https://www.npmjs.com/package/supertest).
+        - `/openapi.yml` - [OpenAPI specification](https://swagger.io/specification/) which contains a complete description of all the API endpoints, request and response data structure etc. It also serves a base for generating documentation, types and the basic implementation of the API server itself.
+    - `/mappings` - contains processor's [event handler functions](#event-handlers) for each of the supported events.
+    - `/model` - contains TypeORM models, both the autogenerated and the custom ones.
+        - `/generated` - contains the models generated from the GraphQL API [input schema](https://docs.subsquid.io/develop-a-squid/schema-file/) via `make codegen` (`squid-typeorm-codegen`).
+    - `/scripts` - contains TypeScript scripts, usually to be executed from the docker container, ie.:
+        - `/export.ts` - the [_Offchain state_ export](./tutorials/preserving-offchain-state.md) script (`npm run offchain-state:export`), mainly to be used by the Gateway operators when [upgrading to a new version of Orion](../operator-guide/tutorials/upgrading-orion.md)
+        - `/getPublicKey.ts` - the script which allows checking the public key that will be derived from a given `APP_PRIVATE_KEY` config value (`npm run get-public key <value>`). It's supposed to be used by Gateway operators interested in setting up the _[App attribution](../operator-guide/tutorials/app-attribution.md)_.
+    - `/server-extension` - contains custom extensions ([custom TypeGraphQL resolvers](https://docs.subsquid.io/graphql-api/custom-resolvers/) & plugins) for the [GraphQL server](https://docs.subsquid.io/graphql-api/overview/) (which is automatically generated by Subsquid from the input schema).
+        - `/resolvers` - [custom TypeGraphQL resolvers](https://docs.subsquid.io/graphql-api/custom-resolvers/) which can include custom queries and mutations (to be merged with the autogenerated GraphQL API).
+        - `/check.ts` - exports a `requestCheck` function, which is then [converted to an Apollo `requestDidStart` plugin by Subsquid](https://github.com/subsquid/squid-sdk/blob/%40subsquid/graphql-server_v3.2.4/graphql-server/src/check.ts#L36) and executed at the beginning on each GraphQL server request (before it's passed to resolvers).
+    - `/tests` - contains initial testing and benchmarking scripts. They were initially used to compare the previous major version of Orion (v1) with the current one (v2) and need to be updated.
+    - `/types` - contains event types autogenerated by `make typegen` (`squid-substrate-typegen`).
+    - `/utils` - contains general utility functions/classes used across the codebase, out of which the most important ones are:
+        - `/auth.ts` - utility functions related to user authentication and session management.
+        - `/cache.ts` - contains [`node-cache`](https://www.npmjs.com/package/node-cache) caches (currently only the session cache)
+        - `/config.ts` - contains utilities for managing the [Gateway config variables](./tutorials/config-variables.md) (such as `KillSwitch`, `SessionMaxDurationHours`, `SendgridApiKey`, `AppPrivateKey` etc.).
+        - `/events.ts` - contains map from event name to event constructor (`eventConstructors`) and type definitions related to events and event handlers. See _[Adding event handlers](./tutorials/adding-new-event-handlers.md)_ guide for more details.
+        - `/globalEm.ts` - contains a global entity manager instance that can be used to perform queries in places where other instance is not provided in the context. **Important:** It should be used carefully, as it operates on the `admin` schema of the database, which means all non-public data (like user account data, encryption artifacts etc.) is available to this instance. See _[Managing entity visibility](./tutorials/entity-visibility.md)_ guide for more details.
+        - `/mail.ts` - utilites for sending e-mails through [SendGrid API](https://sendgrid.com/solutions/email-api/).
+        - `/overlay.ts` - Overlay utilities for managing processor's in-memory entity cache. For more details, see [Understanding the overlay](./tutorials/adding-new-event-handlers.md#understanding-the-overlay) section of _[Adding event handlers](./tutorials/adding-new-event-handlers.md)_ guide.
+        - `/sql.ts` - utilities for parsing and extending PostgreSQL queries.
+        - `/VideoRelevanceManager.ts` / `/CommentsCountersManager.ts` - utility classes for updating the values of stored counter / score fields, such as `video.commentsCount`, `comment.repliesCount` or `video.videoRelevance`, as they are affected by multiple actions (not only the blockchain events, but also some GraphQL mutations such as `excludeContent` or `addVideoView`).
+    - `/processor.ts`- contains Subsquid's [Substrate processor](https://docs.subsquid.io/substrate-indexing/substrate-processor/) service configuration, like the list of supported events, map from event name to event handler and the implementation of the batch processing loop.
+
+- `/db` - contains database migrations and other database-related configs and artifacts.
+    - `/export`
+        - `/export.json` / `export.json.imported` - contains the last offchain data export. For more details see _[Preserving offchain state](./tutorials/preserving-offchain-state.md)_.
+    - `/migrations` - contains migrations that are executed when the PostgreSQL database is being initially set up.
+        - `*-Data.js` - the migration autogenerated from TypeORM models by `make dbgen` command.
+        - `2000000000000-Views.js` - additional migration responsible for splitting the database into a `public` and `admin` schema, where `public` schema only exposes the data that is publically available (through the use of SQL views), while `admin` schema contains the original tables which include private data. For more details see _[Managing entity visibility](./tutorials/entity-visibility.md)_ guide.
+        - `2100000000000-Indexes.js` - additional PostgreSQL indexes (mostly expression indexes on `jsonb` fields, as those are not supported natively by Subsquid).
+        - `2200000000000-Operator.js` - a migration which inserts the initial operator (root) user based on the environment config. For more details, check the _[Authentication API](./tutorials/authentication-api.md)_ guide.
+    - `/postgres.conf` - contains PostgreSQL database service configuration.

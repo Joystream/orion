@@ -5,8 +5,8 @@ type VideoViewEvent @entity {
   "ID of the video that was viewed (the video may no longer exist)"
   videoId: String! @index
 
-  "IP address of the viewer"
-  ip: String! @index
+  "User that viewed the video"
+  user: User!
 
   "Video view event timestamp"
   timestamp: DateTime!
@@ -16,8 +16,8 @@ type Report @entity {
   "Unique identifier of the report"
   id: ID!
 
-  "IP address of the reporter"
-  ip: String! @index
+  "User that reported the channel / video"
+  user: User!
 
   "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
   channelId: String @index
@@ -36,8 +36,8 @@ type NftFeaturingRequest @entity {
   "Unique identifier of the request"
   id: ID!
 
-  "IP address of the reporter"
-  ip: String! @index
+  "User that requested the nft to be featured"
+  user: User!
 
   "ID of the nft that is being requested to be featured by operator"
   nftId: String! @index
@@ -50,15 +50,26 @@ type NftFeaturingRequest @entity {
 }
 
 type ChannelFollow @entity {
-  "Unique identifier of the follow, also serves as a 'cancelToken' that needs to be provided when unfollowing the channel (to prevent abuse / inconsistent state)"
+  "Unique identifier of the follow"
   id: ID!
 
-  "IP address of the follower"
-  ip: String! @index
+  "User that followed the channel"
+  user: User!
 
   "ID of the channel being followed (the channel may no longer exist)"
   channelId: String! @index
 
   "Time when user started following the channel"
   timestamp: DateTime!
+}
+
+type GatewayConfig @entity {
+  "Unique name of the configuration variable"
+  id: ID!
+
+  "Value of the configuration variable serialized to a string"
+  value: String!
+
+  "Last time the configuration variable was updated"
+  updatedAt: DateTime!
 }

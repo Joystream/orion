@@ -1,0 +1,12 @@
+auth.{$GATEWAY_ROOT_DOMAIN} {
+    reverse_proxy orion-auth-api:{$AUTH_API_PORT}
+}
+
+query.{$GATEWAY_ROOT_DOMAIN} {
+    reverse_proxy orion-graphql-api:{$GRAPHQL_API_PORT}
+}
+
+{$GATEWAY_ROOT_DOMAIN} {
+    root * /srv/atlas
+    file_server
+}

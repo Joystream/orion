@@ -35,7 +35,7 @@ module.exports = class Views2000000000000 {
               .join(',')},
             CASE WHEN "is_excluded" = '1' THEN '' ELSE "comment"."text" END as "text"
         FROM
-            "processor"."comment"
+            "admin"."comment"
             WHERE EXISTS(SELECT 1 FROM "video" WHERE "id"="video_id")
       `,
       comment_reaction: [`EXISTS(SELECT 1 FROM "comment" WHERE "id"="comment_id")`],
@@ -70,21 +70,31 @@ module.exports = class Views2000000000000 {
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
+      session: ['FALSE'],
+      user: ['FALSE'],
+      account: ['FALSE'],
+      token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
+      gateway_config: ['FALSE'],
     }
   }
 
   async up(db) {
-    // Create new schema for the processor in order to be easily able to access "hidden" entities
-    await db.query(`CREATE SCHEMA "processor"`)
     const viewDefinitions = this.getViewDefinitions(db)
+    // Create a new "admin" schema through which the "hidden" entities can be accessed
+    await db.query(`CREATE SCHEMA "admin"`)
+    // Create admin user with "admin" schema in default "search_path"
+    await db.query(`CREATE USER "${process.env.DB_ADMIN_USER}" WITH PASSWORD '${process.env.DB_ADMIN_PASS}'`)
+    await db.query(`GRANT pg_read_all_data TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`GRANT pg_write_all_data TO "${process.env.DB_ADMIN_USER}"`)
+    await db.query(`ALTER USER "${process.env.DB_ADMIN_USER}" SET search_path TO admin,public`)
     for (const [tableName, viewConditions] of Object.entries(viewDefinitions)) {
-      await db.query(`ALTER TABLE "${tableName}" SET SCHEMA "processor"`)
+      await db.query(`ALTER TABLE "${tableName}" SET SCHEMA "admin"`)
       if (Array.isArray(viewConditions)) {
         await db.query(`
           CREATE VIEW "${tableName}" AS
             SELECT *
-            FROM "processor"."${tableName}" AS "this"
+            FROM "admin"."${tableName}" AS "this"
             WHERE ${viewConditions.map(cond => `(${cond})`).join(" AND\n")}
         `)
       } else {
@@ -98,8 +108,8 @@ module.exports = class Views2000000000000 {
     const viewDefinitions = this.getViewDefinitions(db)
     for (const viewName of Object.keys(viewDefinitions)) {
       await db.query(`DROP VIEW "${viewName}"`)
-      await db.query(`ALTER TABLE "processor"."${viewName}" SET SCHEMA "public"`)
+      await db.query(`ALTER TABLE "admin"."${viewName}" SET SCHEMA "public"`)
     }
-    await db.query(`DROP SCHEMA "processor"`)
+    await db.query(`DROP SCHEMA "admin"`)
   }
 }
