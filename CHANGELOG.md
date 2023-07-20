@@ -12,16 +12,41 @@ A new authentication api in order to authenticate accounts has been introduced, 
 The `docs/developer-guide/tutorials/authentication-api.md` has a detailed description about this, I will just list
 the routes provided by the api:
 
-- `POST /api/v1/anonymousAuth`: authenticate as anonymousAuth user
-- `POST /api/v1/login`: login to user's account by providing a message signed by the associated blockchain account
-- `GET /api/v1/artifacts`: get wallet seed description with artifacts
-- `GET /api/v1/session-artifacts`: Get wallet seed encryption artifacts for the current session
-- `POST /api/v1/session-artifacts`: Save wallet seed encryption artifacts for the current session on the server
-- `POST /account`: create a new Gateway account
-- `POST /confirm-email`: confirm account's email address provided during registration
-- `POST /request-email-confirmation-token`: Request a token to be sent to account's email address, which will allow confirming the ownership
-of the e-mail by the user
-- `POST /change-account`: change the joystream blockchain account associated with the gateway account
+Version 1.0.0 
+
+- Added new routes:
+  - `/anonymous-auth`: Authenticate as an anonymous user, either using an existing user identifier or creating a new one.
+  - `/login`: Login to a user's account by providing a message signed by the associated blockchain account.
+  - `/artifacts`: Get wallet seed encryption artifacts.
+  - `/session-artifacts`: Get and save wallet seed encryption artifacts for the current session.
+  - `/account`: Create a new Gateway account. Requires anonymous authentication to be performed first.
+  - `/confirm-email`: Confirm the account's email address provided during registration.
+  - `/request-email-confirmation-token`: Request a token to be sent to the account's email address for email confirmation.
+  - `/change-account`: Change the blockchain (Joystream) account associated with the Gateway account.
+  - `/logout`: Terminate the current session.
+
+- Implemented new methods:
+  - `POST /anonymous-auth`: Perform anonymous authentication.
+  - `POST /login`: Perform user login.
+  - `GET /artifacts`: Retrieve wallet seed encryption artifacts.
+  - `GET /session-artifacts`: Retrieve wallet seed encryption artifacts for the current session.
+  - `POST /session-artifacts`: Save wallet seed encryption artifacts for the current session on the server.
+  - `POST /account`: Create a new Gateway account.
+  - `POST /confirm-email`: Confirm the account's email address.
+  - `POST /request-email-confirmation-token`: Request a token for email confirmation.
+  - `POST /change-account`: Change the blockchain (Joystream) account associated with the Gateway account.
+  - `POST /logout`: Terminate the current session.
+
+- Deprecated routes/methods:
+  - None.
+
+- Added comprehensive documentation for easy integration and usage inside `src/auth-api/docs`
+- Added `src/auth-api/email` folder used for html template emails. Currently only registration email for a new gateway account is supported, 
+but more email type will be supported in future releases
+
+Note: For more detailed information about each route and method, please refer to the API documentation, inside `src/auth-api/docs`
+
+
 
 #### Config Variables changes
 - Orion archive `WS_SOURCE` default value has been changed to the public endpoint `wss://rpc.joystream.org:9944`
@@ -58,8 +83,6 @@ appropriate version numbers from the metadata via the `make typegen` command
 - `VideoViewEvent.ip: String` replaced by `VideoViewEvent.user: User` 
 - `NftFeaturingRequest.ip: String` replaced by `NftFeaturingRequest.user: User` 
 - `ChannelFollow.ip: String` replaced by `ChannelFollow.user: User` 
-##### Renames
- -
 #### Additions
 The following entities have been introduced together with the new account management system, more information about
 them is provided in the developer guide
@@ -83,7 +106,7 @@ Furthermore:
 - `GatewayConfig` entity has been added in order to allow persisting configuration variables of different types in 
 the database. The logic of retrieving setting and updating configration variables is defined in `src/utils/config.ts`
 Each configuration variable specified in `src/utils/config.ts` has a corresponding environment variable which serves as a 
-default value in case the cnofig value is not set in the database.
+default value in case the cnofig value is not set in the database. The information stored will be: `( config_variable_name, value, last_modified_at_timestamp)`
 
 ### Middleware
 Following the introduction of user-accounts a new middleware authentication has been introduced, allowing the execution of resolvers
@@ -119,6 +142,11 @@ possibly account information
 - `setVideoViewPerIpLimit`: 
     - has been renamed to `setVideoViewPerUserLimit`
     - argument changed from `VideoViewPerIpTimeLimitInput` to `VideoViewPerUserTimeLimitInput`
+
+### Data migration
+- `VideoView`, `Report` and `NftFeaturingRequest` entities will be persisted. However, they will all be assigned to a mock
+"migration user", created during import (with `id: v2-migration-{random-id-string}`)
+- `ChannelFollows` will not be persisted. In v3, you need to have a registered account in order to follow a channel. 
 
 ### Documentation
 The `/doc` folder has been improved by adding several pieces of documentation, containing explainers and tutorials for both
