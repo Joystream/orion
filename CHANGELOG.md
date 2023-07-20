@@ -26,8 +26,8 @@ of the e-mail by the user
 #### Config Variables changes
 - Orion archive `WS_SOURCE` default value has been changed to the public endpoint `wss://rpc.joystream.org:9944`
 (before was pointing to the local host deployment at port `9944`)
-- `ORION_ENV` variables has been introduced to specify between `development` and `production` stages
-- `DEV_DISABLE_SAME_SITE` 
+- `ORION_ENV`: variables has been introduced to specify between `development` and `production` stages
+- `DEV_DISABLE_SAME_SITE`: disables the "SameSite" attribute for cookies is used to control how cookies are sent in cross-site requests, when `ORION_DEV` is set to `development`
 - `PROCESSOR_HOST` variable has been removed
 - `DB_ADMIN_USER` and `DB_ADMIN_PASS` in order to create the `admin` user that has access to the `admin` schema
 - `AUTH_API_PORT` for specifying port for the authentication api
