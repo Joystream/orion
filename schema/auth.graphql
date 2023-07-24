@@ -115,61 +115,55 @@ type Account @entity {
   "offchain-related notifications like Orion/YPP"
   offchainNotifications: [OffChainNotification!]! @derivedFrom(field: "account")
 
-  # preferences
-  commentCreatedInAppNotificationEnabled: Boolean!
-  commentTextUpdatedInAppNotificationEnabled: Boolean!
-  openAuctionStartedInAppNotificationEnabled: Boolean!
-  englishAuctionStartedInAppNotificationEnabled: Boolean!
-  nftIssuedInAppNotificationEnabled: Boolean!
-  auctionBidMadeInAppNotificationEnabled: Boolean!
-  auctionBidCanceledInAppNotificationEnabled: Boolean!
-  auctionCanceledInAppNotificationEnabled: Boolean!
-  englishAuctionSettledInAppNotificationEnabled: Boolean!
-  bidMadeCompletingAuctionInAppNotificationEnabled: Boolean!
-  openAuctionBidAcceptedInAppNotificationEnabled: Boolean!
-  nftSellOrderMadeInAppNotificationEnabled: Boolean!
-  nftBoughtInAppNotificationEnabled: Boolean!
-  buyNowCanceledInAppNotificationEnabled: Boolean!
-  buyNowPriceUpdatedInAppNotificationEnabled: Boolean!
-  metaprotocolTransactionStatusInAppNotificationEnabled: Boolean!
-  channelRewardClaimedInAppNotificationEnabled: Boolean!
-  channelRewardClaimedAndWithdrawnInAppNotificationEnabled: Boolean!
-  channelFundsWithdrawnInAppNotificationEnabled: Boolean!
-  channelPayoutsUpdatedInAppNotificationEnabled: Boolean!
-  channelPaymentMadeInAppNotificationEnabled: Boolean!
-  memberBannedFromChannelInAppNotificationEnabled: Boolean!
-  channelCreatedInAppNotificationEnabled: Boolean!
-  newChannelFollowerInAppNotificationPreferences: Boolean!
-  channelExcludedFromAppInAppNotificationEnabled: Boolean!,
-  videoExcludedFromAppInAppNotificationEnabled: Boolean!,
+  "notification preferences for the account"
+  notificationPreferences: AccountNotificationPreferences!
 
-  # mail notifications
-  commentCreatedMailNotificationEnabled: Boolean!
-  commentTextUpdatedMailNotificationEnabled: Boolean!
-  openAuctionStartedMailNotificationEnabled: Boolean!
-  englishAuctionStartedMailNotificationEnabled: Boolean!
-  nftIssuedMailNotificationEnabled: Boolean!
-  auctionBidMadeMailNotificationEnabled: Boolean!
-  auctionBidCanceledMailNotificationEnabled: Boolean!
-  auctionCanceledMailNotificationEnabled: Boolean!
-  englishAuctionSettledMailNotificationEnabled: Boolean!
-  bidMadeCompletingAuctionMailNotificationEnabled: Boolean!
-  openAuctionBidAcceptedMailNotificationEnabled: Boolean!
-  nftSellOrderMadeMailNotificationEnabled: Boolean!
-  nftBoughtMailNotificationEnabled: Boolean!
-  buyNowCanceledMailNotificationEnabled: Boolean!
-  buyNowPriceUpdatedMailNotificationEnabled: Boolean!
-  metaprotocolTransactionStatusMailNotificationEnabled: Boolean!
-  channelRewardClaimedMailNotificationEnabled: Boolean!
-  channelRewardClaimedAndWithdrawnMailNotificationEnabled: Boolean!
-  channelFundsWithdrawnMailNotificationEnabled: Boolean!
-  channelPayoutsUpdatedMailNotificationEnabled: Boolean!
-  channelPaymentMadeMailNotificationEnabled: Boolean!
-  memberBannedFromChannelMailNotificationEnabled: Boolean!
-  channelCreatedMailNotificationEnabled: Boolean!
-  newChannelFollowerMailNotificationPreferences: Boolean!
-  channelExcludedFromAppMailNotificationEnabled: Boolean!,
-  videoExcludedFromAppMailNotificationEnabled: Boolean!,
+}
+
+type AccountNotificationPreferences {
+  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design
+  channelExcludedFromAppNotificationEnabled: NotificationPreference!
+  videoExcludedFromAppNotificationEnabled: NotificationPreference!
+  videoFeaturedAsHeroNotificationEnabled: NotificationPreference!
+  videoFeaturedOnCategoryPageNotificationEnabled: NotificationPreference!
+  nftFeaturedOnMarketPlace: NotificationPreference!
+  newChannelFollowerNotificationPreferences: NotificationPreference!
+  videoCommentCreatedNotificationEnabled: NotificationPreference!
+  videoLikedNotificationEnabled: NotificationPreference!
+  videoDislikedNotificationEnabled: NotificationPreference!
+  yppSignupSuccessfulNotificationEnabled: NotificationPreference!
+  yppChannelVerifiedNotificationEnabled: NotificationPreference!
+  nftBoughtNotificationEnabled: NotificationPreference!
+  bidMadeOnNftNotificationEnabled: NotificationPreference!
+  royaltyReceivedNotificationEnabled: NotificationPreference!
+  channelPaymentReceivedNotificationEnabled: NotificationPreference!
+  channelReceivedFundsFromWgNotificationEnabled: NotificationPreference!
+  newPayoutUpdatedByCouncilNotificationEnabled: NotificationPreference!
+  channelFundsWithdrawnNotificationEnabled: NotificationPreference!
+
+  # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
+  channelCreatedNotificationEnabled: NotificationPreference!
+  replyToCommentNotificationEnabled: NotificationPreference!
+  reactionToCommentNotificationEnabled: NotificationPreference!
+  videoPostedNotificationEnabled: NotificationPreference!
+  newNftOnAuctionNotificationEnabled: NotificationPreference!
+  newNftOnSaleNotificationEnabled: NotificationPreference!
+  higherBidThanYoursMadeNotificationEnabled: NotificationPreference!
+  auctionExpiredNotificationEnabled: NotificationPreference!
+  auctionWonNotificationEnabled: NotificationPreference!
+  auctionLostNotificationEnabled: NotificationPreference!
+  openAuctionBidCanBeWithdrawnNotificationEnabled: NotificationPreference!
+  fundsFromCouncilReceivedNotificationEnabled: NotificationPreference!
+  fundsToExternalWalletSentNotificationEnabled: NotificationPreference!
+  fundsFromWgReceivedNotificationEnabled: NotificationPreference!
+}
+
+type NotificationPreference {
+  "Notification is enabled in the app"
+  inAppEnabled: Boolean! 
+
+  "Allows to send email for the notification"
+  emailEnabled: Boolean! 
 }
 
 enum TokenType {
