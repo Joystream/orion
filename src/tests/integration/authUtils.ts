@@ -1,15 +1,15 @@
-import { KeyringPair } from '@polkadot/keyring/types';
+import { KeyringPair } from '@polkadot/keyring/types'
 import assert from 'assert'
-import request from 'supertest';
+import request from 'supertest'
 import { u8aToHex } from '@polkadot/util'
-import { uniqueId } from 'lodash';
-import { globalEm } from '../../utils/globalEm';
-import { AccountAccessData, LoggedInAccountInfo } from '../../auth-server/tests/common';
-import { components } from '../../auth-server/generated/api-types';
-import { Account } from '../../model';
+import { uniqueId } from 'lodash'
+import { globalEm } from '../../utils/globalEm'
+import { AccountAccessData, LoggedInAccountInfo } from '../../auth-server/tests/common'
+import { components } from '../../auth-server/generated/api-types'
+import { Account } from '../../model'
 import { createCipheriv, randomBytes, scrypt, ScryptOptions } from 'crypto'
-import { ConfigVariable } from '../../utils/config';
-import { config } from '../../utils/config';
+import { ConfigVariable } from '../../utils/config'
+import { config } from '../../utils/config'
 import { EntityManager } from 'typeorm'
 
 export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
@@ -23,7 +23,6 @@ export type AccountLoginData = AccountCreationData & {
   sessionId: string
   sessionIdRaw: string
 }
-
 
 export async function prepareEncryptionArtifacts(
   seed: string,
@@ -89,13 +88,11 @@ export async function signedAction<T extends components['schemas']['ActionExecut
   } as T
 }
 
-export async function anonymousAuth(
-  server: request.SuperTest<request.Test>,
-): Promise<string> {
+export async function anonymousAuth(server: request.SuperTest<request.Test>): Promise<string> {
   const response = await server
     .post('/api/v1/anonymous-auth')
     .set('Content-Type', 'application/json')
-    // .expect(200)
+  // .expect(200)
   return extractSessionId(response)
 }
 
@@ -125,7 +122,7 @@ export async function createAccountForMember(
     .set('Content-Type', 'application/json')
     .set('Cookie', `session_id=${anonSessionId}`)
     .send(createAccountReqData)
-    // .expect(200)
+  // .expect(200)
   return { email, password, seed }
 }
 
@@ -136,7 +133,7 @@ export function generateEmailAddr(memberId: string): string {
 export async function createAccountAndSignIn(
   server: request.SuperTest<request.Test>,
   memberId: string,
-  sender: KeyringPair,
+  sender: KeyringPair
 ): Promise<AccountLoginData> {
   const accountData = await createAccountForMember(server, memberId, sender)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
@@ -169,15 +166,14 @@ function extractSessionId(response: request.Response): string {
   return sessionId
 }
 
-export async function operatorLogin(
-  server: request.SuperTest<request.Test>,
-): Promise<string> {
-  const response = await server.post('/api/v1/anonymous-auth').send({
-    "userId": "this-is-not-so-secret-change-it"
-  })
+export async function operatorLogin(server: request.SuperTest<request.Test>): Promise<string> {
+  const response = await server
+    .post('/api/v1/anonymous-auth')
+    .send({
+      'userId': 'this-is-not-so-secret-change-it',
+    })
     .set('Content-Type', 'application/json')
-    // .expect(200)
+  // .expect(200)
 
   return extractSessionId(response)
 }
-

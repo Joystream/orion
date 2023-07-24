@@ -9,7 +9,16 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { VideoViewEvent, Video, Report, Exclusion, MemberNotification, fromJsonOffChainNotificationData, VideoExcludedNotificationData, Account } from '../../../model'
+import {
+  VideoViewEvent,
+  Video,
+  Report,
+  Exclusion,
+  MemberNotification,
+  fromJsonOffChainNotificationData,
+  VideoExcludedNotificationData,
+  Account,
+} from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -44,7 +53,7 @@ import { Channel } from 'diagnostics_channel'
 @Resolver()
 export class VideosResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Query(() => VideosConnection)
   async mostViewedVideosConnection(
@@ -111,12 +120,12 @@ export class VideosResolver {
       idsQuerySql,
       'FROM',
       `LEFT JOIN "admin"."video_view_event" ` +
-      `ON "video_view_event"."video_id" = "video"."id"` +
-      (args.periodDays
-        ? ` AND "video_view_event"."timestamp" > '${new Date(
-          Date.now() - args.periodDays * 24 * 60 * 60 * 1000
-        ).toISOString()}'`
-        : ''),
+        `ON "video_view_event"."video_id" = "video"."id"` +
+        (args.periodDays
+          ? ` AND "video_view_event"."timestamp" > '${new Date(
+              Date.now() - args.periodDays * 24 * 60 * 60 * 1000
+            ).toISOString()}'`
+          : ''),
       ''
     )
 
@@ -166,7 +175,7 @@ export class VideosResolver {
     }
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
-    ; (connectionQuery as { sql: string }).sql = connectionQuerySql
+    ;(connectionQuery as { sql: string }).sql = connectionQuerySql
     console.log('connectionQuery', connectionQuerySql)
 
     const result = await ctx.openreader.executeQuery(connectionQuery)
@@ -179,8 +188,8 @@ export class VideosResolver {
         `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
         'AND'
       )
-        // Override the raw `sql` string in `countQuery` with the modified query
-        ; (countQuery as { sql: string }).sql = countQuerySql
+      // Override the raw `sql` string in `countQuery` with the modified query
+      ;(countQuery as { sql: string }).sql = countQuerySql
       console.log('countQuery', countQuerySql)
       result.totalCount = await ctx.openreader.executeQuery(countQuery)
     }
@@ -306,9 +315,7 @@ export class VideosResolver {
   }
   @Mutation(() => VideoReportInfo)
   @UseMiddleware(OperatorOnly)
-  async excludeVideo(
-    @Args() { videoId, rationale }: ReportVideoArgs,
-  ): Promise<ExcludeVideoInfo> {
+  async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
       const video = await em.findOne(Video, {
@@ -348,22 +355,26 @@ export class VideosResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = video.channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const account = (await em.findOne(Account, { where: { membershipId: channelOwnerMemberId }}))
+        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
-          await addOffChainNotification(em, [account.id], fromJsonOffChainNotificationData({
-            _typeOf: 'VideoExcludedNotificationData',
-
-          }), new MemberNotification())
+          await addOffChainNotification(
+            em,
+            [account.id],
+            fromJsonOffChainNotificationData({
+              _typeOf: 'VideoExcludedNotificationData',
+            }),
+            new MemberNotification()
+          )
         }
       }
 
       return {
-      id: newExclusion.id,
-      videoId,
-      created: true,
-      createdAt: newExclusion.timestamp,
-      rationale,
-    }
-  })
-}
+        id: newExclusion.id,
+        videoId,
+        created: true,
+        createdAt: newExclusion.timestamp,
+        rationale,
+      }
+    })
+  }
 }

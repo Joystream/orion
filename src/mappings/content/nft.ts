@@ -77,10 +77,11 @@ export async function processOpenAuctionStartedEvent({
     }),
   })
 
-
   const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).channelId
   if (channelId) {
-    const followers = (await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })).map((follow) => follow.user.id)
+    const followers = (
+      await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
+    ).map((follow) => follow.user.id)
     await addNotificationForRuntimeData(overlay, followers, event, new MemberNotification())
   }
 
@@ -311,7 +312,8 @@ export async function processEnglishAuctionSettledEvent({
     overlay,
     [previousNftOwnerMemberId, ...auctionBids.map((b) => b.bidderId)],
     event,
-    new ChannelNotification()
+    new ChannelNotification(),
+    winnerId.toString()
   )
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
@@ -476,7 +478,12 @@ export async function processOfferAcceptedEvent({
     data: new NftOfferedEventData(), // FIXME:
   })
 
-  await addNotificationForRuntimeData(overlay, [previousNftOwnerId, memberId], event, new ChannelNotification())
+  await addNotificationForRuntimeData(
+    overlay,
+    [previousNftOwnerId, memberId],
+    event,
+    new ChannelNotification()
+  )
 }
 
 export async function processOfferCanceledEvent({
@@ -523,9 +530,10 @@ export async function processNftSellOrderMadeEvent({
     }),
   })
 
-  const nftPreviousOwnerId = nft.owner.isTypeOf === 'NftOwnerMember' ?
-    nft.owner.member :
-    (await overlay.getRepository(Channel).getByIdOrFail(nft.owner.channel)).ownerMemberId
+  const nftPreviousOwnerId =
+    nft.owner.isTypeOf === 'NftOwnerMember'
+      ? nft.owner.member
+      : (await overlay.getRepository(Channel).getByIdOrFail(nft.owner.channel)).ownerMemberId
 
   addNotificationForRuntimeData(overlay, [nftPreviousOwnerId], event, new MemberNotification())
 

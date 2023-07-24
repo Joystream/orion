@@ -73,7 +73,7 @@ type GatewayConfig @entity {
   "Last time the configuration variable was updated"
   updatedAt: DateTime!
 }
-  
+
 type Exclusion @entity {
   "Unique identifier of the report"
   id: ID!

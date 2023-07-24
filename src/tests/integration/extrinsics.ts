@@ -1,6 +1,6 @@
 // Import the keyring as required
-import { ApiPromise } from '@polkadot/api';
-import { KeyringPair } from '@polkadot/keyring/types';
+import { ApiPromise } from '@polkadot/api'
+import { KeyringPair } from '@polkadot/keyring/types'
 import { u64, BTreeSet } from '@polkadot/types'
 
 async function storageBucketsNumWitness(api: ApiPromise, channelId: string): Promise<number> {
@@ -24,14 +24,19 @@ export class TestContext {
     this._api = api
   }
 
-  public async createVideoWithNft(memberId: string, channelId: string, sender: KeyringPair): Promise<string> {
+  public async createVideoWithNft(
+    memberId: string,
+    channelId: string,
+    sender: KeyringPair
+  ): Promise<string> {
     const initTransactionalStatus = this._api.createType(
       'PalletContentNftTypesInitTransactionalStatusRecord',
-      { Idle: null },
+      { Idle: null }
     )
 
     const expectedVideoStateBloatBond = await this._api.query.content.videoStateBloatBondValue()
-    const expectedDataObjectStateBloatBond = await this._api.query.storage.dataObjectStateBloatBondValue()
+    const expectedDataObjectStateBloatBond =
+      await this._api.query.storage.dataObjectStateBloatBondValue()
 
     const videoCreationParams = this._api.createType('PalletContentVideoCreationParametersRecord', {
       assets: null,
@@ -52,21 +57,23 @@ export class TestContext {
     let unsub: () => void
     let videoId = ''
     await new Promise<() => void>((resolve) => {
-      this._api.tx.content.createVideo(actor, channelId, videoCreationParams).signAndSend(sender, (result) => {
-        if (result.status.isFinalized) {
-          const error = result.dispatchError
-          if (error) {
-            const { name } = this._api.registry.findMetaError(error.asModule)
-            console.log('error:', name)
-          }
-          result.events.forEach(({ event: { data, method, section } }) => {
-            if (section === 'content' && method === 'VideoCreated') {
-              videoId = data[1].toString()
+      this._api.tx.content
+        .createVideo(actor, channelId, videoCreationParams)
+        .signAndSend(sender, (result) => {
+          if (result.status.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              console.log('error:', name)
             }
-          })
-          resolve(unsub)
-        }
-      })
+            result.events.forEach(({ event: { data, method, section } }) => {
+              if (section === 'content' && method === 'VideoCreated') {
+                videoId = data[1].toString()
+              }
+            })
+            resolve(unsub)
+          }
+        })
     })
     return videoId
   }
@@ -76,34 +83,40 @@ export class TestContext {
     // FIXME: find a solution like with storage buckets
     const distributionBuckets = this._api.createType('BTreeSet<u64>')
     distributionBuckets.add(this._api.createType('u64', 0))
-    const expectedDataObjectStateBloatBond = await this._api.query.storage.dataObjectStateBloatBondValue()
+    const expectedDataObjectStateBloatBond =
+      await this._api.query.storage.dataObjectStateBloatBondValue()
     const expectedChannelStateBloatBond = await this._api.query.content.channelStateBloatBondValue()
     const channelOwner = this._api.createType('PalletContentChannelOwner', { Member: memberId })
-    const channelCreationParameters = this._api.createType('PalletContentChannelCreationParametersRecord', {
-      expectedChannelStateBloatBond,
-      expectedDataObjectStateBloatBond,
-      storageBuckets,
-      distributionBuckets,
-    })
+    const channelCreationParameters = this._api.createType(
+      'PalletContentChannelCreationParametersRecord',
+      {
+        expectedChannelStateBloatBond,
+        expectedDataObjectStateBloatBond,
+        storageBuckets,
+        distributionBuckets,
+      }
+    )
 
     let unsub: () => void
     let channelId = ''
     await new Promise<() => void>((resolve) => {
-      this._api.tx.content.createChannel(channelOwner, channelCreationParameters).signAndSend(sender, (result) => {
-        if (result.status.isFinalized) {
-          const error = result.dispatchError
-          if (error) {
-            const { name } = this._api.registry.findMetaError(error.asModule)
-            console.log('error:', name)
-          }
-          result.events.forEach(({ event: { data, method, section } }) => {
-            if (section === 'content') {
-              channelId = data[0].toString()
+      this._api.tx.content
+        .createChannel(channelOwner, channelCreationParameters)
+        .signAndSend(sender, (result) => {
+          if (result.status.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              console.log('error:', name)
             }
-          })
-          resolve(unsub)
-        }
-      })
+            result.events.forEach(({ event: { data, method, section } }) => {
+              if (section === 'content') {
+                channelId = data[0].toString()
+              }
+            })
+            resolve(unsub)
+          }
+        })
     })
     return channelId
   }
@@ -112,24 +125,24 @@ export class TestContext {
     let unsub: () => void
     let memberId = ''
     await new Promise<() => void>((resolve) => {
-      this._api.tx.members.buyMembership({
-        rootAccount: sender.address,
-        controllerAccount: sender.address,
-        handle: handle ?? sender.address.toString(),
-      }).signAndSend(sender, ({ events = [], status }) => {
-        if (status.isFinalized) {
-          events.forEach(({ event: { data, section } }) => {
-            if (section === 'members') {
-              memberId = data[0].toString();
-            }
-          })
-          resolve(unsub)
-        }
-      })
+      this._api.tx.members
+        .buyMembership({
+          rootAccount: sender.address,
+          controllerAccount: sender.address,
+          handle: handle ?? sender.address.toString(),
+        })
+        .signAndSend(sender, ({ events = [], status }) => {
+          if (status.isFinalized) {
+            events.forEach(({ event: { data, section } }) => {
+              if (section === 'members') {
+                memberId = data[0].toString()
+              }
+            })
+            resolve(unsub)
+          }
+        })
     })
 
     return memberId
-
   }
 }
-

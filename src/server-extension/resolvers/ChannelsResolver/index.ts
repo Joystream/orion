@@ -29,7 +29,7 @@ import {
   ChannelNotification,
   fromJsonOffChainNotificationData,
   Report,
-  Exclusion
+  Exclusion,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -46,7 +46,7 @@ import { isNull } from 'lodash'
 @Resolver()
 export class ChannelsResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Query(() => [ExtendedChannel])
   async extendedChannels(
@@ -84,7 +84,7 @@ export class ChannelsResolver {
       `"channel"."id" IN (${mostRecentChannelsQuerySql})`,
       'AND'
     )
-      ; (listQuery as { sql: string }).sql = listQuerySql
+    ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
     console.log('Result', result)
@@ -154,7 +154,7 @@ export class ChannelsResolver {
       )
     }
 
-    ; (listQuery as { sql: string }).sql = listQuerySql
+    ;(listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
@@ -323,9 +323,7 @@ export class ChannelsResolver {
 
   @Mutation(() => ChannelReportInfo)
   @UseMiddleware(OperatorOnly)
-  async verifyChannel(
-    @Args() { channelId }: VerifyChannelArgs,
-  ): Promise<VerifyChannelResult> {
+  async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
     const em = await this.em()
     const channel = await em.findOne(Channel, {
       where: { id: channelId },
@@ -338,13 +336,18 @@ export class ChannelsResolver {
       channel.isVerified = true
       if (channel.ownerMember) {
         const ownerAccount = await em.findOne(Account, {
-          where: { membershipId: channel.ownerMember.id }
+          where: { membershipId: channel.ownerMember.id },
         })
         if (ownerAccount) {
-          await addOffChainNotification(em, [ownerAccount.id], fromJsonOffChainNotificationData({
-            _typeOf: 'ChannelVerifiedNotificationData',
-            _channel: channelId
-          }), new ChannelNotification())
+          await addOffChainNotification(
+            em,
+            [ownerAccount.id],
+            fromJsonOffChainNotificationData({
+              _typeOf: 'ChannelVerifiedNotificationData',
+              _channel: channelId,
+            }),
+            new ChannelNotification()
+          )
         }
       }
     }
@@ -356,7 +359,7 @@ export class ChannelsResolver {
   @Mutation(() => ExcludeChannelResult)
   @UseMiddleware(OperatorOnly)
   async excludeChannel(
-    @Args() { channelId, rationale }: ExcludeChannelArgs,
+    @Args() { channelId, rationale }: ExcludeChannelArgs
   ): Promise<ExcludeChannelResult> {
     const em = await this.em()
 
@@ -394,12 +397,17 @@ export class ChannelsResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const account = (await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } }))
+        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
-          await addOffChainNotification(em, [account.id], fromJsonOffChainNotificationData({
-            _typeOf: 'ChannelExcludedNotificationData',
-            _channel: channel.id,
-          }), new ChannelNotification())
+          await addOffChainNotification(
+            em,
+            [account.id],
+            fromJsonOffChainNotificationData({
+              _typeOf: 'ChannelExcludedNotificationData',
+              _channel: channel.id,
+            }),
+            new ChannelNotification()
+          )
         }
       }
 
@@ -412,6 +420,5 @@ export class ChannelsResolver {
         rationale,
       }
     })
-
   }
 }

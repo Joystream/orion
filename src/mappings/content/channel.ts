@@ -344,5 +344,10 @@ export async function processChannelFundsWithdrawnEvent({
     }),
   })
 
-  await addNotificationForRuntimeData(overlay, [channel.ownerMemberId], entityEvent, new ChannelNotification())
+  await addNotificationForRuntimeData(
+    overlay,
+    [channel.ownerMemberId],
+    entityEvent,
+    new ChannelNotification()
+  )
 }
