@@ -95,9 +95,9 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | ChannelCreatedEventData
-  | VideoCreatedEventData 
-  | VideoReactionEventData 
-  | CommentReactionEventData 
+  | VideoCreatedEventData
+  | VideoReactionEventData
+  | CommentReactionEventData
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -471,7 +471,7 @@ union OffChainNotificationData =
     YppSignupSuccessFullNotificationData
   | ChannelVerifiedNotificationData
   | ChannelExcludedNotificationData
-  | VideoExcludedNotificationData 
+  | VideoExcludedNotificationData
   | ChannelSuspendedNotificationData
   | NewChannelFollowerNotificationData
 
@@ -499,4 +499,3 @@ type ChannelSuspendedNotificationData @variant {
 type NewChannelFollowerNotificationData @variant {
   channel: Channel!
 }
-

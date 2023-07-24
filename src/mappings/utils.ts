@@ -10,6 +10,7 @@ import {
   RuntimeNotification,
   NotificationType,
   Account,
+  EventData,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -85,11 +86,24 @@ export function genericEventFields(
   }
 }
 
+function isAuctionWinner(
+  data: EventData,
+  memberId: string,
+  auctionWinnerId?: string
+): boolean | undefined {
+  if (data.isTypeOf === 'EnglishAuctionSettledEventData') {
+    return memberId === auctionWinnerId!
+  } else {
+    return undefined
+  }
+}
+
 export async function addNotificationForRuntimeData(
   overlay: EntityManagerOverlay,
   memberIds: (string | undefined | null)[],
   event: Flat<Event>,
-  type: NotificationType
+  type: NotificationType,
+  auctionWinnerId?: string
 ): Promise<void> {
   const mailNotifier = new MailNotifier()
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
@@ -99,10 +113,12 @@ export async function addNotificationForRuntimeData(
   for (const memberId of memberIds.filter((m) => m)) {
     const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
     if (account) {
-      const [shouldSendAppNotification, shouldSendMail] = await preferencesForNotification(
-        account as Account,
-        event.data
-      )
+      const { inAppEnabled: shouldSendAppNotification, emailEnabled: shouldSendMail } =
+        preferencesForNotification(
+          account.notificationPreferences,
+          event.data,
+          isAuctionWinner(event.data, memberId!, auctionWinnerId)
+        )
       if (shouldSendAppNotification || shouldSendMail) {
         const repository = overlay.getRepository(RuntimeNotification)
         const newNotificationId = repository.getNewEntityId()

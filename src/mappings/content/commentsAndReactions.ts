@@ -225,7 +225,7 @@ async function processVideoReaction(
     ++newReactionTypeCounter.count
     const event = overlay.getRepository(Event).new({
       ...genericEventFields(overlay, block, indexInBlock, txHash),
-      // add videoreactionevent data as data 
+      // add videoreactionevent data as data
       data: new VideoReactionEventData({
         video: video.id,
         reactionType,
@@ -274,7 +274,16 @@ export async function processReactVideoMessage(
     .getRepository(VideoReaction)
     .getById(videoReactionEntityId({ memberId, videoId }))
 
-  await processVideoReaction(overlay, block, indexInBlock, txHash, memberId, video, reactionType, existingReaction)
+  await processVideoReaction(
+    overlay,
+    block,
+    indexInBlock,
+    txHash,
+    memberId,
+    video,
+    reactionType,
+    existingReaction
+  )
 
   videoRelevanceManager.scheduleRecalcForVideo(video.id)
 
@@ -333,7 +342,7 @@ export async function processReactCommentMessage(
     // new reaction
     const id = commentReactionEntityId({ memberId, commentId, reactionId })
     commentReactionRepository.new({
-      id, 
+      id,
       commentId: comment.id,
       reactionId,
       videoId: video.id,
@@ -344,10 +353,10 @@ export async function processReactCommentMessage(
     ++reactionsCountByReactionId.count
     ++comment.reactionsCount
 
-    // create Event entity 
+    // create Event entity
     const event = overlay.getRepository(Event).new({
       ...genericEventFields(overlay, block, indexInBlock, txHash),
-      // add commentreactionevent data as data 
+      // add commentreactionevent data as data
       data: new CommentReactionEventData({
         commentReaction: id,
       }),
@@ -468,7 +477,6 @@ export async function processCreateCommentMessage(
       )
     }
   }
-
 
   return new MetaprotocolTransactionResultCommentCreated({ commentCreated: comment.id })
 }

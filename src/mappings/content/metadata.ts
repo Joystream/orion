@@ -649,7 +649,12 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  await addNotificationForRuntimeData(overlay, [channel.ownerMemberId], event, new ChannelNotification())
+  await addNotificationForRuntimeData(
+    overlay,
+    [channel.ownerMemberId],
+    event,
+    new ChannelNotification()
+  )
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,

@@ -200,7 +200,7 @@ export class ExcludeChannelArgs {
 }
 
 @ObjectType()
-export class ExcludeChannelResult extends EntityReportInfo { 
+export class ExcludeChannelResult extends EntityReportInfo {
   @Field(() => String, { nullable: false })
   channelId!: string
 }

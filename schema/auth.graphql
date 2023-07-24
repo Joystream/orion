@@ -117,7 +117,6 @@ type Account @entity {
 
   "notification preferences for the account"
   notificationPreferences: AccountNotificationPreferences!
-
 }
 
 type AccountNotificationPreferences {
@@ -160,10 +159,10 @@ type AccountNotificationPreferences {
 
 type NotificationPreference {
   "Notification is enabled in the app"
-  inAppEnabled: Boolean! 
+  inAppEnabled: Boolean!
 
   "Allows to send email for the notification"
-  emailEnabled: Boolean! 
+  emailEnabled: Boolean!
 }
 
 enum TokenType {

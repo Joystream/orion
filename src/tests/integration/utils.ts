@@ -1,9 +1,9 @@
-import { KeyringPair } from '@polkadot/keyring/types';
-import { Keyring } from '@polkadot/api';
-import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types';
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { Account } from '../../model';
-import { expect } from 'chai';
+import { KeyringPair } from '@polkadot/keyring/types'
+import { Keyring } from '@polkadot/api'
+import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
+import { ApiPromise, WsProvider } from '@polkadot/api'
+import { Account, AccountNotificationPreferences } from '../../model'
+import { expect } from 'chai'
 
 const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
@@ -62,37 +62,14 @@ export class UserContext {
   }
 }
 
-// write a function that waits for n seconds where n is a number 
+// write a function that waits for n seconds where n is a number
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-
-export function expectAccountNotificationPreferencesToBeTrue(account: Account) {
-  expect(account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled).to.be.true
-  expect(account.channelRewardClaimedAndWithdrawnMailNotificationEnabled).to.be.true
-  expect(account.metaprotocolTransactionStatusInAppNotificationEnabled).to.be.true
-  expect(account.metaprotocolTransactionStatusMailNotificationEnabled).to.be.true
-  expect(account.bidMadeCompletingAuctionInAppNotificationEnabled).to.be.true
-  expect(account.bidMadeCompletingAuctionMailNotificationEnabled).to.be.true
-  expect(account.openAuctionBidAcceptedInAppNotificationEnabled).to.be.true
-  expect(account.openAuctionBidAcceptedMailNotificationEnabled).to.be.true
-  expect(account.memberBannedFromChannelMailNotificationEnabled).to.be.true
-  expect(account.memberBannedFromChannelInAppNotificationEnabled).to.be.true
-  expect(account.englishAuctionSettledMailNotificationEnabled).to.be.true
-  expect(account.englishAuctionSettledInAppNotificationEnabled).to.be.true
-  expect(account.channelFundsWithdrawnInAppNotificationEnabled).to.be.true
-  expect(account.channelFundsWithdrawnMailNotificationEnabled).to.be.true
-  expect(account.englishAuctionStartedMailNotificationEnabled).to.be.true
-  expect(account.englishAuctionStartedInAppNotificationEnabled).to.be.true
-  expect(account.channelPayoutsUpdatedMailNotificationEnabled).to.be.true
-  expect(account.channelPayoutsUpdatedInAppNotificationEnabled).to.be.true
-  expect(account.channelRewardClaimedMailNotificationEnabled).to.be.true
-  expect(account.channelRewardClaimedInAppNotificationEnabled).to.be.true
-  expect(account.channelRewardClaimedAndWithdrawnMailNotificationEnabled).to.be.true
-  expect(account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled).to.be.true
-  expect(account.nftBoughtMailNotificationEnabled).to.be.true
-  expect(account.nftBoughtInAppNotificationEnabled).to.be.true
-  expect(account.nftIssuedMailNotificationEnabled).to.be.true
-  expect(account.nftIssuedInAppNotificationEnabled).to.be.true
+export function expectAccountNotificationPreferencesToBeTrue(
+  preferences: AccountNotificationPreferences
+) {
+  const _pref = Object.values(preferences)
+  expect(_pref.every((x) => x)).to.be.true
 }

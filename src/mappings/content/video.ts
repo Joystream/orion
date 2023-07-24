@@ -6,9 +6,23 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, ChannelFollow, RuntimeNotification, Video, VideoCreatedEventData, VideoViewEvent, Event, ChannelNotification } from '../../model'
+import {
+  Channel,
+  ChannelFollow,
+  RuntimeNotification,
+  Video,
+  VideoCreatedEventData,
+  VideoViewEvent,
+  Event,
+  ChannelNotification,
+} from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { addNotificationForRuntimeData, deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import {
+  addNotificationForRuntimeData,
+  deserializeMetadata,
+  u8aToBytes,
+  videoRelevanceManager,
+} from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -99,9 +113,9 @@ export async function processVideoCreatedEvent({
   }
 
   channel.totalVideosCreated += 1
-  const followers = (await overlay.getEm()
-    .getRepository(ChannelFollow)
-    .findBy({ channelId: channel.id })).map((follow) => follow.user.id)
+  const followers = (
+    await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId: channel.id })
+  ).map((follow) => follow.user.id)
 
   const eventEntity = overlay.getRepository(Event).new({
     id: `${block.height}-${indexInBlock}`,
@@ -112,12 +126,7 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  await addNotificationForRuntimeData(
-    overlay,
-    followers,
-    eventEntity,
-    new ChannelNotification()
-  )
+  await addNotificationForRuntimeData(overlay, followers, eventEntity, new ChannelNotification())
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

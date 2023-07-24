@@ -12,6 +12,7 @@ import {
 } from '../model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
+import { getNextIdForEntity } from './nextEntityId'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -56,12 +57,58 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 }
 
 // [app notification, email notification] preference
-export async function preferencesForNotification(
+export function preferencesForNotification(
   preferences: AccountNotificationPreferences,
-  notificationType: EventData | OffChainNotificationData
+  notificationType: EventData | OffChainNotificationData,
+  auctionWon?: boolean
 ): NotificationPreference {
-  account.notificationPreferences
   switch (notificationType.isTypeOf) {
+    // TODO: (not.v1) check if this is the correct event data
+    case 'CommentCreatedEventData':
+      return preferences.videoCommentCreatedNotificationEnabled
+    case 'OpenAuctionStartedEventData':
+      return preferences.newNftOnAuctionNotificationEnabled
+    case 'EnglishAuctionStartedEventData':
+      return preferences.newNftOnAuctionNotificationEnabled
+    case 'AuctionBidMadeEventData':
+      return preferences.bidMadeOnNftNotificationEnabled
+    case 'AuctionCanceledEventData':
+      // NOTE: (not.v1) this might not be the best preference for this notification
+      return preferences.auctionLostNotificationEnabled
+    case 'EnglishAuctionSettledEventData':
+      if (auctionWon) {
+        return preferences.auctionWonNotificationEnabled
+      } else {
+        return preferences.auctionLostNotificationEnabled
+      }
+    case 'BidMadeCompletingAuctionEventData':
+      return preferences.auctionWonNotificationEnabled
+    case 'OpenAuctionBidAcceptedEventData':
+      return preferences.bidMadeOnNftNotificationEnabled
+    case 'NftSellOrderMadeEventData':
+      return preferences.newNftOnSaleNotificationEnabled
+    case 'NftBoughtEventData':
+      return preferences.nftBoughtNotificationEnabled
+    case 'ChannelRewardClaimedEventData':
+      // TODO: (not.v1) check if this is the correct event data
+      return preferences.channelReceivedFundsFromWgNotificationEnabled
+    case 'ChannelRewardClaimedAndWithdrawnEventData':
+      return preferences.channelFundsWithdrawnNotificationEnabled
+    case 'ChannelFundsWithdrawnEventData':
+      return preferences.channelFundsWithdrawnNotificationEnabled
+    case 'ChannelPayoutsUpdatedEventData':
+      return preferences.newPayoutUpdatedByCouncilNotificationEnabled
+    case 'ChannelPaymentMadeEventData':
+      // TODO: (not.v1) check if this is the correct event data
+      return preferences.channelPaymentReceivedNotificationEnabled
+    case 'ChannelCreatedEventData':
+      return preferences.channelCreatedNotificationEnabled
+    case 'NewChannelFollowerNotificationData':
+      return preferences.newChannelFollowerNotificationPreferences
+    case 'ChannelExcludedNotificationData':
+      return preferences.channelExcludedFromAppNotificationEnabled
+    case 'VideoExcludedNotificationData':
+      return preferences.videoExcludedFromAppNotificationEnabled
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
@@ -204,19 +251,10 @@ export async function addOffChainNotification(
   for (const accountId of accountIds) {
     const account = await em.getRepository(Account).findOneById(accountId)
     if (account) {
-      const { inAppEnabled: shouldSendAppNotification, emailEnabled: shouldSendMail } = preferencesForNotification(
-        account.notificationPreferences,
-        data
-      )
+      const { inAppEnabled: shouldSendAppNotification, emailEnabled: shouldSendMail } =
+        preferencesForNotification(account.notificationPreferences, data)
       if (shouldSendAppNotification || shouldSendMail) {
-        const nextOffchainNotificationId = parseInt(
-          (
-            await em.getRepository(NextEntityId).findOne({
-              where: { entityName: 'OffChainNotification' },
-              lock: { mode: 'pessimistic_write' },
-            })
-          )?.nextId.toString() || '1'
-        )
+        const nextOffchainNotificationId = await getNextIdForEntity(em, 'OffChainNotification')
         const notification = new OffChainNotification({
           id: nextOffchainNotificationId.toString(),
           accountId,
@@ -241,106 +279,4 @@ export async function addOffChainNotification(
     }
     return
   }
-}
-
-export function setNotificationPreferences(
-  account: Account,
-  notificationPreferences: NotificationPreferences
-) {
-  // account.commentCreatedInAppNotificationEnabled =
-  //   notificationPreferences.commentCreatedInAppNotificationEnabled
-  // account.commentCreatedMailNotificationEnabled =
-  //   notificationPreferences.commentCreatedMailNotificationEnabled
-  // account.commentTextUpdatedInAppNotificationEnabled =
-  //   notificationPreferences.commentTextUpdatedInAppNotificationEnabled
-  // account.openAuctionStartedInAppNotificationEnabled =
-  //   notificationPreferences.openAuctionStartedInAppNotificationEnabled
-  // account.englishAuctionStartedInAppNotificationEnabled =
-  //   notificationPreferences.englishAuctionStartedInAppNotificationEnabled
-  // account.nftIssuedInAppNotificationEnabled =
-  //   notificationPreferences.nftIssuedInAppNotificationEnabled
-  // account.auctionBidMadeInAppNotificationEnabled =
-  //   notificationPreferences.auctionBidMadeInAppNotificationEnabled
-  // account.auctionBidCanceledInAppNotificationEnabled =
-  //   notificationPreferences.auctionBidCanceledInAppNotificationEnabled
-  // account.auctionCanceledInAppNotificationEnabled =
-  //   notificationPreferences.auctionCanceledInAppNotificationEnabled
-  // account.englishAuctionSettledInAppNotificationEnabled =
-  //   notificationPreferences.englishAuctionSettledInAppNotificationEnabled
-  // account.bidMadeCompletingAuctionInAppNotificationEnabled =
-  //   notificationPreferences.bidMadeCompletingAuctionInAppNotificationEnabled
-  // account.openAuctionBidAcceptedInAppNotificationEnabled =
-  //   notificationPreferences.openAuctionBidAcceptedInAppNotificationEnabled
-  // account.nftSellOrderMadeInAppNotificationEnabled =
-  //   notificationPreferences.nftSellOrderMadeInAppNotificationEnabled
-  // account.nftBoughtInAppNotificationEnabled =
-  //   notificationPreferences.nftBoughtInAppNotificationEnabled
-  // account.buyNowCanceledInAppNotificationEnabled =
-  //   notificationPreferences.buyNowCanceledInAppNotificationEnabled
-  // account.buyNowPriceUpdatedInAppNotificationEnabled =
-  //   notificationPreferences.buyNowPriceUpdatedInAppNotificationEnabled
-  // account.metaprotocolTransactionStatusInAppNotificationEnabled =
-  //   notificationPreferences.metaprotocolTransactionStatusInAppNotificationEnabled
-  // account.channelRewardClaimedInAppNotificationEnabled =
-  //   notificationPreferences.channelRewardClaimedInAppNotificationEnabled
-  // account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled =
-  //   notificationPreferences.channelRewardClaimedAndWithdrawnInAppNotificationEnabled
-  // account.channelFundsWithdrawnInAppNotificationEnabled =
-  //   notificationPreferences.channelFundsWithdrawnInAppNotificationEnabled
-  // account.channelPayoutsUpdatedInAppNotificationEnabled =
-  //   notificationPreferences.channelPayoutsUpdatedInAppNotificationEnabled
-  // account.channelPaymentMadeInAppNotificationEnabled =
-  //   notificationPreferences.channelPaymentMadeInAppNotificationEnabled
-  // account.memberBannedFromChannelInAppNotificationEnabled =
-  //   notificationPreferences.memberBannedFromChannelInAppNotificationEnabled
-  // account.channelCreatedInAppNotificationEnabled =
-  //   notificationPreferences.channelCreatedInAppNotificationEnabled
-  // account.commentCreatedMailNotificationEnabled =
-  //   notificationPreferences.commentCreatedMailNotificationEnabled
-  // account.commentTextUpdatedMailNotificationEnabled =
-  //   notificationPreferences.commentTextUpdatedMailNotificationEnabled
-  // account.openAuctionStartedMailNotificationEnabled =
-  //   notificationPreferences.openAuctionStartedMailNotificationEnabled
-  // account.englishAuctionStartedMailNotificationEnabled =
-  //   notificationPreferences.englishAuctionStartedMailNotificationEnabled
-  // account.nftIssuedMailNotificationEnabled =
-  //   notificationPreferences.nftIssuedMailNotificationEnabled
-  // account.auctionBidMadeMailNotificationEnabled =
-  //   notificationPreferences.auctionBidMadeMailNotificationEnabled
-  // account.auctionBidCanceledMailNotificationEnabled =
-  //   notificationPreferences.auctionBidCanceledMailNotificationEnabled
-  // account.auctionCanceledMailNotificationEnabled =
-  //   notificationPreferences.auctionCanceledMailNotificationEnabled
-  // account.englishAuctionSettledMailNotificationEnabled =
-  //   notificationPreferences.englishAuctionSettledMailNotificationEnabled
-  // account.bidMadeCompletingAuctionMailNotificationEnabled =
-  //   notificationPreferences.bidMadeCompletingAuctionMailNotificationEnabled
-  // account.openAuctionBidAcceptedMailNotificationEnabled =
-  //   notificationPreferences.openAuctionBidAcceptedMailNotificationEnabled
-  // account.nftSellOrderMadeMailNotificationEnabled =
-  //   notificationPreferences.nftSellOrderMadeMailNotificationEnabled
-  // account.nftBoughtMailNotificationEnabled =
-  //   notificationPreferences.nftBoughtMailNotificationEnabled
-  // account.buyNowCanceledMailNotificationEnabled =
-  //   notificationPreferences.buyNowCanceledMailNotificationEnabled
-  // account.buyNowPriceUpdatedMailNotificationEnabled =
-  //   notificationPreferences.buyNowPriceUpdatedMailNotificationEnabled
-  // account.metaprotocolTransactionStatusMailNotificationEnabled =
-  //   notificationPreferences.metaprotocolTransactionStatusMailNotificationEnabled
-  // account.channelRewardClaimedMailNotificationEnabled =
-  //   notificationPreferences.channelRewardClaimedMailNotificationEnabled
-  // account.channelRewardClaimedAndWithdrawnMailNotificationEnabled =
-  //   notificationPreferences.channelRewardClaimedAndWithdrawnMailNotificationEnabled
-  // account.channelFundsWithdrawnMailNotificationEnabled =
-  //   notificationPreferences.channelFundsWithdrawnMailNotificationEnabled
-  // account.channelPayoutsUpdatedMailNotificationEnabled =
-  //   notificationPreferences.channelPayoutsUpdatedMailNotificationEnabled
-  // account.channelPaymentMadeMailNotificationEnabled =
-  //   notificationPreferences.channelPaymentMadeMailNotificationEnabled
-  // account.memberBannedFromChannelMailNotificationEnabled =
-  //   notificationPreferences.memberBannedFromChannelMailNotificationEnabled
-  // account.channelCreatedMailNotificationEnabled =
-  //   notificationPreferences.channelCreatedMailNotificationEnabled
-  // account.channelExcludedFromAppInAppNotificationEnabled = notificationPreferences.channelExcludedFromAppInAppNotificationEnabled
-  // account.channelExcludedFromAppMailNotificationEnabled = notificationPreferences.channelExcludedFromAppMailNotificationEnabled
 }
