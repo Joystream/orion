@@ -5,45 +5,49 @@ import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
 import { AccountNotificationPreferences, NotificationPreference, OffChainNotification, RuntimeNotification } from '../../../model'
-import { AccountNotificationPreferencesInput, AccountNotificationPreferencesOutput, AccountNotificationPreferencesResult, NotificationArgs, NotificationPreferenceGQL, toOutputGQL } from './types'
+import { AccountNotificationPreferencesInput, AccountNotificationPreferencesOutput, AccountNotificationPreferencesResult, MarkNotificationsAsReadResult, NotificationArgs, NotificationPreferenceGQL, toOutputGQL } from './types'
 
 @Resolver()
 export class NotificationResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) { }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => MarkNotificationsAsReadResult)
   @UseMiddleware(AccountOnly)
   async markNotificationsAsRead(
     @Args() { notificationIds }: NotificationArgs,
     @Ctx() ctx: Context
-  ): Promise<Boolean[]> {
+  ): Promise<MarkNotificationsAsReadResult> {
     const em = await this.em()
-    const results: Boolean[] = []
     return withHiddenEntities(em, async () => {
+      let result: boolean[] = []
       for (const notificationId of notificationIds) {
         let notification: RuntimeNotification | OffChainNotification | null = null
-
         notification = await em.findOne(RuntimeNotification, {
           where: { id: notificationId },
         })
+        console.log('notification', JSON.stringify(notification))
         if (notification === null) {
           notification = await em.findOne(OffChainNotification, {
             where: { id: notificationId },
           })
         }
+        console.log('notification', JSON.stringify(notification))
         if (notification !== null) {
-          if (notification.account.id === ctx.accountId) {
+          console.log('notification found', notificationId)
+          if (notification.accountId === ctx.accountId) {
+            console.log('account found', notification.account)
             if (!notification.inAppRead) {
               notification.inAppRead = true
               await em.save(notification)
-              results.push(true)
+              result.push(true)
+            } else {
+              result.push(false)
             }
           }
-          results.push(false)
         }
       }
-      return results
+      return { notificationsRead: result }
     })
   }
 
