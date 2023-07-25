@@ -4,11 +4,14 @@ import request from 'supertest'
 import {
   ChannelByMemberIdSub,
   ChannelCreatedNotificationSub,
+  checkNotificationPreferences,
   executeQuery,
   executeSubcription,
+  expectNotificationPreferenceToBe,
   MarkNotificationAsReadMut,
   MembershipByControllerAccountSub,
-  SetNotificationPreferencesMut,
+  SetNotificationEnabledMut,
+  SetNotificationPreferencesAllFalseMut,
   VideoByChannelIdSub,
   VideoCreatedNotificationSub,
 } from './queries'
@@ -22,12 +25,12 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import Websocket from 'ws'
 import { UserContext } from './utils'
-import { Session, Account, RuntimeNotification } from '../../model'
+import { Session, Account, RuntimeNotification, NotificationPreference } from '../../model'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { split, HttpLink } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
+import { NotificationPreferenceOutput } from '../../server-extension/resolvers/NotificationResolver/types'
 
-// HACK: (not.v1) convert to .env variable
 const wsProvider = new WsProvider('ws://127.0.0.1:9944')
 const server = request('http://127.0.0.1:4074')
 
@@ -91,7 +94,6 @@ describe('Notifications', () => {
     })
     describe('Account creation and default notification settings', () => {
       let loginData: AccountLoginData
-
       before(async () => {
         loginData = await createAccountAndSignIn(server, user.membershipId, user.joystreamAccount)
       })
@@ -99,6 +101,7 @@ describe('Notifications', () => {
         const account = await em.findOneBy(Account, { email: generateEmailAddr(user.membershipId) })
 
         expect(account).not.to.be.null
+        aliceAccount = account!
         expect(account!.membershipId).to.equal(user.membershipId)
 
         user.setAccountId(account!.id)
@@ -114,9 +117,11 @@ describe('Notifications', () => {
 
       it('Alice should have all notifications enabled', async () => {
         const preferences = Object.values(aliceAccount.notificationPreferences)
-        expect(preferences.every((pref) => pref === true)).to.be.true
+        expect(preferences.every((pref) => pref.inAppEnabled === true && pref.emailEnabled === true)).to.be.true
       })
-      after(async () => {
+    })
+    describe('Batch updating notifications preferences', () => {
+      before(async () => {
         loggedInClient = new ApolloClient({
           link: new HttpLink({
             uri: 'http://localhost:4350/graphql',
@@ -128,23 +133,31 @@ describe('Notifications', () => {
           cache: new InMemoryCache(),
         })
       })
-    })
-    describe('Batch updating notifications preferences', () => {
       it('setting all account notification preferences to false should work', async () => {
-        await loggedInClient.mutate({
-          mutation: SetNotificationPreferencesMut,
+        const response = await loggedInClient.mutate({
+          mutation: SetNotificationPreferencesAllFalseMut,
         })
 
         const account = await em.findOneBy(Account, { id: user.accountId })
 
         expect(account).not.to.be.null
-        const preferences = Object.values(account!.notificationPreferences)
-        expect(preferences.every((pref) => pref === false)).to.be.true
+        checkNotificationPreferences(account!.notificationPreferences)
+        checkNotificationPreferences(response.data.setNotificationPreference)
       })
     })
     describe('Runtime Notifications', () => {
       describe('Channel Created notification', () => {
         let notificationId: string
+        it('setting the notification to enabled should work', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: SetNotificationEnabledMut('channelCreatedNotificationEnabled')
+          })
+
+          const account = await em.findOneBy(Account, { id: user.accountId })
+          expect(account).not.to.be.null
+          expectNotificationPreferenceToBe(account!.notificationPreferences.channelCreatedNotificationEnabled, true)
+          expectNotificationPreferenceToBe(response.data.setNotificationPreference.channelCreatedNotificationEnabled, true)
+        })
         it('create channel should work', async () => {
           const channelId = await ctx.createChannel(user.membershipId, user.joystreamAccount)
           user.setChannelId(channelId)
