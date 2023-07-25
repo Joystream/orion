@@ -413,54 +413,63 @@ export function expectNotificationPreferenceToBe(pref: NotificationPreference | 
   expect(pref.emailEnabled).to.equal(expected);
 }
 
-export function checkNotificationPreferences(preferences: AccountNotificationPreferencesOutput | AccountNotificationPreferences) {
-  expectNotificationPreferenceToBe(preferences.channelExcludedFromAppNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoExcludedFromAppNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoFeaturedAsHeroNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoFeaturedOnCategoryPageNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.nftFeaturedOnMarketPlaceNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.newChannelFollowerNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoCommentCreatedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoLikedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoDislikedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.yppSignupSuccessfulNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.yppChannelVerifiedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.nftBoughtNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.bidMadeOnNftNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.royaltyReceivedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.channelPaymentReceivedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.channelReceivedFundsFromWgNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.newPayoutUpdatedByCouncilNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.channelFundsWithdrawnNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.channelCreatedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.replyToCommentNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.reactionToCommentNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.videoPostedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.newNftOnAuctionNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.newNftOnSaleNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.higherBidThanYoursMadeNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.auctionExpiredNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.auctionWonNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.auctionLostNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.openAuctionBidCanBeWithdrawnNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.fundsFromCouncilReceivedNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.fundsToExternalWalletSentNotificationEnabled, false);
-  expectNotificationPreferenceToBe(preferences.fundsFromWgReceivedNotificationEnabled, false);
+export function checkAllNotificationPreferencesToBe(preferences: AccountNotificationPreferencesOutput | AccountNotificationPreferences, expected: boolean) {
+  expectNotificationPreferenceToBe(preferences.channelExcludedFromAppNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoExcludedFromAppNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoFeaturedAsHeroNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoFeaturedOnCategoryPageNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.nftFeaturedOnMarketPlaceNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.newChannelFollowerNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoCommentCreatedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoLikedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoDislikedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.yppSignupSuccessfulNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.yppChannelVerifiedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.nftBoughtNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.bidMadeOnNftNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.royaltyReceivedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.channelPaymentReceivedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.channelReceivedFundsFromWgNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.newPayoutUpdatedByCouncilNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.channelFundsWithdrawnNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.channelCreatedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.replyToCommentNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.reactionToCommentNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.videoPostedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.newNftOnAuctionNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.newNftOnSaleNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.higherBidThanYoursMadeNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.auctionExpiredNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.auctionWonNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.auctionLostNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.openAuctionBidCanBeWithdrawnNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.fundsFromCouncilReceivedNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.fundsToExternalWalletSentNotificationEnabled, expected);
+  expectNotificationPreferenceToBe(preferences.fundsFromWgReceivedNotificationEnabled, expected);
 }
 
 export const SetNotificationEnabledMut = (prefFieldName: string) => gql`
-mutation MyMutation {
-  setAccountNotificationPreferences(notificationPreferences: {${prefFieldName}: {emailEnabled: true, inAppEnabled: true}}) {
-    ${prefFieldName} 
-      emailEnabled
-      inAppEnabled
+  mutation {
+    setAccountNotificationPreferences(notificationPreferences: {
+      ${prefFieldName}: {
+        emailEnabled: true
+        inAppEnabled: true
+      }
+    }) {
+      ${prefFieldName} {
+        emailEnabled
+        inAppEnabled
+      }
     }
   }
-}
 `
 
-export const MarkNotificationAsReadMut: (notificationIds: string[]) => string = (notificationIds: string[]) => {
-  return `mutation MarkNotificationAsRead {
-  markNotificationsAsRead(notificationIds: ${notificationIds})
-}
-`}
+export const MarkNotificationAsReadMut = gql`
+  mutation markNotificationAsRead($notificationIds: [String!]!) {
+    markNotificationsAsRead(notificationIds: $notificationIds) {
+      notificationsRead
+    }
+  }
+`
+
+
