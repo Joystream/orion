@@ -26,17 +26,13 @@ export class NotificationResolver {
         notification = await em.findOne(RuntimeNotification, {
           where: { id: notificationId },
         })
-        console.log('notification', JSON.stringify(notification))
         if (notification === null) {
           notification = await em.findOne(OffChainNotification, {
             where: { id: notificationId },
           })
         }
-        console.log('notification', JSON.stringify(notification))
         if (notification !== null) {
-          console.log('notification found', notificationId)
           if (notification.accountId === ctx.accountId) {
-            console.log('account found', notification.account)
             if (!notification.inAppRead) {
               notification.inAppRead = true
               await em.save(notification)

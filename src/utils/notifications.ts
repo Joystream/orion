@@ -131,6 +131,7 @@ export async function addOffChainNotification(
         preferencesForNotification(account.notificationPreferences, data)
       if (shouldSendAppNotification || shouldSendMail) {
         const nextOffchainNotificationId = await getNextIdForEntity(em, 'OffChainNotification')
+        // FIXME: (not.v1) there's no distinction between notification deposited in the database and notification that should not be read but sent
         const notification = new OffChainNotification({
           id: nextOffchainNotificationId.toString(),
           accountId,

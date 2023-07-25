@@ -4,9 +4,11 @@ import request from 'supertest'
 import {
   ChannelByMemberIdSub,
   ChannelCreatedNotificationSub,
+  ChannelFollowerNotificationSub,
   checkAllNotificationPreferencesToBe,
   executeSubcription,
   expectNotificationPreferenceToBe,
+  FollowChannelMut,
   MarkNotificationAsReadMut,
   MembershipByControllerAccountSub,
   SetNotificationEnabledMut,
@@ -15,14 +17,14 @@ import {
 import { expect } from 'chai'
 import { TestContext } from './extrinsics'
 import { AccountLoginData, createAccountAndSignIn, generateEmailAddr } from './authUtils'
-import { EntityManager } from 'typeorm'
+import { EntityManager, FindOptionsWhere } from 'typeorm'
 import { globalEm } from '../../utils/globalEm'
 import { ApolloClient, gql, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import Websocket from 'ws'
 import { UserContext } from './utils'
-import { Session, Account, RuntimeNotification } from '../../model'
+import { Session, Account, RuntimeNotification, OffChainNotification, fromJsonOffChainNotificationData, OffChainNotificationData } from '../../model'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { split, HttpLink } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
@@ -140,7 +142,7 @@ describe('Notifications', () => {
         // checkAllNotificationPreferencesToBe(response.data.setNotificationPreference, false)
       })
     })
-    describe('Runtime Notifications', () => {
+    describe('Tests on actual notifications', () => {
       describe('Channel Created notification', () => {
         let notificationId: string
         it('setting the notification to enabled should work', async () => {
@@ -184,12 +186,60 @@ describe('Notifications', () => {
           expect(notification.mailSent).to.be.false
         })
         it('marking the notification as read should work', async () => {
-            const response = await loggedInClient.mutate({
-              mutation: MarkNotificationAsReadMut,
-              variables: { notificationIds: [notificationId] }
-            });
+          const response = await loggedInClient.mutate({
+            mutation: MarkNotificationAsReadMut,
+            variables: { notificationIds: [notificationId] }
+          });
 
           const notification = await em.findOneBy(RuntimeNotification, { id: notificationId! })
+          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
+          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+          expect(notification).not.to.be.null
+          expect(notification!.inAppRead).to.be.true
+        })
+      })
+      describe('Follow channel notification', () => {
+        let notificationId: string
+        it('setting the notification to enabled should work', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: SetNotificationEnabledMut('newChannelFollowerNotificationEnabled')
+          })
+
+          const account = await em.findOneBy(Account, { id: user.accountId })
+          expect(account).not.to.be.null
+          expectNotificationPreferenceToBe(account!.notificationPreferences.newChannelFollowerNotificationEnabled, true)
+          expectNotificationPreferenceToBe(response.data.setAccountNotificationPreferences.newChannelFollowerNotificationEnabled, true)
+        })
+        it('follow channel should deposit notification', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: FollowChannelMut,
+            variables: { channelId: user.channelId }
+          })
+
+          const notifications = await em.getRepository(OffChainNotification).find({
+            where: {
+              data: {
+                typeOf: 'NewChannelFollowerNotificationData',
+                channel: user.channelId,
+              } as FindOptionsWhere<OffChainNotificationData>,
+            },
+          });
+
+          console.log('notifications')
+          console.log(notifications)
+          // expect(notification).not.to.be.null
+          // notificationId = notification!.id
+          // expect(notification!.inAppRead).to.be.false
+          // // FIXME: (not.v1) this should work  with true instead of false
+          // expect(notification!.mailSent).to.be.false
+        })
+        it('marking the notification as read should work', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: MarkNotificationAsReadMut,
+            variables: { notificationIds: [notificationId] }
+          });
+
+          const notification = await em.findOneBy(OffChainNotification, { id: notificationId! })
           expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
           expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
           expect(notification).not.to.be.null
