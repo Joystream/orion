@@ -1,11 +1,11 @@
 import 'reflect-metadata'
-import { Resolver, Mutation, UseMiddleware, Ctx, Args } from 'type-graphql'
+import { Resolver, Mutation, UseMiddleware, Ctx, Args, Arg } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { Account, OffChainNotification, RuntimeNotification } from '../../../model'
-import { NotificationArgs, SetNotificationPreferencesArgs, SetNotificationPreferencesReturn } from './types'
+import { AccountNotificationPreferences, NotificationPreference, OffChainNotification, RuntimeNotification } from '../../../model'
+import { AccountNotificationPreferencesInput, AccountNotificationPreferencesOutput, AccountNotificationPreferencesResult, NotificationArgs, NotificationPreferenceGQL, toOutputGQL } from './types'
 
 @Resolver()
 export class NotificationResolver {
@@ -48,12 +48,12 @@ export class NotificationResolver {
   }
 
   // HACK: (not.v1) this is a temporary solution, refactor needed
-  @Mutation(() => Boolean)
+  @Mutation(() => AccountNotificationPreferencesOutput)
   @UseMiddleware(AccountOnly)
   async setAccountNotificationPreferences(
-    @Args() newNotificationPreferences: SetNotificationPreferencesArgs,
+    @Arg('notificationPreferences') newPreferences: AccountNotificationPreferencesInput,
     @Ctx() ctx: Context
-  ): Promise<SetNotificationPreferencesReturn> {
+  ): Promise<AccountNotificationPreferencesOutput> {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
@@ -61,12 +61,57 @@ export class NotificationResolver {
       if (!account) {
         throw new Error('Account not found')
       }
-      if (account.notificationPreferences !== newNotificationPreferences.newPreferences) {
-        account.notificationPreferences = newNotificationPreferences.newPreferences
-        await em.save(account)
-      }
+      maybeUpdateNotificationPreference(newPreferences.channelExcludedFromAppNotificationEnabled, account.notificationPreferences.channelExcludedFromAppNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoExcludedFromAppNotificationEnabled, account.notificationPreferences.videoExcludedFromAppNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoFeaturedAsHeroNotificationEnabled, account.notificationPreferences.videoFeaturedAsHeroNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoFeaturedOnCategoryPageNotificationEnabled, account.notificationPreferences.videoFeaturedOnCategoryPageNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.nftFeaturedOnMarketPlaceNotificationEnabled, account.notificationPreferences.nftFeaturedOnMarketPlaceNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.newChannelFollowerNotificationEnabled, account.notificationPreferences.newChannelFollowerNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoCommentCreatedNotificationEnabled, account.notificationPreferences.videoCommentCreatedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoLikedNotificationEnabled, account.notificationPreferences.videoLikedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoDislikedNotificationEnabled, account.notificationPreferences.videoDislikedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.yppSignupSuccessfulNotificationEnabled, account.notificationPreferences.yppSignupSuccessfulNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.yppChannelVerifiedNotificationEnabled, account.notificationPreferences.yppChannelVerifiedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.nftBoughtNotificationEnabled, account.notificationPreferences.nftBoughtNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.bidMadeOnNftNotificationEnabled, account.notificationPreferences.bidMadeOnNftNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.royaltyReceivedNotificationEnabled, account.notificationPreferences.royaltyReceivedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.channelPaymentReceivedNotificationEnabled, account.notificationPreferences.channelPaymentReceivedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.channelReceivedFundsFromWgNotificationEnabled, account.notificationPreferences.channelReceivedFundsFromWgNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.newPayoutUpdatedByCouncilNotificationEnabled, account.notificationPreferences.newPayoutUpdatedByCouncilNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.channelFundsWithdrawnNotificationEnabled, account.notificationPreferences.channelFundsWithdrawnNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.channelCreatedNotificationEnabled, account.notificationPreferences.channelCreatedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.replyToCommentNotificationEnabled, account.notificationPreferences.replyToCommentNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.reactionToCommentNotificationEnabled, account.notificationPreferences.reactionToCommentNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.videoPostedNotificationEnabled, account.notificationPreferences.videoPostedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.newNftOnAuctionNotificationEnabled, account.notificationPreferences.newNftOnAuctionNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.newNftOnSaleNotificationEnabled, account.notificationPreferences.newNftOnSaleNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.higherBidThanYoursMadeNotificationEnabled, account.notificationPreferences.higherBidThanYoursMadeNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.auctionExpiredNotificationEnabled, account.notificationPreferences.auctionExpiredNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.auctionWonNotificationEnabled, account.notificationPreferences.auctionWonNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.auctionLostNotificationEnabled, account.notificationPreferences.auctionLostNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.openAuctionBidCanBeWithdrawnNotificationEnabled, account.notificationPreferences.openAuctionBidCanBeWithdrawnNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.fundsFromCouncilReceivedNotificationEnabled, account.notificationPreferences.fundsFromCouncilReceivedNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.fundsToExternalWalletSentNotificationEnabled, account.notificationPreferences.fundsToExternalWalletSentNotificationEnabled)
+      maybeUpdateNotificationPreference(newPreferences.fundsFromWgReceivedNotificationEnabled, account.notificationPreferences.fundsFromWgReceivedNotificationEnabled)
+      await em.save(account)
 
-      return newNotificationPreferences
+      return toOutputGQL(account!.notificationPreferences)
     })
   }
 }
+
+// Helper function to update notification preferences
+function maybeUpdateNotificationPreference(
+  newPreference: NotificationPreferenceGQL,
+  accountPreference: NotificationPreference
+) {
+  if (newPreference !== undefined && newPreference !== null) {
+    if (newPreference.emailEnabled !== undefined) {
+      accountPreference.emailEnabled = newPreference.emailEnabled
+    }
+    if (newPreference.inAppEnabled !== undefined) {
+      accountPreference.inAppEnabled = newPreference.inAppEnabled
+    }
+  }
+}
+

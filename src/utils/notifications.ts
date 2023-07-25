@@ -24,8 +24,8 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     videoExcludedFromAppNotificationEnabled: notificationPrefAllTrue(),
     videoFeaturedAsHeroNotificationEnabled: notificationPrefAllTrue(),
     videoFeaturedOnCategoryPageNotificationEnabled: notificationPrefAllTrue(),
-    nftFeaturedOnMarketPlace: notificationPrefAllTrue(),
-    newChannelFollowerNotificationPreferences: notificationPrefAllTrue(),
+    nftFeaturedOnMarketPlaceNotificationEnabled: notificationPrefAllTrue(),
+    newChannelFollowerNotificationEnabled: notificationPrefAllTrue(),
     videoCommentCreatedNotificationEnabled: notificationPrefAllTrue(),
     videoLikedNotificationEnabled: notificationPrefAllTrue(),
     videoDislikedNotificationEnabled: notificationPrefAllTrue(),
@@ -104,7 +104,7 @@ export function preferencesForNotification(
     case 'ChannelCreatedEventData':
       return preferences.channelCreatedNotificationEnabled
     case 'NewChannelFollowerNotificationData':
-      return preferences.newChannelFollowerNotificationPreferences
+      return preferences.newChannelFollowerNotificationEnabled
     case 'ChannelExcludedNotificationData':
       return preferences.channelExcludedFromAppNotificationEnabled
     case 'VideoExcludedNotificationData':
@@ -112,130 +112,6 @@ export function preferencesForNotification(
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
-  //   case 'CommentCreatedEventData':
-  //     return account.commentCreatedInAppNotificationEnabled,
-  //   case 'CommentTextUpdatedEventData':
-  //     return [
-  //       account.commentCreatedInAppNotificationEnabled,
-  //       account.commentCreatedMailNotificationEnabled,
-  //     ]
-  //   case 'OpenAuctionStartedEventData':
-  //     return [
-  //       account.openAuctionStartedInAppNotificationEnabled,
-  //       account.openAuctionStartedMailNotificationEnabled,
-  //     ]
-  //   case 'EnglishAuctionStartedEventData':
-  //     return [
-  //       account.englishAuctionStartedInAppNotificationEnabled,
-  //       account.englishAuctionStartedMailNotificationEnabled,
-  //     ]
-  //   case 'NftIssuedEventData':
-  //     return [account.nftIssuedInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
-  //   case 'AuctionBidMadeEventData':
-  //     return [
-  //       account.auctionBidMadeInAppNotificationEnabled,
-  //       account.auctionBidMadeMailNotificationEnabled,
-  //     ]
-  //   case 'AuctionBidCanceledEventData':
-  //     return [
-  //       account.auctionCanceledInAppNotificationEnabled,
-  //       account.auctionBidCanceledMailNotificationEnabled,
-  //     ]
-  //   case 'AuctionCanceledEventData':
-  //     return [
-  //       account.auctionCanceledInAppNotificationEnabled,
-  //       account.auctionCanceledMailNotificationEnabled,
-  //     ]
-  //   case 'EnglishAuctionSettledEventData':
-  //     return [
-  //       account.englishAuctionSettledInAppNotificationEnabled,
-  //       account.englishAuctionSettledMailNotificationEnabled,
-  //     ]
-  //   case 'BidMadeCompletingAuctionEventData':
-  //     return [
-  //       account.bidMadeCompletingAuctionInAppNotificationEnabled,
-  //       account.bidMadeCompletingAuctionMailNotificationEnabled,
-  //     ]
-  //   case 'OpenAuctionBidAcceptedEventData':
-  //     return [
-  //       account.openAuctionBidAcceptedInAppNotificationEnabled,
-  //       account.openAuctionBidAcceptedMailNotificationEnabled,
-  //     ]
-  //   case 'NftSellOrderMadeEventData':
-  //     return [
-  //       account.nftSellOrderMadeInAppNotificationEnabled,
-  //       account.nftSellOrderMadeMailNotificationEnabled,
-  //     ]
-  //   case 'NftBoughtEventData':
-  //     return [account.nftBoughtInAppNotificationEnabled, account.nftBoughtMailNotificationEnabled]
-  //   case 'BuyNowCanceledEventData':
-  //     return [
-  //       account.buyNowCanceledInAppNotificationEnabled,
-  //       account.buyNowCanceledMailNotificationEnabled,
-  //     ]
-  //   case 'BuyNowPriceUpdatedEventData':
-  //     return [
-  //       account.buyNowPriceUpdatedInAppNotificationEnabled,
-  //       account.buyNowPriceUpdatedMailNotificationEnabled,
-  //     ]
-  //   case 'MetaprotocolTransactionStatusEventData':
-  //     return [
-  //       account.metaprotocolTransactionStatusInAppNotificationEnabled,
-  //       account.metaprotocolTransactionStatusMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelRewardClaimedEventData':
-  //     return [
-  //       account.channelRewardClaimedInAppNotificationEnabled,
-  //       account.channelRewardClaimedMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelRewardClaimedAndWithdrawnEventData':
-  //     return [
-  //       account.channelRewardClaimedAndWithdrawnInAppNotificationEnabled,
-  //       account.channelRewardClaimedAndWithdrawnMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelFundsWithdrawnEventData':
-  //     return [
-  //       account.channelFundsWithdrawnInAppNotificationEnabled,
-  //       account.channelFundsWithdrawnMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelPayoutsUpdatedEventData':
-  //     return [
-  //       account.channelPayoutsUpdatedInAppNotificationEnabled,
-  //       account.channelPayoutsUpdatedMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelPaymentMadeEventData':
-  //     return [
-  //       account.channelPaymentMadeInAppNotificationEnabled,
-  //       account.channelPaymentMadeMailNotificationEnabled,
-  //     ]
-  //   case 'MemberBannedFromChannelEventData':
-  //     return [
-  //       account.memberBannedFromChannelInAppNotificationEnabled,
-  //       account.memberBannedFromChannelMailNotificationEnabled,
-  //     ]
-  //   case 'ChannelCreatedEventData':
-  //     return [
-  //       account.channelCreatedInAppNotificationEnabled,
-  //       account.channelCreatedMailNotificationEnabled,
-  //     ]
-  //   case 'NewChannelFollowerNotificationData':
-  //     return [
-  //       account.newChannelFollowerInAppNotificationPreferences,
-  //       account.newChannelFollowerMailNotificationPreferences,
-  //     ]
-  //   case 'ChannelExcludedNotificationData':
-  //     return [
-  //       account.channelExcludedFromAppInAppNotificationEnabled,
-  //       account.channelExcludedFromAppMailNotificationEnabled,
-  //     ]
-  //   case 'VideoExcludedNotificationData':
-  //     return [
-  //       account.videoExcludedFromAppInAppNotificationEnabled,
-  //       account.videoExcludedFromAppMailNotificationEnabled,
-  //     ]
-  //   default:
-  //     return [false, false]
-  // }
 }
 
 export async function addOffChainNotification(

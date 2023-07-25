@@ -125,8 +125,8 @@ type AccountNotificationPreferences {
   videoExcludedFromAppNotificationEnabled: NotificationPreference!
   videoFeaturedAsHeroNotificationEnabled: NotificationPreference!
   videoFeaturedOnCategoryPageNotificationEnabled: NotificationPreference!
-  nftFeaturedOnMarketPlace: NotificationPreference!
-  newChannelFollowerNotificationPreferences: NotificationPreference!
+  nftFeaturedOnMarketPlaceNotificationEnabled: NotificationPreference!
+  newChannelFollowerNotificationEnabled: NotificationPreference!
   videoCommentCreatedNotificationEnabled: NotificationPreference!
   videoLikedNotificationEnabled: NotificationPreference!
   videoDislikedNotificationEnabled: NotificationPreference!
