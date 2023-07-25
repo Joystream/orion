@@ -213,14 +213,15 @@ export class ChannelsResolver {
 
       const ownerMember = channel.ownerMember
       if (ownerMember) {
-        const account = await em.getRepository(Account).findOneBy({ membershipId: ownerMember.id })
+        const account = ctx.account
         if (account) {
+          console.log('******** adding notification *******')
           await addOffChainNotification(
             em,
             [account.id],
             fromJsonOffChainNotificationData({
-              _typeOf: 'NewChannelFollowerNotificationData',
-              _channel: channelId,
+              typeOf: 'NewChannelFollowerNotificationData',
+              channel: channelId,
             }),
             new ChannelNotification()
           )

@@ -96,19 +96,16 @@ subscription VideoCreatedNotification($videoId: String!) {
 
 export const ChannelFollowerNotificationSub = gql`
 subscription ChannelFollowerNotification($channelId: String!) {
-  offChainNotifications(where: {data: {channel: {id_eq: $channelId}}}) {
+  offChainNotifications(where: {data: {channel: {id_eq: $channelId}, isTypeOf_eq: "NewChannelFollowerNotificationData"}}) {
     id
-    data {
-      ... on NewChannelFollowerNotificationData {
+    mailSent
+    inAppRead
+    type {
+      ... on ChannelNotification {
         __typename
-        channel {
-          id
-        }
       }
-    }
-    account {
-      membership {
-        id
+      ... on MemberNotification {
+        __typename
       }
     }
   }
@@ -472,4 +469,14 @@ export const MarkNotificationAsReadMut = gql`
   }
 `
 
+export const FollowChannelMut = gql`
+mutation FollowChannel($channelId: String!) {
+  followChannel(channelId: $channelId) {
+    added
+    channelId
+    followId
+    follows
+  }
+}
+`
 
