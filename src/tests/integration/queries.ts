@@ -64,8 +64,8 @@ export const ChannelCreatedNotificationSub = gql`
   subscription ChannelCreatedNotification($channelId: String!) {
     runtimeNotifications(where: { event: { data: { channel: { id_eq: $channelId } } } }) {
       id
-      inAppRead
-      mailSent
+      status
+      deliveryStatus
       type {
         ... on ChannelNotification {
           __typename
@@ -86,8 +86,8 @@ export const VideoCreatedNotificationSub = gql`
   subscription VideoCreatedNotification($videoId: String!) {
     runtimeNotifications(where: { event: { data: { video: { id_eq: $videoId } } } }) {
       id
-      inAppRead
-      mailSent
+      status
+      deliveryStatus
       type {
         ... on ChannelNotification {
           __typename

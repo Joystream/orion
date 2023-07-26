@@ -120,7 +120,7 @@ export function preferencesForNotification(
 }
 
 export async function addNotification(
-  accountOrMemberIds: (string | undefined | null)[],
+  accounts: Account[],
   params: NotificationParams,
   type: NotificationType
 ) {
@@ -131,25 +131,21 @@ export async function addNotification(
   mailNotifier.setSubject(params.getDataForEmail())
   mailNotifier.setContentUsingTemplate('test')
 
-  for (const id of accountOrMemberIds.filter((id) => id)) {
-    const account = await params.getAccount(id!)
-    if (account !== undefined) {
-      const notificationEntity = await params.createNotification(account, type)
-      if (notificationEntity.shouldSendEmail) {
-        mailNotifier.setReciever(account.email)
-        await mailNotifier.send()
-        if (mailNotifier.mailHasBeenSent()) {
-          notificationEntity.markEmailAsSent()
-        }
+  for (const account of accounts) {
+    const notificationEntity = await params.createNotification(account, type)
+    if (notificationEntity.shouldSendEmail) {
+      mailNotifier.setReciever(account.email)
+      await mailNotifier.send()
+      if (mailNotifier.mailHasBeenSent()) {
+        notificationEntity.markEmailAsSent()
       }
-      await notificationEntity.saveToDb()
     }
+    await notificationEntity.saveToDb()
   }
   return
 }
 
 export abstract class NotificationParams {
-  public abstract getAccount(accountOrMemberId: string): Promise<Account | undefined>
   public abstract createNotification(
     account: Account,
     type: NotificationType
@@ -245,6 +241,7 @@ export class OffChainNotificationParams extends NotificationParams {
       type,
       status: ReadOrUnread.UNREAD,
       deliveryStatus: deliveryStatusFromPreference(pref),
+      data: this._data,
     })
     return new NewOffchainNotificationEntity(
       notification,
@@ -252,12 +249,6 @@ export class OffChainNotificationParams extends NotificationParams {
       this._em,
       pref.emailEnabled
     )
-  }
-
-  public async getAccount(accountOrMemberId: string): Promise<Account | undefined> {
-    // assert(store in EntityManagerOverlay)
-    const account = await this._em.getRepository(Account).findOneBy({ id: accountOrMemberId })
-    return account as Account
   }
 }
 
@@ -308,14 +299,6 @@ export class RuntimeNotificationParams extends NotificationParams {
       deliveryStatus: deliveryStatusFromPreference(pref),
     })
     return new NewRuntimeNotificationEntity(notification as RuntimeNotification, pref.emailEnabled)
-  }
-
-  public async getAccount(accountOrMemberId: string): Promise<Account | undefined> {
-    // assert(store in EntityManagerOverlay)
-    const account = await this._overlay
-      .getRepository(Account)
-      .getOneByRelation('membershipId', accountOrMemberId!)
-    return account as Account
   }
 }
 
