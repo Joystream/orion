@@ -3,16 +3,21 @@ import { EntityManager } from 'typeorm'
 import {
   Account,
   AccountNotificationPreferences,
+  DeliveryStatus,
   EventData,
   NextEntityId,
   NotificationPreference,
   NotificationType,
+  Event,
   OffChainNotification,
   OffChainNotificationData,
+  ReadOrUnread,
+  RuntimeNotification,
 } from '../model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 import { getNextIdForEntity } from './nextEntityId'
+import { EntityManagerOverlay } from './overlay'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -114,46 +119,227 @@ export function preferencesForNotification(
   }
 }
 
-export async function addOffChainNotification(
-  em: EntityManager,
-  accountIds: string[],
-  data: OffChainNotificationData,
+export async function addNotification(
+  accountOrMemberIds: (string | undefined | null)[],
+  params: NotificationParams,
   type: NotificationType
 ) {
+  const em = params.getEm()
+
   const mailNotifier = new MailNotifier()
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
-  mailNotifier.setSubject(data.toString())
+  mailNotifier.setSubject(params.getDataForEmail())
   mailNotifier.setContentUsingTemplate('test')
-  for (const accountId of accountIds) {
-    const account = await em.getRepository(Account).findOneById(accountId)
-    if (account) {
-      const { inAppEnabled: shouldSendAppNotification, emailEnabled: shouldSendMail } =
-        preferencesForNotification(account.notificationPreferences, data)
-      if (shouldSendAppNotification || shouldSendMail) {
-        const nextOffchainNotificationId = await getNextIdForEntity(em, 'OffChainNotification')
-        // FIXME: (not.v1) there's no distinction between notification deposited in the database and notification that should not be read but sent
-        const notification = new OffChainNotification({
-          id: nextOffchainNotificationId.toString(),
-          accountId,
-          data,
-          inAppRead: false,
-          type,
-          mailSent: false,
-        })
-        if (shouldSendMail) {
-          mailNotifier.setReciever(account.email)
-          await mailNotifier.send()
-          notification.mailSent = mailNotifier.mailHasBeenSent()
+
+  for (const id of accountOrMemberIds.filter((id) => id)) {
+    const account = await params.getAccount(id!)
+    if (account !== undefined) {
+      const notificationEntity = await params.createNotification(account, type)
+      if (notificationEntity.shouldSendEmail) {
+        mailNotifier.setReciever(account.email)
+        await mailNotifier.send()
+        if (mailNotifier.mailHasBeenSent()) {
+          notificationEntity.markEmailAsSent()
         }
-        await em.save([
-          notification,
-          new NextEntityId({
-            entityName: 'OffChainNotification',
-            nextId: nextOffchainNotificationId + 1,
-          }),
-        ])
       }
+      await notificationEntity.saveToDb()
     }
-    return
+  }
+  return
+}
+
+export abstract class NotificationParams {
+  public abstract getAccount(accountOrMemberId: string): Promise<Account | undefined>
+  public abstract createNotification(
+    account: Account,
+    type: NotificationType
+  ): Promise<NewNotificationEntity>
+  public abstract getDataForEmail(): string
+  public abstract getEm(): EntityManager
+}
+
+abstract class NewNotificationEntity {
+  private _shouldSendEmail: boolean = false
+
+  public abstract saveToDb(): Promise<void>
+  public markEmailAsSent() {
+    // TODO: (not.v1) implement
+  }
+  get shouldSendEmail(): boolean {
+    return this._shouldSendEmail
+  }
+  constructor(shouldSendEmail: boolean = false) {
+    this._shouldSendEmail = shouldSendEmail
+  }
+}
+
+class NewRuntimeNotificationEntity extends NewNotificationEntity {
+  private _notification: RuntimeNotification
+
+  constructor(notification: RuntimeNotification, shouldSendEmail: boolean) {
+    super(shouldSendEmail)
+    this._notification = notification
+  }
+  public async saveToDb(): Promise<void> {
+    return Promise.resolve()
+  }
+}
+
+class NewOffchainNotificationEntity extends NewNotificationEntity {
+  private _notification: OffChainNotification
+  private _nextOffchainNotificationId: number
+  private _em: EntityManager
+
+  constructor(
+    notification: OffChainNotification,
+    nextOffchainNotificationId: number,
+    em: EntityManager,
+    shouldSendEmail: boolean
+  ) {
+    super(shouldSendEmail)
+    this._em = em
+    this._notification = notification
+    this._nextOffchainNotificationId = nextOffchainNotificationId
+  }
+
+  public async saveToDb(): Promise<void> {
+    await this._em.save([
+      this._notification,
+      new NextEntityId({
+        entityName: 'OffChainNotification',
+        nextId: this._nextOffchainNotificationId + 1,
+      }),
+    ])
+  }
+}
+
+export class OffChainNotificationParams extends NotificationParams {
+  private _data: OffChainNotificationData
+  private _em: EntityManager
+
+  constructor(em: EntityManager, data: OffChainNotificationData) {
+    super()
+    this._em = em
+    this._data = data
+  }
+
+  public getEm(): EntityManager {
+    return this._em
+  }
+
+  public getDataForEmail(): string {
+    // TODO: (not.v1) implement this
+    return JSON.stringify(this._data)
+  }
+
+  public async createNotification(
+    account: Account,
+    type: NotificationType
+  ): Promise<NewOffchainNotificationEntity> {
+    const newNotificationId = await getNextIdForEntity(this._em, 'OffChainNotification')
+
+    const pref = preferencesForNotification(account.notificationPreferences, this._data)
+    const notification = new OffChainNotification({
+      id: newNotificationId.toString(),
+      accountId: account.id,
+      type,
+      status: ReadOrUnread.UNREAD,
+      deliveryStatus: deliveryStatusFromPreference(pref),
+    })
+    return new NewOffchainNotificationEntity(
+      notification,
+      newNotificationId,
+      this._em,
+      pref.emailEnabled
+    )
+  }
+
+  public async getAccount(accountOrMemberId: string): Promise<Account | undefined> {
+    // assert(store in EntityManagerOverlay)
+    const account = await this._em.getRepository(Account).findOneBy({ id: accountOrMemberId })
+    return account as Account
+  }
+}
+
+export class RuntimeNotificationParams extends NotificationParams {
+  private _event: Flat<Event>
+  private _optionWinnerId: string | undefined
+  private _overlay: EntityManagerOverlay
+
+  constructor(overlay: EntityManagerOverlay, event: Flat<Event>, optionWinnerId?: string) {
+    super()
+    this._event = event
+    this._overlay = overlay
+    this._optionWinnerId = optionWinnerId
+  }
+
+  public getEm(): EntityManager {
+    return this._overlay.getEm()
+  }
+
+  public getDataForEmail(): string {
+    // TODO: (not.v1) implement this
+    return JSON.stringify(this._event.data)
+  }
+
+  public async createNotification(
+    account: Account,
+    type: NotificationType
+  ): Promise<NewRuntimeNotificationEntity> {
+    const repository = this._overlay.getRepository(RuntimeNotification)
+    const newNotificationId = repository.getNewEntityId()
+
+    const auctionWinner = isAuctionWinner(
+      this._event.data,
+      account.membershipId,
+      this._optionWinnerId
+    )
+    const pref = preferencesForNotification(
+      account.notificationPreferences,
+      this._event.data,
+      auctionWinner
+    )
+    const notification = repository.new({
+      id: newNotificationId,
+      accountId: account.id,
+      eventId: this._event.id,
+      type,
+      status: ReadOrUnread.UNREAD,
+      deliveryStatus: deliveryStatusFromPreference(pref),
+    })
+    return new NewRuntimeNotificationEntity(notification as RuntimeNotification, pref.emailEnabled)
+  }
+
+  public async getAccount(accountOrMemberId: string): Promise<Account | undefined> {
+    // assert(store in EntityManagerOverlay)
+    const account = await this._overlay
+      .getRepository(Account)
+      .getOneByRelation('membershipId', accountOrMemberId!)
+    return account as Account
+  }
+}
+
+function isAuctionWinner(
+  data: EventData,
+  memberId: string,
+  auctionWinnerId?: string
+): boolean | undefined {
+  if (data.isTypeOf === 'EnglishAuctionSettledEventData') {
+    return memberId === auctionWinnerId!
+  } else {
+    return undefined
+  }
+}
+
+export function deliveryStatusFromPreference(pref: NotificationPreference): DeliveryStatus {
+  // match the delivery status to the preference
+  if (pref.inAppEnabled && pref.emailEnabled) {
+    return DeliveryStatus.EMAIL_AND_IN_APP
+  } else if (pref.inAppEnabled && !pref.emailEnabled) {
+    return DeliveryStatus.IN_APP_ONLY
+  } else if (!pref.inAppEnabled && pref.emailEnabled) {
+    return DeliveryStatus.EMAIL_ONLY
+  } else {
+    return DeliveryStatus.UNDELIVERED
   }
 }

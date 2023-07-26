@@ -41,11 +41,23 @@ type RuntimeNotification @entity {
   "Member Or Channel related notification"
   type: NotificationType!
 
-  "mail sent or not"
-  mailSent: Boolean!
+  "how the notification has been delivered"
+  deliveryStatus: DeliveryStatus!
 
   "in-app read or not"
-  inAppRead: Boolean!
+  status: ReadOrUnread!
+}
+
+enum DeliveryStatus {
+  EMAIL_ONLY
+  IN_APP_ONLY
+  EMAIL_AND_IN_APP
+  UNDELIVERED
+}
+
+enum ReadOrUnread {
+  READ
+  UNREAD
 }
 
 type NftHistoryEntry @entity {
@@ -457,14 +469,14 @@ type OffChainNotification @entity {
   "The notification data associated"
   data: OffChainNotificationData!
 
-  "status read/unread if displayed in-app"
-  inAppRead: Boolean!
-
-  "email has been sent or not"
-  mailSent: Boolean!
-
   "Member Or Channel related notification"
   type: NotificationType!
+
+  "how the notification has been delivered"
+  deliveryStatus: DeliveryStatus!
+
+  "in-app read or not"
+  status: ReadOrUnread!
 }
 
 union OffChainNotificationData =

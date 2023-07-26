@@ -13,7 +13,6 @@ export class MarkNotificationsAsReadResult {
   notificationsRead: boolean[]
 }
 
-
 @InputType()
 export class NotificationPreferenceGQL implements Partial<NotificationPreference> {
   @Field({ nullable: true })
@@ -102,7 +101,9 @@ export class AccountNotificationPreferencesInput {
 }
 
 @ObjectType()
-export class AccountNotificationPreferencesOutput implements Partial<AccountNotificationPreferences> {
+export class AccountNotificationPreferencesOutput
+  implements Partial<AccountNotificationPreferences>
+{
   @Field(() => NotificationPreferenceOutput, { nullable: false })
   channelExcludedFromAppNotificationEnabled: NotificationPreference
   @Field(() => NotificationPreferenceOutput, { nullable: false })
@@ -176,13 +177,18 @@ export class AccountNotificationPreferencesResult {
   newPreferences: AccountNotificationPreferencesOutput
 }
 
-export function toOutputGQL(preferences: AccountNotificationPreferences): AccountNotificationPreferencesOutput {
+export function toOutputGQL(
+  preferences: AccountNotificationPreferences
+): AccountNotificationPreferencesOutput {
   return {
-    channelExcludedFromAppNotificationEnabled: preferences.channelExcludedFromAppNotificationEnabled,
+    channelExcludedFromAppNotificationEnabled:
+      preferences.channelExcludedFromAppNotificationEnabled,
     videoExcludedFromAppNotificationEnabled: preferences.videoExcludedFromAppNotificationEnabled,
     videoFeaturedAsHeroNotificationEnabled: preferences.videoFeaturedAsHeroNotificationEnabled,
-    videoFeaturedOnCategoryPageNotificationEnabled: preferences.videoFeaturedOnCategoryPageNotificationEnabled,
-    nftFeaturedOnMarketPlaceNotificationEnabled: preferences.nftFeaturedOnMarketPlaceNotificationEnabled,
+    videoFeaturedOnCategoryPageNotificationEnabled:
+      preferences.videoFeaturedOnCategoryPageNotificationEnabled,
+    nftFeaturedOnMarketPlaceNotificationEnabled:
+      preferences.nftFeaturedOnMarketPlaceNotificationEnabled,
     newChannelFollowerNotificationEnabled: preferences.newChannelFollowerNotificationEnabled,
     videoCommentCreatedNotificationEnabled: preferences.videoCommentCreatedNotificationEnabled,
     videoLikedNotificationEnabled: preferences.videoLikedNotificationEnabled,
@@ -192,9 +198,12 @@ export function toOutputGQL(preferences: AccountNotificationPreferences): Accoun
     nftBoughtNotificationEnabled: preferences.nftBoughtNotificationEnabled,
     bidMadeOnNftNotificationEnabled: preferences.bidMadeOnNftNotificationEnabled,
     royaltyReceivedNotificationEnabled: preferences.royaltyReceivedNotificationEnabled,
-    channelPaymentReceivedNotificationEnabled: preferences.channelPaymentReceivedNotificationEnabled,
-    channelReceivedFundsFromWgNotificationEnabled: preferences.channelReceivedFundsFromWgNotificationEnabled,
-    newPayoutUpdatedByCouncilNotificationEnabled: preferences.newPayoutUpdatedByCouncilNotificationEnabled,
+    channelPaymentReceivedNotificationEnabled:
+      preferences.channelPaymentReceivedNotificationEnabled,
+    channelReceivedFundsFromWgNotificationEnabled:
+      preferences.channelReceivedFundsFromWgNotificationEnabled,
+    newPayoutUpdatedByCouncilNotificationEnabled:
+      preferences.newPayoutUpdatedByCouncilNotificationEnabled,
     channelFundsWithdrawnNotificationEnabled: preferences.channelFundsWithdrawnNotificationEnabled,
     channelCreatedNotificationEnabled: preferences.channelCreatedNotificationEnabled,
     replyToCommentNotificationEnabled: preferences.replyToCommentNotificationEnabled,
@@ -202,13 +211,17 @@ export function toOutputGQL(preferences: AccountNotificationPreferences): Accoun
     videoPostedNotificationEnabled: preferences.videoPostedNotificationEnabled,
     newNftOnAuctionNotificationEnabled: preferences.newNftOnAuctionNotificationEnabled,
     newNftOnSaleNotificationEnabled: preferences.newNftOnSaleNotificationEnabled,
-    higherBidThanYoursMadeNotificationEnabled: preferences.higherBidThanYoursMadeNotificationEnabled,
+    higherBidThanYoursMadeNotificationEnabled:
+      preferences.higherBidThanYoursMadeNotificationEnabled,
     auctionExpiredNotificationEnabled: preferences.auctionExpiredNotificationEnabled,
     auctionWonNotificationEnabled: preferences.auctionWonNotificationEnabled,
     auctionLostNotificationEnabled: preferences.auctionLostNotificationEnabled,
-    openAuctionBidCanBeWithdrawnNotificationEnabled: preferences.openAuctionBidCanBeWithdrawnNotificationEnabled,
-    fundsFromCouncilReceivedNotificationEnabled: preferences.fundsFromCouncilReceivedNotificationEnabled,
-    fundsToExternalWalletSentNotificationEnabled: preferences.fundsToExternalWalletSentNotificationEnabled,
+    openAuctionBidCanBeWithdrawnNotificationEnabled:
+      preferences.openAuctionBidCanBeWithdrawnNotificationEnabled,
+    fundsFromCouncilReceivedNotificationEnabled:
+      preferences.fundsFromCouncilReceivedNotificationEnabled,
+    fundsToExternalWalletSentNotificationEnabled:
+      preferences.fundsToExternalWalletSentNotificationEnabled,
     fundsFromWgReceivedNotificationEnabled: preferences.fundsFromWgReceivedNotificationEnabled,
   }
 }

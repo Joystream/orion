@@ -58,9 +58,9 @@ import {
   Event,
   ChannelNotification,
 } from '../../model'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
-  addNotificationForRuntimeData,
   commentCountersManager,
   genericEventFields,
   invalidMetadata,
@@ -649,10 +649,9 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  await addNotificationForRuntimeData(
-    overlay,
+  await addNotification(
     [channel.ownerMemberId],
-    event,
+    new RuntimeNotificationParams(overlay, event),
     new ChannelNotification()
   )
 

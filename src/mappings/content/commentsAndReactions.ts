@@ -25,7 +25,6 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
-  fromJsonNotificationType,
   MemberNotification,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
@@ -37,11 +36,11 @@ import {
   VideoReaction,
   VideoReactionOptions,
   VideoReactionsCountByReactionType,
-  Channel,
   CommentReactionEventData,
 } from '../../model'
 import { VideoReactionEventData } from '../../model/generated/_videoReactionEventData'
 import { config, ConfigVariable } from '../../utils/config'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   backwardCompatibleMetaID,
@@ -49,7 +48,6 @@ import {
   metaprotocolTransactionFailure,
   commentCountersManager,
   videoRelevanceManager,
-  addNotificationForRuntimeData,
 } from '../utils'
 import { getChannelOwnerMemberByChannelId } from './utils'
 
@@ -231,7 +229,11 @@ async function processVideoReaction(
         reactionType,
       }),
     })
-    await addNotificationForRuntimeData(overlay, [memberId], event, new MemberNotification())
+    await addNotification(
+      [memberId],
+      new RuntimeNotificationParams(overlay, event),
+      new MemberNotification()
+    )
   }
 }
 
@@ -458,10 +460,9 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
-      await addNotificationForRuntimeData(
-        overlay,
+      await addNotification(
         [parentComment.authorId],
-        event,
+        new RuntimeNotificationParams(overlay, event),
         new ChannelNotification()
       )
     }
@@ -469,10 +470,9 @@ export async function processCreateCommentMessage(
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
-      await addNotificationForRuntimeData(
-        overlay,
+      await addNotification(
         [channelOwnerMemberId],
-        event,
+        new RuntimeNotificationParams(overlay, event),
         new ChannelNotification()
       )
     }

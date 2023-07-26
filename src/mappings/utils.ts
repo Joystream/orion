@@ -86,62 +86,6 @@ export function genericEventFields(
   }
 }
 
-function isAuctionWinner(
-  data: EventData,
-  memberId: string,
-  auctionWinnerId?: string
-): boolean | undefined {
-  if (data.isTypeOf === 'EnglishAuctionSettledEventData') {
-    return memberId === auctionWinnerId!
-  } else {
-    return undefined
-  }
-}
-
-export async function addNotificationForRuntimeData(
-  overlay: EntityManagerOverlay,
-  memberIds: (string | undefined | null)[],
-  event: Flat<Event>,
-  type: NotificationType,
-  auctionWinnerId?: string
-): Promise<void> {
-  const mailNotifier = new MailNotifier()
-  mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, overlay.getEm()))
-  mailNotifier.setSubject(event.data.toString())
-  mailNotifier.setContentUsingTemplate('test')
-
-  for (const memberId of memberIds.filter((m) => m)) {
-    const account = await overlay.getRepository(Account).getOneByRelation('membershipId', memberId!)
-    if (account) {
-      const { inAppEnabled: shouldSendAppNotification, emailEnabled: shouldSendMail } =
-        preferencesForNotification(
-          account.notificationPreferences,
-          event.data,
-          isAuctionWinner(event.data, memberId!, auctionWinnerId)
-        )
-      if (shouldSendAppNotification || shouldSendMail) {
-        const repository = overlay.getRepository(RuntimeNotification)
-        const newNotificationId = repository.getNewEntityId()
-
-        const notification = repository.new({
-          id: newNotificationId,
-          accountId: account.id,
-          eventId: event.id,
-          type,
-          inAppRead: false,
-          mailSent: false,
-        })
-
-        if (shouldSendMail) {
-          mailNotifier.setReciever(account.email)
-          await mailNotifier.send()
-          notification.mailSent = mailNotifier.mailHasBeenSent()
-        }
-      }
-    }
-  }
-}
-
 export function addNftHistoryEntry(overlay: EntityManagerOverlay, nftId: string, eventId: string) {
   const repository = overlay.getRepository(NftHistoryEntry)
   repository.new({
