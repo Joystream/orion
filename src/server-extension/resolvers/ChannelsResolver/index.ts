@@ -40,8 +40,7 @@ import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
-import { addOffChainNotification } from '../../../utils/notifications'
-import { isNull } from 'lodash'
+import { addNotification, OffChainNotificationParams } from '../../../utils/notifications'
 
 @Resolver()
 export class ChannelsResolver {
@@ -215,14 +214,15 @@ export class ChannelsResolver {
       if (ownerMember) {
         const account = ctx.account
         if (account) {
-          console.log('******** adding notification *******')
-          await addOffChainNotification(
-            em,
+          await addNotification(
             [account.id],
-            fromJsonOffChainNotificationData({
-              typeOf: 'NewChannelFollowerNotificationData',
-              channel: channelId,
-            }),
+            new OffChainNotificationParams(
+              em,
+              fromJsonOffChainNotificationData({
+                typeOf: 'NewChannelFollowerNotificationData',
+                channel: channelId,
+              })
+            ),
             new ChannelNotification()
           )
         }
@@ -340,13 +340,15 @@ export class ChannelsResolver {
           where: { membershipId: channel.ownerMember.id },
         })
         if (ownerAccount) {
-          await addOffChainNotification(
-            em,
+          await addNotification(
             [ownerAccount.id],
-            fromJsonOffChainNotificationData({
-              _typeOf: 'ChannelVerifiedNotificationData',
-              _channel: channelId,
-            }),
+            new OffChainNotificationParams(
+              em,
+              fromJsonOffChainNotificationData({
+                typeOf: 'ChannelVerifiedNotificationData',
+                channel: channelId,
+              })
+            ),
             new ChannelNotification()
           )
         }
@@ -400,13 +402,15 @@ export class ChannelsResolver {
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
-          await addOffChainNotification(
-            em,
+          await addNotification(
             [account.id],
-            fromJsonOffChainNotificationData({
-              _typeOf: 'ChannelExcludedNotificationData',
-              _channel: channel.id,
-            }),
+            new OffChainNotificationParams(
+              em,
+              fromJsonOffChainNotificationData({
+                _typeOf: 'ChannelExcludedNotificationData',
+                _channel: channel.id,
+              })
+            ),
             new ChannelNotification()
           )
         }

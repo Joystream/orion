@@ -16,7 +16,6 @@ import {
   Exclusion,
   MemberNotification,
   fromJsonOffChainNotificationData,
-  VideoExcludedNotificationData,
   Account,
 } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
@@ -47,8 +46,7 @@ import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
-import { addOffChainNotification } from '../../../utils/notifications'
-import { Channel } from 'diagnostics_channel'
+import { addNotification, OffChainNotificationParams } from '../../../utils/notifications'
 
 @Resolver()
 export class VideosResolver {
@@ -357,12 +355,14 @@ export class VideosResolver {
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
-          await addOffChainNotification(
-            em,
+          await addNotification(
             [account.id],
-            fromJsonOffChainNotificationData({
-              _typeOf: 'VideoExcludedNotificationData',
-            }),
+            new OffChainNotificationParams(
+              em,
+              fromJsonOffChainNotificationData({
+                typeOf: 'VideoExcludedNotificationData',
+              })
+            ),
             new MemberNotification()
           )
         }

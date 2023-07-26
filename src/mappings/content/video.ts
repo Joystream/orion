@@ -17,15 +17,11 @@ import {
   ChannelNotification,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import {
-  addNotificationForRuntimeData,
-  deserializeMetadata,
-  u8aToBytes,
-  videoRelevanceManager,
-} from '../utils'
+import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -126,7 +122,11 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  await addNotificationForRuntimeData(overlay, followers, eventEntity, new ChannelNotification())
+  await addNotification(
+    followers,
+    new RuntimeNotificationParams(overlay, eventEntity),
+    new ChannelNotification()
+  )
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

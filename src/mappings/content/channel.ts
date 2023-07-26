@@ -14,13 +14,7 @@ import {
   ChannelCreatedEventData,
   ChannelNotification,
 } from '../../model'
-import {
-  addNotificationForRuntimeData,
-  deserializeMetadata,
-  genericEventFields,
-  toAddress,
-  u8aToBytes,
-} from '../utils'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -34,6 +28,7 @@ import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActo
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -119,10 +114,9 @@ export async function processChannelCreatedEvent({
       timestamp: new Date(block.timestamp),
       data: new ChannelCreatedEventData({ channel: channel.id }),
     })
-    await addNotificationForRuntimeData(
-      overlay,
+    await addNotification(
       [ownerMember.id],
-      event,
+      new RuntimeNotificationParams(overlay, event),
       new ChannelNotification({ channel: channel.id })
     )
   }
@@ -344,10 +338,9 @@ export async function processChannelFundsWithdrawnEvent({
     }),
   })
 
-  await addNotificationForRuntimeData(
-    overlay,
+  await addNotification(
     [channel.ownerMemberId],
-    entityEvent,
+    new RuntimeNotificationParams(overlay, entityEvent),
     new ChannelNotification()
   )
 }
