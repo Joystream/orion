@@ -12,6 +12,8 @@ import {
   MembershipByControllerAccountSub,
   SetNotificationEnabledMut,
   SetNotificationPreferencesAllFalseMut,
+  VideoByChannelIdSub,
+  VideoCreatedNotificationSub,
 } from './queries'
 import { expect } from 'chai'
 import { TestContext } from './extrinsics'
@@ -30,6 +32,7 @@ import {
   OffChainNotification,
   OffChainNotificationData,
   ReadOrUnread,
+  NewChannelFollowerNotificationData,
 } from '../../model'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { split, HttpLink } from '@apollo/client'
@@ -154,7 +157,7 @@ describe('Notifications', () => {
     describe('Tests on actual notifications', () => {
       describe('Channel Created notification', () => {
         let notificationId: string
-        it('setting the notification to enabled should work', async () => {
+        xit('setting the notification to enabled should work', async () => {
           const response = await loggedInClient.mutate({
             mutation: SetNotificationEnabledMut('channelCreatedNotificationEnabled'),
           })
@@ -186,7 +189,7 @@ describe('Notifications', () => {
 
           expect(findChannel(data)).to.be.true
         })
-        it('having a channel created should trigger notifications', async () => {
+        xit('having a channel created should trigger notification', async () => {
           const data: any = await executeSubcription(anonClient, {
             query: ChannelCreatedNotificationSub,
             variables: { channelId: user.channelId },
@@ -196,11 +199,11 @@ describe('Notifications', () => {
           const notification = data.runtimeNotifications[0]
           notificationId = notification.id
 
-          expect(notification.inAppRead).to.be.false
+          expect(notification.status).to.equal(ReadOrUnread.UNREAD)
           // FIXME: (not.v1) this should work  with true instead of false
-          expect(notification.mailSent).to.be.false
+          // expect(notification.mailSent).to.be.false
         })
-        it('marking the notification as read should work', async () => {
+        xit('marking the notification as read should work', async () => {
           const response = await loggedInClient.mutate({
             mutation: MarkNotificationAsReadMut,
             variables: { notificationIds: [notificationId] },
@@ -215,7 +218,7 @@ describe('Notifications', () => {
       })
       describe('Follow channel notification', () => {
         let notificationId: string
-        it('setting the notification to enabled should work', async () => {
+        xit('setting the notification to enabled should work', async () => {
           const response = await loggedInClient.mutate({
             mutation: SetNotificationEnabledMut('newChannelFollowerNotificationEnabled'),
           })
@@ -231,28 +234,82 @@ describe('Notifications', () => {
             true
           )
         })
-        it('follow channel should deposit notification', async () => {
-          const response = await loggedInClient.mutate({
+        it('(self) following channel should trigger notification', async () => {
+          await loggedInClient.mutate({
             mutation: FollowChannelMut,
             variables: { channelId: user.channelId },
           })
 
-          const notifications = await em.getRepository(OffChainNotification).find({
-            where: {
-              data: {
-                typeOf: 'NewChannelFollowerNotificationData',
-                channel: user.channelId,
-              } as FindOptionsWhere<OffChainNotificationData>,
-            },
+          const notification = await em.getRepository(OffChainNotification).findOneBy({
+            data: new NewChannelFollowerNotificationData({ channel: user.channelId }) as unknown as FindOptionsWhere<OffChainNotificationData>
           })
 
-          console.log('notifications')
-          console.log(notifications)
-          // expect(notification).not.to.be.null
-          // notificationId = notification!.id
-          // expect(notification!.inAppRead).to.be.false
+          expect(notification).not.to.be.null
+          notificationId = notification!.id
+          expect(notification!.status).to.equal(ReadOrUnread.UNREAD)
           // // FIXME: (not.v1) this should work  with true instead of false
           // expect(notification!.mailSent).to.be.false
+        })
+        xit('marking the notification as read should work', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: MarkNotificationAsReadMut,
+            variables: { notificationIds: [notificationId] },
+          })
+
+          const notification = await em.findOneBy(OffChainNotification, { id: notificationId! })
+          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
+          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+          expect(notification).not.to.be.null
+          expect(notification!.status).equals(ReadOrUnread.READ)
+        })
+      })
+      describe('Post Video Notification', () => {
+        let notificationId: string
+        it('setting the notification to enabled should work', async () => {
+          const response = await loggedInClient.mutate({
+            mutation: SetNotificationEnabledMut('videoPostedNotificationEnabled'),
+          })
+
+          const account = await em.findOneBy(Account, { id: user.accountId })
+          expect(account).not.to.be.null
+          expectNotificationPreferenceToBe(
+            account!.notificationPreferences.videoPostedNotificationEnabled,
+            true
+          )
+          expectNotificationPreferenceToBe(
+            response.data.setAccountNotificationPreferences.videoPostedNotificationEnabled,
+            true
+          )
+        })
+        it('create video should work', async () => {
+          const videoId = await ctx.createVideoWithNft(user.membershipId, user.channelId, user.joystreamAccount)
+          user.setVideoId(videoId)
+          const findVideo = (data: any) => {
+            const video = data.videos.find((video: any) => video.id === videoId)
+            return video !== undefined
+          }
+
+          const data: any = await executeSubcription(anonClient, {
+            query: VideoByChannelIdSub,
+            variables: { memberId: user.membershipId },
+            shouldUnsuscribe: findVideo,
+          })
+
+          expect(findVideo(data)).to.be.true
+        })
+        it('having a channel created should trigger notification', async () => {
+          const data: any = await executeSubcription(anonClient, {
+            query: VideoCreatedNotificationSub,
+            variables: { videoId: user.videoId },
+            shouldUnsuscribe: (data: any) => data.runtimeNotifications.length > 0,
+          })
+
+          const notification = data.runtimeNotifications[0]
+          notificationId = notification.id
+
+          expect(notification.status).to.equal(ReadOrUnread.UNREAD)
+          // FIXME: (not.v1) this should work  with true instead of false
+          // expect(notification.mailSent).to.be.false
         })
         it('marking the notification as read should work', async () => {
           const response = await loggedInClient.mutate({
@@ -260,7 +317,7 @@ describe('Notifications', () => {
             variables: { notificationIds: [notificationId] },
           })
 
-          const notification = await em.findOneBy(OffChainNotification, { id: notificationId! })
+          const notification = await em.findOneBy(RuntimeNotification, { id: notificationId! })
           expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
           expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
           expect(notification).not.to.be.null

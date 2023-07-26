@@ -15,6 +15,8 @@ import {
   VideoViewEvent,
   Event,
   ChannelNotification,
+  User,
+  Account,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
@@ -108,10 +110,10 @@ export async function processVideoCreatedEvent({
     }
   }
 
+  console.log('***** Video created', video.id, video.title, video.description)
+
   channel.totalVideosCreated += 1
-  const followers = (
-    await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId: channel.id })
-  ).map((follow) => follow.user.id)
+
 
   const eventEntity = overlay.getRepository(Event).new({
     id: `${block.height}-${indexInBlock}`,
@@ -122,8 +124,18 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
+  console.log('***** Add notification')
+  // get followers Account Id by getting ChannelFollowRelation user id and then query the Account relation for userId
+  const followersAccountIds = (
+    await overlay
+      .getEm()
+      .getRepository(ChannelFollow)
+      .find({ channel: channel.id })
+  ).map((follow) => follow.user)
+
+
   await addNotification(
-    followers,
+    followersAccountIds,
     new RuntimeNotificationParams(overlay, eventEntity),
     new ChannelNotification()
   )

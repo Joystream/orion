@@ -27,9 +27,11 @@ import {
   Channel,
   ChannelFollow,
   ChannelNotification,
-  fromJsonOffChainNotificationData,
   Report,
   Exclusion,
+  NewChannelFollowerNotificationData,
+  ChannelVerifiedNotificationData,
+  ChannelExcludedNotificationData,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -45,7 +47,7 @@ import { addNotification, OffChainNotificationParams } from '../../../utils/noti
 @Resolver()
 export class ChannelsResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) {}
+  constructor(private em: () => Promise<EntityManager>) { }
 
   @Query(() => [ExtendedChannel])
   async extendedChannels(
@@ -83,7 +85,7 @@ export class ChannelsResolver {
       `"channel"."id" IN (${mostRecentChannelsQuerySql})`,
       'AND'
     )
-    ;(listQuery as { sql: string }).sql = listQuerySql
+      ; (listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
     console.log('Result', result)
@@ -153,7 +155,7 @@ export class ChannelsResolver {
       )
     }
 
-    ;(listQuery as { sql: string }).sql = listQuerySql
+    ; (listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
@@ -210,22 +212,16 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
 
-      const ownerMember = channel.ownerMember
-      if (ownerMember) {
-        const account = ctx.account
-        if (account) {
-          await addNotification(
-            [account.id],
-            new OffChainNotificationParams(
-              em,
-              fromJsonOffChainNotificationData({
-                typeOf: 'NewChannelFollowerNotificationData',
-                channel: channelId,
-              })
-            ),
-            new ChannelNotification()
-          )
-        }
+      const ownerAccountId = await this.getChannelOwnerAccountId(channel)
+      if (ownerAccountId) {
+        await addNotification(
+          [ownerAccountId],
+          new OffChainNotificationParams(
+            em,
+            new NewChannelFollowerNotificationData({ channel: channelId })
+          ),
+          new ChannelNotification({ channel: channelId})
+        )
       }
 
       await em.save([channel, newFollow])
@@ -344,12 +340,9 @@ export class ChannelsResolver {
             [ownerAccount.id],
             new OffChainNotificationParams(
               em,
-              fromJsonOffChainNotificationData({
-                typeOf: 'ChannelVerifiedNotificationData',
-                channel: channelId,
-              })
+              new ChannelVerifiedNotificationData({ phantom: Number(channelId) }),
             ),
-            new ChannelNotification()
+            new ChannelNotification({ channel: channelId })
           )
         }
       }
@@ -406,12 +399,9 @@ export class ChannelsResolver {
             [account.id],
             new OffChainNotificationParams(
               em,
-              fromJsonOffChainNotificationData({
-                _typeOf: 'ChannelExcludedNotificationData',
-                _channel: channel.id,
-              })
+              new ChannelExcludedNotificationData({ phantom: Number(channelId) }),
             ),
-            new ChannelNotification()
+            new ChannelNotification({ channel: channelId })
           )
         }
       }
@@ -426,4 +416,17 @@ export class ChannelsResolver {
       }
     })
   }
+
+
+  protected async getChannelOwnerAccountId(channel: Channel): Promise<string | null> {
+    const ownerMemberId = channel.ownerMemberId
+    const em = await this.em()
+    if (ownerMemberId) {
+      const ownerAccount = await em.getRepository(Account).findOneBy({ membershipId: ownerMemberId })
+      return ownerAccount ? ownerAccount.id : null
+    } else {
+      return null
+    }
+  }
 }
+
