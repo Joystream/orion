@@ -8,20 +8,15 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  ChannelFollow,
-  RuntimeNotification,
   Video,
   VideoCreatedEventData,
   VideoViewEvent,
   Event,
-  ChannelNotification,
-  User,
-  Account,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
-import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
+import { deleteVideo, encodeAssets, getFollowersAccountsForChannel, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 
@@ -110,10 +105,7 @@ export async function processVideoCreatedEvent({
     }
   }
 
-  console.log('***** Video created', video.id, video.title, video.description)
-
   channel.totalVideosCreated += 1
-
 
   const eventEntity = overlay.getRepository(Event).new({
     id: `${block.height}-${indexInBlock}`,
@@ -124,20 +116,11 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  console.log('***** Add notification')
-  // get followers Account Id by getting ChannelFollowRelation user id and then query the Account relation for userId
-  const followersAccountIds = (
-    await overlay
-      .getEm()
-      .getRepository(ChannelFollow)
-      .find({ channel: channel.id })
-  ).map((follow) => follow.user)
-
+  const followersAccounts = await getFollowersAccountsForChannel(overlay, channel.id)
 
   await addNotification(
-    followersAccountIds,
+    followersAccounts,
     new RuntimeNotificationParams(overlay, eventEntity),
-    new ChannelNotification()
   )
 
   if (autoIssueNft) {

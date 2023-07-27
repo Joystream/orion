@@ -26,7 +26,6 @@ import {
   Account,
   Channel,
   ChannelFollow,
-  ChannelNotification,
   Report,
   Exclusion,
   NewChannelFollowerNotificationData,
@@ -43,6 +42,7 @@ import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
 import { addNotification, OffChainNotificationParams } from '../../../utils/notifications'
+import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 
 @Resolver()
 export class ChannelsResolver {
@@ -212,15 +212,14 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
 
-      const ownerAccountId = await this.getChannelOwnerAccountId(channel)
-      if (ownerAccountId) {
+      const ownerAccount = await getChannelOwnerAccount(em, channel)
+      if (ownerAccount) {
         await addNotification(
-          [ownerAccountId],
+          [ownerAccount],
           new OffChainNotificationParams(
             em,
             new NewChannelFollowerNotificationData({ channel: channelId })
           ),
-          new ChannelNotification({ channel: channelId})
         )
       }
 
@@ -337,12 +336,11 @@ export class ChannelsResolver {
         })
         if (ownerAccount) {
           await addNotification(
-            [ownerAccount.id],
+            [ownerAccount],
             new OffChainNotificationParams(
               em,
               new ChannelVerifiedNotificationData({ phantom: Number(channelId) }),
             ),
-            new ChannelNotification({ channel: channelId })
           )
         }
       }
@@ -396,12 +394,11 @@ export class ChannelsResolver {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
           await addNotification(
-            [account.id],
+            [account],
             new OffChainNotificationParams(
               em,
               new ChannelExcludedNotificationData({ phantom: Number(channelId) }),
             ),
-            new ChannelNotification({ channel: channelId })
           )
         }
       }
@@ -416,17 +413,4 @@ export class ChannelsResolver {
       }
     })
   }
-
-
-  protected async getChannelOwnerAccountId(channel: Channel): Promise<string | null> {
-    const ownerMemberId = channel.ownerMemberId
-    const em = await this.em()
-    if (ownerMemberId) {
-      const ownerAccount = await em.getRepository(Account).findOneBy({ membershipId: ownerMemberId })
-      return ownerAccount ? ownerAccount.id : null
-    } else {
-      return null
-    }
-  }
 }
-

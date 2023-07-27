@@ -7,10 +7,7 @@ import {
   MetaprotocolTransactionResultFailed,
   NftActivity,
   NftHistoryEntry,
-  RuntimeNotification,
-  NotificationType,
   Account,
-  EventData,
 } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -19,10 +16,6 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
-import { Flat } from 'lodash'
-import { ConfigVariable, config } from '../utils/config'
-import { MailNotifier } from '../utils/mail'
-import { preferencesForNotification } from '../utils/notifications'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()

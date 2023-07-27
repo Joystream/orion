@@ -17,7 +17,6 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
-  ChannelNotification,
   Comment,
   CommentCreatedEventData,
   CommentReaction,
@@ -25,7 +24,6 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
-  MemberNotification,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -49,7 +47,7 @@ import {
   commentCountersManager,
   videoRelevanceManager,
 } from '../utils'
-import { getChannelOwnerMemberByChannelId } from './utils'
+import { getAccountForMember, getChannelOwnerMemberByChannelId } from './utils'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -229,10 +227,10 @@ async function processVideoReaction(
         reactionType,
       }),
     })
+    const account = await getAccountForMember(overlay.getEm(), memberId)
     await addNotification(
-      [memberId],
+      [account],
       new RuntimeNotificationParams(overlay, event),
-      new MemberNotification()
     )
   }
 }
@@ -460,20 +458,20 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
+      const authorAccount = await getAccountForMember(overlay.getEm(), parentComment.authorId)
       await addNotification(
-        [parentComment.authorId],
+        [authorAccount],
         new RuntimeNotificationParams(overlay, event),
-        new ChannelNotification()
       )
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
+      const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
       await addNotification(
-        [channelOwnerMemberId],
+        [channelOwnerAccount],
         new RuntimeNotificationParams(overlay, event),
-        new ChannelNotification()
       )
     }
   }

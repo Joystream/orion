@@ -12,7 +12,7 @@ import {
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
   ChannelCreatedEventData,
-  ChannelNotification,
+  Account,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -24,7 +24,7 @@ import {
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
-import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActor } from './utils'
+import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActor, getChannelOwnerAccount } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -114,11 +114,14 @@ export async function processChannelCreatedEvent({
       timestamp: new Date(block.timestamp),
       data: new ChannelCreatedEventData({ channel: channel.id }),
     })
-    await addNotification(
-      [ownerMember.id],
-      new RuntimeNotificationParams(overlay, event),
-      new ChannelNotification({ channel: channel.id })
-    )
+
+    const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+    if (ownerAccount) {
+      await addNotification(
+        [ownerAccount],
+        new RuntimeNotificationParams(overlay, event),
+      )
+    }
   }
 }
 
@@ -198,8 +201,8 @@ export async function processChannelOwnerRemarkedEvent({
   const result = decodedMessage
     ? await processOwnerRemark(overlay, block, indexInBlock, extrinsicHash, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -223,8 +226,8 @@ export async function processChannelAgentRemarkedEvent({
   const result = decodedMessage
     ? await processModeratorRemark(overlay, channel, decodedMessage)
     : new MetaprotocolTransactionResultFailed({
-        errorMessage: 'Could not decode the metadata',
-      })
+      errorMessage: 'Could not decode the metadata',
+    })
   overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new MetaprotocolTransactionStatusEventData({
@@ -338,9 +341,12 @@ export async function processChannelFundsWithdrawnEvent({
     }),
   })
 
-  await addNotification(
-    [channel.ownerMemberId],
-    new RuntimeNotificationParams(overlay, entityEvent),
-    new ChannelNotification()
-  )
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+
+  if (channelOwnerAccount) {
+    await addNotification(
+      [channelOwnerAccount],
+      new RuntimeNotificationParams(overlay, entityEvent),
+    )
+  }
 }

@@ -4,13 +4,10 @@ import request from 'supertest'
 import { u8aToHex } from '@polkadot/util'
 import { uniqueId } from 'lodash'
 import { globalEm } from '../../utils/globalEm'
-import { AccountAccessData, LoggedInAccountInfo } from '../../auth-server/tests/common'
 import { components } from '../../auth-server/generated/api-types'
-import { Account } from '../../model'
 import { createCipheriv, randomBytes, scrypt, ScryptOptions } from 'crypto'
 import { ConfigVariable } from '../../utils/config'
 import { config } from '../../utils/config'
-import { EntityManager } from 'typeorm'
 
 export type EncryptionArtifacts = components['schemas']['EncryptionArtifacts']
 export type AccountCreationData = {

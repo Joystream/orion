@@ -5,7 +5,7 @@ import {
   NormalizedCacheObject,
   OperationVariables,
 } from '@apollo/client'
-import {} from '@apollo/client'
+import { } from '@apollo/client'
 import { expect } from 'chai'
 import { AccountNotificationPreferences, NotificationPreference } from '../../model'
 import {
@@ -51,11 +51,12 @@ export async function executeQuery(
   return data
 }
 
-export const MembershipByControllerAccountSub = gql`
-  subscription MembershipById($accountId: String!) {
-    memberships(where: { controllerAccount_eq: $accountId }) {
+export const MembershipByHandleSub = gql`
+  subscription membershipByHandle($handle: String!) {
+    memberships(where: { handle_eq: $handle }) {
       id
       handle
+      controllerAccount
     }
   }
 `
@@ -66,11 +67,6 @@ export const ChannelCreatedNotificationSub = gql`
       id
       status
       deliveryStatus
-      type {
-        ... on ChannelNotification {
-          __typename
-        }
-      }
       event {
         data {
           ... on ChannelCreatedEventData {
@@ -88,11 +84,6 @@ export const VideoCreatedNotificationSub = gql`
       id
       status
       deliveryStatus
-      type {
-        ... on ChannelNotification {
-          __typename
-        }
-      }
       event {
         data {
           ... on VideoCreatedEventData {
@@ -120,35 +111,21 @@ export const ChannelFollowerNotificationSub = gql`
       id
       mailSent
       inAppRead
-      type {
-        ... on ChannelNotification {
-          __typename
-        }
-        ... on MemberNotification {
-          __typename
-        }
-      }
     }
   }
 `
 
-export const ChannelByMemberIdSub = gql`
-  subscription ChannelByMemberId($memberId: String!) {
-    channels(where: { ownerMember: { id_eq: $memberId } }) {
-      id
-      isCensored
-      isExcluded
-      isPublic
-      isVerified
-      language
-      title
-    }
+export const ChannelByIdSub = gql`
+subscription ChannelById($channelId: String!) {
+  channels(where: {id_eq: $channelId}) {
+    id
   }
+}
 `
 
-export const VideoByChannelIdSub = gql`
-  subscription VideosByChannelid($channelId: String!) {
-    videos(where: { channel: { id_eq: $channelId } }) {
+export const VideoByIdSub = gql`
+  subscription VideosById($videoId: String!) {
+    videos(where: { id_eq: $videoId } ) {
       id
       commentsCount
       isPublic

@@ -14,7 +14,6 @@ import {
   Video,
   Report,
   Exclusion,
-  MemberNotification,
   fromJsonOffChainNotificationData,
   Account,
 } from '../../../model'
@@ -356,14 +355,13 @@ export class VideosResolver {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
           await addNotification(
-            [account.id],
+            [account],
             new OffChainNotificationParams(
               em,
               fromJsonOffChainNotificationData({
                 typeOf: 'VideoExcludedNotificationData',
               })
             ),
-            new MemberNotification()
           )
         }
       }
