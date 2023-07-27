@@ -1,5 +1,5 @@
-module.exports = class Data1690365778409 {
-    name = 'Data1690365778409'
+module.exports = class Data1690459187875 {
+    name = 'Data1690459187875'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -93,10 +93,10 @@ module.exports = class Data1690365778409 {
         await db.query(`CREATE INDEX "IDX_1298811c0de5f11198fd43df72" ON "membership" ("handle") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
-        await db.query(`CREATE TABLE "runtime_notification" ("id" character varying NOT NULL, "account_id" character varying, "event_id" character varying, "type" jsonb NOT NULL, "delivery_status" character varying(16) NOT NULL, "status" character varying(6) NOT NULL, CONSTRAINT "PK_386ebd5073dfbf98526a4f73218" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "runtime_notification" ("id" character varying NOT NULL, "account_id" character varying, "event_id" character varying, "delivery_status" character varying(16) NOT NULL, "status" character varying(6) NOT NULL, CONSTRAINT "PK_386ebd5073dfbf98526a4f73218" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2c5b0cbfabbb47fc390f5b1574" ON "runtime_notification" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_e1fbf907648973272e0b2d7360" ON "runtime_notification" ("event_id") `)
-        await db.query(`CREATE TABLE "off_chain_notification" ("id" character varying NOT NULL, "account_id" character varying, "data" jsonb NOT NULL, "type" jsonb NOT NULL, "delivery_status" character varying(16) NOT NULL, "status" character varying(6) NOT NULL, CONSTRAINT "PK_079caa028b5524d617d5d6373a8" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "off_chain_notification" ("id" character varying NOT NULL, "account_id" character varying, "data" jsonb NOT NULL, "delivery_status" character varying(16) NOT NULL, "status" character varying(6) NOT NULL, CONSTRAINT "PK_079caa028b5524d617d5d6373a8" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_0c3e1755ee7400ff697ddd2fa6" ON "off_chain_notification" ("account_id") `)
         await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "user_id" character varying NOT NULL, "email" text NOT NULL, "is_email_confirmed" boolean NOT NULL, "is_blocked" boolean NOT NULL, "registered_at" TIMESTAMP WITH TIME ZONE NOT NULL, "membership_id" character varying NOT NULL, "joystream_account" text NOT NULL, "notification_preferences" jsonb NOT NULL, CONSTRAINT "Account_joystreamAccount" UNIQUE ("joystream_account") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_membership" UNIQUE ("membership_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_email" UNIQUE ("email") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_user" UNIQUE ("user_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_efef1e5fdbe318a379c06678c5" UNIQUE ("user_id"), CONSTRAINT "REL_601b93655bcbe73cb58d8c80cd" UNIQUE ("membership_id"), CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_efef1e5fdbe318a379c06678c5" ON "account" ("user_id") `)

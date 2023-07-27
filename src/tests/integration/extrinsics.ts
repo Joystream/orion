@@ -1,4 +1,5 @@
 // Import the keyring as required
+import { ApolloClient } from '@apollo/client'
 import { ApiPromise } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { u64, BTreeSet } from '@polkadot/types'
@@ -68,7 +69,7 @@ export class TestContext {
             }
             result.events.forEach(({ event: { data, method, section } }) => {
               if (section === 'content' && method === 'VideoCreated') {
-                videoId = data[1].toString()
+                videoId = data[2].toString()
               }
             })
             resolve(unsub)
@@ -146,3 +147,4 @@ export class TestContext {
     return memberId
   }
 }
+

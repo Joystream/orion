@@ -38,9 +38,6 @@ type RuntimeNotification @entity {
   "The notification event"
   event: Event!
 
-  "Member Or Channel related notification"
-  type: NotificationType!
-
   "how the notification has been delivered"
   deliveryStatus: DeliveryStatus!
 
@@ -468,9 +465,6 @@ type OffChainNotification @entity {
 
   "The notification data associated"
   data: OffChainNotificationData!
-
-  "Member Or Channel related notification"
-  type: NotificationType!
 
   "how the notification has been delivered"
   deliveryStatus: DeliveryStatus!

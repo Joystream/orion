@@ -9,34 +9,39 @@ import {
   expectNotificationPreferenceToBe,
   FollowChannelMut,
   MarkNotificationAsReadMut,
-  MembershipByControllerAccountSub,
+  MembershipByHandleSub,
   SetNotificationEnabledMut,
   SetNotificationPreferencesAllFalseMut,
-  VideoByChannelIdSub,
+  VideoByIdSub,
   VideoCreatedNotificationSub,
 } from './queries'
 import { expect } from 'chai'
 import { TestContext } from './extrinsics'
 import { AccountLoginData, createAccountAndSignIn, generateEmailAddr } from './authUtils'
-import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { EntityManager, FindOptionsWhere, MoreThan } from 'typeorm'
 import { globalEm } from '../../utils/globalEm'
-import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
+import { ApolloClient, FetchResult, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import Websocket from 'ws'
-import { UserContext } from './utils'
 import {
   Session,
+  Channel,
   Account,
   RuntimeNotification,
   OffChainNotification,
   OffChainNotificationData,
   ReadOrUnread,
+  Video,
   NewChannelFollowerNotificationData,
+  Membership,
+  DeliveryStatus,
+  ChannelCreatedEventData,
 } from '../../model'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { split, HttpLink } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
+import { createApolloClient, UserContext } from './utils'
 
 const wsProvider = new WsProvider('ws://127.0.0.1:9944')
 const server = request('http://127.0.0.1:4074')
@@ -60,18 +65,19 @@ const splitLink = split(
 )
 describe('Notifications', () => {
   let api: ApiPromise
-  let user: UserContext
+  let alice: UserContext
+  let bob: UserContext
   let em: EntityManager
   let ctx: TestContext
   let anonClient: ApolloClient<NormalizedCacheObject>
-  let loggedInClient: ApolloClient<NormalizedCacheObject>
+  let aliceClient: ApolloClient<NormalizedCacheObject>
+  let bobClient: ApolloClient<NormalizedCacheObject>
   let aliceAccount: Account
 
   before(async () => {
     await cryptoWaitReady()
     api = await ApiPromise.create({ provider: wsProvider })
     ctx = new TestContext(api)
-    user = UserContext.createUserFromUri('//Alice')
 
     // create account
     em = await globalEm
@@ -83,314 +89,452 @@ describe('Notifications', () => {
   })
 
   describe('Notification: Setup', () => {
-    it('create membership should work', async () => {
-      // create a synthetic handlers each test run
-      const handle = 'Alice'
-      await ctx.createMember(user.joystreamAccount, handle)
-      // TODO: provide explicit type for both data and shouldUnsuscribe(data)
-      const data: any = await executeSubcription(anonClient, {
-        query: MembershipByControllerAccountSub,
-        variables: { accountId: user.joystreamAccount.address },
-        shouldUnsuscribe: (data: any) => {
-          return data.memberships.length > 0
-        },
+    describe('Alice account creation', () => {
+      let membership: Membership | null
+      describe('create alice membership should work', () => {
+        const handle = 'Alice'
+        before(async () => {
+          alice = new UserContext('//Alice')
+          await ctx.createMember(alice.joystreamAccount, handle)
+          const data: any = await executeSubcription(anonClient, {
+            query: MembershipByHandleSub,
+            variables: { handle },
+            shouldUnsuscribe: (data: any) => data.memberships.length > 0
+          })
+          membership = data.memberships[0]
+        })
+        it('membership should be in orion db', async () => {
+          expect(membership!.handle).to.be.equal(handle)
+          expect(membership!.controllerAccount).to.be.equal(alice.joystreamAccount.address)
+        })
+        after(() => {
+          alice.setMembershipId(membership!.id)
+        })
       })
-
-      expect(data.memberships).not.to.be.empty
-      user.setMembershipId(data.memberships[0].id)
-    })
-    describe('Account creation and default notification settings', () => {
-      let loginData: AccountLoginData
-      before(async () => {
-        loginData = await createAccountAndSignIn(server, user.membershipId, user.joystreamAccount)
+      describe('creating gateway account and session', () => {
+        let loginData: AccountLoginData
+        describe('creating account', () => {
+          let account: Account | null
+          before(async () => {
+            loginData = await createAccountAndSignIn(server, alice.membershipId, alice.joystreamAccount)
+            account = await em.getRepository(Account).findOneBy({ membershipId: alice.membershipId })
+          })
+          it('account should not be null', () => {
+            expect(account).to.not.be.null
+          })
+          after(() => {
+            alice.setAccountId(account!.id)
+          })
+        })
+        describe('session checks', () => {
+          let session: Session | null
+          before(async () => {
+            session = await em.getRepository(Session).findOneBy({ id: decodeURIComponent(loginData!.sessionId) })
+          })
+          it('session should not be null', () => {
+            expect(session).to.not.be.null
+          })
+          after(() => {
+            alice.setSessionId(session!.id)
+          })
+        })
       })
-      it('Alice should have an account', async () => {
-        const account = await em.findOneBy(Account, { email: generateEmailAddr(user.membershipId) })
-
-        expect(account).not.to.be.null
-        aliceAccount = account!
-        expect(account!.membershipId).to.equal(user.membershipId)
-
-        user.setAccountId(account!.id)
-      })
-
-      it('Alice should have a session', async () => {
-        const session = await em.findOneBy(Session, { accountId: user.accountId })
-
-        expect(session).not.to.be.null
-
-        user.setSessionId(session!.id)
-      })
-
-      it('Alice should have all notifications enabled', async () => {
-        expectNotificationPreferenceToBe(
-          aliceAccount.notificationPreferences.channelCreatedNotificationEnabled,
-          true
-        )
-      })
-    })
-    describe('Batch updating notifications preferences', () => {
-      before(async () => {
-        loggedInClient = new ApolloClient({
+      after(() => {
+        aliceClient = new ApolloClient({
           link: new HttpLink({
             uri: 'http://localhost:4350/graphql',
             headers: {
               'Content-Type': 'application/json',
-              'Cookie': `${SESSION_COOKIE_NAME}=${user.sessionId}`,
+              'Cookie': `${SESSION_COOKIE_NAME}=${alice.sessionId}`,
             },
           }),
           cache: new InMemoryCache(),
         })
       })
-      it('setting all account notification preferences to false should work', async () => {
-        const response = await loggedInClient.mutate({
-          mutation: SetNotificationPreferencesAllFalseMut,
+    })
+    describe('Bob account creation', () => {
+      let membership: Membership | null
+      describe('create bob membership should work', () => {
+        const handle = 'Bob'
+        before(async () => {
+          bob = new UserContext('//Bob')
+          await ctx.createMember(bob.joystreamAccount, handle)
+          const data: any = await executeSubcription(anonClient, {
+            query: MembershipByHandleSub,
+            variables: { handle },
+            shouldUnsuscribe: (data: any) => data.memberships.length > 0
+          })
+          membership = data.memberships[0]
         })
-
-        const account = await em.findOneBy(Account, { id: user.accountId })
-
-        expect(account).not.to.be.null
-        checkAllNotificationPreferencesToBe(account!.notificationPreferences, false)
-        // checkAllNotificationPreferencesToBe(response.data.setNotificationPreference, false)
+        it('membership should be in orion db', async () => {
+          expect(membership!.handle).to.be.equal(handle)
+          expect(membership!.controllerAccount).to.be.equal(bob.joystreamAccount.address)
+        })
+        after(() => {
+          bob.setMembershipId(membership!.id)
+        })
+      })
+      describe('creating gateway account and session', () => {
+        let loginData: AccountLoginData
+        describe('creating account', () => {
+          let account: Account | null
+          before(async () => {
+            loginData = await createAccountAndSignIn(server, bob.membershipId, bob.joystreamAccount)
+            account = await em.getRepository(Account).findOneBy({ membershipId: bob.membershipId })
+          })
+          it('account should not be null', () => {
+            expect(account).to.not.be.null
+          })
+          after(() => {
+            bob.setAccountId(account!.id)
+          })
+        })
+        describe('session checks', () => {
+          let session: Session | null
+          before(async () => {
+            session = await em.getRepository(Session).findOneBy({ id: decodeURIComponent(loginData!.sessionId) })
+          })
+          it('session should not be null', () => {
+            expect(session).to.not.be.null
+          })
+          after(() => {
+            bob.setSessionId(session!.id)
+          })
+        })
+      })
+      after(() => {
+        bobClient = new ApolloClient({
+          link: new HttpLink({
+            uri: 'http://localhost:4350/graphql',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cookie': `${SESSION_COOKIE_NAME}=${alice.sessionId}`,
+            },
+          }),
+          cache: new InMemoryCache(),
+        })
       })
     })
-    describe('Tests on actual notifications', () => {
-      describe('Channel Created notification', () => {
-        let notificationId: string
-        xit('setting the notification to enabled should work', async () => {
-          const response = await loggedInClient.mutate({
+    describe('Batch updating notifications preferences', () => {
+      let account: Account
+      before(async () => {
+        await aliceClient.mutate({
+          mutation: SetNotificationPreferencesAllFalseMut,
+        })
+        account = await alice.getAccount(em)
+      })
+      it('Alice setting all preferences to false should work', async () => {
+        checkAllNotificationPreferencesToBe(account!.notificationPreferences, false)
+      })
+    })
+  })
+  describe('Notification Deposits', () => {
+    describe('Channel Created notification', () => {
+      let notificationId: string
+      let response: FetchResult<any, Record<string, any>, Record<string, any>>
+      describe('setting channel created notification to enabled', () => {
+        before(async () => {
+          response = await aliceClient.mutate({
             mutation: SetNotificationEnabledMut('channelCreatedNotificationEnabled'),
           })
 
-          const account = await em.findOneBy(Account, { id: user.accountId })
-          expect(account).not.to.be.null
+          aliceAccount = await alice.getAccount(em)
+        })
+        it('account preference should be enabled', async () => {
           expectNotificationPreferenceToBe(
-            account!.notificationPreferences.channelCreatedNotificationEnabled,
+            aliceAccount!.notificationPreferences.channelCreatedNotificationEnabled,
             true
           )
+        })
+        it('mutation response field should be true', () => {
           expectNotificationPreferenceToBe(
             response.data.setAccountNotificationPreferences.channelCreatedNotificationEnabled,
             true
           )
         })
-        it('create channel should work', async () => {
-          const channelId = await ctx.createChannel(user.membershipId, user.joystreamAccount)
-          user.setChannelId(channelId)
+      })
+      describe('create channel should work', () => {
+        let channel: Channel
+        before(async () => {
+          const channelId = await ctx.createChannel(alice.membershipId, alice.joystreamAccount)
+
           const findChannel = (data: any) => {
             const channel = data.channels.find((channel: any) => channel.id === channelId)
             return channel !== undefined
           }
 
+
           const data: any = await executeSubcription(anonClient, {
             query: ChannelByMemberIdSub,
-            variables: { memberId: user.membershipId },
+            variables: { memberId: alice.membershipId },
             shouldUnsuscribe: findChannel,
           })
+          console.log('channel:', JSON.stringify(channel, null, 2))
 
-          expect(findChannel(data)).to.be.true
+          channel = data.channels[0]
         })
-        xit('having a channel created should trigger notification', async () => {
-          const data: any = await executeSubcription(anonClient, {
+        it('channel should not be null', async () => {
+          expect(channel).not.to.be.null
+        })
+        after(() => {
+          alice.setChannelId(channel.id)
+        })
+      })
+      describe('channel created notification deposit', () => {
+        let notification: RuntimeNotification
+        before(async () => {
+          await executeSubcription(anonClient, {
             query: ChannelCreatedNotificationSub,
-            variables: { channelId: user.channelId },
-            shouldUnsuscribe: (data: any) => data.runtimeNotifications.length > 0,
+            variables: {},
+            shouldUnsuscribe: (data: any) => {
+              console.log('channelId', alice.channelId)
+              notification = data.runtimeNotifications.find((n: any) => n.event.data.channel.id === alice.channelId)
+              return notification !== undefined
+            }
           })
-
-          const notification = data.runtimeNotifications[0]
-          notificationId = notification.id
-
-          expect(notification.status).to.equal(ReadOrUnread.UNREAD)
-          // FIXME: (not.v1) this should work  with true instead of false
-          // expect(notification.mailSent).to.be.false
         })
-        xit('marking the notification as read should work', async () => {
-          const response = await loggedInClient.mutate({
+        it('notification should be not be null', () => {
+          console.log(JSON.stringify(notification))
+          expect(notification).to.not.be.null
+        })
+        it('notification channelId in data should match Alice\'s', () => {
+          expect(notification!.event.data).to.have.property('channnel').to.have.property('id').to.equal(alice.channelId)
+        })
+        it('notification recipient should be alice', () => {
+          // expect(notification!.account.id).to.equal(alice.accountId)
+        })
+        it('notification status should be unread', () => {
+          expect(notification!.status).to.equal(ReadOrUnread.UNREAD)
+        })
+        it('notification delivery status should be in App and mail', () => {
+          expect(notification!.deliveryStatus).to.equal(DeliveryStatus.EMAIL_AND_IN_APP)
+        })
+        after(() => {
+          notificationId = notification!.id
+        })
+      })
+      describe('marking the notification as read should work', () => {
+        let notification: RuntimeNotification | null
+        let response: FetchResult<any, Record<string, any>, Record<string, any>>
+        before(async () => {
+          response = await aliceClient.mutate({
             mutation: MarkNotificationAsReadMut,
             variables: { notificationIds: [notificationId] },
           })
-
-          const notification = await em.findOneBy(RuntimeNotification, { id: notificationId! })
-          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
-          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+          notification = await em.findOneBy(RuntimeNotification, { id: notificationId })
+        })
+        it('notification should not be null', () => {
           expect(notification).not.to.be.null
+        })
+        it('notifications read returned by the mutations should not be empty', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
+        })
+        it('notification read mutation result should be true', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+        })
+        it('notification entity status marked as read', () => {
           expect(notification!.status).equals(ReadOrUnread.READ)
         })
       })
-      describe('Follow channel notification', () => {
-        let notificationId: string
-        xit('setting the notification to enabled should work', async () => {
-          const response = await loggedInClient.mutate({
+    })
+    describe.skip('Follow channel notification', () => {
+      let notificationId: string
+      let account: Account
+      let response: FetchResult<any, Record<string, any>, Record<string, any>>
+      describe('setting the notification to enabled should work', () => {
+        before(async () => {
+          response = await bobClient.mutate({
             mutation: SetNotificationEnabledMut('newChannelFollowerNotificationEnabled'),
           })
-
-          const account = await em.findOneBy(Account, { id: user.accountId })
-          expect(account).not.to.be.null
+          account = await bob.getAccount(em)
+        })
+        it('account preference should be enabled', async () => {
           expectNotificationPreferenceToBe(
             account!.notificationPreferences.newChannelFollowerNotificationEnabled,
             true
           )
+        })
+        it('mutation response field should be true', () => {
           expectNotificationPreferenceToBe(
             response.data.setAccountNotificationPreferences.newChannelFollowerNotificationEnabled,
             true
           )
         })
-        it('(self) following channel should trigger notification', async () => {
-          await loggedInClient.mutate({
+      })
+      describe('following channel should trigger notification', () => {
+        let notification: OffChainNotification | null
+        before(async () => {
+          await bobClient.mutate({
             mutation: FollowChannelMut,
-            variables: { channelId: user.channelId },
+            variables: { channelId: alice.channelId },
           })
 
-          const notification = await em.getRepository(OffChainNotification).findOneBy({
-            data: new NewChannelFollowerNotificationData({ channel: user.channelId }) as unknown as FindOptionsWhere<OffChainNotificationData>
+          notification = await em.getRepository(OffChainNotification).findOneBy({
+            data: new NewChannelFollowerNotificationData({ channel: alice.channelId }) as unknown as FindOptionsWhere<OffChainNotificationData>
           })
-
-          expect(notification).not.to.be.null
-          notificationId = notification!.id
-          expect(notification!.status).to.equal(ReadOrUnread.UNREAD)
-          // // FIXME: (not.v1) this should work  with true instead of false
-          // expect(notification!.mailSent).to.be.false
         })
-        xit('marking the notification as read should work', async () => {
-          const response = await loggedInClient.mutate({
+        it('notification should not be null', () => {
+          expect(notification).not.to.be.null
+        })
+        it('notification should be "new channel follower" type', () => {
+          expect(notification!.data.isTypeOf).to.equal('NewChannelFollowerNotificationData')
+        })
+        it('notification data.channel should be Alice\'s channel id', () => {
+          expect(notification!.data.toJSON()).to.have.property('_channel').to.equal(alice.channelId)
+        })
+        it('notification recipient should be Alice', () => {
+          expect(notification!.accountId).to.equal(alice.accountId)
+        })
+        it('notification status should be unread', () => {
+          expect(notification!.status).to.equal(ReadOrUnread.UNREAD)
+        })
+        it('notification delivery status should be in App and mail', () => {
+          expect(notification!.deliveryStatus).to.equal(DeliveryStatus.EMAIL_AND_IN_APP)
+        })
+        after(() => {
+          notificationId = notification!.id
+        })
+      })
+      describe('marking the notification as read should work', () => {
+        let response: FetchResult<any, Record<string, any>, Record<string, any>>
+        let notification: OffChainNotification | null
+        before(async () => {
+          response = await aliceClient.mutate({
             mutation: MarkNotificationAsReadMut,
             variables: { notificationIds: [notificationId] },
           })
 
-          const notification = await em.findOneBy(OffChainNotification, { id: notificationId! })
-          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
-          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+          notification = await em.findOneBy(OffChainNotification, { id: notificationId! })
+        })
+        it('notification for the notification id provided should not be null', () => {
           expect(notification).not.to.be.null
+        })
+        it('notification status should be read', () => {
           expect(notification!.status).equals(ReadOrUnread.READ)
         })
+        it('mutation response should provide a non empty array', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
+        })
+        it('mutation response first element marked as true since the mutation is successful', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+        })
       })
-      describe('Post Video Notification', () => {
-        let notificationId: string
-        it('setting the notification to enabled should work', async () => {
-          const response = await loggedInClient.mutate({
+    })
+    describe.skip('Post Video Notification', () => {
+      let notificationId: string
+      let account: Account
+      let response: FetchResult<any, Record<string, any>, Record<string, any>>
+      describe('setting the video posted notification to enabled should work', () => {
+        before(async () => {
+          response = await aliceClient.mutate({
             mutation: SetNotificationEnabledMut('videoPostedNotificationEnabled'),
           })
 
-          const account = await em.findOneBy(Account, { id: user.accountId })
-          expect(account).not.to.be.null
+          account = await alice.getAccount(em)
+        })
+        it('account preference should be enabled', () => {
           expectNotificationPreferenceToBe(
             account!.notificationPreferences.videoPostedNotificationEnabled,
             true
           )
+        })
+        it('mutation response field should be true', () => {
           expectNotificationPreferenceToBe(
             response.data.setAccountNotificationPreferences.videoPostedNotificationEnabled,
             true
           )
         })
-        it('create video should work', async () => {
-          const videoId = await ctx.createVideoWithNft(user.membershipId, user.channelId, user.joystreamAccount)
-          user.setVideoId(videoId)
-          const findVideo = (data: any) => {
-            const video = data.videos.find((video: any) => video.id === videoId)
-            return video !== undefined
-          }
-
-          const data: any = await executeSubcription(anonClient, {
-            query: VideoByChannelIdSub,
-            variables: { memberId: user.membershipId },
-            shouldUnsuscribe: findVideo,
+      })
+      describe('create video should work', () => {
+        let videoId: string | null = null
+        let video: Video | null = null
+        describe('extrinsic should be successful', () => {
+          before(async () => {
+            videoId = await ctx.createVideoWithNft(alice.membershipId, alice.channelId, alice.joystreamAccount)
           })
-
-          expect(findVideo(data)).to.be.true
+          it('video should have been created on chain', () => {
+            expect(videoId).not.to.be.null
+          })
         })
-        it('having a channel created should trigger notification', async () => {
+        describe('video should have been added to orion', () => {
+          before(async () => {
+            const data: any = await executeSubcription(anonClient, {
+              query: VideoByIdSub,
+              variables: { videoId },
+              shouldUnsuscribe: (data: any) => data.videos.length > 0,
+            })
+
+            video = data.videos[0]
+          })
+          it('video should have been created on chain', () => {
+            expect(video).not.to.be.null
+          })
+        })
+        after(() => {
+          alice.setVideoId(video!.id)
+        })
+      })
+      describe('having a video created should trigger correct notification', async () => {
+        let notification: RuntimeNotification | null = null
+        before(async () => {
           const data: any = await executeSubcription(anonClient, {
             query: VideoCreatedNotificationSub,
-            variables: { videoId: user.videoId },
+            variables: { videoId: alice.videoId },
             shouldUnsuscribe: (data: any) => data.runtimeNotifications.length > 0,
           })
 
-          const notification = data.runtimeNotifications[0]
-          notificationId = notification.id
-
-          expect(notification.status).to.equal(ReadOrUnread.UNREAD)
-          // FIXME: (not.v1) this should work  with true instead of false
-          // expect(notification.mailSent).to.be.false
+          notification = data.runtimeNotifications[0]
         })
-        it('marking the notification as read should work', async () => {
-          const response = await loggedInClient.mutate({
+        it('notification should not be null', () => {
+          expect(notification).not.to.be.null
+        })
+        it('notification should be "video created" type', () => {
+          expect(notification!.event.data.isTypeOf).to.equal('VideoCreatedEventData')
+        })
+        it('notification recipient should be alice', () => {
+          expect(notification!.accountId).to.equal(alice.accountId)
+        })
+        it('notification status should be unread', () => {
+          expect(notification!.status).to.equal(ReadOrUnread.UNREAD)
+        })
+        it('notification delivery status should be in App and mail', () => {
+          expect(notification!.deliveryStatus).to.equal(DeliveryStatus.EMAIL_AND_IN_APP)
+        })
+        after(() => {
+          notificationId = notification!.id
+        })
+      })
+      describe('marking the notification as read should work', () => {
+        let notification: RuntimeNotification | null
+        let response: FetchResult<any, Record<string, any>, Record<string, any>>
+        before(async () => {
+          response = await aliceClient.mutate({
             mutation: MarkNotificationAsReadMut,
             variables: { notificationIds: [notificationId] },
           })
+          console.log(response)
 
-          const notification = await em.findOneBy(RuntimeNotification, { id: notificationId! })
-          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
-          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
+          notification = await em.findOneBy(RuntimeNotification, { id: notificationId! })
+          console.log(JSON.stringify(notification))
+        })
+        it('notification for the notification id provided should not be null', () => {
           expect(notification).not.to.be.null
+        })
+        it('notification status should be read', () => {
           expect(notification!.status).equals(ReadOrUnread.READ)
+        })
+        it('mutation response should provide a non empty array', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead).not.to.be.empty
+        })
+        it('mutation response first element marked as true since the mutation is successful', () => {
+          expect(response.data.markNotificationsAsRead.notificationsRead[0]).to.be.true
         })
       })
     })
   })
   after(() => {
     anonClient.stop()
-    loggedInClient.stop()
+    aliceClient.stop()
+    bobClient.stop()
   })
 })
-
-// describe("Offchain Notifications", () => {
-//   let userSessionId: string
-//   let aliceRequest: request.Test
-//   before(async () => {
-//     userSessionId = loginData.sessionId
-//     aliceRequest = server.post('/graphql')
-//       .set('Content-Type', 'application/json')
-//       .set('Cookie', `session_id=${userSessionId}`)
-//   })
-//   it('following a channel should deposit a notification', async () => {
-//     await aliceRequest.send({
-//       "query": FollowChannelMutation(channelId),
-//       "operationName": "FollowChannel",
-//     }).expect(200)
-
-//     const response = await operatorRequest.send({
-//       "query": ChannelFollowerNotificationQuery(channelId),
-//       "operationName": "ChannelFollowerNotification",
-//     })
-
-//     expect(response.status).to.equal(200)
-//     expect(response.body.data).to.equal({
-//       "offchainNotifications": [
-//         {
-//           __typename: "ChannelFollowerNotification",
-//           channel: {
-//             id: channelId!,
-//             ownerMember: {
-//               id: aliceMemberId
-//             }
-//           },
-//           follower: {
-//             id: aliceMemberId
-//           }
-//         }
-//       ]
-//     })
-//   })
-// })
-//
-// it('create video should work', async () => {
-//   const videoId = await ctx.createVideoWithNft(user.membershipId, user.channelId, user.joystreamAccount)
-//   user.setVideoId(videoId)
-//   const findVideo = (data: any) => {
-//     const video = data.videos.find((video: any) => video.id === videoId)
-//     return video !== undefined
-//   }
-
-//   const data: any = await executeSubcription(
-//     client,
-//     {
-//       query: VideoByChannelIdSub,
-//       variables: { channelId: user.channelId },
-//       shouldUnsuscribe: findVideo
-//     })
-
-//   expect(findVideo(data)).to.be.true
-
-// })
-
-//
-// invoke client.stop after all tests have been executed

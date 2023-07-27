@@ -56,7 +56,6 @@ import {
   MemberBannedFromChannelEventData,
   Membership,
   Event,
-  ChannelNotification,
 } from '../../model'
 import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -67,7 +66,7 @@ import {
   metaprotocolTransactionFailure,
   videoRelevanceManager,
 } from '../utils'
-import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
+import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, getAccountForMember, getChannelOwnerAccount, MetaNumberProps } from './utils'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -649,10 +648,10 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
+  const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
   await addNotification(
-    [channel.ownerMemberId],
+    [ownerAccount],
     new RuntimeNotificationParams(overlay, event),
-    new ChannelNotification()
   )
 
   return new MetaprotocolTransactionResultChannelPaid({

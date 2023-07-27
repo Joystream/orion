@@ -7,7 +7,6 @@ import {
   EventData,
   NextEntityId,
   NotificationPreference,
-  NotificationType,
   Event,
   OffChainNotification,
   OffChainNotificationData,
@@ -120,9 +119,8 @@ export function preferencesForNotification(
 }
 
 export async function addNotification(
-  accounts: Account[],
+  accounts: (Account | null)[],
   params: NotificationParams,
-  type: NotificationType
 ) {
   const em = params.getEm()
 
@@ -131,10 +129,10 @@ export async function addNotification(
   mailNotifier.setSubject(params.getDataForEmail())
   mailNotifier.setContentUsingTemplate('test')
 
-  for (const account of accounts) {
-    const notificationEntity = await params.createNotification(account, type)
+  for (const account of accounts.filter((account) => account)) {
+    const notificationEntity = await params.createNotification(account!)
     if (notificationEntity.shouldSendEmail) {
-      mailNotifier.setReciever(account.email)
+      mailNotifier.setReciever(account!.email)
       await mailNotifier.send()
       if (mailNotifier.mailHasBeenSent()) {
         notificationEntity.markEmailAsSent()
@@ -148,7 +146,6 @@ export async function addNotification(
 export abstract class NotificationParams {
   public abstract createNotification(
     account: Account,
-    type: NotificationType
   ): Promise<NewNotificationEntity>
   public abstract getDataForEmail(): string
   public abstract getEm(): EntityManager
@@ -230,7 +227,6 @@ export class OffChainNotificationParams extends NotificationParams {
 
   public async createNotification(
     account: Account,
-    type: NotificationType
   ): Promise<NewOffchainNotificationEntity> {
     const newNotificationId = await getNextIdForEntity(this._em, 'OffChainNotification')
 
@@ -238,7 +234,6 @@ export class OffChainNotificationParams extends NotificationParams {
     const notification = new OffChainNotification({
       id: newNotificationId.toString(),
       accountId: account.id,
-      type,
       status: ReadOrUnread.UNREAD,
       deliveryStatus: deliveryStatusFromPreference(pref),
       data: this._data,
@@ -275,7 +270,6 @@ export class RuntimeNotificationParams extends NotificationParams {
 
   public async createNotification(
     account: Account,
-    type: NotificationType
   ): Promise<NewRuntimeNotificationEntity> {
     const repository = this._overlay.getRepository(RuntimeNotification)
     const newNotificationId = repository.getNewEntityId()
@@ -294,7 +288,6 @@ export class RuntimeNotificationParams extends NotificationParams {
       id: newNotificationId,
       accountId: account.id,
       eventId: this._event.id,
-      type,
       status: ReadOrUnread.UNREAD,
       deliveryStatus: deliveryStatusFromPreference(pref),
     })
