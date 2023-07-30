@@ -1,9 +1,21 @@
-// Import the keyring as required
-import { ApolloClient } from '@apollo/client'
+import Long from 'long'
+import { IMakeChannelPayment, IMemberRemarked, MemberRemarked } from '@joystream/metadata-protobuf'
+import { Bytes } from '@polkadot/types'
 import { ApiPromise } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
 import { u64, BTreeSet } from '@polkadot/types'
+import { AnyMetadataClass } from '@joystream/metadata-protobuf/types'
 
+export type ChannelCreatedEvent = {
+  channelId: string
+  channelRewardAccount: string
+}
+
+export type ChannelPaymentParams = {
+  asMember: string
+  msg: IMakeChannelPayment
+  payment: [string, BigInt]
+}
 async function storageBucketsNumWitness(api: ApiPromise, channelId: string): Promise<number> {
   const channelBag = await api.query.storage.bags(
     api.createType('PalletStorageBagIdType', { Dynamic: { Channel: channelId } })
@@ -79,7 +91,7 @@ export class TestContext {
     return videoId
   }
 
-  public async createChannel(memberId: string, sender: KeyringPair): Promise<string> {
+  public async createChannel(memberId: string, sender: KeyringPair): Promise<ChannelCreatedEvent> {
     const storageBuckets = await getStorageBucketsAccordingToPolicy(this._api)
     // FIXME: find a solution like with storage buckets
     const distributionBuckets = this._api.createType('BTreeSet<u64>')
@@ -100,6 +112,7 @@ export class TestContext {
 
     let unsub: () => void
     let channelId = ''
+    let channelRewardAccount = ''
     await new Promise<() => void>((resolve) => {
       this._api.tx.content
         .createChannel(channelOwner, channelCreationParameters)
@@ -110,16 +123,20 @@ export class TestContext {
               const { name } = this._api.registry.findMetaError(error.asModule)
               console.log('error:', name)
             }
-            result.events.forEach(({ event: { data, method, section } }) => {
+            result.events.forEach(({ event: { data, section } }) => {
               if (section === 'content') {
                 channelId = data[0].toString()
+                channelRewardAccount = data[3].toString()
               }
             })
             resolve(unsub)
           }
         })
     })
-    return channelId
+    return {
+      channelId,
+      channelRewardAccount,
+    }
   }
 
   public async createMember(sender: KeyringPair, handle?: string): Promise<string> {
@@ -146,5 +163,62 @@ export class TestContext {
 
     return memberId
   }
-}
 
+  public async memberPaymentToChannel(
+    sender: KeyringPair,
+    memberId: string,
+    videoId: string,
+    channelRewardAccount: string,
+    amount: BigInt
+  ): Promise<void> {
+    const channelPayment: ChannelPaymentParams =
+      // Channel Payment for a video:
+      {
+        msg: {
+          // create a Long contaning value for videoId
+          videoId: Long.fromNumber(Number(videoId)),
+          rationale: 'Really good video',
+        },
+        payment: [channelRewardAccount, amount],
+        asMember: memberId,
+      }
+
+    const msg: IMemberRemarked = {
+      makeChannelPayment: channelPayment.msg,
+    }
+
+    let unsub: () => void
+    await new Promise<() => void>((resolve, reject) => {
+      this._api.tx.members
+        .memberRemark(
+          channelPayment.asMember,
+          this.metadataToBytes(MemberRemarked, msg)
+          // TODO: fix this error by updating @joystream/types
+          // channelPayment.payment
+        )
+        .signAndSend(sender, (result) => {
+          if (result.status.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              reject(new Error(name))
+            }
+            result.events.forEach(({ event: { data, method, section } }) => {
+              if (section === 'membership' && method === 'MemberRemarked') {
+                resolve(unsub)
+              }
+            })
+          }
+        })
+    })
+    return
+  }
+
+  protected metadataToBytes<T>(metaClass: AnyMetadataClass<T>, obj: T): Bytes {
+    return this._api.createType('Bytes', TestContext.metadataToString(metaClass, obj))
+  }
+
+  public static metadataToString<T>(metaClass: AnyMetadataClass<T>, obj: T): string {
+    return '0x' + Buffer.from(metaClass.encode(obj).finish()).toString('hex')
+  }
+}
