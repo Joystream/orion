@@ -139,6 +139,51 @@ async function main(): Promise<void> {
 
   // Bob reacts to Alice video
   await ctx.reactToVideo(bob.joystreamAccount, videoIdWithNftBuyNow, bob.membershipId)
+
+  // create video with nft on idle and then set it in offer status
+  const videoToBeOffered = await ctx.createVideoWithNft(
+    alice.membershipId,
+    channelId,
+    alice.joystreamAccount,
+    NftStatus.Idle,
+    [alice.membershipId, bob.membershipId]
+  )
+  await ctx.startNftOffer(
+    alice.joystreamAccount,
+    videoToBeOffered,
+    alice.membershipId,
+    bob.membershipId
+  )
+
+  // create video with nft on test and then set it in offer status
+  const videoWithNftForOpenAuction = await ctx.createVideoWithNft(
+    alice.membershipId,
+    channelId,
+    alice.joystreamAccount,
+    NftStatus.Idle,
+    [alice.membershipId, bob.membershipId]
+  )
+  await ctx.startOpenAuction(
+    alice.joystreamAccount,
+    videoWithNftForOpenAuction,
+    alice.membershipId,
+    [alice.membershipId, bob.membershipId]
+  )
+
+  // create video with nft on test and then set it in offer status
+  const videoWithNftForEnglishAuction = await ctx.createVideoWithNft(
+    alice.membershipId,
+    channelId,
+    alice.joystreamAccount,
+    NftStatus.Idle,
+    [alice.membershipId, bob.membershipId]
+  )
+  await ctx.startEnglishAuction(
+    alice.joystreamAccount,
+    videoWithNftForOpenAuction,
+    alice.membershipId,
+    [alice.membershipId, bob.membershipId]
+  )
 }
 
 main()

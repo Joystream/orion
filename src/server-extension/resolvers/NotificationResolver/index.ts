@@ -35,7 +35,7 @@ export class NotificationResolver {
   ): Promise<MarkNotificationsAsReadResult> {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
-      let result: boolean[] = []
+      let notificationsReadIds: string[] = []
       for (const notificationId of notificationIds) {
         let notification: RuntimeNotification | OffChainNotification | null = null
         notification = await em.findOne(RuntimeNotification, {
@@ -54,14 +54,12 @@ export class NotificationResolver {
             ) {
               notification.status = ReadOrUnread.READ
               await em.save(notification)
-              result.push(true)
-            } else {
-              result.push(false)
+              notificationsReadIds.push(notification.id)
             }
           }
         }
       }
-      return { notificationsRead: result }
+      return { notificationsReadIds }
     })
   }
 

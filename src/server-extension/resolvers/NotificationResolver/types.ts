@@ -9,8 +9,8 @@ export class NotificationArgs {
 
 @ObjectType()
 export class MarkNotificationsAsReadResult {
-  @Field(() => [Boolean], { nullable: false })
-  notificationsRead: boolean[]
+  @Field(() => [String], { nullable: false })
+  notificationsReadIds!: string[]
 }
 
 @InputType()

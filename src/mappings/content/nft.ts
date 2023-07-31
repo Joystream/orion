@@ -476,13 +476,9 @@ export async function processOfferAcceptedEvent({
     data: new NftOfferedEventData({ phantom: 0 }), // FIXME:
   })
 
-  const previousNftOwnerAccount = await getAccountForMember(overlay.getEm(), previousNftOwnerId)
+  // notification recipient: member to whom the nft is offered
   const buyerAccount = await getAccountForMember(overlay.getEm(), memberId)
-
-  await addNotification(
-    [previousNftOwnerAccount, buyerAccount],
-    new RuntimeNotificationParams(overlay, event)
-  )
+  await addNotification([buyerAccount], new RuntimeNotificationParams(overlay, event))
 }
 
 export async function processOfferCanceledEvent({

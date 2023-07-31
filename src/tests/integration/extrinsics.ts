@@ -578,13 +578,128 @@ export class TestContext {
             const { name } = this._api.registry.findMetaError(error.asModule)
             reject(new Error(name))
           }
-          result.events.forEach(({ event: { data, method, section } }) => {
+          result.events.forEach(({ event: { method, section } }) => {
             if (section === 'membership' && method === 'MemberRemarked') {
               resolve(unsub)
             }
           })
         }
       })
+    })
+  }
+
+  public async startOpenAuction(
+    sender: KeyringPair,
+    videoId: string,
+    memberId: string,
+    whitelist: string[]
+  ): Promise<void> {
+    let unsub: () => void
+    const boundaries = await this.getAuctionParametersBoundaries()
+    const buyNowPrice = boundaries.startingPrice.min.add(boundaries.bidStep.min.muln(4))
+    const auctionParams = this._api.createType('PalletContentNftTypesOpenAuctionParamsRecord', {
+      startingPrice: boundaries.startingPrice.min,
+      buyNowPrice,
+      whitelist: whitelist,
+      startsAt: null,
+      bidLockDuration: boundaries.bidLockDuration.min,
+    })
+
+    const actor = this._api.createType('PalletContentPermissionsContentActor', {
+      MemberId: memberId,
+    })
+
+    await new Promise<() => void>((resolve, reject) => {
+      this._api.tx.content
+        .startOpenAuction(actor, videoId, auctionParams)
+        .signAndSend(sender, (result) => {
+          if (result.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              reject(new Error(name))
+            }
+            result.events.forEach(({ event: { method, section } }) => {
+              if (section === 'content' && method === 'OpenAuctionStarted') {
+                resolve(unsub)
+              }
+            })
+          }
+        })
+    })
+  }
+
+  public async startEnglishAuction(
+    sender: KeyringPair,
+    videoId: string,
+    memberId: string,
+    whitelist: string[]
+  ): Promise<void> {
+    let unsub: () => void
+    const duration = await this._api.query.content.minAuctionDuration()
+    const boundaries = await this.getAuctionParametersBoundaries()
+    const buyNowPrice = boundaries.startingPrice.min.add(boundaries.bidStep.min.muln(4))
+    const auctionParams = this._api.createType('PalletContentNftTypesEnglishAuctionParamsRecord', {
+      startingPrice: boundaries.startingPrice.min,
+      buyNowPrice,
+      whitelist: whitelist ? whitelist : [],
+      startsAt: null,
+      duration,
+      extensionPeriod: duration,
+      minBidStep: boundaries.bidStep.min,
+    })
+    const actor = this._api.createType('PalletContentPermissionsContentActor', {
+      MemberId: memberId,
+    })
+
+    await new Promise<() => void>((resolve, reject) => {
+      this._api.tx.content
+        .startEnglishAuction(actor, videoId, auctionParams)
+        .signAndSend(sender, (result) => {
+          if (result.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              reject(new Error(name))
+            }
+            result.events.forEach(({ event: { method, section } }) => {
+              if (section === 'content' && method === 'OpenAuctionStarted') {
+                resolve(unsub)
+              }
+            })
+          }
+        })
+    })
+  }
+
+  public async startNftOffer(
+    sender: KeyringPair,
+    videoId: string,
+    ownerMemberId: string,
+    toMember: string
+  ): Promise<void> {
+    let unsub: () => void
+    let price = await this._api.query.content.minStartingPrice()
+    let actor = this._api.createType('PalletContentPermissionsContentActor', {
+      Member: ownerMemberId,
+    })
+    new Promise<() => void>((resolve, reject) => {
+      this._api.tx.content
+        .offerNft(videoId, actor, toMember, price)
+        .signAndSend(sender, (result) => {
+          if (result.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              console.log('error:', name)
+            }
+            result.events.forEach(({ event: { data, method, section } }) => {
+              if (section === 'content' && method === 'OfferStarted') {
+                resolve(unsub)
+              }
+            })
+          }
+        })
     })
   }
 }

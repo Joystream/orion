@@ -66,8 +66,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 export function preferencesForNotification(
   preferences: AccountNotificationPreferences,
   notificationType: EventData | OffChainNotificationData,
-  auctionWon?: boolean,
-  transactionalStatus?: TransactionalStatus
+  auctionWon?: boolean
 ): NotificationPreference {
   switch (notificationType.isTypeOf) {
     // TODO: (not.v1) check if this is the correct event data
@@ -117,17 +116,13 @@ export function preferencesForNotification(
     case 'VideoExcludedNotificationData':
       return preferences.videoExcludedFromAppNotificationEnabled
     case 'NftIssuedEventData':
-      if (transactionalStatus) {
-        switch (transactionalStatus!.isTypeOf) {
-          default:
-            return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
-          case 'TransactionalStatusAuction':
-            return preferences.newNftOnAuctionNotificationEnabled
-          case 'TransactionalStatusBuyNow':
-            return preferences.newNftOnSaleNotificationEnabled
-        }
-      } else {
-        return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
+      switch (notificationType.transactionalStatus.isTypeOf) {
+        default:
+          return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
+        case 'TransactionalStatusAuction':
+          return preferences.newNftOnAuctionNotificationEnabled
+        case 'TransactionalStatusBuyNow':
+          return preferences.newNftOnSaleNotificationEnabled
       }
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
@@ -178,8 +173,6 @@ abstract class NewNotificationEntity {
 }
 
 class NewRuntimeNotificationEntity extends NewNotificationEntity {
-  private _notification: RuntimeNotification
-
   constructor(notification: RuntimeNotification, shouldSendEmail: boolean) {
     super(shouldSendEmail)
     this._notification = notification
@@ -286,14 +279,6 @@ export class RuntimeNotificationParams extends NotificationParams {
       account.membershipId,
       this._optionWinnerId
     )
-
-    let nftTxStatus: TransactionalStatus | undefined
-    if (this._event.data.isTypeOf === 'NftIssuedEventData') {
-      const nft = await this._overlay.getRepository(OwnedNft).getById(this._event.data.nft)
-      if (nft && nft.transactionalStatus) {
-        nftTxStatus = nft.transactionalStatus
-      }
-    }
 
     const pref = preferencesForNotification(
       account.notificationPreferences,
