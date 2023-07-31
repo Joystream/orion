@@ -4,7 +4,8 @@ import { NftStatus, TestContext } from './extrinsics'
 import { UserContext } from './utils'
 import path from 'path'
 import { assert } from 'console'
-import { BSONSymbol } from 'typeorm'
+
+require('dotenv').config()
 
 async function initTestContext(): Promise<TestContext> {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944')
@@ -29,13 +30,16 @@ async function main(): Promise<void> {
   const alice = await createUserFromData('Alice.json')
   const bob = await createUserFromData('Bob.json')
 
+  // created via joystreamCLi
+  const channelId = process.env.CHANNEL_ID!
+  const channelRewardAccount = process.env.CHANNEL_REWARD_ACCOUNT!
   // alice creates channel
-  const { channelId, channelRewardAccount } = await ctx.createChannel(
-    alice.membershipId,
-    alice.joystreamAccount
-  )
-  assert(channelId !== '', 'channelId is empty')
-  assert(channelRewardAccount !== '', 'channel reward account is empty')
+  // const { channelId, channelRewardAccount } = await ctx.createChannel(
+  //   alice.membershipId,
+  //   alice.joystreamAccount
+  // )
+  // assert(channelId !== '', 'channelId is empty')
+  // assert(channelRewardAccount !== '', 'channel reward account is empty')
 
   // Alice creates video in english auction status
   // doing this early so that the auction has time to expire

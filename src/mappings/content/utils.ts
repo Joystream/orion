@@ -83,7 +83,7 @@ export type MetaNumberProps<M> = PropertyOfWithType<M, number>
 export type EntityAssetsMap<
   E,
   M,
-  OTC extends { new(): DataObjectType } = { new(): DataObjectType }
+  OTC extends { new (): DataObjectType } = { new (): DataObjectType }
 > = {
   DataObjectTypeConstructor: OTC
   entityProperty: EntityAssetProps<E>
@@ -95,13 +95,13 @@ export type AssetsMap = {
   channel: EntityAssetsMap<
     Channel,
     IChannelMetadata,
-    { new(): DataObjectType & { channel: string } }
+    { new (): DataObjectType & { channel: string } }
   >
-  video: EntityAssetsMap<Video, IVideoMetadata, { new(): DataObjectType & { video: string } }>
+  video: EntityAssetsMap<Video, IVideoMetadata, { new (): DataObjectType & { video: string } }>
   subtitle: EntityAssetsMap<
     VideoSubtitle,
     ISubtitleMetadata,
-    { new(): DataObjectType & { subtitle: string } }
+    { new (): DataObjectType & { subtitle: string } }
   >
 }
 
@@ -231,7 +231,7 @@ export async function processNft(
   const creatorRoyalty =
     nftIssuanceParameters.royalty !== undefined
       ? // Royalty type is Perbill (1/10^9), so we divide by 10^7 to get Percent
-      nftIssuanceParameters.royalty / Math.pow(10, 7)
+        nftIssuanceParameters.royalty / Math.pow(10, 7)
       : undefined
 
   const nftRepository = overlay.getRepository(OwnedNft)
@@ -259,11 +259,19 @@ export async function processNft(
       actor: parseContentActor(issuer),
       nft: nft.id,
       nftOwner: nft.owner,
+      transactionalStatus: nft.transactionalStatus!,
     }),
   })
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
+
+  // add notification to channel followers
+  if (video.channelId) {
+    const followers = await getFollowersAccountsForChannel(overlay, video.channelId)
+    await addNotification(followers, new RuntimeNotificationParams(overlay, event))
+  }
+
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
@@ -555,11 +563,11 @@ export async function finishAuction(
 
   const winningBid = openAuctionWinner
     ? findOpenAuctionWinningBid(
-      auctionBids,
-      openAuctionWinner.bidAmount,
-      openAuctionWinner.winnerId.toString(),
-      videoId
-    )
+        auctionBids,
+        openAuctionWinner.bidAmount,
+        openAuctionWinner.winnerId.toString(),
+        videoId
+      )
     : assertNotNull(auctionBids.find((b) => b.id === auction.topBidId))
 
   // update NFT's transactional status
@@ -646,41 +654,50 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
     'Option<PalletContentStorageAssetsRecord>',
     assets
       ? {
-        expectedDataSizeFee: new BN(assets.expectedDataSizeFee.toString()),
-        objectCreationList: assets.objectCreationList.map((o) => ({
-          size_: new BN(o.size.toString()),
-          ipfsContentId: Array.from(o.ipfsContentId),
-        })),
-      }
+          expectedDataSizeFee: new BN(assets.expectedDataSizeFee.toString()),
+          objectCreationList: assets.objectCreationList.map((o) => ({
+            size_: new BN(o.size.toString()),
+            ipfsContentId: Array.from(o.ipfsContentId),
+          })),
+        }
       : null
   ).toU8a()
 }
 
-export async function getFollowersAccountsForChannel(overlay: EntityManagerOverlay, channelId: string): Promise<Account[]> {
+export async function getFollowersAccountsForChannel(
+  overlay: EntityManagerOverlay,
+  channelId: string
+): Promise<Account[]> {
   const followers = await overlay
     .getEm()
     .getRepository(ChannelFollow)
     .findBy({ channelId: channelId })
 
   const followersUserIds = await Promise.all(
-    followers.filter(follower => follower.userId).map((follower) => follower.userId!)
+    followers.filter((follower) => follower.userId).map((follower) => follower.userId!)
   )
 
   const followersAccounts = await Promise.all(
-    followersUserIds.map(async (userId) =>
-      await overlay.getEm().getRepository(Account).findOneBy({ userId })
+    followersUserIds.map(
+      async (userId) => await overlay.getEm().getRepository(Account).findOneBy({ userId })
     )
   )
 
   return followersAccounts.filter((account) => account) as Account[]
 }
 
-export async function getChannelOwnerAccount(em: EntityManager, channel: Flat<Channel>): Promise<Account | null> {
+export async function getChannelOwnerAccount(
+  em: EntityManager,
+  channel: Flat<Channel>
+): Promise<Account | null> {
   const ownerMemberId = channel.ownerMemberId
   return getAccountForMember(em, ownerMemberId)
 }
 
-export async function getAccountForMember(em: EntityManager, memberId: string | null | undefined): Promise<Account | null> {
+export async function getAccountForMember(
+  em: EntityManager,
+  memberId: string | null | undefined
+): Promise<Account | null> {
   if (!memberId) {
     return null
   }
@@ -688,7 +705,10 @@ export async function getAccountForMember(em: EntityManager, memberId: string | 
   return memberAccount
 }
 
-export async function getAccountsForBidders(overlay: EntityManagerOverlay, auctionBids: Flat<Bid>[]): Promise<(Account | null)[]> {
+export async function getAccountsForBidders(
+  overlay: EntityManagerOverlay,
+  auctionBids: Flat<Bid>[]
+): Promise<(Account | null)[]> {
   const biddersAccounts = await Promise.all(
     auctionBids.map(async (bid) => {
       const bidderAccount = await getAccountForMember(overlay.getEm(), bid.bidderId)
@@ -703,12 +723,12 @@ export async function addNewBidNotification(
   overlay: EntityManagerOverlay,
   previousNftOwnerMemberId: string | undefined | null,
   auctionBids: Flat<Bid>[],
-  notificationParams: RuntimeNotificationParams,
+  notificationParams: RuntimeNotificationParams
 ) {
-  const previousNftOwnerAccount =  await getAccountForMember(overlay.getEm(), previousNftOwnerMemberId)
-  const biddersAccounts = await getAccountsForBidders(overlay, auctionBids)
-    await addNotification(
-    [previousNftOwnerAccount, ...biddersAccounts],
-    notificationParams,
+  const previousNftOwnerAccount = await getAccountForMember(
+    overlay.getEm(),
+    previousNftOwnerMemberId
   )
+  const biddersAccounts = await getAccountsForBidders(overlay, auctionBids)
+  await addNotification([previousNftOwnerAccount, ...biddersAccounts], notificationParams)
 }
