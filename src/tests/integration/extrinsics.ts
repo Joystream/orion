@@ -1,6 +1,11 @@
 import BN from 'bn.js'
 import Long from 'long'
-import { IMakeChannelPayment, IMemberRemarked, MemberRemarked } from '@joystream/metadata-protobuf'
+import {
+  IMakeChannelPayment,
+  ReactVideo,
+  IMemberRemarked,
+  MemberRemarked,
+} from '@joystream/metadata-protobuf'
 import { Bytes } from '@polkadot/types'
 import { ApiPromise } from '@polkadot/api'
 import { KeyringPair } from '@polkadot/keyring/types'
@@ -16,7 +21,7 @@ export type ChannelCreatedEvent = {
 export type ChannelPaymentParams = {
   asMember: string
   msg: IMakeChannelPayment
-  payment: [string, BigInt]
+  payment: [string, BN]
 }
 async function storageBucketsNumWitness(api: ApiPromise, channelId: string): Promise<number> {
   const channelBag = await api.query.storage.bags(
@@ -250,12 +255,17 @@ export class TestContext {
     return memberId
   }
 
+  public async getFreeBalance(accountId: string): Promise<BN> {
+    const account = await this._api.query.balances.account(accountId)
+    return account.free.toBn()
+  }
+
   public async memberPaymentToChannel(
     sender: KeyringPair,
     memberId: string,
     videoId: string,
     channelRewardAccount: string,
-    amount: BigInt
+    amount: BN
   ): Promise<void> {
     const channelPayment: ChannelPaymentParams =
       // Channel Payment for a video:
@@ -278,9 +288,8 @@ export class TestContext {
       this._api.tx.members
         .memberRemark(
           channelPayment.asMember,
-          this.metadataToBytes(MemberRemarked, msg)
-          // TODO: fix this error by updating @joystream/types
-          // channelPayment.payment
+          this.metadataToBytes(MemberRemarked, msg),
+          channelPayment.payment
         )
         .signAndSend(sender, (result) => {
           if (result.status.isFinalized) {
@@ -322,7 +331,7 @@ export class TestContext {
               reject(new Error(name))
             }
             result.events.forEach(({ event: { data, method, section } }) => {
-              if (section === 'content' && method === 'NftOfferAccepted') {
+              if (section === 'content' && method === 'OfferAccepted') {
                 resolve(unsub)
               }
             })
@@ -489,6 +498,95 @@ export class TestContext {
       return false
     }
   }
+
+  public async withdrawFundsFromChannel(
+    sender: KeyringPair,
+    channelId: string,
+    memberId: string,
+    amount: BN
+  ): Promise<void> {
+    let unsub: () => void
+    const actor = this._api.createType('PalletContentPermissionsContentActor', {
+      Member: memberId,
+    })
+    await new Promise((resolve, reject) => {
+      this._api.tx.content
+        .withdrawFromChannelBalance(actor, channelId, amount)
+        .signAndSend(sender, (result) => {
+          if (result.isFinalized) {
+            const error = result.dispatchError
+            if (error) {
+              const { name } = this._api.registry.findMetaError(error.asModule)
+              reject(new Error(name))
+            }
+            result.events.forEach(({ event: { data, method, section } }) => {
+              if (section === 'content' && method === 'ChannelFundsWithdrawn') {
+                resolve(unsub)
+              }
+            })
+          }
+        })
+    })
+  }
+
+  public async postVideoComment(
+    sender: KeyringPair,
+    videoId: string,
+    memberId: string
+  ): Promise<void> {
+    let unsub: () => void
+    const msg: IMemberRemarked = {
+      createComment: {
+        videoId: new Long(Number(videoId)),
+        body: 'nice video',
+        parentCommentId: null,
+      },
+    }
+    const remark = this.metadataToBytes(MemberRemarked, msg)
+    await new Promise<() => void>((resolve, reject) => {
+      this._api.tx.members.memberRemark(memberId, remark, null).signAndSend(sender, (result) => {
+        if (result.isFinalized) {
+          const error = result.dispatchError
+          if (error) {
+            const { name } = this._api.registry.findMetaError(error.asModule)
+            reject(new Error(name))
+          }
+          result.events.forEach(({ event: { data, method, section } }) => {
+            if (section === 'membership' && method === 'MemberRemarked') {
+              resolve(unsub)
+            }
+          })
+        }
+      })
+    })
+  }
+
+  public async reactToVideo(sender: KeyringPair, videoId: string, memberId: string): Promise<void> {
+    let unsub: () => void
+    const msg: IMemberRemarked = {
+      reactVideo: {
+        videoId: new Long(Number(videoId)),
+        reaction: ReactVideo.Reaction.LIKE,
+      },
+    }
+    const remark = this.metadataToBytes(MemberRemarked, msg)
+    await new Promise<() => void>((resolve, reject) => {
+      this._api.tx.members.memberRemark(memberId, remark, null).signAndSend(sender, (result) => {
+        if (result.isFinalized) {
+          const error = result.dispatchError
+          if (error) {
+            const { name } = this._api.registry.findMetaError(error.asModule)
+            reject(new Error(name))
+          }
+          result.events.forEach(({ event: { data, method, section } }) => {
+            if (section === 'membership' && method === 'MemberRemarked') {
+              resolve(unsub)
+            }
+          })
+        }
+      })
+    })
+  }
 }
 
 export function waitUntil(condition: () => Promise<boolean>): Promise<void> {
@@ -500,7 +598,7 @@ export function waitUntil(condition: () => Promise<boolean>): Promise<void> {
         resolve()
       } else {
         attempts++
-        if (attempts > 10) {
+        if (attempts > 15) {
           clearInterval(interval)
           reject(new Error('waitUntil timeout'))
         }

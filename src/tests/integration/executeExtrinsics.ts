@@ -4,6 +4,7 @@ import { NftStatus, TestContext } from './extrinsics'
 import { UserContext } from './utils'
 import path from 'path'
 import { assert } from 'console'
+import { BSONSymbol } from 'typeorm'
 
 async function initTestContext(): Promise<TestContext> {
   const wsProvider = new WsProvider('ws://127.0.0.1:9944')
@@ -35,6 +36,17 @@ async function main(): Promise<void> {
   )
   assert(channelId !== '', 'channelId is empty')
   assert(channelRewardAccount !== '', 'channel reward account is empty')
+
+  // Alice creates video in english auction status
+  // doing this early so that the auction has time to expire
+  const videoIdWithNftEnglishAuction = await ctx.createVideoWithNft(
+    alice.membershipId,
+    channelId,
+    alice.joystreamAccount,
+    NftStatus.EnglishAuction,
+    [alice.membershipId, bob.membershipId]
+  )
+  assert(videoIdWithNftEnglishAuction !== '', 'videoIdWithNftEnglishAuction is empty')
 
   // Alice creates video in offer status
   const videoIdWithNftOffered = await ctx.createVideoWithNft(
@@ -74,21 +86,11 @@ async function main(): Promise<void> {
   )
   assert(secondOpenAuctionBidPrice !== undefined, 'firstOpenAuctionBidPrice not defined ')
   // Bob makes completing auciton bid on the open auction
-  const winningOpenAuctionBidPrice = await ctx.makeCompletingAuctionBid(
+  await ctx.makeCompletingAuctionBid(
     alice.joystreamAccount,
     videoIdWithNftOpenAuction,
     alice.membershipId
   )
-
-  // Alice creates video in english auction status
-  const videoIdWithNftEnglishAuction = await ctx.createVideoWithNft(
-    alice.membershipId,
-    channelId,
-    alice.joystreamAccount,
-    NftStatus.EnglishAuction,
-    [alice.membershipId, bob.membershipId]
-  )
-  assert(videoIdWithNftEnglishAuction !== '', 'videoIdWithNftEnglishAuction is empty')
 
   // Bob places bid on the english auction
   const englishAuctionBidPrice = await ctx.makeEnglishAuctionBid(
@@ -112,6 +114,27 @@ async function main(): Promise<void> {
   assert(videoIdWithNftBuyNow !== '', 'videoIdWithNftBuyNow is empty')
   // Bob buys nft
   await ctx.buyNft(bob.joystreamAccount, videoIdWithNftBuyNow, bob.membershipId)
+
+  // Alice withdraws firstAuctionBidPrice amount from channel account into her account
+  await ctx.withdrawFundsFromChannel(
+    alice.joystreamAccount,
+    channelId,
+    alice.membershipId,
+    firstOpenAuctionBidPrice!
+  )
+
+  // Bob sends payment to Alice's channel
+  const bobBalance = await ctx.getFreeBalance(bob.joystreamAccount.address)
+  await ctx.memberPaymentToChannel(
+    bob.joystreamAccount,
+    bob.membershipId,
+    videoIdWithNftBuyNow,
+    channelRewardAccount,
+    bobBalance.divn(100)
+  )
+
+  // Bob reacts to Alice video
+  await ctx.reactToVideo(bob.joystreamAccount, videoIdWithNftBuyNow, bob.membershipId)
 }
 
 main()
