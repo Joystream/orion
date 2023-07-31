@@ -12,6 +12,8 @@ import {
   OffChainNotificationData,
   ReadOrUnread,
   RuntimeNotification,
+  TransactionalStatus,
+  OwnedNft,
 } from '../model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
@@ -64,7 +66,8 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 export function preferencesForNotification(
   preferences: AccountNotificationPreferences,
   notificationType: EventData | OffChainNotificationData,
-  auctionWon?: boolean
+  auctionWon?: boolean,
+  transactionalStatus?: TransactionalStatus
 ): NotificationPreference {
   switch (notificationType.isTypeOf) {
     // TODO: (not.v1) check if this is the correct event data
@@ -113,15 +116,25 @@ export function preferencesForNotification(
       return preferences.channelExcludedFromAppNotificationEnabled
     case 'VideoExcludedNotificationData':
       return preferences.videoExcludedFromAppNotificationEnabled
+    case 'NftIssuedEventData':
+      if (transactionalStatus) {
+        switch (transactionalStatus!.isTypeOf) {
+          default:
+            return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
+          case 'TransactionalStatusAuction':
+            return preferences.newNftOnAuctionNotificationEnabled
+          case 'TransactionalStatusBuyNow':
+            return preferences.newNftOnSaleNotificationEnabled
+        }
+      } else {
+        return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
+      }
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
 }
 
-export async function addNotification(
-  accounts: (Account | null)[],
-  params: NotificationParams,
-) {
+export async function addNotification(accounts: (Account | null)[], params: NotificationParams) {
   const em = params.getEm()
 
   const mailNotifier = new MailNotifier()
@@ -144,9 +157,7 @@ export async function addNotification(
 }
 
 export abstract class NotificationParams {
-  public abstract createNotification(
-    account: Account,
-  ): Promise<NewNotificationEntity>
+  public abstract createNotification(account: Account): Promise<NewNotificationEntity>
   public abstract getDataForEmail(): string
   public abstract getEm(): EntityManager
 }
@@ -225,9 +236,7 @@ export class OffChainNotificationParams extends NotificationParams {
     return JSON.stringify(this._data)
   }
 
-  public async createNotification(
-    account: Account,
-  ): Promise<NewOffchainNotificationEntity> {
+  public async createNotification(account: Account): Promise<NewOffchainNotificationEntity> {
     const newNotificationId = await getNextIdForEntity(this._em, 'OffChainNotification')
 
     const pref = preferencesForNotification(account.notificationPreferences, this._data)
@@ -268,9 +277,7 @@ export class RuntimeNotificationParams extends NotificationParams {
     return JSON.stringify(this._event.data)
   }
 
-  public async createNotification(
-    account: Account,
-  ): Promise<NewRuntimeNotificationEntity> {
+  public async createNotification(account: Account): Promise<NewRuntimeNotificationEntity> {
     const repository = this._overlay.getRepository(RuntimeNotification)
     const newNotificationId = repository.getNewEntityId()
 
@@ -279,6 +286,15 @@ export class RuntimeNotificationParams extends NotificationParams {
       account.membershipId,
       this._optionWinnerId
     )
+
+    let nftTxStatus: TransactionalStatus | undefined
+    if (this._event.data.isTypeOf === 'NftIssuedEventData') {
+      const nft = await this._overlay.getRepository(OwnedNft).getById(this._event.data.nft)
+      if (nft && nft.transactionalStatus) {
+        nftTxStatus = nft.transactionalStatus
+      }
+    }
+
     const pref = preferencesForNotification(
       account.notificationPreferences,
       this._event.data,

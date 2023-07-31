@@ -47,6 +47,9 @@ function register_account() {
     echo "Created account for ${USER_URI}"
 
     # login to gateway
+    echo "${USER_URI} is logging in"
+    echo "${LOGIN_PAYLOAD}"
+
     LOGIN_RESPONSE=$(
         curl -i \
             --request POST \

@@ -14,6 +14,8 @@ export APP_NAME=Gleev
 
 ./setup.sh "Alice" "Bob"
 
-npx ts-node ./executeExtrinsics.ts
+# yes | npx @joystream/cli content:createChannel --input ./channelInput.json --context=Member --useMemberId=$ALICE_MEMBER_ID > /dev/null
+
+# npx ts-node ./executeExtrinsics.ts
 
 # now use newman to run tests

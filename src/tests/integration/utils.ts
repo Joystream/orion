@@ -7,7 +7,6 @@ import { expect } from 'chai'
 import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
 import { TestContext } from './extrinsics'
-import { createAccountAndSignIn } from './authUtils'
 import { EntityManager } from 'typeorm'
 import { assert } from 'console'
 
@@ -61,55 +60,4 @@ export class UserContext {
   public setVideoId(videoId: string): void {
     this._videoId = videoId
   }
-
-  public async createSessionAndClient(ctx: TestContext, server: request.SuperTest<request.Test>): Promise<ApolloClient<NormalizedCacheObject>> {
-    const memberId = await ctx.createMember(this.joystreamAccount, this._uri.split('//')[1])
-    const { sessionId } = await createAccountAndSignIn(server, this.membershipId, this.joystreamAccount)
-
-    assert(memberId !== null, `Member id for ${this._uri} is null`)
-    assert(sessionId !== null, `Member id for ${this._uri} is null`)
-
-    this.setMembershipId(memberId)
-    this.setSessionId(sessionId)
-    return createApolloClient(sessionId)
-
-  }
-
-  public async getAccount(em: EntityManager): Promise<Account> {
-    const account = await em.getRepository(Account).findOne({
-      where: {
-        membershipId: this.membershipId
-      }
-    })
-    assert(account !== null, `Account for ${this._uri} is null`)
-    return account!
-  }
-}
-
-// write a function that waits for n seconds where n is a number
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-export function expectAccountNotificationPreferencesToBeTrue(
-  preferences: AccountNotificationPreferences
-) {
-  const _pref = Object.values(preferences)
-  expect(_pref.every((x) => x)).to.be.true
-}
-
-
-export function createApolloClient(sessionId: string): ApolloClient<NormalizedCacheObject> {
-  const client = new ApolloClient({
-    link: new HttpLink({
-      uri: 'http://localhost:4350/graphql',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cookie': `${SESSION_COOKIE_NAME}=${sessionId}`,
-      },
-    }),
-    cache: new InMemoryCache(),
-  })
-
-  return client
 }
