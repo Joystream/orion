@@ -317,40 +317,6 @@ export class ChannelsResolver {
     })
   }
 
-  @Mutation(() => ChannelReportInfo)
-  @UseMiddleware(OperatorOnly)
-  async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
-    const em = await this.em()
-    const channel = await em.findOne(Channel, {
-      where: { id: channelId },
-    })
-    if (!channel) {
-      throw new Error(`Channel by id ${channelId} not found!`)
-    }
-
-    if (!channel.isVerified) {
-      channel.isVerified = true
-      if (channel.ownerMember) {
-        const ownerAccount = await em.findOne(Account, {
-          where: { membershipId: channel.ownerMember.id },
-        })
-        if (ownerAccount) {
-          await addNotification(
-            [ownerAccount],
-            new OffChainNotificationParams(
-              em,
-              new ChannelVerifiedNotificationData({ channel: channelId })
-            )
-          )
-        }
-      }
-      em.save(channel)
-    }
-    return {
-      channel,
-    }
-  }
-
   @Mutation(() => ExcludeChannelResult)
   @UseMiddleware(OperatorOnly)
   async excludeChannel(

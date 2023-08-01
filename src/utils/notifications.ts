@@ -14,11 +14,15 @@ import {
   RuntimeNotification,
   TransactionalStatus,
   OwnedNft,
+  Bid,
+  Video,
+  CommentToVideo,
 } from '../model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 import { getNextIdForEntity } from './nextEntityId'
 import { EntityManagerOverlay } from './overlay'
+import { getChannelOwnerMemberByVideoId } from '../mappings/content/utils'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -63,66 +67,95 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 }
 
 // [app notification, email notification] preference
-export function preferencesForNotification(
-  preferences: AccountNotificationPreferences,
+export async function preferencesForNotification(
+  account: Account,
   notificationType: EventData | OffChainNotificationData,
-  auctionWon?: boolean
-): NotificationPreference {
+  overlay?: EntityManagerOverlay // neeeded for runtime notifications
+): Promise<NotificationPreference> {
   switch (notificationType.isTypeOf) {
-    // TODO: (not.v1) check if this is the correct event data
     case 'CommentCreatedEventData':
-      return preferences.videoCommentCreatedNotificationEnabled
-    case 'OpenAuctionStartedEventData':
-      return preferences.newNftOnAuctionNotificationEnabled
-    case 'EnglishAuctionStartedEventData':
-      return preferences.newNftOnAuctionNotificationEnabled
-    case 'AuctionBidMadeEventData':
-      return preferences.bidMadeOnNftNotificationEnabled
-    case 'AuctionCanceledEventData':
-      // NOTE: (not.v1) this might not be the best preference for this notification
-      return preferences.auctionLostNotificationEnabled
-    case 'EnglishAuctionSettledEventData':
-      if (auctionWon) {
-        return preferences.auctionWonNotificationEnabled
+      if (notificationType.context.isTypeOf === 'CommentToVideo') {
+        // case: account is creator, guaranteed at invocation site
+        return account.notificationPreferences.videoCommentCreatedNotificationEnabled
       } else {
-        return preferences.auctionLostNotificationEnabled
+        // case: account is parent comment author, guaranteed at invocation site
+        return account.notificationPreferences.replyToCommentNotificationEnabled
+      }
+    case 'OpenAuctionStartedEventData':
+      // case: account is channel follower
+      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
+    case 'EnglishAuctionStartedEventData':
+      // case: account is channel follower
+      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
+    case 'AuctionBidMadeEventData':
+      const bid = await overlay!.getRepository(Bid).getByIdOrFail(notificationType.bid)
+      if (bid.bidderId !== account.membershipId) {
+        // member has been outbidded
+        return account.notificationPreferences.higherBidThanYoursMadeNotificationEnabled
+      } else {
+        // case: account is new bidder or account is creatror of the nft
+        return account.notificationPreferences.bidMadeOnNftNotificationEnabled
+      }
+    case 'EnglishAuctionSettledEventData':
+      const winningEngBid = await overlay!
+        .getRepository(Bid)
+        .getByIdOrFail(notificationType.winningBid)
+      if (account.membershipId === winningEngBid.bidderId) {
+        // if account is the winner of the auction
+        return account.notificationPreferences.auctionWonNotificationEnabled
+      } else {
+        // else account has lost the auction
+        return account.notificationPreferences.auctionLostNotificationEnabled
       }
     case 'BidMadeCompletingAuctionEventData':
-      return preferences.auctionWonNotificationEnabled
+      const winningBuyNowBid = await overlay!
+        .getRepository(Bid)
+        .getByIdOrFail(notificationType.winningBid)
+      if (account.membershipId === winningBuyNowBid.bidderId) {
+        // if account is the winner of the auction
+        return account.notificationPreferences.auctionWonNotificationEnabled
+      } else {
+        // else account has lost the auction
+        return account.notificationPreferences.auctionLostNotificationEnabled
+      }
     case 'OpenAuctionBidAcceptedEventData':
-      return preferences.bidMadeOnNftNotificationEnabled
-    case 'NftSellOrderMadeEventData':
-      return preferences.newNftOnSaleNotificationEnabled
-    case 'NftBoughtEventData':
-      return preferences.nftBoughtNotificationEnabled
-    case 'ChannelRewardClaimedEventData':
-      // TODO: (not.v1) check if this is the correct event data
-      return preferences.channelReceivedFundsFromWgNotificationEnabled
-    case 'ChannelRewardClaimedAndWithdrawnEventData':
-      return preferences.channelFundsWithdrawnNotificationEnabled
-    case 'ChannelFundsWithdrawnEventData':
-      return preferences.channelFundsWithdrawnNotificationEnabled
-    case 'ChannelPayoutsUpdatedEventData':
-      return preferences.newPayoutUpdatedByCouncilNotificationEnabled
+      const winningOpenAuctionBid = await overlay!
+        .getRepository(Bid)
+        .getByIdOrFail(notificationType.winningBid)
+      if (account.membershipId === winningOpenAuctionBid.bidderId) {
+        // if account is the winner of the auction
+        return account.notificationPreferences.auctionWonNotificationEnabled
+      } else {
+        // else account has lost the auction
+        return account.notificationPreferences.auctionLostNotificationEnabled
+      }
     case 'ChannelPaymentMadeEventData':
-      // TODO: (not.v1) check if this is the correct event data
-      return preferences.channelPaymentReceivedNotificationEnabled
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.channelReceivedFundsFromWgNotificationEnabled
+    case 'ChannelFundsWithdrawnEventData':
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.channelFundsWithdrawnNotificationEnabled
     case 'ChannelCreatedEventData':
-      return preferences.channelCreatedNotificationEnabled
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.channelCreatedNotificationEnabled
     case 'NewChannelFollowerNotificationData':
-      return preferences.newChannelFollowerNotificationEnabled
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.newChannelFollowerNotificationEnabled
     case 'ChannelExcludedNotificationData':
-      return preferences.channelExcludedFromAppNotificationEnabled
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.channelExcludedFromAppNotificationEnabled
     case 'VideoExcludedNotificationData':
-      return preferences.videoExcludedFromAppNotificationEnabled
+      // case: account is channel owner -> Channel notification
+      return account.notificationPreferences.videoExcludedFromAppNotificationEnabled
     case 'NftIssuedEventData':
+      // case: account is channel follower -> Member notification
       switch (notificationType.transactionalStatus.isTypeOf) {
         default:
           return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
         case 'TransactionalStatusAuction':
-          return preferences.newNftOnAuctionNotificationEnabled
+          return account.notificationPreferences.newNftOnAuctionNotificationEnabled
         case 'TransactionalStatusBuyNow':
-          return preferences.newNftOnSaleNotificationEnabled
+          return account.notificationPreferences.newNftOnSaleNotificationEnabled
       }
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
@@ -234,7 +267,7 @@ export class OffChainNotificationParams extends NotificationParams {
   public async createNotification(account: Account): Promise<NewOffchainNotificationEntity> {
     const newNotificationId = await getNextIdForEntity(this._em, 'OffChainNotification')
 
-    const pref = preferencesForNotification(account.notificationPreferences, this._data)
+    const pref = await preferencesForNotification(account, this._data)
     const notification = new OffChainNotification({
       id: newNotificationId.toString(),
       accountId: account.id,
@@ -282,11 +315,7 @@ export class RuntimeNotificationParams extends NotificationParams {
       this._optionWinnerId
     )
 
-    const pref = preferencesForNotification(
-      account.notificationPreferences,
-      this._event.data,
-      auctionWinner
-    )
+    const pref = await preferencesForNotification(account, this._event.data, this._overlay)
     const notification = repository.new({
       id: newNotificationId,
       accountId: account.id,

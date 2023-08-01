@@ -75,9 +75,10 @@ export async function processOpenAuctionStartedEvent({
     }),
   })
 
-  const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).channelId
-  if (channelId) {
-    const channelFollowersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
+  console.log('***** open auction started, video:', JSON.stringify(video))
+  if (video && video.channelId) {
+    const channelFollowersAccounts = await getFollowersAccountsForChannel(overlay, video.channelId)
     await addNotification(channelFollowersAccounts, new RuntimeNotificationParams(overlay, event))
   }
 
@@ -115,6 +116,14 @@ export async function processEnglishAuctionStartedEvent({
       nftOwner: nft.owner,
     }),
   })
+
+  // notify follower accounts for this event
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
+  console.log('***** english auction started, video:', JSON.stringify(video))
+  if (video && video.channelId) {
+    const followersAccounts = await getFollowersAccountsForChannel(overlay, video.channelId)
+    await addNotification(followersAccounts, new RuntimeNotificationParams(overlay, event))
+  }
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
@@ -525,13 +534,13 @@ export async function processNftSellOrderMadeEvent({
     }),
   })
 
-  const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
-  const previousNftOwnerAccount = await getAccountForMember(
-    overlay.getEm(),
-    previousNftOwnerMemberId
-  )
-
-  await addNotification([previousNftOwnerAccount], new RuntimeNotificationParams(overlay, event))
+  // notify followers of the channel that nft is for sale
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
+  console.log('***** nft sell order made, video:', JSON.stringify(video))
+  if (video && video.channelId) {
+    const channelFollowersAccounts = await getFollowersAccountsForChannel(overlay, video.channelId)
+    await addNotification(channelFollowersAccounts, new RuntimeNotificationParams(overlay, event))
+  }
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
