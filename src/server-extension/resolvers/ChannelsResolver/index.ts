@@ -339,7 +339,7 @@ export class ChannelsResolver {
             [ownerAccount],
             new OffChainNotificationParams(
               em,
-              new ChannelVerifiedNotificationData({ phantom: Number(channelId) })
+              new ChannelVerifiedNotificationData({ channel: channelId })
             )
           )
         }
@@ -398,7 +398,7 @@ export class ChannelsResolver {
             [account],
             new OffChainNotificationParams(
               em,
-              new ChannelExcludedNotificationData({ phantom: Number(channelId) })
+              new ChannelExcludedNotificationData({ channel: channelId })
             )
           )
         }

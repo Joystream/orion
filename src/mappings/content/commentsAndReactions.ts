@@ -35,6 +35,8 @@ import {
   VideoReactionOptions,
   VideoReactionsCountByReactionType,
   CommentReactionEventData,
+  CommentToComment,
+  CommentToVideo,
 } from '../../model'
 import { VideoReactionEventData } from '../../model/generated/_videoReactionEventData'
 import { config, ConfigVariable } from '../../utils/config'
@@ -448,18 +450,19 @@ export async function processCreateCommentMessage(
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
   videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
 
-  // add CommentCreated event
-  const event = overlay.getRepository(Event).new({
-    ...genericEventFields(overlay, block, indexInBlock, txHash),
-    data: new CommentCreatedEventData({
-      comment: comment.id,
-      text: body,
-    }),
-  })
-
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
+      // add event for comment to comment
+      const event = overlay.getRepository(Event).new({
+        ...genericEventFields(overlay, block, indexInBlock, txHash),
+        data: new CommentCreatedEventData({
+          comment: comment.id,
+          text: body,
+          context: new CommentToComment({ parentComment: parentComment.id }),
+        }),
+      })
+
       const authorAccount = await getAccountForMember(overlay.getEm(), parentComment.authorId)
       await addNotification([authorAccount], new RuntimeNotificationParams(overlay, event))
     }
@@ -468,6 +471,15 @@ export async function processCreateCommentMessage(
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
       const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
+      // add event for comment to comment
+      const event = overlay.getRepository(Event).new({
+        ...genericEventFields(overlay, block, indexInBlock, txHash),
+        data: new CommentCreatedEventData({
+          comment: comment.id,
+          text: body,
+          context: new CommentToVideo({ video: comment.id }),
+        }),
+      })
       await addNotification([channelOwnerAccount], new RuntimeNotificationParams(overlay, event))
     }
   }

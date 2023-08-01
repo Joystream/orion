@@ -116,7 +116,19 @@ type CommentCreatedEventData {
 
   "Comment's original text"
   text: String!
+
+  "Comment context"
+  context: CommentContext!
 }
+
+type CommentToVideo @variant {
+  video: Video!
+}
+type CommentToComment @variant {
+  parentComment: Comment!
+}
+
+union CommentContext = CommentToVideo | CommentToComment
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentTextUpdatedEventData {
@@ -483,28 +495,56 @@ union OffChainNotificationData =
   | VideoExcludedNotificationData
   | ChannelSuspendedNotificationData
   | NewChannelFollowerNotificationData
+  | VideoFeaturedOnCategoryPageNotificationData
+  | NftFeaturedNotificationData
+
+type VideoFeaturedOnCategoryPageNotificationData @variant {
+  "video featured"
+  video: Video!
+
+  "category"
+  category: VideoCategory!
+}
 
 type YppSignupSuccessFullNotificationData @variant {
   phantom: Int!
 }
 
 type ChannelVerifiedNotificationData @variant {
-  phantom: Int!
+  "verified channel"
+  channel: Channel!
 }
 
 type ChannelExcludedNotificationData @variant {
-  phantom: Int!
+  "excluded channel"
+  channel: Channel!
+
+  "rationale"
+  rationale: String!
 }
 
 type VideoExcludedNotificationData @variant {
-  phantom: Int!
+  "excluded video"
+  video: Video!
+
+  "rationale"
+  rationale: String!
 }
 
 type ChannelSuspendedNotificationData @variant {
-  phantom: Int!
+  "suspended channel"
+  channel: Channel!
 }
 
-# FIXME: (not.v1) add fields for the new variants
 type NewChannelFollowerNotificationData @variant {
+  "channel just followed"
   channel: Channel!
+
+  "follower account"
+  follower: Account!
+}
+
+type NftFeaturedNotificationData @variant {
+  "nft in question"
+  nft: OwnedNft!
 }
