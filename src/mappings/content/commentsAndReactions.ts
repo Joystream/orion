@@ -227,11 +227,13 @@ async function processVideoReaction(
         reactionType,
       }),
     })
-    const account = await getAccountForMember(overlay.getEm(), memberId)
-    await addNotification(
-      [account],
-      new RuntimeNotificationParams(overlay, event),
-    )
+    if (video.channelId) {
+      const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
+      if (channelOwnerMemberId) {
+        const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
+        await addNotification([channelOwnerAccount], new RuntimeNotificationParams(overlay, event))
+      }
+    }
   }
 }
 
@@ -459,20 +461,14 @@ export async function processCreateCommentMessage(
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId) {
       const authorAccount = await getAccountForMember(overlay.getEm(), parentComment.authorId)
-      await addNotification(
-        [authorAccount],
-        new RuntimeNotificationParams(overlay, event),
-      )
+      await addNotification([authorAccount], new RuntimeNotificationParams(overlay, event))
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId !== comment.authorId) {
       const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
-      await addNotification(
-        [channelOwnerAccount],
-        new RuntimeNotificationParams(overlay, event),
-      )
+      await addNotification([channelOwnerAccount], new RuntimeNotificationParams(overlay, event))
     }
   }
 
