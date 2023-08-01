@@ -173,6 +173,8 @@ abstract class NewNotificationEntity {
 }
 
 class NewRuntimeNotificationEntity extends NewNotificationEntity {
+  private _notification: RuntimeNotification
+
   constructor(notification: RuntimeNotification, shouldSendEmail: boolean) {
     super(shouldSendEmail)
     this._notification = notification

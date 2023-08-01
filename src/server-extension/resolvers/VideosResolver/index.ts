@@ -16,6 +16,7 @@ import {
   Exclusion,
   fromJsonOffChainNotificationData,
   Account,
+  VideoExcludedNotificationData,
 } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
@@ -358,10 +359,8 @@ export class VideosResolver {
             [account],
             new OffChainNotificationParams(
               em,
-              fromJsonOffChainNotificationData({
-                typeOf: 'VideoExcludedNotificationData',
-              })
-            ),
+              new VideoExcludedNotificationData({ phantom: Number(videoId) })
+            )
           )
         }
       }
