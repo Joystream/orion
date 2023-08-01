@@ -359,7 +359,7 @@ export class VideosResolver {
             [account],
             new OffChainNotificationParams(
               em,
-              new VideoExcludedNotificationData({ phantom: Number(videoId) })
+              new VideoExcludedNotificationData({ video: video.id, rationale })
             )
           )
         }
