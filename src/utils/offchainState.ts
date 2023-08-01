@@ -4,6 +4,7 @@ import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
+import { defaultNotificationPreferences } from './notifications'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -72,12 +73,26 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
   return data
 }
 
+function migrateExportDataToV310(data: ExportedData): ExportedData {
+  const migrationUser = {
+    id: `${V2_MIGRATION_USER_PREFIX}${uniqueId()}`,
+    isRoot: false,
+  }
+  // create new notification preferences set all to true
+  data.Account?.values.map((account) => {
+    account.notificationPreferences = defaultNotificationPreferences()
+  })
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
     '3.0.0': migrateExportDataToV300,
+    '3.1.0': migrateExportDataToV310,
   }
 
   public get isImported(): boolean {
