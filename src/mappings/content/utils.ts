@@ -719,6 +719,11 @@ export async function getAccountsForBidders(
   return biddersAccounts
 }
 
+// cases for various events type:
+// - English settled data : all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is winner
+// - Auction Bid made : the account notified for which membership.id !== bid.bidderId is the outbidded and the one with bid.bidderId is new bidder
+// - Bid Made completing auction: all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is the winner
+// - Open auction bid accepted: all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is the winner
 export async function addNewBidNotification(
   overlay: EntityManagerOverlay,
   previousNftOwnerMemberId: string | undefined | null,
