@@ -14,8 +14,7 @@
       <!-- White Background -->
       <mj-section background-color="#FFFFFF" padding="20px">
         <mj-column>
-          <mj-text color="#000000" font-size="16px" line-height="24px" align="center">Hey, {{ userName }} your channel with id {{ channelId }}
-          has been excluded from {{ appName }}.</mj-text>
+          <mj-text color="#000000" font-size="16px" line-height="24px" align="center">{{ NotificationText }}</mj-text>
         </mj-column>
       </mj-section>
       

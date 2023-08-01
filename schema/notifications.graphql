@@ -1,0 +1,305 @@
+union DeliveryStatus =
+    NotificationEmailOnly
+  | NotificationInAppOnly
+  | NotificationEmailAndInApp
+  | Undelivered
+
+type NotificationEmailOnly @variant {
+  "timestamp, if null means delivery error"
+  emailSentAt: DateTime
+}
+
+type NotificationInAppOnly @variant {
+  "timestamp, if null means delivery error"
+  inAppSentAt: DateTime
+}
+
+type NotificationEmailAndInApp @variant {
+  "timestamp, if null means delivery error"
+  sentAt: DateTime
+}
+
+type Undelivered @variant {
+  phantom: Int!
+}
+
+union ReadOrUnread = NotificationRead | NotificationUnread
+
+type NotificationRead @variant {
+  "timestamp"
+  readAt: DateTime!
+}
+
+type NotificationUnread @variant {
+  phantom: Int!
+}
+type OffChainNotification @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Member that should recieve the notification"
+  account: Account!
+
+  "The notification data associated"
+  data: OffChainNotificationData!
+
+  "how the notification has been delivered"
+  deliveryStatus: DeliveryStatus!
+
+  "in-app read or not"
+  status: ReadOrUnread!
+
+  "creation timestamp"
+  createdAt: DateTime!
+}
+
+union OffChainNotificationData =
+    YppSignupSuccessful
+  | ChannelVerified
+  | ChannelExcluded
+  | VideoExcluded
+  | NewChannelFollower
+  | VideoFeaturedOnCategoryPage
+  | VideoFeaturedAsCategoryHero
+  | NftFeaturedOnMarketPlace
+
+type VideoFeaturedAsCategoryHero @variant {
+  "title of the video featured"
+  videoTitle: String!
+
+  "category name"
+  categoryName: String!
+}
+
+type VideoFeaturedOnCategoryPage @variant {
+  "title of the video featured"
+  videoTitle: String!
+
+  "category name"
+  categoryName: String!
+}
+
+type YppSignupSuccessful @variant {
+  phantom: Int!
+}
+
+type ChannelVerified @variant {
+  "channel Title, not required by the design"
+  channelTitle: String!
+}
+
+type ChannelExcluded @variant {
+  "excluded channel"
+  channelTitle: String!
+}
+
+type VideoExcluded @variant {
+  "excluded video"
+  videoTitle: String!
+}
+
+type NewChannelFollower @variant {
+  "channel just followed"
+  channelTitle: String!
+
+  "follower userId"
+  followerMemberHandle: String!
+}
+
+type NftFeaturedOnMarketPlace @variant {
+  "video needed for notification rendering"
+  videoTitle: String!
+}
+
+type RuntimeNotification @entity {
+  "Autoincremented"
+  id: ID!
+
+  "Member that should recieve the notification"
+  account: Account!
+
+  "The notification event"
+  event: Event!
+
+  "how the notification has been delivered (to migrate)"
+  deliveryStatus: DeliveryStatus!
+
+  "in-app read or not (to migrate)"
+  status: ReadOrUnread!
+
+  "data needed for notification rendering"
+  notificationData: RuntimeNotificationData!
+
+  "creation timestamp (to migrate)":
+  createdAt: DateTime!
+}
+
+union RuntimeNotificationData =
+    CommentPostedToVideo
+  | VideoLiked
+  | VideoDisliked
+  | NftPurchased
+  | CreatorReceivesAuctionBid
+  | RoyaltyPaid
+  | DirectChannelPaymentByMember
+  | EnglishAuctionSettled
+  | ChannelFundsWithdrawn
+  | ChannelCreated
+  | CommentReply
+  | ReactionToComment
+  | VideoPosted
+  | NewAuction
+  | NewNftOnSale
+  | HigherBidPlaced
+  | EnglishAuctionWon
+  | EnglishAuctionLost
+  | OpenAuctionWon
+  | OpenAuctionLost
+
+type CommentPostedToVideo @variant {
+  "videoTitle"
+  videoTitle: String!
+}
+
+type VideoLiked @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "member handle doing the like"
+  memberHandle: String!
+}
+
+type VideoDisliked @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "member handle doing the like"
+  memberHandle: String!
+}
+
+type NftPurchased @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "member handle doing the like"
+  memberHandle: String!
+
+  "price in JOY"
+  price: BigInt!
+}
+
+type CreatorReceivesAuctionBid @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "bidder member handle"
+  bidderMemberHandle: String!
+
+  "bid amount in JOY"
+  bidAmount: BigInt!
+}
+
+type RoyaltyPaid @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "royalty amount in JOY"
+  royaltyAmount: BigInt!
+}
+
+type DirectChannelPaymentByMember @variant {
+  "channelTitle"
+  channelTitle: String!
+
+  "member handle doing the payment"
+  memberHandle: String!
+
+  "payment amount in JOY"
+  paymentAmount: BigInt!
+}
+
+type EnglishAuctionSettled @variant {
+  "videoTitle"
+  videoTitle: String!
+}
+
+type ChannelFundsWithdrawn @variant {
+  "channelTitle"
+  channelTitle: String!
+
+  "withdrawal amount in JOY"
+  withdrawalAmount: BigInt!
+}
+
+type ChannelCreated @variant {
+  "channelTitle"
+  channelTitle: String!
+}
+
+type CommentReply @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "member handle doing the reply"
+  memberHandle: String!
+}
+
+type ReactionToComment @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "member handle doing the reaction"
+  memberHandle: String!
+}
+
+type VideoPosted @variant {
+  "videoTitle"
+  videoTitle: String!
+
+  "channel title"
+  channelTitle: String!
+}
+
+type NewAuction @variant {
+  "channelTitle"
+  channelTitle: String!
+
+  "nft videoTitle"
+  videoTitle: String!
+}
+
+type NewNftOnSale @variant {
+  "channelTitle"
+  channelTitle: String!
+
+  "nft videoTitle"
+  videoTitle: String!
+}
+
+type HigherBidPlaced @variant {
+  "nft videoTitle"
+  videoTitle: String!
+
+  "bidder member handle"
+  bidderMemberHandle: String!
+}
+
+type EnglishAuctionWon @variant {
+  "nft videoTitle"
+  videoTitle: String!
+}
+
+type EnglishAuctionLost @variant {
+  "nft videoTitle"
+  videoTitle: String!
+}
+
+type OpenAuctionWon @variant {
+  "nft videoTitle"
+  videoTitle: String!
+}
+
+type OpenAuctionLost @variant {
+  "nft videoTitle"
+  videoTitle: String!
+}
