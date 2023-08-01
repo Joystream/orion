@@ -540,8 +540,8 @@ type NewChannelFollowerNotificationData @variant {
   "channel just followed"
   channel: Channel!
 
-  "follower account"
-  follower: Account!
+  "follower userId"
+  follower: User!
 }
 
 type NftFeaturedNotificationData @variant {

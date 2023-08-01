@@ -218,7 +218,7 @@ export class ChannelsResolver {
           [ownerAccount],
           new OffChainNotificationParams(
             em,
-            new NewChannelFollowerNotificationData({ channel: channelId })
+            new NewChannelFollowerNotificationData({ channel: channelId, follower: user.id })
           )
         )
       }
@@ -398,7 +398,7 @@ export class ChannelsResolver {
             [account],
             new OffChainNotificationParams(
               em,
-              new ChannelExcludedNotificationData({ channel: channelId })
+              new ChannelExcludedNotificationData({ channel: channelId, rationale })
             )
           )
         }
