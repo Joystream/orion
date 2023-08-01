@@ -486,6 +486,9 @@ type OffChainNotification @entity {
 
   "in-app read or not"
   status: ReadOrUnread!
+
+  "creation timestamp"
+  createdAt: DateTime!
 }
 
 union OffChainNotificationData =

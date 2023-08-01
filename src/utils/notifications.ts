@@ -23,6 +23,7 @@ import { MailNotifier } from './mail'
 import { getNextIdForEntity } from './nextEntityId'
 import { EntityManagerOverlay } from './overlay'
 import { getChannelOwnerMemberByVideoId } from '../mappings/content/utils'
+import { DateTime } from '@subsquid/graphql-server'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -274,6 +275,7 @@ export class OffChainNotificationParams extends NotificationParams {
       status: ReadOrUnread.UNREAD,
       deliveryStatus: deliveryStatusFromPreference(pref),
       data: this._data,
+      createdAt: new Date(),
     })
     return new NewOffchainNotificationEntity(
       notification,
