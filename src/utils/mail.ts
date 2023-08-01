@@ -1,6 +1,5 @@
 import sgMail from '@sendgrid/mail'
 import { createLogger } from '@subsquid/logger'
-import { ChannelPaymentMadeEventData, CommentCreatedEventData, EventData } from '../model'
 
 type SendMailArgs = {
   from: string
@@ -42,25 +41,8 @@ export class MailNotifier {
     this._recieverMail = reciever
   }
 
-  public setContentUsingTemplate(notificationData: any) {
-    this._content = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Email Template</title>
-      </head>
-      <body>
-        <div>
-          <p>Hi ${notificationData.user},</p>
-          <p>This is a notification email regarding the following subject: ${notificationData.subject}.</p>
-          <p>Timestamp: ${notificationData.timestamp}</p>
-        </div>
-      </body>
-      </html>
-      `
+  public setContent(content: string) {
+    this._content = content
   }
 
   public async send(): Promise<void> {
@@ -101,7 +83,7 @@ export class SendGridMailStrategy implements SendMailStrategy {
   }
 
   mailHasBeenSent(): boolean {
-    return this._result.statusCode === 202
+    return this._result.statusCode === 202 || this._result.statusCode === 200
   }
 
   async sendMail({ from, to, subject, content }: SendMailArgs): Promise<void> {
@@ -122,7 +104,6 @@ export class SendGridMailStrategy implements SendMailStrategy {
     mailerLogger.info(
       `E - mail sent: \n${JSON.stringify({ from, to, subject, content }, null, 2)} `
     )
-    console.log(`------------> MAIL SENT !!!!!!!!`)
   }
 }
 

@@ -18,45 +18,6 @@ type Event @entity {
   data: EventData!
 }
 
-union NotificationType = ChannelNotification | MemberNotification
-
-type ChannelNotification @variant {
-  channel: Channel!
-}
-
-type MemberNotification @variant {
-  member: Membership!
-}
-
-type RuntimeNotification @entity {
-  "Autoincremented"
-  id: ID!
-
-  "Member that should recieve the notification"
-  account: Account!
-
-  "The notification event"
-  event: Event!
-
-  "how the notification has been delivered"
-  deliveryStatus: DeliveryStatus!
-
-  "in-app read or not"
-  status: ReadOrUnread!
-}
-
-enum DeliveryStatus {
-  EMAIL_ONLY
-  IN_APP_ONLY
-  EMAIL_AND_IN_APP
-  UNDELIVERED
-}
-
-enum ReadOrUnread {
-  READ
-  UNREAD
-}
-
 type NftHistoryEntry @entity {
   "Autoincremented"
   id: ID!
@@ -91,8 +52,6 @@ union EventData =
   | EnglishAuctionSettledEventData
   | BidMadeCompletingAuctionEventData
   | OpenAuctionBidAcceptedEventData
-  | NftOfferedEventData
-  | NftOfferAcceptedEventData
   | NftSellOrderMadeEventData
   | NftBoughtEventData
   | BuyNowCanceledEventData
@@ -103,10 +62,6 @@ union EventData =
   | ChannelFundsWithdrawnEventData
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
-  | ChannelCreatedEventData
-  | VideoCreatedEventData
-  | VideoReactionEventData
-  | CommentReactionEventData
   | MemberBannedFromChannelEventData
 
 # Atlas use-case: `GetCommentEdits` query
@@ -116,19 +71,7 @@ type CommentCreatedEventData {
 
   "Comment's original text"
   text: String!
-
-  "Comment context"
-  context: CommentContext!
 }
-
-type CommentToVideo @variant {
-  video: Video!
-}
-type CommentToComment @variant {
-  parentComment: Comment!
-}
-
-union CommentContext = CommentToVideo | CommentToComment
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentTextUpdatedEventData {
@@ -141,28 +84,16 @@ type CommentTextUpdatedEventData {
   # Only author can edit the comment, so no actor context required
 }
 
-type CommentReactionEventData {
-  commentReaction: CommentReaction!
-}
-
-type NftOfferedEventData {
-  phantom: Int!
-}
-
-type NftOfferAcceptedEventData {
-  phantom: Int!
-}
-
 # Atlas use-case: `GetNftActivities` and `GetNftHistory` query
 type OpenAuctionStartedEventData {
   "Actor that started this auction."
   actor: ContentActor!
 
-  "Nft owner at the time it was put on an auction."
-  nftOwner: NftOwner!
-
   "Auction started."
   auction: Auction!
+
+  "nft being auctioned"
+  nft: OwnedNft!
 }
 
 # Atlas use-case: `GetNftActivities` and `GetNftHistory` query
@@ -170,8 +101,8 @@ type EnglishAuctionStartedEventData {
   "Actor that started this auction."
   actor: ContentActor!
 
-  "Nft owner at the time it was put on an auction."
-  nftOwner: NftOwner!
+  "Nft being auctioned"
+  nft: OwnedNft!
 
   "Auction started."
   auction: Auction!
@@ -469,85 +400,4 @@ type MemberBannedFromChannelEventData {
 
   "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
   action: Boolean!
-}
-
-type OffChainNotification @entity {
-  "Autoincremented"
-  id: ID!
-
-  "Member that should recieve the notification"
-  account: Account!
-
-  "The notification data associated"
-  data: OffChainNotificationData!
-
-  "how the notification has been delivered"
-  deliveryStatus: DeliveryStatus!
-
-  "in-app read or not"
-  status: ReadOrUnread!
-
-  "creation timestamp"
-  createdAt: DateTime!
-}
-
-union OffChainNotificationData =
-    YppSignupSuccessFullNotificationData
-  | ChannelVerifiedNotificationData
-  | ChannelExcludedNotificationData
-  | VideoExcludedNotificationData
-  | ChannelSuspendedNotificationData
-  | NewChannelFollowerNotificationData
-  | VideoFeaturedOnCategoryPageNotificationData
-  | NftFeaturedNotificationData
-
-type VideoFeaturedOnCategoryPageNotificationData @variant {
-  "video featured"
-  video: Video!
-
-  "category"
-  category: VideoCategory!
-}
-
-type YppSignupSuccessFullNotificationData @variant {
-  phantom: Int!
-}
-
-type ChannelVerifiedNotificationData @variant {
-  "verified channel"
-  channel: Channel!
-}
-
-type ChannelExcludedNotificationData @variant {
-  "excluded channel"
-  channel: Channel!
-
-  "rationale"
-  rationale: String!
-}
-
-type VideoExcludedNotificationData @variant {
-  "excluded video"
-  video: Video!
-
-  "rationale"
-  rationale: String!
-}
-
-type ChannelSuspendedNotificationData @variant {
-  "suspended channel"
-  channel: Channel!
-}
-
-type NewChannelFollowerNotificationData @variant {
-  "channel just followed"
-  channel: Channel!
-
-  "follower userId"
-  follower: User!
-}
-
-type NftFeaturedNotificationData @variant {
-  "nft in question"
-  nft: OwnedNft!
 }

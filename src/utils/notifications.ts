@@ -10,20 +10,14 @@ import {
   Event,
   OffChainNotification,
   OffChainNotificationData,
-  ReadOrUnread,
   RuntimeNotification,
-  TransactionalStatus,
-  OwnedNft,
-  Bid,
-  Video,
-  CommentToVideo,
+  RuntimeNotificationData,
+  NotificationUnread,
 } from '../model'
 import { ConfigVariable, config } from './config'
 import { MailNotifier } from './mail'
 import { getNextIdForEntity } from './nextEntityId'
 import { EntityManagerOverlay } from './overlay'
-import { getChannelOwnerMemberByVideoId } from '../mappings/content/utils'
-import { DateTime } from '@subsquid/graphql-server'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -67,97 +61,63 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
   })
 }
 
-// [app notification, email notification] preference
 export async function preferencesForNotification(
   account: Account,
-  notificationType: EventData | OffChainNotificationData,
-  overlay?: EntityManagerOverlay // neeeded for runtime notifications
+  notificationType: RuntimeNotificationData | OffChainNotificationData
 ): Promise<NotificationPreference> {
   switch (notificationType.isTypeOf) {
-    case 'CommentCreatedEventData':
-      if (notificationType.context.isTypeOf === 'CommentToVideo') {
-        // case: account is creator, guaranteed at invocation site
-        return account.notificationPreferences.videoCommentCreatedNotificationEnabled
-      } else {
-        // case: account is parent comment author, guaranteed at invocation site
-        return account.notificationPreferences.replyToCommentNotificationEnabled
-      }
-    case 'OpenAuctionStartedEventData':
-      // case: account is channel follower
-      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
-    case 'EnglishAuctionStartedEventData':
-      // case: account is channel follower
-      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
-    case 'AuctionBidMadeEventData':
-      const bid = await overlay!.getRepository(Bid).getByIdOrFail(notificationType.bid)
-      if (bid.bidderId !== account.membershipId) {
-        // member has been outbidded
-        return account.notificationPreferences.higherBidThanYoursMadeNotificationEnabled
-      } else {
-        // case: account is new bidder or account is creatror of the nft
-        return account.notificationPreferences.bidMadeOnNftNotificationEnabled
-      }
-    case 'EnglishAuctionSettledEventData':
-      const winningEngBid = await overlay!
-        .getRepository(Bid)
-        .getByIdOrFail(notificationType.winningBid)
-      if (account.membershipId === winningEngBid.bidderId) {
-        // if account is the winner of the auction
-        return account.notificationPreferences.auctionWonNotificationEnabled
-      } else {
-        // else account has lost the auction
-        return account.notificationPreferences.auctionLostNotificationEnabled
-      }
-    case 'BidMadeCompletingAuctionEventData':
-      const winningBuyNowBid = await overlay!
-        .getRepository(Bid)
-        .getByIdOrFail(notificationType.winningBid)
-      if (account.membershipId === winningBuyNowBid.bidderId) {
-        // if account is the winner of the auction
-        return account.notificationPreferences.auctionWonNotificationEnabled
-      } else {
-        // else account has lost the auction
-        return account.notificationPreferences.auctionLostNotificationEnabled
-      }
-    case 'OpenAuctionBidAcceptedEventData':
-      const winningOpenAuctionBid = await overlay!
-        .getRepository(Bid)
-        .getByIdOrFail(notificationType.winningBid)
-      if (account.membershipId === winningOpenAuctionBid.bidderId) {
-        // if account is the winner of the auction
-        return account.notificationPreferences.auctionWonNotificationEnabled
-      } else {
-        // else account has lost the auction
-        return account.notificationPreferences.auctionLostNotificationEnabled
-      }
-    case 'ChannelPaymentMadeEventData':
-      // case: account is channel owner -> Channel notification
-      return account.notificationPreferences.channelReceivedFundsFromWgNotificationEnabled
-    case 'ChannelFundsWithdrawnEventData':
-      // case: account is channel owner -> Channel notification
-      return account.notificationPreferences.channelFundsWithdrawnNotificationEnabled
-    case 'ChannelCreatedEventData':
-      // case: account is channel owner -> Channel notification
-      return account.notificationPreferences.channelCreatedNotificationEnabled
-    case 'NewChannelFollowerNotificationData':
-      // case: account is channel owner -> Channel notification
-      return account.notificationPreferences.newChannelFollowerNotificationEnabled
-    case 'ChannelExcludedNotificationData':
-      // case: account is channel owner -> Channel notification
+    case 'ChannelExcluded':
       return account.notificationPreferences.channelExcludedFromAppNotificationEnabled
-    case 'VideoExcludedNotificationData':
-      // case: account is channel owner -> Channel notification
+    case 'VideoExcluded':
       return account.notificationPreferences.videoExcludedFromAppNotificationEnabled
-    case 'NftIssuedEventData':
-      // case: account is channel follower -> Member notification
-      switch (notificationType.transactionalStatus.isTypeOf) {
-        default:
-          return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
-        case 'TransactionalStatusAuction':
-          return account.notificationPreferences.newNftOnAuctionNotificationEnabled
-        case 'TransactionalStatusBuyNow':
-          return account.notificationPreferences.newNftOnSaleNotificationEnabled
-      }
+    case 'VideoFeaturedAsCategoryHero':
+      return account.notificationPreferences.videoFeaturedAsHeroNotificationEnabled
+    case 'VideoFeaturedOnCategoryPage':
+      return account.notificationPreferences.videoFeaturedOnCategoryPageNotificationEnabled
+    case 'NftFeaturedOnMarketPlace':
+      return account.notificationPreferences.nftFeaturedOnMarketPlaceNotificationEnabled
+    case 'NewChannelFollower':
+      return account.notificationPreferences.newChannelFollowerNotificationEnabled
+    case 'CommentPostedToVideo':
+      return account.notificationPreferences.videoCommentCreatedNotificationEnabled
+    case 'VideoLiked':
+      return account.notificationPreferences.videoLikedNotificationEnabled
+    case 'VideoDisliked':
+      return account.notificationPreferences.videoDislikedNotificationEnabled
+    case 'YppSignupSuccessful':
+      return account.notificationPreferences.yppSignupSuccessfulNotificationEnabled
+    case 'ChannelVerified':
+      return account.notificationPreferences.yppChannelVerifiedNotificationEnabled
+    case 'NftPurchased':
+      return account.notificationPreferences.nftBoughtNotificationEnabled
+    case 'CreatorReceivesAuctionBid':
+      return account.notificationPreferences.bidMadeOnNftNotificationEnabled
+    case 'RoyaltyPaid':
+      return account.notificationPreferences.royaltyReceivedNotificationEnabled
+    case 'DirectChannelPaymentByMember':
+      return account.notificationPreferences.channelPaymentReceivedNotificationEnabled
+    case 'ChannelFundsWithdrawn':
+      return account.notificationPreferences.channelFundsWithdrawnNotificationEnabled
+    case 'ChannelCreated':
+      return account.notificationPreferences.channelCreatedNotificationEnabled
+    case 'CommentReply':
+      return account.notificationPreferences.replyToCommentNotificationEnabled
+    case 'ReactionToComment':
+      return account.notificationPreferences.reactionToCommentNotificationEnabled
+    case 'VideoPosted':
+      return account.notificationPreferences.videoPostedNotificationEnabled
+    case 'NewAuction':
+      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
+    case 'NewNftOnSale':
+      return account.notificationPreferences.newNftOnSaleNotificationEnabled
+    case 'EnglishAuctionLost':
+      return account.notificationPreferences.auctionLostNotificationEnabled
+    case 'EnglishAuctionWon':
+      return account.notificationPreferences.auctionWonNotificationEnabled
+    case 'OpenAuctionLost':
+      return account.notificationPreferences.auctionLostNotificationEnabled
+    case 'OpenAuctionWon':
+      return account.notificationPreferences.auctionWonNotificationEnabled
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
@@ -169,7 +129,7 @@ export async function addNotification(accounts: (Account | null)[], params: Noti
   const mailNotifier = new MailNotifier()
   mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
   mailNotifier.setSubject(params.getDataForEmail())
-  mailNotifier.setContentUsingTemplate('test')
+  // mailNotifier.setContentUsingTemplate('test')
 
   for (const account of accounts.filter((account) => account)) {
     const notificationEntity = await params.createNotification(account!)
@@ -272,7 +232,7 @@ export class OffChainNotificationParams extends NotificationParams {
     const notification = new OffChainNotification({
       id: newNotificationId.toString(),
       accountId: account.id,
-      status: ReadOrUnread.UNREAD,
+      status: new NotificationUnread({ phantom: 0 }),
       deliveryStatus: deliveryStatusFromPreference(pref),
       data: this._data,
       createdAt: new Date(),
@@ -352,4 +312,192 @@ export function deliveryStatusFromPreference(pref: NotificationPreference): Deli
   } else {
     return DeliveryStatus.UNDELIVERED
   }
+}
+
+const channelExcludedText = (channelTitle: string) => {
+  return `Your channel ${channelTitle} has been excluded`
+}
+const videoExcludedText = (videoTitle: string) => {
+  return `Your video ${videoTitle} has been excluded`
+}
+
+const videoFeaturedAsHeroText = (videoTitle: string) => {
+  return `Your video ${videoTitle} has been featured as Hero`
+}
+
+const videoFeaturedOnCategoryPageText = (videoTitle: string, categoryTitle: string) => {
+  return `Your video ${videoTitle} has been featured on the ${categoryTitle} category page`
+}
+
+const nftFeaturedOnMarketplaceText = (videoTitle: string) => {
+  return `Your nft for ${videoTitle} has been featured on the marketplace`
+}
+
+const newChannelFollowerText = (channelTitle: string) => {
+  return `You have a new follower on channel ${channelTitle}`
+}
+
+const commentPostedToVideoText = (videoTitle: string, memberHandle: string) => {
+  return `${memberHandle} left a comment on Your video ${videoTitle}`
+}
+
+const videoLikedText = (videoTitle: string) => {
+  return `Your video ${videoTitle} has a new like`
+}
+
+const videoDislikedText = (videoTitle: string) => {
+  return `Your video ${videoTitle} has a new dislike`
+}
+
+const channelVerifiedViaYPPText = () => {
+  return `Your channel has been verified via YPP`
+}
+
+const nftPurchasedText = (videoTitle: string, memberHandle: string, nftPrice: string) => {
+  return `Your NFT for ${videoTitle} has been purchased by ${memberHandle} for ${nftPrice}`
+}
+
+const nftBidReceivedText = (memberHandle: string, nftPrice: string, videoTitle: string) => {
+  return `${memberHandle} placed a bid of ${nftPrice} on nft: ${videoTitle}`
+}
+
+const nftRoyaltyPaymentReceivedText = (nftPrice: string, videoTitle: string) => {
+  return `you received ${nftPrice} royalties for your nft: ${videoTitle}`
+}
+
+const channelReceivedDirectPaymentText = (memberHandle: string, nftPrice: string) => {
+  return `${memberHandle} transferred ${nftPrice} to your channel`
+}
+
+const timedAuctionExpiredText = (videoTitle: string) => {
+  return `Timed auction expired for your nft: ${videoTitle}`
+}
+
+const openAuctionExpiredText = (videoTitle: string) => {
+  return `Open auction settled for your nft: ${videoTitle}`
+}
+
+const channelCreatedText = (channelTitle: string) => {
+  return `${channelTitle} has been created`
+}
+
+const commentRepliedText = (memberHandle: string, videoTitle: string) => {
+  return `${memberHandle} has replied to your comment under ${videoTitle}`
+}
+
+const commentReactedText = (memberHandle: string, videoTitle: string) => {
+  return `${memberHandle} has reacted to your comment under ${videoTitle}`
+}
+
+const newVideoPostedText = (channelTitle: string, videoTitle: string) => {
+  return `${channelTitle} just posted a new video ${videoTitle}`
+}
+
+const newNftOnAuctionText = (channelTitle: string, videoTitle: string) => {
+  return `${channelTitle} just started an auction of nft: ${videoTitle}`
+}
+
+const newNftOnSaleText = (channelTitle: string, videoTitle: string) => {
+  return `${channelTitle} just started the sale of nft ${videoTitle}`
+}
+
+const nftBidOutbidText = (memberHandle: string, videoTitle: string) => {
+  return `${memberHandle} placed a higher bid on NFT ${videoTitle}`
+}
+
+const openAuctionBidWonText = (videoTitle: string) => {
+  return `You won an open auction for nft: ${videoTitle}`
+}
+
+const timedAuctionBidWonText = (videoTitle: string) => {
+  return `You won a timed auction for nft: ${videoTitle}`
+}
+
+const openAuctionBidLostText = (videoTitle: string) => {
+  return `You lost an open auction for nft: ${videoTitle}`
+}
+
+const timedAuctionBidLostText = (videoTitle: string) => {
+  return `You lost an timed auction for nft: ${videoTitle}`
+}
+
+const councilPayoutText = (nftPrice: string) => {
+  return `You received ${nftPrice} from the council`
+}
+
+const councilPayoutTextForChannel = (channelTitle: string, nftPrice: string) => {
+  return `${channelTitle} received ${nftPrice} from the council`
+}
+
+const councilPayoutTextForChannelToMember = (
+  channelTitle: string,
+  memberHandle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
+}
+
+const councilPayoutTextForChannelToExternalWallet = (channelTitle: string, nftPrice: string) => {
+  return `${channelTitle} transferred ${nftPrice} to an external wallet`
+}
+
+const workingGroupPayoutText = (nftPrice: string) => {
+  return `You received ${nftPrice} from the working group`
+}
+
+const workingGroupPayoutTextForChannel = (channelTitle: string, nftPrice: string) => {
+  return `${channelTitle} received ${nftPrice} from the working group`
+}
+
+const workingGroupPayoutTextForChannelToMember = (
+  channelTitle: string,
+  memberHandle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
+}
+
+const workingGroupPayoutTextForChannelToExternalWallet = (
+  channelTitle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to an external wallet`
+}
+
+const payoutUpdatedByCouncilText = (nftPrice: string) => {
+  return `New payout of ${nftPrice} has been updated by the council`
+}
+
+const payoutUpdatedByCouncilTextForChannel = (channelTitle: string, nftPrice: string) => {
+  return `New payout of ${nftPrice} has been updated by the council for ${channelTitle}`
+}
+
+const payoutUpdatedByCouncilTextForChannelToMember = (
+  channelTitle: string,
+  memberHandle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
+}
+
+const payoutUpdatedByCouncilTextForChannelToExternalWallet = (
+  channelTitle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to an external wallet`
+}
+
+const payoutUpdatedByCouncilTextForChannelToWorkingGroup = (
+  channelTitle: string,
+  nftPrice: string
+) => {
+  return `${channelTitle} transferred ${nftPrice} to the working group`
+}
+
+const payoutUpdatedByCouncilTextForChannelToCouncil = (channelTitle: string, nftPrice: string) => {
+  return `${channelTitle} transferred ${nftPrice} to the council`
+}
+
+const payoutUpdatedByCouncilTextForChannelToTreasury = (channelTitle: string, nftPrice: string) => {
+  return `${channelTitle} transferred ${nftPrice} to the treasury`
 }

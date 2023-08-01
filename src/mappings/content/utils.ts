@@ -701,7 +701,7 @@ export async function getAccountForMember(
   if (!memberId) {
     return null
   }
-  const memberAccount = await em.getRepository(Account).findOneBy({ membershipId: memberId })
+  const memberAccount = await em.getRepository(Account).findOneByOrFail({ membershipId: memberId })
   return memberAccount
 }
 
