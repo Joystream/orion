@@ -10,4 +10,6 @@ src/model/generated
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data
-/db/export
+/db/exportsrc/tests/integration/Alice.json
+src/tests/integration/Bob.json
+src/tests/integration/Alice.json

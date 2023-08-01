@@ -140,13 +140,15 @@ async function main(): Promise<void> {
   // Bob reacts to Alice video
   await ctx.reactToVideo(bob.joystreamAccount, videoIdWithNftBuyNow, bob.membershipId)
 
+  // Bob comments on Alice's video
+  await ctx.postVideoComment(bob.joystreamAccount, videoIdWithNftBuyNow, bob.membershipId)
+
   // create video with nft on idle and then set it in offer status
   const videoToBeOffered = await ctx.createVideoWithNft(
     alice.membershipId,
     channelId,
     alice.joystreamAccount,
-    NftStatus.Idle,
-    [alice.membershipId, bob.membershipId]
+    NftStatus.Idle
   )
   await ctx.startNftOffer(
     alice.joystreamAccount,
@@ -160,9 +162,10 @@ async function main(): Promise<void> {
     alice.membershipId,
     channelId,
     alice.joystreamAccount,
-    NftStatus.Idle,
-    [alice.membershipId, bob.membershipId]
+    NftStatus.Idle
   )
+  assert(videoWithNftForOpenAuction !== '', 'videoWithNftForOpenAuction is empty')
+
   await ctx.startOpenAuction(
     alice.joystreamAccount,
     videoWithNftForOpenAuction,
@@ -175,12 +178,13 @@ async function main(): Promise<void> {
     alice.membershipId,
     channelId,
     alice.joystreamAccount,
-    NftStatus.Idle,
-    [alice.membershipId, bob.membershipId]
+    NftStatus.Idle
   )
+  assert(videoWithNftForEnglishAuction !== '', 'videoWithNftForEnglishAuction is empty')
+
   await ctx.startEnglishAuction(
     alice.joystreamAccount,
-    videoWithNftForOpenAuction,
+    videoWithNftForEnglishAuction,
     alice.membershipId,
     [alice.membershipId, bob.membershipId]
   )
