@@ -47,7 +47,7 @@ import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 @Resolver()
 export class ChannelsResolver {
   // Set by depenency injection
-  constructor(private em: () => Promise<EntityManager>) { }
+  constructor(private em: () => Promise<EntityManager>) {}
 
   @Query(() => [ExtendedChannel])
   async extendedChannels(
@@ -85,7 +85,7 @@ export class ChannelsResolver {
       `"channel"."id" IN (${mostRecentChannelsQuerySql})`,
       'AND'
     )
-      ; (listQuery as { sql: string }).sql = listQuerySql
+    ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
     console.log('Result', result)
@@ -155,7 +155,7 @@ export class ChannelsResolver {
       )
     }
 
-    ; (listQuery as { sql: string }).sql = listQuerySql
+    ;(listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
@@ -219,7 +219,7 @@ export class ChannelsResolver {
           new OffChainNotificationParams(
             em,
             new NewChannelFollowerNotificationData({ channel: channelId })
-          ),
+          )
         )
       }
 
@@ -339,11 +339,12 @@ export class ChannelsResolver {
             [ownerAccount],
             new OffChainNotificationParams(
               em,
-              new ChannelVerifiedNotificationData({ phantom: Number(channelId) }),
-            ),
+              new ChannelVerifiedNotificationData({ phantom: Number(channelId) })
+            )
           )
         }
       }
+      em.save(channel)
     }
     return {
       channel,
@@ -397,8 +398,8 @@ export class ChannelsResolver {
             [account],
             new OffChainNotificationParams(
               em,
-              new ChannelExcludedNotificationData({ phantom: Number(channelId) }),
-            ),
+              new ChannelExcludedNotificationData({ phantom: Number(channelId) })
+            )
           )
         }
       }
