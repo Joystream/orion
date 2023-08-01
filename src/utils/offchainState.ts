@@ -25,7 +25,7 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'is_verified'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -74,13 +74,14 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
 }
 
 function migrateExportDataToV310(data: ExportedData): ExportedData {
-  const migrationUser = {
-    id: `${V2_MIGRATION_USER_PREFIX}${uniqueId()}`,
-    isRoot: false,
-  }
-  // create new notification preferences set all to true
+  // account will find himself with all notification pref. enabled by default
   data.Account?.values.map((account) => {
     account.notificationPreferences = defaultNotificationPreferences()
+  })
+
+  // setting channel native Orion verification status to false
+  data.Channel?.values.map((channel) => {
+    channel.isVerified = false
   })
 
   return data
