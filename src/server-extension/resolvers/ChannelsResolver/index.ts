@@ -41,7 +41,6 @@ import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
-import { addNotification, OffChainNotificationParams } from '../../../utils/notifications'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 
 @Resolver()
