@@ -11,8 +11,11 @@ import {
   ChannelRewardClaimedEventData,
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
+  ChannelCreated,
+  ChannelRecipient,
   ChannelCreatedEventData,
-  Account,
+  NotificationData,
+  ChannelFundsWithdrawn,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -35,7 +38,12 @@ import {
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
+import { addNotification } from '../../utils/notification/helpers'
+import {
+  channelCreatedText,
+  fundsWithdrawnFromChannelText,
+  notificationPageLinkPlaceholder,
+} from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -123,7 +131,18 @@ export async function processChannelCreatedEvent({
     })
 
     const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
-    await addNotification([ownerAccount], new RuntimeNotificationParams(overlay, event))
+    await addNotification(
+      overlay.getEm(),
+      [ownerAccount],
+      new ChannelCreated({
+        recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+        data: new NotificationData({
+          text: channelCreatedText(channel.title || ''),
+          linkPage: notificationPageLinkPlaceholder(),
+        }),
+      }),
+      event
+    )
   }
 }
 
@@ -347,8 +366,16 @@ export async function processChannelFundsWithdrawnEvent({
 
   if (channelOwnerAccount) {
     await addNotification(
+      overlay.getEm(),
       [channelOwnerAccount],
-      new RuntimeNotificationParams(overlay, entityEvent)
+      new ChannelFundsWithdrawn({
+        recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+        data: new NotificationData({
+          text: fundsWithdrawnFromChannelText(channel.title || ''),
+          linkPage: notificationPageLinkPlaceholder(),
+        }),
+      }),
+      entityEvent
     )
   }
 }
