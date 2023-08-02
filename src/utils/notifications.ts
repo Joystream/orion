@@ -4,19 +4,17 @@ import {
   AccountNotificationPreferences,
   NextEntityId,
   NotificationPreference,
-  OffChainNotification,
-  RuntimeNotification,
   EmailDeliveryStatus,
-  RuntimeNotificationEmailDelivery,
-  OffChainNotificationEmailDelivery,
-  OffChainNotificationInAppDelivery,
-  OffChainNotificationType,
-  RuntimeNotificationType,
+  NotificationType,
+  Notification,
+  Event,
+  Unread,
+  NotificationInAppDelivery,
+  NotificationEmailDelivery,
 } from '../model'
 import { getNextIdForEntity } from './nextEntityId'
 import { sgSendMail } from './mail'
 import { ConfigVariable, config } from './config'
-import { EntityManagerOverlay } from './overlay'
 
 export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -62,9 +60,9 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 
 export function preferencesForNotification(
   preferences: AccountNotificationPreferences,
-  notificationType: RuntimeNotificationType | OffChainNotificationType
+  notificationType: NotificationType
 ): NotificationPreference {
-  switch (notificationType) {
+  switch (notificationType.isTypeOf) {
     case 'ChannelExcluded':
       return preferences.channelExcludedFromAppNotificationEnabled
     case 'VideoExcluded':
@@ -122,24 +120,28 @@ export function preferencesForNotification(
   }
 }
 
-export async function addOffChainNotification(
+export async function addNotification(
   em: EntityManager,
   accounts: (Account | null)[],
-  notificationData: OffChainNotificationType
+  notificationType: NotificationType,
+  event?: Event
 ) {
+  const notificationChainTag = event ? 'OffChainNotification' : 'OnChainNotification'
   // filter accounts that are not null
   for (const account of accounts.map((account) => account)) {
     // create notification as disabled = true
     const { inAppEnabled, emailEnabled } = preferencesForNotification(
       account!.notificationPreferences,
-      notificationData
+      notificationType
     )
     // create notification (for the notification center)
-    const nextOffChainNotificationId = await getNextIdForEntity(em, 'OffChainNotification')
-    const notification = new OffChainNotification({
-      id: nextOffChainNotificationId.toString(),
+    const nextNotificationId = await getNextIdForEntity(em, notificationChainTag)
+    const notification = new Notification({
+      id: notificationChainTag + '-' + nextNotificationId.toString(),
       accountId: account!.id,
-      notificationType: notificationType,
+      notificationType,
+      eventId: event?.id,
+      status: new Unread(),
     })
 
     // deliver via mail if enabled
@@ -149,46 +151,26 @@ export async function addOffChainNotification(
 
     // deliver via in app if enabled
     if (inAppEnabled) {
-      const deliveryId = await getNextIdForEntity(em, 'OffChainNotificationInAppDelivery')
-      const inAppDelivery = new OffChainNotificationInAppDelivery({
+      const deliveryId = await getNextIdForEntity(em, 'NotificationInAppDelivery')
+      const inAppDelivery = new NotificationInAppDelivery({
         id: deliveryId.toString(),
         notificationId: notification.id,
       })
       await em.save([
         inAppDelivery,
         new NextEntityId({
-          entityName: 'OffChainNotificationInAppDelivery',
+          entityName: 'NotificationInAppDelivery',
           nextId: deliveryId + 1,
         }),
       ])
     }
 
     const newOffChainNotificationNextEntityId = new NextEntityId({
-      entityName: 'OffChainNotification',
-      nextId: nextOffChainNotificationId + 1,
+      entityName: notificationChainTag,
+      nextId: nextNotificationId + 1,
     })
     await em.save([notification, newOffChainNotificationNextEntityId])
   }
-
-  // const em = params.getEm()
-
-  // const mailNotifier = new MailNotifier()
-  // mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
-  // mailNotifier.setSubject(params.getDataForEmail())
-  // // mailNotifier.setContentUsingTemplate('test')
-
-  // for (const account of accounts.filter((account) => account)) {
-  //   const notificationEntity = await params.createNotification(account!)
-  //   if (notificationEntity.shouldSendEmail) {
-  //     mailNotifier.setReciever(account!.email)
-  //     await mailNotifier.send()
-  //     if (mailNotifier.mailHasBeenSent()) {
-  //       notificationEntity.markEmailAsSent()
-  //     }
-  //   }
-  //   await notificationEntity.saveToDb()
-  // }
-  // return
 }
 
 const channelExcludedText = (channelTitle: string) => {
@@ -305,10 +287,10 @@ const fundsWithdrawnFromChannelText = (amount: string) => {
 async function deliverOffChainNotificationViaEmail(
   em: EntityManager,
   to: string,
-  notification: OffChainNotification
+  notification: Notification
 ): Promise<void> {
   const nextEntityId = await getNextIdForEntity(em, 'OffChainNotificationEmailDelivery')
-  const notificationDelivery = new OffChainNotificationEmailDelivery({
+  const notificationDelivery = new NotificationEmailDelivery({
     id: nextEntityId.toString(),
     notificationId: notification.id,
     deliveryAttemptAt: new Date(),
@@ -318,7 +300,7 @@ async function deliverOffChainNotificationViaEmail(
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to,
     subject: `New notification from ${appName}!`,
-    content: notification.text,
+    content: notification.notificationType.data.text,
   })
   if (resp?.statusCode === 202 || resp?.statusCode === 200) {
     notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
@@ -332,30 +314,4 @@ async function deliverOffChainNotificationViaEmail(
       nextId: nextEntityId + 1,
     }),
   ])
-}
-
-async function deliverRuntimeNotificationViaEmail(
-  overlay: EntityManagerOverlay,
-  to: string,
-  notification: RuntimeNotification
-): Promise<void> {
-  const id = overlay.getRepository(RuntimeNotificationEmailDelivery).getNextIdNumber().toString()
-  const notificationDelivery = overlay.getRepository(RuntimeNotificationEmailDelivery).new({
-    id,
-    notificationId: notification.id,
-    deliveryAttemptAt: new Date(),
-  })
-  const em = overlay.getEm()
-  const appName = await config.get(ConfigVariable.AppName, em)
-  const resp = await sgSendMail({
-    from: await config.get(ConfigVariable.SendgridFromEmail, em),
-    to,
-    subject: `New notification from ${appName}!`,
-    content: notification.text,
-  })
-  if (resp?.statusCode === 202 || resp?.statusCode === 200) {
-    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
-  } else {
-    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Failure
-  }
 }
