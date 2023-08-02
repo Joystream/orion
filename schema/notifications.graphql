@@ -1,4 +1,3 @@
-
 type EmailDelivered @entity {
   "Autoincremented"
   id: ID!
@@ -46,12 +45,10 @@ type Unread {
 union ReadOrUnread = Read | Unread
 
 type Notification @entity {
-  "
-  id is computed as follows 
-  - id = 'offchain' ++ '-' ++ 'offchainGlobalCounter' for offchain notifications 
-  - id = 'onchain' ++ '-' ++ 'onchainGlobalCounter' for runtime related notifications 
-  This will prevent conflicts during migration
-  "
+  # id is computed as follows
+  # - id = 'offchain' ++ '-' ++ 'offchainGlobalCounter' for offchain notifications "
+  # - id = 'onchain' ++ '-' ++ 'onchainGlobalCounter' for runtime related notifications "
+  # to avoid conflicts during migration
   id: ID!
 
   "Member that should recieve the notification"
@@ -61,7 +58,7 @@ type Notification @entity {
   notificationType: NotificationType!
 
   "related event for on chain notifications"
-  event: Event!
+  event: Event
 
   "status"
   status: ReadOrUnread!
@@ -114,7 +111,31 @@ type YppSignupSuccessful @variant {
   data: NotificationData!
 
   "recipient"
-  recipient: MemberRecipient!
+  recipient: RecipientType!
+}
+
+type NftFeaturedOnMarketPlace @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
+type VideoFeaturedOnCategoryPage @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
+type VideoFeaturedAsCategoryHero @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
 }
 
 type ChannelVerified @variant {
@@ -122,7 +143,7 @@ type ChannelVerified @variant {
   data: NotificationData!
 
   "recipient"
-  recipient: ChannelRecipient!
+  recipient: RecipientType!
 }
 
 type ChannelExcluded @variant {
@@ -130,7 +151,7 @@ type ChannelExcluded @variant {
   data: NotificationData!
 
   "recipient"
-  recipient: ChannelRecipient!
+  recipient: RecipientType!
 }
 
 type VideoExcluded @variant {
@@ -138,7 +159,7 @@ type VideoExcluded @variant {
   data: NotificationData!
 
   "recipient"
-  recipient: ChannelRecipient!
+  recipient: RecipientType!
 }
 
 type NewChannelFollower @variant {
@@ -146,7 +167,7 @@ type NewChannelFollower @variant {
   data: NotificationData!
 
   "recipient"
-  recipient: ChannelRecipient!
+  recipient: RecipientType!
 }
 
 type CommentPostedToVideo @variant {

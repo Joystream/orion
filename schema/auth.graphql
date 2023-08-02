@@ -110,10 +110,7 @@ type Account @entity {
   joystreamAccount: String! @unique
 
   "runtime notifications"
-  runtimeNotifications: [RuntimeNotification!]! @derivedFrom(field: "account")
-
-  "offchain-related notifications like Orion/YPP"
-  offchainNotifications: [OffChainNotification!]! @derivedFrom(field: "account")
+  notifications: [Notification!]! @derivedFrom(field: "account")
 
   "notification preferences for the account"
   notificationPreferences: AccountNotificationPreferences!
