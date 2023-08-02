@@ -35,7 +35,7 @@ import {
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 
 export async function processChannelCreatedEvent({
   overlay,

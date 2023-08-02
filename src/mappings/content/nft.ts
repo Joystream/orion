@@ -44,7 +44,7 @@ import {
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
 import { NftOfferedEventData } from '../../model/generated/_nftOfferedEventData'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 
 export async function processOpenAuctionStartedEvent({
   overlay,

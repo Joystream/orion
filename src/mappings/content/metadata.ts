@@ -57,7 +57,7 @@ import {
   Membership,
   Event,
 } from '../../model'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,
@@ -66,7 +66,15 @@ import {
   metaprotocolTransactionFailure,
   videoRelevanceManager,
 } from '../utils'
-import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, getAccountForMember, getChannelOwnerAccount, MetaNumberProps } from './utils'
+import {
+  AsDecoded,
+  ASSETS_MAP,
+  EntityAssetProps,
+  EntityAssetsMap,
+  getAccountForMember,
+  getChannelOwnerAccount,
+  MetaNumberProps,
+} from './utils'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -649,10 +657,7 @@ export async function processChannelPaymentFromMember(
   })
 
   const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  await addNotification(
-    [ownerAccount],
-    new RuntimeNotificationParams(overlay, event),
-  )
+  await addNotification([ownerAccount], new RuntimeNotificationParams(overlay, event))
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,

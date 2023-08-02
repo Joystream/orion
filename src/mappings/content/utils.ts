@@ -64,7 +64,7 @@ import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }

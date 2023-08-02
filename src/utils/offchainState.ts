@@ -4,7 +4,7 @@ import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
-import { defaultNotificationPreferences } from './notifications'
+import { defaultNotificationPreferences } from './notification/helpers'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
