@@ -6,19 +6,19 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import {
-  Channel,
-  Video,
-  VideoCreatedEventData,
-  VideoViewEvent,
-  Event,
-} from '../../model'
+import { Channel, Video, VideoCreatedEventData, VideoViewEvent, Event } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
-import { deleteVideo, encodeAssets, getFollowersAccountsForChannel, processAppActionMetadata, processNft } from './utils'
+import {
+  deleteVideo,
+  encodeAssets,
+  getFollowersAccountsForChannel,
+  processAppActionMetadata,
+  processNft,
+} from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -118,10 +118,7 @@ export async function processVideoCreatedEvent({
 
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channel.id)
 
-  await addNotification(
-    followersAccounts,
-    new RuntimeNotificationParams(overlay, eventEntity),
-  )
+  await addNotification(followersAccounts, new RuntimeNotificationParams(overlay, eventEntity))
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

@@ -50,7 +50,7 @@ import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { getChannelOwnerAccount, getNftOwnerMemberId } from '../../../mappings/content/utils'
-import { OffChainNotificationParams, addNotification } from '../../../utils/notifications'
+import { OffChainNotificationParams, addNotification } from '../../../utils/notification/helpers'
 import { add } from 'lodash'
 
 @Resolver()

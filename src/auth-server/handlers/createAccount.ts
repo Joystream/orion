@@ -6,7 +6,7 @@ import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../mo
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
 import { verifyActionExecutionRequest } from '../utils'
-import { defaultNotificationPreferences } from '../../utils/notifications'
+import { defaultNotificationPreferences } from '../../utils/notification/helpers'
 
 type ReqParams = Record<string, string>
 type ResBody =

@@ -40,7 +40,7 @@ import {
 } from '../../model'
 import { VideoReactionEventData } from '../../model/generated/_videoReactionEventData'
 import { config, ConfigVariable } from '../../utils/config'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notifications'
+import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   backwardCompatibleMetaID,

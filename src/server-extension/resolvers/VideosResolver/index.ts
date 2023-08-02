@@ -46,7 +46,7 @@ import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
-import { addNotification, OffChainNotificationParams } from '../../../utils/notifications'
+import { addNotification, OffChainNotificationParams } from '../../../utils/notification/helpers'
 
 @Resolver()
 export class VideosResolver {
