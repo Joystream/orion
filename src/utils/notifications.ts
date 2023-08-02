@@ -1,22 +1,21 @@
-import { Flat } from 'lodash'
 import { EntityManager } from 'typeorm'
 import {
   Account,
   AccountNotificationPreferences,
-  DeliveryStatus,
-  EventData,
   NextEntityId,
   NotificationPreference,
-  Event,
   OffChainNotification,
-  OffChainNotificationData,
   RuntimeNotification,
-  RuntimeNotificationData,
-  NotificationUnread,
+  EmailDeliveryStatus,
+  RuntimeNotificationEmailDelivery,
+  OffChainNotificationEmailDelivery,
+  OffChainNotificationInAppDelivery,
+  OffChainNotificationType,
+  RuntimeNotificationType,
 } from '../model'
-import { ConfigVariable, config } from './config'
-import { MailNotifier } from './mail'
 import { getNextIdForEntity } from './nextEntityId'
+import { sgSendMail } from './mail'
+import { ConfigVariable, config } from './config'
 import { EntityManagerOverlay } from './overlay'
 
 export function notificationPrefAllTrue(): NotificationPreference {
@@ -61,161 +60,135 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
   })
 }
 
-export async function preferencesForNotification(
-  account: Account,
-  notificationType: RuntimeNotificationData | OffChainNotificationData
-): Promise<NotificationPreference> {
-  switch (notificationType.isTypeOf) {
+export function preferencesForNotification(
+  preferences: AccountNotificationPreferences,
+  notificationType: RuntimeNotificationType | OffChainNotificationType
+): NotificationPreference {
+  switch (notificationType) {
     case 'ChannelExcluded':
-      return account.notificationPreferences.channelExcludedFromAppNotificationEnabled
+      return preferences.channelExcludedFromAppNotificationEnabled
     case 'VideoExcluded':
-      return account.notificationPreferences.videoExcludedFromAppNotificationEnabled
+      return preferences.videoExcludedFromAppNotificationEnabled
     case 'VideoFeaturedAsCategoryHero':
-      return account.notificationPreferences.videoFeaturedAsHeroNotificationEnabled
+      return preferences.videoFeaturedAsHeroNotificationEnabled
     case 'VideoFeaturedOnCategoryPage':
-      return account.notificationPreferences.videoFeaturedOnCategoryPageNotificationEnabled
+      return preferences.videoFeaturedOnCategoryPageNotificationEnabled
     case 'NftFeaturedOnMarketPlace':
-      return account.notificationPreferences.nftFeaturedOnMarketPlaceNotificationEnabled
+      return preferences.nftFeaturedOnMarketPlaceNotificationEnabled
     case 'NewChannelFollower':
-      return account.notificationPreferences.newChannelFollowerNotificationEnabled
+      return preferences.newChannelFollowerNotificationEnabled
     case 'CommentPostedToVideo':
-      return account.notificationPreferences.videoCommentCreatedNotificationEnabled
+      return preferences.videoCommentCreatedNotificationEnabled
     case 'VideoLiked':
-      return account.notificationPreferences.videoLikedNotificationEnabled
+      return preferences.videoLikedNotificationEnabled
     case 'VideoDisliked':
-      return account.notificationPreferences.videoDislikedNotificationEnabled
+      return preferences.videoDislikedNotificationEnabled
     case 'YppSignupSuccessful':
-      return account.notificationPreferences.yppSignupSuccessfulNotificationEnabled
+      return preferences.yppSignupSuccessfulNotificationEnabled
     case 'ChannelVerified':
-      return account.notificationPreferences.yppChannelVerifiedNotificationEnabled
+      return preferences.yppChannelVerifiedNotificationEnabled
     case 'NftPurchased':
-      return account.notificationPreferences.nftBoughtNotificationEnabled
+      return preferences.nftBoughtNotificationEnabled
     case 'CreatorReceivesAuctionBid':
-      return account.notificationPreferences.bidMadeOnNftNotificationEnabled
+      return preferences.bidMadeOnNftNotificationEnabled
     case 'RoyaltyPaid':
-      return account.notificationPreferences.royaltyReceivedNotificationEnabled
+      return preferences.royaltyReceivedNotificationEnabled
     case 'DirectChannelPaymentByMember':
-      return account.notificationPreferences.channelPaymentReceivedNotificationEnabled
+      return preferences.channelPaymentReceivedNotificationEnabled
     case 'ChannelFundsWithdrawn':
-      return account.notificationPreferences.channelFundsWithdrawnNotificationEnabled
+      return preferences.channelFundsWithdrawnNotificationEnabled
     case 'ChannelCreated':
-      return account.notificationPreferences.channelCreatedNotificationEnabled
+      return preferences.channelCreatedNotificationEnabled
     case 'CommentReply':
-      return account.notificationPreferences.replyToCommentNotificationEnabled
+      return preferences.replyToCommentNotificationEnabled
     case 'ReactionToComment':
-      return account.notificationPreferences.reactionToCommentNotificationEnabled
+      return preferences.reactionToCommentNotificationEnabled
     case 'VideoPosted':
-      return account.notificationPreferences.videoPostedNotificationEnabled
+      return preferences.videoPostedNotificationEnabled
     case 'NewAuction':
-      return account.notificationPreferences.newNftOnAuctionNotificationEnabled
+      return preferences.newNftOnAuctionNotificationEnabled
     case 'NewNftOnSale':
-      return account.notificationPreferences.newNftOnSaleNotificationEnabled
+      return preferences.newNftOnSaleNotificationEnabled
     case 'EnglishAuctionLost':
-      return account.notificationPreferences.auctionLostNotificationEnabled
+      return preferences.auctionLostNotificationEnabled
     case 'EnglishAuctionWon':
-      return account.notificationPreferences.auctionWonNotificationEnabled
+      return preferences.auctionWonNotificationEnabled
     case 'OpenAuctionLost':
-      return account.notificationPreferences.auctionLostNotificationEnabled
+      return preferences.auctionLostNotificationEnabled
     case 'OpenAuctionWon':
-      return account.notificationPreferences.auctionWonNotificationEnabled
+      return preferences.auctionWonNotificationEnabled
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
 }
 
-export async function addNotification(accounts: (Account | null)[], params: NotificationParams) {
-  const em = params.getEm()
-
-  const mailNotifier = new MailNotifier()
-  mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
-  mailNotifier.setSubject(params.getDataForEmail())
-  // mailNotifier.setContentUsingTemplate('test')
-
-  for (const account of accounts.filter((account) => account)) {
-    const notificationEntity = await params.createNotification(account!)
-    if (notificationEntity.shouldSendEmail) {
-      mailNotifier.setReciever(account!.email)
-      await mailNotifier.send()
-      if (mailNotifier.mailHasBeenSent()) {
-        notificationEntity.markEmailAsSent()
-      }
-    }
-    await notificationEntity.saveToDb()
-  }
-  return
-}
-
-){
+export async function addOffChainNotification(
+  em: EntityManager,
+  accounts: (Account | null)[],
+  notificationData: OffChainNotificationType
+) {
+  // filter accounts that are not null
+  for (const account of accounts.map((account) => account)) {
+    // create notification as disabled = true
+    const { inAppEnabled, emailEnabled } = preferencesForNotification(
+      account!.notificationPreferences,
+      notificationData
     )
-  }
-}
-
-export class RuntimeNotificationParams extends NotificationParams {
-  private _event: Flat<Event>
-  private _optionWinnerId: string | undefined
-  private _overlay: EntityManagerOverlay
-
-  constructor(overlay: EntityManagerOverlay, event: Flat<Event>, optionWinnerId?: string) {
-    super()
-    this._event = event
-    this._overlay = overlay
-    this._optionWinnerId = optionWinnerId
-  }
-
-  public getEm(): EntityManager {
-    return this._overlay.getEm()
-  }
-
-  public getDataForEmail(): string {
-    // TODO: (not.v1) implement this
-    return JSON.stringify(this._event.data)
-  }
-
-  public async createNotification(account: Account): Promise<NewRuntimeNotificationEntity> {
-    const repository = this._overlay.getRepository(RuntimeNotification)
-    const newNotificationId = repository.getNewEntityId()
-
-    const auctionWinner = isAuctionWinner(
-      this._event.data,
-      account.membershipId,
-      this._optionWinnerId
-    )
-
-    const pref = await preferencesForNotification(account, this._event.data, this._overlay)
-    const notification = repository.new({
-      id: newNotificationId,
-      accountId: account.id,
-      eventId: this._event.id,
-      status: ReadOrUnread.UNREAD,
-      deliveryStatus: deliveryStatusFromPreference(pref),
+    // create notification (for the notification center)
+    const nextOffChainNotificationId = await getNextIdForEntity(em, 'OffChainNotification')
+    const notification = new OffChainNotification({
+      id: nextOffChainNotificationId.toString(),
+      accountId: account!.id,
+      notificationType: notificationType,
     })
-    return new NewRuntimeNotificationEntity(notification as RuntimeNotification, pref.emailEnabled)
-  }
-}
 
-function isAuctionWinner(
-  data: EventData,
-  memberId: string,
-  auctionWinnerId?: string
-): boolean | undefined {
-  if (data.isTypeOf === 'EnglishAuctionSettledEventData') {
-    return memberId === auctionWinnerId!
-  } else {
-    return undefined
-  }
-}
+    // deliver via mail if enabled
+    if (emailEnabled) {
+      await deliverOffChainNotificationViaEmail(em, account!.email, notification)
+    }
 
-export function deliveryStatusFromPreference(pref: NotificationPreference): DeliveryStatus {
-  // match the delivery status to the preference
-  if (pref.inAppEnabled && pref.emailEnabled) {
-    return DeliveryStatus.EMAIL_AND_IN_APP
-  } else if (pref.inAppEnabled && !pref.emailEnabled) {
-    return DeliveryStatus.IN_APP_ONLY
-  } else if (!pref.inAppEnabled && pref.emailEnabled) {
-    return DeliveryStatus.EMAIL_ONLY
-  } else {
-    return DeliveryStatus.UNDELIVERED
+    // deliver via in app if enabled
+    if (inAppEnabled) {
+      const deliveryId = await getNextIdForEntity(em, 'OffChainNotificationInAppDelivery')
+      const inAppDelivery = new OffChainNotificationInAppDelivery({
+        id: deliveryId.toString(),
+        notificationId: notification.id,
+      })
+      await em.save([
+        inAppDelivery,
+        new NextEntityId({
+          entityName: 'OffChainNotificationInAppDelivery',
+          nextId: deliveryId + 1,
+        }),
+      ])
+    }
+
+    const newOffChainNotificationNextEntityId = new NextEntityId({
+      entityName: 'OffChainNotification',
+      nextId: nextOffChainNotificationId + 1,
+    })
+    await em.save([notification, newOffChainNotificationNextEntityId])
   }
+
+  // const em = params.getEm()
+
+  // const mailNotifier = new MailNotifier()
+  // mailNotifier.setSender(await config.get(ConfigVariable.SendgridFromEmail, em))
+  // mailNotifier.setSubject(params.getDataForEmail())
+  // // mailNotifier.setContentUsingTemplate('test')
+
+  // for (const account of accounts.filter((account) => account)) {
+  //   const notificationEntity = await params.createNotification(account!)
+  //   if (notificationEntity.shouldSendEmail) {
+  //     mailNotifier.setReciever(account!.email)
+  //     await mailNotifier.send()
+  //     if (mailNotifier.mailHasBeenSent()) {
+  //       notificationEntity.markEmailAsSent()
+  //     }
+  //   }
+  //   await notificationEntity.saveToDb()
+  // }
+  // return
 }
 
 const channelExcludedText = (channelTitle: string) => {
@@ -261,7 +234,7 @@ const nftPurchasedText = (videoTitle: string, memberHandle: string, nftPrice: st
   return `Your NFT for ${videoTitle} has been purchased by ${memberHandle} for ${nftPrice}`
 }
 
-const nftBidReceivedText = (memberHandle: string, nftPrice: string, videoTitle: string) => {
+const nftBidReceivedText = (videoTitle: string, memberHandle: string, nftPrice: string) => {
   return `${memberHandle} placed a bid of ${nftPrice} on nft: ${videoTitle}`
 }
 
@@ -325,83 +298,64 @@ const timedAuctionBidLostText = (videoTitle: string) => {
   return `You lost an timed auction for nft: ${videoTitle}`
 }
 
-const councilPayoutText = (nftPrice: string) => {
-  return `You received ${nftPrice} from the council`
+const fundsWithdrawnFromChannelText = (amount: string) => {
+  return `Sucessfully transferred ${amount} JOY from your channel`
 }
 
-const councilPayoutTextForChannel = (channelTitle: string, nftPrice: string) => {
-  return `${channelTitle} received ${nftPrice} from the council`
+async function deliverOffChainNotificationViaEmail(
+  em: EntityManager,
+  to: string,
+  notification: OffChainNotification
+): Promise<void> {
+  const nextEntityId = await getNextIdForEntity(em, 'OffChainNotificationEmailDelivery')
+  const notificationDelivery = new OffChainNotificationEmailDelivery({
+    id: nextEntityId.toString(),
+    notificationId: notification.id,
+    deliveryAttemptAt: new Date(),
+  })
+  const appName = await config.get(ConfigVariable.AppName, em)
+  const resp = await sgSendMail({
+    from: await config.get(ConfigVariable.SendgridFromEmail, em),
+    to,
+    subject: `New notification from ${appName}!`,
+    content: notification.text,
+  })
+  if (resp?.statusCode === 202 || resp?.statusCode === 200) {
+    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
+  } else {
+    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Failure
+  }
+  await em.save([
+    notificationDelivery,
+    new NextEntityId({
+      entityName: 'OffChainNotificationEmailDelivery',
+      nextId: nextEntityId + 1,
+    }),
+  ])
 }
 
-const councilPayoutTextForChannelToMember = (
-  channelTitle: string,
-  memberHandle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
-}
-
-const councilPayoutTextForChannelToExternalWallet = (channelTitle: string, nftPrice: string) => {
-  return `${channelTitle} transferred ${nftPrice} to an external wallet`
-}
-
-const workingGroupPayoutText = (nftPrice: string) => {
-  return `You received ${nftPrice} from the working group`
-}
-
-const workingGroupPayoutTextForChannel = (channelTitle: string, nftPrice: string) => {
-  return `${channelTitle} received ${nftPrice} from the working group`
-}
-
-const workingGroupPayoutTextForChannelToMember = (
-  channelTitle: string,
-  memberHandle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
-}
-
-const workingGroupPayoutTextForChannelToExternalWallet = (
-  channelTitle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to an external wallet`
-}
-
-const payoutUpdatedByCouncilText = (nftPrice: string) => {
-  return `New payout of ${nftPrice} has been updated by the council`
-}
-
-const payoutUpdatedByCouncilTextForChannel = (channelTitle: string, nftPrice: string) => {
-  return `New payout of ${nftPrice} has been updated by the council for ${channelTitle}`
-}
-
-const payoutUpdatedByCouncilTextForChannelToMember = (
-  channelTitle: string,
-  memberHandle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to ${memberHandle}`
-}
-
-const payoutUpdatedByCouncilTextForChannelToExternalWallet = (
-  channelTitle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to an external wallet`
-}
-
-const payoutUpdatedByCouncilTextForChannelToWorkingGroup = (
-  channelTitle: string,
-  nftPrice: string
-) => {
-  return `${channelTitle} transferred ${nftPrice} to the working group`
-}
-
-const payoutUpdatedByCouncilTextForChannelToCouncil = (channelTitle: string, nftPrice: string) => {
-  return `${channelTitle} transferred ${nftPrice} to the council`
-}
-
-const payoutUpdatedByCouncilTextForChannelToTreasury = (channelTitle: string, nftPrice: string) => {
-  return `${channelTitle} transferred ${nftPrice} to the treasury`
+async function deliverRuntimeNotificationViaEmail(
+  overlay: EntityManagerOverlay,
+  to: string,
+  notification: RuntimeNotification
+): Promise<void> {
+  const id = overlay.getRepository(RuntimeNotificationEmailDelivery).getNextIdNumber().toString()
+  const notificationDelivery = overlay.getRepository(RuntimeNotificationEmailDelivery).new({
+    id,
+    notificationId: notification.id,
+    deliveryAttemptAt: new Date(),
+  })
+  const em = overlay.getEm()
+  const appName = await config.get(ConfigVariable.AppName, em)
+  const resp = await sgSendMail({
+    from: await config.get(ConfigVariable.SendgridFromEmail, em),
+    to,
+    subject: `New notification from ${appName}!`,
+    content: notification.text,
+  })
+  if (resp?.statusCode === 202 || resp?.statusCode === 200) {
+    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
+  } else {
+    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Failure
+  }
 }
