@@ -92,8 +92,8 @@ export class OffchainState {
   private _isImported = false
 
   private migrations: Migrations = {
-    '3.0.0': migrateExportDataToV300,
     '3.1.0': migrateExportDataToV310,
+    '3.0.0': migrateExportDataToV300,
   }
 
   public get isImported(): boolean {
