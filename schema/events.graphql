@@ -41,7 +41,8 @@ type NftActivity @entity {
 }
 
 union EventData =
-    CommentCreatedEventData
+    ChannelCreatedEventData
+  | CommentCreatedEventData
   | CommentTextUpdatedEventData
   | OpenAuctionStartedEventData
   | EnglishAuctionStartedEventData
