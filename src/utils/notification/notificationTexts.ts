@@ -65,7 +65,7 @@ export const channelCreatedText = (channelTitle: string) => {
   return `${channelTitle} has been created`
 }
 
-export const commentRepliedText = (memberHandle: string, videoTitle: string) => {
+export const commentRepliedText = (videoTitle: string, memberHandle: string) => {
   return `${memberHandle} has replied to your comment under ${videoTitle}`
 }
 

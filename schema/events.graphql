@@ -42,7 +42,9 @@ type NftActivity @entity {
 
 union EventData =
     ChannelCreatedEventData
+  | VideoCreatedEventData
   | CommentCreatedEventData
+  | CommentReactionEventData
   | CommentTextUpdatedEventData
   | OpenAuctionStartedEventData
   | EnglishAuctionStartedEventData
@@ -64,6 +66,19 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | MemberBannedFromChannelEventData
+  | VideoReactionEventData
+
+# Needed when adding a new runtime notification
+type CommentReactionEventData {
+  "comment reaction reference"
+  commentReaction: CommentReaction!
+}
+
+# Needed when adding a new runtime notification
+type VideoReactionEventData {
+  "video reaction reference"
+  videoReaction: VideoReaction!
+}
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentCreatedEventData {
@@ -255,14 +270,6 @@ type VideoCreatedEventData {
 
   "video just created"
   video: Video!
-}
-
-type VideoReactionEventData {
-  "video reference"
-  video: Video!
-
-  "like/dislike"
-  reactionType: VideoReactionOptions!
 }
 
 type MetaprotocolTransactionResultCommentCreated {

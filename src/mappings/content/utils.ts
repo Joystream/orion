@@ -46,6 +46,7 @@ import {
   RuntimeNotification,
   ChannelFollow,
   Account,
+  Membership,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -505,6 +506,14 @@ export async function getChannelOwnerMemberByVideoId(
   }
 }
 
+export async function getChannelTitle(
+  overlay: EntityManagerOverlay,
+  channelId: string
+): Promise<string | undefined> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+  return channel.title ?? undefined
+}
+
 export async function getChannelOwnerMemberByChannelId(
   overlay: EntityManagerOverlay,
   channelId: string
@@ -736,4 +745,12 @@ export async function addNewBidNotification(
   )
   const biddersAccounts = await getAccountsForBidders(overlay, auctionBids)
   await addNotification([previousNftOwnerAccount, ...biddersAccounts], notificationParams)
+}
+
+export async function memberHandleById(
+  overlay: EntityManagerOverlay,
+  memberId: string
+): Promise<string | undefined> {
+  const member = await overlay.getRepository(Membership).getById(memberId)
+  return member ? member.handle : undefined
 }
