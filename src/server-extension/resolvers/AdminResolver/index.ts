@@ -27,11 +27,14 @@ import {
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
 import {
-  NftFeaturedNotificationData,
+  ChannelRecipient,
+  NftFeaturedOnMarketPlace,
+  NotificationData,
   Video,
   VideoCategory,
+  VideoFeaturedAsCategoryHero,
   VideoFeaturedInCategory,
-  VideoFeaturedOnCategoryPageNotificationData,
+  VideoFeaturedOnCategoryPage,
   VideoHero as VideoHeroEntity,
 } from '../../../model'
 import { GraphQLResolveInfo } from 'graphql'
@@ -40,7 +43,7 @@ import { parseObjectTree } from '@subsquid/openreader/lib/opencrud/tree'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
 import { getObjectSize } from '@subsquid/openreader/lib/limit.size'
-import { VideoHero } from '../baseTypes'
+import { VideoHero, VideosConnection } from '../baseTypes'
 import { model } from '../model'
 import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
 import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
@@ -49,9 +52,14 @@ import { AppAction } from '@joystream/metadata-protobuf'
 import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
-import { getChannelOwnerAccount, getNftOwnerMemberId } from '../../../mappings/content/utils'
-import { OffChainNotificationParams, addNotification } from '../../../utils/notification/helpers'
-import { add } from 'lodash'
+import { getChannelOwnerAccount } from '../../../mappings/content/utils'
+import {
+  addNotification,
+  nftFeaturedOnMarketplaceText,
+  notificationPageLinkPlaceholder,
+  videoFeaturedAsHeroText,
+  videoFeaturedOnCategoryPageText,
+} from '../../../utils/notification'
 
 @Resolver()
 export class AdminResolver {
@@ -114,11 +122,16 @@ export class AdminResolver {
     ctx.openreader.responseSizeLimit?.check(() => getObjectSize(model, fields) + 1)
 
     const em = await this.em()
-    const { id: currentHeroId } =
+    const { id: currentHeroId, video } =
       (
         await em.getRepository(VideoHeroEntity).find({
           select: { id: true },
           order: { activatedAt: 'DESC' },
+          relations: {
+            video: {
+              channel: true,
+            },
+          },
           take: 1,
         })
       )[0] || {}
@@ -133,6 +146,19 @@ export class AdminResolver {
       'VideoHero',
       fields,
       currentHeroId
+    )
+
+    const account = await getChannelOwnerAccount(em, video.channel)
+    await addNotification(
+      em,
+      account,
+      new VideoFeaturedAsCategoryHero({
+        recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: videoFeaturedAsHeroText(video.title || ''),
+        }),
+      })
     )
 
     return ctx.openreader.executeQuery(entityByIdQuery)
@@ -190,21 +216,32 @@ export class AdminResolver {
     )
     await em.save(newRows)
 
-    await Promise.all(
-      args.videos.map(async ({ videoId }) => {
-        const video = await em.getRepository('Video').findOneBy({ id: videoId })
-        if (video) {
-          const creatorAccount = await getChannelOwnerAccount(em, video.channelId)
-          await addNotification(
-            [creatorAccount],
-            new OffChainNotificationParams(
-              em,
-              new VideoFeaturedOnCategoryPageNotificationData({ video: videoId })
-            )
-          )
-        }
-      })
-    )
+    const { name: categoryTitle } = await em
+      .getRepository(VideoCategory)
+      .findOneOrFail({ where: { id: categoryId }, select: { name: true } })
+    for (const { videoId } of args.videos) {
+      const video = (
+        await em.getRepository(Video).find({
+          where: { id: videoId },
+          relations: { channel: true },
+          take: 1,
+        })
+      )?.[0]
+      if (video.channel && video.channel.id) {
+        const creatorAccount = await getChannelOwnerAccount(em, video.channel)
+        await addNotification(
+          em,
+          creatorAccount,
+          new VideoFeaturedOnCategoryPage({
+            recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
+            data: new NotificationData({
+              linkPage: notificationPageLinkPlaceholder(),
+              text: videoFeaturedOnCategoryPageText(video.title || '', categoryTitle || ''),
+            }),
+          })
+        )
+      }
+    }
 
     return {
       categoryId,
@@ -280,19 +317,25 @@ export class AdminResolver {
 
       // fetch all featured nfts and deposit notification for their creators
       for (const featuredNftId of featuredNftsIds) {
-        const featuredNft = await em.getRepository('OwnedNft').findOneBy({ id: featuredNftId })
-        if (featuredNft) {
-          const video = await em.getRepository('Video').findOneBy({ id: featuredNft.videoId })
-          if (video) {
-            const channelOwnerAccount = await getChannelOwnerAccount(em, video.channelId)
-            await addNotification(
-              [channelOwnerAccount],
-              new OffChainNotificationParams(
-                em,
-                new NftFeaturedNotificationData({ nft: featuredNftId })
-              )
-            )
-          }
+        const featuredNft = await em.getRepository('OwnedNft').findOne({
+          where: { id: featuredNftId },
+          relations: { video: { channel: true } },
+        })
+        if (featuredNft?.video?.channel) {
+          const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
+          await addNotification(
+            em,
+            channelOwnerAccount,
+            new NftFeaturedOnMarketPlace({
+              recipient: new ChannelRecipient({
+                channelTitle: featuredNft.video.channel.title || '',
+              }),
+              data: new NotificationData({
+                linkPage: notificationPageLinkPlaceholder(),
+                text: nftFeaturedOnMarketplaceText(featuredNft.video.title || ''),
+              }),
+            })
+          )
         }
       }
     }
