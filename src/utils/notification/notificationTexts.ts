@@ -5,6 +5,10 @@ export const videoExcludedText = (videoTitle: string) => {
   return `Your video ${videoTitle} has been excluded`
 }
 
+export const nftOfferedText = (videoTitle: string, price: string) => {
+  return `Nft for ${videoTitle} has been offered to you for ${price}`
+}
+
 export const videoFeaturedAsHeroText = (videoTitle: string) => {
   return `Your video ${videoTitle} has been featured as Hero`
 }
@@ -85,7 +89,7 @@ export const newNftOnSaleText = (channelTitle: string, videoTitle: string) => {
   return `${channelTitle} just started the sale of nft ${videoTitle}`
 }
 
-export const nftBidOutbidText = (memberHandle: string, videoTitle: string) => {
+export const nftBidOutbidText = (videoTitle: string, memberHandle: string) => {
   return `${memberHandle} placed a higher bid on NFT ${videoTitle}`
 }
 
@@ -103,6 +107,14 @@ export const openAuctionBidLostText = (videoTitle: string) => {
 
 export const timedAuctionBidLostText = (videoTitle: string) => {
   return `You lost an timed auction for nft: ${videoTitle}`
+}
+
+export const bidMadeCompletingAuction = (
+  videoTitle: string,
+  memberHandle: string,
+  price: string
+) => {
+  return `Member ${memberHandle} won auction for nft: ${videoTitle} by a buy now bid of ${price} JOY`
 }
 
 export const fundsWithdrawnFromChannelText = (amount: string) => {

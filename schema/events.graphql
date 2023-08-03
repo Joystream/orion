@@ -49,6 +49,7 @@ union EventData =
   | OpenAuctionStartedEventData
   | EnglishAuctionStartedEventData
   | NftIssuedEventData
+  | NftOfferedEventData
   | AuctionBidMadeEventData
   | AuctionBidCanceledEventData
   | AuctionCanceledEventData
@@ -108,8 +109,8 @@ type OpenAuctionStartedEventData {
   "Auction started."
   auction: Auction!
 
-  "nft being auctioned"
-  nft: OwnedNft!
+  "owner of the NFT being auctioned"
+  nftOwner: NftOwner!
 }
 
 # Atlas use-case: `GetNftActivities` and `GetNftHistory` query
@@ -117,8 +118,8 @@ type EnglishAuctionStartedEventData {
   "Actor that started this auction."
   actor: ContentActor!
 
-  "Nft being auctioned"
-  nft: OwnedNft!
+  "owner of the NFT being auctioned"
+  nftOwner: NftOwner!
 
   "Auction started."
   auction: Auction!
@@ -170,6 +171,12 @@ type AuctionCanceledEventData {
 
   "Auction that was canceled."
   auction: Auction!
+}
+
+# Use case Notification event deposit
+type NftOfferedEventData {
+  "Nft owner at the time the nft was offered"
+  nftOwner: NftOwner!
 }
 
 # Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query

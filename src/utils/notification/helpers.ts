@@ -15,6 +15,7 @@ import {
 import { getNextIdForEntity } from '../nextEntityId'
 import { sgSendMail } from '../mail'
 import { ConfigVariable, config } from '../config'
+import { Flat } from 'lodash'
 
 function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -122,7 +123,7 @@ export function preferencesForNotification(
 
 export async function addNotification(
   em: EntityManager,
-  account: Account | null,
+  account: Flat<Account> | null,
   notificationType: NotificationType,
   event?: Event
 ) {
