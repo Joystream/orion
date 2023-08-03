@@ -14,9 +14,10 @@ import {
   Video,
   Report,
   Exclusion,
-  fromJsonOffChainNotificationData,
   Account,
-  VideoExcludedNotificationData,
+  VideoExcluded,
+  ChannelRecipient,
+  NotificationData,
 } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
@@ -46,7 +47,8 @@ import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
-import { addNotification, OffChainNotificationParams } from '../../../utils/notification/helpers'
+import { addNotification } from '../../../utils/notification/helpers'
+import { notificationPageLinkPlaceholder, videoExcludedText } from '../../../utils/notification'
 
 @Resolver()
 export class VideosResolver {
@@ -356,11 +358,15 @@ export class VideosResolver {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
           await addNotification(
-            [account],
-            new OffChainNotificationParams(
-              em,
-              new VideoExcludedNotificationData({ video: video.id, rationale })
-            )
+            em,
+            account,
+            new VideoExcluded({
+              recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
+              data: new NotificationData({
+                linkPage: notificationPageLinkPlaceholder(),
+                text: videoExcludedText(video.title || ''),
+              }),
+            })
           )
         }
       }
