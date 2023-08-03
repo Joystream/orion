@@ -4,18 +4,10 @@ import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import {
-  AccountNotificationPreferences,
-  DeliveryStatus,
-  NotificationPreference,
-  OffChainNotification,
-  ReadOrUnread,
-  RuntimeNotification,
-} from '../../../model'
+import { Notification, NotificationPreference, Read } from '../../../model'
 import {
   AccountNotificationPreferencesInput,
   AccountNotificationPreferencesOutput,
-  AccountNotificationPreferencesResult,
   MarkNotificationsAsReadResult,
   NotificationArgs,
   NotificationPreferenceGQL,
@@ -36,26 +28,16 @@ export class NotificationResolver {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
       let notificationsReadIds: string[] = []
-      for (const notificationId of notificationIds) {
-        let notification: RuntimeNotification | OffChainNotification | null = null
-        notification = await em.findOne(RuntimeNotification, {
-          where: { id: notificationId },
-        })
-        if (notification === null) {
-          notification = await em.findOne(OffChainNotification, {
-            where: { id: notificationId },
-          })
-        }
-        if (notification !== null) {
-          if (notification.accountId === ctx.accountId) {
-            if (
-              notification.status === ReadOrUnread.UNREAD &&
-              notification.deliveryStatus !== DeliveryStatus.UNDELIVERED
-            ) {
-              notification.status = ReadOrUnread.READ
-              await em.save(notification)
-              notificationsReadIds.push(notification.id)
-            }
+      for (const notificationId of notificationIds.filter((id) => id)) {
+        const notification = await em.getRepository(Notification).findOneBy({ id: notificationId! })
+        if (notification?.accountId) {
+          if (notification.accountId !== ctx.accountId) {
+            throw new Error('This notification cannot be read from this account')
+          } else {
+            if (notification.status.isTypeOf === 'Unread')
+              notification.status = new Read({ readAt: new Date() })
+            await em.save(notification)
+            notificationsReadIds.push(notification.id)
           }
         }
       }
