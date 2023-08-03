@@ -10,6 +10,7 @@ export enum ConfigVariable {
   VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
   RelevanceWeights = 'RELEVANCE_WEIGHTS',
   AppPrivateKey = 'APP_PRIVATE_KEY',
+  AppRootDomain = 'APP_ROOT_DOMAIN',
   SessionExpiryAfterInactivityMinutes = 'SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES',
   SessionMaxDurationHours = 'SESSION_MAX_DURATION_HOURS',
   SendgridApiKey = 'SENDGRID_API_KEY',
@@ -58,6 +59,7 @@ export const configVariables = {
   [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
   [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
   [ConfigVariable.EmailConfirmationTokenRateLimit]: intType,
+  [ConfigVariable.AppRootDomain]: stringType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
