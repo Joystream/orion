@@ -56,8 +56,11 @@ import {
   MemberBannedFromChannelEventData,
   Membership,
   Event,
+  DirectChannelPaymentByMember,
+  NotificationData,
+  ChannelRecipient,
 } from '../../model'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
+import { addNotification } from '../../utils/notification/helpers'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,
@@ -75,6 +78,10 @@ import {
   getChannelOwnerAccount,
   MetaNumberProps,
 } from './utils'
+import {
+  channelReceivedDirectPaymentText,
+  notificationPageLinkPlaceholder,
+} from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -657,7 +664,19 @@ export async function processChannelPaymentFromMember(
   })
 
   const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  await addNotification([ownerAccount], new RuntimeNotificationParams(overlay, event))
+  const channelTitle = channel.title || ''
+  await addNotification(
+    overlay.getEm(),
+    ownerAccount,
+    new DirectChannelPaymentByMember({
+      recipient: new ChannelRecipient({ channelTitle }),
+      data: new NotificationData({
+        linkPage: notificationPageLinkPlaceholder(),
+        text: channelReceivedDirectPaymentText(channelTitle, amount.toString()),
+      }),
+    }),
+    event
+  )
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,
