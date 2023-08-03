@@ -43,10 +43,20 @@ import {
   VideoMediaEncoding,
   App,
   BannedMember,
-  RuntimeNotification,
   ChannelFollow,
   Account,
   Membership,
+  HigherBidPlaced,
+  MemberRecipient,
+  NotificationData,
+  NewAuctionBid,
+  ChannelRecipient,
+  Notification,
+  NotificationType,
+  OpenAuctionWon,
+  OpenAuctionLost,
+  EnglishAuctionWon,
+  EnglishAuctionLost,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -65,7 +75,16 @@ import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
+import { addNotification } from '../../utils/notification/helpers'
+import {
+  nftBidOutbidText,
+  nftBidReceivedText,
+  notificationPageLinkPlaceholder,
+  openAuctionBidLostText,
+  openAuctionBidWonText,
+  timedAuctionBidLostText,
+  timedAuctionBidWonText,
+} from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -164,7 +183,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   const mediaMetadataRepository = overlay.getRepository(VideoMediaMetadata)
   const mediaEncodingRepository = overlay.getRepository(VideoMediaEncoding)
   const subtitlesRepository = overlay.getRepository(VideoSubtitle)
-  const notificationRepository = overlay.getRepository(RuntimeNotification)
+  const notificationRepository = overlay.getRepository(Notification)
   const em = overlay.getEm()
 
   const video = await videoRepository.getByIdOrFail(videoId.toString())
@@ -177,7 +196,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
 
   // Events to remove
   const eventsToRemove: Event[] = []
-  const notificationsToRemove: Flat<RuntimeNotification>[] = []
+  const notificationsToRemove: Flat<Notification>[] = []
   if (comments.length) {
     // FIXME: We need to persist the state to get all CommentCreated/CommentTextUpdated events,
     // as the relationship is nested inside jsonb field, so we can't use any existing RepositoryOverlay methods.
@@ -266,13 +285,6 @@ export async function processNft(
 
   // Add nft history and activities entry
   const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
-
-  // add notification to channel followers
-  if (video.channelId) {
-    const followers = await getFollowersAccountsForChannel(overlay, video.channelId)
-    await addNotification(followers, new RuntimeNotificationParams(overlay, event))
-  }
-
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [nftOwnerMemberId], event.id)
 }
@@ -728,23 +740,63 @@ export async function getAccountsForBidders(
   return biddersAccounts
 }
 
-// cases for various events type:
-// - English settled data : all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is winner
-// - Auction Bid made : the account notified for which membership.id !== bid.bidderId is the outbidded and the one with bid.bidderId is new bidder
-// - Bid Made completing auction: all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is the winner
-// - Open auction bid accepted: all the accounts notified for which membership.id !== bid.bidderId are losers and the one with bid.bidderId is the winner
+export type NewBidNotificationMetadata = {
+  videoTitle: string | null | undefined
+  newTopBidderHandle: string | undefined
+  bidAmount: BigInt | null | undefined
+}
+
 export async function addNewBidNotification(
   overlay: EntityManagerOverlay,
-  previousNftOwnerMemberId: string | undefined | null,
-  auctionBids: Flat<Bid>[],
-  notificationParams: RuntimeNotificationParams
+  ownerMemberId: string | undefined | null,
+  previousTopBid: Flat<Bid> | undefined | null,
+  event: Event,
+  { videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
 ) {
-  const previousNftOwnerAccount = await getAccountForMember(
-    overlay.getEm(),
-    previousNftOwnerMemberId
-  )
-  const biddersAccounts = await getAccountsForBidders(overlay, auctionBids)
-  await addNotification([previousNftOwnerAccount, ...biddersAccounts], notificationParams)
+  const nftOwnerAccount = await getAccountForMember(overlay.getEm(), ownerMemberId)
+  if (previousTopBid && previousTopBid.bidderId) {
+    const outbiddedMemberId = previousTopBid.bidderId
+    const outbiddedMemberHandle = await memberHandleById(overlay, outbiddedMemberId)
+    const outbiddedMemberAccount = await getAccountForMember(overlay.getEm(), outbiddedMemberId)
+    await addNotification(
+      overlay.getEm(),
+      outbiddedMemberAccount,
+      new HigherBidPlaced({
+        recipient: new MemberRecipient({ memberHandle: outbiddedMemberHandle }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: nftBidOutbidText(videoTitle || '', newTopBidderHandle || ''),
+        }),
+      }),
+      event
+    )
+  }
+
+  if (ownerMemberId) {
+    const channel = await overlay
+      .getRepository(Channel)
+      .getOneByRelationOrFail('ownerMemberId', ownerMemberId)
+    // if nft owner is also a channel owner then notify
+    if (channel) {
+      await addNotification(
+        overlay.getEm(),
+        nftOwnerAccount,
+        new NewAuctionBid({
+          // case: channel exist but has no title set, notify anyways with incomplete messagej
+          recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+          data: new NotificationData({
+            linkPage: notificationPageLinkPlaceholder(),
+            text: nftBidReceivedText(
+              videoTitle || '',
+              newTopBidderHandle || '',
+              bidAmount?.toString() || ''
+            ),
+          }),
+        }),
+        event
+      )
+    }
+  }
 }
 
 export async function memberHandleById(
@@ -753,4 +805,123 @@ export async function memberHandleById(
 ): Promise<string | undefined> {
   const member = await overlay.getRepository(Membership).getById(memberId)
   return member ? member.handle : undefined
+}
+
+export async function notifyChannelFollowers(
+  overlay: EntityManagerOverlay,
+  channelId: string,
+  notificationTypeForMember: (handle: string) => NotificationType,
+  event: Event
+) {
+  const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
+  for (const followerAccount of followersAccounts) {
+    const handle = await memberHandleById(overlay, followerAccount.membershipId)
+    await addNotification(
+      overlay.getEm(),
+      followerAccount,
+      notificationTypeForMember(handle || ''),
+      // new VideoPosted({
+      //   recipient: new MemberRecipient({ memberHandle: handle }),
+      //   data: new NotificationData({
+      //     linkPage: notificationPageLinkPlaceholder(),
+      //     text: newVideoPostedText(channel.title || '', video.title || ''),
+      //   }),
+      // }),
+      event
+    )
+  }
+}
+
+export async function notifyBiddersOnAuctionCompletion(
+  overlay: EntityManagerOverlay,
+  biddersMemberIds: string[],
+  winnerId: bigint,
+  notifier: {
+    won: (memberHandle: string) => NotificationType
+    lost: (memberHandle: string) => NotificationType
+  },
+  event: Event
+) {
+  for (const bidderId of biddersMemberIds.map((id) => id)) {
+    const account = await getAccountForMember(overlay.getEm(), bidderId)
+    const memberHandle = (await memberHandleById(overlay, bidderId!)) || ''
+    const notification =
+      bidderId === winnerId.toString() ? notifier.won(memberHandle) : notifier.lost(memberHandle)
+
+    await addNotification(overlay.getEm(), account, notification, event)
+  }
+}
+
+export const openAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
+  return {
+    won: (memberHandle: string) =>
+      new OpenAuctionWon({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: openAuctionBidWonText(videoTitle),
+        }),
+      }),
+    lost: (memberHandle: string) =>
+      new OpenAuctionLost({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: openAuctionBidLostText(videoTitle),
+        }),
+      }),
+  }
+}
+
+export type AuctionNotifiers = {
+  won: (memberHandle: string) => NotificationType
+  lost: (memberHandle: string) => NotificationType
+}
+
+export const englishAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
+  return {
+    won: (memberHandle: string) =>
+      new EnglishAuctionWon({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: timedAuctionBidWonText(videoTitle),
+        }),
+      }),
+    lost: (memberHandle: string) =>
+      new EnglishAuctionLost({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: timedAuctionBidLostText(videoTitle),
+        }),
+      }),
+  }
+}
+
+export async function notifyChannelOwner(
+  overlay: EntityManagerOverlay,
+  nftOwner: NftOwner,
+  notificationType: (channelTitle: string) => NotificationType,
+  event: Event
+): Promise<void> {
+  if (nftOwner.isTypeOf === 'NftOwnerChannel') {
+    const channelId = nftOwner.channel
+    const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+    const nftOwnerAccount = await getAccountForMember(overlay.getEm(), channel.ownerMemberId)
+    await addNotification(
+      overlay.getEm(),
+      nftOwnerAccount,
+      notificationType(channel.title || ''),
+      event
+    )
+  }
 }

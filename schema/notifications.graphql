@@ -99,6 +99,7 @@ union NotificationType =
   | CommentReply
   | ReactionToComment
   | VideoPosted
+  | NewAuctionBid
   | NewAuction
   | NewNftOnSale
   | HigherBidPlaced
@@ -106,6 +107,8 @@ union NotificationType =
   | EnglishAuctionLost
   | OpenAuctionWon
   | OpenAuctionLost
+  | NftOffered
+  | BidMadeCompletingAuction
 
 type YppSignupSuccessful @variant {
   "notification data"
@@ -219,6 +222,14 @@ type RoyaltyPaid @variant {
   recipient: RecipientType!
 }
 
+type NftOffered @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
 type DirectChannelPaymentByMember @variant {
   "notification data"
   data: NotificationData!
@@ -283,6 +294,14 @@ type NewAuction @variant {
   recipient: RecipientType!
 }
 
+type NewAuctionBid @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
 type NewNftOnSale @variant {
   "notification data"
   data: NotificationData!
@@ -324,6 +343,15 @@ type OpenAuctionWon @variant {
 }
 
 type OpenAuctionLost @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
+# design addition: for bid made completing auction so that channel owner is properly notified
+type BidMadeCompletingAuction @variant {
   "notification data"
   data: NotificationData!
 

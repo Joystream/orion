@@ -24,6 +24,7 @@ import {
   encodeAssets,
   getFollowersAccountsForChannel,
   memberHandleById,
+  notifyChannelFollowers,
   processAppActionMetadata,
   processNft,
 } from './utils'
@@ -128,22 +129,15 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  const followersAccounts = await getFollowersAccountsForChannel(overlay, channel.id)
-  for (const followerAccount of followersAccounts) {
-    const handle = await memberHandleById(overlay, followerAccount.membershipId)
-    await addNotification(
-      overlay.getEm(),
-      followerAccount,
-      new VideoPosted({
-        recipient: new MemberRecipient({ memberHandle: handle }),
-        data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
-          text: newVideoPostedText(channel.title || '', video.title || ''),
-        }),
+  const notifier = (handle: string) =>
+    new VideoPosted({
+      recipient: new MemberRecipient({ memberHandle: handle }),
+      data: new NotificationData({
+        linkPage: notificationPageLinkPlaceholder(),
+        text: newVideoPostedText(channel.title || '', video.title || ''),
       }),
-      eventEntity
-    )
-  }
+    })
+  await notifyChannelFollowers(overlay, channel.id, notifier, eventEntity)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
