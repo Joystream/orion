@@ -28,9 +28,10 @@ import {
   ChannelFollow,
   Report,
   Exclusion,
-  NewChannelFollowerNotificationData,
-  ChannelVerifiedNotificationData,
-  ChannelExcludedNotificationData,
+  ChannelRecipient,
+  NewChannelFollower,
+  NotificationData,
+  ChannelExcluded,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -42,6 +43,12 @@ import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
+import {
+  addNotification,
+  channelExcludedText,
+  newChannelFollowerText,
+  notificationPageLinkPlaceholder,
+} from '../../../utils/notification'
 
 @Resolver()
 export class ChannelsResolver {
@@ -213,12 +220,17 @@ export class ChannelsResolver {
 
       const ownerAccount = await getChannelOwnerAccount(em, channel)
       if (ownerAccount) {
+        const channelTitle = channel.title || ''
         await addNotification(
-          [ownerAccount],
-          new OffChainNotificationParams(
-            em,
-            new NewChannelFollowerNotificationData({ channel: channelId, follower: user.id })
-          )
+          em,
+          ownerAccount,
+          new NewChannelFollower({
+            recipient: new ChannelRecipient({ channelTitle }),
+            data: new NotificationData({
+              linkPage: notificationPageLinkPlaceholder(),
+              text: newChannelFollowerText(channelTitle),
+            }),
+          })
         )
       }
 
@@ -360,11 +372,15 @@ export class ChannelsResolver {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
           await addNotification(
-            [account],
-            new OffChainNotificationParams(
-              em,
-              new ChannelExcludedNotificationData({ channel: channelId, rationale })
-            )
+            em,
+            account,
+            new ChannelExcluded({
+              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+              data: new NotificationData({
+                linkPage: notificationPageLinkPlaceholder(),
+                text: channelExcludedText(channel.title || ''),
+              }),
+            })
           )
         }
       }
