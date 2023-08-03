@@ -6,7 +6,16 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, Video, VideoCreatedEventData, VideoViewEvent, Event } from '../../model'
+import {
+  Channel,
+  Video,
+  VideoViewEvent,
+  Event,
+  VideoCreatedEventData,
+  VideoPosted,
+  MemberRecipient,
+  NotificationData,
+} from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
@@ -14,11 +23,14 @@ import {
   deleteVideo,
   encodeAssets,
   getFollowersAccountsForChannel,
+  memberHandleById,
   processAppActionMetadata,
   processNft,
 } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification, RuntimeNotificationParams } from '../../utils/notification/helpers'
+import { addNotification } from '../../utils/notification/helpers'
+import { Not } from 'typeorm'
+import { newVideoPostedText, notificationPageLinkPlaceholder } from '../../utils/notification'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -117,8 +129,21 @@ export async function processVideoCreatedEvent({
   })
 
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channel.id)
-
-  await addNotification(followersAccounts, new RuntimeNotificationParams(overlay, eventEntity))
+  for (const followerAccount of followersAccounts) {
+    const handle = await memberHandleById(overlay, followerAccount.membershipId)
+    await addNotification(
+      overlay.getEm(),
+      followerAccount,
+      new VideoPosted({
+        recipient: new MemberRecipient({ memberHandle: handle }),
+        data: new NotificationData({
+          linkPage: notificationPageLinkPlaceholder(),
+          text: newVideoPostedText(channel.title || '', video.title || ''),
+        }),
+      }),
+      eventEntity
+    )
+  }
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

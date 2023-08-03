@@ -122,13 +122,12 @@ export function preferencesForNotification(
 
 export async function addNotification(
   em: EntityManager,
-  accounts: (Account | null)[],
+  account: Account | null,
   notificationType: NotificationType,
   event?: Event
 ) {
-  const notificationChainTag = event ? 'OffChainNotification' : 'OnChainNotification'
-  // filter accounts that are not null
-  for (const account of accounts.map((account) => account)) {
+  if (account) {
+    const notificationChainTag = event ? 'OffChainNotification' : 'OnChainNotification'
     // create notification as disabled = true
     const { inAppEnabled, emailEnabled } = preferencesForNotification(
       account!.notificationPreferences,
