@@ -53,8 +53,8 @@ export const nftRoyaltyPaymentReceivedText = (nftPrice: string, videoTitle: stri
   return `you received ${nftPrice} royalties for your nft: ${videoTitle}`
 }
 
-export const channelReceivedDirectPaymentText = (memberHandle: string, nftPrice: string) => {
-  return `${memberHandle} transferred ${nftPrice} to your channel`
+export const channelReceivedDirectPaymentText = (memberHandle: string, amount: string) => {
+  return `${memberHandle} transferred ${amount} JOY to your channel`
 }
 
 export const timedAuctionExpiredText = (videoTitle: string) => {
