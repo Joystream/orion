@@ -22,6 +22,30 @@ export class SetVideoWeightsInput {
   ytTimestampSubWeight!: number
 }
 
+@ArgsType()
+export class SetNotificationCenterPathInput {
+  @Field(() => String, { nullable: false })
+  newPath!: string
+}
+
+@ObjectType()
+export class NotificationCenterPath {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
+}
+
+@ArgsType()
+export class SetRootDomainInput {
+  @Field(() => String, { nullable: false })
+  newRootDomain!: string
+}
+
+@ObjectType()
+export class AppRootDomain {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
+}
+
 @ObjectType()
 export class VideoWeights {
   @Field(() => Boolean, { nullable: false })

@@ -3,11 +3,13 @@ import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-
 import { EntityManager, In, Not } from 'typeorm'
 import {
   AppActionSignatureInput,
+  AppRootDomain,
   ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
   GeneratedSignature,
   KillSwitch,
+  NotificationCenterPath,
   RestoreContentArgs,
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
@@ -15,6 +17,8 @@ import {
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
+  SetNotificationCenterPathInput,
+  SetRootDomainInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
@@ -84,6 +88,24 @@ export class AdminResolver {
       em
     )
     await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+    return { isApplied: true }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => NotificationCenterPath)
+  async setNewNotificationCenterPath(
+    @Args() args: SetNotificationCenterPathInput
+  ): Promise<AppRootDomain> {
+    const em = await this.em()
+    await config.set(ConfigVariable.NotificationCenterPath, args.newPath, em)
+    return { isApplied: true }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => AppRootDomain)
+  async setNewAppRootDomain(@Args() args: SetRootDomainInput): Promise<AppRootDomain> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppRootDomain, args.newRootDomain, em)
     return { isApplied: true }
   }
 
