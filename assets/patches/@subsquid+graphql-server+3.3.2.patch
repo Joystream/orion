@@ -56,3 +56,23 @@ index 04e74c3..e95a07b 100644
          };
      }
      async createTypeormConnection(options) {
+diff --git a/node_modules/@subsquid/graphql-server/src/check.ts b/node_modules/@subsquid/graphql-server/src/check.ts
+index 51eee8d..683847b 100644
+--- a/node_modules/@subsquid/graphql-server/src/check.ts
++++ b/node_modules/@subsquid/graphql-server/src/check.ts
+@@ -48,6 +48,15 @@ export function createCheckPlugin(requestCheck: RequestCheckFunction, model: Mod
+                         model
+                     })
+                     if (typeof ok == 'string') {
++                        if (ok === 'Unauthorized') {
++                            return {
++                                errors: [{ message: 'Unauthorized'}],
++                                http: {
++                                    status: 401,
++                                    headers: new Headers(),
++                                },
++                            }
++                        }
+                         return {errors: [{message: ok}]}
+                     } else if (ok) {
+                         return null
