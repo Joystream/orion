@@ -226,14 +226,15 @@ export class ChannelsResolver {
       })
 
       const ownerAccount = await getChannelOwnerAccount(em, channel)
-      const { account: followerAccount } = ctx
-      if (ownerAccount && followerAccount) {
-        const followerMembership = await em
-          .getRepository(Membership)
-          .findOneByOrFail({ id: followerAccount.membershipId })
-        const linkPage = followerMembership.handle
-          ? await newChannelFollowerLink(em, followerMembership.handle || '')
-          : ''
+      if (ownerAccount) {
+        const { account: followerAccount } = ctx // non-null because of @UseMiddleware(AccountOnly)
+        const followerHandle =
+          (
+            await em
+              .getRepository(Membership)
+              .findOneByOrFail({ id: followerAccount!.membershipId })
+          )?.handle || ''
+        const linkPage = await newChannelFollowerLink(em, followerHandle)
         const channelTitle = channel.title || ''
         await addNotification(
           em,
