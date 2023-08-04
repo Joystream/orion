@@ -18,6 +18,8 @@ import {
   TopSellingChannelsResult,
   ExcludeChannelArgs,
   ExcludeChannelResult,
+  VerifyChannelArgs,
+  VerifyChannelResult,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import {
@@ -31,6 +33,8 @@ import {
   NewChannelFollower,
   NotificationData,
   ChannelExcluded,
+  ChannelVerified,
+  ChannelVerification,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -46,6 +50,8 @@ import {
   addNotification,
   channelExcludedLink,
   channelExcludedText,
+  channelVerifiedLink,
+  channelVerifiedViaYPPText,
   newChannelFollowerLink,
   newChannelFollowerText,
 } from '../../../utils/notification'
@@ -332,6 +338,67 @@ export class ChannelsResolver {
         created: true,
         createdAt: newReport.timestamp,
         rationale,
+      }
+    })
+  }
+
+  @Mutation(() => VerifyChannelResult)
+  @UseMiddleware(OperatorOnly)
+  async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
+    const em = await this.em()
+
+    return withHiddenEntities(em, async () => {
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+      })
+
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      const existingVerification = await em.findOne(ChannelVerification, {
+        where: { channelId: channel.id },
+      })
+      // If exclusion already exists - return its data with { created: false }
+      if (existingVerification) {
+        return {
+          id: existingVerification.id,
+          channelId: channel.id,
+          createdAt: existingVerification.timestamp,
+        }
+      }
+      // If exclusion doesn't exist, create a new one
+      const newVerification = new ChannelVerification({
+        id: uniqueId(8),
+        channelId: channel.id,
+        timestamp: new Date(),
+      })
+      channel.isVerified = true
+      await em.save(newVerification)
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const linkPage = await channelVerifiedLink(em)
+        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+        if (account) {
+          await addNotification(
+            em,
+            account,
+            new ChannelVerified({
+              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+              data: new NotificationData({
+                linkPage,
+                text: channelVerifiedViaYPPText(),
+              }),
+            })
+          )
+        }
+      }
+
+      return {
+        id: newVerification.id,
+        channelId: channel.id,
+        createdAt: newVerification.timestamp,
       }
     })
   }

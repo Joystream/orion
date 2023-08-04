@@ -72,3 +72,14 @@ type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
   member: Membership!
   channel: Channel!
 }
+
+type ChannelVerification @entity {
+  "unique Id"
+  id: ID!
+
+  "channel verified"
+  channel: Channel!
+
+  "timestamp of verification"
+  timestamp: DateTime!
+}
