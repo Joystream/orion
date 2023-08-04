@@ -2,6 +2,7 @@ import { ArgsType, Field, ObjectType, InputType, Int, registerEnumType } from 't
 import { Channel, ChannelWhereInput, ChannelOrderByInput, Membership } from '../baseTypes'
 import { MaxLength } from 'class-validator'
 import { EntityReportInfo } from '../commonTypes'
+import { DateTime } from '@subsquid/graphql-server'
 
 @ObjectType()
 export class ExtendedChannel {
@@ -185,8 +186,14 @@ export class VerifyChannelArgs {
 
 @ObjectType()
 export class VerifyChannelResult {
-  @Field(() => Channel, { nullable: false })
-  channel!: Channel
+  @Field(() => String, { nullable: false })
+  id!: string
+
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => DateTime, { nullable: false })
+  createdAt!: Date
 }
 
 @ArgsType()
