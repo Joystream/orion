@@ -57,6 +57,7 @@ import {
   OpenAuctionLost,
   EnglishAuctionWon,
   EnglishAuctionLost,
+  RoyaltyPaid,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -81,15 +82,18 @@ import {
   higherBidPlacedLink,
   nftBidOutbidText,
   nftBidReceivedText,
+  nftRoyaltyPaymentReceivedText,
   openAuctionBidLostText,
   openAuctionBidWonText,
   openAuctionLostLink,
   openAuctionWonLink,
+  royaltiesReceivedLink,
   timedAuctionBidLostText,
   timedAuctionBidWonText,
   timedAuctionLostLink,
   timedAuctionWonLink,
 } from '../../utils/notification'
+import { type } from 'os'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -906,6 +910,24 @@ export async function notifyChannelOwner(
     await addNotification(
       overlay.getEm(),
       nftOwnerAccount,
+      notificationType(channel.title || ''),
+      event
+    )
+  }
+}
+
+export async function addRoyaltyPaymentNotification(
+  overlay: EntityManagerOverlay,
+  channelId: string | undefined | null,
+  notificationType: (channelTitle: string) => NotificationType,
+  event: Event
+): Promise<void> {
+  if (channelId) {
+    const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+    const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+    await addNotification(
+      overlay.getEm(),
+      creatorAccount,
       notificationType(channel.title || ''),
       event
     )
