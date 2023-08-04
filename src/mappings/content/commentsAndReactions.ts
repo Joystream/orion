@@ -63,11 +63,16 @@ import {
   memberHandleById,
 } from './utils'
 import {
+  commentPostedToVideoLink,
   commentPostedToVideoText,
   commentReactedText,
+  commentReactionLink,
   commentRepliedText,
+  commentReplyLink,
   notificationPageLinkPlaceholder,
+  videoDislikedLink,
   videoDislikedText,
+  videoLikedLink,
   videoLikedText,
 } from '../../utils/notification'
 
@@ -260,14 +265,14 @@ async function processVideoReaction(
                 recipient,
                 data: new NotificationData({
                   text: videoLikedText(video.title || ''),
-                  linkPage: notificationPageLinkPlaceholder(),
+                  linkPage: await videoLikedLink(overlay.getEm(), video.id),
                 }),
               })
             : new VideoDisliked({
                 recipient,
                 data: new NotificationData({
                   text: videoDislikedText(video.title || ''),
-                  linkPage: notificationPageLinkPlaceholder(),
+                  linkPage: await videoDislikedLink(overlay.getEm(), video.id),
                 }),
               })
         await addNotification(overlay.getEm(), channelOwnerAccount, notificationType, event)
@@ -416,7 +421,7 @@ export async function processReactCommentMessage(
             recipient: new MemberRecipient({ memberHandle: commentAuthorMemberHandle }),
             data: new NotificationData({
               text: commentReactedText(memberHandle, video.title),
-              linkPage: notificationPageLinkPlaceholder(),
+              linkPage: await commentReactionLink(overlay.getEm(), video.id),
             }),
           }),
           event
@@ -529,7 +534,7 @@ export async function processCreateCommentMessage(
           recipient: new ChannelRecipient({ channelTitle }),
           data: new NotificationData({
             text: commentRepliedText(video.title || '', authorHandle || ''),
-            linkPage: notificationPageLinkPlaceholder(),
+            linkPage: await commentReplyLink(overlay.getEm(), video.id),
           }),
         })
       )
@@ -549,7 +554,7 @@ export async function processCreateCommentMessage(
           recipient: new MemberRecipient({ memberHandle: channelOwnerHandle || '' }),
           data: new NotificationData({
             text: commentPostedToVideoText(video.title || '', memberHandle || ''),
-            linkPage: notificationPageLinkPlaceholder(),
+            linkPage: await commentPostedToVideoLink(overlay.getEm(), video.id),
           }),
         }),
         event

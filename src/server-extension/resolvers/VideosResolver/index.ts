@@ -48,7 +48,7 @@ import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification/helpers'
-import { notificationPageLinkPlaceholder, videoExcludedText } from '../../../utils/notification'
+import { videoExcludedLink, videoExcludedText } from '../../../utils/notification'
 
 @Resolver()
 export class VideosResolver {
@@ -356,6 +356,7 @@ export class VideosResolver {
       const channelOwnerMemberId = video.channel.ownerMemberId
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+        const linkPage = await videoExcludedLink(em)
         if (account) {
           await addNotification(
             em,
@@ -363,7 +364,7 @@ export class VideosResolver {
             new VideoExcluded({
               recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
               data: new NotificationData({
-                linkPage: notificationPageLinkPlaceholder(),
+                linkPage,
                 text: videoExcludedText(video.title || ''),
               }),
             })

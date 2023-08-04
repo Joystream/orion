@@ -22,16 +22,12 @@ import { processVideoMetadata } from './metadata'
 import {
   deleteVideo,
   encodeAssets,
-  getFollowersAccountsForChannel,
-  memberHandleById,
   notifyChannelFollowers,
   processAppActionMetadata,
   processNft,
 } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification } from '../../utils/notification/helpers'
-import { Not } from 'typeorm'
-import { newVideoPostedText, notificationPageLinkPlaceholder } from '../../utils/notification'
+import { newVideoPostedLink, newVideoPostedText } from '../../utils/notification'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -129,11 +125,12 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
+  const linkPage = await newVideoPostedLink(overlay.getEm(), video.id)
   const notifier = (handle: string) =>
     new VideoPosted({
       recipient: new MemberRecipient({ memberHandle: handle }),
       data: new NotificationData({
-        linkPage: notificationPageLinkPlaceholder(),
+        linkPage,
         text: newVideoPostedText(channel.title || '', video.title || ''),
       }),
     })

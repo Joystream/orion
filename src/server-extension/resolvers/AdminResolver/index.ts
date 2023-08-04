@@ -55,9 +55,11 @@ import { videoRelevanceManager } from '../../../mappings/utils'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 import {
   addNotification,
+  nftFeaturedOnMarketplaceLink,
   nftFeaturedOnMarketplaceText,
-  notificationPageLinkPlaceholder,
+  videoFeaturedAsCategoryHeroLink,
   videoFeaturedAsHeroText,
+  videoFeaturedOnCategoryPageLink,
   videoFeaturedOnCategoryPageText,
 } from '../../../utils/notification'
 
@@ -149,13 +151,14 @@ export class AdminResolver {
     )
 
     const account = await getChannelOwnerAccount(em, video.channel)
+    const linkPage = await videoFeaturedAsCategoryHeroLink(em, video.channel.id)
     await addNotification(
       em,
       account,
       new VideoFeaturedAsCategoryHero({
         recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage,
           text: videoFeaturedAsHeroText(video.title || ''),
         }),
       })
@@ -229,13 +232,14 @@ export class AdminResolver {
       )?.[0]
       if (video.channel && video.channel.id) {
         const creatorAccount = await getChannelOwnerAccount(em, video.channel)
+        const linkPage = await videoFeaturedOnCategoryPageLink(em, categoryId)
         await addNotification(
           em,
           creatorAccount,
           new VideoFeaturedOnCategoryPage({
             recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
             data: new NotificationData({
-              linkPage: notificationPageLinkPlaceholder(),
+              linkPage,
               text: videoFeaturedOnCategoryPageText(video.title || '', categoryTitle || ''),
             }),
           })
@@ -323,6 +327,7 @@ export class AdminResolver {
         })
         if (featuredNft?.video?.channel) {
           const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
+          const linkPage = await nftFeaturedOnMarketplaceLink(em, featuredNftId)
           await addNotification(
             em,
             channelOwnerAccount,
@@ -331,7 +336,7 @@ export class AdminResolver {
                 channelTitle: featuredNft.video.channel.title || '',
               }),
               data: new NotificationData({
-                linkPage: notificationPageLinkPlaceholder(),
+                linkPage,
                 text: nftFeaturedOnMarketplaceText(featuredNft.video.title || ''),
               }),
             })
