@@ -40,9 +40,10 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 import { addNotification } from '../../utils/notification/helpers'
 import {
+  channelCreatedLink,
   channelCreatedText,
+  channelFundsWithdrawnLink,
   fundsWithdrawnFromChannelText,
-  notificationPageLinkPlaceholder,
 } from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
@@ -138,7 +139,7 @@ export async function processChannelCreatedEvent({
         recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
         data: new NotificationData({
           text: channelCreatedText(channel.title || ''),
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: await channelCreatedLink(overlay.getEm(), channel.id),
         }),
       }),
       event
@@ -372,7 +373,7 @@ export async function processChannelFundsWithdrawnEvent({
         recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
         data: new NotificationData({
           text: fundsWithdrawnFromChannelText(channel.title || ''),
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: channelFundsWithdrawnLink(),
         }),
       }),
       entityEvent

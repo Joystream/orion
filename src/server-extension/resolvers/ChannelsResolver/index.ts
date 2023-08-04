@@ -16,8 +16,6 @@ import {
   ChannelNftCollectorsOrderByInput,
   TopSellingChannelsArgs,
   TopSellingChannelsResult,
-  VerifyChannelArgs,
-  VerifyChannelResult,
   ExcludeChannelArgs,
   ExcludeChannelResult,
 } from './types'
@@ -27,6 +25,7 @@ import {
   Channel,
   ChannelFollow,
   Report,
+  Membership,
   Exclusion,
   ChannelRecipient,
   NewChannelFollower,
@@ -45,9 +44,10 @@ import { AccountOnly, OperatorOnly } from '../middleware'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 import {
   addNotification,
+  channelExcludedLink,
   channelExcludedText,
+  newChannelFollowerLink,
   newChannelFollowerText,
-  notificationPageLinkPlaceholder,
 } from '../../../utils/notification'
 
 @Resolver()
@@ -200,6 +200,7 @@ export class ChannelsResolver {
       const existingFollow = await em.findOne(ChannelFollow, {
         where: { channelId, userId: user.id },
       })
+
       // If so - just return the result
       if (existingFollow) {
         return {
@@ -219,7 +220,14 @@ export class ChannelsResolver {
       })
 
       const ownerAccount = await getChannelOwnerAccount(em, channel)
-      if (ownerAccount) {
+      const { account: followerAccount } = ctx
+      if (ownerAccount && followerAccount) {
+        const followerMembership = await em
+          .getRepository(Membership)
+          .findOneByOrFail({ id: followerAccount.membershipId })
+        const linkPage = followerMembership.handle
+          ? await newChannelFollowerLink(em, followerMembership.handle || '')
+          : ''
         const channelTitle = channel.title || ''
         await addNotification(
           em,
@@ -227,7 +235,7 @@ export class ChannelsResolver {
           new NewChannelFollower({
             recipient: new ChannelRecipient({ channelTitle }),
             data: new NotificationData({
-              linkPage: notificationPageLinkPlaceholder(),
+              linkPage,
               text: newChannelFollowerText(channelTitle),
             }),
           })
@@ -369,6 +377,7 @@ export class ChannelsResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
+        const linkPage = await channelExcludedLink(em)
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         if (account) {
           await addNotification(
@@ -377,7 +386,7 @@ export class ChannelsResolver {
             new ChannelExcluded({
               recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
               data: new NotificationData({
-                linkPage: notificationPageLinkPlaceholder(),
+                linkPage,
                 text: channelExcludedText(channel.title || ''),
               }),
             })

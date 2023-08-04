@@ -77,13 +77,18 @@ import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
 import { addNotification } from '../../utils/notification/helpers'
 import {
+  auctionBidMadeLink,
+  higherBidPlacedLink,
   nftBidOutbidText,
   nftBidReceivedText,
-  notificationPageLinkPlaceholder,
   openAuctionBidLostText,
   openAuctionBidWonText,
+  openAuctionLostLink,
+  openAuctionWonLink,
   timedAuctionBidLostText,
   timedAuctionBidWonText,
+  timedAuctionLostLink,
+  timedAuctionWonLink,
 } from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -741,6 +746,7 @@ export async function getAccountsForBidders(
 }
 
 export type NewBidNotificationMetadata = {
+  videoId: string
   videoTitle: string | null | undefined
   newTopBidderHandle: string | undefined
   bidAmount: BigInt | null | undefined
@@ -751,20 +757,21 @@ export async function addNewBidNotification(
   ownerMemberId: string | undefined | null,
   previousTopBid: Flat<Bid> | undefined | null,
   event: Event,
-  { videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
+  { videoId, videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
 ) {
   const nftOwnerAccount = await getAccountForMember(overlay.getEm(), ownerMemberId)
-  if (previousTopBid && previousTopBid.bidderId) {
+  if (previousTopBid?.bidderId) {
     const outbiddedMemberId = previousTopBid.bidderId
     const outbiddedMemberHandle = await memberHandleById(overlay, outbiddedMemberId)
     const outbiddedMemberAccount = await getAccountForMember(overlay.getEm(), outbiddedMemberId)
+    const linkPage = await higherBidPlacedLink(overlay.getEm(), videoId)
     await addNotification(
       overlay.getEm(),
       outbiddedMemberAccount,
       new HigherBidPlaced({
         recipient: new MemberRecipient({ memberHandle: outbiddedMemberHandle }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage,
           text: nftBidOutbidText(videoTitle || '', newTopBidderHandle || ''),
         }),
       }),
@@ -778,6 +785,7 @@ export async function addNewBidNotification(
       .getOneByRelationOrFail('ownerMemberId', ownerMemberId)
     // if nft owner is also a channel owner then notify
     if (channel) {
+      const linkPage = await auctionBidMadeLink(overlay.getEm(), videoId)
       await addNotification(
         overlay.getEm(),
         nftOwnerAccount,
@@ -785,7 +793,7 @@ export async function addNewBidNotification(
           // case: channel exist but has no title set, notify anyways with incomplete messagej
           recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
           data: new NotificationData({
-            linkPage: notificationPageLinkPlaceholder(),
+            linkPage,
             text: nftBidReceivedText(
               videoTitle || '',
               newTopBidderHandle || '',
@@ -816,19 +824,8 @@ export async function notifyChannelFollowers(
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
   for (const followerAccount of followersAccounts) {
     const handle = await memberHandleById(overlay, followerAccount.membershipId)
-    await addNotification(
-      overlay.getEm(),
-      followerAccount,
-      notificationTypeForMember(handle || ''),
-      // new VideoPosted({
-      //   recipient: new MemberRecipient({ memberHandle: handle }),
-      //   data: new NotificationData({
-      //     linkPage: notificationPageLinkPlaceholder(),
-      //     text: newVideoPostedText(channel.title || '', video.title || ''),
-      //   }),
-      // }),
-      event
-    )
+    const notificationType = await notificationTypeForMember(handle || '')
+    await addNotification(overlay.getEm(), followerAccount, notificationType, event)
   }
 }
 
@@ -852,7 +849,16 @@ export async function notifyBiddersOnAuctionCompletion(
   }
 }
 
-export const openAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
+export type PageLinkData = {
+  em: EntityManager
+  videoId: string
+}
+export const openAuctionNotifiers = async (
+  { em, videoId }: PageLinkData,
+  videoTitle: string
+): Promise<AuctionNotifiers> => {
+  const winningLink = await openAuctionWonLink(em, videoId)
+  const losingLink = await openAuctionLostLink(em, videoId)
   return {
     won: (memberHandle: string) =>
       new OpenAuctionWon({
@@ -860,7 +866,7 @@ export const openAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
           memberHandle,
         }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: winningLink,
           text: openAuctionBidWonText(videoTitle),
         }),
       }),
@@ -870,7 +876,7 @@ export const openAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
           memberHandle,
         }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: losingLink,
           text: openAuctionBidLostText(videoTitle),
         }),
       }),
@@ -882,7 +888,12 @@ export type AuctionNotifiers = {
   lost: (memberHandle: string) => NotificationType
 }
 
-export const englishAuctionNotifiers = (videoTitle: string): AuctionNotifiers => {
+export const englishAuctionNotifiers = async (
+  { em, videoId }: PageLinkData,
+  videoTitle: string
+): Promise<AuctionNotifiers> => {
+  const winningLink = await timedAuctionWonLink(em, videoId)
+  const losingLink = await timedAuctionLostLink(em, videoId)
   return {
     won: (memberHandle: string) =>
       new EnglishAuctionWon({
@@ -890,7 +901,7 @@ export const englishAuctionNotifiers = (videoTitle: string): AuctionNotifiers =>
           memberHandle,
         }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: winningLink,
           text: timedAuctionBidWonText(videoTitle),
         }),
       }),
@@ -900,7 +911,7 @@ export const englishAuctionNotifiers = (videoTitle: string): AuctionNotifiers =>
           memberHandle,
         }),
         data: new NotificationData({
-          linkPage: notificationPageLinkPlaceholder(),
+          linkPage: losingLink,
           text: timedAuctionBidLostText(videoTitle),
         }),
       }),

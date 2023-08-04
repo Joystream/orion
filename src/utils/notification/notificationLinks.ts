@@ -48,7 +48,7 @@ export const directPaymentByMemberLink = async (em: EntityManager, memberHandle:
   `https://${await getRootDomain(em)}/member/${memberHandle}`
 
 // design specifies no-redirect
-export const ChannelFundsWithdrawn = () => ''
+export const channelFundsWithdrawnLink = () => ''
 
 // FIXME: edit link such that the page is focused to comment
 export const commentReplyLink = async (em: EntityManager, videoId: string) =>
@@ -63,16 +63,25 @@ export const newVideoPostedLink = async (em: EntityManager, videoId: string) =>
 export const nftOnSaleLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
-export const nftOnAuction = async (em: EntityManager, videoId: string) =>
+export const nftOnAuctionLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
-export const hiherBidPlacedLink = async (em: EntityManager, videoId: string) =>
+export const auctionBidMadeLink = async (em: EntityManager, videoId: string) =>
+  `https://${await getRootDomain(em)}/video/${videoId}`
+
+export const higherBidPlacedLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
 export const timedAuctionWonLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
 export const openAuctionWonLink = async (em: EntityManager, videoId: string) =>
+  `https://${await getRootDomain(em)}/video/${videoId}`
+
+export const timedAuctionExpiredLink = async (em: EntityManager, videoId: string) =>
+  `https://${await getRootDomain(em)}/video/${videoId}`
+
+export const bidMadeCompletingAuctionLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
 export const timedAuctionLostLink = async (em: EntityManager, videoId: string) =>
@@ -83,3 +92,6 @@ export const openAuctionLostLink = async (em: EntityManager, videoId: string) =>
 
 export const channelCreatedLink = async (em: EntityManager, channelId: string) =>
   `https://${await getRootDomain(em)}/channel/${channelId}`
+
+export const nftFeaturedOnMarketplaceLink = async (em: EntityManager, videoId: string) =>
+  `https://${await getRootDomain(em)}/video/${videoId}`

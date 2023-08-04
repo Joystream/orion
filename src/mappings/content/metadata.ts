@@ -80,6 +80,7 @@ import {
 } from './utils'
 import {
   channelReceivedDirectPaymentText,
+  directPaymentByMemberLink,
   notificationPageLinkPlaceholder,
 } from '../../utils/notification'
 
@@ -671,7 +672,7 @@ export async function processChannelPaymentFromMember(
     new DirectChannelPaymentByMember({
       recipient: new ChannelRecipient({ channelTitle }),
       data: new NotificationData({
-        linkPage: notificationPageLinkPlaceholder(),
+        linkPage: await directPaymentByMemberLink(overlay.getEm(), member.handle),
         text: channelReceivedDirectPaymentText(channelTitle, amount.toString()),
       }),
     }),
