@@ -140,7 +140,7 @@ type NftIssuedEventData {
   transactionalStatus: TransactionalStatus!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type AuctionBidMadeEventData {
   "The bid that was submitted "
   bid: Bid!
@@ -179,7 +179,7 @@ type NftOfferedEventData {
   nftOwner: NftOwner!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type EnglishAuctionSettledEventData {
   "English auction winning bid"
   winningBid: Bid!
@@ -188,7 +188,7 @@ type EnglishAuctionSettledEventData {
   previousNftOwner: NftOwner!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type BidMadeCompletingAuctionEventData {
   "Bid that completed the auction"
   winningBid: Bid!
@@ -224,7 +224,7 @@ type NftSellOrderMadeEventData {
   price: BigInt!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type NftBoughtEventData {
   "The NFT that was bought"
   nft: OwnedNft!

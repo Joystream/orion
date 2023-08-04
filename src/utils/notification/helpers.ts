@@ -11,11 +11,13 @@ import {
   Unread,
   NotificationInAppDelivery,
   NotificationEmailDelivery,
+  Membership,
 } from '../../model'
 import { getNextIdForEntity } from '../nextEntityId'
 import { sgSendMail } from '../mail'
 import { ConfigVariable, config } from '../config'
 import { Flat } from 'lodash'
+import { notificationEmailContent } from '../../auth-server/emails'
 
 function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -146,7 +148,7 @@ export async function addNotification(
 
     // deliver via mail if enabled
     if (emailEnabled) {
-      await deliverOffChainNotificationViaEmail(em, account!.email, notification)
+      await deliverNotificationViaEmail(em, account!, notification)
     }
 
     // deliver via in app if enabled
@@ -173,9 +175,9 @@ export async function addNotification(
   }
 }
 
-async function deliverOffChainNotificationViaEmail(
+async function deliverNotificationViaEmail(
   em: EntityManager,
-  to: string,
+  toAccount: Account,
   notification: Notification
 ): Promise<void> {
   const nextEntityId = await getNextIdForEntity(em, 'OffChainNotificationEmailDelivery')
@@ -185,11 +187,25 @@ async function deliverOffChainNotificationViaEmail(
     deliveryAttemptAt: new Date(),
   })
   const appName = await config.get(ConfigVariable.AppName, em)
+  const membership = await em
+    .getRepository(Membership)
+    .findOne({ select: { handle: true }, where: { id: toAccount.membershipId } })
+  const preferencePageLink = `https://${await config.get(
+    ConfigVariable.AppRootDomain,
+    em
+  )}/member/${membership?.handle}/?tab=preferences`
+  const content = notificationEmailContent({
+    notificationText: notification.notificationType.data.text,
+    notificationLink: notification.notificationType.data.linkPage,
+    preferencePageLink,
+    appName,
+  })
+
   const resp = await sgSendMail({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
-    to,
+    to: toAccount.email,
     subject: `New notification from ${appName}!`,
-    content: notification.notificationType.data.text,
+    content,
   })
   if (resp?.statusCode === 202 || resp?.statusCode === 200) {
     notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
