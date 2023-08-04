@@ -358,3 +358,11 @@ type BidMadeCompletingAuction @variant {
   "recipient"
   recipient: RecipientType!
 }
+
+type NftRoyaltyPaid @variant {
+  "notification data"
+  data: NotificationData!
+
+  "recipient"
+  recipient: RecipientType!
+}

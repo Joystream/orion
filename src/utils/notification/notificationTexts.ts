@@ -49,8 +49,8 @@ export const nftBidReceivedText = (videoTitle: string, memberHandle: string, nft
   return `${memberHandle} placed a bid of ${nftPrice} on nft: ${videoTitle}`
 }
 
-export const nftRoyaltyPaymentReceivedText = (nftPrice: string, videoTitle: string) => {
-  return `you received ${nftPrice} royalties for your nft: ${videoTitle}`
+export const nftRoyaltyPaymentReceivedText = (videoTitle: string, royalties: string) => {
+  return `you received ${royalties} JOY nominal royalties for your nft: ${videoTitle}`
 }
 
 export const channelReceivedDirectPaymentText = (memberHandle: string, amount: string) => {
