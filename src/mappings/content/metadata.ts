@@ -81,7 +81,6 @@ import {
 import {
   channelReceivedDirectPaymentText,
   directPaymentByMemberLink,
-  notificationPageLinkPlaceholder,
 } from '../../utils/notification'
 
 export async function processChannelMetadata(

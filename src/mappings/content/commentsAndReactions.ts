@@ -69,7 +69,6 @@ import {
   commentReactionLink,
   commentRepliedText,
   commentReplyLink,
-  notificationPageLinkPlaceholder,
   videoDislikedLink,
   videoDislikedText,
   videoLikedLink,
