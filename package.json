@@ -21,7 +21,6 @@
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
-    "tests:notifications": "./src/tests/integration/run_tests.sh",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
   },
@@ -81,7 +80,6 @@
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
     "@subsquid/typeorm-codegen": "^0.3.1",
-    "@types/chai": "^4.3.5",
     "@types/cookie-parser": "^1.4.3",
     "@types/express-rate-limit": "^6.0.0",
     "@types/mocha": "^10.0.1",
@@ -102,7 +100,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-standard": "^5.0.0",
-    "graphql-ws": "^5.14.0",
     "mocha": "^10.2.0",
     "openapi-typescript": "^6.1.1",
     "prettier": "^2.7.1",
