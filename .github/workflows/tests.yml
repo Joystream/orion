@@ -11,6 +11,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+      - name: Create joystream_default network
+        run: docker network create joystream_default
       - name: Prepare workspace
         run: make prepare
       - name: Start db
