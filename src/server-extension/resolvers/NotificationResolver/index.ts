@@ -4,7 +4,7 @@ import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { Notification, NotificationPreference, Read } from '../../../model'
+import { Account, Notification, NotificationPreference, Read } from '../../../model'
 import {
   AccountNotificationPreferencesInput,
   AccountNotificationPreferencesOutput,
@@ -29,7 +29,7 @@ export class NotificationResolver {
     return withHiddenEntities(em, async () => {
       const notificationsReadIds: string[] = []
       for (const notificationId of notificationIds.filter((id) => id)) {
-        const notification = await em.getRepository(Notification).findOneBy({ id: notificationId! })
+        const notification = await em.getRepository(Notification).findOneBy({ id: notificationId })
         if (notification?.accountId) {
           if (notification.accountId !== ctx.accountId) {
             throw new Error('This notification cannot be read from this account')
@@ -55,10 +55,12 @@ export class NotificationResolver {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
-      const account = ctx.account
-      if (!account) {
-        throw new Error('Account not found')
+      if (ctx.account === undefined) {
+        // account not null because of the UseMiddleware(AccountOnly) decorator
+        throw new Error('Account not specified')
       }
+      const account = ctx.account as Account // avoid ctx.account! due to eslint
+
       maybeUpdateNotificationPreference(
         newPreferences.channelExcludedFromAppNotificationEnabled,
         account.notificationPreferences.channelExcludedFromAppNotificationEnabled
@@ -189,7 +191,7 @@ export class NotificationResolver {
       )
       await em.save(account)
 
-      return toOutputGQL(account!.notificationPreferences)
+      return toOutputGQL(account.notificationPreferences)
     })
   }
 }

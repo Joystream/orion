@@ -29,7 +29,6 @@ import {
   CommentTextUpdatedEventData,
   Event,
   MemberRecipient,
-  Membership,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,

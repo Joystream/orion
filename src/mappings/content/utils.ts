@@ -51,13 +51,11 @@ import {
   NotificationData,
   NewAuctionBid,
   ChannelRecipient,
-  Notification,
   NotificationType,
   OpenAuctionWon,
   OpenAuctionLost,
   EnglishAuctionWon,
   EnglishAuctionLost,
-  RoyaltyPaid,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -82,18 +80,15 @@ import {
   higherBidPlacedLink,
   nftBidOutbidText,
   nftBidReceivedText,
-  nftRoyaltyPaymentReceivedText,
   openAuctionBidLostText,
   openAuctionBidWonText,
   openAuctionLostLink,
   openAuctionWonLink,
-  royaltiesReceivedLink,
   timedAuctionBidLostText,
   timedAuctionBidWonText,
   timedAuctionLostLink,
   timedAuctionWonLink,
 } from '../../utils/notification'
-import { type } from 'os'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -263,7 +258,6 @@ export async function processNft(
       actor: parseContentActor(issuer),
       nft: nft.id,
       nftOwner: nft.owner,
-      transactionalStatus: nft.transactionalStatus!,
     }),
   })
 
@@ -675,9 +669,9 @@ export async function getFollowersAccountsForChannel(
 ): Promise<Account[]> {
   const followers = await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
 
-  const followersUserIds = await Promise.all(
-    followers.filter((follower) => follower.userId).map((follower) => follower.userId!)
-  )
+  const followersUserIds = followers
+    .filter((follower) => follower?.userId)
+    .map((follower) => follower.userId as string)
 
   const followersAccounts = await Promise.all(
     followersUserIds.map(
@@ -815,9 +809,9 @@ export async function notifyBiddersOnAuctionCompletion(
   },
   event: Event
 ) {
-  for (const bidderId of biddersMemberIds.map((id) => id)) {
+  for (const bidderId of biddersMemberIds.filter((id) => id)) {
     const account = await getAccountForMember(overlay.getEm(), bidderId)
-    const memberHandle = (await memberHandleById(overlay, bidderId!)) || ''
+    const memberHandle = (await memberHandleById(overlay, bidderId)) || ''
     const notification =
       bidderId === winnerId.toString() ? notifier.won(memberHandle) : notifier.lost(memberHandle)
 
@@ -829,6 +823,12 @@ export type PageLinkData = {
   em: EntityManager
   videoId: string
 }
+
+export type AuctionNotifiers = {
+  won: (memberHandle: string) => NotificationType
+  lost: (memberHandle: string) => NotificationType
+}
+
 export const openAuctionNotifiers = async (
   { em, videoId }: PageLinkData,
   videoTitle: string
@@ -857,11 +857,6 @@ export const openAuctionNotifiers = async (
         }),
       }),
   }
-}
-
-export type AuctionNotifiers = {
-  won: (memberHandle: string) => NotificationType
-  lost: (memberHandle: string) => NotificationType
 }
 
 export const englishAuctionNotifiers = async (

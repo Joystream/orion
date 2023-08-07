@@ -2,13 +2,7 @@ import { metaToObject } from '@joystream/metadata-protobuf/utils'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { Logger } from '../logger'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
-import {
-  Event,
-  MetaprotocolTransactionResultFailed,
-  NftActivity,
-  NftHistoryEntry,
-  Account,
-} from '../model'
+import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
 import { Bytes } from '@polkadot/types/primitive'
