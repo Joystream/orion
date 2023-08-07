@@ -313,6 +313,7 @@ export class VideosResolver {
       }
     })
   }
+
   @Mutation(() => VideoReportInfo)
   @UseMiddleware(OperatorOnly)
   async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {

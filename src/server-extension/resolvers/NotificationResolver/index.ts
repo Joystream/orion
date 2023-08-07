@@ -27,7 +27,7 @@ export class NotificationResolver {
   ): Promise<MarkNotificationsAsReadResult> {
     const em = await this.em()
     return withHiddenEntities(em, async () => {
-      let notificationsReadIds: string[] = []
+      const notificationsReadIds: string[] = []
       for (const notificationId of notificationIds.filter((id) => id)) {
         const notification = await em.getRepository(Notification).findOneBy({ id: notificationId! })
         if (notification?.accountId) {

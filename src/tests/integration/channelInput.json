@@ -1,8 +1,0 @@
-{
-  "title": "Test channel",
-  "avatarPhotoPath": "./image.png",
-  "coverPhotoPath": "./image.png",
-  "description": "This is a test channel",
-  "isPublic": true,
-  "language": "en"
-}
