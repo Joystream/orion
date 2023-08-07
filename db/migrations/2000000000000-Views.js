@@ -63,11 +63,11 @@ module.exports = class Views2000000000000 {
         `("type"->>'channel' IS NULL OR EXISTS(SELECT 1 FROM "channel" WHERE "id"="type"->>'channel'))`,
         `("type"->>'video' IS NULL OR EXISTS(SELECT 1 FROM "video" WHERE "id"="type"->>'video'))`
       ],
-      runtime_notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       // HIDDEN entities
       video_view_event: ['FALSE'],
+      notification: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
       exclusion: ['FALSE'],
@@ -78,7 +78,6 @@ module.exports = class Views2000000000000 {
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
-      off_chain_notification: [`FALSE`], 
     }
   }
 
