@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Query, Resolver, Mutation, UseMiddleware, Ctx, Info, Args } from 'type-graphql'
+import { Query, Resolver, UseMiddleware, Ctx, Info } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { AccountData, FollowedChannel } from './types'

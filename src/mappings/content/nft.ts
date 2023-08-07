@@ -8,7 +8,6 @@ import {
   englishAuctionNotifiers,
   findTopBid,
   finishAuction,
-  getChannelOwnerAccount,
   getChannelTitle,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
@@ -44,9 +43,7 @@ import {
   TransactionalStatusIdle,
   TransactionalStatusInitiatedOfferToMember,
   Video,
-  Channel,
   MemberRecipient,
-  NftOffered,
   NotificationData,
   NewAuction,
   NewNftOnSale,
@@ -73,7 +70,6 @@ import {
   timedAuctionExpiredLink,
   timedAuctionExpiredText,
 } from '../../utils/notification'
-import { channel } from 'diagnostics_channel'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -599,9 +595,6 @@ export async function processOpenAuctionBidAcceptedEvent({
 
 export async function processOfferStartedEvent({
   overlay,
-  block,
-  indexInBlock,
-  extrinsicHash,
   event: {
     asV1000: [videoId, , memberId, price],
   },
@@ -628,7 +621,6 @@ export async function processOfferAcceptedEvent({
 }: EventHandlerContext<'Content.OfferAccepted'>): Promise<void> {
   // load NFT
   const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
-  const previousNftOwnerId = await getNftOwnerMemberId(overlay, nft.owner)
 
   // read member from offer
   const memberId = (nft.transactionalStatus as TransactionalStatusInitiatedOfferToMember).member

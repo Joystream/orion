@@ -133,14 +133,14 @@ export async function addNotification(
     const notificationChainTag = event ? 'OffChainNotification' : 'OnChainNotification'
     // create notification as disabled = true
     const { inAppEnabled, emailEnabled } = preferencesForNotification(
-      account!.notificationPreferences,
+      account.notificationPreferences,
       notificationType
     )
     // create notification (for the notification center)
     const nextNotificationId = await getNextIdForEntity(em, notificationChainTag)
     const notification = new Notification({
       id: notificationChainTag + '-' + nextNotificationId.toString(),
-      accountId: account!.id,
+      accountId: account.id,
       notificationType,
       eventId: event?.id,
       status: new Unread(),
@@ -148,7 +148,7 @@ export async function addNotification(
 
     // deliver via mail if enabled
     if (emailEnabled) {
-      await deliverNotificationViaEmail(em, account!, notification)
+      await deliverNotificationViaEmail(em, account, notification)
     }
 
     // deliver via in app if enabled

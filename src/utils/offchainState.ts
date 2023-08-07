@@ -80,12 +80,12 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
 
 function migrateExportDataToV310(data: ExportedData): ExportedData {
   // account will find himself with all notification pref. enabled by default
-  data.Account?.values.map((account) => {
+  data.Account?.values.forEach((account) => {
     account.notificationPreferences = defaultNotificationPreferences()
   })
 
   // setting channel native Orion verification status to false
-  data.Channel?.values.map((channel) => {
+  data.Channel?.values.forEach((channel) => {
     channel.isVerified = false
   })
 
@@ -280,17 +280,19 @@ export class OffchainState {
   }
 
   private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    Object.entries(this.globalCountersMigration)
-      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)) // sort in increasing order
-      .forEach(([version, counters]) => {
-        if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-          this.logger.info(`Migrating global counters to version ${version}`)
-          counters.forEach(async (entityName) => {
-            // build query that gets the entityName with the highest id
-            const latestId = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
-            await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
-          })
+    const migrationData = Object.entries(this.globalCountersMigration).sort(
+      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
+    ) // sort in increasing order
+
+    for (const [version, counters] of migrationData) {
+      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
+        this.logger.info(`Migrating global counters to version ${version}`)
+        for (const entityName of counters) {
+          // build query that gets the entityName with the highest id
+          const latestId = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
+          await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
         }
-      })
+      }
+    }
   }
 }

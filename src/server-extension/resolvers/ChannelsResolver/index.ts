@@ -227,13 +227,14 @@ export class ChannelsResolver {
 
       const ownerAccount = await getChannelOwnerAccount(em, channel)
       if (ownerAccount) {
-        const { account: followerAccount } = ctx // non-null because of @UseMiddleware(AccountOnly)
+        if (ctx.account === undefined) {
+          // account not null because of the UseMiddleware(AccountOnly) decorator
+          throw new Error('Account not specified')
+        }
+        const followerAccount = ctx.account as Account
         const followerHandle =
-          (
-            await em
-              .getRepository(Membership)
-              .findOneByOrFail({ id: followerAccount!.membershipId })
-          )?.handle || ''
+          (await em.getRepository(Membership).findOneByOrFail({ id: followerAccount.membershipId }))
+            ?.handle || ''
         const linkPage = await newChannelFollowerLink(em, followerHandle)
         const channelTitle = channel.title || ''
         await addNotification(

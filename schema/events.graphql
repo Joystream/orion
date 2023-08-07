@@ -135,9 +135,6 @@ type NftIssuedEventData {
 
   "NFT's initial owner."
   nftOwner: NftOwner!
-
-  "init transactional status"
-  transactionalStatus: TransactionalStatus!
 }
 
 # Atlas use-case: `GetNftActivities`, `GetNftHistory`

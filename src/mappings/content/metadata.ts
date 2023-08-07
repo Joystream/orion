@@ -74,7 +74,6 @@ import {
   ASSETS_MAP,
   EntityAssetProps,
   EntityAssetsMap,
-  getAccountForMember,
   getChannelOwnerAccount,
   MetaNumberProps,
 } from './utils'
