@@ -1,14 +1,6 @@
 import { KeyringPair } from '@polkadot/keyring/types'
 import { Keyring } from '@polkadot/api'
 import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-import request from 'supertest'
-import { Account, AccountNotificationPreferences } from '../../model'
-import { expect } from 'chai'
-import { ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
-import { SESSION_COOKIE_NAME } from '../../utils/auth'
-import { TestContext } from './extrinsics'
-import { EntityManager } from 'typeorm'
-import { assert } from 'console'
 
 const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
