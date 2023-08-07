@@ -673,10 +673,7 @@ export async function getFollowersAccountsForChannel(
   overlay: EntityManagerOverlay,
   channelId: string
 ): Promise<Account[]> {
-  const followers = await overlay
-    .getEm()
-    .getRepository(ChannelFollow)
-    .findBy({ channelId: channelId })
+  const followers = await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
 
   const followersUserIds = await Promise.all(
     followers.filter((follower) => follower.userId).map((follower) => follower.userId!)
@@ -728,7 +725,7 @@ export type NewBidNotificationMetadata = {
   videoId: string
   videoTitle: string | null | undefined
   newTopBidderHandle: string | undefined
-  bidAmount: BigInt | null | undefined
+  bidAmount: bigint | null | undefined
 }
 
 export async function addNewBidNotification(
