@@ -179,9 +179,27 @@ export class ChannelsSearchArgs {
 }
 
 @ArgsType()
+export class SuspendChannelArgs {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+}
+
+@ArgsType()
 export class VerifyChannelArgs {
   @Field(() => String, { nullable: false })
   channelId!: string
+}
+
+@ObjectType()
+export class SuspendChannelResult {
+  @Field(() => String, { nullable: false })
+  id!: string
+
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => DateTime, { nullable: false })
+  createdAt!: Date
 }
 
 @ObjectType()
