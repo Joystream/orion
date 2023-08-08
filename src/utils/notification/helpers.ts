@@ -34,7 +34,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     videoCommentCreatedNotificationEnabled: notificationPrefAllTrue(),
     videoLikedNotificationEnabled: notificationPrefAllTrue(),
     videoDislikedNotificationEnabled: notificationPrefAllTrue(),
-    yppSignupSuccessfulNotificationEnabled: notificationPrefAllTrue(),
+    yppChannelSuspendedNotificationEnabled: notificationPrefAllTrue(),
     yppChannelVerifiedNotificationEnabled: notificationPrefAllTrue(),
     nftBoughtNotificationEnabled: notificationPrefAllTrue(),
     bidMadeOnNftNotificationEnabled: notificationPrefAllTrue(),
@@ -51,7 +51,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     newNftOnAuctionNotificationEnabled: notificationPrefAllTrue(),
     newNftOnSaleNotificationEnabled: notificationPrefAllTrue(),
     higherBidThanYoursMadeNotificationEnabled: notificationPrefAllTrue(),
-    auctionExpiredNotificationEnabled: notificationPrefAllTrue(),
+    timedAuctionExpiredNotificationEnabled: notificationPrefAllTrue(),
     auctionWonNotificationEnabled: notificationPrefAllTrue(),
     auctionLostNotificationEnabled: notificationPrefAllTrue(),
     openAuctionBidCanBeWithdrawnNotificationEnabled: notificationPrefAllTrue(),
@@ -84,8 +84,10 @@ export function preferencesForNotification(
       return preferences.videoLikedNotificationEnabled
     case 'VideoDisliked':
       return preferences.videoDislikedNotificationEnabled
-    case 'YppSignupSuccessful':
-      return preferences.yppSignupSuccessfulNotificationEnabled
+    case 'EnglishAuctionSettled':
+      return preferences.timedAuctionExpiredNotificationEnabled
+    case 'ChannelSuspended':
+      return preferences.yppChannelSuspendedNotificationEnabled
     case 'ChannelVerified':
       return preferences.yppChannelVerifiedNotificationEnabled
     case 'NftPurchased':

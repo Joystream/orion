@@ -127,9 +127,10 @@ type AccountNotificationPreferences {
   videoCommentCreatedNotificationEnabled: NotificationPreference!
   videoLikedNotificationEnabled: NotificationPreference!
   videoDislikedNotificationEnabled: NotificationPreference!
-  yppSignupSuccessfulNotificationEnabled: NotificationPreference!
   yppChannelVerifiedNotificationEnabled: NotificationPreference!
+  yppChannelSuspendedNotificationEnabled: NotificationPreference!
   nftBoughtNotificationEnabled: NotificationPreference!
+  timedAuctionExpiredNotificationEnabled: NotificationPreference!
   bidMadeOnNftNotificationEnabled: NotificationPreference!
   royaltyReceivedNotificationEnabled: NotificationPreference!
   channelPaymentReceivedNotificationEnabled: NotificationPreference!
@@ -145,7 +146,6 @@ type AccountNotificationPreferences {
   newNftOnAuctionNotificationEnabled: NotificationPreference!
   newNftOnSaleNotificationEnabled: NotificationPreference!
   higherBidThanYoursMadeNotificationEnabled: NotificationPreference!
-  auctionExpiredNotificationEnabled: NotificationPreference!
   auctionWonNotificationEnabled: NotificationPreference!
   auctionLostNotificationEnabled: NotificationPreference!
   openAuctionBidCanBeWithdrawnNotificationEnabled: NotificationPreference!
