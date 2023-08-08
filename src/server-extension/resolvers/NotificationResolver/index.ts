@@ -98,8 +98,8 @@ export class NotificationResolver {
         account.notificationPreferences.videoDislikedNotificationEnabled
       )
       maybeUpdateNotificationPreference(
-        newPreferences.yppSignupSuccessfulNotificationEnabled,
-        account.notificationPreferences.yppSignupSuccessfulNotificationEnabled
+        newPreferences.yppChannelSuspendedNotificationEnabled,
+        account.notificationPreferences.yppChannelSuspendedNotificationEnabled
       )
       maybeUpdateNotificationPreference(
         newPreferences.yppChannelVerifiedNotificationEnabled,
@@ -163,7 +163,7 @@ export class NotificationResolver {
       )
       maybeUpdateNotificationPreference(
         newPreferences.auctionExpiredNotificationEnabled,
-        account.notificationPreferences.auctionExpiredNotificationEnabled
+        account.notificationPreferences.timedAuctionExpiredNotificationEnabled
       )
       maybeUpdateNotificationPreference(
         newPreferences.auctionWonNotificationEnabled,

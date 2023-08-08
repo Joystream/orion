@@ -78,7 +78,7 @@ type ChannelRecipient {
 }
 
 union NotificationType =
-    YppSignupSuccessful
+    ChannelSuspended
   | ChannelVerified
   | ChannelExcluded
   | VideoExcluded
@@ -110,7 +110,7 @@ union NotificationType =
   | NftOffered
   | BidMadeCompletingAuction
 
-type YppSignupSuccessful @variant {
+type ChannelSuspended @variant {
   "notification data"
   data: NotificationData!
 

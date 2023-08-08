@@ -61,7 +61,7 @@ export class AccountNotificationPreferencesInput {
   videoDislikedNotificationEnabled: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  yppSignupSuccessfulNotificationEnabled: NotificationPreference
+  yppChannelSuspendedNotificationEnabled: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
   yppChannelVerifiedNotificationEnabled: NotificationPreference
@@ -253,7 +253,7 @@ export function toOutputGQL(
     videoCommentCreatedNotificationEnabled: preferences.videoCommentCreatedNotificationEnabled,
     videoLikedNotificationEnabled: preferences.videoLikedNotificationEnabled,
     videoDislikedNotificationEnabled: preferences.videoDislikedNotificationEnabled,
-    yppSignupSuccessfulNotificationEnabled: preferences.yppSignupSuccessfulNotificationEnabled,
+    yppSignupSuccessfulNotificationEnabled: preferences.yppChannelSuspendedNotificationEnabled,
     yppChannelVerifiedNotificationEnabled: preferences.yppChannelVerifiedNotificationEnabled,
     nftBoughtNotificationEnabled: preferences.nftBoughtNotificationEnabled,
     bidMadeOnNftNotificationEnabled: preferences.bidMadeOnNftNotificationEnabled,
@@ -273,7 +273,7 @@ export function toOutputGQL(
     newNftOnSaleNotificationEnabled: preferences.newNftOnSaleNotificationEnabled,
     higherBidThanYoursMadeNotificationEnabled:
       preferences.higherBidThanYoursMadeNotificationEnabled,
-    auctionExpiredNotificationEnabled: preferences.auctionExpiredNotificationEnabled,
+    auctionExpiredNotificationEnabled: preferences.timedAuctionExpiredNotificationEnabled,
     auctionWonNotificationEnabled: preferences.auctionWonNotificationEnabled,
     auctionLostNotificationEnabled: preferences.auctionLostNotificationEnabled,
     openAuctionBidCanBeWithdrawnNotificationEnabled:
