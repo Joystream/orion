@@ -84,10 +84,7 @@ function migrateExportDataToV310(data: ExportedData): ExportedData {
     account.notificationPreferences = defaultNotificationPreferences()
   })
 
-  // setting channel native Orion verification status to false
-  data.Channel?.values.forEach((channel) => {
-    channel.isVerified = false
-  })
+  // Channel.isVerified = false by default
 
   return data
 }
@@ -258,8 +255,8 @@ export class OffchainState {
     }
 
     // migrate counters for NextEntityId
-    const { version } = exportFile
-    await this.migrateCounters(version, em)
+    const { orionVersion } = exportFile
+    await this.migrateCounters(orionVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
@@ -289,7 +286,9 @@ export class OffchainState {
         this.logger.info(`Migrating global counters to version ${version}`)
         for (const entityName of counters) {
           // build query that gets the entityName with the highest id
-          const latestId = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
+          const results = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
+          const latestId = results[0]?.id || 0
+          console.log(`latestId: ${JSON.stringify(latestId)} for entityName: ${entityName}`)
           await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
         }
       }

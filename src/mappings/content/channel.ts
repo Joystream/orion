@@ -132,18 +132,20 @@ export async function processChannelCreatedEvent({
     })
 
     const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
-    await addNotification(
-      overlay.getEm(),
-      ownerAccount,
-      new ChannelCreated({
-        recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-        data: new NotificationData({
-          text: channelCreatedText(channel.title || ''),
-          linkPage: await channelCreatedLink(overlay.getEm(), channel.id),
+    if (ownerAccount) {
+      await addNotification(
+        overlay.getEm(),
+        ownerAccount,
+        new ChannelCreated({
+          recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+          data: new NotificationData({
+            text: channelCreatedText(channel.title || ''),
+            linkPage: await channelCreatedLink(overlay.getEm(), channel.id),
+          }),
         }),
-      }),
-      event
-    )
+        event
+      )
+    }
   }
 }
 
