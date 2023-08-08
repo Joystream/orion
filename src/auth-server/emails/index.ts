@@ -1,21 +1,12 @@
 import { compile } from 'handlebars'
-import mjml2html from 'mjml'
 import fs from 'fs'
 import path from 'path'
 
 function getEmailTemplateData<T>(templatePath: string): (data: T) => string {
-  const config = {
-    'beautify': false,
-    'fonts': {
-      'Roboto': 'https://fonts.googleapis.com/css?family=Roboto',
-    },
-  }
-
   const fullPath = path.join(__dirname, 'templates/' + templatePath)
   return (data) => {
-    const mjmlXml = compile<T>(fs.readFileSync(fullPath).toString())
-    const { html } = mjml2html(mjmlXml(data), config)
-    return html
+    const mailContent = compile<T>(fs.readFileSync(fullPath).toString())
+    return mailContent(data).toString()
   }
 }
 
@@ -27,8 +18,9 @@ type RegisterEmailTemplateData = {
 }
 
 // function exports
-export const registerEmailContent: (data: RegisterEmailTemplateData) => string =
-  getEmailTemplateData<RegisterEmailTemplateData>('register.xml.mst')
+export function registerEmailContent(data: RegisterEmailTemplateData): string {
+  return getEmailTemplateData<RegisterEmailTemplateData>('register.html.mst')(data)
+}
 
 export type NotificationEmailTemplateData = {
   notificationText: string
@@ -36,5 +28,6 @@ export type NotificationEmailTemplateData = {
   preferencePageLink: string
   appName: string
 }
-export const notificationEmailContent: (data: NotificationEmailTemplateData) => string =
-  getEmailTemplateData<NotificationEmailTemplateData>('notification.xml.mst')
+export function notificationEmailContent(data: NotificationEmailTemplateData): string {
+  return getEmailTemplateData<NotificationEmailTemplateData>('notification.html.mst')(data)
+}
