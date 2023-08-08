@@ -20,6 +20,8 @@ import {
   ExcludeChannelResult,
   VerifyChannelArgs,
   VerifyChannelResult,
+  SuspendChannelResult,
+  SuspendChannelArgs,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
 import {
@@ -35,6 +37,8 @@ import {
   ChannelExcluded,
   ChannelVerified,
   ChannelVerification,
+  ChannelSuspension,
+  ChannelSuspended,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -50,6 +54,8 @@ import {
   addNotification,
   channelExcludedLink,
   channelExcludedText,
+  channelSuspendedLink,
+  channelSuspendedViaYPPText,
   channelVerifiedLink,
   channelVerifiedViaYPPText,
   newChannelFollowerLink,
@@ -340,6 +346,67 @@ export class ChannelsResolver {
         created: true,
         createdAt: newReport.timestamp,
         rationale,
+      }
+    })
+  }
+
+  @Mutation(() => SuspendChannelResult)
+  @UseMiddleware(OperatorOnly)
+  async suspendChannel(@Args() { channelId }: SuspendChannelArgs): Promise<SuspendChannelResult> {
+    const em = await this.em()
+
+    return withHiddenEntities(em, async () => {
+      const channel = await em.findOne(Channel, {
+        where: { id: channelId },
+      })
+
+      if (!channel) {
+        throw new Error(`Channel by id ${channelId} not found!`)
+      }
+      const existingSuspension = await em.findOne(ChannelSuspension, {
+        where: { channelId: channel.id },
+      })
+      // If exclusion already exists - return its data with { created: false }
+      if (existingSuspension) {
+        return {
+          id: existingSuspension.id,
+          channelId: channel.id,
+          createdAt: existingSuspension.timestamp,
+        }
+      }
+      // If exclusion doesn't exist, create a new one
+      const newVerification = new ChannelSuspension({
+        id: uniqueId(8),
+        channelId: channel.id,
+        timestamp: new Date(),
+      })
+      channel.isVerified = true
+      await em.save(newVerification)
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const linkPage = await channelSuspendedLink(em)
+        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+        if (account) {
+          await addNotification(
+            em,
+            account,
+            new ChannelSuspended({
+              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+              data: new NotificationData({
+                linkPage,
+                text: channelSuspendedViaYPPText(),
+              }),
+            })
+          )
+        }
+      }
+
+      return {
+        id: newVerification.id,
+        channelId: channel.id,
+        createdAt: newVerification.timestamp,
       }
     })
   }

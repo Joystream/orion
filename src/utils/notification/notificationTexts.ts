@@ -41,6 +41,10 @@ export const channelVerifiedViaYPPText = () => {
   return `Your channel has been verified via YPP`
 }
 
+export const channelSuspendedViaYPPText = () => {
+  return `Your channel has been suspended via YPP`
+}
+
 export const nftPurchasedText = (videoTitle: string, memberHandle: string, nftPrice: string) => {
   return `Your NFT for ${videoTitle} has been purchased by ${memberHandle} for ${nftPrice}`
 }

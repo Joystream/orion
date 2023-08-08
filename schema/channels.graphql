@@ -83,3 +83,14 @@ type ChannelVerification @entity {
   "timestamp of verification"
   timestamp: DateTime!
 }
+
+type ChannelSuspension @entity {
+  "unique Id"
+  id: ID!
+
+  "channel suspended"
+  channel: Channel!
+
+  "timestamp of suspension"
+  timestamp: DateTime!
+}
