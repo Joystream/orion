@@ -409,22 +409,20 @@ export async function processReactCommentMessage(
     // add notification
     if (comment.authorId) {
       const commentAuthorMemberHandle = await memberHandleById(overlay, comment.authorId)
-      const memberHandle = await memberHandleById(overlay, memberId)
+      const memberHandle = (await memberHandleById(overlay, memberId)) || ''
       const commentAuthorAccount = await getAccountForMember(overlay.getEm(), comment.authorId)
-      if (memberHandle && video.title) {
-        await addNotification(
-          overlay.getEm(),
-          commentAuthorAccount,
-          new ReactionToComment({
-            recipient: new MemberRecipient({ memberHandle: commentAuthorMemberHandle }),
-            data: new NotificationData({
-              text: commentReactedText(memberHandle, video.title),
-              linkPage: await commentReactionLink(overlay.getEm(), video.id),
-            }),
+      await addNotification(
+        overlay.getEm(),
+        commentAuthorAccount,
+        new ReactionToComment({
+          recipient: new MemberRecipient({ memberHandle: commentAuthorMemberHandle }),
+          data: new NotificationData({
+            text: commentReactedText(memberHandle, video.title || ''),
+            linkPage: await commentReactionLink(overlay.getEm(), video.id),
           }),
-          event
-        )
-      }
+        }),
+        event
+      )
     }
   }
 
