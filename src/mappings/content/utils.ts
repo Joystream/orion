@@ -49,8 +49,6 @@ import {
   HigherBidPlaced,
   MemberRecipient,
   NotificationData,
-  NewAuctionBid,
-  ChannelRecipient,
   NotificationType,
   OpenAuctionWon,
   OpenAuctionLost,
@@ -76,10 +74,8 @@ import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
 import { addNotification } from '../../utils/notification/helpers'
 import {
-  auctionBidMadeLink,
   higherBidPlacedLink,
   nftBidOutbidText,
-  nftBidReceivedText,
   openAuctionBidLostText,
   openAuctionBidWonText,
   openAuctionLostLink,
@@ -727,9 +723,8 @@ export async function addNewBidNotification(
   ownerMemberId: string | undefined | null,
   previousTopBid: Flat<Bid> | undefined | null,
   event: Event,
-  { videoId, videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
+  { videoId, videoTitle, newTopBidderHandle }: NewBidNotificationMetadata
 ) {
-  const nftOwnerAccount = await getAccountForMember(overlay.getEm(), ownerMemberId)
   if (previousTopBid?.bidderId) {
     const outbiddedMemberId = previousTopBid.bidderId
     const outbiddedMemberHandle = await memberHandleById(overlay, outbiddedMemberId)
