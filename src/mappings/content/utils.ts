@@ -925,3 +925,9 @@ export async function addRoyaltyPaymentNotification(
     )
   }
 }
+
+export function computeRoyalty(royalty: number, price: bigint): bigint {
+  const royaltyDecimal = royalty / 100
+  const royaltyPrice = Math.floor(royaltyDecimal * Number(price))
+  return BigInt(royaltyPrice)
+}

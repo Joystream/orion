@@ -3,6 +3,7 @@ import { criticalError } from '../../utils/misc'
 import {
   addNewBidNotification,
   addRoyaltyPaymentNotification,
+  computeRoyalty,
   createAuction,
   createBid,
   englishAuctionNotifiers,
@@ -396,7 +397,7 @@ export async function processEnglishAuctionSettledEvent({
     const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
     const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
       .channelId
-    const royaltyPrice = winningBid.amount * BigInt(nft.creatorRoyalty / 100)
+    const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
     await addRoyaltyPaymentNotification(
       overlay,
       channelId,
@@ -500,7 +501,7 @@ export async function processBidMadeCompletingAuctionEvent({
     const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
     const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
       .channelId
-    const royaltyPrice = winningBid.amount * BigInt(nft.creatorRoyalty / 100)
+    const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
     await addRoyaltyPaymentNotification(
       overlay,
       channelId,
@@ -650,7 +651,7 @@ export async function processOfferAcceptedEvent({
     const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
     const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
       .channelId
-    const royaltyPrice = price * BigInt(nft.creatorRoyalty / 100)
+    const royaltyPrice = computeRoyalty(nft.creatorRoyalty, price)
     await addRoyaltyPaymentNotification(
       overlay,
       channelId,
@@ -792,7 +793,7 @@ export async function processNftBoughtEvent({
     const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
     const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
       .channelId
-    const royaltyPrice = price * BigInt(nft.creatorRoyalty / 100)
+    const royaltyPrice = computeRoyalty(nft.creatorRoyalty, price)
     await addRoyaltyPaymentNotification(
       overlay,
       channelId,

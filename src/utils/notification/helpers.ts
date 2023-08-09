@@ -132,7 +132,7 @@ export async function addNotification(
   event?: Event
 ) {
   if (account) {
-    const notificationChainTag = event ? 'OffChainNotification' : 'OnChainNotification'
+    const notificationChainTag = event ? 'OnChainNotification' : 'OffChainNotification'
     // create notification as disabled = true
     const { inAppEnabled, emailEnabled } = preferencesForNotification(
       account.notificationPreferences,
