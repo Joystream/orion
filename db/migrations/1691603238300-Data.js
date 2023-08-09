@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/migrations/1691590623690-Data.js
 <<<<<<<< HEAD:db/migrations/1691496441567-Data.js
 module.exports = class Data1691496441567 {
     name = 'Data1691496441567'
@@ -8,6 +9,13 @@ module.exports = class Data1691496239796 {
 module.exports = class Data1691590623690 {
     name = 'Data1691590623690'
 >>>>>>>> 691af139 (feat: :art: add notification timestamp):db/migrations/1691590623690-Data.js
+||||||| parent of 5be0f573 (fix: :bug: VideoHero and channel suspension resolvers):db/migrations/1691590623690-Data.js
+module.exports = class Data1691590623690 {
+    name = 'Data1691590623690'
+=======
+module.exports = class Data1691603238300 {
+    name = 'Data1691603238300'
+>>>>>>> 5be0f573 (fix: :bug: VideoHero and channel suspension resolvers):db/migrations/1691603238300-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -45,7 +53,7 @@ module.exports = class Data1691590623690 {
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
-        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric, "is_verified" boolean NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric, "is_verified" boolean NOT NULL, "is_suspended" boolean NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_25c85bc448b5e236a4c1a5f789" ON "channel" ("owner_member_id") `)
         await db.query(`CREATE INDEX "IDX_a77e12f3d8c6ced020e179a5e9" ON "channel" ("cover_photo_id") `)
         await db.query(`CREATE INDEX "IDX_6997e94413b3f2f25a84e4a96f" ON "channel" ("avatar_photo_id") `)

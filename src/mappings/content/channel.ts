@@ -68,6 +68,7 @@ export async function processChannelCreatedEvent({
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
+    isSuspended: false,
     isExcluded: false,
     createdAt: new Date(block.timestamp),
     createdInBlock: block.height,

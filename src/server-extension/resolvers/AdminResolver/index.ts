@@ -146,16 +146,11 @@ export class AdminResolver {
     ctx.openreader.responseSizeLimit?.check(() => getObjectSize(model, fields) + 1)
 
     const em = await this.em()
-    const { id: currentHeroId, video } =
+    const { id: currentHeroId } =
       (
         await em.getRepository(VideoHeroEntity).find({
           select: { id: true },
           order: { activatedAt: 'DESC' },
-          relations: {
-            video: {
-              channel: true,
-            },
-          },
           take: 1,
         })
       )[0] || {}
@@ -170,20 +165,6 @@ export class AdminResolver {
       'VideoHero',
       fields,
       currentHeroId
-    )
-
-    const account = await getChannelOwnerAccount(em, video.channel)
-    const linkPage = await videoFeaturedAsCategoryHeroLink(em, video.channel.id)
-    await addNotification(
-      em,
-      account,
-      new VideoFeaturedAsCategoryHero({
-        recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
-        data: new NotificationData({
-          linkPage,
-          text: videoFeaturedAsHeroText(video.title || ''),
-        }),
-      })
     )
 
     return ctx.openreader.executeQuery(entityByIdQuery)
@@ -207,6 +188,28 @@ export class AdminResolver {
       heroVideoCutUrl: args.videoCutUrl,
       video: new Video({ id: args.videoId }),
     })
+
+    const [video] = await em.getRepository(Video).find({
+      where: { id: args.videoId },
+      relations: { channel: true, category: true },
+      take: 1,
+    })
+    if (video?.channel) {
+      const account = await getChannelOwnerAccount(em, video.channel)
+      const linkPage = await videoFeaturedAsCategoryHeroLink(em, video.category?.id || '')
+      await addNotification(
+        em,
+        account,
+        new VideoFeaturedAsCategoryHero({
+          recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
+          data: new NotificationData({
+            linkPage,
+            text: videoFeaturedAsHeroText(video.title || ''),
+          }),
+        })
+      )
+    }
+
     await em.save(videoHero)
 
     return { id }
@@ -252,7 +255,7 @@ export class AdminResolver {
           take: 1,
         })
       )?.[0]
-      if (video.channel && video.channel.id) {
+      if (video?.channel?.id) {
         const creatorAccount = await getChannelOwnerAccount(em, video.channel)
         const linkPage = await videoFeaturedOnCategoryPageLink(em, categoryId)
         await addNotification(

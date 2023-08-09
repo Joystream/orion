@@ -64,6 +64,9 @@ type Channel @entity {
 
   "Channel that has been verified"
   isVerified: Boolean!
+
+  "Channel that has been suspended"
+  isSuspended: Boolean!
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
