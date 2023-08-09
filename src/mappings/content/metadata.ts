@@ -671,7 +671,7 @@ export async function processChannelPaymentFromMember(
       recipient: new ChannelRecipient({ channelTitle }),
       data: new NotificationData({
         linkPage: await directPaymentByMemberLink(overlay.getEm(), member.handle),
-        text: channelReceivedDirectPaymentText(channelTitle, amount.toString()),
+        text: channelReceivedDirectPaymentText(member.handle, amount.toString()),
       }),
     }),
     event
