@@ -14,7 +14,7 @@ export const videoFeaturedOnCategoryPageLink = async (em: EntityManager, categor
   `https://${await getRootDomain(em)}/category/${categoryId}`
 
 export const videoFeaturedAsCategoryHeroLink = async (em: EntityManager, categoryId: string) =>
-  `https://${await getRootDomain(em)}/category/${categoryId}`
+  `https://${await getRootDomain(em)}/video/${categoryId}`
 
 export const newChannelFollowerLink = async (em: EntityManager, memberHandle: string) =>
   `https://${await getRootDomain(em)}/${memberHandle}`

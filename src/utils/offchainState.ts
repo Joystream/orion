@@ -30,7 +30,7 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'is_verified'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'is_verified', 'is_suspended'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],

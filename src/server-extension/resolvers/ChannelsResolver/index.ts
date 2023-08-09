@@ -375,13 +375,13 @@ export class ChannelsResolver {
         }
       }
       // If exclusion doesn't exist, create a new one
-      const newVerification = new ChannelSuspension({
+      const newSuspension = new ChannelSuspension({
         id: uniqueId(8),
         channelId: channel.id,
         timestamp: new Date(),
       })
-      channel.isVerified = true
-      await em.save(newVerification)
+      channel.isSuspended = true
+      await em.save(newSuspension)
 
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
@@ -404,9 +404,9 @@ export class ChannelsResolver {
       }
 
       return {
-        id: newVerification.id,
+        id: newSuspension.id,
         channelId: channel.id,
-        createdAt: newVerification.timestamp,
+        createdAt: newSuspension.timestamp,
       }
     })
   }
