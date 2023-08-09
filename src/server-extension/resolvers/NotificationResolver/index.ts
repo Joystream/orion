@@ -201,12 +201,10 @@ function maybeUpdateNotificationPreference(
   newPreference: NotificationPreferenceGQL,
   accountPreference: NotificationPreference
 ) {
-  if (newPreference !== undefined && newPreference !== null) {
-    if (newPreference.emailEnabled !== undefined) {
-      accountPreference.emailEnabled = newPreference.emailEnabled
-    }
-    if (newPreference.inAppEnabled !== undefined) {
-      accountPreference.inAppEnabled = newPreference.inAppEnabled
-    }
+  if (newPreference?.emailEnabled !== undefined || null) {
+    accountPreference.emailEnabled = newPreference.emailEnabled
+  }
+  if (newPreference?.inAppEnabled !== undefined || null) {
+    accountPreference.inAppEnabled = newPreference.inAppEnabled
   }
 }

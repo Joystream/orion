@@ -748,33 +748,6 @@ export async function addNewBidNotification(
       event
     )
   }
-
-  if (ownerMemberId) {
-    const channel = await overlay
-      .getRepository(Channel)
-      .getOneByRelationOrFail('ownerMemberId', ownerMemberId)
-    // if nft owner is also a channel owner then notify
-    if (channel) {
-      const linkPage = await auctionBidMadeLink(overlay.getEm(), videoId)
-      await addNotification(
-        overlay.getEm(),
-        nftOwnerAccount,
-        new NewAuctionBid({
-          // case: channel exist but has no title set, notify anyways with incomplete messagej
-          recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-          data: new NotificationData({
-            linkPage,
-            text: nftBidReceivedText(
-              videoTitle || '',
-              newTopBidderHandle || '',
-              bidAmount?.toString() || ''
-            ),
-          }),
-        }),
-        event
-      )
-    }
-  }
 }
 
 export async function memberHandleById(
