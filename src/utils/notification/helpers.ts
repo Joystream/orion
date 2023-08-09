@@ -146,6 +146,7 @@ export async function addNotification(
       notificationType,
       eventId: event?.id,
       status: new Unread(),
+      createdAt: new Date(),
     })
 
     // deliver via mail if enabled
