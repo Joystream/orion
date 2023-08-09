@@ -63,6 +63,9 @@ type Notification @entity {
 
   "status"
   status: ReadOrUnread!
+
+  "timestamp"
+  createdAt: DateTime!
 }
 
 union RecipientType = MemberRecipient | ChannelRecipient
