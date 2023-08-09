@@ -46,11 +46,11 @@ export const channelSuspendedViaYPPText = () => {
 }
 
 export const nftPurchasedText = (videoTitle: string, memberHandle: string, nftPrice: string) => {
-  return `Your NFT for ${videoTitle} has been purchased by ${memberHandle} for ${nftPrice}`
+  return `Your NFT for ${videoTitle} has been purchased by ${memberHandle} for ${nftPrice} JOY`
 }
 
 export const nftBidReceivedText = (videoTitle: string, memberHandle: string, nftPrice: string) => {
-  return `${memberHandle} placed a bid of ${nftPrice} on nft: ${videoTitle}`
+  return `${memberHandle} placed a bid of ${nftPrice} JOY on nft: ${videoTitle}`
 }
 
 export const nftRoyaltyPaymentReceivedText = (videoTitle: string, royalties: string) => {

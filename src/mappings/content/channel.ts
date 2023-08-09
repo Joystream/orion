@@ -374,7 +374,7 @@ export async function processChannelFundsWithdrawnEvent({
       new ChannelFundsWithdrawn({
         recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
         data: new NotificationData({
-          text: fundsWithdrawnFromChannelText(channel.title || ''),
+          text: fundsWithdrawnFromChannelText(amount.toString()),
           linkPage: channelFundsWithdrawnLink(),
         }),
       }),
