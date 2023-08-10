@@ -1,21 +1,5 @@
-<<<<<<< HEAD:db/migrations/1691590623690-Data.js
-<<<<<<<< HEAD:db/migrations/1691496441567-Data.js
-module.exports = class Data1691496441567 {
-    name = 'Data1691496441567'
-|||||||| parent of 691af139 (feat: :art: add notification timestamp):db/migrations/1691496239796-Data.js
-module.exports = class Data1691496239796 {
-    name = 'Data1691496239796'
-========
-module.exports = class Data1691590623690 {
-    name = 'Data1691590623690'
->>>>>>>> 691af139 (feat: :art: add notification timestamp):db/migrations/1691590623690-Data.js
-||||||| parent of 5be0f573 (fix: :bug: VideoHero and channel suspension resolvers):db/migrations/1691590623690-Data.js
-module.exports = class Data1691590623690 {
-    name = 'Data1691590623690'
-=======
-module.exports = class Data1691603238300 {
-    name = 'Data1691603238300'
->>>>>>> 5be0f573 (fix: :bug: VideoHero and channel suspension resolvers):db/migrations/1691603238300-Data.js
+module.exports = class Data1691651747590 {
+    name = 'Data1691651747590'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)

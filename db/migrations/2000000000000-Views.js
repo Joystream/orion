@@ -73,6 +73,7 @@ module.exports = class Views2000000000000 {
       exclusion: ['FALSE'],
       session: ['FALSE'],
       channel_verification: ['False'],
+      channel_suspension: ['False'],
       user: ['FALSE'],
       account: ['FALSE'],
       token: ['FALSE'],
