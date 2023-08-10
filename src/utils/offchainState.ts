@@ -18,6 +18,8 @@ const exportedStateMap = {
   ChannelFollow: true,
   Report: true,
   Exclusion: true,
+  ChannelVerification: true,
+  ChannelSuspension: true,
   GatewayConfig: true,
   NftFeaturingRequest: true,
   VideoHero: true,
