@@ -4,12 +4,8 @@ import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
-<<<<<<< HEAD
 import { defaultNotificationPreferences } from './notification/helpers'
-||||||| parent of c1d8d629 (feat: :art: migrate next entity id for account)
-=======
 import { NextEntityId } from '../model'
->>>>>>> c1d8d629 (feat: :art: migrate next entity id for account)
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
