@@ -360,7 +360,7 @@ export async function processEnglishAuctionSettledEvent({
     }),
   })
 
-  // Notfy all bidders (winner & losers) just once
+  // Notify all bidders (winner & losers) just once
   const biddersMemberIds = [...new Set(auctionBids.map((bid) => bid.bidderId).filter((id) => id))]
   const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   const notifiers =
