@@ -458,7 +458,7 @@ export async function processBidMadeCompletingAuctionEvent({
     }),
   })
 
-  // Notfy all bidders (winner & losers) just once
+  // Notify all bidders (winner & losers) just once
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
   const biddersMemberIds = [...new Set(auctionBids.map((bid) => bid.bidderId).filter((id) => id))]
   const videoTitle = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title
