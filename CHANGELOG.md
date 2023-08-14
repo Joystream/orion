@@ -1,3 +1,8 @@
+# 3.0.1
+
+### Bug Fixes:
+Fixed: The Orion processor was crashing while processing a `Storage.DataObjectsDeleted` event, when not immediately followed by `VideoDeleted*` event in the same block. The Data object deletion mapping bug has been fixed by unsetting the reference of dataObject, that needs to be deleted, from the `Video` entity before performing deletion.
+
 # 3.0.0
 This is a major release that will contains several breaking changes due to the 
 introduction of the user account feature. Throught this release changelog the term
