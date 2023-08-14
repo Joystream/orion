@@ -199,8 +199,8 @@ export async function deleteDataObjects(
   overlay: EntityManagerOverlay,
   objects: Flat<StorageDataObject>[]
 ) {
-  overlay.getRepository(StorageDataObject).remove(...objects)
   await Promise.all(objects.map((o) => unsetAssetRelations(overlay, o)))
+  overlay.getRepository(StorageDataObject).remove(...objects)
 }
 
 export async function deleteDataObjectsByIds(overlay: EntityManagerOverlay, ids: bigint[]) {
