@@ -87,6 +87,6 @@ type Exclusion @entity {
   "Time of the report"
   timestamp: DateTime!
 
-  "Rationale behind the report"
+  "Rationale behind the exclusion"
   rationale: String!
 }
