@@ -131,6 +131,8 @@ export async function addNotification(
   notificationType: NotificationType,
   event?: Event
 ) {
+  // case: orion is deployed and resynching happens, since there are no accounts (before migration) yet we do not create notifications
+  // this will prevent notifications from being created twice after a new orion release
   if (account) {
     const notificationChainTag = event ? 'OnChainNotification' : 'OffChainNotification'
     // create notification as disabled = true
@@ -140,6 +142,15 @@ export async function addNotification(
     )
     // create notification (for the notification center)
     const nextNotificationId = await getNextIdForEntity(em, notificationChainTag)
+    // case: in case the orion_processor is restarted (but not orion_db) and resynching happens not deposit the same notification again
+    if (event) {
+      const notification = await em
+        .getRepository(Notification)
+        .findOneBy({ id: nextNotificationId.toString() })
+      if (notification) {
+        return
+      }
+    }
     const notification = new Notification({
       id: notificationChainTag + '-' + nextNotificationId.toString(),
       accountId: account.id,
@@ -151,7 +162,12 @@ export async function addNotification(
 
     // deliver via mail if enabled
     if (emailEnabled) {
-      await deliverNotificationViaEmail(em, account, notification)
+      // handle the case gracefully in case of error
+      try {
+        await deliverNotificationViaEmail(em, account, notification)
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     // deliver via in app if enabled
