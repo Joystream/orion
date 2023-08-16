@@ -81,7 +81,7 @@ type Exclusion @entity {
   "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
   channelId: String @index
 
-  "If it's a video report: ID of the video being reported (the video may no longer exist)"
+  "If it's a video exclusion: ID of the video being reported (the video may no longer exist)"
   videoId: String @index
 
   "Time of the report"
