@@ -55,11 +55,11 @@ export class NotificationResolver {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
-      if (ctx.account === undefined) {
+      if (!ctx.account) {
         // account not null because of the UseMiddleware(AccountOnly) decorator
         throw new Error('Account not specified')
       }
-      const account = ctx.account as Account // avoid ctx.account! due to eslint
+      const account = ctx.account
 
       maybeUpdateNotificationPreference(
         newPreferences.channelExcludedFromAppNotificationEnabled,
