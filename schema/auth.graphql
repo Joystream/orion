@@ -117,41 +117,41 @@ type Account @entity {
 }
 
 type AccountNotificationPreferences {
-  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design
-  channelExcludedFromAppNotificationEnabled: NotificationPreference!
-  videoExcludedFromAppNotificationEnabled: NotificationPreference!
-  videoFeaturedAsHeroNotificationEnabled: NotificationPreference!
-  videoFeaturedOnCategoryPageNotificationEnabled: NotificationPreference!
-  nftFeaturedOnMarketPlaceNotificationEnabled: NotificationPreference!
-  newChannelFollowerNotificationEnabled: NotificationPreference!
-  videoCommentCreatedNotificationEnabled: NotificationPreference!
-  videoLikedNotificationEnabled: NotificationPreference!
-  videoDislikedNotificationEnabled: NotificationPreference!
-  yppChannelVerifiedNotificationEnabled: NotificationPreference!
-  yppChannelSuspendedNotificationEnabled: NotificationPreference!
-  nftBoughtNotificationEnabled: NotificationPreference!
-  timedAuctionExpiredNotificationEnabled: NotificationPreference!
-  bidMadeOnNftNotificationEnabled: NotificationPreference!
-  royaltyReceivedNotificationEnabled: NotificationPreference!
-  channelPaymentReceivedNotificationEnabled: NotificationPreference!
-  channelReceivedFundsFromWgNotificationEnabled: NotificationPreference!
-  newPayoutUpdatedByCouncilNotificationEnabled: NotificationPreference!
-  channelFundsWithdrawnNotificationEnabled: NotificationPreference!
+  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design:
+  channelExcludedFromApp: NotificationPreference!
+  videoExcludedFromApp: NotificationPreference!
+  videoFeaturedAsHero: NotificationPreference!
+  videoFeaturedOnCategoryPage: NotificationPreference!
+  nftFeaturedOnMarketPlace: NotificationPreference!
+  newChannelFollower: NotificationPreference!
+  videoCommentCreated: NotificationPreference!
+  videoLiked: NotificationPreference!
+  videoDisliked: NotificationPreference!
+  yppChannelVerified: NotificationPreference!
+  yppChannelSuspended: NotificationPreference!
+  nftBought: NotificationPreference!
+  timedAuctionExpired: NotificationPreference!
+  bidMadeOnNft: NotificationPreference!
+  royaltyReceived: NotificationPreference!
+  channelPaymentReceived: NotificationPreference!
+  channelReceivedFundsFromWg: NotificationPreference!
+  newPayoutUpdatedByCouncil: NotificationPreference!
+  channelFundsWithdrawn: NotificationPreference!
 
   # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
-  channelCreatedNotificationEnabled: NotificationPreference!
-  replyToCommentNotificationEnabled: NotificationPreference!
-  reactionToCommentNotificationEnabled: NotificationPreference!
-  videoPostedNotificationEnabled: NotificationPreference!
-  newNftOnAuctionNotificationEnabled: NotificationPreference!
-  newNftOnSaleNotificationEnabled: NotificationPreference!
-  higherBidThanYoursMadeNotificationEnabled: NotificationPreference!
-  auctionWonNotificationEnabled: NotificationPreference!
-  auctionLostNotificationEnabled: NotificationPreference!
-  openAuctionBidCanBeWithdrawnNotificationEnabled: NotificationPreference!
-  fundsFromCouncilReceivedNotificationEnabled: NotificationPreference!
-  fundsToExternalWalletSentNotificationEnabled: NotificationPreference!
-  fundsFromWgReceivedNotificationEnabled: NotificationPreference!
+  channelCreated: NotificationPreference!
+  replyToComment: NotificationPreference!
+  reactionToComment: NotificationPreference!
+  videoPosted: NotificationPreference!
+  newNftOnAuction: NotificationPreference!
+  newNftOnSale: NotificationPreference!
+  higherBidThanYoursMade: NotificationPreference!
+  auctionWon: NotificationPreference!
+  auctionLost: NotificationPreference!
+  openAuctionBidCanBeWithdrawn: NotificationPreference!
+  fundsFromCouncilReceived: NotificationPreference!
+  fundsToExternalWalletSent: NotificationPreference!
+  fundsFromWgReceived: NotificationPreference!
 }
 
 type NotificationPreference {

@@ -358,19 +358,17 @@ export class VideosResolver {
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
         const linkPage = await videoExcludedLink(em)
-        if (account) {
-          await addNotification(
-            em,
-            account,
-            new VideoExcluded({
-              recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
-              data: new NotificationData({
-                linkPage,
-                text: videoExcludedText(video.title || ''),
-              }),
-            })
-          )
-        }
+        await addNotification(
+          em,
+          account,
+          new VideoExcluded({
+            recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
+            data: new NotificationData({
+              linkPage,
+              text: videoExcludedText(video.title || ''),
+            }),
+          })
+        )
       }
 
       return {

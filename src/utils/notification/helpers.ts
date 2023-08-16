@@ -25,39 +25,39 @@ function notificationPrefAllTrue(): NotificationPreference {
 
 export function defaultNotificationPreferences(): AccountNotificationPreferences {
   return new AccountNotificationPreferences({
-    channelExcludedFromAppNotificationEnabled: notificationPrefAllTrue(),
-    videoExcludedFromAppNotificationEnabled: notificationPrefAllTrue(),
-    videoFeaturedAsHeroNotificationEnabled: notificationPrefAllTrue(),
-    videoFeaturedOnCategoryPageNotificationEnabled: notificationPrefAllTrue(),
-    nftFeaturedOnMarketPlaceNotificationEnabled: notificationPrefAllTrue(),
-    newChannelFollowerNotificationEnabled: notificationPrefAllTrue(),
-    videoCommentCreatedNotificationEnabled: notificationPrefAllTrue(),
-    videoLikedNotificationEnabled: notificationPrefAllTrue(),
-    videoDislikedNotificationEnabled: notificationPrefAllTrue(),
-    yppChannelSuspendedNotificationEnabled: notificationPrefAllTrue(),
-    yppChannelVerifiedNotificationEnabled: notificationPrefAllTrue(),
-    nftBoughtNotificationEnabled: notificationPrefAllTrue(),
-    bidMadeOnNftNotificationEnabled: notificationPrefAllTrue(),
-    royaltyReceivedNotificationEnabled: notificationPrefAllTrue(),
-    channelPaymentReceivedNotificationEnabled: notificationPrefAllTrue(),
-    channelReceivedFundsFromWgNotificationEnabled: notificationPrefAllTrue(),
-    newPayoutUpdatedByCouncilNotificationEnabled: notificationPrefAllTrue(),
-    channelFundsWithdrawnNotificationEnabled: notificationPrefAllTrue(),
+    channelExcludedFromApp: notificationPrefAllTrue(),
+    videoExcludedFromApp: notificationPrefAllTrue(),
+    videoFeaturedAsHero: notificationPrefAllTrue(),
+    videoFeaturedOnCategoryPage: notificationPrefAllTrue(),
+    nftFeaturedOnMarketPlace: notificationPrefAllTrue(),
+    newChannelFollower: notificationPrefAllTrue(),
+    videoCommentCreated: notificationPrefAllTrue(),
+    videoLiked: notificationPrefAllTrue(),
+    videoDisliked: notificationPrefAllTrue(),
+    yppChannelSuspended: notificationPrefAllTrue(),
+    yppChannelVerified: notificationPrefAllTrue(),
+    nftBought: notificationPrefAllTrue(),
+    bidMadeOnNft: notificationPrefAllTrue(),
+    royaltyReceived: notificationPrefAllTrue(),
+    channelPaymentReceived: notificationPrefAllTrue(),
+    channelReceivedFundsFromWg: notificationPrefAllTrue(),
+    newPayoutUpdatedByCouncil: notificationPrefAllTrue(),
+    channelFundsWithdrawn: notificationPrefAllTrue(),
 
-    channelCreatedNotificationEnabled: notificationPrefAllTrue(),
-    replyToCommentNotificationEnabled: notificationPrefAllTrue(),
-    reactionToCommentNotificationEnabled: notificationPrefAllTrue(),
-    videoPostedNotificationEnabled: notificationPrefAllTrue(),
-    newNftOnAuctionNotificationEnabled: notificationPrefAllTrue(),
-    newNftOnSaleNotificationEnabled: notificationPrefAllTrue(),
-    higherBidThanYoursMadeNotificationEnabled: notificationPrefAllTrue(),
-    timedAuctionExpiredNotificationEnabled: notificationPrefAllTrue(),
-    auctionWonNotificationEnabled: notificationPrefAllTrue(),
-    auctionLostNotificationEnabled: notificationPrefAllTrue(),
-    openAuctionBidCanBeWithdrawnNotificationEnabled: notificationPrefAllTrue(),
-    fundsFromCouncilReceivedNotificationEnabled: notificationPrefAllTrue(),
-    fundsToExternalWalletSentNotificationEnabled: notificationPrefAllTrue(),
-    fundsFromWgReceivedNotificationEnabled: notificationPrefAllTrue(),
+    channelCreated: notificationPrefAllTrue(),
+    replyToComment: notificationPrefAllTrue(),
+    reactionToComment: notificationPrefAllTrue(),
+    videoPosted: notificationPrefAllTrue(),
+    newNftOnAuction: notificationPrefAllTrue(),
+    newNftOnSale: notificationPrefAllTrue(),
+    higherBidThanYoursMade: notificationPrefAllTrue(),
+    timedAuctionExpired: notificationPrefAllTrue(),
+    auctionWon: notificationPrefAllTrue(),
+    auctionLost: notificationPrefAllTrue(),
+    openAuctionBidCanBeWithdrawn: notificationPrefAllTrue(),
+    fundsFromCouncilReceived: notificationPrefAllTrue(),
+    fundsToExternalWalletSent: notificationPrefAllTrue(),
+    fundsFromWgReceived: notificationPrefAllTrue(),
   })
 }
 
@@ -67,59 +67,59 @@ export function preferencesForNotification(
 ): NotificationPreference {
   switch (notificationType.isTypeOf) {
     case 'ChannelExcluded':
-      return preferences.channelExcludedFromAppNotificationEnabled
+      return preferences.channelExcludedFromApp
     case 'VideoExcluded':
-      return preferences.videoExcludedFromAppNotificationEnabled
+      return preferences.videoExcludedFromApp
     case 'VideoFeaturedAsCategoryHero':
-      return preferences.videoFeaturedAsHeroNotificationEnabled
+      return preferences.videoFeaturedAsHero
     case 'VideoFeaturedOnCategoryPage':
-      return preferences.videoFeaturedOnCategoryPageNotificationEnabled
+      return preferences.videoFeaturedOnCategoryPage
     case 'NftFeaturedOnMarketPlace':
-      return preferences.nftFeaturedOnMarketPlaceNotificationEnabled
+      return preferences.nftFeaturedOnMarketPlace
     case 'NewChannelFollower':
-      return preferences.newChannelFollowerNotificationEnabled
+      return preferences.newChannelFollower
     case 'CommentPostedToVideo':
-      return preferences.videoCommentCreatedNotificationEnabled
+      return preferences.videoCommentCreated
     case 'VideoLiked':
-      return preferences.videoLikedNotificationEnabled
+      return preferences.videoLiked
     case 'VideoDisliked':
-      return preferences.videoDislikedNotificationEnabled
+      return preferences.videoDisliked
     case 'EnglishAuctionSettled':
-      return preferences.timedAuctionExpiredNotificationEnabled
+      return preferences.timedAuctionExpired
     case 'ChannelSuspended':
-      return preferences.yppChannelSuspendedNotificationEnabled
+      return preferences.yppChannelSuspended
     case 'ChannelVerified':
-      return preferences.yppChannelVerifiedNotificationEnabled
+      return preferences.yppChannelVerified
     case 'NftPurchased':
-      return preferences.nftBoughtNotificationEnabled
+      return preferences.nftBought
     case 'CreatorReceivesAuctionBid':
-      return preferences.bidMadeOnNftNotificationEnabled
+      return preferences.bidMadeOnNft
     case 'RoyaltyPaid':
-      return preferences.royaltyReceivedNotificationEnabled
+      return preferences.royaltyReceived
     case 'DirectChannelPaymentByMember':
-      return preferences.channelPaymentReceivedNotificationEnabled
+      return preferences.channelPaymentReceived
     case 'ChannelFundsWithdrawn':
-      return preferences.channelFundsWithdrawnNotificationEnabled
+      return preferences.channelFundsWithdrawn
     case 'ChannelCreated':
-      return preferences.channelCreatedNotificationEnabled
+      return preferences.channelCreated
     case 'CommentReply':
-      return preferences.replyToCommentNotificationEnabled
+      return preferences.replyToComment
     case 'ReactionToComment':
-      return preferences.reactionToCommentNotificationEnabled
+      return preferences.reactionToComment
     case 'VideoPosted':
-      return preferences.videoPostedNotificationEnabled
+      return preferences.videoPosted
     case 'NewAuction':
-      return preferences.newNftOnAuctionNotificationEnabled
+      return preferences.newNftOnAuction
     case 'NewNftOnSale':
-      return preferences.newNftOnSaleNotificationEnabled
+      return preferences.newNftOnSale
     case 'EnglishAuctionLost':
-      return preferences.auctionLostNotificationEnabled
+      return preferences.auctionLost
     case 'EnglishAuctionWon':
-      return preferences.auctionWonNotificationEnabled
+      return preferences.auctionWon
     case 'OpenAuctionLost':
-      return preferences.auctionLostNotificationEnabled
+      return preferences.auctionLost
     case 'OpenAuctionWon':
-      return preferences.auctionWonNotificationEnabled
+      return preferences.auctionWon
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }

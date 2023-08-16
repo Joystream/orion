@@ -34,100 +34,100 @@ export class NotificationPreferenceOutput {
 @InputType()
 export class AccountNotificationPreferencesInput {
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  channelExcludedFromAppNotificationEnabled: NotificationPreference
+  channelExcludedFromApp: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoExcludedFromAppNotificationEnabled: NotificationPreference
+  videoExcludedFromApp: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoFeaturedAsHeroNotificationEnabled: NotificationPreference
+  videoFeaturedAsHero: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoFeaturedOnCategoryPageNotificationEnabled: NotificationPreference
+  videoFeaturedOnCategoryPage: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  nftFeaturedOnMarketPlaceNotificationEnabled: NotificationPreference
+  nftFeaturedOnMarketPlace: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  newChannelFollowerNotificationEnabled: NotificationPreference
+  newChannelFollower: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoCommentCreatedNotificationEnabled: NotificationPreference
+  videoCommentCreated: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoLikedNotificationEnabled: NotificationPreference
+  videoLiked: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoDislikedNotificationEnabled: NotificationPreference
+  videoDisliked: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  yppChannelSuspendedNotificationEnabled: NotificationPreference
+  yppChannelSuspended: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  yppChannelVerifiedNotificationEnabled: NotificationPreference
+  yppChannelVerified: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  nftBoughtNotificationEnabled: NotificationPreference
+  nftBought: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  bidMadeOnNftNotificationEnabled: NotificationPreference
+  bidMadeOnNft: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  royaltyReceivedNotificationEnabled: NotificationPreference
+  royaltyReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  channelPaymentReceivedNotificationEnabled: NotificationPreference
+  channelPaymentReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  channelReceivedFundsFromWgNotificationEnabled: NotificationPreference
+  channelReceivedFundsFromWg: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  newPayoutUpdatedByCouncilNotificationEnabled: NotificationPreference
+  newPayoutUpdatedByCouncil: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  channelFundsWithdrawnNotificationEnabled: NotificationPreference
+  channelFundsWithdrawn: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  channelCreatedNotificationEnabled: NotificationPreference
+  channelCreated: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  replyToCommentNotificationEnabled: NotificationPreference
+  replyToComment: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  reactionToCommentNotificationEnabled: NotificationPreference
+  reactionToComment: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoPostedNotificationEnabled: NotificationPreference
+  videoPosted: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  newNftOnAuctionNotificationEnabled: NotificationPreference
+  newNftOnAuction: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  newNftOnSaleNotificationEnabled: NotificationPreference
+  newNftOnSale: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  higherBidThanYoursMadeNotificationEnabled: NotificationPreference
+  higherBidThanYoursMade: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  auctionExpiredNotificationEnabled: NotificationPreference
+  auctionExpired: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  auctionWonNotificationEnabled: NotificationPreference
+  auctionWon: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  auctionLostNotificationEnabled: NotificationPreference
+  auctionLost: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  openAuctionBidCanBeWithdrawnNotificationEnabled: NotificationPreference
+  openAuctionBidCanBeWithdrawn: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  fundsFromCouncilReceivedNotificationEnabled: NotificationPreference
+  fundsFromCouncilReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  fundsToExternalWalletSentNotificationEnabled: NotificationPreference
+  fundsToExternalWalletSent: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  fundsFromWgReceivedNotificationEnabled: NotificationPreference
+  fundsFromWgReceived: NotificationPreference
 }
 
 @ObjectType()
@@ -135,100 +135,100 @@ export class AccountNotificationPreferencesOutput
   implements Partial<AccountNotificationPreferences>
 {
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  channelExcludedFromAppNotificationEnabled: NotificationPreference
+  channelExcludedFromApp: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoExcludedFromAppNotificationEnabled: NotificationPreference
+  videoExcludedFromApp: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoFeaturedAsHeroNotificationEnabled: NotificationPreference
+  videoFeaturedAsHero: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoFeaturedOnCategoryPageNotificationEnabled: NotificationPreference
+  videoFeaturedOnCategoryPage: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  nftFeaturedOnMarketPlaceNotificationEnabled: NotificationPreference
+  nftFeaturedOnMarketPlace: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  newChannelFollowerNotificationEnabled: NotificationPreference
+  newChannelFollower: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoCommentCreatedNotificationEnabled: NotificationPreference
+  videoCommentCreated: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoLikedNotificationEnabled: NotificationPreference
+  videoLiked: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoDislikedNotificationEnabled: NotificationPreference
+  videoDisliked: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  yppSignupSuccessfulNotificationEnabled: NotificationPreference
+  yppSignupSuccessful: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  yppChannelVerifiedNotificationEnabled: NotificationPreference
+  yppChannelVerified: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  nftBoughtNotificationEnabled: NotificationPreference
+  nftBought: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  bidMadeOnNftNotificationEnabled: NotificationPreference
+  bidMadeOnNft: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  royaltyReceivedNotificationEnabled: NotificationPreference
+  royaltyReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  channelPaymentReceivedNotificationEnabled: NotificationPreference
+  channelPaymentReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  channelReceivedFundsFromWgNotificationEnabled: NotificationPreference
+  channelReceivedFundsFromWg: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  newPayoutUpdatedByCouncilNotificationEnabled: NotificationPreference
+  newPayoutUpdatedByCouncil: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  channelFundsWithdrawnNotificationEnabled: NotificationPreference
+  channelFundsWithdrawn: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  channelCreatedNotificationEnabled: NotificationPreference
+  channelCreated: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  replyToCommentNotificationEnabled: NotificationPreference
+  replyToComment: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  reactionToCommentNotificationEnabled: NotificationPreference
+  reactionToComment: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoPostedNotificationEnabled: NotificationPreference
+  videoPosted: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  newNftOnAuctionNotificationEnabled: NotificationPreference
+  newNftOnAuction: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  newNftOnSaleNotificationEnabled: NotificationPreference
+  newNftOnSale: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  higherBidThanYoursMadeNotificationEnabled: NotificationPreference
+  higherBidThanYoursMade: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  auctionExpiredNotificationEnabled: NotificationPreference
+  auctionExpired: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  auctionWonNotificationEnabled: NotificationPreference
+  auctionWon: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  auctionLostNotificationEnabled: NotificationPreference
+  auctionLost: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  openAuctionBidCanBeWithdrawnNotificationEnabled: NotificationPreference
+  openAuctionBidCanBeWithdrawn: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  fundsFromCouncilReceivedNotificationEnabled: NotificationPreference
+  fundsFromCouncilReceived: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  fundsToExternalWalletSentNotificationEnabled: NotificationPreference
+  fundsToExternalWalletSent: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
-  fundsFromWgReceivedNotificationEnabled: NotificationPreference
+  fundsFromWgReceived: NotificationPreference
 }
 
 @ObjectType()
@@ -241,47 +241,37 @@ export function toOutputGQL(
   preferences: AccountNotificationPreferences
 ): AccountNotificationPreferencesOutput {
   return {
-    channelExcludedFromAppNotificationEnabled:
-      preferences.channelExcludedFromAppNotificationEnabled,
-    videoExcludedFromAppNotificationEnabled: preferences.videoExcludedFromAppNotificationEnabled,
-    videoFeaturedAsHeroNotificationEnabled: preferences.videoFeaturedAsHeroNotificationEnabled,
-    videoFeaturedOnCategoryPageNotificationEnabled:
-      preferences.videoFeaturedOnCategoryPageNotificationEnabled,
-    nftFeaturedOnMarketPlaceNotificationEnabled:
-      preferences.nftFeaturedOnMarketPlaceNotificationEnabled,
-    newChannelFollowerNotificationEnabled: preferences.newChannelFollowerNotificationEnabled,
-    videoCommentCreatedNotificationEnabled: preferences.videoCommentCreatedNotificationEnabled,
-    videoLikedNotificationEnabled: preferences.videoLikedNotificationEnabled,
-    videoDislikedNotificationEnabled: preferences.videoDislikedNotificationEnabled,
-    yppSignupSuccessfulNotificationEnabled: preferences.yppChannelSuspendedNotificationEnabled,
-    yppChannelVerifiedNotificationEnabled: preferences.yppChannelVerifiedNotificationEnabled,
-    nftBoughtNotificationEnabled: preferences.nftBoughtNotificationEnabled,
-    bidMadeOnNftNotificationEnabled: preferences.bidMadeOnNftNotificationEnabled,
-    royaltyReceivedNotificationEnabled: preferences.royaltyReceivedNotificationEnabled,
-    channelPaymentReceivedNotificationEnabled:
-      preferences.channelPaymentReceivedNotificationEnabled,
-    channelReceivedFundsFromWgNotificationEnabled:
-      preferences.channelReceivedFundsFromWgNotificationEnabled,
-    newPayoutUpdatedByCouncilNotificationEnabled:
-      preferences.newPayoutUpdatedByCouncilNotificationEnabled,
-    channelFundsWithdrawnNotificationEnabled: preferences.channelFundsWithdrawnNotificationEnabled,
-    channelCreatedNotificationEnabled: preferences.channelCreatedNotificationEnabled,
-    replyToCommentNotificationEnabled: preferences.replyToCommentNotificationEnabled,
-    reactionToCommentNotificationEnabled: preferences.reactionToCommentNotificationEnabled,
-    videoPostedNotificationEnabled: preferences.videoPostedNotificationEnabled,
-    newNftOnAuctionNotificationEnabled: preferences.newNftOnAuctionNotificationEnabled,
-    newNftOnSaleNotificationEnabled: preferences.newNftOnSaleNotificationEnabled,
-    higherBidThanYoursMadeNotificationEnabled:
-      preferences.higherBidThanYoursMadeNotificationEnabled,
-    auctionExpiredNotificationEnabled: preferences.timedAuctionExpiredNotificationEnabled,
-    auctionWonNotificationEnabled: preferences.auctionWonNotificationEnabled,
-    auctionLostNotificationEnabled: preferences.auctionLostNotificationEnabled,
-    openAuctionBidCanBeWithdrawnNotificationEnabled:
-      preferences.openAuctionBidCanBeWithdrawnNotificationEnabled,
-    fundsFromCouncilReceivedNotificationEnabled:
-      preferences.fundsFromCouncilReceivedNotificationEnabled,
-    fundsToExternalWalletSentNotificationEnabled:
-      preferences.fundsToExternalWalletSentNotificationEnabled,
-    fundsFromWgReceivedNotificationEnabled: preferences.fundsFromWgReceivedNotificationEnabled,
+    channelExcludedFromApp: preferences.channelExcludedFromApp,
+    videoExcludedFromApp: preferences.videoExcludedFromApp,
+    videoFeaturedAsHero: preferences.videoFeaturedAsHero,
+    videoFeaturedOnCategoryPage: preferences.videoFeaturedOnCategoryPage,
+    nftFeaturedOnMarketPlace: preferences.nftFeaturedOnMarketPlace,
+    newChannelFollower: preferences.newChannelFollower,
+    videoCommentCreated: preferences.videoCommentCreated,
+    videoLiked: preferences.videoLiked,
+    videoDisliked: preferences.videoDisliked,
+    yppSignupSuccessful: preferences.yppChannelSuspended,
+    yppChannelVerified: preferences.yppChannelVerified,
+    nftBought: preferences.nftBought,
+    bidMadeOnNft: preferences.bidMadeOnNft,
+    royaltyReceived: preferences.royaltyReceived,
+    channelPaymentReceived: preferences.channelPaymentReceived,
+    channelReceivedFundsFromWg: preferences.channelReceivedFundsFromWg,
+    newPayoutUpdatedByCouncil: preferences.newPayoutUpdatedByCouncil,
+    channelFundsWithdrawn: preferences.channelFundsWithdrawn,
+    channelCreated: preferences.channelCreated,
+    replyToComment: preferences.replyToComment,
+    reactionToComment: preferences.reactionToComment,
+    videoPosted: preferences.videoPosted,
+    newNftOnAuction: preferences.newNftOnAuction,
+    newNftOnSale: preferences.newNftOnSale,
+    higherBidThanYoursMade: preferences.higherBidThanYoursMade,
+    auctionExpired: preferences.timedAuctionExpired,
+    auctionWon: preferences.auctionWon,
+    auctionLost: preferences.auctionLost,
+    openAuctionBidCanBeWithdrawn: preferences.openAuctionBidCanBeWithdrawn,
+    fundsFromCouncilReceived: preferences.fundsFromCouncilReceived,
+    fundsToExternalWalletSent: preferences.fundsToExternalWalletSent,
+    fundsFromWgReceived: preferences.fundsFromWgReceived,
   }
 }
