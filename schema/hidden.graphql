@@ -75,7 +75,7 @@ type GatewayConfig @entity {
 }
 
 type Exclusion @entity {
-  "Unique identifier of the report"
+  "Unique identifier of the exclusion"
   id: ID!
 
   "If it's a channel report: ID of the channel being reported (the channel may no longer exist)"
