@@ -366,18 +366,16 @@ export async function processChannelFundsWithdrawnEvent({
 
   const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
 
-  if (channelOwnerAccount) {
-    await addNotification(
-      overlay.getEm(),
-      channelOwnerAccount,
-      new ChannelFundsWithdrawn({
-        recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-        data: new NotificationData({
-          text: fundsWithdrawnFromChannelText(amount.toString()),
-          linkPage: channelFundsWithdrawnLink(),
-        }),
+  await addNotification(
+    overlay.getEm(),
+    channelOwnerAccount,
+    new ChannelFundsWithdrawn({
+      recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+      data: new NotificationData({
+        text: fundsWithdrawnFromChannelText(amount.toString()),
+        linkPage: channelFundsWithdrawnLink(),
       }),
-      entityEvent
-    )
-  }
+    }),
+    entityEvent
+  )
 }
