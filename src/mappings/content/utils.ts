@@ -1,3 +1,4 @@
+import pLimit from 'p-limit'
 import {
   AppAction,
   IAppAction,
@@ -71,7 +72,7 @@ import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
-import { addNotification } from '../../utils/notification/helpers'
+import { addOnChainNotification } from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -648,9 +649,10 @@ export async function getFollowersAccountsForChannel(
     .filter((follower) => follower?.userId)
     .map((follower) => follower.userId as string)
 
-  const followersAccounts = await Promise.all(
-    followersUserIds.map(
-      async (userId) => await overlay.getEm().getRepository(Account).findOneBy({ userId })
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+  const followersAccounts: (Account | null)[] = await Promise.all(
+    followersUserIds.map((userId) =>
+      limit(async () => await overlay.getEm().getRepository(Account).findOneBy({ userId }))
     )
   )
 
@@ -672,6 +674,7 @@ export async function getAccountForMember(
   if (!memberId) {
     return null
   }
+  // accounts are created by orion_auth_api and updated by orion_graphql-server
   const memberAccount = await em.getRepository(Account).findOneBy({ membershipId: memberId })
   return memberAccount
 }
@@ -753,7 +756,7 @@ export async function notifyBiddersOnAuctionCompletion(
     const notification =
       bidderId === winnerId.toString() ? notifier.won(bidderId) : notifier.lost(bidderId)
 
-    await addNotification(overlay.getEm(), account, notification, event)
+    await addOnChainNotification({ store: overlay, event }, account, notification)
   }
 }
 
@@ -855,8 +858,8 @@ export async function addRoyaltyPaymentNotification(
   if (channelId) {
     const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
     const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-    await addNotification(
-      overlay.getEm(),
+    await addOnChainNotification(
+      { store: overlay, event },
       creatorAccount,
       notificationType(channel.title || ''),
       event
@@ -865,7 +868,7 @@ export async function addRoyaltyPaymentNotification(
 }
 
 export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
-  const royaltyDecimal = royaltyPct / 100
-  const royaltyPrice = Math.floor(royaltyDecimal * Number(price))
-  return BigInt(royaltyPrice)
+  const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
+  const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
+  return royaltyPrice
 }

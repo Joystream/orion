@@ -65,7 +65,6 @@ module.exports = class Views2000000000000 {
       ],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
-      notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       // HIDDEN entities
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
@@ -73,6 +72,7 @@ module.exports = class Views2000000000000 {
       exclusion: ['FALSE'],
       session: ['FALSE'],
       notification_email_delivery: ['FALSE'],
+      on_chain_notification_email_delivery: ['FALSE'],
       notification_in_app_delivery: ['FALSE'],
       channel_verification: ['FALSE'],
       channel_suspension: ['FALSE'],
@@ -81,6 +81,7 @@ module.exports = class Views2000000000000 {
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
+      notification: ['FALSE'],
     }
   }
 

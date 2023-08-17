@@ -133,8 +133,8 @@ export async function processChannelCreatedEvent({
     })
 
     const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
-    await addNotification(
-      overlay.getEm(),
+    await addOnChainNotification(
+      { store: overlay, event },
       ownerAccount,
       new ChannelCreated({
         recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
@@ -366,8 +366,8 @@ export async function processChannelFundsWithdrawnEvent({
 
   const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
 
-  await addNotification(
-    overlay.getEm(),
+  await addOnChainNotification(
+    { store: overlay, event: entityEvent },
     channelOwnerAccount,
     new ChannelFundsWithdrawn({
       recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),

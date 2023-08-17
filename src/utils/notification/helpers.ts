@@ -4,20 +4,18 @@ import {
   AccountNotificationPreferences,
   NextEntityId,
   NotificationPreference,
-  EmailDeliveryStatus,
   NotificationType,
   Notification,
   Event,
   Unread,
   NotificationInAppDelivery,
-  NotificationEmailDelivery,
-  Membership,
+  OnChainNotification,
 } from '../../model'
 import { getNextIdForEntity } from '../nextEntityId'
-import { sgSendMail } from '../mail'
-import { ConfigVariable, config } from '../config'
 import { Flat } from 'lodash'
 import { notificationEmailContent } from '../../auth-server/emails'
+import { deliverNotificationViaEmail, deliverOnChainNotificationViaEmail } from './mail'
+import { EntityManagerOverlay } from '../overlay'
 
 function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -125,37 +123,47 @@ export function preferencesForNotification(
   }
 }
 
-export async function addNotification(
-  em: EntityManager,
+export type OnChain = {
+  store: EntityManagerOverlay
+  event: Event
+}
+
+export type OffChain = {
+  store: EntityManager
+}
+
+export type NotificationParameters = OnChain | OffChain
+
+// invoked by orion_processor and uses the EntityManagerOverlay as a store
+export async function addOnChainNotification(
+  { store, event }: OnChain,
   account: Flat<Account> | null,
-  notificationType: NotificationType,
-  event?: Event
+  notificationType: NotificationType
 ) {
   // case: orion is deployed and resynching happens, since there are no accounts (before migration) yet we do not create notifications
   // this will prevent notifications from being created twice after a new orion release
   if (account) {
-    const notificationChainTag = event ? 'OnChainNotification' : 'OffChainNotification'
-    // create notification as disabled = true
+    const notificationChainTag = 'OnChainNotification'
     const { inAppEnabled, emailEnabled } = preferencesForNotification(
       account.notificationPreferences,
       notificationType
     )
-    // create notification (for the notification center)
-    const nextNotificationId = await getNextIdForEntity(em, notificationChainTag)
-    // case: in case the orion_processor is restarted (but not orion_db) and resynching happens not deposit the same notification again
-    if (event) {
-      const notification = await em
-        .getRepository(Notification)
-        .findOneBy({ id: nextNotificationId.toString() })
-      if (notification) {
-        return
-      }
+    // get notification Id from orion_db in any case
+    const nextNotificationId = store.getRepository(OnChainNotification).getNewEntityId()
+    // check that notification is not already present in orion_db in case the processor has been restarted (but not orion_db)
+    const existingNotification = await store
+      .getEm()
+      .getRepository(Notification)
+      .findOneBy({ id: nextNotificationId.toString() })
+    if (existingNotification) {
+      console.log('Notification already exists, skipping')
+      return
     }
-    const notification = new Notification({
+    const notification = store.getRepository(Notification).new({
       id: notificationChainTag + '-' + nextNotificationId.toString(),
       accountId: account.id,
       notificationType,
-      eventId: event?.id,
+      eventId: event.id,
       status: new Unread(),
       createdAt: new Date(),
     })
@@ -164,7 +172,7 @@ export async function addNotification(
     if (emailEnabled) {
       // handle the case gracefully in case of error
       try {
-        await deliverNotificationViaEmail(em, account, notification)
+        await deliverOnChainNotificationViaEmail(store, account, notification as Flat<Notification>)
       } catch (e) {
         console.error(e)
       }
@@ -172,12 +180,57 @@ export async function addNotification(
 
     // deliver via in app if enabled
     if (inAppEnabled) {
-      const deliveryId = await getNextIdForEntity(em, 'NotificationInAppDelivery')
+      const deliveryId = store.getRepository(NotificationInAppDelivery).getNewEntityId()
+      store.getRepository(NotificationInAppDelivery).new({
+        id: deliveryId.toString(),
+        notificationId: notification.id,
+      })
+    }
+  }
+}
+
+export async function addOffChainNotification(
+  { store }: OffChain,
+  account: Flat<Account> | null,
+  notificationType: NotificationType
+) {
+  const notificationByProcessor = event !== undefined
+  // case: orion is deployed and resynching happens, since there are no accounts (before migration) yet we do not create notifications
+  // this will prevent notifications from being created twice after a new orion release
+  if (account) {
+    const notificationChainTag = 'OffChainNotification'
+    const { inAppEnabled, emailEnabled } = preferencesForNotification(
+      account.notificationPreferences,
+      notificationType
+    )
+    // get notification Id from orion_db in any case
+    const nextNotificationId = await getNextIdForEntity(store, notificationChainTag)
+    const notification = new Notification({
+      id: notificationChainTag + '-' + nextNotificationId.toString(),
+      accountId: account.id,
+      notificationType,
+      status: new Unread(),
+      createdAt: new Date(),
+    })
+
+    // deliver via mail if enabled
+    if (emailEnabled) {
+      // handle the case gracefully in case of error
+      try {
+        await deliverNotificationViaEmail(store, account, notification)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
+    // deliver via in app if enabled
+    if (inAppEnabled) {
+      const deliveryId = await getNextIdForEntity(store, 'NotificationInAppDelivery')
       const inAppDelivery = new NotificationInAppDelivery({
         id: deliveryId.toString(),
         notificationId: notification.id,
       })
-      await em.save([
+      await store.save([
         inAppDelivery,
         new NextEntityId({
           entityName: 'NotificationInAppDelivery',
@@ -190,52 +243,6 @@ export async function addNotification(
       entityName: notificationChainTag,
       nextId: nextNotificationId + 1,
     })
-    await em.save([notification, newOffChainNotificationNextEntityId])
+    await store.save([notification, newOffChainNotificationNextEntityId])
   }
-}
-
-async function deliverNotificationViaEmail(
-  em: EntityManager,
-  toAccount: Account,
-  notification: Notification
-): Promise<void> {
-  const nextEntityId = await getNextIdForEntity(em, 'OffChainNotificationEmailDelivery')
-  const notificationDelivery = new NotificationEmailDelivery({
-    id: nextEntityId.toString(),
-    notificationId: notification.id,
-    deliveryAttemptAt: new Date(),
-  })
-  const appName = await config.get(ConfigVariable.AppName, em)
-  const membership = await em
-    .getRepository(Membership)
-    .findOne({ select: { handle: true }, where: { id: toAccount.membershipId } })
-  const preferencePageLink = `https://${await config.get(
-    ConfigVariable.AppRootDomain,
-    em
-  )}/member/${membership?.handle}/?tab=preferences`
-  const content = notificationEmailContent({
-    notificationText: notification.notificationType.data.text,
-    notificationLink: notification.notificationType.data.linkPage,
-    preferencePageLink,
-    appName,
-  })
-
-  const resp = await sgSendMail({
-    from: await config.get(ConfigVariable.SendgridFromEmail, em),
-    to: toAccount.email,
-    subject: `New notification from ${appName}!`,
-    content,
-  })
-  if (resp?.statusCode === 202 || resp?.statusCode === 200) {
-    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Success
-  } else {
-    notificationDelivery.deliveryStatus = EmailDeliveryStatus.Failure
-  }
-  await em.save([
-    notificationDelivery,
-    new NextEntityId({
-      entityName: 'OffChainNotificationEmailDelivery',
-      nextId: nextEntityId + 1,
-    }),
-  ])
 }

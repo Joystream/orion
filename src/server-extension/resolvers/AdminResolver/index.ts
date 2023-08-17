@@ -57,7 +57,7 @@ import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
-import { addNotification } from '../../../utils/notification'
+import { addOffChainNotification } from '../../../utils/notification'
 
 @Resolver()
 export class AdminResolver {

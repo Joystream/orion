@@ -378,7 +378,7 @@ export class ChannelsResolver {
       }
       // otherwise create a new suspension
       const newSuspension = new ChannelSuspension({
-        id: uniqueId(8),
+        id: uniqueId(),
         channelId: channel.id,
         timestamp: new Date(),
       })
@@ -439,7 +439,7 @@ export class ChannelsResolver {
       }
       // othewise create new verification
       const newVerification = new ChannelVerification({
-        id: uniqueId(8),
+        id: uniqueId(),
         channelId: channel.id,
         timestamp: new Date(),
       })

@@ -21,7 +21,22 @@ type NotificationEmailDelivery @entity {
   deliveryStatus: EmailDeliveryStatus!
 }
 
+type OnChainNotificationEmailDelivery @entity {
+  "Autoincremented"
+  id: ID!
+
+  "the notification being delivered"
+  notification: Notification!
+
+  "attempted delivery"
+  deliveryAttemptAt: DateTime!
+
+  "notification delivery status"
+  deliveryStatus: EmailDeliveryStatus!
+}
+
 enum EmailDeliveryStatus {
+  Unsent
   Success
   Failure
 }
@@ -386,4 +401,15 @@ type NftRoyaltyPaid @variant {
 
   "recipient"
   recipient: RecipientType!
+}
+
+# the following are created just for the NextEntityId table
+type OnChainNotification @entity {
+  "actually unused"
+  id: ID!
+}
+
+type OffChainNotification @entity {
+  "actually unused"
+  id: ID!
 }

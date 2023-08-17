@@ -60,7 +60,7 @@ import {
   NotificationData,
   ChannelRecipient,
 } from '../../model'
-import { addNotification } from '../../utils/notification/helpers'
+import { addOnChainNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,

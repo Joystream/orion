@@ -46,7 +46,7 @@ import {
   VideoReactionsCountByReactionType,
 } from '../../model'
 import { config, ConfigVariable } from '../../utils/config'
-import { addNotification } from '../../utils/notification/helpers'
+import { addOnChainNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   backwardCompatibleMetaID,
@@ -256,7 +256,11 @@ async function processVideoReaction(
                   linkPage: await videoDislikedLink(overlay.getEm(), video.id),
                 }),
               })
-        await addNotification(overlay.getEm(), channelOwnerAccount, notificationType, event)
+        await addOnChainNotification(
+          { store: overlay, event },
+          channelOwnerAccount,
+          notificationType
+        )
       }
     }
   }
@@ -394,8 +398,8 @@ export async function processReactCommentMessage(
       const commentAuthorMemberHandle = await memberHandleById(overlay, comment.authorId)
       const memberHandle = (await memberHandleById(overlay, memberId)) || ''
       const commentAuthorAccount = await getAccountForMember(overlay.getEm(), comment.authorId)
-      await addNotification(
-        overlay.getEm(),
+      await addOnChainNotification(
+        { store: overlay, event },
         commentAuthorAccount,
         new ReactionToComment({
           recipient: new MemberRecipient({ memberHandle: commentAuthorMemberHandle }),
@@ -506,8 +510,8 @@ export async function processCreateCommentMessage(
       const authorHandle = await memberHandleById(overlay, comment.authorId)
       const channelTitle = await getChannelTitle(overlay, channelId)
       const authorAccount = await getAccountForMember(overlay.getEm(), parentComment.authorId)
-      await addNotification(
-        overlay.getEm(),
+      await addOnChainNotification(
+        { store: overlay, event },
         authorAccount,
         new CommentReply({
           recipient: new ChannelRecipient({ channelTitle }),
@@ -527,8 +531,8 @@ export async function processCreateCommentMessage(
       const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
       // add event for comment to comment
       const authorId = assertNotNull(comment.authorId)
-      await addNotification(
-        overlay.getEm(),
+      await addOnChainNotification(
+        { store: overlay, event },
         channelOwnerAccount,
         new CommentPostedToVideo({
           recipient: new MemberRecipient({ memberHandle: channelOwnerHandle || '' }),
