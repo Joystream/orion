@@ -4,11 +4,12 @@
  * on them, before "flushing" the final state into the database.
  */
 import { Store } from '@subsquid/typeorm-store'
-import { EntityManager, FindOptionsWhere, In, Not, Repository } from 'typeorm'
+import AsyncLock from 'async-lock'
 import _, { isObject } from 'lodash'
+import { EntityManager, FindOptionsWhere, In, Not, Repository } from 'typeorm'
+import { Logger } from '../logger'
 import { NextEntityId } from '../model/NextEntityId'
 import { criticalError, idStringFromNumber } from './misc'
-import { Logger } from '../logger'
 
 // A stub which can represent any entity type
 export type AnyEntity = { id: string }
@@ -58,6 +59,10 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
   private cached: Map<string, Cached<E>> = new Map()
   // Name of the entity class
   public readonly entityName: string
+  // Locking construct to prevent multiple asynchronous reads of same
+  // "uncached" entity from overlay, which could lead to one operation
+  // rewriting the cached state of other operation (i.e. lost updates)
+  private asyncLock: AsyncLock = new AsyncLock({ maxPending: Number.MAX_SAFE_INTEGER })
 
   public constructor(
     public readonly EntityClass: Constructor<E>,
@@ -139,76 +144,86 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
 
   // Retrieves a (flat) entity by any non-relational field(s)
   async getOneBy(where: { [K in keyof FlatRelationless<E>]?: E[K] }): Promise<Flat<E> | undefined> {
-    const allCached = Array.from(this.cached.values())
-    const cachedFound = allCached.find(
-      (e) => e.state !== CachedEntityState.ToBeRemoved && e.entity && this.matches(e.entity, where)
-    )
-    if (cachedFound) {
-      return cachedFound.entity
-    }
+    // Lock complete table
+    return this.asyncLock.acquire(`${this.entityName}`, async () => {
+      const allCached = Array.from(this.cached.values())
+      const cachedFound = allCached.find(
+        (e) =>
+          e.state !== CachedEntityState.ToBeRemoved && e.entity && this.matches(e.entity, where)
+      )
+      if (cachedFound) {
+        return cachedFound.entity
+      }
 
-    const stored = await this.repository.findBy(where as FindOptionsWhere<E>)
-    for (const storedEntity of stored) {
-      // See if we have a cached version of this entity. If yes - prioritize the cached one!
-      const cached = this.cached.get(storedEntity.id)
-      if (cached?.state === CachedEntityState.ToBeRemoved) {
-        continue
+      const stored = await this.repository.findBy(where as FindOptionsWhere<E>)
+      for (const storedEntity of stored) {
+        // See if we have a cached version of this entity. If yes - prioritize the cached one!
+        const cached = this.cached.get(storedEntity.id)
+        if (cached?.state === CachedEntityState.ToBeRemoved) {
+          continue
+        }
+        if (cached?.entity && this.matches(cached.entity, where)) {
+          return cached.entity
+        }
+        if (!cached && this.matches(storedEntity, where)) {
+          return this.cache(storedEntity)
+        }
       }
-      if (cached?.entity && this.matches(cached.entity, where)) {
-        return cached.entity
-      }
-      if (!cached && this.matches(storedEntity, where)) {
-        return this.cache(storedEntity)
-      }
-    }
 
-    return undefined
+      return undefined
+    })
   }
 
   // Retrieves a (flat) entity by id.
   // Cached version of the entity has a priority.
   // If not found in cache - the entity is retrieved from the database and then cached (if existing).
   async getById(id: string): Promise<Flat<E> | undefined> {
-    const cached = this.cached.get(id)
+    // Lock single entity by given ID
+    return this.asyncLock.acquire(`${this.entityName}-${id}`, async () => {
+      const cached = this.cached.get(id)
 
-    if (cached?.state === CachedEntityState.ToBeRemoved) {
+      if (cached?.state === CachedEntityState.ToBeRemoved) {
+        return undefined
+      }
+
+      if (cached?.entity) {
+        return cached.entity
+      }
+
+      const stored = await this.repository.findOneBy({ id } as FindOptionsWhere<E>)
+
+      if (stored) {
+        // Update cache if entity found
+        return this.cache(stored)
+      }
+
       return undefined
-    }
-
-    if (cached?.entity) {
-      return cached.entity
-    }
-
-    const stored = await this.repository.findOneBy({ id } as FindOptionsWhere<E>)
-
-    if (stored) {
-      // Update cache if entity found
-      return this.cache(stored)
-    }
-
-    return undefined
+    })
   }
 
   // Get all entities of given type that satisfy given relation condition (e[relation] = id).
   // This is achieved by inspecting both cached and stored state.
   // The entity must be the owning-side of the relation.
   async getManyByRelation(relation: OwnedRelations<E>, id: string): Promise<Flat<E>[]> {
-    const cachedIds = Array.from(this.cached.keys())
-    // Get all managed child entities (excluding those scheduled for removal) where child.parent_id = parent.id
-    const cachedChildren = Array.from(this.cached.values())
-      .filter(
-        (e) => e.state !== CachedEntityState.ToBeRemoved && e.entity && e.entity[relation] === id
-      )
-      .flatMap((e) => (e.entity ? [e.entity] : []))
-    // Get all stored child entities where child.parent_id = parent.id and child.id is NOT IN(cachedIds)
-    const storedChildren = await this.repository.findBy({
-      id: Not(In(cachedIds)),
-      [relation]: id,
-    } as FindOptionsWhere<E>)
-    // Cache loaded entities
-    const storedChildrenCached = storedChildren.map((c) => this.cache(c))
-    // Return concatinated result
-    return cachedChildren.concat(storedChildrenCached)
+    // Lock complete table
+    return this.asyncLock.acquire(`${this.entityName}`, async () => {
+      const cachedIds = Array.from(this.cached.keys())
+      // Get all managed child entities (excluding those scheduled for removal) where child.parent_id = parent.id
+      const cachedChildren = Array.from(this.cached.values())
+        .filter(
+          (e) => e.state !== CachedEntityState.ToBeRemoved && e.entity && e.entity[relation] === id
+        )
+        .flatMap((e) => (e.entity ? [e.entity] : []))
+      // Get all stored child entities where child.parent_id = parent.id and child.id is NOT IN(cachedIds)
+      const storedChildren = await this.repository.findBy({
+        id: Not(In(cachedIds)),
+        [relation]: id,
+      } as FindOptionsWhere<E>)
+      // Cache loaded entities
+      const storedChildrenCached = storedChildren.map((c) => this.cache(c))
+      // Return concatinated result
+      return cachedChildren.concat(storedChildrenCached)
+    })
   }
 
   // Get a single entity of given type that satisfied given relation condition.
