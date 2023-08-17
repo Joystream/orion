@@ -9,7 +9,6 @@ import {
   englishAuctionNotifiers,
   findTopBid,
   finishAuction,
-  getChannelTitle,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
   memberHandleById,
@@ -52,25 +51,10 @@ import {
   ChannelRecipient,
   EnglishAuctionSettled,
   BidMadeCompletingAuction,
-  RoyaltyPaid,
   NftOfferedEventData,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
-import {
-  bidMadeCompletingAuction,
-  bidMadeCompletingAuctionLink,
-  newNftOnAuctionText,
-  newNftOnSaleText,
-  nftOnAuctionLink,
-  nftOnSaleLink,
-  nftPurchasedText,
-  nftRoyaltyPaymentReceivedText,
-  nftSoldLink,
-  royaltiesReceivedLink,
-  timedAuctionExpiredLink,
-  timedAuctionExpiredText,
-} from '../../utils/notification'
 
 export async function processOpenAuctionStartedEvent({
   overlay,

@@ -77,10 +77,6 @@ import {
   getChannelOwnerAccount,
   MetaNumberProps,
 } from './utils'
-import {
-  channelReceivedDirectPaymentText,
-  directPaymentByMemberLink,
-} from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,

@@ -27,7 +27,6 @@ import {
   processNft,
 } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { newVideoPostedLink, newVideoPostedText } from '../../utils/notification'
 
 export async function processVideoCreatedEvent({
   overlay,

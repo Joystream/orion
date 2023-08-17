@@ -4,7 +4,7 @@ import { EntityManager } from 'typeorm'
 import { AccountOnly } from '../middleware'
 import { Context } from '../../check'
 import { withHiddenEntities } from '../../../utils/sql'
-import { Account, Notification, NotificationPreference, Read } from '../../../model'
+import { Notification, NotificationPreference, Read } from '../../../model'
 import {
   AccountNotificationPreferencesInput,
   AccountNotificationPreferencesOutput,

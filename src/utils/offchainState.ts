@@ -27,7 +27,7 @@ const exportedStateMap = {
   Account: true,
   Notification: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'is_verified', 'is_suspended'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],

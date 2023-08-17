@@ -1,7 +1,8 @@
 import { assertNotNull } from '@subsquid/substrate-processor'
-import { Membership, NotificationType, Video } from '../../model'
+import { NotificationType, Video } from '../../model'
 import { ConfigVariable, config } from '../config'
 import { EntityManager } from 'typeorm'
+import { getMemberHandle } from './notificationTexts'
 
 // expected like "gleev.xyz"
 const getRootDomain = async (em: EntityManager) => config.get(ConfigVariable.AppRootDomain, em)
@@ -98,7 +99,6 @@ export const channelCreatedLink = async (em: EntityManager, channelId: string) =
 export const nftFeaturedOnMarketplaceLink = async (em: EntityManager, videoId: string) =>
   `https://${await getRootDomain(em)}/video/${videoId}`
 
-// TODO: complete
 export async function linkForNotification(
   em: EntityManager,
   notificationType: NotificationType
@@ -110,23 +110,17 @@ export async function linkForNotification(
     case 'VideoExcluded':
       return await videoExcludedLink(em)
     case 'VideoFeaturedOnCategoryPage':
-      const video = await em.getRepository(Video).findOneByOrFail({
-        id: notificationType.video,
-      })
-      const categoryId = assertNotNull(video.categoryId)
-      return await videoFeaturedOnCategoryPageLink(em, categoryId)
+      return await videoFeaturedOnCategoryPageLink(
+        em,
+        await getCategoryIdFromVideo(em, notificationType.video)
+      )
     case 'VideoFeaturedAsCategoryHero':
-      const videoHero = await em.getRepository(Video).findOneByOrFail({
-        id: notificationType.video,
-      })
-      const videoHeroCategoryid = assertNotNull(videoHero.categoryId)
-      return await videoFeaturedOnCategoryPageLink(em, videoHeroCategoryid)
+      return await videoFeaturedOnCategoryPageLink(
+        em,
+        await getCategoryIdFromVideo(em, notificationType.video)
+      )
     case 'NewChannelFollower':
-      const follower = await em
-        .getRepository(Membership)
-        .findOneByOrFail({ id: notificationType.follower })
-      const followerHandle = assertNotNull(follower.handle)
-      return await newChannelFollowerLink(em, followerHandle)
+      return await newChannelFollowerLink(em, await getMemberHandle(em, notificationType.follower))
     case 'CommentPostedToVideo':
       return await commentPostedToVideoLink(em, notificationType.video)
     case 'VideoLiked':
@@ -152,11 +146,7 @@ export async function linkForNotification(
     case 'HigherBidPlaced':
       return await higherBidPlacedLink(em, notificationType.video)
     case 'DirectChannelPaymentByMember':
-      const payerMember = await em
-        .getRepository(Membership)
-        .findOneByOrFail({ id: notificationType.member })
-      const payerHandle = assertNotNull(payerMember.handle)
-      return await directPaymentByMemberLink(em, payerHandle)
+      return await directPaymentByMemberLink(em, await getMemberHandle(em, notificationType.member))
     case 'EnglishAuctionLost':
       return await timedAuctionLostLink(em, notificationType.video)
     case 'EnglishAuctionWon':
@@ -184,4 +174,9 @@ export async function linkForNotification(
     default:
       return ''
   }
+}
+
+async function getCategoryIdFromVideo(em: EntityManager, videoId: string): Promise<string> {
+  const video = await em.getRepository(Video).findOneByOrFail({ id: videoId })
+  return assertNotNull(video.categoryId)
 }

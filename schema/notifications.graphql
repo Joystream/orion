@@ -181,6 +181,9 @@ type CommentPostedToVideo @variant {
   "notification data"
   data: NotificationData!
 
+  "member that comments"
+  member: Membership!
+
   "recipient"
   recipient: RecipientType!
 }
@@ -237,6 +240,9 @@ type DirectChannelPaymentByMember @variant {
   "notification data"
   data: NotificationData!
 
+  "amount paid"
+  amount: BigInt!
+
   "recipient"
   recipient: RecipientType!
 }
@@ -269,6 +275,9 @@ type CommentReply @variant {
   "notification data"
   data: NotificationData!
 
+  "member who replied"
+  member: Membership!
+
   "recipient"
   recipient: RecipientType!
 }
@@ -276,6 +285,9 @@ type CommentReply @variant {
 type ReactionToComment @variant {
   "notification data"
   data: NotificationData!
+
+  "member who reacted"
+  member: Membership!
 
   "recipient"
   recipient: RecipientType!
@@ -365,6 +377,12 @@ type BidMadeCompletingAuction @variant {
 type NftRoyaltyPaid @variant {
   "notification data"
   data: NotificationData!
+
+  "bid amount"
+  amount: BigInt!
+
+  "bidder"
+  bidder: Membership!
 
   "recipient"
   recipient: RecipientType!

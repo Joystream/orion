@@ -55,24 +55,7 @@ import {
   commentCountersManager,
   videoRelevanceManager,
 } from '../utils'
-import {
-  getAccountForMember,
-  getChannelOwnerMemberByChannelId,
-  getChannelTitle,
-  memberHandleById,
-} from './utils'
-import {
-  commentPostedToVideoLink,
-  commentPostedToVideoText,
-  commentReactedText,
-  commentReactionLink,
-  commentRepliedText,
-  commentReplyLink,
-  videoDislikedLink,
-  videoDislikedText,
-  videoLikedLink,
-  videoLikedText,
-} from '../../utils/notification'
+import { getAccountForMember, getChannelOwnerMemberByChannelId } from './utils'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -543,6 +526,7 @@ export async function processCreateCommentMessage(
       const memberHandle = await memberHandleById(overlay, memberId)
       const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
       // add event for comment to comment
+      const authorId = assertNotNull(comment.authorId)
       await addNotification(
         overlay.getEm(),
         channelOwnerAccount,

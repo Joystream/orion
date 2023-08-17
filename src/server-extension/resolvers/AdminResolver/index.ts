@@ -57,15 +57,7 @@ import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
-import {
-  addNotification,
-  nftFeaturedOnMarketplaceLink,
-  nftFeaturedOnMarketplaceText,
-  videoFeaturedAsCategoryHeroLink,
-  videoFeaturedAsHeroText,
-  videoFeaturedOnCategoryPageLink,
-  videoFeaturedOnCategoryPageText,
-} from '../../../utils/notification'
+import { addNotification } from '../../../utils/notification'
 
 @Resolver()
 export class AdminResolver {

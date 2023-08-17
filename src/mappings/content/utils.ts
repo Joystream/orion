@@ -45,7 +45,6 @@ import {
   BannedMember,
   ChannelFollow,
   Account,
-  Membership,
   HigherBidPlaced,
   MemberRecipient,
   NotificationData,
@@ -73,18 +72,6 @@ import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
 import { addNotification } from '../../utils/notification/helpers'
-import {
-  higherBidPlacedLink,
-  nftBidOutbidText,
-  openAuctionBidLostText,
-  openAuctionBidWonText,
-  openAuctionLostLink,
-  openAuctionWonLink,
-  timedAuctionBidLostText,
-  timedAuctionBidWonText,
-  timedAuctionLostLink,
-  timedAuctionWonLink,
-} from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -492,14 +479,6 @@ export async function getChannelOwnerMemberByVideoId(
   }
 }
 
-export async function getChannelTitle(
-  overlay: EntityManagerOverlay,
-  channelId: string
-): Promise<string | undefined> {
-  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
-  return channel.title ?? undefined
-}
-
 export async function getChannelOwnerMemberByChannelId(
   overlay: EntityManagerOverlay,
   channelId: string
@@ -745,14 +724,6 @@ export async function addNewBidNotification(
   }
 }
 
-export async function memberHandleById(
-  overlay: EntityManagerOverlay,
-  memberId: string
-): Promise<string | undefined> {
-  const member = await overlay.getRepository(Membership).getById(memberId)
-  return member ? member.handle : undefined
-}
-
 export async function notifyChannelFollowers(
   overlay: EntityManagerOverlay,
   channelId: string,
@@ -779,9 +750,8 @@ export async function notifyBiddersOnAuctionCompletion(
 ) {
   for (const bidderId of biddersMemberIds.filter((id) => id)) {
     const account = await getAccountForMember(overlay.getEm(), bidderId)
-    const memberHandle = (await memberHandleById(overlay, bidderId)) || ''
     const notification =
-      bidderId === winnerId.toString() ? notifier.won(memberHandle) : notifier.lost(memberHandle)
+      bidderId === winnerId.toString() ? notifier.won(bidderId) : notifier.lost(bidderId)
 
     await addNotification(overlay.getEm(), account, notification, event)
   }
@@ -793,8 +763,8 @@ export type PageLinkData = {
 }
 
 export type AuctionNotifiers = {
-  won: (memberHandle: string) => NotificationType
-  lost: (memberHandle: string) => NotificationType
+  won: (memberId: string) => NotificationType
+  lost: (memberId: string) => NotificationType
 }
 
 export const openAuctionNotifiers = async (
