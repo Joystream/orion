@@ -16,6 +16,7 @@ import {
   ChannelCreatedEventData,
   NotificationData,
   ChannelFundsWithdrawn,
+  YppUnverified,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -68,7 +69,6 @@ export async function processChannelCreatedEvent({
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
     isCensored: false,
-    isSuspended: false,
     isExcluded: false,
     createdAt: new Date(block.timestamp),
     createdInBlock: block.height,
@@ -78,7 +78,7 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
-    isVerified: false,
+    yppStatus: new YppUnverified(),
   })
 
   const ownerMember = channel.ownerMemberId

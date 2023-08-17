@@ -39,6 +39,8 @@ import {
   ChannelVerification,
   ChannelSuspension,
   ChannelSuspended,
+  YppVerified,
+  YppSuspended,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -363,24 +365,24 @@ export class ChannelsResolver {
       if (!channel) {
         throw new Error(`Channel by id ${channelId} not found!`)
       }
-      const existingSuspension = await em.findOne(ChannelSuspension, {
-        where: { channelId: channel.id },
-      })
-      // If exclusion already exists - return its data with { created: false }
-      if (existingSuspension) {
+      // If channel already suspended - return its data
+      if (channel.yppStatus.isTypeOf === 'YppSuspended') {
+        const existingSuspension = await em.getRepository(ChannelSuspension).findOneOrFail({
+          where: { id: channel.yppStatus.suspension },
+        })
         return {
           id: existingSuspension.id,
           channelId: channel.id,
           createdAt: existingSuspension.timestamp,
         }
       }
-      // If exclusion doesn't exist, create a new one
+      // otherwise create a new suspension
       const newSuspension = new ChannelSuspension({
         id: uniqueId(8),
         channelId: channel.id,
         timestamp: new Date(),
       })
-      channel.isSuspended = true
+      channel.yppStatus = new YppSuspended({ suspension: newSuspension.id })
       await em.save(newSuspension)
 
       // in case account exist deposit notification
@@ -424,24 +426,24 @@ export class ChannelsResolver {
       if (!channel) {
         throw new Error(`Channel by id ${channelId} not found!`)
       }
-      const existingVerification = await em.findOne(ChannelVerification, {
-        where: { channelId: channel.id },
-      })
-      // If exclusion already exists - return its data with { created: false }
-      if (existingVerification) {
+      // If channel already verified - return its data
+      if (channel.yppStatus.isTypeOf === 'YppVerified') {
+        const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
+          where: { channelId: channel.id },
+        })
         return {
           id: existingVerification.id,
           channelId: channel.id,
           createdAt: existingVerification.timestamp,
         }
       }
-      // If exclusion doesn't exist, create a new one
+      // othewise create new verification
       const newVerification = new ChannelVerification({
         id: uniqueId(8),
         channelId: channel.id,
         timestamp: new Date(),
       })
-      channel.isVerified = true
+      channel.yppStatus = new YppVerified({ verification: newVerification.id })
       await em.save(newVerification)
 
       // in case account exist deposit notification

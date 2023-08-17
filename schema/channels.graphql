@@ -62,11 +62,22 @@ type Channel @entity {
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
 
-  "Channel that has been verified"
-  isVerified: Boolean!
+  "Channel Ypp Status: either unverified , verified or suspended"
+  yppStatus: ChannelYppStatus!
+}
 
-  "Channel that has been suspended"
-  isSuspended: Boolean!
+union ChannelYppStatus = YppUnverified | YppVerified | YppSuspended
+
+type YppUnverified {
+  phantom: Int
+}
+
+type YppVerified {
+  verification: ChannelVerification!
+}
+
+type YppSuspended {
+  suspension: ChannelSuspension!
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
