@@ -62,6 +62,7 @@ import {
   newChannelFollowerLink,
   newChannelFollowerText,
 } from '../../../utils/notification'
+import { assertNotNull } from '@subsquid/substrate-processor'
 
 @Resolver()
 export class ChannelsResolver {
@@ -238,17 +239,16 @@ export class ChannelsResolver {
           // account not null because of the UseMiddleware(AccountOnly) decorator
           throw new Error('Account not specified')
         }
-        const followerAccount = ctx.account
-        const followerHandle =
-          (await em.getRepository(Membership).findOneByOrFail({ id: followerAccount.membershipId }))
-            ?.handle || ''
-        const linkPage = await newChannelFollowerLink(em, followerHandle)
-        const channelTitle = channel.title || ''
+        const followerMembership = await em
+          .getRepository(Membership)
+          .findOneByOrFail({ id: ctx.account.membershipId })
+        const channelTitle = parseChannelTitle(channel)
         await addNotification(
           em,
           ownerAccount,
           new NewChannelFollower({
             recipient: new ChannelRecipient({ channelTitle }),
+            followerHandle: assertNotNull(followerMembership.handle),
           })
         )
       }
