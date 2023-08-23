@@ -378,7 +378,7 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
       channel.yppStatus = new YppSuspended({ suspension: newSuspension.id })
-      await em.save(newSuspension)
+      await em.save([newSuspension, channel])
 
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
@@ -432,7 +432,7 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
       channel.yppStatus = new YppVerified({ verification: newVerification.id })
-      await em.save(newVerification)
+      await em.save([newVerification, channel])
 
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
