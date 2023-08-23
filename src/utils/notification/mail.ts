@@ -26,7 +26,6 @@ export async function deliverNotificationViaEmail(
   const notificationDelivery = new NotificationEmailDelivery({
     id: nextEntityId.toString(),
     notificationId: notification.id,
-    deliveryAttemptAt: new Date(),
     deliveryStatus: EmailDeliveryStatus.Unsent,
   })
 

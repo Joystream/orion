@@ -72,7 +72,6 @@ module.exports = class Views2000000000000 {
       exclusion: ['FALSE'],
       session: ['FALSE'],
       notification_email_delivery: ['FALSE'],
-      on_chain_notification_email_delivery: ['FALSE'],
       notification_in_app_delivery: ['FALSE'],
       channel_verification: ['FALSE'],
       channel_suspension: ['FALSE'],

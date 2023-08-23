@@ -26,6 +26,8 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Notification: true,
+  NotificationInAppDelivery: true,
+  NotificationEmailDelivery: true,
   Token: true,
   Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status'],
   Video: ['is_excluded', 'views_num'],

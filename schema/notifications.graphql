@@ -14,9 +14,6 @@ type NotificationEmailDelivery @entity {
   "the notification being delivered"
   notification: Notification!
 
-  "attempted delivery"
-  deliveryAttemptAt: DateTime!
-
   "notification delivery status"
   deliveryStatus: EmailDeliveryStatus!
 }
