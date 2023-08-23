@@ -7,7 +7,6 @@ import {
   Notification,
   NextEntityId,
   NotificationEmailDelivery,
-  OnChainNotificationEmailDelivery,
 } from '../../model'
 import { getNextIdForEntity } from '../nextEntityId'
 import { notificationEmailContent } from '../../auth-server/emails'
@@ -43,29 +42,6 @@ export async function deliverNotificationViaEmail(
   ])
 }
 
-export async function deliverOnChainNotificationViaEmail(
-  store: EntityManagerOverlay,
-  toAccount: Account,
-  notification: Flat<Notification>
-): Promise<void> {
-  const id = store.getRepository(OnChainNotificationEmailDelivery).getNewEntityId()
-  const notificationDelivery = store.getRepository(OnChainNotificationEmailDelivery).new({
-    id,
-    notificationId: notification.id,
-    deliveryAttemptAt: new Date(),
-    deliveryStatus: EmailDeliveryStatus.Unsent,
-  })
-
-  const appName = await config.get(ConfigVariable.AppName, store.getEm())
-  const content = await createMailContent(store.getEm(), toAccount, appName, notification)
-  notificationDelivery.deliveryStatus = await executeMailDelivery(
-    appName,
-    store.getEm(),
-    toAccount,
-    content
-  )
-}
-
 async function executeMailDelivery(
   appName: string,
   em: EntityManager,
@@ -96,8 +72,8 @@ async function createMailContent(
     em
   )}/member/${handle}/?tab=preferences`
   const content = notificationEmailContent({
-    notificationText: await textForNotification(em, notification.notificationType),
-    notificationLink: await linkForNotification(em, notification.notificationType),
+    notificationText: await textForNotification(notification.notificationType),
+    notificationLink: await linkForNotification(em, notification.notificationType), // em used only for fetching root domain from orion_db
     preferencePageLink,
     appName,
   })

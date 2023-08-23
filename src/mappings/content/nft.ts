@@ -9,6 +9,7 @@ import {
   englishAuctionNotifiers,
   findTopBid,
   finishAuction,
+  getChannelTitleById,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
   memberHandleById,
@@ -17,6 +18,7 @@ import {
   notifyChannelOwner,
   openAuctionNotifiers,
   parseContentActor,
+  parseVideoTitle,
   processNft,
 } from './utils'
 import {
@@ -44,7 +46,6 @@ import {
   TransactionalStatusInitiatedOfferToMember,
   Video,
   MemberRecipient,
-  NotificationData,
   NewAuction,
   NewNftOnSale,
   NftPurchased,
@@ -52,6 +53,7 @@ import {
   EnglishAuctionSettled,
   BidMadeCompletingAuction,
   NftOfferedEventData,
+  NftRoyaltyPaid,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
@@ -89,16 +91,13 @@ export async function processOpenAuctionStartedEvent({
   // Add notification for all followers of the channel
   const video = await overlay.getRepository(Video).getById(videoId.toString())
   if (video && video.channelId) {
-    const channelTitle = await getChannelTitle(overlay, video.channelId)
-    const linkPage = await nftOnAuctionLink(overlay.getEm(), videoId.toString())
-
+    const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notifier = (handle: string) =>
       new NewAuction({
         recipient: new MemberRecipient({ memberHandle: handle }),
-        data: new NotificationData({
-          linkPage,
-          text: newNftOnAuctionText(channelTitle || '', video.title || ''),
-        }),
+        channelTitle,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
       })
     await notifyChannelFollowers(overlay, video.channelId, notifier, event)
   }
@@ -141,15 +140,13 @@ export async function processEnglishAuctionStartedEvent({
   // Add notification for all followers of the channel
   const video = await overlay.getRepository(Video).getById(videoId.toString())
   if (video && video.channelId) {
-    const channelTitle = await getChannelTitle(overlay, video.channelId)
-    const linkPage = await nftOnAuctionLink(overlay.getEm(), videoId.toString())
+    const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notifier = (handle: string) =>
       new NewAuction({
         recipient: new MemberRecipient({ memberHandle: handle }),
-        data: new NotificationData({
-          linkPage,
-          text: newNftOnAuctionText(channelTitle || '', video.title || ''),
-        }),
+        channelTitle,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
       })
     await notifyChannelFollowers(overlay, video.channelId, notifier, event)
   }
@@ -213,12 +210,12 @@ export async function processAuctionBidMadeEvent({
     }),
   })
 
-  const nftOwnerMemberId = await getNftOwnerMemberId(overlay, nft.owner)
-
   // Notify outbidded member & nft owner (if he's creator)
   const newTopBidderHandle = await memberHandleById(overlay, memberId.toString())
-  const videoTitle = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title
-  await addNewBidNotification(overlay, nftOwnerMemberId, previousTopBid, event, {
+  const videoTitle = parseVideoTitle(
+    await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
+  )
+  await addNewBidNotification(overlay, nft.owner, previousTopBid, event, {
     videoId: videoId.toString(),
     videoTitle,
     newTopBidderHandle,
@@ -349,8 +346,8 @@ export async function processEnglishAuctionSettledEvent({
   const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   const notifiers =
     auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
-      ? await englishAuctionNotifiers({ em: overlay.getEm(), videoId: video.id }, video.title || '')
-      : await openAuctionNotifiers({ em: overlay.getEm(), videoId: video.id }, video.title || '')
+      ? await englishAuctionNotifiers(video.id, parseVideoTitle(video))
+      : await openAuctionNotifiers(video.id, parseVideoTitle(video))
 
   await notifyBiddersOnAuctionCompletion(
     overlay,
@@ -361,40 +358,23 @@ export async function processEnglishAuctionSettledEvent({
   )
 
   // notify previous nft owner if he's a channel owner
-  const videoTitle = video.title || ''
-  const linkPage = await timedAuctionExpiredLink(overlay.getEm(), videoId.toString())
+  const videoTitle = parseVideoTitle(video)
   await notifyChannelOwner(
     overlay,
     previousNftOwner,
     (channelTitle: string) =>
       new EnglishAuctionSettled({
         recipient: new ChannelRecipient({ channelTitle }),
-        data: new NotificationData({
-          linkPage,
-          text: timedAuctionExpiredText(videoTitle),
-        }),
+        videoId: video.id,
+        videoTitle,
+        price: winningBid.amount,
       }),
     event
   )
 
   if (nft.creatorRoyalty) {
-    const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
-    const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
-      .channelId
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
-    await addRoyaltyPaymentNotification(
-      overlay,
-      channelId,
-      (channelTitle: string) =>
-        new RoyaltyPaid({
-          recipient: new ChannelRecipient({ channelTitle }),
-          data: new NotificationData({
-            linkPage,
-            text: nftRoyaltyPaymentReceivedText(videoTitle, royaltyPrice.toString()),
-          }),
-        }),
-      event
-    )
+    await addRoyaltyPaymentNotification(overlay, video, royaltyPrice, event)
   }
 
   // Add nft history and activities entry
@@ -445,23 +425,16 @@ export async function processBidMadeCompletingAuctionEvent({
   // Notify all bidders (winner & losers) just once
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
   const biddersMemberIds = [...new Set(auctionBids.map((bid) => bid.bidderId).filter((id) => id))]
-  const videoTitle = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   await notifyBiddersOnAuctionCompletion(
     overlay,
     biddersMemberIds as string[],
     memberId,
-    await openAuctionNotifiers(
-      { em: overlay.getEm(), videoId: videoId.toString() },
-      videoTitle || ''
-    ),
+    await openAuctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
 
   // notify previous owner if he's a channel owner
-  const linkPageAuctionCompletion = await bidMadeCompletingAuctionLink(
-    overlay.getEm(),
-    videoId.toString()
-  )
   const winnerHandle = await memberHandleById(overlay, memberId.toString())
   await notifyChannelOwner(
     overlay,
@@ -469,36 +442,17 @@ export async function processBidMadeCompletingAuctionEvent({
     (channelTitle: string) =>
       new BidMadeCompletingAuction({
         recipient: new ChannelRecipient({ channelTitle }),
-        data: new NotificationData({
-          linkPage: linkPageAuctionCompletion,
-          text: bidMadeCompletingAuction(
-            videoTitle || '',
-            winnerHandle || '',
-            winningBid.amount.toString()
-          ),
-        }),
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        amount: winningBid.amount,
+        bidderHandle: winnerHandle,
       }),
     event
   )
 
   if (nft.creatorRoyalty) {
-    const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
-    const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
-      .channelId
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
-    await addRoyaltyPaymentNotification(
-      overlay,
-      channelId,
-      (channelTitle: string) =>
-        new RoyaltyPaid({
-          recipient: new ChannelRecipient({ channelTitle }),
-          data: new NotificationData({
-            linkPage,
-            text: nftRoyaltyPaymentReceivedText(videoTitle || '', royaltyPrice.toString()),
-          }),
-        }),
-      event
-    )
+    await addRoyaltyPaymentNotification(overlay, video, royaltyPrice, event)
   }
 
   // Add nft history and activities entry
@@ -543,34 +497,18 @@ export async function processOpenAuctionBidAcceptedEvent({
   // notify all bidders (winner & loser) just once
   const previousNftOwnerMemberId = await getNftOwnerMemberId(overlay, previousNftOwner)
   const biddersMemberIds = [...new Set(auctionBids.map((bid) => bid.bidderId).filter((id) => id))]
-  const videoTitle =
-    (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title || ''
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   await notifyBiddersOnAuctionCompletion(
     overlay,
     biddersMemberIds.filter((id) => id) as string[],
     winnerId,
-    await openAuctionNotifiers({ em: overlay.getEm(), videoId: videoId.toString() }, videoTitle),
+    await openAuctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
 
   if (nft.creatorRoyalty) {
-    const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
-    const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
-      .channelId
-    const royaltyPrice = winningBid.amount * BigInt(nft.creatorRoyalty / 100)
-    await addRoyaltyPaymentNotification(
-      overlay,
-      channelId,
-      (channelTitle: string) =>
-        new RoyaltyPaid({
-          recipient: new ChannelRecipient({ channelTitle }),
-          data: new NotificationData({
-            linkPage,
-            text: nftRoyaltyPaymentReceivedText(videoTitle, royaltyPrice.toString()),
-          }),
-        }),
-      event
-    )
+    const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
+    await addRoyaltyPaymentNotification(overlay, video, royaltyPrice, event)
   }
 
   // Add nft history and activities entry
@@ -630,25 +568,9 @@ export async function processOfferAcceptedEvent({
   })
 
   if (nft.creatorRoyalty && price) {
-    const videoTitle =
-      (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title || ''
-    const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
-    const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
-      .channelId
+    const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, price)
-    await addRoyaltyPaymentNotification(
-      overlay,
-      channelId,
-      (channelTitle: string) =>
-        new RoyaltyPaid({
-          recipient: new ChannelRecipient({ channelTitle }),
-          data: new NotificationData({
-            linkPage,
-            text: nftRoyaltyPaymentReceivedText(videoTitle, royaltyPrice.toString()),
-          }),
-        }),
-      event
-    )
+    await addRoyaltyPaymentNotification(overlay, video, royaltyPrice, event)
   }
 }
 
@@ -699,15 +621,13 @@ export async function processNftSellOrderMadeEvent({
   // notify followers of the channel that nft is for sale
   const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   if (video?.channelId) {
-    const channelTitle = await getChannelTitle(overlay, video.channelId)
-    const linkPage = await nftOnSaleLink(overlay.getEm(), videoId.toString())
+    const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notifier = (handle: string) =>
       new NewNftOnSale({
         recipient: new MemberRecipient({ memberHandle: handle }),
-        data: new NotificationData({
-          linkPage,
-          text: newNftOnSaleText(channelTitle || '', video.title || ''),
-        }),
+        channelTitle,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
       })
     await notifyChannelFollowers(overlay, video.channelId, notifier, event)
   }
@@ -756,41 +676,23 @@ export async function processNftBoughtEvent({
 
   // Notify (previous) nft owner if he's also a channel owner
   const buyerHandle = await memberHandleById(overlay, memberId.toString())
-  const linkPage = await nftSoldLink(overlay.getEm(), videoId.toString())
+  const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
   await notifyChannelOwner(
     overlay,
     previousNftOwner,
     (channelTitle: string) =>
       new NftPurchased({
         recipient: new ChannelRecipient({ channelTitle }),
-        data: new NotificationData({
-          linkPage,
-          text: nftPurchasedText(videoId.toString(), buyerHandle || '', price?.toString() || ''),
-        }),
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        buyerHandle,
       }),
     event
   )
 
   if (nft.creatorRoyalty) {
-    const videoTitle =
-      (await overlay.getRepository(Video).getByIdOrFail(videoId.toString())).title || ''
-    const linkPage = await royaltiesReceivedLink(overlay.getEm(), videoId.toString())
-    const channelId = (await overlay.getRepository(Video).getByIdOrFail(videoId.toString()))
-      .channelId
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, price)
-    await addRoyaltyPaymentNotification(
-      overlay,
-      channelId,
-      (channelTitle: string) =>
-        new RoyaltyPaid({
-          recipient: new ChannelRecipient({ channelTitle }),
-          data: new NotificationData({
-            linkPage,
-            text: nftRoyaltyPaymentReceivedText(videoTitle, royaltyPrice.toString()),
-          }),
-        }),
-      event
-    )
+    await addRoyaltyPaymentNotification(overlay, video, royaltyPrice, event)
   }
 
   // Add nft history and activities entry

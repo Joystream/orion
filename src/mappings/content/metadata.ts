@@ -57,10 +57,8 @@ import {
   Membership,
   Event,
   DirectChannelPaymentByMember,
-  NotificationData,
   ChannelRecipient,
 } from '../../model'
-import { addOnChainNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,
@@ -76,7 +74,9 @@ import {
   EntityAssetsMap,
   getChannelOwnerAccount,
   MetaNumberProps,
+  parseChannelTitle,
 } from './utils'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -659,16 +659,14 @@ export async function processChannelPaymentFromMember(
   })
 
   const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  const channelTitle = channel.title || ''
+  const channelTitle = parseChannelTitle(channel)
   await addNotification(
     overlay.getEm(),
     ownerAccount,
     new DirectChannelPaymentByMember({
       recipient: new ChannelRecipient({ channelTitle }),
-      data: new NotificationData({
-        linkPage: await directPaymentByMemberLink(overlay.getEm(), member.handle),
-        text: channelReceivedDirectPaymentText(member.handle, amount.toString()),
-      }),
+      amount,
+      payerHandle: member.handle,
     }),
     event
   )

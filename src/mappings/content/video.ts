@@ -14,7 +14,6 @@ import {
   VideoCreatedEventData,
   VideoPosted,
   MemberRecipient,
-  NotificationData,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
@@ -23,6 +22,8 @@ import {
   deleteVideo,
   encodeAssets,
   notifyChannelFollowers,
+  parseChannelTitle,
+  parseVideoTitle,
   processAppActionMetadata,
   processNft,
 } from './utils'
@@ -124,14 +125,12 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  const linkPage = await newVideoPostedLink(overlay.getEm(), video.id)
   const notifier = (handle: string) =>
     new VideoPosted({
       recipient: new MemberRecipient({ memberHandle: handle }),
-      data: new NotificationData({
-        linkPage,
-        text: newVideoPostedText(channel.title || '', video.title || ''),
-      }),
+      channelTitle: parseChannelTitle(channel),
+      videoTitle: parseVideoTitle(video),
+      videoId: video.id,
     })
   await notifyChannelFollowers(overlay, channel.id, notifier, eventEntity)
 

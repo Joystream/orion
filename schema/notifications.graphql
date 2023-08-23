@@ -21,32 +21,10 @@ type NotificationEmailDelivery @entity {
   deliveryStatus: EmailDeliveryStatus!
 }
 
-type OnChainNotificationEmailDelivery @entity {
-  "Autoincremented"
-  id: ID!
-
-  "the notification being delivered"
-  notification: Notification!
-
-  "attempted delivery"
-  deliveryAttemptAt: DateTime!
-
-  "notification delivery status"
-  deliveryStatus: EmailDeliveryStatus!
-}
-
 enum EmailDeliveryStatus {
   Unsent
   Success
   Failure
-}
-
-type NotificationData {
-  "text to display"
-  text: String!
-
-  "page link"
-  linkPage: String!
 }
 
 type Read {
@@ -109,7 +87,7 @@ union NotificationType =
   | VideoDisliked
   | NftPurchased
   | CreatorReceivesAuctionBid
-  | RoyaltyPaid
+  | NftRoyaltyPaid
   | DirectChannelPaymentByMember
   | EnglishAuctionSettled
   | ChannelFundsWithdrawn
@@ -129,252 +107,343 @@ union NotificationType =
   | BidMadeCompletingAuction
 
 type ChannelSuspended @variant {
-  "notification data"
-  data: NotificationData!
-
-  "recipient"
+  "recipient also used for text production"
   recipient: RecipientType!
 }
 
 type NftFeaturedOnMarketPlace @variant {
-  "notification data"
-  data: NotificationData!
+  "videoId used for link construction"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type VideoFeaturedOnCategoryPage @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "category name used for notification text"
+  categoryName: String!
+
+  "category id used for notification text"
+  categoryId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type VideoFeaturedAsCategoryHero @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "category name used for notification text"
+  categoryName: String!
+
+  "category id used for notification text"
+  categoryId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type ChannelVerified @variant {
-  "notification data"
-  data: NotificationData!
-
   "recipient"
   recipient: RecipientType!
 }
 
 type ChannelExcluded @variant {
-  "notification data"
-  data: NotificationData!
-
-  "recipient"
+  "recipient also used for text production"
   recipient: RecipientType!
 }
 
 type VideoExcluded @variant {
-  "notification data"
-  data: NotificationData!
+  "video title used for notification text"
+  videoTitle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NewChannelFollower @variant {
-  "notification data"
-  data: NotificationData!
+  "follower member handle for link"
+  followerHandle: String!
 
-  "recipient"
+  "recipient also used for text production"
   recipient: RecipientType!
 }
 
 type CommentPostedToVideo @variant {
-  "notification data"
-  data: NotificationData!
+  "video title used for notification text"
+  videoTitle: String!
 
-  "member that comments"
-  member: Membership!
+  "video Id used for link"
+  videoId: String!
+
+  "commenter handle for text"
+  memberHandle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type VideoLiked @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type VideoDisliked @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NftPurchased @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "buyer handle for notification text"
+  buyerHandle: String!
+
+  "price paid"
+  price: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type CreatorReceivesAuctionBid @variant {
-  "notification data"
-  data: NotificationData!
+  "videoId used for notification link"
+  videoId: String!
 
-  "recipient"
-  recipient: RecipientType!
-}
+  "video title used for notification text"
+  videoTitle: String!
 
-type RoyaltyPaid @variant {
-  "notification data"
-  data: NotificationData!
+  "bidder handle for notification text"
+  bidderHandle: String!
 
-  "recipient"
-  recipient: RecipientType!
-}
-
-type NftOffered @variant {
-  "notification data"
-  data: NotificationData!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type DirectChannelPaymentByMember @variant {
-  "notification data"
-  data: NotificationData!
-
-  "amount paid"
+  "bid amount"
   amount: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
+type NftOffered @variant {
+  "videoId used for notification link"
+  videoId: String!
+
+  "video title used for notification text"
+  videoTitle: String!
+
+  "offering amount"
+  amount: BigInt!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
+type DirectChannelPaymentByMember @variant {
+  "payer handle"
+  payerHandle: String!
+
+  "amount paid"
+  amount: BigInt!
+
+  "recipient, contains also channel title"
+  recipient: RecipientType!
+}
+
 type EnglishAuctionSettled @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "price paid"
+  price: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type ChannelFundsWithdrawn @variant {
-  "notification data"
-  data: NotificationData!
+  "amount"
+  amount: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type ChannelCreated @variant {
-  "notification data"
-  data: NotificationData!
+  "channelId for link"
+  channelId: String!
+
+  "channel title for notification text"
+  channelTitle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type CommentReply @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
 
   "member who replied"
-  member: Membership!
+  memberHandle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type ReactionToComment @variant {
-  "notification data"
-  data: NotificationData!
+  "video Id used for link"
+  videoId: String!
 
-  "member who reacted"
-  member: Membership!
+  "video title for notification text"
+  videoTitle: String!
+
+  "member who replied"
+  memberHandle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type VideoPosted @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "channel title for notification text"
+  channelTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NewAuction @variant {
-  "notification data"
-  data: NotificationData!
+  "channel title for notification text"
+  channelTitle: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NewAuctionBid @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "bidder handle for notification text"
+  bidderHandle: String!
+
+  "bid amount"
+  amount: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NewNftOnSale @variant {
-  "notification data"
-  data: NotificationData!
+  "channel title for notification text"
+  channelTitle: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type HigherBidPlaced @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "new bidder handle "
+  newBidderHandle: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type EnglishAuctionWon @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type EnglishAuctionLost @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type OpenAuctionWon @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type OpenAuctionLost @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "recipient"
   recipient: RecipientType!
@@ -382,34 +451,32 @@ type OpenAuctionLost @variant {
 
 # design addition: for bid made completing auction so that channel owner is properly notified
 type BidMadeCompletingAuction @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "bidder handle for notification text"
+  bidderHandle: String!
+
+  "bid amount"
+  amount: BigInt!
 
   "recipient"
   recipient: RecipientType!
 }
 
 type NftRoyaltyPaid @variant {
-  "notification data"
-  data: NotificationData!
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
 
   "bid amount"
   amount: BigInt!
 
-  "bidder"
-  bidder: Membership!
-
   "recipient"
   recipient: RecipientType!
-}
-
-# the following are created just for the NextEntityId table
-type OnChainNotification @entity {
-  "actually unused"
-  id: ID!
-}
-
-type OffChainNotification @entity {
-  "actually unused"
-  id: ID!
 }

@@ -1,8 +1,6 @@
-import { assertNotNull } from '@subsquid/substrate-processor'
-import { NotificationType, Video } from '../../model'
+import { NotificationType } from '../../model'
 import { ConfigVariable, config } from '../config'
 import { EntityManager } from 'typeorm'
-import { getMemberHandle } from './notificationTexts'
 
 // expected like "gleev.xyz"
 const getRootDomain = async (em: EntityManager) => config.get(ConfigVariable.AppRootDomain, em)
@@ -110,73 +108,62 @@ export async function linkForNotification(
     case 'VideoExcluded':
       return await videoExcludedLink(em)
     case 'VideoFeaturedOnCategoryPage':
-      return await videoFeaturedOnCategoryPageLink(
-        em,
-        await getCategoryIdFromVideo(em, notificationType.video)
-      )
+      return await videoFeaturedOnCategoryPageLink(em, notificationType.categoryId)
     case 'VideoFeaturedAsCategoryHero':
-      return await videoFeaturedOnCategoryPageLink(
-        em,
-        await getCategoryIdFromVideo(em, notificationType.video)
-      )
+      return await videoFeaturedOnCategoryPageLink(em, notificationType.categoryName)
     case 'NewChannelFollower':
-      return await newChannelFollowerLink(em, await getMemberHandle(em, notificationType.follower))
+      return await newChannelFollowerLink(em, notificationType.followerHandle)
     case 'CommentPostedToVideo':
-      return await commentPostedToVideoLink(em, notificationType.video)
+      return await commentPostedToVideoLink(em, notificationType.videoId)
     case 'VideoLiked':
-      return await videoLikedLink(em, notificationType.video)
+      return await videoLikedLink(em, notificationType.videoId)
     case 'VideoDisliked':
-      return await videoDislikedLink(em, notificationType.video)
+      return await videoDislikedLink(em, notificationType.videoId)
     case 'ChannelVerified':
       return await channelVerifiedLink(em)
     case 'ChannelSuspended':
       return await channelSuspendedLink(em)
     case 'BidMadeCompletingAuction':
-      return await bidMadeCompletingAuctionLink(em, notificationType.video)
+      return await bidMadeCompletingAuctionLink(em, notificationType.videoId)
     case 'ChannelCreated':
-      return await channelCreatedLink(em, notificationType.channel)
+      return await channelCreatedLink(em, notificationType.channelId)
     case 'ChannelFundsWithdrawn':
       return channelFundsWithdrawnLink()
     case 'CommentReply':
-      return await commentReplyLink(em, notificationType.video)
+      return await commentReplyLink(em, notificationType.videoId)
     case 'ReactionToComment':
-      return await commentReactionLink(em, notificationType.video)
+      return await commentReactionLink(em, notificationType.videoId)
     case 'CreatorReceivesAuctionBid':
-      return await auctionBidMadeLink(em, notificationType.video)
+      return await auctionBidMadeLink(em, notificationType.videoId)
     case 'HigherBidPlaced':
-      return await higherBidPlacedLink(em, notificationType.video)
+      return await higherBidPlacedLink(em, notificationType.videoId)
     case 'DirectChannelPaymentByMember':
-      return await directPaymentByMemberLink(em, await getMemberHandle(em, notificationType.member))
+      return await directPaymentByMemberLink(em, notificationType.payerHandle)
     case 'EnglishAuctionLost':
-      return await timedAuctionLostLink(em, notificationType.video)
+      return await timedAuctionLostLink(em, notificationType.videoId)
     case 'EnglishAuctionWon':
-      return await timedAuctionWonLink(em, notificationType.video)
+      return await timedAuctionWonLink(em, notificationType.videoId)
     case 'EnglishAuctionSettled':
-      return await timedAuctionExpiredLink(em, notificationType.video)
+      return await timedAuctionExpiredLink(em, notificationType.videoId)
     case 'OpenAuctionLost':
-      return await openAuctionLostLink(em, notificationType.video)
+      return await openAuctionLostLink(em, notificationType.videoId)
     case 'OpenAuctionWon':
-      return await openAuctionWonLink(em, notificationType.video)
+      return await openAuctionWonLink(em, notificationType.videoId)
     case 'NewAuction':
-      return await nftOnAuctionLink(em, notificationType.video)
+      return await nftOnAuctionLink(em, notificationType.videoId)
     case 'NewAuctionBid':
-      return await auctionBidMadeLink(em, notificationType.video)
+      return await auctionBidMadeLink(em, notificationType.videoId)
     case 'NewNftOnSale':
-      return await nftOnSaleLink(em, notificationType.video)
+      return await nftOnSaleLink(em, notificationType.videoId)
     case 'NftFeaturedOnMarketPlace':
-      return await nftFeaturedOnMarketplaceLink(em, notificationType.video)
+      return await nftFeaturedOnMarketplaceLink(em, notificationType.videoId)
     case 'NftPurchased':
-      return await nftSoldLink(em, notificationType.video)
-    case 'RoyaltyPaid':
-      return await royaltiesReceivedLink(em, notificationType.video)
+      return await nftSoldLink(em, notificationType.videoId)
+    case 'NftRoyaltyPaid':
+      return await royaltiesReceivedLink(em, notificationType.videoId)
     case 'VideoPosted':
-      return await newVideoPostedLink(em, notificationType.video)
+      return await newVideoPostedLink(em, notificationType.videoId)
     default:
       return ''
   }
-}
-
-async function getCategoryIdFromVideo(em: EntityManager, videoId: string): Promise<string> {
-  const video = await em.getRepository(Video).findOneByOrFail({ id: videoId })
-  return assertNotNull(video.categoryId)
 }

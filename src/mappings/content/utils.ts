@@ -48,12 +48,15 @@ import {
   Account,
   HigherBidPlaced,
   MemberRecipient,
-  NotificationData,
   NotificationType,
   OpenAuctionWon,
   OpenAuctionLost,
   EnglishAuctionWon,
   EnglishAuctionLost,
+  Membership,
+  NewAuctionBid,
+  ChannelRecipient,
+  NftRoyaltyPaid,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -72,7 +75,7 @@ import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
-import { addOnChainNotification } from '../../utils/notification'
+import { addNotification } from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -695,33 +698,47 @@ export async function getAccountsForBidders(
 
 export type NewBidNotificationMetadata = {
   videoId: string
-  videoTitle: string | null | undefined
-  newTopBidderHandle: string | undefined
-  bidAmount: bigint | null | undefined
+  videoTitle: string
+  newTopBidderHandle: string
+  bidAmount: bigint
 }
 
 export async function addNewBidNotification(
   overlay: EntityManagerOverlay,
-  ownerMemberId: string | undefined | null,
+  owner: NftOwner,
   previousTopBid: Flat<Bid> | undefined | null,
   event: Event,
-  { videoId, videoTitle, newTopBidderHandle }: NewBidNotificationMetadata
+  { videoId, videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
 ) {
   if (previousTopBid?.bidderId) {
     const outbiddedMemberId = previousTopBid.bidderId
     const outbiddedMemberHandle = await memberHandleById(overlay, outbiddedMemberId)
     const outbiddedMemberAccount = await getAccountForMember(overlay.getEm(), outbiddedMemberId)
-    const linkPage = await higherBidPlacedLink(overlay.getEm(), videoId)
     await addNotification(
       overlay.getEm(),
       outbiddedMemberAccount,
       new HigherBidPlaced({
         recipient: new MemberRecipient({ memberHandle: outbiddedMemberHandle }),
-        data: new NotificationData({
-          linkPage,
-          text: nftBidOutbidText(videoTitle || '', newTopBidderHandle || ''),
-        }),
+        newBidderHandle: newTopBidderHandle,
+        videoId,
+        videoTitle,
       }),
+      event
+    )
+  }
+
+  if (owner.isTypeOf === 'NftOwnerChannel') {
+    await notifyChannelOwner(
+      overlay,
+      owner,
+      (channelTitle) =>
+        new NewAuctionBid({
+          recipient: new ChannelRecipient({ channelTitle }),
+          amount: bidAmount,
+          bidderHandle: newTopBidderHandle,
+          videoId,
+          videoTitle,
+        }),
       event
     )
   }
@@ -756,7 +773,7 @@ export async function notifyBiddersOnAuctionCompletion(
     const notification =
       bidderId === winnerId.toString() ? notifier.won(bidderId) : notifier.lost(bidderId)
 
-    await addOnChainNotification({ store: overlay, event }, account, notification)
+    await addNotification(overlay.getEm(), account, notification, event)
   }
 }
 
@@ -771,61 +788,49 @@ export type AuctionNotifiers = {
 }
 
 export const openAuctionNotifiers = async (
-  { em, videoId }: PageLinkData,
+  videoId: string,
   videoTitle: string
 ): Promise<AuctionNotifiers> => {
-  const winningLink = await openAuctionWonLink(em, videoId)
-  const losingLink = await openAuctionLostLink(em, videoId)
   return {
     won: (memberHandle: string) =>
       new OpenAuctionWon({
         recipient: new MemberRecipient({
           memberHandle,
         }),
-        data: new NotificationData({
-          linkPage: winningLink,
-          text: openAuctionBidWonText(videoTitle),
-        }),
+        videoId,
+        videoTitle,
       }),
     lost: (memberHandle: string) =>
       new OpenAuctionLost({
         recipient: new MemberRecipient({
           memberHandle,
         }),
-        data: new NotificationData({
-          linkPage: losingLink,
-          text: openAuctionBidLostText(videoTitle),
-        }),
+        videoId,
+        videoTitle,
       }),
   }
 }
 
 export const englishAuctionNotifiers = async (
-  { em, videoId }: PageLinkData,
+  videoId: string,
   videoTitle: string
 ): Promise<AuctionNotifiers> => {
-  const winningLink = await timedAuctionWonLink(em, videoId)
-  const losingLink = await timedAuctionLostLink(em, videoId)
   return {
     won: (memberHandle: string) =>
       new EnglishAuctionWon({
         recipient: new MemberRecipient({
           memberHandle,
         }),
-        data: new NotificationData({
-          linkPage: winningLink,
-          text: timedAuctionBidWonText(videoTitle),
-        }),
+        videoId,
+        videoTitle,
       }),
     lost: (memberHandle: string) =>
       new EnglishAuctionLost({
         recipient: new MemberRecipient({
           memberHandle,
         }),
-        data: new NotificationData({
-          linkPage: losingLink,
-          text: timedAuctionBidLostText(videoTitle),
-        }),
+        videoId,
+        videoTitle,
       }),
   }
 }
@@ -851,24 +856,49 @@ export async function notifyChannelOwner(
 
 export async function addRoyaltyPaymentNotification(
   overlay: EntityManagerOverlay,
-  channelId: string | undefined | null,
-  notificationType: (channelTitle: string) => NotificationType,
+  video: Flat<Video>,
+  royaltyPrice: bigint,
   event: Event
 ): Promise<void> {
-  if (channelId) {
-    const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
-    const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-    await addOnChainNotification(
-      { store: overlay, event },
-      creatorAccount,
-      notificationType(channel.title || ''),
-      event
-    )
-  }
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
+  const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+  await addNotification(
+    overlay.getEm(),
+    creatorAccount,
+    new NftRoyaltyPaid({
+      recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
+      amount: royaltyPrice,
+      videoId: video.id,
+      videoTitle: parseVideoTitle(video),
+    }),
+    event
+  )
 }
 
 export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
   const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
   const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
   return royaltyPrice
+}
+
+export function parseChannelTitle(channel: Flat<Channel>): string {
+  return channel.title || '??'
+}
+
+export function parseVideoTitle(video: Flat<Video>): string {
+  return video.title || '??'
+}
+
+export async function memberHandleById(
+  overlay: EntityManagerOverlay,
+  memberId: string
+): Promise<string> {
+  const member = await overlay.getRepository(Membership).getByIdOrFail(memberId)
+  // handle not null (runtime guarantee)
+  return assertNotNull(member.handle)
+}
+
+export async function getChannelTitleById(overlay: EntityManagerOverlay, channelId: string) {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+  return parseChannelTitle(channel)
 }

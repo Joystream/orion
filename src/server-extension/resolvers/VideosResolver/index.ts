@@ -17,7 +17,6 @@ import {
   Account,
   VideoExcluded,
   ChannelRecipient,
-  NotificationData,
 } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
@@ -48,7 +47,7 @@ import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification/helpers'
-import { videoExcludedLink, videoExcludedText } from '../../../utils/notification'
+import { parseChannelTitle, parseVideoTitle } from '../../../mappings/content/utils'
 
 @Resolver()
 export class VideosResolver {
@@ -357,16 +356,12 @@ export class VideosResolver {
       const channelOwnerMemberId = video.channel.ownerMemberId
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        const linkPage = await videoExcludedLink(em)
         await addNotification(
           em,
           account,
           new VideoExcluded({
-            recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
-            data: new NotificationData({
-              linkPage,
-              text: videoExcludedText(video.title || ''),
-            }),
+            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
+            videoTitle: parseVideoTitle(video),
           })
         )
       }

@@ -14,9 +14,9 @@ import {
   ChannelCreated,
   ChannelRecipient,
   ChannelCreatedEventData,
-  NotificationData,
   ChannelFundsWithdrawn,
   YppUnverified,
+  MemberRecipient,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -35,6 +35,7 @@ import {
   parseContentActor,
   getChannelOwnerAccount,
   getAccountForMember,
+  parseChannelTitle,
 } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
@@ -133,15 +134,13 @@ export async function processChannelCreatedEvent({
     })
 
     const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
-    await addOnChainNotification(
-      { store: overlay, event },
+    await addNotification(
+      overlay.getEm(),
       ownerAccount,
       new ChannelCreated({
-        recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-        data: new NotificationData({
-          text: channelCreatedText(channel.title || ''),
-          linkPage: await channelCreatedLink(overlay.getEm(), channel.id),
-        }),
+        recipient: new MemberRecipient({ memberHandle: ownerMember.handle }),
+        channelId: channel.id,
+        channelTitle: parseChannelTitle(channel),
       }),
       event
     )
@@ -366,15 +365,12 @@ export async function processChannelFundsWithdrawnEvent({
 
   const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
 
-  await addOnChainNotification(
-    { store: overlay, event: entityEvent },
+  await addNotification(
+    overlay.getEm(),
     channelOwnerAccount,
     new ChannelFundsWithdrawn({
-      recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-      data: new NotificationData({
-        text: fundsWithdrawnFromChannelText(amount.toString()),
-        linkPage: channelFundsWithdrawnLink(),
-      }),
+      recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
+      amount,
     }),
     entityEvent
   )

@@ -1,8 +1,7 @@
 export {
   defaultNotificationPreferences,
   preferencesForNotification,
-  addOffChainNotification,
-  addOnChainNotification,
+  addNotification,
 } from './helpers'
 export * from './notificationTexts'
 export * from './notificationLinks'

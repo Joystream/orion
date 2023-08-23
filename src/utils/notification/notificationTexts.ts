@@ -153,121 +153,87 @@ export async function getMemberHandle(em: EntityManager, memberId: string): Prom
   return member.handle || ''
 }
 
-export async function textForNotification(
-  em: EntityManager,
-  notification: NotificationType
-): Promise<string> {
+export async function textForNotification(notification: NotificationType): Promise<string> {
   switch (notification.isTypeOf) {
     case 'ChannelExcluded':
-      return channelExcludedText(
-        await getChannelTitle(em, (notification.recipient as ChannelRecipient).channel)
-      )
+      return channelExcludedText((notification.recipient as ChannelRecipient).channelTitle)
     case 'VideoExcluded':
-      return videoExcludedText(await getVideoTitle(em, notification.video))
+      return videoExcludedText(notification.videoTitle)
     case 'VideoFeaturedOnCategoryPage':
-      return videoFeaturedOnCategoryPageText(
-        await getVideoTitle(em, notification.video),
-        await getCategoryNameFromVideo(em, notification.video)
-      )
+      return videoFeaturedOnCategoryPageText(notification.videoTitle, notification.categoryName)
     case 'VideoFeaturedAsCategoryHero':
-      return videoFeaturedAsHeroText(await getVideoTitle(em, notification.video))
+      return videoFeaturedAsHeroText(notification.videoTitle)
     case 'NewChannelFollower':
-      return newChannelFollowerText(
-        await getChannelTitle(em, (notification.recipient as ChannelRecipient).channel)
-      )
+      return newChannelFollowerText((notification.recipient as ChannelRecipient).channelTitle)
     case 'CommentPostedToVideo':
-      return commentPostedToVideoText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.member)
-      )
+      return commentPostedToVideoText(notification.videoTitle, notification.memberHandle)
     case 'VideoLiked':
-      return videoLikedText(await getVideoTitle(em, notification.video))
+      return videoLikedText(notification.videoTitle)
     case 'VideoDisliked':
-      return videoLikedText(await getVideoTitle(em, notification.video))
+      return videoLikedText(notification.videoTitle)
     case 'ChannelVerified':
       return channelVerifiedViaYPPText()
     case 'ChannelSuspended':
       return channelSuspendedViaYPPText()
     case 'BidMadeCompletingAuction':
       return bidMadeCompletingAuctionText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.bidder),
+        notification.videoTitle,
+        notification.bidderHandle,
         notification.amount.toString()
       )
     case 'ChannelCreated':
-      return channelCreatedText(await getChannelTitle(em, notification.channel))
+      return channelCreatedText(notification.channelTitle)
     case 'ChannelFundsWithdrawn':
       return fundsWithdrawnFromChannelText(notification.amount.toString())
     case 'CommentReply':
-      return commentRepliedText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.member)
-      )
+      return commentRepliedText(notification.videoTitle, notification.memberHandle)
     case 'ReactionToComment':
-      return commentReactedText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.member)
-      )
+      return commentReactedText(notification.videoTitle, notification.memberHandle)
     case 'CreatorReceivesAuctionBid':
       return nftBidReceivedText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.bidder),
+        notification.videoTitle,
+        notification.bidderHandle,
         notification.amount.toString()
       )
     case 'HigherBidPlaced':
-      return nftBidOutbidText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.bidder)
-      )
+      return nftBidOutbidText(notification.videoTitle, notification.newBidderHandle)
     case 'DirectChannelPaymentByMember':
       return channelReceivedDirectPaymentText(
-        await getChannelTitle(em, notification.member),
+        (notification.recipient as ChannelRecipient).channelTitle,
         notification.amount.toString()
       )
     case 'EnglishAuctionLost':
-      return timedAuctionBidLostText(await getVideoTitle(em, notification.video))
+      return timedAuctionBidLostText(notification.videoTitle)
     case 'EnglishAuctionWon':
-      return timedAuctionBidWonText(await getVideoTitle(em, notification.video))
+      return timedAuctionBidWonText(notification.videoTitle)
     case 'EnglishAuctionSettled':
-      return timedAuctionExpiredText(await getVideoTitle(em, notification.video))
+      return timedAuctionExpiredText(notification.videoTitle)
     case 'OpenAuctionLost':
-      return openAuctionBidLostText(await getVideoTitle(em, notification.video))
+      return openAuctionBidLostText(notification.videoTitle)
     case 'OpenAuctionWon':
-      return openAuctionBidWonText(await getVideoTitle(em, notification.video))
+      return openAuctionBidWonText(notification.videoTitle)
     case 'NewAuction':
-      return newNftOnAuctionText(
-        await getChannelTitle(em, (notification.recipient as ChannelRecipient).channel),
-        await getVideoTitle(em, notification.video)
-      )
+      return newNftOnAuctionText(notification.channelTitle, notification.videoTitle)
     case 'NewAuctionBid':
       return nftBidReceivedText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.bidder),
-        notification.bidAmount.toString()
+        notification.videoTitle,
+        notification.bidderHandle,
+        notification.amount.toString()
       )
     case 'NewNftOnSale':
-      return newNftOnSaleText(
-        await getChannelTitle(em, (notification.recipient as ChannelRecipient).channel),
-        await getVideoTitle(em, notification.video)
-      )
+      return newNftOnSaleText(notification.channelTitle, notification.videoTitle)
     case 'NftFeaturedOnMarketPlace':
-      return nftFeaturedOnMarketplaceText(await getVideoTitle(em, notification.video))
+      return nftFeaturedOnMarketplaceText(notification.videoTitle)
     case 'NftPurchased':
       return nftPurchasedText(
-        await getVideoTitle(em, notification.video),
-        await getMemberHandle(em, notification.buyer),
+        notification.videoTitle,
+        notification.buyerHandle,
         notification.price.toString()
       )
-    case 'RoyaltyPaid':
-      return nftRoyaltyPaymentReceivedText(
-        await getVideoTitle(em, notification.video),
-        notification.royaltyAmount.toString()
-      )
+    case 'NftRoyaltyPaid':
+      return nftRoyaltyPaymentReceivedText(notification.videoTitle, notification.amount.toString())
     case 'VideoPosted':
-      return newVideoPostedText(
-        await getChannelTitle(em, (notification.recipient as ChannelRecipient).channel),
-        await getVideoTitle(em, notification.video)
-      )
+      return newVideoPostedText(notification.channelTitle, notification.videoTitle)
     default:
       return ''
   }

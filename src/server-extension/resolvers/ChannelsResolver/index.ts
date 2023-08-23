@@ -33,7 +33,6 @@ import {
   Exclusion,
   ChannelRecipient,
   NewChannelFollower,
-  NotificationData,
   ChannelExcluded,
   ChannelVerified,
   ChannelVerification,
@@ -51,7 +50,7 @@ import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly } from '../middleware'
-import { getChannelOwnerAccount } from '../../../mappings/content/utils'
+import { getChannelOwnerAccount, parseChannelTitle } from '../../../mappings/content/utils'
 import {
   addNotification,
   channelExcludedLink,
@@ -250,10 +249,6 @@ export class ChannelsResolver {
           ownerAccount,
           new NewChannelFollower({
             recipient: new ChannelRecipient({ channelTitle }),
-            data: new NotificationData({
-              linkPage,
-              text: newChannelFollowerText(channelTitle),
-            }),
           })
         )
       }
@@ -388,21 +383,14 @@ export class ChannelsResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const linkPage = await channelSuspendedLink(em)
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        if (account) {
-          await addNotification(
-            em,
-            account,
-            new ChannelSuspended({
-              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-              data: new NotificationData({
-                linkPage,
-                text: channelSuspendedViaYPPText(),
-              }),
-            })
-          )
-        }
+        await addNotification(
+          em,
+          account,
+          new ChannelSuspended({
+            recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
+          })
+        )
       }
 
       return {
@@ -449,21 +437,14 @@ export class ChannelsResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const linkPage = await channelVerifiedLink(em)
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        if (account) {
-          await addNotification(
-            em,
-            account,
-            new ChannelVerified({
-              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-              data: new NotificationData({
-                linkPage,
-                text: channelVerifiedViaYPPText(),
-              }),
-            })
-          )
-        }
+        await addNotification(
+          em,
+          account,
+          new ChannelVerified({
+            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
+          })
+        )
       }
 
       return {
@@ -515,21 +496,14 @@ export class ChannelsResolver {
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const linkPage = await channelExcludedLink(em)
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        if (account) {
-          await addNotification(
-            em,
-            account,
-            new ChannelExcluded({
-              recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-              data: new NotificationData({
-                linkPage,
-                text: channelExcludedText(channel.title || ''),
-              }),
-            })
-          )
-        }
+        await addNotification(
+          em,
+          account,
+          new ChannelExcluded({
+            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
+          })
+        )
       }
 
       return {
