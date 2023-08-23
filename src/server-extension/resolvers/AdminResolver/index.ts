@@ -336,7 +336,7 @@ export class AdminResolver {
       for (const featuredNftId of featuredNftsIds) {
         const featuredNft = await em.getRepository('OwnedNft').findOne({
           where: { id: featuredNftId },
-          relations: { video: { channel: true } },
+          relations: { video: { id: true, title: true, channel: true } },
         })
         if (featuredNft?.video?.channel) {
           const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
