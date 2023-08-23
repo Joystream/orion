@@ -189,16 +189,18 @@ export class AdminResolver {
       relations: { channel: true, category: true },
       take: 1,
     })
-    if (video?.channel) {
+    // if category for video is defined then send notification as otherwise full notificatino info won't be defined
+    const category = video?.category
+    if (video?.channel && category) {
       const account = await getChannelOwnerAccount(em, video.channel)
       await addNotification(
         em,
         account,
         new VideoFeaturedAsCategoryHero({
-          recipient: new ChannelRecipient({ channelTitle: video.channel.title || '' }),
-          categoryId: video.category?.id || '',
+          recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
+          categoryId: category?.id || '',
           videoTitle: parseVideoTitle(video),
-          categoryName: video.category?.name || '',
+          categoryName: category?.name || '',
         })
       )
     }
