@@ -241,19 +241,22 @@ export class AdminResolver {
       const video = (
         await em.getRepository(Video).find({
           where: { id: videoId },
-          relations: { channel: true, category: true },
+          relations: { channel: true },
           take: 1,
         })
       )?.[0]
       if (video?.channel?.id) {
         const creatorAccount = await getChannelOwnerAccount(em, video.channel)
+        const category = await em
+          .getRepository(VideoCategory)
+          .findOneByOrFail({ id: args.categoryId })
         await addNotification(
           em,
           creatorAccount,
           new VideoFeaturedOnCategoryPage({
             recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-            categoryId: video.category?.id || '',
-            categoryName: video.category?.name || '',
+            categoryId: category.id,
+            categoryName: category.name || '??',
             videoTitle: parseVideoTitle(video),
           })
         )
