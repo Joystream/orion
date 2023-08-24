@@ -1,18 +1,26 @@
 import { ConfigVariable, config } from '../utils/config'
 import schedule from 'node-schedule'
 import { globalEm } from '../utils/globalEm'
-import { EmailDeliveryStatus, NotificationEmailDelivery } from '../model'
-import { Equal } from 'typeorm'
+import {
+  EmailDeliveryStatus,
+  NotificationEmailDelivery,
+  fromJsonEmailDeliveryStatus,
+} from '../model'
+import { FindOptionsWhere } from 'typeorm'
 import { createMailContent, executeMailDelivery } from './utils'
 
 // Function to send new data
-async function sendNew() {
+export async function sendNew() {
   const em = await globalEm
   console.log('Sending new emails')
   const newEmailDeliveries = await em.getRepository(NotificationEmailDelivery).find({
-    where: { deliveryStatus: Equal(EmailDeliveryStatus.Unsent) },
+    where: {
+      deliveryStatus: fromJsonEmailDeliveryStatus({
+        isTypeOf: 'Unsent',
+        phantom: undefined,
+      }) as unknown as FindOptionsWhere<EmailDeliveryStatus>,
+    },
     relations: { notification: { account: true } },
-    select: ['id', 'notification', 'deliveryStatus'],
   })
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account

@@ -1,17 +1,3 @@
-<<<<<<< HEAD:db/migrations/1695920086688-Data.js
-module.exports = class Data1695920086688 {
-    name = 'Data1695920086688'
-||||||| parent of 70648b27d (test: :white_check_mark: add test setup):db/migrations/1695917318799-Data.js
-module.exports = class Data1695917318799 {
-    name = 'Data1695917318799'
-=======
-<<<<<<< HEAD:db/migrations/1695917318799-Data.js
-module.exports = class Data1695917318799 {
-    name = 'Data1695917318799'
-||||||| parent of 7d3f67be8 (test: :white_check_mark: add test setup):db/migrations/1695907091293-Data.js
-module.exports = class Data1695907091293 {
-    name = 'Data1695907091293'
-=======
 <<<<<<<< HEAD:db/migrations/1695907091293-Data.js
 module.exports = class Data1695907091293 {
     name = 'Data1695907091293'
@@ -22,8 +8,6 @@ module.exports = class Data1692869984811 {
 module.exports = class Data1692893407716 {
     name = 'Data1692893407716'
 >>>>>>>> aa9ef4814 (test: :white_check_mark: add test setup):db/migrations/1692893407716-Data.js
->>>>>>> 7d3f67be8 (test: :white_check_mark: add test setup):db/migrations/1695907091293-Data.js
->>>>>>> 70648b27d (test: :white_check_mark: add test setup):db/migrations/1695917318799-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)

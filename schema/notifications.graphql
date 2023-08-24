@@ -9,10 +9,38 @@ type NotificationEmailDelivery @entity {
   deliveryStatus: EmailDeliveryStatus!
 }
 
-enum EmailDeliveryStatus {
-  Unsent
-  Success
-  Failure
+union EmailDeliveryStatus = Unsent | Success | Failure | Discard
+
+type Discard @variant {
+  phantom: Int
+}
+
+type Unsent @variant {
+  phantom: Int
+}
+
+type Success @variant {
+  succesDelivery: SuccessDelivery!
+}
+
+type Failure @variant {
+  failureDelivery: FailedDelivery!
+}
+
+type SuccessDelivery @entity {
+  "uuid"
+  id: ID!
+
+  "timestamp"
+  timestamp: DateTime!
+}
+
+type FailedDelivery @entity {
+  "uuid"
+  id: ID!
+
+  "timestamp"
+  timestamp: DateTime!
 }
 
 type Read {

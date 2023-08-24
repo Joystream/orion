@@ -1,23 +1,32 @@
 {
+  "memberships": [
+    {
+      "id": "16",
+      "createdAt": "2023-08-24T15:22:00.001000Z",
+      "metadata": {
+        "id": "16"
+      },
+      "bannedFromChannels": [],
+      "totalChannelsCreated": 0,
+      "handle": "Alice",
+      "controllerAccount": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
+      "channels": []
+    }
+  ],
   "notifications": [
     {
       "id": "OnChainNotification-1",
+      "accountId": "00000001",
       "status": {
-        "__typename": "Unread"
+        "isTypeOf": "Unread"
       },
       "notificationType": {
-        "__typename": "ChannelCreated",
+        "isTypeOf": "ChannelCreated",
         "channelId": "1",
         "channelTitle": "Test channel",
         "recipient": {
-          "__typename": "MemberRecipient",
+          "isTypeOf": "MemberRecipient",
           "memberHandle": "Alice"
-        }
-      },
-      "account": {
-        "id": "00000001",
-        "membership": {
-          "handle": "Alice"
         }
       }
     }
@@ -29,6 +38,12 @@
       "notification": {
         "id": "OnChainNotification-1"
       }
+    }
+  ],
+  "users": [
+    {
+      "id": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "isRoot": false
     }
   ],
   "accounts": [
