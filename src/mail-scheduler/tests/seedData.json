@@ -1,0 +1,46 @@
+{
+  "notifications": [
+    {
+      "id": "OnChainNotification-1",
+      "status": {
+        "__typename": "Unread"
+      },
+      "notificationType": {
+        "__typename": "ChannelCreated",
+        "channelId": "1",
+        "channelTitle": "Test channel",
+        "recipient": {
+          "__typename": "MemberRecipient",
+          "memberHandle": "Alice"
+        }
+      },
+      "account": {
+        "id": "00000001",
+        "membership": {
+          "handle": "Alice"
+        }
+      }
+    }
+  ],
+  "notificationEmailDeliveries": [
+    {
+      "id": "1",
+      "deliveryStatus": "Unsent",
+      "notification": {
+        "id": "OnChainNotification-1"
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "id": "00000001",
+      "userId": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "email": "16_Alice.test@example.com",
+      "isEmailConfirmed": false,
+      "isBlocked": false,
+      "registeredAt": "2023-08-08T06:11:07.300Z",
+      "membershipId": "16",
+      "joystreamAccount": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
+    }
+  ]
+}
