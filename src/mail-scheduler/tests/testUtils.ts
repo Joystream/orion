@@ -12,7 +12,6 @@ import {
   SuccessDelivery,
   FailedDelivery,
 } from '../../model'
-import { globalEm } from '../../utils/globalEm'
 import { defaultNotificationPreferences } from '../../utils/notification'
 
 export async function populateDbWithSeedData(em: EntityManager) {

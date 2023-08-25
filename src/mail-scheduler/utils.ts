@@ -1,10 +1,18 @@
 import { EntityManager } from 'typeorm'
 import { notificationEmailContent } from '../auth-server/emails'
-import { Account, EmailDeliveryStatus, Notification } from '../model'
+import {
+  Account,
+  EmailDeliveryStatus,
+  Failure,
+  Notification,
+  Success,
+  SuccessDelivery,
+  SuccessReport,
+} from '../model'
 import { ConfigVariable, config } from '../utils/config'
-
 import { sgSendMail } from '../utils/mail'
 import { getMemberHandle, textForNotification, linkForNotification } from '../utils/notification'
+import { uniqueId } from '../utils/crypto'
 
 export async function executeMailDelivery(
   appName: string,
@@ -19,9 +27,20 @@ export async function executeMailDelivery(
     content,
   })
   if (resp?.statusCode === 202 || resp?.statusCode === 200) {
-    return EmailDeliveryStatus.Success
+    return processSuccessCase()
   }
-  return EmailDeliveryStatus.Failure
+  return processFailureCase()
+}
+
+function processSuccessCase(): EmailDeliveryStatus {
+  return new Success({
+    succesDelivery: '00000',
+  })
+}
+function processFailureCase(): EmailDeliveryStatus {
+  return new Failure({
+    failureDelivery: '00000',
+  })
 }
 
 export async function createMailContent(

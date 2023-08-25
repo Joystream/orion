@@ -6,22 +6,29 @@ import {
   NotificationEmailDelivery,
   fromJsonEmailDeliveryStatus,
 } from '../model'
-import { FindOptionsWhere } from 'typeorm'
+import { EntityManager, FindOptionsWhere } from 'typeorm'
 import { createMailContent, executeMailDelivery } from './utils'
+
+export async function findDeliveriesByStatus(
+  em: EntityManager,
+  status: string
+): Promise<NotificationEmailDelivery[]> {
+  const result = await em.getRepository(NotificationEmailDelivery).find({
+    where: {
+      deliveryStatus: fromJsonEmailDeliveryStatus({
+        isTypeOf: status,
+      }) as unknown as FindOptionsWhere<EmailDeliveryStatus>,
+    },
+    relations: { notification: { account: true } },
+  })
+  return result
+}
 
 // Function to send new data
 export async function sendNew() {
   const em = await globalEm
   console.log('Sending new emails')
-  const newEmailDeliveries = await em.getRepository(NotificationEmailDelivery).find({
-    where: {
-      deliveryStatus: fromJsonEmailDeliveryStatus({
-        isTypeOf: 'Unsent',
-        phantom: undefined,
-      }) as unknown as FindOptionsWhere<EmailDeliveryStatus>,
-    },
-    relations: { notification: { account: true } },
-  })
+  const newEmailDeliveries = await findDeliveriesByStatus(em, 'Unsent')
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
     const notification = notificationDelivery.notification
