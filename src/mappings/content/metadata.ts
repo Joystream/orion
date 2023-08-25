@@ -56,6 +56,8 @@ import {
   MemberBannedFromChannelEventData,
   Membership,
   Event,
+  DirectChannelPaymentByMember,
+  ChannelRecipient,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
@@ -65,7 +67,16 @@ import {
   metaprotocolTransactionFailure,
   videoRelevanceManager,
 } from '../utils'
-import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
+import {
+  AsDecoded,
+  ASSETS_MAP,
+  EntityAssetProps,
+  EntityAssetsMap,
+  getChannelOwnerAccount,
+  MetaNumberProps,
+  parseChannelTitle,
+} from './utils'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -636,7 +647,7 @@ export async function processChannelPaymentFromMember(
     paymentContext.channel = channel.id
   }
 
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new ChannelPaymentMadeEventData({
       payer: member.id,
@@ -646,6 +657,19 @@ export async function processChannelPaymentFromMember(
       amount,
     }),
   })
+
+  const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+  const channelTitle = parseChannelTitle(channel)
+  await addNotification(
+    overlay.getEm(),
+    ownerAccount,
+    new DirectChannelPaymentByMember({
+      recipient: new ChannelRecipient({ channelTitle }),
+      amount,
+      payerHandle: member.handle,
+    }),
+    event
+  )
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,

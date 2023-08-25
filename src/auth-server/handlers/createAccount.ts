@@ -6,6 +6,7 @@ import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../mo
 import { AuthContext } from '../../utils/auth'
 import { idStringFromNumber } from '../../utils/misc'
 import { verifyActionExecutionRequest } from '../utils'
+import { defaultNotificationPreferences } from '../../utils/notification/helpers'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -76,6 +77,7 @@ export const createAccount: (
         )
       }
 
+      const notificationPreferences = defaultNotificationPreferences()
       const account = new Account({
         id: idStringFromNumber(nextAccountId),
         email,
@@ -85,6 +87,7 @@ export const createAccount: (
         userId: authContext.user.id,
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
+        notificationPreferences,
       })
 
       await em.save([

@@ -1,14 +1,23 @@
 import 'reflect-metadata'
-import { Arg, Args, Ctx, Info, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, MoreThan } from 'typeorm'
 import {
   AddVideoViewResult,
+  ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { VideoViewEvent, Video, Report } from '../../../model'
+import {
+  VideoViewEvent,
+  Video,
+  Report,
+  Exclusion,
+  Account,
+  VideoExcluded,
+  ChannelRecipient,
+} from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -36,6 +45,9 @@ import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
+import { OperatorOnly } from '../middleware'
+import { addNotification } from '../../../utils/notification/helpers'
+import { parseChannelTitle, parseVideoTitle } from '../../../mappings/content/utils'
 
 @Resolver()
 export class VideosResolver {
@@ -296,6 +308,69 @@ export class VideosResolver {
         videoId,
         created: true,
         createdAt: newReport.timestamp,
+        rationale,
+      }
+    })
+  }
+
+  @Mutation(() => ExcludeVideoInfo)
+  @UseMiddleware(OperatorOnly)
+  async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {
+    const em = await this.em()
+    return withHiddenEntities(em, async () => {
+      const video = await em.findOne(Video, {
+        where: { id: videoId },
+        relations: { channel: true },
+      })
+
+      if (!video) {
+        throw new Error(`Video by id ${videoId} not found!`)
+      }
+
+      const existingExclusion = await em.findOne(Exclusion, {
+        where: { channelId: video.channel.id, videoId },
+      })
+      // If exclusion already exists - return its data with { created: false }
+      if (existingExclusion) {
+        return {
+          id: existingExclusion.id,
+          channelId: video.channel.id,
+          videoId,
+          created: false,
+          createdAt: existingExclusion.timestamp,
+          rationale: existingExclusion.rationale,
+        }
+      }
+      // If exclusion doesn't exist, create a new one
+      const newExclusion = new Exclusion({
+        id: uniqueId(8),
+        channelId: video.channel.id,
+        videoId,
+        rationale,
+        timestamp: new Date(),
+      })
+      video.isExcluded = true
+      await em.save(newExclusion)
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = video.channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+        await addNotification(
+          em,
+          account,
+          new VideoExcluded({
+            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
+            videoTitle: parseVideoTitle(video),
+          })
+        )
+      }
+
+      return {
+        id: newExclusion.id,
+        videoId,
+        created: true,
+        createdAt: newExclusion.timestamp,
         rationale,
       }
     })

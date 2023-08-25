@@ -1,3 +1,4 @@
+import pLimit from 'p-limit'
 import {
   AppAction,
   IAppAction,
@@ -43,7 +44,19 @@ import {
   VideoMediaEncoding,
   App,
   BannedMember,
-  Notification,
+  ChannelFollow,
+  Account,
+  HigherBidPlaced,
+  MemberRecipient,
+  NotificationType,
+  OpenAuctionWon,
+  OpenAuctionLost,
+  EnglishAuctionWon,
+  EnglishAuctionLost,
+  Membership,
+  NewAuctionBid,
+  ChannelRecipient,
+  NftRoyaltyPaid,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -60,7 +73,9 @@ import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import { ed25519Verify } from '@polkadot/util-crypto'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
+import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
+import { addNotification } from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -148,6 +163,7 @@ export async function deleteChannel(overlay: EntityManagerOverlay, channelId: bi
 
   overlay.getRepository(BannedMember).remove(...bannedMembers)
   overlay.getRepository(Channel).remove(channelId.toString())
+  // delete channel related notifications
 }
 
 export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint) {
@@ -159,8 +175,6 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   const mediaMetadataRepository = overlay.getRepository(VideoMediaMetadata)
   const mediaEncodingRepository = overlay.getRepository(VideoMediaEncoding)
   const subtitlesRepository = overlay.getRepository(VideoSubtitle)
-  const notificationRepository = overlay.getRepository(Notification)
-  const em = overlay.getEm()
 
   const video = await videoRepository.getByIdOrFail(videoId.toString())
   const comments = await commentRepository.getManyByRelation('videoId', video.id)
@@ -169,28 +183,6 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   const mediaMetadata = await mediaMetadataRepository.getOneByRelation('videoId', video.id)
   const mediaEncoding = await mediaEncodingRepository.getById(mediaMetadata?.encodingId || '')
   const subtitles = await subtitlesRepository.getManyByRelation('videoId', video.id)
-
-  // Events to remove
-  const eventsToRemove: Event[] = []
-  const notificationsToRemove: Flat<Notification>[] = []
-  if (comments.length) {
-    // FIXME: We need to persist the state to get all CommentCreated/CommentTextUpdated events,
-    // as the relationship is nested inside jsonb field, so we can't use any existing RepositoryOverlay methods.
-    await overlay.updateDatabase()
-    const relatedEvents = await em
-      .getRepository(Event)
-      .createQueryBuilder('e')
-      .where(`e.data->>'comment' IN (${comments.map((c, i) => `:cid_${i}`).join(', ')})`)
-      .setParameters(Object.fromEntries(comments.map((c, i) => [`cid_${i}`, c.id])))
-      .getMany()
-    eventsToRemove.push(...relatedEvents)
-    const relatedNotifications = (
-      await Promise.all(
-        eventsToRemove.map((e) => notificationRepository.getManyByRelation('eventId', e.id))
-      )
-    ).flat()
-    notificationsToRemove.push(...relatedNotifications)
-  }
 
   commentReactionRepository.remove(...commentReactions)
   commentRepository.remove(...comments)
@@ -206,8 +198,6 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   }
   subtitlesRepository.remove(...subtitles)
   videoRepository.remove(video)
-  notificationRepository.remove(...notificationsToRemove)
-  overlay.getRepository(Event).remove(...eventsToRemove)
 }
 
 export async function processNft(
@@ -650,4 +640,265 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
         }
       : null
   ).toU8a()
+}
+
+export async function getFollowersAccountsForChannel(
+  overlay: EntityManagerOverlay,
+  channelId: string
+): Promise<Account[]> {
+  const followers = await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
+
+  const followersUserIds = followers
+    .filter((follower) => follower?.userId)
+    .map((follower) => follower.userId as string)
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+  const followersAccounts: (Account | null)[] = await Promise.all(
+    followersUserIds.map((userId) =>
+      limit(async () => await overlay.getEm().getRepository(Account).findOneBy({ userId }))
+    )
+  )
+
+  return followersAccounts.filter((account) => account) as Account[]
+}
+
+export async function getChannelOwnerAccount(
+  em: EntityManager,
+  channel: Flat<Channel>
+): Promise<Account | null> {
+  const ownerMemberId = channel.ownerMemberId
+  return getAccountForMember(em, ownerMemberId)
+}
+
+export async function getAccountForMember(
+  em: EntityManager,
+  memberId: string | null | undefined
+): Promise<Account | null> {
+  if (!memberId) {
+    return null
+  }
+  // accounts are created by orion_auth_api and updated by orion_graphql-server
+  const memberAccount = await em.getRepository(Account).findOneBy({ membershipId: memberId })
+  return memberAccount
+}
+
+export async function getAccountsForBidders(
+  overlay: EntityManagerOverlay,
+  auctionBids: Flat<Bid>[]
+): Promise<(Account | null)[]> {
+  const biddersAccounts = await Promise.all(
+    auctionBids.map(async (bid) => {
+      const bidderAccount = await getAccountForMember(overlay.getEm(), bid.bidderId)
+      return bidderAccount
+    })
+  )
+
+  return biddersAccounts
+}
+
+export type NewBidNotificationMetadata = {
+  videoId: string
+  videoTitle: string
+  newTopBidderHandle: string
+  bidAmount: bigint
+}
+
+export async function addNewBidNotification(
+  overlay: EntityManagerOverlay,
+  owner: NftOwner,
+  previousTopBid: Flat<Bid> | undefined | null,
+  event: Event,
+  { videoId, videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
+) {
+  if (previousTopBid?.bidderId) {
+    const outbiddedMemberId = previousTopBid.bidderId
+    const outbiddedMemberHandle = await memberHandleById(overlay, outbiddedMemberId)
+    const outbiddedMemberAccount = await getAccountForMember(overlay.getEm(), outbiddedMemberId)
+    await addNotification(
+      overlay.getEm(),
+      outbiddedMemberAccount,
+      new HigherBidPlaced({
+        recipient: new MemberRecipient({ memberHandle: outbiddedMemberHandle }),
+        newBidderHandle: newTopBidderHandle,
+        videoId,
+        videoTitle,
+      }),
+      event
+    )
+  }
+
+  if (owner.isTypeOf === 'NftOwnerChannel') {
+    await notifyChannelOwner(
+      overlay,
+      owner,
+      (channelTitle) =>
+        new NewAuctionBid({
+          recipient: new ChannelRecipient({ channelTitle }),
+          amount: bidAmount,
+          bidderHandle: newTopBidderHandle,
+          videoId,
+          videoTitle,
+        }),
+      event
+    )
+  }
+}
+
+export async function notifyChannelFollowers(
+  overlay: EntityManagerOverlay,
+  channelId: string,
+  notificationTypeForMember: (handle: string) => NotificationType,
+  event: Event
+) {
+  const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
+  for (const followerAccount of followersAccounts) {
+    const handle = await memberHandleById(overlay, followerAccount.membershipId)
+    const notificationType = await notificationTypeForMember(handle || '')
+    await addNotification(overlay.getEm(), followerAccount, notificationType, event)
+  }
+}
+
+export async function notifyBiddersOnAuctionCompletion(
+  overlay: EntityManagerOverlay,
+  biddersMemberIds: string[],
+  winnerId: bigint,
+  notifier: {
+    won: (memberHandle: string) => NotificationType
+    lost: (memberHandle: string) => NotificationType
+  },
+  event: Event
+) {
+  for (const bidderId of biddersMemberIds.filter((id) => id)) {
+    const account = await getAccountForMember(overlay.getEm(), bidderId)
+    const notification =
+      bidderId === winnerId.toString() ? notifier.won(bidderId) : notifier.lost(bidderId)
+
+    await addNotification(overlay.getEm(), account, notification, event)
+  }
+}
+
+export type PageLinkData = {
+  em: EntityManager
+  videoId: string
+}
+
+export type AuctionNotifiers = {
+  won: (memberId: string) => NotificationType
+  lost: (memberId: string) => NotificationType
+}
+
+export const openAuctionNotifiers = async (
+  videoId: string,
+  videoTitle: string
+): Promise<AuctionNotifiers> => {
+  return {
+    won: (memberHandle: string) =>
+      new OpenAuctionWon({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        videoId,
+        videoTitle,
+      }),
+    lost: (memberHandle: string) =>
+      new OpenAuctionLost({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        videoId,
+        videoTitle,
+      }),
+  }
+}
+
+export const englishAuctionNotifiers = async (
+  videoId: string,
+  videoTitle: string
+): Promise<AuctionNotifiers> => {
+  return {
+    won: (memberHandle: string) =>
+      new EnglishAuctionWon({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        videoId,
+        videoTitle,
+      }),
+    lost: (memberHandle: string) =>
+      new EnglishAuctionLost({
+        recipient: new MemberRecipient({
+          memberHandle,
+        }),
+        videoId,
+        videoTitle,
+      }),
+  }
+}
+
+export async function notifyChannelOwner(
+  overlay: EntityManagerOverlay,
+  nftOwner: NftOwner,
+  notificationType: (channelTitle: string) => NotificationType,
+  event: Event
+): Promise<void> {
+  if (nftOwner.isTypeOf === 'NftOwnerChannel') {
+    const channelId = nftOwner.channel
+    const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+    const nftOwnerAccount = await getAccountForMember(overlay.getEm(), channel.ownerMemberId)
+    await addNotification(
+      overlay.getEm(),
+      nftOwnerAccount,
+      notificationType(channel.title || ''),
+      event
+    )
+  }
+}
+
+export async function addRoyaltyPaymentNotification(
+  overlay: EntityManagerOverlay,
+  video: Flat<Video>,
+  royaltyPrice: bigint,
+  event: Event
+): Promise<void> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
+  const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+  await addNotification(
+    overlay.getEm(),
+    creatorAccount,
+    new NftRoyaltyPaid({
+      recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
+      amount: royaltyPrice,
+      videoId: video.id,
+      videoTitle: parseVideoTitle(video),
+    }),
+    event
+  )
+}
+
+export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
+  const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
+  const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
+  return royaltyPrice
+}
+
+export function parseChannelTitle(channel: Flat<Channel>): string {
+  return channel.title || '??'
+}
+
+export function parseVideoTitle(video: Flat<Video>): string {
+  return video.title || '??'
+}
+
+export async function memberHandleById(
+  overlay: EntityManagerOverlay,
+  memberId: string
+): Promise<string> {
+  const member = await overlay.getRepository(Membership).getByIdOrFail(memberId)
+  // handle not null (runtime guarantee)
+  return assertNotNull(member.handle)
+}
+
+export async function getChannelTitleById(overlay: EntityManagerOverlay, channelId: string) {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
+  return parseChannelTitle(channel)
 }

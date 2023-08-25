@@ -5,6 +5,7 @@
 /**Versions.jsonl
 
 # IDE files
+/.vscode
 /.idea
 src/model/generated
 /schema.graphql

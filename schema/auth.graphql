@@ -108,6 +108,58 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
+
+  "runtime notifications"
+  notifications: [Notification!]! @derivedFrom(field: "account")
+
+  "notification preferences for the account"
+  notificationPreferences: AccountNotificationPreferences!
+}
+
+type AccountNotificationPreferences {
+  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design:
+  channelExcludedFromApp: NotificationPreference!
+  videoExcludedFromApp: NotificationPreference!
+  videoFeaturedAsHero: NotificationPreference!
+  videoFeaturedOnCategoryPage: NotificationPreference!
+  nftFeaturedOnMarketPlace: NotificationPreference!
+  newChannelFollower: NotificationPreference!
+  videoCommentCreated: NotificationPreference!
+  videoLiked: NotificationPreference!
+  videoDisliked: NotificationPreference!
+  yppChannelVerified: NotificationPreference!
+  yppChannelSuspended: NotificationPreference!
+  nftBought: NotificationPreference!
+  timedAuctionExpired: NotificationPreference!
+  bidMadeOnNft: NotificationPreference!
+  royaltyReceived: NotificationPreference!
+  channelPaymentReceived: NotificationPreference!
+  channelReceivedFundsFromWg: NotificationPreference!
+  newPayoutUpdatedByCouncil: NotificationPreference!
+  channelFundsWithdrawn: NotificationPreference!
+
+  # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
+  channelCreated: NotificationPreference!
+  replyToComment: NotificationPreference!
+  reactionToComment: NotificationPreference!
+  videoPosted: NotificationPreference!
+  newNftOnAuction: NotificationPreference!
+  newNftOnSale: NotificationPreference!
+  higherBidThanYoursMade: NotificationPreference!
+  auctionWon: NotificationPreference!
+  auctionLost: NotificationPreference!
+  openAuctionBidCanBeWithdrawn: NotificationPreference!
+  fundsFromCouncilReceived: NotificationPreference!
+  fundsToExternalWalletSent: NotificationPreference!
+  fundsFromWgReceived: NotificationPreference!
+}
+
+type NotificationPreference {
+  "Notification is enabled in the app"
+  inAppEnabled: Boolean!
+
+  "Allows to send email for the notification"
+  emailEnabled: Boolean!
 }
 
 enum TokenType {

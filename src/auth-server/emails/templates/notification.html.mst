@@ -145,7 +145,7 @@
                   <tbody>
                     <tr>
                       <td align="left" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:20px;font-weight:bold;line-height:1;text-align:left;color:#FFFFFF;">Orion</div>
+                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:20px;font-weight:bold;line-height:1;text-align:center;color:#FFFFFF;">{{ appName }}</div>
                       </td>
                     </tr>
                   </tbody>
@@ -171,7 +171,7 @@
                   <tbody>
                     <tr>
                       <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#000000;"></div>
+                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:24px;text-align:center;color:#000000;">{{ notificationText }}</div>
                       </td>
                     </tr>
                   </tbody>
@@ -206,7 +206,7 @@
                           <tr>
                             <td align="center" bgcolor="#0324fc" role="presentation" style="border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:#0324fc;" valign="middle">
                               <p style="display:inline-block;background:#0324fc;color:#FFFFFF;font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:14px;font-weight:normal;line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;">
-                                <a href="{{ link }}">View in {{ appName }}</a><br />
+                                <a href="{{ notificationLink }}">View in {{ appName }}</a><br />
                               </p>
                             </td>
                           </tr>
@@ -254,7 +254,9 @@
                     </tr>
                     <tr>
                       <td align="center" style="font-size:0px;padding:10px 25px;word-break:break-word;">
-                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:24px;text-align:center;color:#FFFFFF;">You can unsubscribe at any time.</div>
+                        <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:12px;line-height:24px;text-align:center;color:#FFFFFF;">You can <a href="{{ preferencePageLink }}">
+                            <mj-text color="#FFFFFF">unsubscribe</mj-text>
+                          </a> at any time.</div>
                       </td>
                     </tr>
                   </tbody>
@@ -269,4 +271,5 @@
     <!--[if mso | IE]></td></tr></table><![endif]-->
   </div>
 </body>
+
 </html>
