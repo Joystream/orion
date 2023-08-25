@@ -2,10 +2,9 @@ import { EntityManager } from 'typeorm'
 import { notificationEmailContent } from '../auth-server/emails'
 import {
   Account,
+  DeliveryStatus,
   EmailDeliveryStatus,
-  Failure,
   Notification,
-  Success,
   SuccessDelivery,
   SuccessReport,
 } from '../model'
@@ -33,14 +32,10 @@ export async function executeMailDelivery(
 }
 
 function processSuccessCase(): EmailDeliveryStatus {
-  return new Success({
-    succesDelivery: '00000',
-  })
+  return new EmailDeliveryStatus({})
 }
 function processFailureCase(): EmailDeliveryStatus {
-  return new Failure({
-    failureDelivery: '00000',
-  })
+  return new EmailDeliveryStatus({})
 }
 
 export async function createMailContent(

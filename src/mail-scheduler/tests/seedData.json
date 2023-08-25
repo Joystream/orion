@@ -40,6 +40,18 @@
       }
     }
   ],
+  "emailDeliveryStatuses": [
+    {
+      "id": "1",
+      "deliveryStatus": "UNSENT",
+      "notificationDeliveryId": "1",
+      "successDelivery": [],
+      "failureDelivery": [],
+      "notification": {
+        "id": "OnChainNotification-1"
+      }
+    }
+  ],
   "users": [
     {
       "id": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",

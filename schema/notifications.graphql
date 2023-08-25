@@ -73,6 +73,9 @@ type FailureReport @entity {
   "timestamp"
   timestamp: DateTime!
 
+  "error code / error status encountered"
+  errorCode: String!
+
   "failed Delivery FK"
   failedDelivery: FailedDelivery @derivedFrom(field: "failureReport")
 }

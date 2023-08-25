@@ -2,6 +2,7 @@ import { assert, expect } from 'chai'
 import {
   Account,
   ChannelCreated,
+  DeliveryStatus,
   EmailDeliveryStatus,
   FailedDelivery,
   MemberRecipient,
@@ -10,13 +11,11 @@ import {
   NotificationEmailDelivery,
   SuccessDelivery,
   Unread,
-  Unsent,
   User,
-  fromJsonEmailDeliveryStatus,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 import { globalEm } from '../../utils/globalEm'
-import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { EntityManager, Equal, FindOptionsWhere } from 'typeorm'
 import _ from 'lodash'
 import { clearDb, populateDbWithSeedData } from './testUtils'
 
@@ -42,18 +41,15 @@ describe('Database seed data tests', () => {
       expect(result?.membership.handle).to.equal(seedData.memberships[0].handle)
     })
     it('check that notification delivery entity is correct', async () => {
-      const result = await em.getRepository(NotificationEmailDelivery).findOne({
+      const result = await em.getRepository(EmailDeliveryStatus).findOne({
         where: {
-          deliveryStatus: fromJsonEmailDeliveryStatus({
-            isTypeOf: 'Unsent',
-            phantom: undefined,
-          }) as unknown as FindOptionsWhere<EmailDeliveryStatus>,
+          deliveryStatus: Equal(DeliveryStatus.UNSENT),
         },
-        relations: { notification: { account: true } },
+        relations: { notificationDelivery: { notification: { account: true } } },
       })
 
       expect(result).to.not.be.null
-      expect(result?.notification.account.id).to.equal(seedData.accounts[0].id)
+      expect(result?.notificationDelivery.notification.account.id).to.equal(seedData.accounts[0].id)
     })
   })
 
@@ -65,6 +61,7 @@ describe('Database seed data tests', () => {
       const accounts = await em.getRepository(Account).find({})
       const notifications = await em.getRepository(Notification).find({})
       const deliveries = await em.getRepository(NotificationEmailDelivery).find({})
+      const deliveryStatuses = await em.getRepository(EmailDeliveryStatus).find({})
       const successDeliveries = await em.getRepository(SuccessDelivery).find({})
       const failedDeliveries = await em.getRepository(FailedDelivery).find({})
 
@@ -73,6 +70,7 @@ describe('Database seed data tests', () => {
       expect(deliveries).to.be.empty
       expect(successDeliveries).to.be.empty
       expect(failedDeliveries).to.be.empty
+      expect(deliveryStatuses).to.be.empty
     })
   })
 })

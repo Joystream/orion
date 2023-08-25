@@ -8,9 +8,9 @@ import {
   ChannelCreated,
   MemberRecipient,
   NotificationEmailDelivery,
-  Unsent,
   SuccessDelivery,
   FailedDelivery,
+  EmailDeliveryStatus,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 
@@ -54,9 +54,14 @@ export async function populateDbWithSeedData(em: EntityManager) {
   for (const _notificationEmailDelivery of seedData.notificationEmailDeliveries) {
     const notificationEmailDelivery = new NotificationEmailDelivery({
       ..._notificationEmailDelivery,
-      deliveryStatus: new Unsent({}),
     })
     await em.save(notificationEmailDelivery)
+  }
+  for (const _emailDeliveryStatus of seedData.emailDeliveryStatuses) {
+    const emailDeliveryStatus = new EmailDeliveryStatus({
+      ..._emailDeliveryStatus,
+    })
+    await em.save(emailDeliveryStatus)
   }
   return em
 }
@@ -64,6 +69,7 @@ export async function populateDbWithSeedData(em: EntityManager) {
 export async function clearDb(em: EntityManager): Promise<void> {
   await em.getRepository(SuccessDelivery).delete({})
   await em.getRepository(FailedDelivery).delete({})
+  await em.getRepository(EmailDeliveryStatus).delete({})
   await em.getRepository(NotificationEmailDelivery).delete({})
   await em.getRepository(Notification).delete({})
   await em.getRepository(Account).delete({})

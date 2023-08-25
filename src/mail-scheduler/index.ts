@@ -1,46 +1,39 @@
 import { ConfigVariable, config } from '../utils/config'
 import schedule from 'node-schedule'
 import { globalEm } from '../utils/globalEm'
-import {
-  EmailDeliveryStatus,
-  NotificationEmailDelivery,
-  fromJsonEmailDeliveryStatus,
-} from '../model'
-import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { DeliveryStatus, EmailDeliveryStatus, NotificationEmailDelivery } from '../model'
+import { EntityManager, Equal, FindOptionsWhere } from 'typeorm'
 import { createMailContent, executeMailDelivery } from './utils'
 
 export async function findDeliveriesByStatus(
   em: EntityManager,
-  status: string
-): Promise<NotificationEmailDelivery[]> {
-  const result = await em.getRepository(NotificationEmailDelivery).find({
+  status: DeliveryStatus
+): Promise<EmailDeliveryStatus[]> {
+  const result = await em.getRepository(EmailDeliveryStatus).find({
     where: {
-      deliveryStatus: fromJsonEmailDeliveryStatus({
-        isTypeOf: status,
-      }) as unknown as FindOptionsWhere<EmailDeliveryStatus>,
+      deliveryStatus: Equal(status),
     },
-    relations: { notification: { account: true } },
+    relations: { notificationDelivery: { notification: true } },
   })
   return result
 }
 
 // Function to send new data
 export async function sendNew() {
-  const em = await globalEm
-  console.log('Sending new emails')
-  const newEmailDeliveries = await findDeliveriesByStatus(em, 'Unsent')
-  for (const notificationDelivery of newEmailDeliveries) {
-    const toAccount = notificationDelivery.notification.account
-    const notification = notificationDelivery.notification
-    const appName = await config.get(ConfigVariable.AppName, em)
-    const content = await createMailContent(em, toAccount, appName, notification)
-    notificationDelivery.deliveryStatus = await executeMailDelivery(appName, em, toAccount, content)
-  }
-  await em.save(newEmailDeliveries)
+  // const em = await globalEm
+  // console.log('Sending new emails')
+  // const newEmailDeliveries = await findDeliveriesByStatus(em, DeliveryStatus.UNSENT)
+  // for (const notificationDelivery of newEmailDeliveries) {
+  //   // const toAccount = notificationDelivery.notification.account
+  //   // const notification = notificationDelivery.notification
+  //   // const appName = await config.get(ConfigVariable.AppName, em)
+  //   // const content = await createMailContent(em, toAccount, appName, notification)
+  // }
+  // await em.save(newEmailDeliveries)
 }
 
 // Function to send failed data
-function sendFailed() {
+export async function sendFailed() {
   console.log('Sending failed data...')
   // Implement your logic here
 }
