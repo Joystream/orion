@@ -16,6 +16,6 @@ if ! [[ "$(docker container inspect -f '{{.State.Running}}' orion_db)" = "true" 
 fi
 
 # Run the tests
-npx ts-mocha "./src/mail-scheduler/tests/*.ts" --timeout 60000 --exit
+npx ts-mocha "./src/mail-scheduler/tests/*.test.ts" --timeout 60000 --exit
 
 docker stop orion_db && docker rm orion_db >/dev/null

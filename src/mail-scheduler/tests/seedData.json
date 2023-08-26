@@ -11,9 +11,37 @@
       "handle": "Alice",
       "controllerAccount": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
       "channels": []
+    },
+    {
+      "id": "17",
+      "createdAt": "2023-08-24T15:22:00.001000Z",
+      "metadata": {
+        "id": "17"
+      },
+      "bannedFromChannels": [],
+      "totalChannelsCreated": 0,
+      "handle": "Bob",
+      "controllerAccount": "j5W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
+      "channels": []
     }
   ],
   "notifications": [
+    {
+      "id": "OnChainNotification-2",
+      "accountId": "00000002",
+      "status": {
+        "isTypeOf": "Unread"
+      },
+      "notificationType": {
+        "isTypeOf": "Channel",
+        "channelId": "2",
+        "channelTitle": "Test channel 2",
+        "recipient": {
+          "isTypeOf": "MemberRecipient",
+          "memberHandle": "Bob"
+        }
+      }
+    },
     {
       "id": "OnChainNotification-1",
       "accountId": "00000001",
@@ -21,7 +49,7 @@
         "isTypeOf": "Unread"
       },
       "notificationType": {
-        "isTypeOf": "ChannelCreated",
+        "isTypeOf": "Channel",
         "channelId": "1",
         "channelTitle": "Test channel",
         "recipient": {
@@ -34,10 +62,13 @@
   "notificationEmailDeliveries": [
     {
       "id": "1",
-      "deliveryStatus": "Unsent",
-      "notification": {
-        "id": "OnChainNotification-1"
-      }
+      "deliveryStatusId": "1",
+      "notificationId": "OnChainNotification-1"
+    },
+    {
+      "id": "2",
+      "deliveryStatusId": "2",
+      "notificationId": "OnChainNotification-2"
     }
   ],
   "emailDeliveryStatuses": [
@@ -46,15 +77,23 @@
       "deliveryStatus": "UNSENT",
       "notificationDeliveryId": "1",
       "successDelivery": [],
-      "failureDelivery": [],
-      "notification": {
-        "id": "OnChainNotification-1"
-      }
+      "failureDelivery": []
+    },
+    {
+      "id": "2",
+      "deliveryStatus": "UNSENT",
+      "notificationDeliveryId": "2",
+      "successDelivery": [],
+      "failureDelivery": []
     }
   ],
   "users": [
     {
       "id": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "isRoot": false
+    },
+    {
+      "id": "WajIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
       "isRoot": false
     }
   ],
@@ -68,6 +107,16 @@
       "registeredAt": "2023-08-08T06:11:07.300Z",
       "membershipId": "16",
       "joystreamAccount": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
+    },
+    {
+      "id": "00000002",
+      "userId": "WajIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "email": "17_Bob.test",
+      "isEmailConfirmed": false,
+      "isBlocked": false,
+      "registeredAt": "2023-08-08T06:11:07.300Z",
+      "membershipId": "17",
+      "joystreamAccount": "j5W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
     }
   ]
 }

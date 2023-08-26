@@ -34,7 +34,6 @@ export async function sendNew() {
 
 // Function to send failed data
 export async function sendFailed() {
-  console.log('Sending failed data...')
   // Implement your logic here
 }
 
