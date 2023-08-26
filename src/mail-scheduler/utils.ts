@@ -8,6 +8,7 @@ import {
   Notification,
   SuccessDelivery,
   FailedDelivery,
+  SuccessReport,
 } from '../model'
 import { ConfigVariable, config } from '../utils/config'
 import { sgSendMail } from '../utils/mail'
@@ -18,7 +19,8 @@ export async function executeMailDelivery(
   appName: string,
   em: EntityManager,
   toAccount: Account,
-  content: string
+  content: string,
+  deliveryId: string
 ): Promise<SuccessDelivery | FailedDelivery> {
   try {
     await sgSendMail({
@@ -27,17 +29,39 @@ export async function executeMailDelivery(
       subject: `New notification from ${appName}!`,
       content,
     })
-    return processSuccessCase()
+    return await processSuccessCase(em, deliveryId)
   } catch (e) {
-    return processFailureCase()
+    return await processFailureCase(em, deliveryId)
   }
 }
 
-function processSuccessCase(): SuccessDelivery {
-  return new SuccessDelivery({})
+async function processSuccessCase(em: EntityManager, deliveryId: string): Promise<SuccessDelivery> {
+  const successReport = new SuccessReport({
+    id: uniqueId(),
+    timestamp: new Date(),
+  })
+  const success = new SuccessDelivery({
+    id: deliveryId + '-' + successReport.id,
+    successReportId: successReport.id,
+    deliveryId,
+  })
+  await em.save([successReport, success])
+  return success
 }
-function processFailureCase(): FailedDelivery {
-  return new FailedDelivery({})
+
+async function processFailureCase(em: EntityManager, deliveryId: string): Promise<FailedDelivery> {
+  const failureReport = new FailureReport({
+    id: uniqueId(),
+    timestamp: new Date(),
+    errorCode: 'test',
+  })
+  const failure = new FailedDelivery({
+    id: deliveryId + '-' + failureReport.id,
+    failureReportId: failureReport.id,
+    deliveryId,
+  })
+  await em.save([failureReport, failure])
+  return failure
 }
 
 export async function createMailContent(

@@ -31,7 +31,7 @@ describe('Scheduler', () => {
     expect(result.deliveryStatus).to.equal(DeliveryStatus.SUCCESS)
   })
 
-  it('should create SuccessReport when successfull', async () => {
+  it('should create SuccessReport when successful', async () => {
     await sendNew()
 
     const result = await em.getRepository(EmailDeliveryStatus).findOneOrFail({

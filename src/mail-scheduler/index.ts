@@ -35,7 +35,13 @@ export async function sendNew() {
     const notification = notificationDelivery.notificationDelivery.notification
     const appName = await config.get(ConfigVariable.AppName, em)
     const content = await createMailContent(em, toAccount, appName, notification)
-    const successOrFailure = await executeMailDelivery(appName, em, toAccount, content)
+    const successOrFailure = await executeMailDelivery(
+      appName,
+      em,
+      toAccount,
+      content,
+      notificationDelivery.id
+    )
     if (successOrFailure instanceof SuccessDelivery) {
       notificationDelivery.deliveryStatus = DeliveryStatus.SUCCESS
     }
