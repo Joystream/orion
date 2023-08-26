@@ -17,10 +17,10 @@ type EmailDeliveryStatus @entity {
   notificationDelivery: NotificationEmailDelivery! @unique
 
   "success status, one to many = one to optional"
-  successDelivery: [SuccessDelivery!]! @derivedFrom(field: "delivery")
+  successDelivery: [SuccessfulDelivery!]! @derivedFrom(field: "delivery")
 
   "delivery failure status"
-  failureDelivery: [FailedDelivery!]! @derivedFrom(field: "delivery")
+  failedDelivery: [FailedDelivery!]! @derivedFrom(field: "delivery")
 
   "delivery status"
   deliveryStatus: DeliveryStatus!
@@ -33,51 +33,29 @@ enum DeliveryStatus {
   DISCARD
 }
 
-type SuccessDelivery @entity {
-  "{SuccessReportId}-{NotificationEmailDeliveryId}"
-  id: ID!
-
-  "delivery reference"
-  delivery: EmailDeliveryStatus!
-
-  "success report reference"
-  successReport: SuccessReport! @unique
-}
-
-type SuccessReport @entity {
+type SuccessfulDelivery @entity {
   "uuid"
   id: ID!
+
+  "delivery FK"
+  delivery: EmailDeliveryStatus!
 
   "timestamp"
   timestamp: DateTime!
-
-  "successful delivery FK"
-  successfulDelivery: SuccessDelivery @derivedFrom(field: "successReport")
 }
 
 type FailedDelivery @entity {
-  "{FailedReportId}-{NotificationEmailDeliveryId}"
-  id: ID!
-
-  "delivery reference"
-  delivery: EmailDeliveryStatus!
-
-  "failure report reference"
-  failureReport: FailureReport! @unique
-}
-
-type FailureReport @entity {
   "uuid"
   id: ID!
+
+  "delivery FK"
+  delivery: EmailDeliveryStatus!
 
   "timestamp"
   timestamp: DateTime!
 
   "error, optional code : message format"
   errorStatus: String!
-
-  "failed Delivery FK"
-  failedDelivery: FailedDelivery @derivedFrom(field: "failureReport")
 }
 
 type Read {

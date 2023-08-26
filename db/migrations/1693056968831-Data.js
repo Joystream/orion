@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/migrations/1693049394549-Data.js
 <<<<<<< HEAD:db/migrations/1692978958528-Data.js
 <<<<<<< HEAD:db/migrations/1692961851841-Data.js
 <<<<<<< HEAD:db/migrations/1692893407716-Data.js
@@ -32,6 +33,13 @@ module.exports = class Data1692978958528 {
 module.exports = class Data1693049394549 {
     name = 'Data1693049394549'
 >>>>>>> 79cb6093e (feat: :art: add support for error status):db/migrations/1693049394549-Data.js
+||||||| parent of a68396b05 (fix: :bug: avoid rewriting failedDlivery field on EmailDelivery with old version):db/migrations/1693049394549-Data.js
+module.exports = class Data1693049394549 {
+    name = 'Data1693049394549'
+=======
+module.exports = class Data1693056968831 {
+    name = 'Data1693056968831'
+>>>>>>> a68396b05 (fix: :bug: avoid rewriting failedDlivery field on EmailDelivery with old version):db/migrations/1693056968831-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -168,14 +176,10 @@ module.exports = class Data1693049394549 {
         await db.query(`CREATE TABLE "notification_email_delivery" ("id" character varying NOT NULL, "notification_id" character varying, CONSTRAINT "PK_60dc7ff42a7abf7b0d44bf60516" PRIMARY KEY ("id"))`)
 >>>>>>> 075952bc0 (feat: :art: setup tests and refactor data model):db/migrations/1692978958528-Data.js
         await db.query(`CREATE INDEX "IDX_3b756627c3146db150d66d1292" ON "notification_email_delivery" ("notification_id") `)
-        await db.query(`CREATE TABLE "success_report" ("id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9e168a2c0df57ef9ad53f50e7dc" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "success_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "success_report_id" character varying NOT NULL, CONSTRAINT "SuccessDelivery_successReport" UNIQUE ("success_report_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_1eff99d4e12cc3bb8f02515252" UNIQUE ("success_report_id"), CONSTRAINT "PK_c80a6ee76f83fae6419fbd73167" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_ff12dd53141f24a602778bedf4" ON "success_delivery" ("delivery_id") `)
-        await db.query(`CREATE INDEX "IDX_1eff99d4e12cc3bb8f02515252" ON "success_delivery" ("success_report_id") `)
-        await db.query(`CREATE TABLE "failure_report" ("id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "error_status" text NOT NULL, CONSTRAINT "PK_7ff9e42656125d098268c60878f" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE TABLE "failed_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "failure_report_id" character varying NOT NULL, CONSTRAINT "FailedDelivery_failureReport" UNIQUE ("failure_report_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_4c87e0cf37a3cb6f4b7453fe70" UNIQUE ("failure_report_id"), CONSTRAINT "PK_80247257b6c0f3fead24219a1ac" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "successful_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_ac4e5205c071e8fdba3c1db49a4" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_b10724c2b22a5619dbe7c4d9ab" ON "successful_delivery" ("delivery_id") `)
+        await db.query(`CREATE TABLE "failed_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "error_status" text NOT NULL, CONSTRAINT "PK_80247257b6c0f3fead24219a1ac" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_d83e7e21adb8745feae65aad36" ON "failed_delivery" ("delivery_id") `)
-        await db.query(`CREATE INDEX "IDX_4c87e0cf37a3cb6f4b7453fe70" ON "failed_delivery" ("failure_report_id") `)
         await db.query(`CREATE TABLE "email_delivery_status" ("id" character varying NOT NULL, "notification_delivery_id" character varying NOT NULL, "delivery_status" character varying(7) NOT NULL, CONSTRAINT "EmailDeliveryStatus_notificationDelivery" UNIQUE ("notification_delivery_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_a35d013a8ad128b3db5e92d142" UNIQUE ("notification_delivery_id"), CONSTRAINT "PK_11200cb4eff779ef9c3e8ddeaeb" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a35d013a8ad128b3db5e92d142" ON "email_delivery_status" ("notification_delivery_id") `)
         await db.query(`CREATE TABLE "video_hero" ("id" character varying NOT NULL, "video_id" character varying, "hero_title" text NOT NULL, "hero_video_cut_url" text NOT NULL, "hero_poster_url" text NOT NULL, "activated_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_f3b63979879773378afac0b9495" PRIMARY KEY ("id"))`)
@@ -266,10 +270,8 @@ module.exports = class Data1693049394549 {
         await db.query(`ALTER TABLE "nft_activity" ADD CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_activity" ADD CONSTRAINT "FK_94d325a753f2c08fdd416eb095f" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "notification_email_delivery" ADD CONSTRAINT "FK_3b756627c3146db150d66d12929" FOREIGN KEY ("notification_id") REFERENCES "notification"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "success_delivery" ADD CONSTRAINT "FK_ff12dd53141f24a602778bedf40" FOREIGN KEY ("delivery_id") REFERENCES "email_delivery_status"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "success_delivery" ADD CONSTRAINT "FK_1eff99d4e12cc3bb8f025152524" FOREIGN KEY ("success_report_id") REFERENCES "success_report"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "successful_delivery" ADD CONSTRAINT "FK_b10724c2b22a5619dbe7c4d9ab1" FOREIGN KEY ("delivery_id") REFERENCES "email_delivery_status"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "failed_delivery" ADD CONSTRAINT "FK_d83e7e21adb8745feae65aad368" FOREIGN KEY ("delivery_id") REFERENCES "email_delivery_status"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "failed_delivery" ADD CONSTRAINT "FK_4c87e0cf37a3cb6f4b7453fe70a" FOREIGN KEY ("failure_report_id") REFERENCES "failure_report"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "email_delivery_status" ADD CONSTRAINT "FK_a35d013a8ad128b3db5e92d1424" FOREIGN KEY ("notification_delivery_id") REFERENCES "notification_email_delivery"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_hero" ADD CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1" FOREIGN KEY ("video_id") REFERENCES "video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "video_media_metadata" ADD CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0" FOREIGN KEY ("encoding_id") REFERENCES "video_media_encoding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -401,14 +403,10 @@ module.exports = class Data1693049394549 {
         await db.query(`DROP INDEX "public"."IDX_94d325a753f2c08fdd416eb095"`)
         await db.query(`DROP TABLE "notification_email_delivery"`)
         await db.query(`DROP INDEX "public"."IDX_3b756627c3146db150d66d1292"`)
-        await db.query(`DROP TABLE "success_report"`)
-        await db.query(`DROP TABLE "success_delivery"`)
-        await db.query(`DROP INDEX "public"."IDX_ff12dd53141f24a602778bedf4"`)
-        await db.query(`DROP INDEX "public"."IDX_1eff99d4e12cc3bb8f02515252"`)
-        await db.query(`DROP TABLE "failure_report"`)
+        await db.query(`DROP TABLE "successful_delivery"`)
+        await db.query(`DROP INDEX "public"."IDX_b10724c2b22a5619dbe7c4d9ab"`)
         await db.query(`DROP TABLE "failed_delivery"`)
         await db.query(`DROP INDEX "public"."IDX_d83e7e21adb8745feae65aad36"`)
-        await db.query(`DROP INDEX "public"."IDX_4c87e0cf37a3cb6f4b7453fe70"`)
         await db.query(`DROP TABLE "email_delivery_status"`)
         await db.query(`DROP INDEX "public"."IDX_a35d013a8ad128b3db5e92d142"`)
         await db.query(`DROP TABLE "video_hero"`)
@@ -499,10 +497,8 @@ module.exports = class Data1693049394549 {
         await db.query(`ALTER TABLE "nft_activity" DROP CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54"`)
         await db.query(`ALTER TABLE "nft_activity" DROP CONSTRAINT "FK_94d325a753f2c08fdd416eb095f"`)
         await db.query(`ALTER TABLE "notification_email_delivery" DROP CONSTRAINT "FK_3b756627c3146db150d66d12929"`)
-        await db.query(`ALTER TABLE "success_delivery" DROP CONSTRAINT "FK_ff12dd53141f24a602778bedf40"`)
-        await db.query(`ALTER TABLE "success_delivery" DROP CONSTRAINT "FK_1eff99d4e12cc3bb8f025152524"`)
+        await db.query(`ALTER TABLE "successful_delivery" DROP CONSTRAINT "FK_b10724c2b22a5619dbe7c4d9ab1"`)
         await db.query(`ALTER TABLE "failed_delivery" DROP CONSTRAINT "FK_d83e7e21adb8745feae65aad368"`)
-        await db.query(`ALTER TABLE "failed_delivery" DROP CONSTRAINT "FK_4c87e0cf37a3cb6f4b7453fe70a"`)
         await db.query(`ALTER TABLE "email_delivery_status" DROP CONSTRAINT "FK_a35d013a8ad128b3db5e92d1424"`)
         await db.query(`ALTER TABLE "video_hero" DROP CONSTRAINT "FK_9feac5d9713a9f07e32eb8ba7a1"`)
         await db.query(`ALTER TABLE "video_media_metadata" DROP CONSTRAINT "FK_5944dc5896cb16bd395414a0ce0"`)

@@ -8,9 +8,9 @@ import {
   ChannelCreated,
   MemberRecipient,
   NotificationEmailDelivery,
-  SuccessDelivery,
   FailedDelivery,
   EmailDeliveryStatus,
+  SuccessfulDelivery,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 
@@ -67,7 +67,7 @@ export async function populateDbWithSeedData(em: EntityManager) {
 }
 
 export async function clearDb(em: EntityManager): Promise<void> {
-  await em.getRepository(SuccessDelivery).delete({})
+  await em.getRepository(SuccessfulDelivery).delete({})
   await em.getRepository(FailedDelivery).delete({})
   await em.getRepository(EmailDeliveryStatus).delete({})
   await em.getRepository(NotificationEmailDelivery).delete({})

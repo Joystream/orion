@@ -2,14 +2,7 @@ import sgMail from '@sendgrid/mail'
 import { ResponseError } from '@sendgrid/mail'
 import { EntityManager } from 'typeorm'
 import { notificationEmailContent } from '../auth-server/emails'
-import {
-  Account,
-  FailureReport,
-  Notification,
-  SuccessDelivery,
-  FailedDelivery,
-  SuccessReport,
-} from '../model'
+import { Account, Notification, FailedDelivery, SuccessfulDelivery } from '../model'
 import { ConfigVariable, config } from '../utils/config'
 import { getMemberHandle, textForNotification, linkForNotification } from '../utils/notification'
 import { uniqueId } from '../utils/crypto'
@@ -21,7 +14,7 @@ export async function executeMailDelivery(
   toAccount: Account,
   content: string,
   deliveryId: string
-): Promise<SuccessDelivery | FailedDelivery> {
+): Promise<boolean> {
   const resp = await sendGridSend({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to: toAccount.email,
@@ -29,24 +22,20 @@ export async function executeMailDelivery(
     content,
   })
   if (resp.success) {
-    return processSuccessCase(em, deliveryId)
+    await processSuccessCase(em, deliveryId)
   } else {
-    return processFailureCase(em, deliveryId, resp)
+    await processFailureCase(em, deliveryId, resp)
   }
+  return resp.success
 }
 
-async function processSuccessCase(em: EntityManager, deliveryId: string): Promise<SuccessDelivery> {
-  const successReport = new SuccessReport({
+async function processSuccessCase(em: EntityManager, deliveryId: string) {
+  const success = new SuccessfulDelivery({
     id: uniqueId(),
     timestamp: new Date(),
-  })
-  const success = new SuccessDelivery({
-    id: deliveryId + '-' + successReport.id,
-    successReportId: successReport.id,
     deliveryId,
   })
-  await em.save([successReport, success])
-  return success
+  await em.save(success)
 }
 
 function getErrorCode(error: ResponseError | Error): string {
@@ -57,21 +46,16 @@ async function processFailureCase(
   em: EntityManager,
   deliveryId: string,
   { type: error }: SendGridResponseFailure
-): Promise<FailedDelivery> {
+) {
   const errorCode = getErrorCode(error)
   const errorStatus = errorCode + ' : ' + error.message
-  const failureReport = new FailureReport({
+  const failure = new FailedDelivery({
     id: uniqueId(),
+    deliveryId,
     timestamp: new Date(),
     errorStatus,
   })
-  const failure = new FailedDelivery({
-    id: deliveryId + '-' + failureReport.id,
-    failureReportId: failureReport.id,
-    deliveryId,
-  })
-  await em.save([failureReport, failure])
-  return failure
+  await em.save(failure)
 }
 
 export async function createMailContent(

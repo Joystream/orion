@@ -9,7 +9,7 @@ import {
   Membership,
   Notification,
   NotificationEmailDelivery,
-  SuccessDelivery,
+  SuccessfulDelivery,
   Unread,
   User,
 } from '../../model'
@@ -62,7 +62,7 @@ describe('Database seed data tests', () => {
       const notifications = await em.getRepository(Notification).find({})
       const deliveries = await em.getRepository(NotificationEmailDelivery).find({})
       const deliveryStatuses = await em.getRepository(EmailDeliveryStatus).find({})
-      const successDeliveries = await em.getRepository(SuccessDelivery).find({})
+      const successDeliveries = await em.getRepository(SuccessfulDelivery).find({})
       const failedDeliveries = await em.getRepository(FailedDelivery).find({})
 
       expect(accounts).to.be.empty
