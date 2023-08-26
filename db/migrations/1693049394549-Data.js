@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/migrations/1692978958528-Data.js
 <<<<<<< HEAD:db/migrations/1692961851841-Data.js
 <<<<<<< HEAD:db/migrations/1692893407716-Data.js
 <<<<<<<< HEAD:db/migrations/1695907091293-Data.js
@@ -24,6 +25,13 @@ module.exports = class Data1692961851841 {
 module.exports = class Data1692978958528 {
     name = 'Data1692978958528'
 >>>>>>> 075952bc0 (feat: :art: setup tests and refactor data model):db/migrations/1692978958528-Data.js
+||||||| parent of 79cb6093e (feat: :art: add support for error status):db/migrations/1692978958528-Data.js
+module.exports = class Data1692978958528 {
+    name = 'Data1692978958528'
+=======
+module.exports = class Data1693049394549 {
+    name = 'Data1693049394549'
+>>>>>>> 79cb6093e (feat: :art: add support for error status):db/migrations/1693049394549-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -164,7 +172,7 @@ module.exports = class Data1692978958528 {
         await db.query(`CREATE TABLE "success_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "success_report_id" character varying NOT NULL, CONSTRAINT "SuccessDelivery_successReport" UNIQUE ("success_report_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_1eff99d4e12cc3bb8f02515252" UNIQUE ("success_report_id"), CONSTRAINT "PK_c80a6ee76f83fae6419fbd73167" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_ff12dd53141f24a602778bedf4" ON "success_delivery" ("delivery_id") `)
         await db.query(`CREATE INDEX "IDX_1eff99d4e12cc3bb8f02515252" ON "success_delivery" ("success_report_id") `)
-        await db.query(`CREATE TABLE "failure_report" ("id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "error_code" text NOT NULL, CONSTRAINT "PK_7ff9e42656125d098268c60878f" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "failure_report" ("id" character varying NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "error_status" text NOT NULL, CONSTRAINT "PK_7ff9e42656125d098268c60878f" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "failed_delivery" ("id" character varying NOT NULL, "delivery_id" character varying, "failure_report_id" character varying NOT NULL, CONSTRAINT "FailedDelivery_failureReport" UNIQUE ("failure_report_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_4c87e0cf37a3cb6f4b7453fe70" UNIQUE ("failure_report_id"), CONSTRAINT "PK_80247257b6c0f3fead24219a1ac" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_d83e7e21adb8745feae65aad36" ON "failed_delivery" ("delivery_id") `)
         await db.query(`CREATE INDEX "IDX_4c87e0cf37a3cb6f4b7453fe70" ON "failed_delivery" ("failure_report_id") `)

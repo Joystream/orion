@@ -62,7 +62,7 @@ describe('Scheduler', () => {
     expect(result.failureDelivery).to.not.be.empty
     expect(result.failureDelivery[0].failureReport).to.have.property('id')
     expect(result.failureDelivery[0].failureReport).to.have.property('timestamp').to.be.not.null
-    expect(result.failureDelivery[0].failureReport).to.have.property('errorCode').to.be.not.null
+    expect(result.failureDelivery[0].failureReport).to.have.property('errorStatus').to.be.not.null
   })
   it('should keep EmailDeliveryStatus.deliveryStatus to failure on a failed second attempt', async () => {
     await sendNew()

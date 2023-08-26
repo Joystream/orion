@@ -1,9 +1,9 @@
+import sgMail from '@sendgrid/mail'
+import { ResponseError } from '@sendgrid/mail'
 import { EntityManager } from 'typeorm'
 import { notificationEmailContent } from '../auth-server/emails'
 import {
   Account,
-  DeliveryStatus,
-  EmailDeliveryStatus,
   FailureReport,
   Notification,
   SuccessDelivery,
@@ -11,9 +11,9 @@ import {
   SuccessReport,
 } from '../model'
 import { ConfigVariable, config } from '../utils/config'
-import { sgSendMail } from '../utils/mail'
 import { getMemberHandle, textForNotification, linkForNotification } from '../utils/notification'
 import { uniqueId } from '../utils/crypto'
+import { ClientResponse } from '@sendgrid/mail'
 
 export async function executeMailDelivery(
   appName: string,
@@ -22,16 +22,16 @@ export async function executeMailDelivery(
   content: string,
   deliveryId: string
 ): Promise<SuccessDelivery | FailedDelivery> {
-  try {
-    await sgSendMail({
-      from: await config.get(ConfigVariable.SendgridFromEmail, em),
-      to: toAccount.email,
-      subject: `New notification from ${appName}!`,
-      content,
-    })
-    return await processSuccessCase(em, deliveryId)
-  } catch (e) {
-    return await processFailureCase(em, deliveryId)
+  const resp = await sendGridSend({
+    from: await config.get(ConfigVariable.SendgridFromEmail, em),
+    to: toAccount.email,
+    subject: `New notification from ${appName}!`,
+    content,
+  })
+  if (resp.success) {
+    return processSuccessCase(em, deliveryId)
+  } else {
+    return processFailureCase(em, deliveryId, resp)
   }
 }
 
@@ -49,11 +49,21 @@ async function processSuccessCase(em: EntityManager, deliveryId: string): Promis
   return success
 }
 
-async function processFailureCase(em: EntityManager, deliveryId: string): Promise<FailedDelivery> {
+function getErrorCode(error: ResponseError | Error): string {
+  return (error as ResponseError).code?.toString() || ''
+}
+
+async function processFailureCase(
+  em: EntityManager,
+  deliveryId: string,
+  { type: error }: SendGridResponseFailure
+): Promise<FailedDelivery> {
+  const errorCode = getErrorCode(error)
+  const errorStatus = errorCode + ' : ' + error.message
   const failureReport = new FailureReport({
     id: uniqueId(),
     timestamp: new Date(),
-    errorCode: 'test',
+    errorStatus,
   })
   const failure = new FailedDelivery({
     id: deliveryId + '-' + failureReport.id,
@@ -82,4 +92,64 @@ export async function createMailContent(
     appName,
   })
   return content
+}
+
+type SendMailArgs = {
+  from: string
+  to: string
+  subject: string
+  content: string
+}
+
+type SendGridResponseSuccess = {
+  type: ClientResponse
+  success: true
+}
+type SendGridResponseFailure = {
+  type: ResponseError | Error
+  success: false
+}
+type SendGridResponse = SendGridResponseSuccess | SendGridResponseFailure
+
+export async function sendGridSend({
+  from,
+  to,
+  subject,
+  content,
+}: SendMailArgs): Promise<SendGridResponse> {
+  const apiKey = process.env.SENDGRID_API_KEY
+  if (apiKey) {
+    sgMail.setApiKey(apiKey)
+  }
+
+  try {
+    const sendGridSuccess = await new Promise<SendGridResponseSuccess>((resolve, reject) => {
+      sgMail.send(
+        {
+          from,
+          to,
+          subject,
+          html: content,
+        },
+        undefined,
+        (error, result) => {
+          if (error) {
+            reject({
+              type: error,
+              success: false,
+            })
+          } else {
+            const [type] = result
+            resolve({
+              type,
+              success: true,
+            })
+          }
+        }
+      )
+    })
+    return sendGridSuccess
+  } catch (sendGrideFailure) {
+    return sendGrideFailure as SendGridResponseFailure
+  }
 }
