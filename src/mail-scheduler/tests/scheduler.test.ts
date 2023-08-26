@@ -6,8 +6,8 @@ import { globalEm } from '../../utils/globalEm'
 import { sendFailed, sendNew } from '..'
 
 describe('Scheduler', () => {
-  const okNotificationId = '1'
-  const errNotificationId = '2'
+  const okNotificationId = 'OnChainNotification-1'
+  const errNotificationId = 'OnChainNotification-2'
   let em: EntityManager
 
   before(async () => {

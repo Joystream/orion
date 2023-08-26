@@ -4,9 +4,10 @@ import {
   Account,
   DeliveryStatus,
   EmailDeliveryStatus,
+  FailureReport,
   Notification,
   SuccessDelivery,
-  SuccessReport,
+  FailedDelivery,
 } from '../model'
 import { ConfigVariable, config } from '../utils/config'
 import { sgSendMail } from '../utils/mail'
@@ -18,24 +19,25 @@ export async function executeMailDelivery(
   em: EntityManager,
   toAccount: Account,
   content: string
-): Promise<EmailDeliveryStatus> {
-  const resp = await sgSendMail({
-    from: await config.get(ConfigVariable.SendgridFromEmail, em),
-    to: toAccount.email,
-    subject: `New notification from ${appName}!`,
-    content,
-  })
-  if (resp?.statusCode === 202 || resp?.statusCode === 200) {
+): Promise<SuccessDelivery | FailedDelivery> {
+  try {
+    await sgSendMail({
+      from: await config.get(ConfigVariable.SendgridFromEmail, em),
+      to: toAccount.email,
+      subject: `New notification from ${appName}!`,
+      content,
+    })
     return processSuccessCase()
+  } catch (e) {
+    return processFailureCase()
   }
-  return processFailureCase()
 }
 
-function processSuccessCase(): EmailDeliveryStatus {
-  return new EmailDeliveryStatus({})
+function processSuccessCase(): SuccessDelivery {
+  return new SuccessDelivery({})
 }
-function processFailureCase(): EmailDeliveryStatus {
-  return new EmailDeliveryStatus({})
+function processFailureCase(): FailedDelivery {
+  return new FailedDelivery({})
 }
 
 export async function createMailContent(
