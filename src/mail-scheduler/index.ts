@@ -1,10 +1,14 @@
 import { ConfigVariable, config } from '../utils/config'
-import schedule from 'node-schedule'
 import { globalEm } from '../utils/globalEm'
-import { DeliveryStatus, EmailDeliveryStatus, FailedDelivery } from '../model'
+import { DeliveryStatus, NotificationEmailDelivery } from '../model'
 import { EntityManager, Equal } from 'typeorm'
-import { createMailContent, executeMailDelivery } from './utils'
-import { assert } from 'console'
+import {
+  createMailContent,
+  executeMailDelivery,
+  partitionDeliveriesByEmail,
+  updateDeliveryStatuses,
+  updateFailedDeliveryStatuses,
+} from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
   // TODO: replace with value in GatewayConfig

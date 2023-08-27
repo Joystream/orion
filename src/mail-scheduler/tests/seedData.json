@@ -23,6 +23,18 @@
       "handle": "Bob",
       "controllerAccount": "j5W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
       "channels": []
+    },
+    {
+      "id": "18",
+      "createdAt": "2023-08-24T15:22:00.001000Z",
+      "metadata": {
+        "id": "18"
+      },
+      "bannedFromChannels": [],
+      "totalChannelsCreated": 0,
+      "handle": "Charlie",
+      "controllerAccount": "j6W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf",
+      "channels": []
     }
   ],
   "notifications": [
@@ -57,11 +69,44 @@
           "memberHandle": "Alice"
         }
       }
+    },
+    {
+      "id": "OnChainNotification-3",
+      "accountId": "00000003",
+      "status": {
+        "isTypeOf": "Unread"
+      },
+      "notificationType": {
+        "isTypeOf": "Channel",
+        "channelId": "3",
+        "channelTitle": "Test channel",
+        "recipient": {
+          "isTypeOf": "MemberRecipient",
+          "memberHandle": "Charlie"
+        }
+      }
+    },
+    {
+      "id": "OnChainNotification-4",
+      "accountId": "00000003",
+      "status": {
+        "isTypeOf": "Unread"
+      },
+      "notificationType": {
+        "isTypeOf": "Channel",
+        "channelId": "4",
+        "channelTitle": "Test channel",
+        "recipient": {
+          "isTypeOf": "MemberRecipient",
+          "memberHandle": "Charlie"
+        }
+      }
     }
   ],
   "notificationEmailDeliveries": [
     {
       "id": "1",
+<<<<<<< HEAD
       "deliveryStatusId": "1",
       "notificationId": "OnChainNotification-1"
     },
@@ -76,13 +121,32 @@
       "id": "1",
       "deliveryStatus": "UNSENT",
       "notificationDeliveryId": "1",
+||||||| parent of 250aa9347 (fix: :art: add fk for inApp and email delivery no notification entity)
+      "notificationId": "OnChainNotification-1",
+      "deliveryStatus": "UNSENT",
+=======
+      "notificationId": "OnChainNotification-1",
+>>>>>>> 250aa9347 (fix: :art: add fk for inApp and email delivery no notification entity)
       "successDelivery": [],
       "failureDelivery": []
     },
     {
       "id": "2",
       "deliveryStatus": "UNSENT",
-      "notificationDeliveryId": "2",
+      "successDelivery": [],
+      "failureDelivery": []
+    },
+    {
+      "id": "3",
+      "notificationId": "OnChainNotification-3",
+      "deliveryStatus": "UNSENT",
+      "successDelivery": [],
+      "failureDelivery": []
+    },
+    {
+      "id": "4",
+      "notificationId": "OnChainNotification-4",
+      "deliveryStatus": "UNSENT",
       "successDelivery": [],
       "failureDelivery": []
     }
@@ -94,6 +158,10 @@
     },
     {
       "id": "WajIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "isRoot": false
+    },
+    {
+      "id": "WbjIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
       "isRoot": false
     }
   ],
@@ -117,6 +185,16 @@
       "registeredAt": "2023-08-08T06:11:07.300Z",
       "membershipId": "17",
       "joystreamAccount": "j5W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
+    },
+    {
+      "id": "00000003",
+      "userId": "WbjIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+      "email": "18_Charlie.test",
+      "isEmailConfirmed": false,
+      "isBlocked": false,
+      "registeredAt": "2023-08-08T06:11:07.300Z",
+      "membershipId": "18",
+      "joystreamAccount": "j6W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
     }
   ]
 }
