@@ -23,15 +23,15 @@ export class SetVideoWeightsInput {
 }
 
 @ArgsType()
-export class SetNotificationCenterPathInput {
-  @Field(() => String, { nullable: false })
-  newPath!: string
+export class SetMaxAttemptsOnMailDeliveryInput {
+  @Field(() => Int, { nullable: false })
+  newMaxAttempts!: number
 }
 
 @ObjectType()
-export class NotificationCenterPath {
-  @Field(() => Boolean, { nullable: false })
-  isApplied!: boolean
+export class MaxAttemptsOnMailDelivery {
+  @Field(() => Int, { nullable: false })
+  maxAttempts!: number
 }
 
 @ArgsType()

@@ -11,8 +11,8 @@ import {
 } from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
-  // TODO: replace with value in GatewayConfig
-  return Promise.resolve(5)
+  const maxAttempts = await config.get(ConfigVariable.EmailNotificationDeliveryMaxAttempts, em)
+  return maxAttempts
 }
 
 export async function getFailedDeliveries(
