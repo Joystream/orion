@@ -11,6 +11,7 @@ import {
   FailedDelivery,
   EmailDeliveryStatus,
   SuccessfulDelivery,
+  GatewayConfig,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 
@@ -63,6 +64,13 @@ export async function populateDbWithSeedData(em: EntityManager) {
     })
     await em.save(emailDeliveryStatus)
   }
+  for (const _config of seedData.gatewayConfigs) {
+    const config = new GatewayConfig({
+      ..._config,
+    })
+    await em.save(config)
+  }
+
   return em
 }
 
@@ -75,4 +83,5 @@ export async function clearDb(em: EntityManager): Promise<void> {
   await em.getRepository(Account).delete({})
   await em.getRepository(User).delete({})
   await em.getRepository(Membership).delete({})
+  await em.getRepository(GatewayConfig).delete({})
 }

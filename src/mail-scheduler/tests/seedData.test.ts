@@ -1,4 +1,5 @@
-import { assert, expect } from 'chai'
+import { expect } from 'chai'
+import { ConfigVariable, config } from '../../utils/config'
 import {
   Account,
   ChannelCreated,
@@ -50,6 +51,11 @@ describe('Database seed data tests', () => {
 
       expect(result).to.not.be.null
       expect(result?.notificationDelivery.notification.account.id).to.equal(seedData.accounts[0].id)
+    })
+    it('check that max attempt config variable is set', async () => {
+      const result = await config.get(ConfigVariable.EmailNotificationDeliveryMaxAttempts, em)
+
+      expect(result).to.not.be.undefined
     })
   })
 

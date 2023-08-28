@@ -121,12 +121,7 @@
       "id": "1",
       "deliveryStatus": "UNSENT",
       "notificationDeliveryId": "1",
-||||||| parent of 250aa9347 (fix: :art: add fk for inApp and email delivery no notification entity)
       "notificationId": "OnChainNotification-1",
-      "deliveryStatus": "UNSENT",
-=======
-      "notificationId": "OnChainNotification-1",
->>>>>>> 250aa9347 (fix: :art: add fk for inApp and email delivery no notification entity)
       "successDelivery": [],
       "failureDelivery": []
     },
@@ -195,6 +190,13 @@
       "registeredAt": "2023-08-08T06:11:07.300Z",
       "membershipId": "18",
       "joystreamAccount": "j6W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
+    }
+  ],
+  "gatewayConfigs": [
+    {
+      "id": "EMAIL_NOTIFICATION_DELIVERY_MAX_ATTEMPTS",
+      "value": 5,
+      "updatedAt": "2023-08-08T06:11:07.300Z"
     }
   ]
 }

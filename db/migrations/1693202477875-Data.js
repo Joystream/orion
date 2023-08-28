@@ -1,3 +1,4 @@
+<<<<<<< HEAD:db/migrations/1693148177520-Data.js
 <<<<<<<< HEAD:db/migrations/1695907091293-Data.js
 <<<<<<<< HEAD:db/migrations/1695907091293-Data.js
 module.exports = class Data1695907091293 {
@@ -16,6 +17,13 @@ module.exports = class Data1693146166126 {
 module.exports = class Data1693148177520 {
     name = 'Data1693148177520'
 >>>>>>>> 250aa9347 (fix: :art: add fk for inApp and email delivery no notification entity):db/migrations/1693148177520-Data.js
+||||||| parent of 32c66d736 (feat: :art: seed data for config variable):db/migrations/1693148177520-Data.js
+module.exports = class Data1693148177520 {
+    name = 'Data1693148177520'
+=======
+module.exports = class Data1693202477875 {
+    name = 'Data1693202477875'
+>>>>>>> 32c66d736 (feat: :art: seed data for config variable):db/migrations/1693202477875-Data.js
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
