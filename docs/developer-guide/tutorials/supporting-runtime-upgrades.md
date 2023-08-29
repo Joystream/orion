@@ -1,7 +1,7 @@
 # Updating event handlers to support an incoming runtime upgrade
 
 Each event handler has to support all versions of a given event.
-If there is an incoming runtime upgrade and some exising event signature is going to change (for example, a new field will be added to `Members.MemberRemarked` event), you will need to:
+If there is an incoming runtime upgrade and some existing event signature is going to change (for example, a new field will be added to `Members.MemberRemarked` event), you will need to:
 - Update the `joystream.jsonl` file,
 - Generate new types (`src/types/events.ts`) using `make typegen`,
 - Adjust the event handler by adding support for the new version of the event.
@@ -59,7 +59,7 @@ In this case, array destructuring works, because `payment` is an optional field 
 
 ## Possible future runtime upgrade scenario
 
-Now let's imagine a scenario where the runtime is about to be upgraded to a spec version `3000` and the `Members.MemberRemarked` event signature is going to change again. To make things more complex, we won't be introducing a new field, but instead change the type of the exising `payment` field, so that the event signature will now look like this:
+Now let's imagine a scenario where the runtime is about to be upgraded to a spec version `3000` and the `Members.MemberRemarked` event signature is going to change again. To make things more complex, we won't be introducing a new field, but instead change the type of the existing `payment` field, so that the event signature will now look like this:
 ```
 MemberRemarked(MemberId, Vec<u8>, Vec<(AccountId, Balance)>)
 ```
