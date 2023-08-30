@@ -31,7 +31,7 @@ In order to do that, you'll need to:
     # docker-compose down -v
     docker-compose up -d orion_db
     # Generate the new migration
-    make dbegen
+    make dbgen
     ```
 5. You can now update the event handlers like `processVideoCreatedEvent` and `processVideoUpdatedEvent` to include the logic associated with the new field:
     ```typescript
