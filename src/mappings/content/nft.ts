@@ -686,6 +686,7 @@ export async function processNftBoughtEvent({
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
         buyerHandle,
+        price,
       }),
     event
   )
