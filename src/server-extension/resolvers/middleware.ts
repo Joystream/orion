@@ -15,3 +15,11 @@ export const AccountOnly: MiddlewareFn<Context> = async ({ context }, next) => {
 
   return next()
 }
+
+export const UserOnly: MiddlewareFn<Context> = async ({ context }, next) => {
+  if (context.user === null) {
+    throw new Error('Unauthorized: User required')
+  }
+
+  return next()
+}

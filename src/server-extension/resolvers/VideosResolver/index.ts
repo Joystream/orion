@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Arg, Args, Ctx, Info, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, MoreThan } from 'typeorm'
 import {
   AddVideoViewResult,
@@ -8,7 +8,11 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { VideoViewEvent, Video, Report } from '../../../model'
+import {
+  VideoViewEvent,
+  Video,
+  Report,
+} from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -36,6 +40,7 @@ import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
+import { UserOnly } from '../middleware'
 
 @Resolver()
 export class VideosResolver {
@@ -184,6 +189,7 @@ export class VideosResolver {
     return result as VideosConnection
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
@@ -250,6 +256,7 @@ export class VideosResolver {
     })
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => VideoReportInfo)
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,
