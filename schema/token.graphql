@@ -16,7 +16,7 @@ type TokenAvatarUri @variant {
 
 union TokenAvatar = TokenAvatarObject | TokenAvatarUri
 
-type Token @entity {
+type CreatorToken @entity {
   "runtime token identifier"
   id: ID!
 
@@ -104,7 +104,7 @@ type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
   video: Video!
 
   "token reference, unique as one token cannot have multiple trailers"
-  token: Token! @unique
+  token: CreatorToken! @unique
 }
 
 type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
@@ -112,7 +112,7 @@ type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
   id: ID!
 
   "token reference"
-  token: Token! @unique
+  token: CreatorToken! @unique
 
   "channel reference"
   channel: Channel! @unique
@@ -123,7 +123,7 @@ type RevenueShare @entity {
   id: ID!
 
   "token which this revenue share is for"
-  token: Token!
+  token: CreatorToken!
 
   "list of participating members"
   stakers: [RevenueShareParticipation!] @derivedFrom(field: "revenueShare")
@@ -155,7 +155,7 @@ type Benefit @entity @index(fields: ["token", "displayOrder"], unique: true) {
   id: ID!
 
   "token the benefit is for"
-  token: Token!
+  token: CreatorToken!
 
   "emoji for the benefit"
   emojiCode: String
@@ -175,7 +175,7 @@ type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
   id: ID!
 
   "token for which the sale is issued"
-  token: Token!
+  token: CreatorToken!
 
   "constant price in HAPI for each token"
   pricePerUnit: BigInt!
@@ -247,7 +247,7 @@ type AmmCurve @entity {
   id: ID!
 
   "token this Amm is for"
-  token: Token!
+  token: CreatorToken!
 
   "quantity bought on the market by the amm"
   burnedByAmm: BigInt!
@@ -307,7 +307,7 @@ type TokenAccount @entity @index(fields: ["token", "member"]) {
   member: Membership!
 
   "token for which the account is created"
-  token: Token!
+  token: CreatorToken!
 
   "staked amount, to avoid walking to split participations"
   stakedAmount: BigInt!

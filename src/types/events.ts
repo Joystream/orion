@@ -266,29 +266,6 @@ export class ContentChannelFundsWithdrawnEvent {
     }
 }
 
-export class ContentChannelFundsWithdrawnEvent {
-    private readonly _chain: Chain
-    private readonly event: Event
-
-    constructor(ctx: EventContext)
-    constructor(ctx: ChainContext, event: Event)
-    constructor(ctx: EventContext, event?: Event) {
-        event = event || ctx.event
-        assert(event.name === 'Content.ChannelFundsWithdrawn')
-        this._chain = ctx._chain
-        this.event = event
-    }
-
-    get isV1000(): boolean {
-        return this._chain.getEventHash('Content.ChannelFundsWithdrawn') === '7dca80457bf01f2cc037aae08e74e23bbe427f74ec7529d9dbd569314f36d7a3'
-    }
-
-    get asV1000(): [v1000.ContentActor, bigint, bigint, v1000.ChannelFundsDestination] {
-        assert(this.isV1000)
-        return this._chain.decodeEvent(this.event)
-    }
-}
-
 export class ContentChannelOwnerRemarkedEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -950,15 +927,6 @@ export class MembersMemberInvitedEvent {
         assert(this.isV2001)
         return this._chain.decodeEvent(this.event)
     }
-
-    get isV2001(): boolean {
-        return this._chain.getEventHash('Members.MemberInvited') === '2f40067e3af4b48461e4507b5e8d3f2cda085bea2ea03ea8114789c0589accfe'
-    }
-
-    get asV2001(): [bigint, v2001.InviteMembershipParameters, bigint] {
-        assert(this.isV2001)
-        return this._chain.decodeEvent(this.event)
-    }
 }
 
 export class MembersMemberProfileUpdatedEvent {
@@ -1003,15 +971,6 @@ export class MembersMemberRemarkedEvent {
 
     get asV1000(): [bigint, Uint8Array] {
         assert(this.isV1000)
-        return this._chain.decodeEvent(this.event)
-    }
-
-    get isV2001(): boolean {
-        return this._chain.getEventHash('Members.MemberRemarked') === '800e11437fa752c6c57a4245f54183c0c5c445b438324a6d5c2f2272b4bd0e2a'
-    }
-
-    get asV2001(): [bigint, Uint8Array, ([Uint8Array, bigint] | undefined)] {
-        assert(this.isV2001)
         return this._chain.decodeEvent(this.event)
     }
 

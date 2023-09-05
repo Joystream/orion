@@ -94,7 +94,6 @@ import {
   ProjectTokenAmmDeactivatedEvent,
   ProjectTokenAmmActivatedEvent,
   ContentCreatorTokenIssuerRemarkedEvent,
-  ContentCreatorTokenIssuedEvent,
   ProjectTokenTokensSoldOnAmmEvent,
 } from '../types/events'
 import { EntityManagerOverlay } from './overlay'

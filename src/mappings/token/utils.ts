@@ -1,8 +1,8 @@
 import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
 import {
+  CreatorToken,
   IssuerTransferVestingSource,
-  Token,
   TokenAccount,
   VestedAccount,
   VestingSchedule,
@@ -113,7 +113,7 @@ export async function addVestingScheduleToAccount(
 
 export function createAccount(
   overlay: EntityManagerOverlay,
-  token: Flat<Token>,
+  token: Flat<CreatorToken>,
   memberId: bigint,
   allocationAmount: bigint
 ): Flat<TokenAccount> {
@@ -159,7 +159,7 @@ export async function getTokenAccountByMemberByTokenOrFail(
 
 export async function processValidatedTransfers(
   overlay: EntityManagerOverlay,
-  token: Flat<Token>,
+  token: Flat<CreatorToken>,
   sourceAccount: Flat<TokenAccount>,
   validatedTransfers: [Validated, ValidatedPayment][],
   blockHeight: number
@@ -179,7 +179,7 @@ export async function processValidatedTransfers(
       )
       destinationAccount.totalAmount += validatedPaymentWithVesting.payment.amount
     } else {
-      const token = await overlay.getRepository(Token).getByIdOrFail(tokenId.toString())
+      const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
       destinationAccount = createAccount(
         overlay,
         token,
