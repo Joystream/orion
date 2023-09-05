@@ -121,7 +121,7 @@ export async function getSessionIdFromCookie(req: Request): Promise<string | und
 export async function authenticate(
   req: Request,
   authType: 'cookie' | 'header'
-): Promise<AuthContext | false> {
+): Promise<AuthContext> {
   const em = await globalEm
   const sessionId =
     authType === 'cookie' ? await getSessionIdFromCookie(req) : await getSessionIdFromHeader(req)
@@ -143,14 +143,8 @@ export async function authenticate(
       return session
     }
   }
-  if (!sessionId) {
-    authLogger.debug(`Recieved a request w/ no sessionId provided. AuthType: ${authType}.`)
-    return false
-  }
-
-  authLogger.warn(`Cannot authenticate user. Session not found or expired: ${sessionId}`)
-
-  return false
+  authLogger.debug(`Recieved a request w/ no sessionId provided. AuthType: ${authType}.`)
+  return null
 }
 
 export async function getOrCreateSession(

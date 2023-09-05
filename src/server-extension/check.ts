@@ -28,9 +28,6 @@ export const requestCheck: RequestCheckFunction = async (ctx) => {
   const context = ctx.context as Context
 
   const authContext = await authenticate(context.req, 'cookie')
-  if (authContext === false) {
-    return 'Unauthorized'
-  }
 
   Object.assign(context, authContext)
 
