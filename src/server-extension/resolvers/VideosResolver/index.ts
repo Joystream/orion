@@ -8,11 +8,7 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import {
-  VideoViewEvent,
-  Video,
-  Report,
-} from '../../../model'
+import { VideoViewEvent, Video, Report } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
