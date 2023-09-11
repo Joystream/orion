@@ -27,6 +27,7 @@ import {
   createAccount,
   getTokenAccountByMemberByToken,
   getTokenAccountByMemberByTokenOrFail,
+  processTokenMetadata,
   processValidatedTransfers,
   VestingScheduleData,
 } from './utils'
@@ -38,9 +39,9 @@ export async function processTokenIssuedEvent({
   overlay,
   block,
   event: {
-    asV1000: [
+    asV2002: [
       tokenId,
-      { initialAllocation, symbol, transferPolicy, patronageRate, revenueSplitRate },
+      { initialAllocation, transferPolicy, patronageRate, revenueSplitRate, metadata },
     ],
   },
 }: EventHandlerContext<'ProjectToken.TokenIssued'>) {
@@ -55,7 +56,6 @@ export async function processTokenIssuedEvent({
     createdAt: new Date(block.timestamp),
     totalSupply,
     revenueShareRatioPermill: revenueSplitRate,
-    symbol: symbol.toString(),
     annualCreatorReward: patronageRate,
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
@@ -86,6 +86,8 @@ export async function processTokenIssuedEvent({
       )
     }
   }
+
+  await processTokenMetadata(token, metadata, overlay)
 }
 
 export async function processCreatorTokenIssuedEvent({
@@ -234,9 +236,10 @@ export async function processTokenSaleInitializedEvent({
 
 export async function processPatronageRateDecreasedToEvent({
   overlay,
-  event,
+  event: {
+    asV1000: [tokenId, newRate],
+  },
 }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
-  const [tokenId, newRate] = event.isV1000 ? event.asV1000 : event.asV2002
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   if (typeof newRate === 'number') {
     token.annualCreatorReward = newRate
@@ -527,7 +530,7 @@ export async function processUserParticipatedInSplitEvent({
 export async function processCreatorTokenIssuerRemarkedEvent({
   overlay,
   event: {
-    asV2002: [tokenId, metadataBytes],
+    asV2002: [tokenId, _, metadataBytes],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
   const creatorRemarked = deserializeMetadata(CreatorTokenIssuerRemarked, metadataBytes)
@@ -540,67 +543,6 @@ export async function processCreatorTokenIssuerRemarkedEvent({
   }
 
   const newMetadata = metadata!.newMetadata!
-
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
-  if (isSet(newMetadata.description)) {
-    token.description = newMetadata.description
-  }
-
-  if (isSet(newMetadata.benefits)) {
-    for (const benefit of newMetadata.benefits) {
-      if (benefit.displayOrder !== null) {
-        // remove existing benefit with the same display order (if exists)
-        const existingBenefit = (
-          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
-        ).find((b) => b.displayOrder === benefit.displayOrder)
-
-        if (existingBenefit !== undefined) {
-          overlay.getRepository(Benefit).remove(existingBenefit)
-        }
-
-        // if the benefit title is null, it means we want to remove the benefit
-        if (benefit.title !== null) {
-          overlay.getRepository(Benefit).new({
-            id: overlay.getRepository(Benefit).getNewEntityId(),
-            title: benefit.title,
-            description: benefit.description,
-            emojiCode: benefit.emoji,
-            displayOrder: benefit.displayOrder,
-            tokenId: token.id,
-          })
-        }
-      }
-    }
-  }
-
-  if (isSet(newMetadata.whitelistApplicationNote)) {
-    token.whitelistApplicantNote = newMetadata.whitelistApplicationNote || null
-  }
-
-  if (isSet(newMetadata.whitelistApplicationApplyLink)) {
-    token.whitelistApplicantLink = newMetadata.whitelistApplicationApplyLink || null
-  }
-
-  if (isSet(newMetadata.avatarUri)) {
-    token.avatar = newMetadata.avatarUri
-      ? new TokenAvatarUri({ avatarUri: newMetadata.avatarUri })
-      : null
-  }
-
-  if (isSet(newMetadata.trailerVideoId)) {
-    const video = await overlay.getRepository(Video).getById(newMetadata.trailerVideoId)
-    if (video) {
-      const trailerVideoRepository = overlay.getRepository(TrailerVideo)
-      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
-      trailerVideoRepository.remove(oldTrailer)
-
-      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
-      overlay.getRepository(TrailerVideo).new({
-        id,
-        tokenId: token.id,
-        videoId: video.id,
-      })
-      token.trailerVideoId = id
-    }
-  }
+  await processTokenMetadata(token, newMetadata, overlay)
 }

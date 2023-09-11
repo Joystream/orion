@@ -188,7 +188,7 @@ export class ContentChannelCreatedEvent {
     }
 
     get isV2002(): boolean {
-        return this._chain.getEventHash('Content.ChannelCreated') === 'ed351930d72aa24b919921257fbdfbd245dfe2d7ceb5661947c33aad92fa0c6a'
+        return this._chain.getEventHash('Content.ChannelCreated') === 'ed1e79f9c18a9412cdef1dd5be6aead961dde1060f899bc16de8d92cae07904f'
     }
 
     get asV2002(): [bigint, v2002.ChannelRecord, v2002.ChannelCreationParametersRecord, Uint8Array] {
@@ -405,7 +405,7 @@ export class ContentChannelUpdatedEvent {
     }
 
     get isV2002(): boolean {
-        return this._chain.getEventHash('Content.ChannelUpdated') === '1cdb63f013cbfd13d8b9de0a9b55c81a84b707ceba6a94c2e2a665281048a619'
+        return this._chain.getEventHash('Content.ChannelUpdated') === '04b387c7526087dd7cecb3b544af3518f7ba802843793c1552ad4a949508c56b'
     }
 
     get asV2002(): [v2002.ContentActor, bigint, v2002.ChannelUpdateParametersRecord, bigint[]] {
@@ -474,10 +474,10 @@ export class ContentCreatorTokenIssuerRemarkedEvent {
     }
 
     get isV2002(): boolean {
-        return this._chain.getEventHash('Content.CreatorTokenIssuerRemarked') === '455000da2c8f650044c433ea0fc69e39c5cb2db11e7a81e15e0fcba6f0757e16'
+        return this._chain.getEventHash('Content.CreatorTokenIssuerRemarked') === '582c390b8c641f5fc98a7855175e82d670fb7a9f362dbd16a6f8a9b6db2b0edc'
     }
 
-    get asV2002(): [bigint, Uint8Array] {
+    get asV2002(): [bigint, bigint, Uint8Array] {
         assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
@@ -1090,7 +1090,7 @@ export class ProjectTokenAmmActivatedEvent {
      * - params for the bonding curve
      */
     get isV2002(): boolean {
-        return this._chain.getEventHash('ProjectToken.AmmActivated') === '5d454faccb3c909f667f0fc5ebe8e60e00b95c937542ae2dc56162b62178426c'
+        return this._chain.getEventHash('ProjectToken.AmmActivated') === 'd05b62f4ff4c6616fab2b54d9fb6f68004ac80b667e32dc5e060f79cf5ebdb0f'
     }
 
     /**
@@ -1248,27 +1248,6 @@ export class ProjectTokenPatronageRateDecreasedToEvent {
      */
     get asV1000(): [bigint, bigint] {
         assert(this.isV1000)
-        return this._chain.decodeEvent(this.event)
-    }
-
-    /**
-     * Patronage rate decreased
-     * Params:
-     * - token identifier
-     * - new patronage rate
-     */
-    get isV2002(): boolean {
-        return this._chain.getEventHash('ProjectToken.PatronageRateDecreasedTo') === 'b57e136df7099b4d95c82d61169a7dca2b6b7da2952d6383cedc8494d541669a'
-    }
-
-    /**
-     * Patronage rate decreased
-     * Params:
-     * - token identifier
-     * - new patronage rate
-     */
-    get asV2002(): [bigint, number] {
-        assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
 }
@@ -1534,6 +1513,27 @@ export class ProjectTokenTokenIssuedEvent {
         assert(this.isV1000)
         return this._chain.decodeEvent(this.event)
     }
+
+    /**
+     * Token Issued
+     * Params:
+     * - token id
+     * - token issuance parameters
+     */
+    get isV2002(): boolean {
+        return this._chain.getEventHash('ProjectToken.TokenIssued') === '2ae40928bb5270dff57ac6bd3a99231c6be5bec1f62f297ce145cbfec3eee2c2'
+    }
+
+    /**
+     * Token Issued
+     * Params:
+     * - token id
+     * - token issuance parameters
+     */
+    get asV2002(): [bigint, v2002.TokenIssuanceParameters] {
+        assert(this.isV2002)
+        return this._chain.decodeEvent(this.event)
+    }
 }
 
 export class ProjectTokenTokenSaleFinalizedEvent {
@@ -1610,33 +1610,6 @@ export class ProjectTokenTokenSaleInitializedEvent {
      */
     get asV1000(): [bigint, number, v1000.TokenSale, (Uint8Array | undefined)] {
         assert(this.isV1000)
-        return this._chain.decodeEvent(this.event)
-    }
-
-    /**
-     * Toke Sale was Initialized
-     * Params:
-     * - token id
-     * - token sale id
-     * - funds source member id
-     * - token sale data
-     * - token sale metadata
-     */
-    get isV2002(): boolean {
-        return this._chain.getEventHash('ProjectToken.TokenSaleInitialized') === '67bdd3b5a8607e0a3478ca1e5e8997e2e8dc15f6bd04822216fdfcd252ab84a0'
-    }
-
-    /**
-     * Toke Sale was Initialized
-     * Params:
-     * - token id
-     * - token sale id
-     * - funds source member id
-     * - token sale data
-     * - token sale metadata
-     */
-    get asV2002(): [bigint, number, bigint, v2002.TokenSale, (Uint8Array | undefined)] {
-        assert(this.isV2002)
         return this._chain.decodeEvent(this.event)
     }
 }

@@ -55,10 +55,10 @@ index 0000000..79fafec
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 old mode 100755
 new mode 100644
-index c95539d..eabd4b9
+index c95539d..2334b11
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.d.ts
-@@ -4545,6 +4545,522 @@ export class DistributionBucketFamilyMetadata implements IDistributionBucketFami
+@@ -4545,6 +4545,528 @@ export class DistributionBucketFamilyMetadata implements IDistributionBucketFami
      public toJSON(): { [k: string]: any };
  }
  
@@ -251,6 +251,9 @@ index c95539d..eabd4b9
 +    /** TokenMetadata name */
 +    name?: (string|null);
 +
++    /** TokenMetadata symbol */
++    symbol?: (string|null);
++
 +    /** TokenMetadata description */
 +    description?: (string|null);
 +
@@ -284,6 +287,9 @@ index c95539d..eabd4b9
 +
 +    /** TokenMetadata name. */
 +    public name: string;
++
++    /** TokenMetadata symbol. */
++    public symbol: string;
 +
 +    /** TokenMetadata description. */
 +    public description: string;
@@ -584,10 +590,10 @@ index c95539d..eabd4b9
 diff --git a/node_modules/@joystream/metadata-protobuf/compiled/index.js b/node_modules/@joystream/metadata-protobuf/compiled/index.js
 old mode 100755
 new mode 100644
-index 2e7a59c..824d80c
+index 2e7a59c..238e8a8
 --- a/node_modules/@joystream/metadata-protobuf/compiled/index.js
 +++ b/node_modules/@joystream/metadata-protobuf/compiled/index.js
-@@ -11132,6 +11132,1253 @@ $root.DistributionBucketFamilyMetadata = (function() {
+@@ -11132,6 +11132,1275 @@ $root.DistributionBucketFamilyMetadata = (function() {
      return DistributionBucketFamilyMetadata;
  })();
  
@@ -1001,6 +1007,7 @@ index 2e7a59c..824d80c
 +     * @exports ITokenMetadata
 +     * @interface ITokenMetadata
 +     * @property {string|null} [name] TokenMetadata name
++     * @property {string|null} [symbol] TokenMetadata symbol
 +     * @property {string|null} [description] TokenMetadata description
 +     * @property {number|null} [avatarObject] TokenMetadata avatarObject
 +     * @property {string|null} [avatarUri] TokenMetadata avatarUri
@@ -1033,6 +1040,14 @@ index 2e7a59c..824d80c
 +     * @instance
 +     */
 +    TokenMetadata.prototype.name = "";
++
++    /**
++     * TokenMetadata symbol.
++     * @member {string} symbol
++     * @memberof TokenMetadata
++     * @instance
++     */
++    TokenMetadata.prototype.symbol = "";
 +
 +    /**
 +     * TokenMetadata description.
@@ -1130,21 +1145,23 @@ index 2e7a59c..824d80c
 +            writer = $Writer.create();
 +        if (message.name != null && Object.hasOwnProperty.call(message, "name"))
 +            writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
++        if (message.symbol != null && Object.hasOwnProperty.call(message, "symbol"))
++            writer.uint32(/* id 2, wireType 2 =*/18).string(message.symbol);
 +        if (message.description != null && Object.hasOwnProperty.call(message, "description"))
-+            writer.uint32(/* id 2, wireType 2 =*/18).string(message.description);
++            writer.uint32(/* id 3, wireType 2 =*/26).string(message.description);
 +        if (message.avatarObject != null && Object.hasOwnProperty.call(message, "avatarObject"))
-+            writer.uint32(/* id 3, wireType 0 =*/24).uint32(message.avatarObject);
++            writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.avatarObject);
 +        if (message.avatarUri != null && Object.hasOwnProperty.call(message, "avatarUri"))
-+            writer.uint32(/* id 4, wireType 2 =*/34).string(message.avatarUri);
++            writer.uint32(/* id 5, wireType 2 =*/42).string(message.avatarUri);
 +        if (message.benefits != null && message.benefits.length)
 +            for (var i = 0; i < message.benefits.length; ++i)
-+                $root.Benefit.encode(message.benefits[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
++                $root.Benefit.encode(message.benefits[i], writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
 +        if (message.whitelistApplicationNote != null && Object.hasOwnProperty.call(message, "whitelistApplicationNote"))
-+            writer.uint32(/* id 6, wireType 2 =*/50).string(message.whitelistApplicationNote);
++            writer.uint32(/* id 7, wireType 2 =*/58).string(message.whitelistApplicationNote);
 +        if (message.whitelistApplicationApplyLink != null && Object.hasOwnProperty.call(message, "whitelistApplicationApplyLink"))
-+            writer.uint32(/* id 7, wireType 2 =*/58).string(message.whitelistApplicationApplyLink);
++            writer.uint32(/* id 8, wireType 2 =*/66).string(message.whitelistApplicationApplyLink);
 +        if (message.trailerVideoId != null && Object.hasOwnProperty.call(message, "trailerVideoId"))
-+            writer.uint32(/* id 8, wireType 0 =*/64).uint64(message.trailerVideoId);
++            writer.uint32(/* id 9, wireType 0 =*/72).uint64(message.trailerVideoId);
 +        return writer;
 +    };
 +
@@ -1183,26 +1200,29 @@ index 2e7a59c..824d80c
 +                message.name = reader.string();
 +                break;
 +            case 2:
-+                message.description = reader.string();
++                message.symbol = reader.string();
 +                break;
 +            case 3:
-+                message.avatarObject = reader.uint32();
++                message.description = reader.string();
 +                break;
 +            case 4:
-+                message.avatarUri = reader.string();
++                message.avatarObject = reader.uint32();
 +                break;
 +            case 5:
++                message.avatarUri = reader.string();
++                break;
++            case 6:
 +                if (!(message.benefits && message.benefits.length))
 +                    message.benefits = [];
 +                message.benefits.push($root.Benefit.decode(reader, reader.uint32()));
 +                break;
-+            case 6:
++            case 7:
 +                message.whitelistApplicationNote = reader.string();
 +                break;
-+            case 7:
++            case 8:
 +                message.whitelistApplicationApplyLink = reader.string();
 +                break;
-+            case 8:
++            case 9:
 +                message.trailerVideoId = reader.uint64();
 +                break;
 +            default:
@@ -1244,6 +1264,9 @@ index 2e7a59c..824d80c
 +        if (message.name != null && message.hasOwnProperty("name"))
 +            if (!$util.isString(message.name))
 +                return "name: string expected";
++        if (message.symbol != null && message.hasOwnProperty("symbol"))
++            if (!$util.isString(message.symbol))
++                return "symbol: string expected";
 +        if (message.description != null && message.hasOwnProperty("description"))
 +            if (!$util.isString(message.description))
 +                return "description: string expected";
@@ -1294,6 +1317,8 @@ index 2e7a59c..824d80c
 +        var message = new $root.TokenMetadata();
 +        if (object.name != null)
 +            message.name = String(object.name);
++        if (object.symbol != null)
++            message.symbol = String(object.symbol);
 +        if (object.description != null)
 +            message.description = String(object.description);
 +        if (object.avatarObject != null)
@@ -1343,6 +1368,7 @@ index 2e7a59c..824d80c
 +            object.benefits = [];
 +        if (options.defaults) {
 +            object.name = "";
++            object.symbol = "";
 +            object.description = "";
 +            object.whitelistApplicationNote = "";
 +            object.whitelistApplicationApplyLink = "";
@@ -1354,6 +1380,8 @@ index 2e7a59c..824d80c
 +        }
 +        if (message.name != null && message.hasOwnProperty("name"))
 +            object.name = message.name;
++        if (message.symbol != null && message.hasOwnProperty("symbol"))
++            object.symbol = message.symbol;
 +        if (message.description != null && message.hasOwnProperty("description"))
 +            object.description = message.description;
 +        if (message.avatarObject != null && message.hasOwnProperty("avatarObject")) {
@@ -1928,10 +1956,10 @@ index 0000000..f8ced4e
 +exports.default = messages_json_1.nested;
 diff --git a/node_modules/@joystream/metadata-protobuf/lib/json/messages.json b/node_modules/@joystream/metadata-protobuf/lib/json/messages.json
 new file mode 100644
-index 0000000..479c647
+index 0000000..ebec8b3
 --- /dev/null
 +++ b/node_modules/@joystream/metadata-protobuf/lib/json/messages.json
-@@ -0,0 +1,1348 @@
+@@ -0,0 +1,1352 @@
 +{
 +    "nested": {
 +        "AppActionMetadata": {
@@ -2873,34 +2901,38 @@ index 0000000..479c647
 +                    "type": "string",
 +                    "id": 1
 +                },
-+                "description": {
++                "symbol": {
 +                    "type": "string",
 +                    "id": 2
 +                },
++                "description": {
++                    "type": "string",
++                    "id": 3
++                },
 +                "avatarObject": {
 +                    "type": "uint32",
-+                    "id": 3
++                    "id": 4
 +                },
 +                "avatarUri": {
 +                    "type": "string",
-+                    "id": 4
++                    "id": 5
 +                },
 +                "benefits": {
 +                    "rule": "repeated",
 +                    "type": "Benefit",
-+                    "id": 5
++                    "id": 6
 +                },
 +                "whitelistApplicationNote": {
 +                    "type": "string",
-+                    "id": 6
++                    "id": 7
 +                },
 +                "whitelistApplicationApplyLink": {
 +                    "type": "string",
-+                    "id": 7
++                    "id": 8
 +                },
 +                "trailerVideoId": {
 +                    "type": "uint64",
-+                    "id": 8
++                    "id": 9
 +                }
 +            }
 +        },
@@ -3294,10 +3326,10 @@ index 79612c9..dd7db96 100644
      encode(obj: T): {
 diff --git a/node_modules/@joystream/metadata-protobuf/proto/Token.proto b/node_modules/@joystream/metadata-protobuf/proto/Token.proto
 new file mode 100644
-index 0000000..19832e8
+index 0000000..7c48473
 --- /dev/null
 +++ b/node_modules/@joystream/metadata-protobuf/proto/Token.proto
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,35 @@
 +syntax = "proto2";
 +message CreatorTokenIssuerRemarked {
 +    oneof creator_token_issuer_remarked {
@@ -3311,15 +3343,16 @@ index 0000000..19832e8
 +
 +message TokenMetadata {
 +  optional string name = 1; // Title
-+  optional string description = 2; // token description
++  optional string symbol = 2; // Symbol
++  optional string description = 3; // token description
 +  oneof avatar {
-+    uint32 avatar_object = 3; // avatar for token - index into external [assets array](#.Assets)
-+    string avatar_uri = 4; // Url to member's avatar
++    uint32 avatar_object = 4; // avatar for token - index into external [assets array](#.Assets)
++    string avatar_uri = 5; // Url to member's avatar
 +  }
-+  repeated Benefit benefits = 5; // benefits for tokne
-+  optional string whitelist_application_note = 6; // note for applicant
-+  optional string whitelist_application_apply_link = 7; // link to application process
-+  optional uint64 trailer_video_id = 8; // runtime id for video trailer
++  repeated Benefit benefits = 6; // benefits for tokne
++  optional string whitelist_application_note = 7; // note for applicant
++  optional string whitelist_application_apply_link = 8; // link to application process
++  optional uint64 trailer_video_id = 9; // runtime id for video trailer
 +}
 +
 +message Benefit {
@@ -3504,10 +3537,10 @@ index 0000000..56c581a
 +export default nested
 diff --git a/node_modules/@joystream/metadata-protobuf/src/json/messages.json b/node_modules/@joystream/metadata-protobuf/src/json/messages.json
 new file mode 100644
-index 0000000..77e3244
+index 0000000..bed0d77
 --- /dev/null
 +++ b/node_modules/@joystream/metadata-protobuf/src/json/messages.json
-@@ -0,0 +1,1348 @@
+@@ -0,0 +1,1352 @@
 +{
 +  "nested": {
 +    "AppActionMetadata": {
@@ -4449,34 +4482,38 @@ index 0000000..77e3244
 +          "type": "string",
 +          "id": 1
 +        },
-+        "description": {
++        "symbol": {
 +          "type": "string",
 +          "id": 2
 +        },
++        "description": {
++          "type": "string",
++          "id": 3
++        },
 +        "avatarObject": {
 +          "type": "uint32",
-+          "id": 3
++          "id": 4
 +        },
 +        "avatarUri": {
 +          "type": "string",
-+          "id": 4
++          "id": 5
 +        },
 +        "benefits": {
 +          "rule": "repeated",
 +          "type": "Benefit",
-+          "id": 5
++          "id": 6
 +        },
 +        "whitelistApplicationNote": {
 +          "type": "string",
-+          "id": 6
++          "id": 7
 +        },
 +        "whitelistApplicationApplyLink": {
 +          "type": "string",
-+          "id": 7
++          "id": 8
 +        },
 +        "trailerVideoId": {
 +          "type": "uint64",
-+          "id": 8
++          "id": 9
 +        }
 +      }
 +    },

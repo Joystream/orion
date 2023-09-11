@@ -1,14 +1,19 @@
 import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
 import {
+  Benefit,
   CreatorToken,
   IssuerTransferVestingSource,
   TokenAccount,
+  TokenAvatarUri,
+  TrailerVideo,
   VestedAccount,
   VestingSchedule,
   VestingSource,
+  Video,
 } from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
+import { isSet, uniqueId } from 'lodash'
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
@@ -203,6 +208,81 @@ export async function processValidatedTransfers(
         validatedPaymentWithVesting.payment.amount,
         new IssuerTransferVestingSource()
       )
+    }
+  }
+}
+
+export async function processTokenMetadata(
+  token: Flat<CreatorToken>,
+  metadata: any,
+  overlay: EntityManagerOverlay,
+  isUpdate: boolean
+) {
+  if (isSet(metadata.description)) {
+    token.description = metadata.description
+  }
+
+  if (isSet(metadata.benefits)) {
+    for (const benefit of metadata.benefits) {
+      if (benefit.displayOrder !== null) {
+        // remove existing benefit with the same display order (if exists)
+        const existingBenefit = (
+          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
+        ).find((b) => b.displayOrder === benefit.displayOrder)
+
+        if (existingBenefit !== undefined) {
+          overlay.getRepository(Benefit).remove(existingBenefit)
+        }
+
+        // if the benefit title is null, it means we want to remove the benefit
+        if (benefit.title !== null) {
+          overlay.getRepository(Benefit).new({
+            id: overlay.getRepository(Benefit).getNewEntityId(),
+            title: benefit.title,
+            description: benefit.description,
+            emojiCode: benefit.emoji,
+            displayOrder: benefit.displayOrder,
+            tokenId: token.id,
+          })
+        }
+      }
+    }
+  }
+
+  if (isSet(metadata.whitelistApplicationNote)) {
+    token.whitelistApplicantNote = metadata.whitelistApplicationNote || null
+  }
+
+  if (isSet(metadata.whitelistApplicationApplyLink)) {
+    token.whitelistApplicantLink = metadata.whitelistApplicationApplyLink || null
+  }
+
+  if (isSet(metadata.avatarUri)) {
+    token.avatar = metadata.avatarUri ? new TokenAvatarUri({ avatarUri: metadata.avatarUri }) : null
+  }
+
+  if (isUpdate) {
+    if (isSet(metadata.symbol)) {
+      token.symbol = metadata.symbol
+    } else {
+      token.symbol = uniqueId() // create artificial unique symbol in case it's not provided
+    }
+  }
+
+  if (isSet(metadata.trailerVideoId)) {
+    const video = await overlay.getRepository(Video).getById(metadata.trailerVideoId)
+    if (video) {
+      const trailerVideoRepository = overlay.getRepository(TrailerVideo)
+      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
+      trailerVideoRepository.remove(oldTrailer)
+
+      const id = overlay.getRepository(TrailerVideo).getNewEntityId()
+      overlay.getRepository(TrailerVideo).new({
+        id,
+        tokenId: token.id,
+        videoId: video.id,
+      })
+      token.trailerVideoId = id
     }
   }
 }
