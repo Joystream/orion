@@ -19,7 +19,7 @@ export const getSessionArtifacts: (
   try {
     const em = await globalEm
     const { authContext: session } = res.locals
-    if (!session.account) {
+    if (!session?.account) {
       throw new UnauthorizedError('Cannot get session artifacts for anonymous session')
     }
     const artifacts = await em
