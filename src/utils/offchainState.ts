@@ -266,8 +266,11 @@ export class OffchainState {
         for (const entityName of counters) {
           // build query that gets the entityName with the highest id
           const results = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
-          const latestId = results[0]?.id || 0
-          await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
+          console.log(`results: ${JSON.stringify(results)}`)
+          const latestId = parseInt(results[0]?.id || 0, 16)
+
+          this.logger.info(`Setting next id for ${entityName} to ${latestId + 1}`)
+          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
         }
       }
     }
