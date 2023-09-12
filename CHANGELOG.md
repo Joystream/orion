@@ -1,4 +1,8 @@
 # 3.0.1
+### Misc
+- add migration for the `Account` id field
+- exposes the grahql api to any unauthentcate user
+- adds an index to the `videoRelevance` field for the `Video` entity, used when loading the home page by gateways
 
 ### Bug Fixes:
 Fixed: Added the locking mechanism to prevent multiple asynchronous operation from having concurrent access to Overlay (Orion processor's in-memory cache layer), which otherwise could lead to one asynchronous operation overriding the changes made (to the cache) by the other asynchronous operation. 
