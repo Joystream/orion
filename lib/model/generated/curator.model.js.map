@@ -1,1 +1,0 @@
-{"version":3,"file":"curator.model.js","sourceRoot":"","sources":["../../../src/model/generated/curator.model.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qCAA6F;AAGtF,IAAM,OAAO,GAAb,MAAM,OAAO;IAChB,YAAY,KAAwB;QAChC,MAAM,CAAC,MAAM,CAAC,IAAI,EAAE,KAAK,CAAC,CAAA;IAC9B,CAAC;CAOJ,CAAA;AAFG;IAAC,IAAA,uBAAc,GAAE;;mCACN;AATF,OAAO;IADnB,IAAA,gBAAO,GAAE;;GACG,OAAO,CAUnB;AAVY,0BAAO"}
