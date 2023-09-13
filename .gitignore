@@ -11,7 +11,9 @@ src/model/generated/index.ts
 src/model/generated/.DS_STORE
 /schema.graphql
 /db/persisted
-/scripts/orion-v1-migration/data
+/db/export
+
+# Network test
 /network-tests/node_modules
 /network-tests/graphql/generated
 /network-tests/data
