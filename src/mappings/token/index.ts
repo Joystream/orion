@@ -87,7 +87,7 @@ export async function processTokenIssuedEvent({
     }
   }
 
-  await processTokenMetadata(token, metadata, overlay)
+  await processTokenMetadata(token, metadata, overlay, false)
 }
 
 export async function processCreatorTokenIssuedEvent({
@@ -544,5 +544,5 @@ export async function processCreatorTokenIssuerRemarkedEvent({
 
   const newMetadata = metadata!.newMetadata!
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
-  await processTokenMetadata(token, newMetadata, overlay)
+  await processTokenMetadata(token, newMetadata, overlay, true)
 }
