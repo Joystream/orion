@@ -4,6 +4,7 @@ process: migrate
 install:
 	@rm -rf node_modules # clean up node_modules to avoid issues with patch-package
 	@npm install
+	@npm install --workspace=network-tests
 
 build:
 	@npm run build

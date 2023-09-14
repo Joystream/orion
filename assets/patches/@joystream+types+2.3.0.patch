@@ -2798,7 +2798,7 @@ index 51a9e80..feb7c88 100644
              /**
               * The full account information for a particular account ID.
 diff --git a/node_modules/@joystream/types/lib/augment/augment-api-tx.d.ts b/node_modules/@joystream/types/lib/augment/augment-api-tx.d.ts
-index d14be1e..04ac324 100644
+index d14be1e..083977f 100644
 --- a/node_modules/@joystream/types/lib/augment/augment-api-tx.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/augment-api-tx.d.ts
 @@ -2,7 +2,7 @@ import type { ApiTypes } from '@polkadot/api-base/types';
@@ -2847,7 +2847,24 @@ index d14be1e..04ac324 100644
              /**
               * Perform transfer of tokens as creator token issuer
               *
-@@ -1261,10 +1284,10 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -1012,6 +1035,16 @@ declare module '@polkadot/api-base/types/submittable' {
+             } | {
+                 Lead: any;
+             } | string | Uint8Array, channelId: u64 | AnyNumber | Uint8Array, outputs: PalletProjectTokenTransfersPaymentWithVesting, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletContentPermissionsContentActor, u64, PalletProjectTokenTransfersPaymentWithVesting, Bytes]>;
++            /**
++             * Deactivate Amm functionality for token
++             **/
++            deactivateAmm: AugmentedSubmittable<(actor: PalletContentPermissionsContentActor | {
++                Curator: any;
++            } | {
++                Member: any;
++            } | {
++                Lead: any;
++            } | string | Uint8Array, channelId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletContentPermissionsContentActor, u64]>;
+             /**
+              * Deissue channel's creator token
+              *
+@@ -1261,10 +1294,10 @@ declare module '@polkadot/api-base/types/submittable' {
                  Lead: any;
              } | string | Uint8Array, channelId: u64 | AnyNumber | Uint8Array, params: PalletProjectTokenTokenIssuanceParameters | {
                  initialAllocation?: any;
@@ -2859,7 +2876,7 @@ index d14be1e..04ac324 100644
              } | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletContentPermissionsContentActor, u64, PalletProjectTokenTokenIssuanceParameters]>;
              /**
               * Issue NFT
-@@ -1692,7 +1715,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -1692,7 +1725,7 @@ declare module '@polkadot/api-base/types/submittable' {
                  minCashoutAllowed?: any;
                  maxCashoutAllowed?: any;
                  channelCashoutsEnabled?: any;
@@ -2868,7 +2885,7 @@ index d14be1e..04ac324 100644
              /**
               * Extrinsic for updating channel privilege level (requires lead access)
               *
-@@ -3302,7 +3325,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -3302,7 +3335,7 @@ declare module '@polkadot/api-base/types/submittable' {
               * - O(1) doesn't depend on the state or parameters
               * # </weight>
               **/
@@ -2877,7 +2894,7 @@ index d14be1e..04ac324 100644
              /**
               * Remove staking account for a member.
               *
-@@ -4638,6 +4661,22 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -4638,6 +4671,22 @@ declare module '@polkadot/api-base/types/submittable' {
               * # </weight>
               **/
              burn: AugmentedSubmittable<(tokenId: u64 | AnyNumber | Uint8Array, memberId: u64 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, u128]>;
@@ -2900,7 +2917,7 @@ index d14be1e..04ac324 100644
              /**
               * Allow any user to remove an account
               *
-@@ -4796,6 +4835,25 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -4796,6 +4845,25 @@ declare module '@polkadot/api-base/types/submittable' {
               * # </weight>
               **/
              purchaseTokensOnSale: AugmentedSubmittable<(tokenId: u64 | AnyNumber | Uint8Array, memberId: u64 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, u128]>;
@@ -2926,7 +2943,7 @@ index d14be1e..04ac324 100644
              /**
               * Allow to transfer from `src_member_id` account to the various `outputs` beneficiaries
               * in the specified amounts.
-@@ -5007,6 +5065,18 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5007,6 +5075,18 @@ declare module '@polkadot/api-base/types/submittable' {
              vote: AugmentedSubmittable<(voterId: u64 | AnyNumber | Uint8Array, proposalId: u32 | AnyNumber | Uint8Array, vote: PalletProposalsEngineVoteKind | 'Approve' | 'Reject' | 'Slash' | 'Abstain' | number | Uint8Array, rationale: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
          };
          referendum: {
@@ -2945,7 +2962,7 @@ index d14be1e..04ac324 100644
              /**
               * Release a locked stake.
               * # <weight>
-@@ -5800,7 +5870,8 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5800,7 +5880,8 @@ declare module '@polkadot/api-base/types/submittable' {
               **/
              setStorageOperatorMetadata: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, storageBucketId: u64 | AnyNumber | Uint8Array, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, Bytes]>;
              /**
@@ -2955,7 +2972,7 @@ index d14be1e..04ac324 100644
               * <weight>
               *
               * ## Weight
-@@ -5811,16 +5882,6 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5811,16 +5892,6 @@ declare module '@polkadot/api-base/types/submittable' {
               * # </weight>
               **/
              storageOperatorRemark: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, storageBucketId: u64 | AnyNumber | Uint8Array, msg: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, Bytes]>;
@@ -2972,7 +2989,7 @@ index d14be1e..04ac324 100644
              /**
               * Add and remove hashes to the current blacklist.
               * <weight>
-@@ -6257,61 +6318,6 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -6257,61 +6328,6 @@ declare module '@polkadot/api-base/types/submittable' {
               **/
              workerRemark: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, msg: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, Bytes]>;
          };
@@ -3035,7 +3052,7 @@ index d14be1e..04ac324 100644
              /**
               * A dispatch that will fill the block weight up to the given ratio.
 diff --git a/node_modules/@joystream/types/lib/augment/lookup.d.ts b/node_modules/@joystream/types/lib/augment/lookup.d.ts
-index ae9bbdb..f2cdcd0 100644
+index ae9bbdb..180934a 100644
 --- a/node_modules/@joystream/types/lib/augment/lookup.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/lookup.d.ts
 @@ -363,23 +363,7 @@ declare const _default: {
@@ -4520,7 +4537,7 @@ index ae9bbdb..f2cdcd0 100644
              };
              claim_channel_reward: {
                  actor: string;
-@@ -3172,6 +3147,16 @@ declare const _default: {
+@@ -3172,6 +3147,20 @@ declare const _default: {
                  actor: string;
                  channelId: string;
              };
@@ -4528,6 +4545,10 @@ index ae9bbdb..f2cdcd0 100644
 +                actor: string;
 +                channelId: string;
 +                params: string;
++            };
++            deactivate_amm: {
++                actor: string;
++                channelId: string;
 +            };
 +            creator_token_issuer_remark: {
 +                actor: string;
@@ -4537,7 +4558,7 @@ index ae9bbdb..f2cdcd0 100644
          };
      };
      /**
-@@ -3230,7 +3215,14 @@ declare const _default: {
+@@ -3230,7 +3219,14 @@ declare const _default: {
       **/
      PalletProjectTokenTransfersPaymentWithVesting: string;
      /**
@@ -4553,7 +4574,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3364,9 +3356,6 @@ declare const _default: {
+@@ -3364,9 +3360,6 @@ declare const _default: {
                  bucketId: string;
                  metadata: string;
              };
@@ -4563,7 +4584,7 @@ index ae9bbdb..f2cdcd0 100644
              storage_operator_remark: {
                  workerId: string;
                  storageBucketId: string;
-@@ -3380,7 +3369,7 @@ declare const _default: {
+@@ -3380,7 +3373,7 @@ declare const _default: {
          };
      };
      /**
@@ -4572,7 +4593,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenCall: {
          _enum: {
-@@ -3418,30 +3407,44 @@ declare const _default: {
+@@ -3418,30 +3411,44 @@ declare const _default: {
                  tokenId: string;
                  memberId: string;
              };
@@ -4622,7 +4643,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsEngineCall: {
          _enum: {
-@@ -3466,7 +3469,7 @@ declare const _default: {
+@@ -3466,7 +3473,7 @@ declare const _default: {
          };
      };
      /**
@@ -4631,7 +4652,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsDiscussionCall: {
          _enum: {
-@@ -3495,7 +3498,7 @@ declare const _default: {
+@@ -3495,7 +3502,7 @@ declare const _default: {
          };
      };
      /**
@@ -4640,7 +4661,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsCodexCall: {
          _enum: {
-@@ -3506,7 +3509,7 @@ declare const _default: {
+@@ -3506,7 +3513,7 @@ declare const _default: {
          };
      };
      /**
@@ -4649,7 +4670,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletWorkingGroupCall: {
          _enum: {
-@@ -3589,7 +3592,7 @@ declare const _default: {
+@@ -3589,7 +3596,7 @@ declare const _default: {
          };
      };
      /**
@@ -4658,7 +4679,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      JoystreamNodeRuntimeOriginCaller: {
          _enum: {
-@@ -3598,7 +3601,7 @@ declare const _default: {
+@@ -3598,7 +3605,7 @@ declare const _default: {
          };
      };
      /**
@@ -4667,7 +4688,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      FrameSupportDispatchRawOrigin: {
          _enum: {
-@@ -3608,17 +3611,17 @@ declare const _default: {
+@@ -3608,17 +3615,17 @@ declare const _default: {
          };
      };
      /**
@@ -4688,7 +4709,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      SpConsensusBabeDigestsPreDigest: {
          _enum: {
-@@ -3629,7 +3632,7 @@ declare const _default: {
+@@ -3629,7 +3636,7 @@ declare const _default: {
          };
      };
      /**
@@ -4697,7 +4718,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      SpConsensusBabeDigestsPrimaryPreDigest: {
          authorityIndex: string;
-@@ -3638,14 +3641,14 @@ declare const _default: {
+@@ -3638,14 +3645,14 @@ declare const _default: {
          vrfProof: string;
      };
      /**
@@ -4714,7 +4735,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      SpConsensusBabeDigestsSecondaryVRFPreDigest: {
          authorityIndex: string;
-@@ -3654,20 +3657,20 @@ declare const _default: {
+@@ -3654,20 +3661,20 @@ declare const _default: {
          vrfProof: string;
      };
      /**
@@ -4738,7 +4759,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletAuthorshipUncleEntryItem: {
          _enum: {
-@@ -3676,13 +3679,13 @@ declare const _default: {
+@@ -3676,13 +3683,13 @@ declare const _default: {
          };
      };
      /**
@@ -4754,7 +4775,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBalancesBalanceLock: {
          id: string;
-@@ -3690,38 +3693,38 @@ declare const _default: {
+@@ -3690,38 +3697,38 @@ declare const _default: {
          reasons: string;
      };
      /**
@@ -4799,7 +4820,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletElectionProviderMultiPhasePhase: {
          _enum: {
-@@ -3732,7 +3735,7 @@ declare const _default: {
+@@ -3732,7 +3739,7 @@ declare const _default: {
          };
      };
      /**
@@ -4808,7 +4829,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletElectionProviderMultiPhaseReadySolution: {
          supports: string;
-@@ -3740,14 +3743,14 @@ declare const _default: {
+@@ -3740,14 +3747,14 @@ declare const _default: {
          compute: string;
      };
      /**
@@ -4825,7 +4846,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletElectionProviderMultiPhaseSignedSignedSubmission: {
          who: string;
-@@ -3756,13 +3759,13 @@ declare const _default: {
+@@ -3756,13 +3763,13 @@ declare const _default: {
          callFee: string;
      };
      /**
@@ -4841,7 +4862,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStakingStakingLedger: {
          stash: string;
-@@ -3772,14 +3775,14 @@ declare const _default: {
+@@ -3772,14 +3779,14 @@ declare const _default: {
          claimedRewards: string;
      };
      /**
@@ -4858,7 +4879,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStakingNominations: {
          targets: string;
-@@ -3787,27 +3790,27 @@ declare const _default: {
+@@ -3787,27 +3794,27 @@ declare const _default: {
          suppressed: string;
      };
      /**
@@ -4890,7 +4911,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStakingUnappliedSlash: {
          validator: string;
-@@ -3817,7 +3820,7 @@ declare const _default: {
+@@ -3817,7 +3824,7 @@ declare const _default: {
          payout: string;
      };
      /**
@@ -4899,7 +4920,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStakingSlashingSlashingSpans: {
          spanIndex: string;
-@@ -3826,36 +3829,36 @@ declare const _default: {
+@@ -3826,36 +3833,36 @@ declare const _default: {
          prior: string;
      };
      /**
@@ -4942,7 +4963,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletGrandpaStoredState: {
          _enum: {
-@@ -3872,7 +3875,7 @@ declare const _default: {
+@@ -3872,7 +3879,7 @@ declare const _default: {
          };
      };
      /**
@@ -4951,7 +4972,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletGrandpaStoredPendingChange: {
          scheduledAt: string;
-@@ -3881,39 +3884,33 @@ declare const _default: {
+@@ -3881,39 +3888,33 @@ declare const _default: {
          forced: string;
      };
      /**
@@ -4996,7 +5017,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBagsListListNode: {
          id: string;
-@@ -3923,14 +3920,14 @@ declare const _default: {
+@@ -3923,14 +3924,14 @@ declare const _default: {
          score: string;
      };
      /**
@@ -5013,7 +5034,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBagsListError: {
          _enum: {
-@@ -3938,25 +3935,25 @@ declare const _default: {
+@@ -3938,25 +3939,25 @@ declare const _default: {
          };
      };
      /**
@@ -5043,7 +5064,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletMultisigMultisig: {
          when: string;
-@@ -3965,20 +3962,20 @@ declare const _default: {
+@@ -3965,20 +3966,20 @@ declare const _default: {
          approvals: string;
      };
      /**
@@ -5067,7 +5088,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletCouncilCouncilStage: {
          _enum: {
-@@ -3988,26 +3985,26 @@ declare const _default: {
+@@ -3988,26 +3989,26 @@ declare const _default: {
          };
      };
      /**
@@ -5098,7 +5119,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletCouncilCouncilMember: {
          stakingAccountId: string;
-@@ -4018,7 +4015,7 @@ declare const _default: {
+@@ -4018,7 +4019,7 @@ declare const _default: {
          unpaidReward: string;
      };
      /**
@@ -5107,7 +5128,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletCouncilCandidate: {
          stakingAccountId: string;
-@@ -4029,13 +4026,13 @@ declare const _default: {
+@@ -4029,13 +4030,13 @@ declare const _default: {
          noteHash: string;
      };
      /**
@@ -5123,7 +5144,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletReferendumReferendumStage: {
          _enum: {
-@@ -4045,7 +4042,7 @@ declare const _default: {
+@@ -4045,7 +4046,7 @@ declare const _default: {
          };
      };
      /**
@@ -5132,7 +5153,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletReferendumReferendumStageVoting: {
          started: string;
-@@ -4054,7 +4051,7 @@ declare const _default: {
+@@ -4054,7 +4055,7 @@ declare const _default: {
          endsAt: string;
      };
      /**
@@ -5141,7 +5162,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletReferendumReferendumStageRevealing: {
          started: string;
-@@ -4064,7 +4061,7 @@ declare const _default: {
+@@ -4064,7 +4065,7 @@ declare const _default: {
          endsAt: string;
      };
      /**
@@ -5150,7 +5171,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletReferendumCastVote: {
          commitment: string;
-@@ -4073,13 +4070,13 @@ declare const _default: {
+@@ -4073,13 +4074,13 @@ declare const _default: {
          voteFor: string;
      };
      /**
@@ -5166,7 +5187,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletMembershipMembershipObject: {
          handleHash: string;
-@@ -4089,20 +4086,20 @@ declare const _default: {
+@@ -4089,20 +4090,20 @@ declare const _default: {
          invites: string;
      };
      /**
@@ -5190,7 +5211,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletForumCategory: {
          titleHash: string;
-@@ -4115,7 +4112,7 @@ declare const _default: {
+@@ -4115,7 +4116,7 @@ declare const _default: {
          stickyThreadIds: string;
      };
      /**
@@ -5199,7 +5220,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletForumThread: {
          categoryId: string;
-@@ -4124,7 +4121,7 @@ declare const _default: {
+@@ -4124,7 +4125,7 @@ declare const _default: {
          numberOfEditablePosts: string;
      };
      /**
@@ -5208,7 +5229,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletForumPost: {
          threadId: string;
-@@ -4134,19 +4131,19 @@ declare const _default: {
+@@ -4134,19 +4135,19 @@ declare const _default: {
          lastEdited: string;
      };
      /**
@@ -5231,7 +5252,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBountyBountyRecord: {
          creationParams: string;
-@@ -4156,7 +4153,7 @@ declare const _default: {
+@@ -4156,7 +4157,7 @@ declare const _default: {
          hasUnpaidOracleReward: string;
      };
      /**
@@ -5240,7 +5261,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBountyBountyParametersBoundedBTreeSet: {
          oracle: string;
-@@ -4168,7 +4165,7 @@ declare const _default: {
+@@ -4168,7 +4169,7 @@ declare const _default: {
          fundingType: string;
      };
      /**
@@ -5249,7 +5270,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBountyAssuranceContractTypeBoundedBTreeSet: {
          _enum: {
-@@ -4177,7 +4174,7 @@ declare const _default: {
+@@ -4177,7 +4178,7 @@ declare const _default: {
          };
      };
      /**
@@ -5258,7 +5279,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBountyBountyMilestone: {
          _enum: {
-@@ -4194,14 +4191,14 @@ declare const _default: {
+@@ -4194,14 +4195,14 @@ declare const _default: {
          };
      };
      /**
@@ -5275,7 +5296,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletBountyEntryRecord: {
          memberId: string;
-@@ -4210,13 +4207,13 @@ declare const _default: {
+@@ -4210,13 +4211,13 @@ declare const _default: {
          workSubmitted: string;
      };
      /**
@@ -5291,7 +5312,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentVideoRecord: {
          inChannel: string;
-@@ -4225,7 +4222,7 @@ declare const _default: {
+@@ -4225,7 +4226,7 @@ declare const _default: {
          videoStateBloatBond: string;
      };
      /**
@@ -5300,7 +5321,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesOwnedNft: {
          owner: string;
-@@ -4234,7 +4231,7 @@ declare const _default: {
+@@ -4234,7 +4235,7 @@ declare const _default: {
          openAuctionsNonce: string;
      };
      /**
@@ -5309,7 +5330,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesTransactionalStatusRecord: {
          _enum: {
-@@ -4246,7 +4243,7 @@ declare const _default: {
+@@ -4246,7 +4247,7 @@ declare const _default: {
          };
      };
      /**
@@ -5318,7 +5339,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesEnglishAuctionRecord: {
          startingPrice: string;
-@@ -4259,14 +4256,14 @@ declare const _default: {
+@@ -4259,14 +4260,14 @@ declare const _default: {
          topBid: string;
      };
      /**
@@ -5335,7 +5356,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesOpenAuctionRecord: {
          startingPrice: string;
-@@ -4277,7 +4274,7 @@ declare const _default: {
+@@ -4277,7 +4278,7 @@ declare const _default: {
          start: string;
      };
      /**
@@ -5344,7 +5365,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesNftOwner: {
          _enum: {
-@@ -4286,7 +4283,7 @@ declare const _default: {
+@@ -4286,7 +4287,7 @@ declare const _default: {
          };
      };
      /**
@@ -5353,7 +5374,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentPermissionsCuratorGroupCuratorGroupRecord: {
          curators: string;
-@@ -4294,7 +4291,7 @@ declare const _default: {
+@@ -4294,7 +4295,7 @@ declare const _default: {
          permissionsByLevel: string;
      };
      /**
@@ -5362,7 +5383,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletContentNftTypesOpenAuctionBidRecord: {
          amount: string;
-@@ -4302,13 +4299,13 @@ declare const _default: {
+@@ -4302,13 +4303,13 @@ declare const _default: {
          auctionId: string;
      };
      /**
@@ -5378,7 +5399,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageBagRecord: {
          storedBy: string;
-@@ -4317,7 +4314,7 @@ declare const _default: {
+@@ -4317,7 +4318,7 @@ declare const _default: {
          objectsNumber: string;
      };
      /**
@@ -5387,7 +5408,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageStorageBucketRecord: {
          operatorStatus: string;
-@@ -4326,7 +4323,7 @@ declare const _default: {
+@@ -4326,7 +4327,7 @@ declare const _default: {
          assignedBags: string;
      };
      /**
@@ -5396,7 +5417,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageStorageBucketOperatorStatus: {
          _enum: {
-@@ -4336,14 +4333,14 @@ declare const _default: {
+@@ -4336,14 +4337,14 @@ declare const _default: {
          };
      };
      /**
@@ -5413,7 +5434,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageDataObject: {
          _alias: {
-@@ -4355,13 +4352,13 @@ declare const _default: {
+@@ -4355,13 +4356,13 @@ declare const _default: {
          ipfsContentId: string;
      };
      /**
@@ -5429,7 +5450,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletStorageDistributionBucketRecord: {
          acceptingNewBags: string;
-@@ -4371,13 +4368,13 @@ declare const _default: {
+@@ -4371,13 +4372,13 @@ declare const _default: {
          assignedBags: string;
      };
      /**
@@ -5445,7 +5466,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenAccountData: {
          vestingSchedules: string;
-@@ -4388,14 +4385,14 @@ declare const _default: {
+@@ -4388,14 +4389,14 @@ declare const _default: {
          lastSaleTotalPurchasedAmount: string;
      };
      /**
@@ -5462,7 +5483,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenVestingSchedule: {
          linearVestingStartBlock: string;
-@@ -4405,7 +4402,7 @@ declare const _default: {
+@@ -4405,7 +4406,7 @@ declare const _default: {
          burnedAmount: string;
      };
      /**
@@ -5471,7 +5492,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenTokenData: {
          totalSupply: string;
-@@ -4413,15 +4410,15 @@ declare const _default: {
+@@ -4413,15 +4414,15 @@ declare const _default: {
          nextSaleId: string;
          sale: string;
          transferPolicy: string;
@@ -5489,7 +5510,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenRevenueSplitState: {
          _enum: {
-@@ -4430,7 +4427,7 @@ declare const _default: {
+@@ -4430,7 +4431,7 @@ declare const _default: {
          };
      };
      /**
@@ -5498,7 +5519,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenRevenueSplitInfo: {
          allocation: string;
-@@ -4438,14 +4435,14 @@ declare const _default: {
+@@ -4438,14 +4439,14 @@ declare const _default: {
          dividendsClaimed: string;
      };
      /**
@@ -5515,7 +5536,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProjectTokenPatronageData: {
          rate: string;
-@@ -4453,13 +4450,13 @@ declare const _default: {
+@@ -4453,13 +4454,13 @@ declare const _default: {
          lastUnclaimedPatronageTallyBlock: string;
      };
      /**
@@ -5531,7 +5552,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsEngineProposal: {
          parameters: string;
-@@ -4472,7 +4469,7 @@ declare const _default: {
+@@ -4472,7 +4473,7 @@ declare const _default: {
          stakingAccountId: string;
      };
      /**
@@ -5540,7 +5561,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsEngineProposalParameters: {
          votingPeriod: string;
-@@ -4485,7 +4482,7 @@ declare const _default: {
+@@ -4485,7 +4486,7 @@ declare const _default: {
          constitutionality: string;
      };
      /**
@@ -5549,7 +5570,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsEngineVotingResults: {
          abstentions: string;
-@@ -4494,13 +4491,13 @@ declare const _default: {
+@@ -4494,13 +4495,13 @@ declare const _default: {
          slashes: string;
      };
      /**
@@ -5565,7 +5586,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsDiscussionDiscussionThread: {
          activatedAt: string;
-@@ -4508,7 +4505,7 @@ declare const _default: {
+@@ -4508,7 +4509,7 @@ declare const _default: {
          mode: string;
      };
      /**
@@ -5574,7 +5595,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsDiscussionThreadModeBoundedBTreeSet: {
          _enum: {
-@@ -4517,7 +4514,7 @@ declare const _default: {
+@@ -4517,7 +4518,7 @@ declare const _default: {
          };
      };
      /**
@@ -5583,7 +5604,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletProposalsDiscussionDiscussionPost: {
          authorId: string;
-@@ -4525,19 +4522,19 @@ declare const _default: {
+@@ -4525,19 +4526,19 @@ declare const _default: {
          lastEdited: string;
      };
      /**
@@ -5606,7 +5627,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletWorkingGroupOpening: {
          openingType: string;
-@@ -4548,7 +4545,7 @@ declare const _default: {
+@@ -4548,7 +4549,7 @@ declare const _default: {
          creationStake: string;
      };
      /**
@@ -5615,7 +5636,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletWorkingGroupJobApplication: {
          roleAccountId: string;
-@@ -4559,7 +4556,7 @@ declare const _default: {
+@@ -4559,7 +4560,7 @@ declare const _default: {
          openingId: string;
      };
      /**
@@ -5624,7 +5645,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      PalletWorkingGroupGroupWorker: {
          memberId: string;
-@@ -4573,13 +4570,13 @@ declare const _default: {
+@@ -4573,13 +4574,13 @@ declare const _default: {
          createdAt: string;
      };
      /**
@@ -5640,7 +5661,7 @@ index ae9bbdb..f2cdcd0 100644
       **/
      SpRuntimeMultiSignature: {
          _enum: {
-@@ -4589,39 +4586,39 @@ declare const _default: {
+@@ -4589,39 +4590,39 @@ declare const _default: {
          };
      };
      /**
@@ -5719,7 +5740,7 @@ index a1514a1..3c7a54b 100644
          PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
          PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
-index 3896f19..f8d0aa5 100644
+index 3896f19..f305ba5 100644
 --- a/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 +++ b/node_modules/@joystream/types/lib/augment/types-lookup.d.ts
 @@ -360,23 +360,7 @@ declare module '@polkadot/types/lookup' {
@@ -7111,7 +7132,7 @@ index 3896f19..f8d0aa5 100644
          } & Struct;
          readonly isClaimChannelReward: boolean;
          readonly asClaimChannelReward: {
-@@ -3491,7 +3472,19 @@ declare module '@polkadot/types/lookup' {
+@@ -3491,7 +3472,24 @@ declare module '@polkadot/types/lookup' {
              readonly actor: PalletContentPermissionsContentActor;
              readonly channelId: u64;
          } & Struct;
@@ -7122,17 +7143,22 @@ index 3896f19..f8d0aa5 100644
 +            readonly channelId: u64;
 +            readonly params: PalletProjectTokenAmmParams;
 +        } & Struct;
++        readonly isDeactivateAmm: boolean;
++        readonly asDeactivateAmm: {
++            readonly actor: PalletContentPermissionsContentActor;
++            readonly channelId: u64;
++        } & Struct;
 +        readonly isCreatorTokenIssuerRemark: boolean;
 +        readonly asCreatorTokenIssuerRemark: {
 +            readonly actor: PalletContentPermissionsContentActor;
 +            readonly channelId: u64;
 +            readonly remark: Bytes;
 +        } & Struct;
-+        readonly type: 'CreateCuratorGroup' | 'UpdateCuratorGroupPermissions' | 'SetCuratorGroupStatus' | 'AddCuratorToGroup' | 'RemoveCuratorFromGroup' | 'CreateChannel' | 'UpdateChannel' | 'UpdateChannelPrivilegeLevel' | 'SetChannelPausedFeaturesAsModerator' | 'DeleteChannel' | 'DeleteChannelAssetsAsModerator' | 'DeleteChannelAsModerator' | 'SetChannelVisibilityAsModerator' | 'CreateVideo' | 'UpdateVideo' | 'DeleteVideo' | 'DeleteVideoAssetsAsModerator' | 'DeleteVideoAsModerator' | 'SetVideoVisibilityAsModerator' | 'UpdateChannelPayouts' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'UpdateChannelStateBloatBond' | 'UpdateVideoStateBloatBond' | 'ClaimAndWithdrawChannelReward' | 'IssueNft' | 'DestroyNft' | 'StartOpenAuction' | 'StartEnglishAuction' | 'CancelEnglishAuction' | 'CancelOpenAuction' | 'CancelOffer' | 'CancelBuyNow' | 'UpdateBuyNowPrice' | 'MakeOpenAuctionBid' | 'MakeEnglishAuctionBid' | 'CancelOpenAuctionBid' | 'SettleEnglishAuction' | 'PickOpenAuctionWinner' | 'OfferNft' | 'SlingNftBack' | 'AcceptIncomingOffer' | 'SellNft' | 'BuyNft' | 'ToggleNftLimits' | 'ChannelOwnerRemark' | 'ChannelAgentRemark' | 'NftOwnerRemark' | 'InitializeChannelTransfer' | 'CancelChannelTransfer' | 'AcceptChannelTransfer' | 'UpdateGlobalNftLimit' | 'UpdateChannelNftLimit' | 'IssueCreatorToken' | 'InitCreatorTokenSale' | 'UpdateUpcomingCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRateTo' | 'ClaimCreatorTokenPatronageCredit' | 'IssueRevenueSplit' | 'FinalizeRevenueSplit' | 'FinalizeCreatorTokenSale' | 'DeissueCreatorToken' | 'ActivateAmm' | 'CreatorTokenIssuerRemark';
++        readonly type: 'CreateCuratorGroup' | 'UpdateCuratorGroupPermissions' | 'SetCuratorGroupStatus' | 'AddCuratorToGroup' | 'RemoveCuratorFromGroup' | 'CreateChannel' | 'UpdateChannel' | 'UpdateChannelPrivilegeLevel' | 'SetChannelPausedFeaturesAsModerator' | 'DeleteChannel' | 'DeleteChannelAssetsAsModerator' | 'DeleteChannelAsModerator' | 'SetChannelVisibilityAsModerator' | 'CreateVideo' | 'UpdateVideo' | 'DeleteVideo' | 'DeleteVideoAssetsAsModerator' | 'DeleteVideoAsModerator' | 'SetVideoVisibilityAsModerator' | 'UpdateChannelPayouts' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'UpdateChannelStateBloatBond' | 'UpdateVideoStateBloatBond' | 'ClaimAndWithdrawChannelReward' | 'IssueNft' | 'DestroyNft' | 'StartOpenAuction' | 'StartEnglishAuction' | 'CancelEnglishAuction' | 'CancelOpenAuction' | 'CancelOffer' | 'CancelBuyNow' | 'UpdateBuyNowPrice' | 'MakeOpenAuctionBid' | 'MakeEnglishAuctionBid' | 'CancelOpenAuctionBid' | 'SettleEnglishAuction' | 'PickOpenAuctionWinner' | 'OfferNft' | 'SlingNftBack' | 'AcceptIncomingOffer' | 'SellNft' | 'BuyNft' | 'ToggleNftLimits' | 'ChannelOwnerRemark' | 'ChannelAgentRemark' | 'NftOwnerRemark' | 'InitializeChannelTransfer' | 'CancelChannelTransfer' | 'AcceptChannelTransfer' | 'UpdateGlobalNftLimit' | 'UpdateChannelNftLimit' | 'IssueCreatorToken' | 'InitCreatorTokenSale' | 'UpdateUpcomingCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRateTo' | 'ClaimCreatorTokenPatronageCredit' | 'IssueRevenueSplit' | 'FinalizeRevenueSplit' | 'FinalizeCreatorTokenSale' | 'DeissueCreatorToken' | 'ActivateAmm' | 'DeactivateAmm' | 'CreatorTokenIssuerRemark';
      }
      /** @name PalletContentChannelBagWitness (385) */
      interface PalletContentChannelBagWitness extends Struct {
-@@ -3534,7 +3527,12 @@ declare module '@polkadot/types/lookup' {
+@@ -3534,7 +3532,12 @@ declare module '@polkadot/types/lookup' {
      /** @name PalletProjectTokenTransfersPaymentWithVesting (392) */
      interface PalletProjectTokenTransfersPaymentWithVesting extends BTreeMap<u64, PalletProjectTokenPaymentWithVesting> {
      }
@@ -7146,7 +7172,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStorageCall extends Enum {
          readonly isDeleteStorageBucket: boolean;
          readonly asDeleteStorageBucket: {
-@@ -3698,10 +3696,6 @@ declare module '@polkadot/types/lookup' {
+@@ -3698,10 +3701,6 @@ declare module '@polkadot/types/lookup' {
              readonly bucketId: PalletStorageDistributionBucketIdRecord;
              readonly metadata: Bytes;
          } & Struct;
@@ -7157,7 +7183,7 @@ index 3896f19..f8d0aa5 100644
          readonly isStorageOperatorRemark: boolean;
          readonly asStorageOperatorRemark: {
              readonly workerId: u64;
-@@ -3714,9 +3708,9 @@ declare module '@polkadot/types/lookup' {
+@@ -3714,9 +3713,9 @@ declare module '@polkadot/types/lookup' {
              readonly distributionBucketId: PalletStorageDistributionBucketIdRecord;
              readonly msg: Bytes;
          } & Struct;
@@ -7169,7 +7195,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProjectTokenCall extends Enum {
          readonly isTransfer: boolean;
          readonly asTransfer: {
-@@ -3759,25 +3753,41 @@ declare module '@polkadot/types/lookup' {
+@@ -3759,25 +3758,41 @@ declare module '@polkadot/types/lookup' {
              readonly tokenId: u64;
              readonly memberId: u64;
          } & Struct;
@@ -7217,7 +7243,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineCall extends Enum {
          readonly isVote: boolean;
          readonly asVote: {
-@@ -3803,7 +3813,7 @@ declare module '@polkadot/types/lookup' {
+@@ -3803,7 +3818,7 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'Vote' | 'CancelProposal' | 'VetoProposal' | 'ProposerRemark';
      }
@@ -7226,7 +7252,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsDiscussionCall extends Enum {
          readonly isAddPost: boolean;
          readonly asAddPost: {
-@@ -3833,7 +3843,7 @@ declare module '@polkadot/types/lookup' {
+@@ -3833,7 +3848,7 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'AddPost' | 'DeletePost' | 'UpdatePost' | 'ChangeThreadMode';
      }
@@ -7235,7 +7261,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsCodexCall extends Enum {
          readonly isCreateProposal: boolean;
          readonly asCreateProposal: {
-@@ -3842,7 +3852,7 @@ declare module '@polkadot/types/lookup' {
+@@ -3842,7 +3857,7 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'CreateProposal';
      }
@@ -7244,7 +7270,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletWorkingGroupCall extends Enum {
          readonly isAddOpening: boolean;
          readonly asAddOpening: {
-@@ -3941,14 +3951,14 @@ declare module '@polkadot/types/lookup' {
+@@ -3941,14 +3956,14 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'AddOpening' | 'ApplyOnOpening' | 'FillOpening' | 'UpdateRoleAccount' | 'LeaveRole' | 'TerminateRole' | 'SlashStake' | 'DecreaseStake' | 'IncreaseStake' | 'WithdrawApplication' | 'CancelOpening' | 'SetBudget' | 'UpdateRewardAccount' | 'UpdateRewardAmount' | 'SetStatusText' | 'SpendFromBudget' | 'FundWorkingGroupBudget' | 'LeadRemark' | 'WorkerRemark';
      }
@@ -7261,7 +7287,7 @@ index 3896f19..f8d0aa5 100644
      interface FrameSupportDispatchRawOrigin extends Enum {
          readonly isRoot: boolean;
          readonly isSigned: boolean;
-@@ -3956,14 +3966,14 @@ declare module '@polkadot/types/lookup' {
+@@ -3956,14 +3971,14 @@ declare module '@polkadot/types/lookup' {
          readonly isNone: boolean;
          readonly type: 'Root' | 'Signed' | 'None';
      }
@@ -7279,7 +7305,7 @@ index 3896f19..f8d0aa5 100644
      interface SpConsensusBabeDigestsPreDigest extends Enum {
          readonly isPrimary: boolean;
          readonly asPrimary: SpConsensusBabeDigestsPrimaryPreDigest;
-@@ -3973,31 +3983,31 @@ declare module '@polkadot/types/lookup' {
+@@ -3973,31 +3988,31 @@ declare module '@polkadot/types/lookup' {
          readonly asSecondaryVRF: SpConsensusBabeDigestsSecondaryVRFPreDigest;
          readonly type: 'Primary' | 'SecondaryPlain' | 'SecondaryVRF';
      }
@@ -7316,7 +7342,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBabeError extends Enum {
          readonly isInvalidEquivocationProof: boolean;
          readonly isInvalidKeyOwnershipProof: boolean;
-@@ -4005,7 +4015,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4005,7 +4020,7 @@ declare module '@polkadot/types/lookup' {
          readonly isInvalidConfiguration: boolean;
          readonly type: 'InvalidEquivocationProof' | 'InvalidKeyOwnershipProof' | 'DuplicateOffenceReport' | 'InvalidConfiguration';
      }
@@ -7325,7 +7351,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletAuthorshipUncleEntryItem extends Enum {
          readonly isInclusionHeight: boolean;
          readonly asInclusionHeight: u32;
-@@ -4013,7 +4023,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4013,7 +4028,7 @@ declare module '@polkadot/types/lookup' {
          readonly asUncle: ITuple<[H256, Option<AccountId32>]>;
          readonly type: 'InclusionHeight' | 'Uncle';
      }
@@ -7334,7 +7360,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletAuthorshipError extends Enum {
          readonly isInvalidUncleParent: boolean;
          readonly isUnclesAlreadySet: boolean;
-@@ -4024,31 +4034,31 @@ declare module '@polkadot/types/lookup' {
+@@ -4024,31 +4039,31 @@ declare module '@polkadot/types/lookup' {
          readonly isOldUncle: boolean;
          readonly type: 'InvalidUncleParent' | 'UnclesAlreadySet' | 'TooManyUncles' | 'GenesisUncle' | 'TooHighUncle' | 'UncleAlreadyIncluded' | 'OldUncle';
      }
@@ -7371,7 +7397,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBalancesError extends Enum {
          readonly isVestingBalance: boolean;
          readonly isLiquidityRestrictions: boolean;
-@@ -4060,13 +4070,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4060,13 +4075,13 @@ declare module '@polkadot/types/lookup' {
          readonly isTooManyReserves: boolean;
          readonly type: 'VestingBalance' | 'LiquidityRestrictions' | 'InsufficientBalance' | 'ExistentialDeposit' | 'KeepAlive' | 'ExistingVestingSchedule' | 'DeadAccount' | 'TooManyReserves';
      }
@@ -7387,7 +7413,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletElectionProviderMultiPhasePhase extends Enum {
          readonly isOff: boolean;
          readonly isSigned: boolean;
-@@ -4075,25 +4085,25 @@ declare module '@polkadot/types/lookup' {
+@@ -4075,25 +4090,25 @@ declare module '@polkadot/types/lookup' {
          readonly isEmergency: boolean;
          readonly type: 'Off' | 'Signed' | 'Unsigned' | 'Emergency';
      }
@@ -7417,7 +7443,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletElectionProviderMultiPhaseError extends Enum {
          readonly isPreDispatchEarlySubmission: boolean;
          readonly isPreDispatchWrongWinnerCount: boolean;
-@@ -4109,7 +4119,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4109,7 +4124,7 @@ declare module '@polkadot/types/lookup' {
          readonly isFallbackFailed: boolean;
          readonly type: 'PreDispatchEarlySubmission' | 'PreDispatchWrongWinnerCount' | 'PreDispatchWeakSubmission' | 'SignedQueueFull' | 'SignedCannotPayDeposit' | 'SignedInvalidWitness' | 'SignedTooMuchWeight' | 'OcwCallWrongEra' | 'MissingSnapshotMetadata' | 'InvalidSubmissionIndex' | 'CallNotAllowed' | 'FallbackFailed';
      }
@@ -7426,7 +7452,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStakingStakingLedger extends Struct {
          readonly stash: AccountId32;
          readonly total: Compact<u128>;
-@@ -4117,28 +4127,28 @@ declare module '@polkadot/types/lookup' {
+@@ -4117,28 +4132,28 @@ declare module '@polkadot/types/lookup' {
          readonly unlocking: Vec<PalletStakingUnlockChunk>;
          readonly claimedRewards: Vec<u32>;
      }
@@ -7460,7 +7486,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStakingForcing extends Enum {
          readonly isNotForcing: boolean;
          readonly isForceNew: boolean;
-@@ -4146,7 +4156,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4146,7 +4161,7 @@ declare module '@polkadot/types/lookup' {
          readonly isForceAlways: boolean;
          readonly type: 'NotForcing' | 'ForceNew' | 'ForceNone' | 'ForceAlways';
      }
@@ -7469,7 +7495,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStakingUnappliedSlash extends Struct {
          readonly validator: AccountId32;
          readonly own: u128;
-@@ -4154,19 +4164,19 @@ declare module '@polkadot/types/lookup' {
+@@ -4154,19 +4169,19 @@ declare module '@polkadot/types/lookup' {
          readonly reporters: Vec<AccountId32>;
          readonly payout: u128;
      }
@@ -7492,7 +7518,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStakingReleases extends Enum {
          readonly isV100Ancient: boolean;
          readonly isV200: boolean;
-@@ -4179,7 +4189,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4179,7 +4194,7 @@ declare module '@polkadot/types/lookup' {
          readonly isV900: boolean;
          readonly type: 'V100Ancient' | 'V200' | 'V300' | 'V400' | 'V500' | 'V600' | 'V700' | 'V800' | 'V900';
      }
@@ -7501,7 +7527,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStakingPalletError extends Enum {
          readonly isNotController: boolean;
          readonly isNotStash: boolean;
-@@ -4208,10 +4218,10 @@ declare module '@polkadot/types/lookup' {
+@@ -4208,10 +4223,10 @@ declare module '@polkadot/types/lookup' {
          readonly isBondingRestricted: boolean;
          readonly type: 'NotController' | 'NotStash' | 'AlreadyBonded' | 'AlreadyPaired' | 'EmptyTargets' | 'DuplicateIndex' | 'InvalidSlashIndex' | 'InsufficientBond' | 'NoMoreChunks' | 'NoUnlockChunk' | 'FundedTarget' | 'InvalidEraToReward' | 'InvalidNumberOfNominations' | 'NotSortedAndUnique' | 'AlreadyClaimed' | 'IncorrectHistoryDepth' | 'IncorrectSlashingSpans' | 'BadState' | 'TooManyTargets' | 'BadTarget' | 'CannotChillOther' | 'TooManyNominators' | 'TooManyValidators' | 'CommissionTooLow' | 'BondingRestricted';
      }
@@ -7514,7 +7540,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletSessionError extends Enum {
          readonly isInvalidProof: boolean;
          readonly isNoAssociatedValidatorId: boolean;
-@@ -4220,7 +4230,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4220,7 +4235,7 @@ declare module '@polkadot/types/lookup' {
          readonly isNoAccount: boolean;
          readonly type: 'InvalidProof' | 'NoAssociatedValidatorId' | 'DuplicatedKey' | 'NoKeys' | 'NoAccount';
      }
@@ -7523,7 +7549,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletGrandpaStoredState extends Enum {
          readonly isLive: boolean;
          readonly isPendingPause: boolean;
-@@ -4236,14 +4246,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4236,14 +4251,14 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'Live' | 'PendingPause' | 'Paused' | 'PendingResume';
      }
@@ -7540,7 +7566,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletGrandpaError extends Enum {
          readonly isPauseFailed: boolean;
          readonly isResumeFailed: boolean;
-@@ -4254,28 +4264,23 @@ declare module '@polkadot/types/lookup' {
+@@ -4254,28 +4269,23 @@ declare module '@polkadot/types/lookup' {
          readonly isDuplicateOffenceReport: boolean;
          readonly type: 'PauseFailed' | 'ResumeFailed' | 'ChangePending' | 'TooSoon' | 'InvalidKeyOwnershipProof' | 'InvalidEquivocationProof' | 'DuplicateOffenceReport';
      }
@@ -7573,7 +7599,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBagsListListNode extends Struct {
          readonly id: AccountId32;
          readonly prev: Option<AccountId32>;
-@@ -4283,18 +4288,18 @@ declare module '@polkadot/types/lookup' {
+@@ -4283,18 +4293,18 @@ declare module '@polkadot/types/lookup' {
          readonly bagUpper: u64;
          readonly score: u64;
      }
@@ -7595,7 +7621,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBagsListListListError extends Enum {
          readonly isDuplicate: boolean;
          readonly isNotHeavier: boolean;
-@@ -4302,13 +4307,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4302,13 +4312,13 @@ declare module '@polkadot/types/lookup' {
          readonly isNodeNotFound: boolean;
          readonly type: 'Duplicate' | 'NotHeavier' | 'NotInSameBag' | 'NodeNotFound';
      }
@@ -7611,7 +7637,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletVestingError extends Enum {
          readonly isNotVesting: boolean;
          readonly isAtMaxVestingSchedules: boolean;
-@@ -4317,14 +4322,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4317,14 +4327,14 @@ declare module '@polkadot/types/lookup' {
          readonly isInvalidScheduleParams: boolean;
          readonly type: 'NotVesting' | 'AtMaxVestingSchedules' | 'AmountLow' | 'ScheduleIndexOutOfBounds' | 'InvalidScheduleParams';
      }
@@ -7628,7 +7654,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletMultisigError extends Enum {
          readonly isMinimumThreshold: boolean;
          readonly isAlreadyApproved: boolean;
-@@ -4342,12 +4347,12 @@ declare module '@polkadot/types/lookup' {
+@@ -4342,12 +4352,12 @@ declare module '@polkadot/types/lookup' {
          readonly isAlreadyStored: boolean;
          readonly type: 'MinimumThreshold' | 'AlreadyApproved' | 'NoApprovalsNeeded' | 'TooFewSignatories' | 'TooManySignatories' | 'SignatoriesOutOfOrder' | 'SenderInSignatories' | 'NotFound' | 'NotOwner' | 'NoTimepoint' | 'WrongTimepoint' | 'UnexpectedTimepoint' | 'MaxWeightTooLow' | 'AlreadyStored';
      }
@@ -7643,7 +7669,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletCouncilCouncilStage extends Enum {
          readonly isAnnouncing: boolean;
          readonly asAnnouncing: PalletCouncilCouncilStageAnnouncing;
-@@ -4357,20 +4362,20 @@ declare module '@polkadot/types/lookup' {
+@@ -4357,20 +4367,20 @@ declare module '@polkadot/types/lookup' {
          readonly asIdle: PalletCouncilCouncilStageIdle;
          readonly type: 'Announcing' | 'Election' | 'Idle';
      }
@@ -7668,7 +7694,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletCouncilCouncilMember extends Struct {
          readonly stakingAccountId: AccountId32;
          readonly rewardAccountId: AccountId32;
-@@ -4379,7 +4384,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4379,7 +4389,7 @@ declare module '@polkadot/types/lookup' {
          readonly lastPaymentBlock: u32;
          readonly unpaidReward: u128;
      }
@@ -7677,7 +7703,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletCouncilCandidate extends Struct {
          readonly stakingAccountId: AccountId32;
          readonly rewardAccountId: AccountId32;
-@@ -4388,7 +4393,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4388,7 +4398,7 @@ declare module '@polkadot/types/lookup' {
          readonly votePower: u128;
          readonly noteHash: Option<H256>;
      }
@@ -7686,7 +7712,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletCouncilError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isBadOrigin: boolean;
-@@ -4416,7 +4421,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4416,7 +4426,7 @@ declare module '@polkadot/types/lookup' {
          readonly isInsufficientBalanceForTransfer: boolean;
          readonly type: 'ArithmeticError' | 'BadOrigin' | 'CantCandidateNow' | 'CantReleaseStakeNow' | 'CandidacyStakeTooLow' | 'CantCandidateTwice' | 'ConflictingStake' | 'StakeStillNeeded' | 'NoStake' | 'InsufficientBalanceForStaking' | 'CantVoteForYourself' | 'MemberIdNotMatchAccount' | 'InvalidAccountToStakeReuse' | 'NotCandidatingNow' | 'CantWithdrawCandidacyNow' | 'NotCouncilor' | 'InsufficientFundsForFundingRequest' | 'ZeroBalanceFundRequest' | 'RepeatedFundRequestAccount' | 'EmptyFundingRequests' | 'InsufficientTokensForFunding' | 'ZeroTokensFunding' | 'CandidateDoesNotExist' | 'InsufficientBalanceForTransfer';
      }
@@ -7695,7 +7721,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletReferendumReferendumStage extends Enum {
          readonly isInactive: boolean;
          readonly isVoting: boolean;
-@@ -4425,14 +4430,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4425,14 +4435,14 @@ declare module '@polkadot/types/lookup' {
          readonly asRevealing: PalletReferendumReferendumStageRevealing;
          readonly type: 'Inactive' | 'Voting' | 'Revealing';
      }
@@ -7712,7 +7738,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletReferendumReferendumStageRevealing extends Struct {
          readonly started: u32;
          readonly winningTargetCount: u32;
-@@ -4440,14 +4445,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4440,14 +4450,14 @@ declare module '@polkadot/types/lookup' {
          readonly currentCycleId: u64;
          readonly endsAt: u32;
      }
@@ -7729,7 +7755,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletReferendumError extends Enum {
          readonly isBadOrigin: boolean;
          readonly isReferendumNotRunning: boolean;
-@@ -4462,9 +4467,10 @@ declare module '@polkadot/types/lookup' {
+@@ -4462,9 +4472,10 @@ declare module '@polkadot/types/lookup' {
          readonly isUnstakingVoteInSameCycle: boolean;
          readonly isSaltTooLong: boolean;
          readonly isUnstakingForbidden: boolean;
@@ -7742,7 +7768,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletMembershipMembershipObject extends Struct {
          readonly handleHash: H256;
          readonly rootAccount: AccountId32;
-@@ -4472,12 +4478,12 @@ declare module '@polkadot/types/lookup' {
+@@ -4472,12 +4483,12 @@ declare module '@polkadot/types/lookup' {
          readonly verified: bool;
          readonly invites: u32;
      }
@@ -7757,7 +7783,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletMembershipError extends Enum {
          readonly isNotEnoughBalanceToBuyMembership: boolean;
          readonly isControllerAccountRequired: boolean;
-@@ -4500,9 +4506,10 @@ declare module '@polkadot/types/lookup' {
+@@ -4500,9 +4511,10 @@ declare module '@polkadot/types/lookup' {
          readonly isInsufficientBalanceToCoverStake: boolean;
          readonly isGifLockExceedsCredit: boolean;
          readonly isInsufficientBalanceToGift: boolean;
@@ -7770,7 +7796,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletForumCategory extends Struct {
          readonly titleHash: H256;
          readonly descriptionHash: H256;
-@@ -4513,14 +4520,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4513,14 +4525,14 @@ declare module '@polkadot/types/lookup' {
          readonly parentCategoryId: Option<u64>;
          readonly stickyThreadIds: BTreeSet<u64>;
      }
@@ -7787,7 +7813,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletForumPost extends Struct {
          readonly threadId: u64;
          readonly textHash: H256;
-@@ -4528,7 +4535,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4528,7 +4540,7 @@ declare module '@polkadot/types/lookup' {
          readonly cleanupPayOff: PalletCommonBloatBondRepayableBloatBond;
          readonly lastEdited: u32;
      }
@@ -7796,7 +7822,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletForumError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isOriginNotForumLead: boolean;
-@@ -4559,11 +4566,11 @@ declare module '@polkadot/types/lookup' {
+@@ -4559,11 +4571,11 @@ declare module '@polkadot/types/lookup' {
          readonly isMaxNumberOfStickiedThreadsExceeded: boolean;
          readonly type: 'ArithmeticError' | 'OriginNotForumLead' | 'ForumUserIdNotMatchAccount' | 'ModeratorIdNotMatchAccount' | 'AccountDoesNotMatchThreadAuthor' | 'ThreadDoesNotExist' | 'ModeratorModerateOriginCategory' | 'ModeratorModerateDestinationCategory' | 'ThreadMoveInvalid' | 'ThreadNotBeingUpdated' | 'InsufficientBalanceForThreadCreation' | 'CannotDeleteThreadWithOutstandingPosts' | 'PostDoesNotExist' | 'AccountDoesNotMatchPostAuthor' | 'InsufficientBalanceForPost' | 'CategoryNotBeingUpdated' | 'AncestorCategoryImmutable' | 'MaxValidCategoryDepthExceeded' | 'CategoryDoesNotExist' | 'CategoryModeratorDoesNotExist' | 'CategoryNotEmptyThreads' | 'CategoryNotEmptyCategories' | 'ModeratorCantDeleteCategory' | 'ModeratorCantUpdateCategory' | 'MapSizeLimit' | 'PathLengthShouldBeGreaterThanZero' | 'MaxNumberOfStickiedThreadsExceeded';
      }
@@ -7810,7 +7836,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBountyBountyRecord extends Struct {
          readonly creationParams: PalletBountyBountyParametersBoundedBTreeSet;
          readonly totalFunding: u128;
-@@ -4571,7 +4578,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4571,7 +4583,7 @@ declare module '@polkadot/types/lookup' {
          readonly activeWorkEntryCount: u32;
          readonly hasUnpaidOracleReward: bool;
      }
@@ -7819,7 +7845,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBountyBountyParametersBoundedBTreeSet extends Struct {
          readonly oracle: PalletBountyBountyActor;
          readonly contractType: PalletBountyAssuranceContractTypeBoundedBTreeSet;
-@@ -4581,14 +4588,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4581,14 +4593,14 @@ declare module '@polkadot/types/lookup' {
          readonly entrantStake: u128;
          readonly fundingType: PalletBountyFundingType;
      }
@@ -7836,7 +7862,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBountyBountyMilestone extends Enum {
          readonly isCreated: boolean;
          readonly asCreated: {
-@@ -4604,19 +4611,19 @@ declare module '@polkadot/types/lookup' {
+@@ -4604,19 +4616,19 @@ declare module '@polkadot/types/lookup' {
          } & Struct;
          readonly type: 'Created' | 'BountyMaxFundingReached' | 'WorkSubmitted' | 'Terminated' | 'JudgmentSubmitted';
      }
@@ -7859,7 +7885,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletBountyError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isMinFundingAmountCannotBeGreaterThanMaxAmount: boolean;
-@@ -4655,21 +4662,21 @@ declare module '@polkadot/types/lookup' {
+@@ -4655,21 +4667,21 @@ declare module '@polkadot/types/lookup' {
          readonly isOracleRewardAlreadyWithdrawn: boolean;
          readonly type: 'ArithmeticError' | 'MinFundingAmountCannotBeGreaterThanMaxAmount' | 'BountyDoesntExist' | 'SwitchOracleOriginIsRoot' | 'InvalidStageUnexpectedFunding' | 'InvalidStageUnexpectedNoFundingContributed' | 'InvalidStageUnexpectedCancelled' | 'InvalidStageUnexpectedWorkSubmission' | 'InvalidStageUnexpectedJudgment' | 'InvalidStageUnexpectedSuccessfulBountyWithdrawal' | 'InvalidStageUnexpectedFailedBountyWithdrawal' | 'InsufficientBalanceForBounty' | 'NoBountyContributionFound' | 'InsufficientBalanceForStake' | 'ConflictingStakes' | 'WorkEntryDoesntExist' | 'CherryLessThenMinimumAllowed' | 'CannotSubmitWorkToClosedContractBounty' | 'ClosedContractMemberListIsEmpty' | 'ClosedContractMemberListIsTooLarge' | 'ClosedContractMemberNotFound' | 'InvalidOracleMemberId' | 'InvalidStakingAccountForMember' | 'ZeroWinnerReward' | 'TotalRewardShouldBeEqualToTotalFunding' | 'EntrantStakeIsLessThanMininum' | 'FundingAmountCannotBeZero' | 'FundingPeriodCannotBeZero' | 'WinnerShouldHasWorkSubmission' | 'InvalidContributorActorSpecified' | 'InvalidOracleActorSpecified' | 'InvalidEntrantWorkerSpecified' | 'InvalidCreatorActorSpecified' | 'WorkEntryDoesntBelongToWorker' | 'OracleRewardAlreadyWithdrawn';
      }
@@ -7884,7 +7910,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletContentNftTypesTransactionalStatusRecord extends Enum {
          readonly isIdle: boolean;
          readonly isInitiatedOfferToMember: boolean;
-@@ -4682,7 +4689,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4682,7 +4694,7 @@ declare module '@polkadot/types/lookup' {
          readonly asBuyNow: u128;
          readonly type: 'Idle' | 'InitiatedOfferToMember' | 'EnglishAuction' | 'OpenAuction' | 'BuyNow';
      }
@@ -7893,7 +7919,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletContentNftTypesEnglishAuctionRecord extends Struct {
          readonly startingPrice: u128;
          readonly buyNowPrice: Option<u128>;
-@@ -4693,12 +4700,12 @@ declare module '@polkadot/types/lookup' {
+@@ -4693,12 +4705,12 @@ declare module '@polkadot/types/lookup' {
          readonly minBidStep: u128;
          readonly topBid: Option<PalletContentNftTypesEnglishAuctionBid>;
      }
@@ -7908,7 +7934,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletContentNftTypesOpenAuctionRecord extends Struct {
          readonly startingPrice: u128;
          readonly buyNowPrice: Option<u128>;
-@@ -4707,26 +4714,26 @@ declare module '@polkadot/types/lookup' {
+@@ -4707,26 +4719,26 @@ declare module '@polkadot/types/lookup' {
          readonly auctionId: u64;
          readonly start: u32;
      }
@@ -7939,7 +7965,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletContentErrorsError extends Enum {
          readonly isChannelStateBloatBondChanged: boolean;
          readonly isVideoStateBloatBondChanged: boolean;
-@@ -4856,23 +4863,24 @@ declare module '@polkadot/types/lookup' {
+@@ -4856,23 +4868,24 @@ declare module '@polkadot/types/lookup' {
          readonly isPatronageCanOnlyBeClaimedForMemberOwnedChannels: boolean;
          readonly isChannelTransfersBlockedDuringRevenueSplits: boolean;
          readonly isChannelTransfersBlockedDuringTokenSales: boolean;
@@ -7968,7 +7994,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStorageStorageBucketOperatorStatus extends Enum {
          readonly isMissing: boolean;
          readonly isInvitedStorageWorker: boolean;
-@@ -4881,23 +4889,23 @@ declare module '@polkadot/types/lookup' {
+@@ -4881,23 +4894,23 @@ declare module '@polkadot/types/lookup' {
          readonly asStorageWorker: ITuple<[u64, AccountId32]>;
          readonly type: 'Missing' | 'InvitedStorageWorker' | 'StorageWorker';
      }
@@ -7996,7 +8022,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStorageDistributionBucketRecord extends Struct {
          readonly acceptingNewBags: bool;
          readonly distributing: bool;
-@@ -4905,7 +4913,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4905,7 +4918,7 @@ declare module '@polkadot/types/lookup' {
          readonly operators: BTreeSet<u64>;
          readonly assignedBags: u64;
      }
@@ -8005,7 +8031,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletStorageError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isInvalidCidLength: boolean;
-@@ -4974,7 +4982,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4974,7 +4987,7 @@ declare module '@polkadot/types/lookup' {
          readonly isCallDisabled: boolean;
          readonly type: 'ArithmeticError' | 'InvalidCidLength' | 'NoObjectsOnUpload' | 'StorageBucketDoesntExist' | 'StorageBucketIsNotBoundToBag' | 'StorageBucketIsBoundToBag' | 'NoStorageBucketInvitation' | 'StorageProviderAlreadySet' | 'StorageProviderMustBeSet' | 'DifferentStorageProviderInvited' | 'InvitedStorageProvider' | 'StorageBucketIdCollectionsAreEmpty' | 'StorageBucketsNumberViolatesDynamicBagCreationPolicy' | 'DistributionBucketsViolatesDynamicBagCreationPolicy' | 'EmptyContentId' | 'ZeroObjectSize' | 'InvalidStateBloatBondSourceAccount' | 'InvalidStorageProvider' | 'InsufficientBalance' | 'DataObjectDoesntExist' | 'UploadingBlocked' | 'DataObjectIdCollectionIsEmpty' | 'SourceAndDestinationBagsAreEqual' | 'DataObjectBlacklisted' | 'BlacklistSizeLimitExceeded' | 'VoucherMaxObjectSizeLimitExceeded' | 'VoucherMaxObjectNumberLimitExceeded' | 'StorageBucketObjectNumberLimitReached' | 'StorageBucketObjectSizeLimitReached' | 'InsufficientTreasuryBalance' | 'CannotDeleteNonEmptyStorageBucket' | 'DataObjectIdParamsAreEmpty' | 'StorageBucketsPerBagLimitTooLow' | 'StorageBucketsPerBagLimitTooHigh' | 'StorageBucketPerBagLimitExceeded' | 'StorageBucketDoesntAcceptNewBags' | 'DynamicBagExists' | 'DynamicBagDoesntExist' | 'StorageProviderOperatorDoesntExist' | 'DataSizeFeeChanged' | 'DataObjectStateBloatBondChanged' | 'CannotDeleteNonEmptyDynamicBag' | 'MaxDistributionBucketFamilyNumberLimitExceeded' | 'DistributionBucketFamilyDoesntExist' | 'DistributionBucketDoesntExist' | 'DistributionBucketIdCollectionsAreEmpty' | 'DistributionBucketDoesntAcceptNewBags' | 'MaxDistributionBucketNumberPerBagLimitExceeded' | 'DistributionBucketIsNotBoundToBag' | 'DistributionBucketIsBoundToBag' | 'DistributionBucketsPerBagLimitTooLow' | 'DistributionBucketsPerBagLimitTooHigh' | 'DistributionProviderOperatorDoesntExist' | 'DistributionProviderOperatorAlreadyInvited' | 'DistributionProviderOperatorSet' | 'NoDistributionBucketInvitation' | 'MustBeDistributionProviderOperatorForBucket' | 'MaxNumberOfPendingInvitationsLimitForDistributionBucketReached' | 'MaxNumberOfOperatorsPerDistributionBucketReached' | 'DistributionFamilyBoundToBagCreationPolicy' | 'MaxDataObjectSizeExceeded' | 'InvalidTransactorAccount' | 'NumberOfStorageBucketsOutsideOfAllowedContraints' | 'NumberOfDistributionBucketsOutsideOfAllowedContraints' | 'CallDisabled';
      }
@@ -8014,7 +8040,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProjectTokenAccountData extends Struct {
          readonly vestingSchedules: BTreeMap<PalletProjectTokenVestingSource, PalletProjectTokenVestingSchedule>;
          readonly amount: u128;
-@@ -4983,12 +4991,12 @@ declare module '@polkadot/types/lookup' {
+@@ -4983,12 +4996,12 @@ declare module '@polkadot/types/lookup' {
          readonly nextVestingTransferId: u64;
          readonly lastSaleTotalPurchasedAmount: Option<ITuple<[u32, u128]>>;
      }
@@ -8029,7 +8055,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProjectTokenVestingSchedule extends Struct {
          readonly linearVestingStartBlock: u32;
          readonly linearVestingDuration: u32;
-@@ -4996,56 +5004,56 @@ declare module '@polkadot/types/lookup' {
+@@ -4996,56 +5009,56 @@ declare module '@polkadot/types/lookup' {
          readonly postCliffTotalAmount: u128;
          readonly burnedAmount: u128;
      }
@@ -8094,7 +8120,7 @@ index 3896f19..f8d0aa5 100644
          readonly isTokenIssuanceNotInIdleState: boolean;
          readonly isInsufficientJoyBalance: boolean;
          readonly isJoyTransferSubjectToDusting: boolean;
-@@ -5070,6 +5078,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5070,6 +5083,7 @@ declare module '@polkadot/types/lookup' {
          readonly isSaleCapPerMemberIsZero: boolean;
          readonly isSaleUnitPriceIsZero: boolean;
          readonly isSalePurchaseAmountIsZero: boolean;
@@ -8102,7 +8128,7 @@ index 3896f19..f8d0aa5 100644
          readonly isRevenueSplitTimeToStartTooShort: boolean;
          readonly isRevenueSplitDurationTooShort: boolean;
          readonly isRevenueSplitAlreadyActiveForToken: boolean;
-@@ -5085,9 +5094,15 @@ declare module '@polkadot/types/lookup' {
+@@ -5085,9 +5099,15 @@ declare module '@polkadot/types/lookup' {
          readonly isRevenueSplitRateIsZero: boolean;
          readonly isBurnAmountIsZero: boolean;
          readonly isBurnAmountGreaterThanAccountTokensAmount: boolean;
@@ -8121,7 +8147,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineProposal extends Struct {
          readonly parameters: PalletProposalsEngineProposalParameters;
          readonly proposerId: u64;
-@@ -5098,7 +5113,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5098,7 +5118,7 @@ declare module '@polkadot/types/lookup' {
          readonly nrOfCouncilConfirmations: u32;
          readonly stakingAccountId: Option<AccountId32>;
      }
@@ -8130,7 +8156,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineProposalParameters extends Struct {
          readonly votingPeriod: u32;
          readonly gracePeriod: u32;
-@@ -5109,14 +5124,14 @@ declare module '@polkadot/types/lookup' {
+@@ -5109,14 +5129,14 @@ declare module '@polkadot/types/lookup' {
          readonly requiredStake: Option<u128>;
          readonly constitutionality: u32;
      }
@@ -8147,7 +8173,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsEngineError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isEmptyTitleProvided: boolean;
-@@ -5143,26 +5158,26 @@ declare module '@polkadot/types/lookup' {
+@@ -5143,26 +5163,26 @@ declare module '@polkadot/types/lookup' {
          readonly isMaxDispatchableCallCodeSizeExceeded: boolean;
          readonly type: 'ArithmeticError' | 'EmptyTitleProvided' | 'EmptyDescriptionProvided' | 'TitleIsTooLong' | 'DescriptionIsTooLong' | 'ProposalNotFound' | 'ProposalFinalized' | 'AlreadyVoted' | 'NotAuthor' | 'MaxActiveProposalNumberExceeded' | 'EmptyStake' | 'StakeShouldBeEmpty' | 'StakeDiffersFromRequired' | 'InvalidParameterApprovalThreshold' | 'InvalidParameterSlashingThreshold' | 'RequireRootOrigin' | 'ProposalHasVotes' | 'ZeroExactExecutionBlock' | 'InvalidExactExecutionBlock' | 'InsufficientBalanceForStake' | 'ConflictingStakes' | 'InvalidStakingAccountForMember' | 'MaxDispatchableCallCodeSizeExceeded';
      }
@@ -8178,7 +8204,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsDiscussionError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isThreadDoesntExist: boolean;
-@@ -5176,7 +5191,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5176,7 +5196,7 @@ declare module '@polkadot/types/lookup' {
          readonly isCannotDeletePost: boolean;
          readonly type: 'ArithmeticError' | 'ThreadDoesntExist' | 'PostDoesntExist' | 'RequireRootOrigin' | 'CannotPostOnClosedThread' | 'NotAuthorOrCouncilor' | 'MaxWhiteListSizeExceeded' | 'WhitelistedMemberDoesNotExist' | 'InsufficientBalanceForPost' | 'CannotDeletePost';
      }
@@ -8187,7 +8213,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletProposalsCodexError extends Enum {
          readonly isSignalProposalIsEmpty: boolean;
          readonly isRuntimeProposalIsEmpty: boolean;
-@@ -5206,7 +5221,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5206,7 +5226,7 @@ declare module '@polkadot/types/lookup' {
          readonly isArithmeticError: boolean;
          readonly type: 'SignalProposalIsEmpty' | 'RuntimeProposalIsEmpty' | 'InvalidFundingRequestProposalBalance' | 'InvalidValidatorCount' | 'RequireRootOrigin' | 'InvalidCouncilElectionParameterCouncilSize' | 'InvalidCouncilElectionParameterCandidacyLimit' | 'InvalidCouncilElectionParameterMinVotingStake' | 'InvalidCouncilElectionParameterNewTermDuration' | 'InvalidCouncilElectionParameterMinCouncilStake' | 'InvalidCouncilElectionParameterRevealingPeriod' | 'InvalidCouncilElectionParameterVotingPeriod' | 'InvalidCouncilElectionParameterAnnouncingPeriod' | 'InvalidWorkingGroupBudgetCapacity' | 'InvalidSetLeadParameterCannotBeCouncilor' | 'SlashingStakeIsZero' | 'DecreasingStakeIsZero' | 'InsufficientFundsForBudgetUpdate' | 'InvalidFundingRequestProposalNumberOfAccount' | 'InvalidFundingRequestProposalRepeatedAccount' | 'InvalidChannelPayoutsProposalMinCashoutExceedsMaxCashout' | 'InvalidLeadWorkerId' | 'InvalidLeadOpeningId' | 'InvalidLeadApplicationId' | 'InvalidProposalId' | 'ArithmeticError';
      }
@@ -8196,7 +8222,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletWorkingGroupOpening extends Struct {
          readonly openingType: PalletWorkingGroupOpeningType;
          readonly created: u32;
-@@ -5215,7 +5230,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5215,7 +5235,7 @@ declare module '@polkadot/types/lookup' {
          readonly rewardPerBlock: Option<u128>;
          readonly creationStake: u128;
      }
@@ -8205,7 +8231,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletWorkingGroupJobApplication extends Struct {
          readonly roleAccountId: AccountId32;
          readonly rewardAccountId: AccountId32;
-@@ -5224,7 +5239,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5224,7 +5244,7 @@ declare module '@polkadot/types/lookup' {
          readonly descriptionHash: H256;
          readonly openingId: u64;
      }
@@ -8214,7 +8240,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletWorkingGroupGroupWorker extends Struct {
          readonly memberId: u64;
          readonly roleAccountId: AccountId32;
-@@ -5236,7 +5251,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5236,7 +5256,7 @@ declare module '@polkadot/types/lookup' {
          readonly missedReward: Option<u128>;
          readonly createdAt: u32;
      }
@@ -8223,7 +8249,7 @@ index 3896f19..f8d0aa5 100644
      interface PalletWorkingGroupErrorsError extends Enum {
          readonly isArithmeticError: boolean;
          readonly isStakeBalanceCannotBeZero: boolean;
-@@ -5272,7 +5287,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5272,7 +5292,7 @@ declare module '@polkadot/types/lookup' {
          readonly isInsufficientBalanceForTransfer: boolean;
          readonly type: 'ArithmeticError' | 'StakeBalanceCannotBeZero' | 'OpeningDoesNotExist' | 'CannotHireMultipleLeaders' | 'WorkerApplicationDoesNotExist' | 'MaxActiveWorkerNumberExceeded' | 'SuccessfulWorkerApplicationDoesNotExist' | 'CannotHireLeaderWhenLeaderExists' | 'IsNotLeadAccount' | 'CurrentLeadNotSet' | 'WorkerDoesNotExist' | 'InvalidMemberOrigin' | 'SignerIsNotWorkerRoleAccount' | 'BelowMinimumStakes' | 'InsufficientBalanceToCoverStake' | 'ApplicationStakeDoesntMatchOpening' | 'OriginIsNotApplicant' | 'WorkerIsLeaving' | 'CannotRewardWithZero' | 'InvalidStakingAccountForMember' | 'ConflictStakesOnAccount' | 'WorkerHasNoReward' | 'UnstakingPeriodLessThanMinimum' | 'CannotSpendZero' | 'InsufficientBudgetForSpending' | 'NoApplicationsProvided' | 'CannotDecreaseStakeDeltaGreaterThanStake' | 'ApplicationsNotForOpening' | 'WorkerStorageValueTooLong' | 'InsufficientTokensForFunding' | 'ZeroTokensFunding' | 'InsufficientBalanceForTransfer';
      }
@@ -8232,7 +8258,7 @@ index 3896f19..f8d0aa5 100644
      interface SpRuntimeMultiSignature extends Enum {
          readonly isEd25519: boolean;
          readonly asEd25519: SpCoreEd25519Signature;
-@@ -5282,25 +5297,25 @@ declare module '@polkadot/types/lookup' {
+@@ -5282,25 +5302,25 @@ declare module '@polkadot/types/lookup' {
          readonly asEcdsa: SpCoreEcdsaSignature;
          readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
      }
@@ -8268,7 +8294,7 @@ index 3896f19..f8d0aa5 100644
      type JoystreamNodeRuntimeRuntime = Null;
  }
 diff --git a/node_modules/@joystream/types/lib/cjs/augment/lookup.js b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
-index b6fcc72..322ddcf 100644
+index b6fcc72..fa6f522 100644
 --- a/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/cjs/augment/lookup.js
 @@ -368,23 +368,7 @@ exports.default = {
@@ -9778,7 +9804,7 @@ index b6fcc72..322ddcf 100644
              },
              claim_channel_reward: {
                  actor: 'PalletContentPermissionsContentActor',
-@@ -3175,7 +3150,17 @@ exports.default = {
+@@ -3175,7 +3150,21 @@ exports.default = {
              },
              deissue_creator_token: {
                  actor: 'PalletContentPermissionsContentActor',
@@ -9790,6 +9816,10 @@ index b6fcc72..322ddcf 100644
 +                channelId: 'u64',
 +                params: 'PalletProjectTokenAmmParams',
 +            },
++            deactivate_amm: {
++                actor: 'PalletContentPermissionsContentActor',
++                channelId: 'u64',
++            },
 +            creator_token_issuer_remark: {
 +                actor: 'PalletContentPermissionsContentActor',
 +                channelId: 'u64',
@@ -9797,7 +9827,7 @@ index b6fcc72..322ddcf 100644
              }
          }
      },
-@@ -3235,7 +3220,14 @@ exports.default = {
+@@ -3235,7 +3224,14 @@ exports.default = {
       **/
      PalletProjectTokenTransfersPaymentWithVesting: 'BTreeMap<u64, PalletProjectTokenPaymentWithVesting>',
      /**
@@ -9813,7 +9843,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3369,9 +3361,6 @@ exports.default = {
+@@ -3369,9 +3365,6 @@ exports.default = {
                  bucketId: 'PalletStorageDistributionBucketIdRecord',
                  metadata: 'Bytes',
              },
@@ -9823,7 +9853,7 @@ index b6fcc72..322ddcf 100644
              storage_operator_remark: {
                  workerId: 'u64',
                  storageBucketId: 'u64',
-@@ -3385,7 +3374,7 @@ exports.default = {
+@@ -3385,7 +3378,7 @@ exports.default = {
          }
      },
      /**
@@ -9832,7 +9862,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenCall: {
          _enum: {
-@@ -3421,32 +3410,46 @@ exports.default = {
+@@ -3421,32 +3414,46 @@ exports.default = {
              },
              exit_revenue_split: {
                  tokenId: 'u64',
@@ -9885,7 +9915,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsEngineCall: {
          _enum: {
-@@ -3471,7 +3474,7 @@ exports.default = {
+@@ -3471,7 +3478,7 @@ exports.default = {
          }
      },
      /**
@@ -9894,7 +9924,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsDiscussionCall: {
          _enum: {
-@@ -3500,7 +3503,7 @@ exports.default = {
+@@ -3500,7 +3507,7 @@ exports.default = {
          }
      },
      /**
@@ -9903,7 +9933,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsCodexCall: {
          _enum: {
-@@ -3511,7 +3514,7 @@ exports.default = {
+@@ -3511,7 +3518,7 @@ exports.default = {
          }
      },
      /**
@@ -9912,7 +9942,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletWorkingGroupCall: {
          _enum: {
-@@ -3594,7 +3597,7 @@ exports.default = {
+@@ -3594,7 +3601,7 @@ exports.default = {
          }
      },
      /**
@@ -9921,7 +9951,7 @@ index b6fcc72..322ddcf 100644
       **/
      JoystreamNodeRuntimeOriginCaller: {
          _enum: {
-@@ -3603,7 +3606,7 @@ exports.default = {
+@@ -3603,7 +3610,7 @@ exports.default = {
          }
      },
      /**
@@ -9930,7 +9960,7 @@ index b6fcc72..322ddcf 100644
       **/
      FrameSupportDispatchRawOrigin: {
          _enum: {
-@@ -3613,17 +3616,17 @@ exports.default = {
+@@ -3613,17 +3620,17 @@ exports.default = {
          }
      },
      /**
@@ -9951,7 +9981,7 @@ index b6fcc72..322ddcf 100644
       **/
      SpConsensusBabeDigestsPreDigest: {
          _enum: {
-@@ -3634,7 +3637,7 @@ exports.default = {
+@@ -3634,7 +3641,7 @@ exports.default = {
          }
      },
      /**
@@ -9960,7 +9990,7 @@ index b6fcc72..322ddcf 100644
       **/
      SpConsensusBabeDigestsPrimaryPreDigest: {
          authorityIndex: 'u32',
-@@ -3643,14 +3646,14 @@ exports.default = {
+@@ -3643,14 +3650,14 @@ exports.default = {
          vrfProof: '[u8;64]'
      },
      /**
@@ -9977,7 +10007,7 @@ index b6fcc72..322ddcf 100644
       **/
      SpConsensusBabeDigestsSecondaryVRFPreDigest: {
          authorityIndex: 'u32',
-@@ -3659,20 +3662,20 @@ exports.default = {
+@@ -3659,20 +3666,20 @@ exports.default = {
          vrfProof: '[u8;64]'
      },
      /**
@@ -10001,7 +10031,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletAuthorshipUncleEntryItem: {
          _enum: {
-@@ -3681,13 +3684,13 @@ exports.default = {
+@@ -3681,13 +3688,13 @@ exports.default = {
          }
      },
      /**
@@ -10017,7 +10047,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBalancesBalanceLock: {
          id: '[u8;8]',
-@@ -3695,38 +3698,38 @@ exports.default = {
+@@ -3695,38 +3702,38 @@ exports.default = {
          reasons: 'PalletBalancesReasons'
      },
      /**
@@ -10062,7 +10092,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletElectionProviderMultiPhasePhase: {
          _enum: {
-@@ -3737,7 +3740,7 @@ exports.default = {
+@@ -3737,7 +3744,7 @@ exports.default = {
          }
      },
      /**
@@ -10071,7 +10101,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletElectionProviderMultiPhaseReadySolution: {
          supports: 'Vec<(AccountId32,SpNposElectionsSupport)>',
-@@ -3745,14 +3748,14 @@ exports.default = {
+@@ -3745,14 +3752,14 @@ exports.default = {
          compute: 'PalletElectionProviderMultiPhaseElectionCompute'
      },
      /**
@@ -10088,7 +10118,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletElectionProviderMultiPhaseSignedSignedSubmission: {
          who: 'AccountId32',
-@@ -3761,13 +3764,13 @@ exports.default = {
+@@ -3761,13 +3768,13 @@ exports.default = {
          callFee: 'u128'
      },
      /**
@@ -10104,7 +10134,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStakingStakingLedger: {
          stash: 'AccountId32',
-@@ -3777,14 +3780,14 @@ exports.default = {
+@@ -3777,14 +3784,14 @@ exports.default = {
          claimedRewards: 'Vec<u32>'
      },
      /**
@@ -10121,7 +10151,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStakingNominations: {
          targets: 'Vec<AccountId32>',
-@@ -3792,27 +3795,27 @@ exports.default = {
+@@ -3792,27 +3799,27 @@ exports.default = {
          suppressed: 'bool'
      },
      /**
@@ -10153,7 +10183,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStakingUnappliedSlash: {
          validator: 'AccountId32',
-@@ -3822,7 +3825,7 @@ exports.default = {
+@@ -3822,7 +3829,7 @@ exports.default = {
          payout: 'u128'
      },
      /**
@@ -10162,7 +10192,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStakingSlashingSlashingSpans: {
          spanIndex: 'u32',
-@@ -3831,36 +3834,36 @@ exports.default = {
+@@ -3831,36 +3838,36 @@ exports.default = {
          prior: 'Vec<u32>'
      },
      /**
@@ -10205,7 +10235,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletGrandpaStoredState: {
          _enum: {
-@@ -3877,7 +3880,7 @@ exports.default = {
+@@ -3877,7 +3884,7 @@ exports.default = {
          }
      },
      /**
@@ -10214,7 +10244,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletGrandpaStoredPendingChange: {
          scheduledAt: 'u32',
-@@ -3886,39 +3889,33 @@ exports.default = {
+@@ -3886,39 +3893,33 @@ exports.default = {
          forced: 'Option<u32>'
      },
      /**
@@ -10259,7 +10289,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBagsListListNode: {
          id: 'AccountId32',
-@@ -3928,14 +3925,14 @@ exports.default = {
+@@ -3928,14 +3929,14 @@ exports.default = {
          score: 'u64'
      },
      /**
@@ -10276,7 +10306,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBagsListError: {
          _enum: {
-@@ -3943,25 +3940,25 @@ exports.default = {
+@@ -3943,25 +3944,25 @@ exports.default = {
          }
      },
      /**
@@ -10306,7 +10336,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletMultisigMultisig: {
          when: 'PalletMultisigTimepoint',
-@@ -3970,20 +3967,20 @@ exports.default = {
+@@ -3970,20 +3971,20 @@ exports.default = {
          approvals: 'Vec<AccountId32>'
      },
      /**
@@ -10330,7 +10360,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletCouncilCouncilStage: {
          _enum: {
-@@ -3993,26 +3990,26 @@ exports.default = {
+@@ -3993,26 +3994,26 @@ exports.default = {
          }
      },
      /**
@@ -10361,7 +10391,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletCouncilCouncilMember: {
          stakingAccountId: 'AccountId32',
-@@ -4023,7 +4020,7 @@ exports.default = {
+@@ -4023,7 +4024,7 @@ exports.default = {
          unpaidReward: 'u128'
      },
      /**
@@ -10370,7 +10400,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletCouncilCandidate: {
          stakingAccountId: 'AccountId32',
-@@ -4034,13 +4031,13 @@ exports.default = {
+@@ -4034,13 +4035,13 @@ exports.default = {
          noteHash: 'Option<H256>'
      },
      /**
@@ -10386,7 +10416,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletReferendumReferendumStage: {
          _enum: {
-@@ -4050,7 +4047,7 @@ exports.default = {
+@@ -4050,7 +4051,7 @@ exports.default = {
          }
      },
      /**
@@ -10395,7 +10425,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletReferendumReferendumStageVoting: {
          started: 'u32',
-@@ -4059,7 +4056,7 @@ exports.default = {
+@@ -4059,7 +4060,7 @@ exports.default = {
          endsAt: 'u32'
      },
      /**
@@ -10404,7 +10434,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletReferendumReferendumStageRevealing: {
          started: 'u32',
-@@ -4069,7 +4066,7 @@ exports.default = {
+@@ -4069,7 +4070,7 @@ exports.default = {
          endsAt: 'u32'
      },
      /**
@@ -10413,7 +10443,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletReferendumCastVote: {
          commitment: 'H256',
-@@ -4078,13 +4075,13 @@ exports.default = {
+@@ -4078,13 +4079,13 @@ exports.default = {
          voteFor: 'Option<u64>'
      },
      /**
@@ -10430,7 +10460,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletMembershipMembershipObject: {
          handleHash: 'H256',
-@@ -4094,20 +4091,20 @@ exports.default = {
+@@ -4094,20 +4095,20 @@ exports.default = {
          invites: 'u32'
      },
      /**
@@ -10455,7 +10485,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletForumCategory: {
          titleHash: 'H256',
-@@ -4120,7 +4117,7 @@ exports.default = {
+@@ -4120,7 +4121,7 @@ exports.default = {
          stickyThreadIds: 'BTreeSet<u64>'
      },
      /**
@@ -10464,7 +10494,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletForumThread: {
          categoryId: 'u64',
-@@ -4129,7 +4126,7 @@ exports.default = {
+@@ -4129,7 +4130,7 @@ exports.default = {
          numberOfEditablePosts: 'u64'
      },
      /**
@@ -10473,7 +10503,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletForumPost: {
          threadId: 'u64',
-@@ -4139,19 +4136,19 @@ exports.default = {
+@@ -4139,19 +4140,19 @@ exports.default = {
          lastEdited: 'u32'
      },
      /**
@@ -10496,7 +10526,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBountyBountyRecord: {
          creationParams: 'PalletBountyBountyParametersBoundedBTreeSet',
-@@ -4161,7 +4158,7 @@ exports.default = {
+@@ -4161,7 +4162,7 @@ exports.default = {
          hasUnpaidOracleReward: 'bool'
      },
      /**
@@ -10505,7 +10535,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBountyBountyParametersBoundedBTreeSet: {
          oracle: 'PalletBountyBountyActor',
-@@ -4173,7 +4170,7 @@ exports.default = {
+@@ -4173,7 +4174,7 @@ exports.default = {
          fundingType: 'PalletBountyFundingType'
      },
      /**
@@ -10514,7 +10544,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBountyAssuranceContractTypeBoundedBTreeSet: {
          _enum: {
-@@ -4182,7 +4179,7 @@ exports.default = {
+@@ -4182,7 +4183,7 @@ exports.default = {
          }
      },
      /**
@@ -10523,7 +10553,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBountyBountyMilestone: {
          _enum: {
-@@ -4199,14 +4196,14 @@ exports.default = {
+@@ -4199,14 +4200,14 @@ exports.default = {
          }
      },
      /**
@@ -10540,7 +10570,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletBountyEntryRecord: {
          memberId: 'u64',
-@@ -4215,13 +4212,13 @@ exports.default = {
+@@ -4215,13 +4216,13 @@ exports.default = {
          workSubmitted: 'bool'
      },
      /**
@@ -10556,7 +10586,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentVideoRecord: {
          inChannel: 'u64',
-@@ -4230,7 +4227,7 @@ exports.default = {
+@@ -4230,7 +4231,7 @@ exports.default = {
          videoStateBloatBond: 'PalletCommonBloatBondRepayableBloatBond'
      },
      /**
@@ -10565,7 +10595,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesOwnedNft: {
          owner: 'PalletContentNftTypesNftOwner',
-@@ -4239,7 +4236,7 @@ exports.default = {
+@@ -4239,7 +4240,7 @@ exports.default = {
          openAuctionsNonce: 'u64'
      },
      /**
@@ -10574,7 +10604,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesTransactionalStatusRecord: {
          _enum: {
-@@ -4251,7 +4248,7 @@ exports.default = {
+@@ -4251,7 +4252,7 @@ exports.default = {
          }
      },
      /**
@@ -10583,7 +10613,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesEnglishAuctionRecord: {
          startingPrice: 'u128',
-@@ -4264,14 +4261,14 @@ exports.default = {
+@@ -4264,14 +4265,14 @@ exports.default = {
          topBid: 'Option<PalletContentNftTypesEnglishAuctionBid>'
      },
      /**
@@ -10600,7 +10630,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesOpenAuctionRecord: {
          startingPrice: 'u128',
-@@ -4282,7 +4279,7 @@ exports.default = {
+@@ -4282,7 +4283,7 @@ exports.default = {
          start: 'u32'
      },
      /**
@@ -10609,7 +10639,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesNftOwner: {
          _enum: {
-@@ -4291,7 +4288,7 @@ exports.default = {
+@@ -4291,7 +4292,7 @@ exports.default = {
          }
      },
      /**
@@ -10618,7 +10648,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentPermissionsCuratorGroupCuratorGroupRecord: {
          curators: 'BTreeMap<u64, BTreeSet<PalletContentIterableEnumsChannelActionPermission>>',
-@@ -4299,7 +4296,7 @@ exports.default = {
+@@ -4299,7 +4300,7 @@ exports.default = {
          permissionsByLevel: 'BTreeMap<u8, BTreeSet<PalletContentPermissionsCuratorGroupIterableEnumsContentModerationAction>>'
      },
      /**
@@ -10627,7 +10657,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletContentNftTypesOpenAuctionBidRecord: {
          amount: 'u128',
-@@ -4307,13 +4304,13 @@ exports.default = {
+@@ -4307,13 +4308,13 @@ exports.default = {
          auctionId: 'u64'
      },
      /**
@@ -10644,7 +10674,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageBagRecord: {
          storedBy: 'BTreeSet<u64>',
-@@ -4322,7 +4319,7 @@ exports.default = {
+@@ -4322,7 +4323,7 @@ exports.default = {
          objectsNumber: 'u64'
      },
      /**
@@ -10653,7 +10683,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageStorageBucketRecord: {
          operatorStatus: 'PalletStorageStorageBucketOperatorStatus',
-@@ -4331,7 +4328,7 @@ exports.default = {
+@@ -4331,7 +4332,7 @@ exports.default = {
          assignedBags: 'u64'
      },
      /**
@@ -10662,7 +10692,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageStorageBucketOperatorStatus: {
          _enum: {
-@@ -4341,14 +4338,14 @@ exports.default = {
+@@ -4341,14 +4342,14 @@ exports.default = {
          }
      },
      /**
@@ -10679,7 +10709,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageDataObject: {
          _alias: {
-@@ -4360,13 +4357,13 @@ exports.default = {
+@@ -4360,13 +4361,13 @@ exports.default = {
          ipfsContentId: 'Bytes'
      },
      /**
@@ -10695,7 +10725,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletStorageDistributionBucketRecord: {
          acceptingNewBags: 'bool',
-@@ -4376,13 +4373,13 @@ exports.default = {
+@@ -4376,13 +4377,13 @@ exports.default = {
          assignedBags: 'u64'
      },
      /**
@@ -10711,7 +10741,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenAccountData: {
          vestingSchedules: 'BTreeMap<PalletProjectTokenVestingSource, PalletProjectTokenVestingSchedule>',
-@@ -4393,14 +4390,14 @@ exports.default = {
+@@ -4393,14 +4394,14 @@ exports.default = {
          lastSaleTotalPurchasedAmount: 'Option<(u32,u128)>'
      },
      /**
@@ -10728,7 +10758,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenVestingSchedule: {
          linearVestingStartBlock: 'u32',
-@@ -4410,7 +4407,7 @@ exports.default = {
+@@ -4410,7 +4411,7 @@ exports.default = {
          burnedAmount: 'u128'
      },
      /**
@@ -10737,7 +10767,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenTokenData: {
          totalSupply: 'u128',
-@@ -4418,15 +4415,15 @@ exports.default = {
+@@ -4418,15 +4419,15 @@ exports.default = {
          nextSaleId: 'u32',
          sale: 'Option<PalletProjectTokenTokenSale>',
          transferPolicy: 'PalletProjectTokenTransferPolicy',
@@ -10756,7 +10786,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenRevenueSplitState: {
          _enum: {
-@@ -4435,7 +4432,7 @@ exports.default = {
+@@ -4435,7 +4436,7 @@ exports.default = {
          }
      },
      /**
@@ -10765,7 +10795,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenRevenueSplitInfo: {
          allocation: 'u128',
-@@ -4443,14 +4440,14 @@ exports.default = {
+@@ -4443,14 +4444,14 @@ exports.default = {
          dividendsClaimed: 'u128'
      },
      /**
@@ -10782,7 +10812,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProjectTokenPatronageData: {
          rate: 'Perquintill',
-@@ -4458,13 +4455,13 @@ exports.default = {
+@@ -4458,13 +4459,13 @@ exports.default = {
          lastUnclaimedPatronageTallyBlock: 'u32'
      },
      /**
@@ -10799,7 +10829,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsEngineProposal: {
          parameters: 'PalletProposalsEngineProposalParameters',
-@@ -4477,7 +4474,7 @@ exports.default = {
+@@ -4477,7 +4478,7 @@ exports.default = {
          stakingAccountId: 'Option<AccountId32>'
      },
      /**
@@ -10808,7 +10838,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsEngineProposalParameters: {
          votingPeriod: 'u32',
-@@ -4490,7 +4487,7 @@ exports.default = {
+@@ -4490,7 +4491,7 @@ exports.default = {
          constitutionality: 'u32'
      },
      /**
@@ -10817,7 +10847,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsEngineVotingResults: {
          abstentions: 'u32',
-@@ -4499,13 +4496,13 @@ exports.default = {
+@@ -4499,13 +4500,13 @@ exports.default = {
          slashes: 'u32'
      },
      /**
@@ -10833,7 +10863,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsDiscussionDiscussionThread: {
          activatedAt: 'u32',
-@@ -4513,7 +4510,7 @@ exports.default = {
+@@ -4513,7 +4514,7 @@ exports.default = {
          mode: 'PalletProposalsDiscussionThreadModeBoundedBTreeSet'
      },
      /**
@@ -10842,7 +10872,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsDiscussionThreadModeBoundedBTreeSet: {
          _enum: {
-@@ -4522,7 +4519,7 @@ exports.default = {
+@@ -4522,7 +4523,7 @@ exports.default = {
          }
      },
      /**
@@ -10851,7 +10881,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletProposalsDiscussionDiscussionPost: {
          authorId: 'u64',
-@@ -4530,19 +4527,19 @@ exports.default = {
+@@ -4530,19 +4531,19 @@ exports.default = {
          lastEdited: 'u32'
      },
      /**
@@ -10874,7 +10904,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletWorkingGroupOpening: {
          openingType: 'PalletWorkingGroupOpeningType',
-@@ -4553,7 +4550,7 @@ exports.default = {
+@@ -4553,7 +4554,7 @@ exports.default = {
          creationStake: 'u128'
      },
      /**
@@ -10883,7 +10913,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletWorkingGroupJobApplication: {
          roleAccountId: 'AccountId32',
-@@ -4564,7 +4561,7 @@ exports.default = {
+@@ -4564,7 +4565,7 @@ exports.default = {
          openingId: 'u64'
      },
      /**
@@ -10892,7 +10922,7 @@ index b6fcc72..322ddcf 100644
       **/
      PalletWorkingGroupGroupWorker: {
          memberId: 'u64',
-@@ -4578,13 +4575,13 @@ exports.default = {
+@@ -4578,13 +4579,13 @@ exports.default = {
          createdAt: 'u32'
      },
      /**
@@ -10908,7 +10938,7 @@ index b6fcc72..322ddcf 100644
       **/
      SpRuntimeMultiSignature: {
          _enum: {
-@@ -4594,39 +4591,39 @@ exports.default = {
+@@ -4594,39 +4595,39 @@ exports.default = {
          }
      },
      /**
@@ -10958,7 +10988,7 @@ index b6fcc72..322ddcf 100644
      JoystreamNodeRuntimeRuntime: 'Null'
  };
 diff --git a/node_modules/@joystream/types/lib/mjs/augment/lookup.js b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
-index b7d08da..26905d1 100644
+index b7d08da..e5de3af 100644
 --- a/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 +++ b/node_modules/@joystream/types/lib/mjs/augment/lookup.js
 @@ -366,23 +366,7 @@ export default {
@@ -12468,7 +12498,7 @@ index b7d08da..26905d1 100644
              },
              claim_channel_reward: {
                  actor: 'PalletContentPermissionsContentActor',
-@@ -3173,7 +3148,17 @@ export default {
+@@ -3173,7 +3148,21 @@ export default {
              },
              deissue_creator_token: {
                  actor: 'PalletContentPermissionsContentActor',
@@ -12480,6 +12510,10 @@ index b7d08da..26905d1 100644
 +                channelId: 'u64',
 +                params: 'PalletProjectTokenAmmParams',
 +            },
++            deactivate_amm: {
++                actor: 'PalletContentPermissionsContentActor',
++                channelId: 'u64',
++            },
 +            creator_token_issuer_remark: {
 +                actor: 'PalletContentPermissionsContentActor',
 +                channelId: 'u64',
@@ -12487,7 +12521,7 @@ index b7d08da..26905d1 100644
              }
          }
      },
-@@ -3233,7 +3218,14 @@ export default {
+@@ -3233,7 +3222,14 @@ export default {
       **/
      PalletProjectTokenTransfersPaymentWithVesting: 'BTreeMap<u64, PalletProjectTokenPaymentWithVesting>',
      /**
@@ -12503,7 +12537,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageCall: {
          _enum: {
-@@ -3367,9 +3359,6 @@ export default {
+@@ -3367,9 +3363,6 @@ export default {
                  bucketId: 'PalletStorageDistributionBucketIdRecord',
                  metadata: 'Bytes',
              },
@@ -12513,7 +12547,7 @@ index b7d08da..26905d1 100644
              storage_operator_remark: {
                  workerId: 'u64',
                  storageBucketId: 'u64',
-@@ -3383,7 +3372,7 @@ export default {
+@@ -3383,7 +3376,7 @@ export default {
          }
      },
      /**
@@ -12522,7 +12556,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenCall: {
          _enum: {
-@@ -3419,32 +3408,46 @@ export default {
+@@ -3419,32 +3412,46 @@ export default {
              },
              exit_revenue_split: {
                  tokenId: 'u64',
@@ -12575,7 +12609,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsEngineCall: {
          _enum: {
-@@ -3469,7 +3472,7 @@ export default {
+@@ -3469,7 +3476,7 @@ export default {
          }
      },
      /**
@@ -12584,7 +12618,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsDiscussionCall: {
          _enum: {
-@@ -3498,7 +3501,7 @@ export default {
+@@ -3498,7 +3505,7 @@ export default {
          }
      },
      /**
@@ -12593,7 +12627,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsCodexCall: {
          _enum: {
-@@ -3509,7 +3512,7 @@ export default {
+@@ -3509,7 +3516,7 @@ export default {
          }
      },
      /**
@@ -12602,7 +12636,7 @@ index b7d08da..26905d1 100644
       **/
      PalletWorkingGroupCall: {
          _enum: {
-@@ -3592,7 +3595,7 @@ export default {
+@@ -3592,7 +3599,7 @@ export default {
          }
      },
      /**
@@ -12611,7 +12645,7 @@ index b7d08da..26905d1 100644
       **/
      JoystreamNodeRuntimeOriginCaller: {
          _enum: {
-@@ -3601,7 +3604,7 @@ export default {
+@@ -3601,7 +3608,7 @@ export default {
          }
      },
      /**
@@ -12620,7 +12654,7 @@ index b7d08da..26905d1 100644
       **/
      FrameSupportDispatchRawOrigin: {
          _enum: {
-@@ -3611,17 +3614,17 @@ export default {
+@@ -3611,17 +3618,17 @@ export default {
          }
      },
      /**
@@ -12641,7 +12675,7 @@ index b7d08da..26905d1 100644
       **/
      SpConsensusBabeDigestsPreDigest: {
          _enum: {
-@@ -3632,7 +3635,7 @@ export default {
+@@ -3632,7 +3639,7 @@ export default {
          }
      },
      /**
@@ -12650,7 +12684,7 @@ index b7d08da..26905d1 100644
       **/
      SpConsensusBabeDigestsPrimaryPreDigest: {
          authorityIndex: 'u32',
-@@ -3641,14 +3644,14 @@ export default {
+@@ -3641,14 +3648,14 @@ export default {
          vrfProof: '[u8;64]'
      },
      /**
@@ -12667,7 +12701,7 @@ index b7d08da..26905d1 100644
       **/
      SpConsensusBabeDigestsSecondaryVRFPreDigest: {
          authorityIndex: 'u32',
-@@ -3657,20 +3660,20 @@ export default {
+@@ -3657,20 +3664,20 @@ export default {
          vrfProof: '[u8;64]'
      },
      /**
@@ -12691,7 +12725,7 @@ index b7d08da..26905d1 100644
       **/
      PalletAuthorshipUncleEntryItem: {
          _enum: {
-@@ -3679,13 +3682,13 @@ export default {
+@@ -3679,13 +3686,13 @@ export default {
          }
      },
      /**
@@ -12707,7 +12741,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBalancesBalanceLock: {
          id: '[u8;8]',
-@@ -3693,38 +3696,38 @@ export default {
+@@ -3693,38 +3700,38 @@ export default {
          reasons: 'PalletBalancesReasons'
      },
      /**
@@ -12752,7 +12786,7 @@ index b7d08da..26905d1 100644
       **/
      PalletElectionProviderMultiPhasePhase: {
          _enum: {
-@@ -3735,7 +3738,7 @@ export default {
+@@ -3735,7 +3742,7 @@ export default {
          }
      },
      /**
@@ -12761,7 +12795,7 @@ index b7d08da..26905d1 100644
       **/
      PalletElectionProviderMultiPhaseReadySolution: {
          supports: 'Vec<(AccountId32,SpNposElectionsSupport)>',
-@@ -3743,14 +3746,14 @@ export default {
+@@ -3743,14 +3750,14 @@ export default {
          compute: 'PalletElectionProviderMultiPhaseElectionCompute'
      },
      /**
@@ -12778,7 +12812,7 @@ index b7d08da..26905d1 100644
       **/
      PalletElectionProviderMultiPhaseSignedSignedSubmission: {
          who: 'AccountId32',
-@@ -3759,13 +3762,13 @@ export default {
+@@ -3759,13 +3766,13 @@ export default {
          callFee: 'u128'
      },
      /**
@@ -12794,7 +12828,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStakingStakingLedger: {
          stash: 'AccountId32',
-@@ -3775,14 +3778,14 @@ export default {
+@@ -3775,14 +3782,14 @@ export default {
          claimedRewards: 'Vec<u32>'
      },
      /**
@@ -12811,7 +12845,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStakingNominations: {
          targets: 'Vec<AccountId32>',
-@@ -3790,27 +3793,27 @@ export default {
+@@ -3790,27 +3797,27 @@ export default {
          suppressed: 'bool'
      },
      /**
@@ -12843,7 +12877,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStakingUnappliedSlash: {
          validator: 'AccountId32',
-@@ -3820,7 +3823,7 @@ export default {
+@@ -3820,7 +3827,7 @@ export default {
          payout: 'u128'
      },
      /**
@@ -12852,7 +12886,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStakingSlashingSlashingSpans: {
          spanIndex: 'u32',
-@@ -3829,36 +3832,36 @@ export default {
+@@ -3829,36 +3836,36 @@ export default {
          prior: 'Vec<u32>'
      },
      /**
@@ -12895,7 +12929,7 @@ index b7d08da..26905d1 100644
       **/
      PalletGrandpaStoredState: {
          _enum: {
-@@ -3875,7 +3878,7 @@ export default {
+@@ -3875,7 +3882,7 @@ export default {
          }
      },
      /**
@@ -12904,7 +12938,7 @@ index b7d08da..26905d1 100644
       **/
      PalletGrandpaStoredPendingChange: {
          scheduledAt: 'u32',
-@@ -3884,39 +3887,33 @@ export default {
+@@ -3884,39 +3891,33 @@ export default {
          forced: 'Option<u32>'
      },
      /**
@@ -12949,7 +12983,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBagsListListNode: {
          id: 'AccountId32',
-@@ -3926,14 +3923,14 @@ export default {
+@@ -3926,14 +3927,14 @@ export default {
          score: 'u64'
      },
      /**
@@ -12966,7 +13000,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBagsListError: {
          _enum: {
-@@ -3941,25 +3938,25 @@ export default {
+@@ -3941,25 +3942,25 @@ export default {
          }
      },
      /**
@@ -12996,7 +13030,7 @@ index b7d08da..26905d1 100644
       **/
      PalletMultisigMultisig: {
          when: 'PalletMultisigTimepoint',
-@@ -3968,20 +3965,20 @@ export default {
+@@ -3968,20 +3969,20 @@ export default {
          approvals: 'Vec<AccountId32>'
      },
      /**
@@ -13020,7 +13054,7 @@ index b7d08da..26905d1 100644
       **/
      PalletCouncilCouncilStage: {
          _enum: {
-@@ -3991,26 +3988,26 @@ export default {
+@@ -3991,26 +3992,26 @@ export default {
          }
      },
      /**
@@ -13051,7 +13085,7 @@ index b7d08da..26905d1 100644
       **/
      PalletCouncilCouncilMember: {
          stakingAccountId: 'AccountId32',
-@@ -4021,7 +4018,7 @@ export default {
+@@ -4021,7 +4022,7 @@ export default {
          unpaidReward: 'u128'
      },
      /**
@@ -13060,7 +13094,7 @@ index b7d08da..26905d1 100644
       **/
      PalletCouncilCandidate: {
          stakingAccountId: 'AccountId32',
-@@ -4032,13 +4029,13 @@ export default {
+@@ -4032,13 +4033,13 @@ export default {
          noteHash: 'Option<H256>'
      },
      /**
@@ -13076,7 +13110,7 @@ index b7d08da..26905d1 100644
       **/
      PalletReferendumReferendumStage: {
          _enum: {
-@@ -4048,7 +4045,7 @@ export default {
+@@ -4048,7 +4049,7 @@ export default {
          }
      },
      /**
@@ -13085,7 +13119,7 @@ index b7d08da..26905d1 100644
       **/
      PalletReferendumReferendumStageVoting: {
          started: 'u32',
-@@ -4057,7 +4054,7 @@ export default {
+@@ -4057,7 +4058,7 @@ export default {
          endsAt: 'u32'
      },
      /**
@@ -13094,7 +13128,7 @@ index b7d08da..26905d1 100644
       **/
      PalletReferendumReferendumStageRevealing: {
          started: 'u32',
-@@ -4067,7 +4064,7 @@ export default {
+@@ -4067,7 +4068,7 @@ export default {
          endsAt: 'u32'
      },
      /**
@@ -13103,7 +13137,7 @@ index b7d08da..26905d1 100644
       **/
      PalletReferendumCastVote: {
          commitment: 'H256',
-@@ -4076,13 +4073,13 @@ export default {
+@@ -4076,13 +4077,13 @@ export default {
          voteFor: 'Option<u64>'
      },
      /**
@@ -13120,7 +13154,7 @@ index b7d08da..26905d1 100644
       **/
      PalletMembershipMembershipObject: {
          handleHash: 'H256',
-@@ -4092,20 +4089,20 @@ export default {
+@@ -4092,20 +4093,20 @@ export default {
          invites: 'u32'
      },
      /**
@@ -13145,7 +13179,7 @@ index b7d08da..26905d1 100644
       **/
      PalletForumCategory: {
          titleHash: 'H256',
-@@ -4118,7 +4115,7 @@ export default {
+@@ -4118,7 +4119,7 @@ export default {
          stickyThreadIds: 'BTreeSet<u64>'
      },
      /**
@@ -13154,7 +13188,7 @@ index b7d08da..26905d1 100644
       **/
      PalletForumThread: {
          categoryId: 'u64',
-@@ -4127,7 +4124,7 @@ export default {
+@@ -4127,7 +4128,7 @@ export default {
          numberOfEditablePosts: 'u64'
      },
      /**
@@ -13163,7 +13197,7 @@ index b7d08da..26905d1 100644
       **/
      PalletForumPost: {
          threadId: 'u64',
-@@ -4137,19 +4134,19 @@ export default {
+@@ -4137,19 +4138,19 @@ export default {
          lastEdited: 'u32'
      },
      /**
@@ -13186,7 +13220,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBountyBountyRecord: {
          creationParams: 'PalletBountyBountyParametersBoundedBTreeSet',
-@@ -4159,7 +4156,7 @@ export default {
+@@ -4159,7 +4160,7 @@ export default {
          hasUnpaidOracleReward: 'bool'
      },
      /**
@@ -13195,7 +13229,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBountyBountyParametersBoundedBTreeSet: {
          oracle: 'PalletBountyBountyActor',
-@@ -4171,7 +4168,7 @@ export default {
+@@ -4171,7 +4172,7 @@ export default {
          fundingType: 'PalletBountyFundingType'
      },
      /**
@@ -13204,7 +13238,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBountyAssuranceContractTypeBoundedBTreeSet: {
          _enum: {
-@@ -4180,7 +4177,7 @@ export default {
+@@ -4180,7 +4181,7 @@ export default {
          }
      },
      /**
@@ -13213,7 +13247,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBountyBountyMilestone: {
          _enum: {
-@@ -4197,14 +4194,14 @@ export default {
+@@ -4197,14 +4198,14 @@ export default {
          }
      },
      /**
@@ -13230,7 +13264,7 @@ index b7d08da..26905d1 100644
       **/
      PalletBountyEntryRecord: {
          memberId: 'u64',
-@@ -4213,13 +4210,13 @@ export default {
+@@ -4213,13 +4214,13 @@ export default {
          workSubmitted: 'bool'
      },
      /**
@@ -13246,7 +13280,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentVideoRecord: {
          inChannel: 'u64',
-@@ -4228,7 +4225,7 @@ export default {
+@@ -4228,7 +4229,7 @@ export default {
          videoStateBloatBond: 'PalletCommonBloatBondRepayableBloatBond'
      },
      /**
@@ -13255,7 +13289,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesOwnedNft: {
          owner: 'PalletContentNftTypesNftOwner',
-@@ -4237,7 +4234,7 @@ export default {
+@@ -4237,7 +4238,7 @@ export default {
          openAuctionsNonce: 'u64'
      },
      /**
@@ -13264,7 +13298,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesTransactionalStatusRecord: {
          _enum: {
-@@ -4249,7 +4246,7 @@ export default {
+@@ -4249,7 +4250,7 @@ export default {
          }
      },
      /**
@@ -13273,7 +13307,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesEnglishAuctionRecord: {
          startingPrice: 'u128',
-@@ -4262,14 +4259,14 @@ export default {
+@@ -4262,14 +4263,14 @@ export default {
          topBid: 'Option<PalletContentNftTypesEnglishAuctionBid>'
      },
      /**
@@ -13290,7 +13324,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesOpenAuctionRecord: {
          startingPrice: 'u128',
-@@ -4280,7 +4277,7 @@ export default {
+@@ -4280,7 +4281,7 @@ export default {
          start: 'u32'
      },
      /**
@@ -13299,7 +13333,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesNftOwner: {
          _enum: {
-@@ -4289,7 +4286,7 @@ export default {
+@@ -4289,7 +4290,7 @@ export default {
          }
      },
      /**
@@ -13308,7 +13342,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentPermissionsCuratorGroupCuratorGroupRecord: {
          curators: 'BTreeMap<u64, BTreeSet<PalletContentIterableEnumsChannelActionPermission>>',
-@@ -4297,7 +4294,7 @@ export default {
+@@ -4297,7 +4298,7 @@ export default {
          permissionsByLevel: 'BTreeMap<u8, BTreeSet<PalletContentPermissionsCuratorGroupIterableEnumsContentModerationAction>>'
      },
      /**
@@ -13317,7 +13351,7 @@ index b7d08da..26905d1 100644
       **/
      PalletContentNftTypesOpenAuctionBidRecord: {
          amount: 'u128',
-@@ -4305,13 +4302,13 @@ export default {
+@@ -4305,13 +4306,13 @@ export default {
          auctionId: 'u64'
      },
      /**
@@ -13334,7 +13368,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageBagRecord: {
          storedBy: 'BTreeSet<u64>',
-@@ -4320,7 +4317,7 @@ export default {
+@@ -4320,7 +4321,7 @@ export default {
          objectsNumber: 'u64'
      },
      /**
@@ -13343,7 +13377,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageStorageBucketRecord: {
          operatorStatus: 'PalletStorageStorageBucketOperatorStatus',
-@@ -4329,7 +4326,7 @@ export default {
+@@ -4329,7 +4330,7 @@ export default {
          assignedBags: 'u64'
      },
      /**
@@ -13352,7 +13386,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageStorageBucketOperatorStatus: {
          _enum: {
-@@ -4339,14 +4336,14 @@ export default {
+@@ -4339,14 +4340,14 @@ export default {
          }
      },
      /**
@@ -13369,7 +13403,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageDataObject: {
          _alias: {
-@@ -4358,13 +4355,13 @@ export default {
+@@ -4358,13 +4359,13 @@ export default {
          ipfsContentId: 'Bytes'
      },
      /**
@@ -13385,7 +13419,7 @@ index b7d08da..26905d1 100644
       **/
      PalletStorageDistributionBucketRecord: {
          acceptingNewBags: 'bool',
-@@ -4374,13 +4371,13 @@ export default {
+@@ -4374,13 +4375,13 @@ export default {
          assignedBags: 'u64'
      },
      /**
@@ -13401,7 +13435,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenAccountData: {
          vestingSchedules: 'BTreeMap<PalletProjectTokenVestingSource, PalletProjectTokenVestingSchedule>',
-@@ -4391,14 +4388,14 @@ export default {
+@@ -4391,14 +4392,14 @@ export default {
          lastSaleTotalPurchasedAmount: 'Option<(u32,u128)>'
      },
      /**
@@ -13418,7 +13452,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenVestingSchedule: {
          linearVestingStartBlock: 'u32',
-@@ -4408,7 +4405,7 @@ export default {
+@@ -4408,7 +4409,7 @@ export default {
          burnedAmount: 'u128'
      },
      /**
@@ -13427,7 +13461,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenTokenData: {
          totalSupply: 'u128',
-@@ -4416,15 +4413,15 @@ export default {
+@@ -4416,15 +4417,15 @@ export default {
          nextSaleId: 'u32',
          sale: 'Option<PalletProjectTokenTokenSale>',
          transferPolicy: 'PalletProjectTokenTransferPolicy',
@@ -13446,7 +13480,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenRevenueSplitState: {
          _enum: {
-@@ -4433,7 +4430,7 @@ export default {
+@@ -4433,7 +4434,7 @@ export default {
          }
      },
      /**
@@ -13455,7 +13489,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenRevenueSplitInfo: {
          allocation: 'u128',
-@@ -4441,14 +4438,14 @@ export default {
+@@ -4441,14 +4442,14 @@ export default {
          dividendsClaimed: 'u128'
      },
      /**
@@ -13472,7 +13506,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProjectTokenPatronageData: {
          rate: 'Perquintill',
-@@ -4456,13 +4453,13 @@ export default {
+@@ -4456,13 +4457,13 @@ export default {
          lastUnclaimedPatronageTallyBlock: 'u32'
      },
      /**
@@ -13489,7 +13523,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsEngineProposal: {
          parameters: 'PalletProposalsEngineProposalParameters',
-@@ -4475,7 +4472,7 @@ export default {
+@@ -4475,7 +4476,7 @@ export default {
          stakingAccountId: 'Option<AccountId32>'
      },
      /**
@@ -13498,7 +13532,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsEngineProposalParameters: {
          votingPeriod: 'u32',
-@@ -4488,7 +4485,7 @@ export default {
+@@ -4488,7 +4489,7 @@ export default {
          constitutionality: 'u32'
      },
      /**
@@ -13507,7 +13541,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsEngineVotingResults: {
          abstentions: 'u32',
-@@ -4497,13 +4494,13 @@ export default {
+@@ -4497,13 +4498,13 @@ export default {
          slashes: 'u32'
      },
      /**
@@ -13523,7 +13557,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsDiscussionDiscussionThread: {
          activatedAt: 'u32',
-@@ -4511,7 +4508,7 @@ export default {
+@@ -4511,7 +4512,7 @@ export default {
          mode: 'PalletProposalsDiscussionThreadModeBoundedBTreeSet'
      },
      /**
@@ -13532,7 +13566,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsDiscussionThreadModeBoundedBTreeSet: {
          _enum: {
-@@ -4520,7 +4517,7 @@ export default {
+@@ -4520,7 +4521,7 @@ export default {
          }
      },
      /**
@@ -13541,7 +13575,7 @@ index b7d08da..26905d1 100644
       **/
      PalletProposalsDiscussionDiscussionPost: {
          authorId: 'u64',
-@@ -4528,19 +4525,19 @@ export default {
+@@ -4528,19 +4529,19 @@ export default {
          lastEdited: 'u32'
      },
      /**
@@ -13564,7 +13598,7 @@ index b7d08da..26905d1 100644
       **/
      PalletWorkingGroupOpening: {
          openingType: 'PalletWorkingGroupOpeningType',
-@@ -4551,7 +4548,7 @@ export default {
+@@ -4551,7 +4552,7 @@ export default {
          creationStake: 'u128'
      },
      /**
@@ -13573,7 +13607,7 @@ index b7d08da..26905d1 100644
       **/
      PalletWorkingGroupJobApplication: {
          roleAccountId: 'AccountId32',
-@@ -4562,7 +4559,7 @@ export default {
+@@ -4562,7 +4563,7 @@ export default {
          openingId: 'u64'
      },
      /**
@@ -13582,7 +13616,7 @@ index b7d08da..26905d1 100644
       **/
      PalletWorkingGroupGroupWorker: {
          memberId: 'u64',
-@@ -4576,13 +4573,13 @@ export default {
+@@ -4576,13 +4577,13 @@ export default {
          createdAt: 'u32'
      },
      /**
@@ -13598,7 +13632,7 @@ index b7d08da..26905d1 100644
       **/
      SpRuntimeMultiSignature: {
          _enum: {
-@@ -4592,39 +4589,39 @@ export default {
+@@ -4592,39 +4593,39 @@ export default {
          }
      },
      /**
@@ -13998,7 +14032,7 @@ index e4b6b80..0cba160 100644
        /**
         * The full account information for a particular account ID.
 diff --git a/node_modules/@joystream/types/src/augment/augment-api-tx.ts b/node_modules/@joystream/types/src/augment/augment-api-tx.ts
-index d9b72b5..fdc8238 100644
+index d9b72b5..15c9944 100644
 --- a/node_modules/@joystream/types/src/augment/augment-api-tx.ts
 +++ b/node_modules/@joystream/types/src/augment/augment-api-tx.ts
 @@ -5,7 +5,7 @@ import type { ApiTypes } from '@polkadot/api-base/types';
@@ -14032,7 +14066,18 @@ index d9b72b5..fdc8238 100644
        /**
         * Perform transfer of tokens as creator token issuer
         * 
-@@ -996,7 +1004,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -845,6 +853,10 @@ declare module '@polkadot/api-base/types/submittable' {
+        * # </weight>
+        **/
+       creatorTokenIssuerTransfer: AugmentedSubmittable<(actor: PalletContentPermissionsContentActor | { Curator: any } | { Member: any } | { Lead: any } | string | Uint8Array, channelId: u64 | AnyNumber | Uint8Array, outputs: PalletProjectTokenTransfersPaymentWithVesting, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletContentPermissionsContentActor, u64, PalletProjectTokenTransfersPaymentWithVesting, Bytes]>;
++      /**
++       * Deactivate Amm functionality for token
++       **/
++      deactivateAmm: AugmentedSubmittable<(actor: PalletContentPermissionsContentActor | { Curator: any } | { Member: any } | { Lead: any } | string | Uint8Array, channelId: u64 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [PalletContentPermissionsContentActor, u64]>;
+       /**
+        * Deissue channel's creator token
+        * 
+@@ -996,7 +1008,7 @@ declare module '@polkadot/api-base/types/submittable' {
         * - `O(A)` - from the the generated weights
         * # </weight>
         **/
@@ -14041,7 +14086,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Issue NFT
         * 
-@@ -1289,7 +1297,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -1289,7 +1301,7 @@ declare module '@polkadot/api-base/types/submittable' {
         * - O(1)
         * # </weight>
         **/
@@ -14050,7 +14095,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Extrinsic for updating channel privilege level (requires lead access)
         * 
-@@ -2748,7 +2756,7 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -2748,7 +2760,7 @@ declare module '@polkadot/api-base/types/submittable' {
         * - O(1) doesn't depend on the state or parameters
         * # </weight>
         **/
@@ -14059,7 +14104,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Remove staking account for a member.
         * 
-@@ -4041,6 +4049,22 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -4041,6 +4053,22 @@ declare module '@polkadot/api-base/types/submittable' {
         * # </weight>
         **/
        burn: AugmentedSubmittable<(tokenId: u64 | AnyNumber | Uint8Array, memberId: u64 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, u128]>;
@@ -14082,7 +14127,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Allow any user to remove an account
         * 
-@@ -4199,6 +4223,25 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -4199,6 +4227,25 @@ declare module '@polkadot/api-base/types/submittable' {
         * # </weight>
         **/
        purchaseTokensOnSale: AugmentedSubmittable<(tokenId: u64 | AnyNumber | Uint8Array, memberId: u64 | AnyNumber | Uint8Array, amount: u128 | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, u128]>;
@@ -14108,7 +14153,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Allow to transfer from `src_member_id` account to the various `outputs` beneficiaries
         * in the specified amounts.
-@@ -4354,6 +4397,18 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -4354,6 +4401,18 @@ declare module '@polkadot/api-base/types/submittable' {
        vote: AugmentedSubmittable<(voterId: u64 | AnyNumber | Uint8Array, proposalId: u32 | AnyNumber | Uint8Array, vote: PalletProposalsEngineVoteKind | 'Approve' | 'Reject' | 'Slash' | 'Abstain' | number | Uint8Array, rationale: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u32, PalletProposalsEngineVoteKind, Bytes]>;
      };
      referendum: {
@@ -14127,7 +14172,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Release a locked stake.
         * # <weight>
-@@ -5058,7 +5113,8 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5058,7 +5117,8 @@ declare module '@polkadot/api-base/types/submittable' {
         **/
        setStorageOperatorMetadata: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, storageBucketId: u64 | AnyNumber | Uint8Array, metadata: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, Bytes]>;
        /**
@@ -14137,7 +14182,7 @@ index d9b72b5..fdc8238 100644
         * <weight>
         * 
         * ## Weight
-@@ -5069,10 +5125,6 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5069,10 +5129,6 @@ declare module '@polkadot/api-base/types/submittable' {
         * # </weight>
         **/
        storageOperatorRemark: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, storageBucketId: u64 | AnyNumber | Uint8Array, msg: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, u64, Bytes]>;
@@ -14148,7 +14193,7 @@ index d9b72b5..fdc8238 100644
        /**
         * Add and remove hashes to the current blacklist.
         * <weight>
-@@ -5485,61 +5537,6 @@ declare module '@polkadot/api-base/types/submittable' {
+@@ -5485,61 +5541,6 @@ declare module '@polkadot/api-base/types/submittable' {
         **/
        workerRemark: AugmentedSubmittable<(workerId: u64 | AnyNumber | Uint8Array, msg: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [u64, Bytes]>;
      };
@@ -14211,7 +14256,7 @@ index d9b72b5..fdc8238 100644
        /**
         * A dispatch that will fill the block weight up to the given ratio.
 diff --git a/node_modules/@joystream/types/src/augment/lookup.ts b/node_modules/@joystream/types/src/augment/lookup.ts
-index 58896db..f0594ca 100644
+index 58896db..d721815 100644
 --- a/node_modules/@joystream/types/src/augment/lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/lookup.ts
 @@ -368,23 +368,7 @@ export default {
@@ -15721,7 +15766,7 @@ index 58896db..f0594ca 100644
        },
        claim_channel_reward: {
          actor: 'PalletContentPermissionsContentActor',
-@@ -3175,7 +3150,17 @@ export default {
+@@ -3175,7 +3150,21 @@ export default {
        },
        deissue_creator_token: {
          actor: 'PalletContentPermissionsContentActor',
@@ -15733,6 +15778,10 @@ index 58896db..f0594ca 100644
 +        channelId: 'u64',
 +        params: 'PalletProjectTokenAmmParams',
 +      },
++      deactivate_amm: {
++        actor: 'PalletContentPermissionsContentActor',
++        channelId: 'u64',
++      },
 +      creator_token_issuer_remark: {
 +        actor: 'PalletContentPermissionsContentActor',
 +        channelId: 'u64',
@@ -15740,7 +15789,7 @@ index 58896db..f0594ca 100644
        }
      }
    },
-@@ -3235,7 +3220,14 @@ export default {
+@@ -3235,7 +3224,14 @@ export default {
     **/
    PalletProjectTokenTransfersPaymentWithVesting: 'BTreeMap<u64, PalletProjectTokenPaymentWithVesting>',
    /**
@@ -15756,7 +15805,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageCall: {
      _enum: {
-@@ -3369,9 +3361,6 @@ export default {
+@@ -3369,9 +3365,6 @@ export default {
          bucketId: 'PalletStorageDistributionBucketIdRecord',
          metadata: 'Bytes',
        },
@@ -15766,7 +15815,7 @@ index 58896db..f0594ca 100644
        storage_operator_remark: {
          workerId: 'u64',
          storageBucketId: 'u64',
-@@ -3385,7 +3374,7 @@ export default {
+@@ -3385,7 +3378,7 @@ export default {
      }
    },
    /**
@@ -15775,7 +15824,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenCall: {
      _enum: {
-@@ -3421,32 +3410,46 @@ export default {
+@@ -3421,32 +3414,46 @@ export default {
        },
        exit_revenue_split: {
          tokenId: 'u64',
@@ -15828,7 +15877,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsEngineCall: {
      _enum: {
-@@ -3471,7 +3474,7 @@ export default {
+@@ -3471,7 +3478,7 @@ export default {
      }
    },
    /**
@@ -15837,7 +15886,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsDiscussionCall: {
      _enum: {
-@@ -3500,7 +3503,7 @@ export default {
+@@ -3500,7 +3507,7 @@ export default {
      }
    },
    /**
@@ -15846,7 +15895,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsCodexCall: {
      _enum: {
-@@ -3511,7 +3514,7 @@ export default {
+@@ -3511,7 +3518,7 @@ export default {
      }
    },
    /**
@@ -15855,7 +15904,7 @@ index 58896db..f0594ca 100644
     **/
    PalletWorkingGroupCall: {
      _enum: {
-@@ -3594,7 +3597,7 @@ export default {
+@@ -3594,7 +3601,7 @@ export default {
      }
    },
    /**
@@ -15864,7 +15913,7 @@ index 58896db..f0594ca 100644
     **/
    JoystreamNodeRuntimeOriginCaller: {
      _enum: {
-@@ -3603,7 +3606,7 @@ export default {
+@@ -3603,7 +3610,7 @@ export default {
      }
    },
    /**
@@ -15873,7 +15922,7 @@ index 58896db..f0594ca 100644
     **/
    FrameSupportDispatchRawOrigin: {
      _enum: {
-@@ -3613,17 +3616,17 @@ export default {
+@@ -3613,17 +3620,17 @@ export default {
      }
    },
    /**
@@ -15894,7 +15943,7 @@ index 58896db..f0594ca 100644
     **/
    SpConsensusBabeDigestsPreDigest: {
      _enum: {
-@@ -3634,7 +3637,7 @@ export default {
+@@ -3634,7 +3641,7 @@ export default {
      }
    },
    /**
@@ -15903,7 +15952,7 @@ index 58896db..f0594ca 100644
     **/
    SpConsensusBabeDigestsPrimaryPreDigest: {
      authorityIndex: 'u32',
-@@ -3643,14 +3646,14 @@ export default {
+@@ -3643,14 +3650,14 @@ export default {
      vrfProof: '[u8;64]'
    },
    /**
@@ -15920,7 +15969,7 @@ index 58896db..f0594ca 100644
     **/
    SpConsensusBabeDigestsSecondaryVRFPreDigest: {
      authorityIndex: 'u32',
-@@ -3659,20 +3662,20 @@ export default {
+@@ -3659,20 +3666,20 @@ export default {
      vrfProof: '[u8;64]'
    },
    /**
@@ -15944,7 +15993,7 @@ index 58896db..f0594ca 100644
     **/
    PalletAuthorshipUncleEntryItem: {
      _enum: {
-@@ -3681,13 +3684,13 @@ export default {
+@@ -3681,13 +3688,13 @@ export default {
      }
    },
    /**
@@ -15960,7 +16009,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBalancesBalanceLock: {
      id: '[u8;8]',
-@@ -3695,38 +3698,38 @@ export default {
+@@ -3695,38 +3702,38 @@ export default {
      reasons: 'PalletBalancesReasons'
    },
    /**
@@ -16005,7 +16054,7 @@ index 58896db..f0594ca 100644
     **/
    PalletElectionProviderMultiPhasePhase: {
      _enum: {
-@@ -3737,7 +3740,7 @@ export default {
+@@ -3737,7 +3744,7 @@ export default {
      }
    },
    /**
@@ -16014,7 +16063,7 @@ index 58896db..f0594ca 100644
     **/
    PalletElectionProviderMultiPhaseReadySolution: {
      supports: 'Vec<(AccountId32,SpNposElectionsSupport)>',
-@@ -3745,14 +3748,14 @@ export default {
+@@ -3745,14 +3752,14 @@ export default {
      compute: 'PalletElectionProviderMultiPhaseElectionCompute'
    },
    /**
@@ -16031,7 +16080,7 @@ index 58896db..f0594ca 100644
     **/
    PalletElectionProviderMultiPhaseSignedSignedSubmission: {
      who: 'AccountId32',
-@@ -3761,13 +3764,13 @@ export default {
+@@ -3761,13 +3768,13 @@ export default {
      callFee: 'u128'
    },
    /**
@@ -16047,7 +16096,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStakingStakingLedger: {
      stash: 'AccountId32',
-@@ -3777,14 +3780,14 @@ export default {
+@@ -3777,14 +3784,14 @@ export default {
      claimedRewards: 'Vec<u32>'
    },
    /**
@@ -16064,7 +16113,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStakingNominations: {
      targets: 'Vec<AccountId32>',
-@@ -3792,27 +3795,27 @@ export default {
+@@ -3792,27 +3799,27 @@ export default {
      suppressed: 'bool'
    },
    /**
@@ -16096,7 +16145,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStakingUnappliedSlash: {
      validator: 'AccountId32',
-@@ -3822,7 +3825,7 @@ export default {
+@@ -3822,7 +3829,7 @@ export default {
      payout: 'u128'
    },
    /**
@@ -16105,7 +16154,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStakingSlashingSlashingSpans: {
      spanIndex: 'u32',
-@@ -3831,36 +3834,36 @@ export default {
+@@ -3831,36 +3838,36 @@ export default {
      prior: 'Vec<u32>'
    },
    /**
@@ -16148,7 +16197,7 @@ index 58896db..f0594ca 100644
     **/
    PalletGrandpaStoredState: {
      _enum: {
-@@ -3877,7 +3880,7 @@ export default {
+@@ -3877,7 +3884,7 @@ export default {
      }
    },
    /**
@@ -16157,7 +16206,7 @@ index 58896db..f0594ca 100644
     **/
    PalletGrandpaStoredPendingChange: {
      scheduledAt: 'u32',
-@@ -3886,39 +3889,33 @@ export default {
+@@ -3886,39 +3893,33 @@ export default {
      forced: 'Option<u32>'
    },
    /**
@@ -16202,7 +16251,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBagsListListNode: {
      id: 'AccountId32',
-@@ -3928,14 +3925,14 @@ export default {
+@@ -3928,14 +3929,14 @@ export default {
      score: 'u64'
    },
    /**
@@ -16219,7 +16268,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBagsListError: {
      _enum: {
-@@ -3943,25 +3940,25 @@ export default {
+@@ -3943,25 +3944,25 @@ export default {
      }
    },
    /**
@@ -16249,7 +16298,7 @@ index 58896db..f0594ca 100644
     **/
    PalletMultisigMultisig: {
      when: 'PalletMultisigTimepoint',
-@@ -3970,20 +3967,20 @@ export default {
+@@ -3970,20 +3971,20 @@ export default {
      approvals: 'Vec<AccountId32>'
    },
    /**
@@ -16273,7 +16322,7 @@ index 58896db..f0594ca 100644
     **/
    PalletCouncilCouncilStage: {
      _enum: {
-@@ -3993,26 +3990,26 @@ export default {
+@@ -3993,26 +3994,26 @@ export default {
      }
    },
    /**
@@ -16304,7 +16353,7 @@ index 58896db..f0594ca 100644
     **/
    PalletCouncilCouncilMember: {
      stakingAccountId: 'AccountId32',
-@@ -4023,7 +4020,7 @@ export default {
+@@ -4023,7 +4024,7 @@ export default {
      unpaidReward: 'u128'
    },
    /**
@@ -16313,7 +16362,7 @@ index 58896db..f0594ca 100644
     **/
    PalletCouncilCandidate: {
      stakingAccountId: 'AccountId32',
-@@ -4034,13 +4031,13 @@ export default {
+@@ -4034,13 +4035,13 @@ export default {
      noteHash: 'Option<H256>'
    },
    /**
@@ -16329,7 +16378,7 @@ index 58896db..f0594ca 100644
     **/
    PalletReferendumReferendumStage: {
      _enum: {
-@@ -4050,7 +4047,7 @@ export default {
+@@ -4050,7 +4051,7 @@ export default {
      }
    },
    /**
@@ -16338,7 +16387,7 @@ index 58896db..f0594ca 100644
     **/
    PalletReferendumReferendumStageVoting: {
      started: 'u32',
-@@ -4059,7 +4056,7 @@ export default {
+@@ -4059,7 +4060,7 @@ export default {
      endsAt: 'u32'
    },
    /**
@@ -16347,7 +16396,7 @@ index 58896db..f0594ca 100644
     **/
    PalletReferendumReferendumStageRevealing: {
      started: 'u32',
-@@ -4069,7 +4066,7 @@ export default {
+@@ -4069,7 +4070,7 @@ export default {
      endsAt: 'u32'
    },
    /**
@@ -16356,7 +16405,7 @@ index 58896db..f0594ca 100644
     **/
    PalletReferendumCastVote: {
      commitment: 'H256',
-@@ -4078,13 +4075,13 @@ export default {
+@@ -4078,13 +4079,13 @@ export default {
      voteFor: 'Option<u64>'
    },
    /**
@@ -16373,7 +16422,7 @@ index 58896db..f0594ca 100644
     **/
    PalletMembershipMembershipObject: {
      handleHash: 'H256',
-@@ -4094,20 +4091,20 @@ export default {
+@@ -4094,20 +4095,20 @@ export default {
      invites: 'u32'
    },
    /**
@@ -16398,7 +16447,7 @@ index 58896db..f0594ca 100644
     **/
    PalletForumCategory: {
      titleHash: 'H256',
-@@ -4120,7 +4117,7 @@ export default {
+@@ -4120,7 +4121,7 @@ export default {
      stickyThreadIds: 'BTreeSet<u64>'
    },
    /**
@@ -16407,7 +16456,7 @@ index 58896db..f0594ca 100644
     **/
    PalletForumThread: {
      categoryId: 'u64',
-@@ -4129,7 +4126,7 @@ export default {
+@@ -4129,7 +4130,7 @@ export default {
      numberOfEditablePosts: 'u64'
    },
    /**
@@ -16416,7 +16465,7 @@ index 58896db..f0594ca 100644
     **/
    PalletForumPost: {
      threadId: 'u64',
-@@ -4139,19 +4136,19 @@ export default {
+@@ -4139,19 +4140,19 @@ export default {
      lastEdited: 'u32'
    },
    /**
@@ -16439,7 +16488,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBountyBountyRecord: {
      creationParams: 'PalletBountyBountyParametersBoundedBTreeSet',
-@@ -4161,7 +4158,7 @@ export default {
+@@ -4161,7 +4162,7 @@ export default {
      hasUnpaidOracleReward: 'bool'
    },
    /**
@@ -16448,7 +16497,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBountyBountyParametersBoundedBTreeSet: {
      oracle: 'PalletBountyBountyActor',
-@@ -4173,7 +4170,7 @@ export default {
+@@ -4173,7 +4174,7 @@ export default {
      fundingType: 'PalletBountyFundingType'
    },
    /**
@@ -16457,7 +16506,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBountyAssuranceContractTypeBoundedBTreeSet: {
      _enum: {
-@@ -4182,7 +4179,7 @@ export default {
+@@ -4182,7 +4183,7 @@ export default {
      }
    },
    /**
@@ -16466,7 +16515,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBountyBountyMilestone: {
      _enum: {
-@@ -4199,14 +4196,14 @@ export default {
+@@ -4199,14 +4200,14 @@ export default {
      }
    },
    /**
@@ -16483,7 +16532,7 @@ index 58896db..f0594ca 100644
     **/
    PalletBountyEntryRecord: {
      memberId: 'u64',
-@@ -4215,13 +4212,13 @@ export default {
+@@ -4215,13 +4216,13 @@ export default {
      workSubmitted: 'bool'
    },
    /**
@@ -16499,7 +16548,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentVideoRecord: {
      inChannel: 'u64',
-@@ -4230,7 +4227,7 @@ export default {
+@@ -4230,7 +4231,7 @@ export default {
      videoStateBloatBond: 'PalletCommonBloatBondRepayableBloatBond'
    },
    /**
@@ -16508,7 +16557,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesOwnedNft: {
      owner: 'PalletContentNftTypesNftOwner',
-@@ -4239,7 +4236,7 @@ export default {
+@@ -4239,7 +4240,7 @@ export default {
      openAuctionsNonce: 'u64'
    },
    /**
@@ -16517,7 +16566,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesTransactionalStatusRecord: {
      _enum: {
-@@ -4251,7 +4248,7 @@ export default {
+@@ -4251,7 +4252,7 @@ export default {
      }
    },
    /**
@@ -16526,7 +16575,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesEnglishAuctionRecord: {
      startingPrice: 'u128',
-@@ -4264,14 +4261,14 @@ export default {
+@@ -4264,14 +4265,14 @@ export default {
      topBid: 'Option<PalletContentNftTypesEnglishAuctionBid>'
    },
    /**
@@ -16543,7 +16592,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesOpenAuctionRecord: {
      startingPrice: 'u128',
-@@ -4282,7 +4279,7 @@ export default {
+@@ -4282,7 +4283,7 @@ export default {
      start: 'u32'
    },
    /**
@@ -16552,7 +16601,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesNftOwner: {
      _enum: {
-@@ -4291,7 +4288,7 @@ export default {
+@@ -4291,7 +4292,7 @@ export default {
      }
    },
    /**
@@ -16561,7 +16610,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentPermissionsCuratorGroupCuratorGroupRecord: {
      curators: 'BTreeMap<u64, BTreeSet<PalletContentIterableEnumsChannelActionPermission>>',
-@@ -4299,7 +4296,7 @@ export default {
+@@ -4299,7 +4300,7 @@ export default {
      permissionsByLevel: 'BTreeMap<u8, BTreeSet<PalletContentPermissionsCuratorGroupIterableEnumsContentModerationAction>>'
    },
    /**
@@ -16570,7 +16619,7 @@ index 58896db..f0594ca 100644
     **/
    PalletContentNftTypesOpenAuctionBidRecord: {
      amount: 'u128',
-@@ -4307,13 +4304,13 @@ export default {
+@@ -4307,13 +4308,13 @@ export default {
      auctionId: 'u64'
    },
    /**
@@ -16587,7 +16636,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageBagRecord: {
      storedBy: 'BTreeSet<u64>',
-@@ -4322,7 +4319,7 @@ export default {
+@@ -4322,7 +4323,7 @@ export default {
      objectsNumber: 'u64'
    },
    /**
@@ -16596,7 +16645,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageStorageBucketRecord: {
      operatorStatus: 'PalletStorageStorageBucketOperatorStatus',
-@@ -4331,7 +4328,7 @@ export default {
+@@ -4331,7 +4332,7 @@ export default {
      assignedBags: 'u64'
    },
    /**
@@ -16605,7 +16654,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageStorageBucketOperatorStatus: {
      _enum: {
-@@ -4341,14 +4338,14 @@ export default {
+@@ -4341,14 +4342,14 @@ export default {
      }
    },
    /**
@@ -16622,7 +16671,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageDataObject: {
      _alias: {
-@@ -4360,13 +4357,13 @@ export default {
+@@ -4360,13 +4361,13 @@ export default {
      ipfsContentId: 'Bytes'
    },
    /**
@@ -16638,7 +16687,7 @@ index 58896db..f0594ca 100644
     **/
    PalletStorageDistributionBucketRecord: {
      acceptingNewBags: 'bool',
-@@ -4376,13 +4373,13 @@ export default {
+@@ -4376,13 +4377,13 @@ export default {
      assignedBags: 'u64'
    },
    /**
@@ -16654,7 +16703,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenAccountData: {
      vestingSchedules: 'BTreeMap<PalletProjectTokenVestingSource, PalletProjectTokenVestingSchedule>',
-@@ -4393,14 +4390,14 @@ export default {
+@@ -4393,14 +4394,14 @@ export default {
      lastSaleTotalPurchasedAmount: 'Option<(u32,u128)>'
    },
    /**
@@ -16671,7 +16720,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenVestingSchedule: {
      linearVestingStartBlock: 'u32',
-@@ -4410,7 +4407,7 @@ export default {
+@@ -4410,7 +4411,7 @@ export default {
      burnedAmount: 'u128'
    },
    /**
@@ -16680,7 +16729,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenTokenData: {
      totalSupply: 'u128',
-@@ -4418,15 +4415,15 @@ export default {
+@@ -4418,15 +4419,15 @@ export default {
      nextSaleId: 'u32',
      sale: 'Option<PalletProjectTokenTokenSale>',
      transferPolicy: 'PalletProjectTokenTransferPolicy',
@@ -16699,7 +16748,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenRevenueSplitState: {
      _enum: {
-@@ -4435,7 +4432,7 @@ export default {
+@@ -4435,7 +4436,7 @@ export default {
      }
    },
    /**
@@ -16708,7 +16757,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenRevenueSplitInfo: {
      allocation: 'u128',
-@@ -4443,14 +4440,14 @@ export default {
+@@ -4443,14 +4444,14 @@ export default {
      dividendsClaimed: 'u128'
    },
    /**
@@ -16725,7 +16774,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProjectTokenPatronageData: {
      rate: 'Perquintill',
-@@ -4458,13 +4455,13 @@ export default {
+@@ -4458,13 +4459,13 @@ export default {
      lastUnclaimedPatronageTallyBlock: 'u32'
    },
    /**
@@ -16742,7 +16791,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsEngineProposal: {
      parameters: 'PalletProposalsEngineProposalParameters',
-@@ -4477,7 +4474,7 @@ export default {
+@@ -4477,7 +4478,7 @@ export default {
      stakingAccountId: 'Option<AccountId32>'
    },
    /**
@@ -16751,7 +16800,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsEngineProposalParameters: {
      votingPeriod: 'u32',
-@@ -4490,7 +4487,7 @@ export default {
+@@ -4490,7 +4491,7 @@ export default {
      constitutionality: 'u32'
    },
    /**
@@ -16760,7 +16809,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsEngineVotingResults: {
      abstentions: 'u32',
-@@ -4499,13 +4496,13 @@ export default {
+@@ -4499,13 +4500,13 @@ export default {
      slashes: 'u32'
    },
    /**
@@ -16776,7 +16825,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsDiscussionDiscussionThread: {
      activatedAt: 'u32',
-@@ -4513,7 +4510,7 @@ export default {
+@@ -4513,7 +4514,7 @@ export default {
      mode: 'PalletProposalsDiscussionThreadModeBoundedBTreeSet'
    },
    /**
@@ -16785,7 +16834,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsDiscussionThreadModeBoundedBTreeSet: {
      _enum: {
-@@ -4522,7 +4519,7 @@ export default {
+@@ -4522,7 +4523,7 @@ export default {
      }
    },
    /**
@@ -16794,7 +16843,7 @@ index 58896db..f0594ca 100644
     **/
    PalletProposalsDiscussionDiscussionPost: {
      authorId: 'u64',
-@@ -4530,19 +4527,19 @@ export default {
+@@ -4530,19 +4531,19 @@ export default {
      lastEdited: 'u32'
    },
    /**
@@ -16817,7 +16866,7 @@ index 58896db..f0594ca 100644
     **/
    PalletWorkingGroupOpening: {
      openingType: 'PalletWorkingGroupOpeningType',
-@@ -4553,7 +4550,7 @@ export default {
+@@ -4553,7 +4554,7 @@ export default {
      creationStake: 'u128'
    },
    /**
@@ -16826,7 +16875,7 @@ index 58896db..f0594ca 100644
     **/
    PalletWorkingGroupJobApplication: {
      roleAccountId: 'AccountId32',
-@@ -4564,7 +4561,7 @@ export default {
+@@ -4564,7 +4565,7 @@ export default {
      openingId: 'u64'
    },
    /**
@@ -16835,7 +16884,7 @@ index 58896db..f0594ca 100644
     **/
    PalletWorkingGroupGroupWorker: {
      memberId: 'u64',
-@@ -4578,13 +4575,13 @@ export default {
+@@ -4578,13 +4579,13 @@ export default {
      createdAt: 'u32'
    },
    /**
@@ -16851,7 +16900,7 @@ index 58896db..f0594ca 100644
     **/
    SpRuntimeMultiSignature: {
      _enum: {
-@@ -4594,39 +4591,39 @@ export default {
+@@ -4594,39 +4595,39 @@ export default {
      }
    },
    /**
@@ -16933,7 +16982,7 @@ index cdcf544..28ad10d 100644
      PalletTransactionPaymentChargeTransactionPayment: PalletTransactionPaymentChargeTransactionPayment;
      PalletTransactionPaymentReleases: PalletTransactionPaymentReleases;
 diff --git a/node_modules/@joystream/types/src/augment/types-lookup.ts b/node_modules/@joystream/types/src/augment/types-lookup.ts
-index c035e7d..0769a00 100644
+index c035e7d..8914031 100644
 --- a/node_modules/@joystream/types/src/augment/types-lookup.ts
 +++ b/node_modules/@joystream/types/src/augment/types-lookup.ts
 @@ -392,24 +392,7 @@ declare module '@polkadot/types/lookup' {
@@ -18411,7 +18460,7 @@ index c035e7d..0769a00 100644
      } & Struct;
      readonly isClaimChannelReward: boolean;
      readonly asClaimChannelReward: {
-@@ -3695,7 +3675,19 @@ declare module '@polkadot/types/lookup' {
+@@ -3695,7 +3675,24 @@ declare module '@polkadot/types/lookup' {
        readonly actor: PalletContentPermissionsContentActor;
        readonly channelId: u64;
      } & Struct;
@@ -18422,17 +18471,22 @@ index c035e7d..0769a00 100644
 +      readonly channelId: u64;
 +      readonly params: PalletProjectTokenAmmParams;
 +    } & Struct;
++    readonly isDeactivateAmm: boolean;
++    readonly asDeactivateAmm: {
++      readonly actor: PalletContentPermissionsContentActor;
++      readonly channelId: u64;
++    } & Struct;
 +    readonly isCreatorTokenIssuerRemark: boolean;
 +    readonly asCreatorTokenIssuerRemark: {
 +      readonly actor: PalletContentPermissionsContentActor;
 +      readonly channelId: u64;
 +      readonly remark: Bytes;
 +    } & Struct;
-+    readonly type: 'CreateCuratorGroup' | 'UpdateCuratorGroupPermissions' | 'SetCuratorGroupStatus' | 'AddCuratorToGroup' | 'RemoveCuratorFromGroup' | 'CreateChannel' | 'UpdateChannel' | 'UpdateChannelPrivilegeLevel' | 'SetChannelPausedFeaturesAsModerator' | 'DeleteChannel' | 'DeleteChannelAssetsAsModerator' | 'DeleteChannelAsModerator' | 'SetChannelVisibilityAsModerator' | 'CreateVideo' | 'UpdateVideo' | 'DeleteVideo' | 'DeleteVideoAssetsAsModerator' | 'DeleteVideoAsModerator' | 'SetVideoVisibilityAsModerator' | 'UpdateChannelPayouts' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'UpdateChannelStateBloatBond' | 'UpdateVideoStateBloatBond' | 'ClaimAndWithdrawChannelReward' | 'IssueNft' | 'DestroyNft' | 'StartOpenAuction' | 'StartEnglishAuction' | 'CancelEnglishAuction' | 'CancelOpenAuction' | 'CancelOffer' | 'CancelBuyNow' | 'UpdateBuyNowPrice' | 'MakeOpenAuctionBid' | 'MakeEnglishAuctionBid' | 'CancelOpenAuctionBid' | 'SettleEnglishAuction' | 'PickOpenAuctionWinner' | 'OfferNft' | 'SlingNftBack' | 'AcceptIncomingOffer' | 'SellNft' | 'BuyNft' | 'ToggleNftLimits' | 'ChannelOwnerRemark' | 'ChannelAgentRemark' | 'NftOwnerRemark' | 'InitializeChannelTransfer' | 'CancelChannelTransfer' | 'AcceptChannelTransfer' | 'UpdateGlobalNftLimit' | 'UpdateChannelNftLimit' | 'IssueCreatorToken' | 'InitCreatorTokenSale' | 'UpdateUpcomingCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRateTo' | 'ClaimCreatorTokenPatronageCredit' | 'IssueRevenueSplit' | 'FinalizeRevenueSplit' | 'FinalizeCreatorTokenSale' | 'DeissueCreatorToken' | 'ActivateAmm' | 'CreatorTokenIssuerRemark';
++    readonly type: 'CreateCuratorGroup' | 'UpdateCuratorGroupPermissions' | 'SetCuratorGroupStatus' | 'AddCuratorToGroup' | 'RemoveCuratorFromGroup' | 'CreateChannel' | 'UpdateChannel' | 'UpdateChannelPrivilegeLevel' | 'SetChannelPausedFeaturesAsModerator' | 'DeleteChannel' | 'DeleteChannelAssetsAsModerator' | 'DeleteChannelAsModerator' | 'SetChannelVisibilityAsModerator' | 'CreateVideo' | 'UpdateVideo' | 'DeleteVideo' | 'DeleteVideoAssetsAsModerator' | 'DeleteVideoAsModerator' | 'SetVideoVisibilityAsModerator' | 'UpdateChannelPayouts' | 'ClaimChannelReward' | 'WithdrawFromChannelBalance' | 'UpdateChannelStateBloatBond' | 'UpdateVideoStateBloatBond' | 'ClaimAndWithdrawChannelReward' | 'IssueNft' | 'DestroyNft' | 'StartOpenAuction' | 'StartEnglishAuction' | 'CancelEnglishAuction' | 'CancelOpenAuction' | 'CancelOffer' | 'CancelBuyNow' | 'UpdateBuyNowPrice' | 'MakeOpenAuctionBid' | 'MakeEnglishAuctionBid' | 'CancelOpenAuctionBid' | 'SettleEnglishAuction' | 'PickOpenAuctionWinner' | 'OfferNft' | 'SlingNftBack' | 'AcceptIncomingOffer' | 'SellNft' | 'BuyNft' | 'ToggleNftLimits' | 'ChannelOwnerRemark' | 'ChannelAgentRemark' | 'NftOwnerRemark' | 'InitializeChannelTransfer' | 'CancelChannelTransfer' | 'AcceptChannelTransfer' | 'UpdateGlobalNftLimit' | 'UpdateChannelNftLimit' | 'IssueCreatorToken' | 'InitCreatorTokenSale' | 'UpdateUpcomingCreatorTokenSale' | 'CreatorTokenIssuerTransfer' | 'MakeCreatorTokenPermissionless' | 'ReduceCreatorTokenPatronageRateTo' | 'ClaimCreatorTokenPatronageCredit' | 'IssueRevenueSplit' | 'FinalizeRevenueSplit' | 'FinalizeCreatorTokenSale' | 'DeissueCreatorToken' | 'ActivateAmm' | 'DeactivateAmm' | 'CreatorTokenIssuerRemark';
    }
  
    /** @name PalletContentChannelBagWitness (385) */
-@@ -3745,7 +3737,13 @@ declare module '@polkadot/types/lookup' {
+@@ -3745,7 +3742,13 @@ declare module '@polkadot/types/lookup' {
    /** @name PalletProjectTokenTransfersPaymentWithVesting (392) */
    export interface PalletProjectTokenTransfersPaymentWithVesting extends BTreeMap<u64, PalletProjectTokenPaymentWithVesting> {}
  
@@ -18447,7 +18501,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageCall extends Enum {
      readonly isDeleteStorageBucket: boolean;
      readonly asDeleteStorageBucket: {
-@@ -3909,10 +3907,6 @@ declare module '@polkadot/types/lookup' {
+@@ -3909,10 +3912,6 @@ declare module '@polkadot/types/lookup' {
        readonly bucketId: PalletStorageDistributionBucketIdRecord;
        readonly metadata: Bytes;
      } & Struct;
@@ -18458,7 +18512,7 @@ index c035e7d..0769a00 100644
      readonly isStorageOperatorRemark: boolean;
      readonly asStorageOperatorRemark: {
        readonly workerId: u64;
-@@ -3925,10 +3919,10 @@ declare module '@polkadot/types/lookup' {
+@@ -3925,10 +3924,10 @@ declare module '@polkadot/types/lookup' {
        readonly distributionBucketId: PalletStorageDistributionBucketIdRecord;
        readonly msg: Bytes;
      } & Struct;
@@ -18471,7 +18525,7 @@ index c035e7d..0769a00 100644
    export interface PalletProjectTokenCall extends Enum {
      readonly isTransfer: boolean;
      readonly asTransfer: {
-@@ -3971,28 +3965,44 @@ declare module '@polkadot/types/lookup' {
+@@ -3971,28 +3970,44 @@ declare module '@polkadot/types/lookup' {
        readonly tokenId: u64;
        readonly memberId: u64;
      } & Struct;
@@ -18522,7 +18576,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsEngineCall extends Enum {
      readonly isVote: boolean;
      readonly asVote: {
-@@ -4019,7 +4029,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4019,7 +4034,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Vote' | 'CancelProposal' | 'VetoProposal' | 'ProposerRemark';
    }
  
@@ -18531,7 +18585,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsDiscussionCall extends Enum {
      readonly isAddPost: boolean;
      readonly asAddPost: {
-@@ -4050,7 +4060,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4050,7 +4065,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'AddPost' | 'DeletePost' | 'UpdatePost' | 'ChangeThreadMode';
    }
  
@@ -18540,7 +18594,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsCodexCall extends Enum {
      readonly isCreateProposal: boolean;
      readonly asCreateProposal: {
-@@ -4060,7 +4070,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4060,7 +4075,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'CreateProposal';
    }
  
@@ -18549,7 +18603,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupCall extends Enum {
      readonly isAddOpening: boolean;
      readonly asAddOpening: {
-@@ -4160,7 +4170,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4160,7 +4175,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'AddOpening' | 'ApplyOnOpening' | 'FillOpening' | 'UpdateRoleAccount' | 'LeaveRole' | 'TerminateRole' | 'SlashStake' | 'DecreaseStake' | 'IncreaseStake' | 'WithdrawApplication' | 'CancelOpening' | 'SetBudget' | 'UpdateRewardAccount' | 'UpdateRewardAmount' | 'SetStatusText' | 'SpendFromBudget' | 'FundWorkingGroupBudget' | 'LeadRemark' | 'WorkerRemark';
    }
  
@@ -18558,7 +18612,7 @@ index c035e7d..0769a00 100644
    export interface JoystreamNodeRuntimeOriginCaller extends Enum {
      readonly isSystem: boolean;
      readonly asSystem: FrameSupportDispatchRawOrigin;
-@@ -4168,7 +4178,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4168,7 +4183,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'System' | 'Void';
    }
  
@@ -18567,7 +18621,7 @@ index c035e7d..0769a00 100644
    export interface FrameSupportDispatchRawOrigin extends Enum {
      readonly isRoot: boolean;
      readonly isSigned: boolean;
-@@ -4177,16 +4187,16 @@ declare module '@polkadot/types/lookup' {
+@@ -4177,16 +4192,16 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Root' | 'Signed' | 'None';
    }
  
@@ -18587,7 +18641,7 @@ index c035e7d..0769a00 100644
    export interface SpConsensusBabeDigestsPreDigest extends Enum {
      readonly isPrimary: boolean;
      readonly asPrimary: SpConsensusBabeDigestsPrimaryPreDigest;
-@@ -4197,7 +4207,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4197,7 +4212,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Primary' | 'SecondaryPlain' | 'SecondaryVRF';
    }
  
@@ -18596,7 +18650,7 @@ index c035e7d..0769a00 100644
    export interface SpConsensusBabeDigestsPrimaryPreDigest extends Struct {
      readonly authorityIndex: u32;
      readonly slot: u64;
-@@ -4205,13 +4215,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4205,13 +4220,13 @@ declare module '@polkadot/types/lookup' {
      readonly vrfProof: U8aFixed;
    }
  
@@ -18612,7 +18666,7 @@ index c035e7d..0769a00 100644
    export interface SpConsensusBabeDigestsSecondaryVRFPreDigest extends Struct {
      readonly authorityIndex: u32;
      readonly slot: u64;
-@@ -4219,13 +4229,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4219,13 +4234,13 @@ declare module '@polkadot/types/lookup' {
      readonly vrfProof: U8aFixed;
    }
  
@@ -18628,7 +18682,7 @@ index c035e7d..0769a00 100644
    export interface PalletBabeError extends Enum {
      readonly isInvalidEquivocationProof: boolean;
      readonly isInvalidKeyOwnershipProof: boolean;
-@@ -4234,7 +4244,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4234,7 +4249,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'InvalidEquivocationProof' | 'InvalidKeyOwnershipProof' | 'DuplicateOffenceReport' | 'InvalidConfiguration';
    }
  
@@ -18637,7 +18691,7 @@ index c035e7d..0769a00 100644
    export interface PalletAuthorshipUncleEntryItem extends Enum {
      readonly isInclusionHeight: boolean;
      readonly asInclusionHeight: u32;
-@@ -4243,7 +4253,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4243,7 +4258,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'InclusionHeight' | 'Uncle';
    }
  
@@ -18646,7 +18700,7 @@ index c035e7d..0769a00 100644
    export interface PalletAuthorshipError extends Enum {
      readonly isInvalidUncleParent: boolean;
      readonly isUnclesAlreadySet: boolean;
-@@ -4255,14 +4265,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4255,14 +4270,14 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'InvalidUncleParent' | 'UnclesAlreadySet' | 'TooManyUncles' | 'GenesisUncle' | 'TooHighUncle' | 'UncleAlreadyIncluded' | 'OldUncle';
    }
  
@@ -18663,7 +18717,7 @@ index c035e7d..0769a00 100644
    export interface PalletBalancesReasons extends Enum {
      readonly isFee: boolean;
      readonly isMisc: boolean;
-@@ -4270,20 +4280,20 @@ declare module '@polkadot/types/lookup' {
+@@ -4270,20 +4285,20 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Fee' | 'Misc' | 'All';
    }
  
@@ -18687,7 +18741,7 @@ index c035e7d..0769a00 100644
    export interface PalletBalancesError extends Enum {
      readonly isVestingBalance: boolean;
      readonly isLiquidityRestrictions: boolean;
-@@ -4296,14 +4306,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4296,14 +4311,14 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'VestingBalance' | 'LiquidityRestrictions' | 'InsufficientBalance' | 'ExistentialDeposit' | 'KeepAlive' | 'ExistingVestingSchedule' | 'DeadAccount' | 'TooManyReserves';
    }
  
@@ -18704,7 +18758,7 @@ index c035e7d..0769a00 100644
    export interface PalletElectionProviderMultiPhasePhase extends Enum {
      readonly isOff: boolean;
      readonly isSigned: boolean;
-@@ -4313,20 +4323,20 @@ declare module '@polkadot/types/lookup' {
+@@ -4313,20 +4328,20 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Off' | 'Signed' | 'Unsigned' | 'Emergency';
    }
  
@@ -18728,7 +18782,7 @@ index c035e7d..0769a00 100644
    export interface PalletElectionProviderMultiPhaseSignedSignedSubmission extends Struct {
      readonly who: AccountId32;
      readonly deposit: u128;
-@@ -4334,7 +4344,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4334,7 +4349,7 @@ declare module '@polkadot/types/lookup' {
      readonly callFee: u128;
    }
  
@@ -18737,7 +18791,7 @@ index c035e7d..0769a00 100644
    export interface PalletElectionProviderMultiPhaseError extends Enum {
      readonly isPreDispatchEarlySubmission: boolean;
      readonly isPreDispatchWrongWinnerCount: boolean;
-@@ -4351,7 +4361,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4351,7 +4366,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'PreDispatchEarlySubmission' | 'PreDispatchWrongWinnerCount' | 'PreDispatchWeakSubmission' | 'SignedQueueFull' | 'SignedCannotPayDeposit' | 'SignedInvalidWitness' | 'SignedTooMuchWeight' | 'OcwCallWrongEra' | 'MissingSnapshotMetadata' | 'InvalidSubmissionIndex' | 'CallNotAllowed' | 'FallbackFailed';
    }
  
@@ -18746,7 +18800,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingStakingLedger extends Struct {
      readonly stash: AccountId32;
      readonly total: Compact<u128>;
-@@ -4360,32 +4370,32 @@ declare module '@polkadot/types/lookup' {
+@@ -4360,32 +4375,32 @@ declare module '@polkadot/types/lookup' {
      readonly claimedRewards: Vec<u32>;
    }
  
@@ -18784,7 +18838,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingForcing extends Enum {
      readonly isNotForcing: boolean;
      readonly isForceNew: boolean;
-@@ -4394,7 +4404,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4394,7 +4409,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'NotForcing' | 'ForceNew' | 'ForceNone' | 'ForceAlways';
    }
  
@@ -18793,7 +18847,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingUnappliedSlash extends Struct {
      readonly validator: AccountId32;
      readonly own: u128;
-@@ -4403,7 +4413,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4403,7 +4418,7 @@ declare module '@polkadot/types/lookup' {
      readonly payout: u128;
    }
  
@@ -18802,7 +18856,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingSlashingSlashingSpans extends Struct {
      readonly spanIndex: u32;
      readonly lastStart: u32;
-@@ -4411,13 +4421,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4411,13 +4426,13 @@ declare module '@polkadot/types/lookup' {
      readonly prior: Vec<u32>;
    }
  
@@ -18818,7 +18872,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingReleases extends Enum {
      readonly isV100Ancient: boolean;
      readonly isV200: boolean;
-@@ -4431,7 +4441,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4431,7 +4446,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'V100Ancient' | 'V200' | 'V300' | 'V400' | 'V500' | 'V600' | 'V700' | 'V800' | 'V900';
    }
  
@@ -18827,7 +18881,7 @@ index c035e7d..0769a00 100644
    export interface PalletStakingPalletError extends Enum {
      readonly isNotController: boolean;
      readonly isNotStash: boolean;
-@@ -4461,10 +4471,10 @@ declare module '@polkadot/types/lookup' {
+@@ -4461,10 +4476,10 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'NotController' | 'NotStash' | 'AlreadyBonded' | 'AlreadyPaired' | 'EmptyTargets' | 'DuplicateIndex' | 'InvalidSlashIndex' | 'InsufficientBond' | 'NoMoreChunks' | 'NoUnlockChunk' | 'FundedTarget' | 'InvalidEraToReward' | 'InvalidNumberOfNominations' | 'NotSortedAndUnique' | 'AlreadyClaimed' | 'IncorrectHistoryDepth' | 'IncorrectSlashingSpans' | 'BadState' | 'TooManyTargets' | 'BadTarget' | 'CannotChillOther' | 'TooManyNominators' | 'TooManyValidators' | 'CommissionTooLow' | 'BondingRestricted';
    }
  
@@ -18840,7 +18894,7 @@ index c035e7d..0769a00 100644
    export interface PalletSessionError extends Enum {
      readonly isInvalidProof: boolean;
      readonly isNoAssociatedValidatorId: boolean;
-@@ -4474,7 +4484,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4474,7 +4489,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'InvalidProof' | 'NoAssociatedValidatorId' | 'DuplicatedKey' | 'NoKeys' | 'NoAccount';
    }
  
@@ -18849,7 +18903,7 @@ index c035e7d..0769a00 100644
    export interface PalletGrandpaStoredState extends Enum {
      readonly isLive: boolean;
      readonly isPendingPause: boolean;
-@@ -4491,7 +4501,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4491,7 +4506,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Live' | 'PendingPause' | 'Paused' | 'PendingResume';
    }
  
@@ -18858,7 +18912,7 @@ index c035e7d..0769a00 100644
    export interface PalletGrandpaStoredPendingChange extends Struct {
      readonly scheduledAt: u32;
      readonly delay: u32;
-@@ -4499,7 +4509,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4499,7 +4514,7 @@ declare module '@polkadot/types/lookup' {
      readonly forced: Option<u32>;
    }
  
@@ -18867,7 +18921,7 @@ index c035e7d..0769a00 100644
    export interface PalletGrandpaError extends Enum {
      readonly isPauseFailed: boolean;
      readonly isResumeFailed: boolean;
-@@ -4511,32 +4521,26 @@ declare module '@polkadot/types/lookup' {
+@@ -4511,32 +4526,26 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'PauseFailed' | 'ResumeFailed' | 'ChangePending' | 'TooSoon' | 'InvalidKeyOwnershipProof' | 'InvalidEquivocationProof' | 'DuplicateOffenceReport';
    }
  
@@ -18904,7 +18958,7 @@ index c035e7d..0769a00 100644
    export interface PalletBagsListListNode extends Struct {
      readonly id: AccountId32;
      readonly prev: Option<AccountId32>;
-@@ -4545,20 +4549,20 @@ declare module '@polkadot/types/lookup' {
+@@ -4545,20 +4554,20 @@ declare module '@polkadot/types/lookup' {
      readonly score: u64;
    }
  
@@ -18928,7 +18982,7 @@ index c035e7d..0769a00 100644
    export interface PalletBagsListListListError extends Enum {
      readonly isDuplicate: boolean;
      readonly isNotHeavier: boolean;
-@@ -4567,14 +4571,14 @@ declare module '@polkadot/types/lookup' {
+@@ -4567,14 +4576,14 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Duplicate' | 'NotHeavier' | 'NotInSameBag' | 'NodeNotFound';
    }
  
@@ -18945,7 +18999,7 @@ index c035e7d..0769a00 100644
    export interface PalletVestingError extends Enum {
      readonly isNotVesting: boolean;
      readonly isAtMaxVestingSchedules: boolean;
-@@ -4584,7 +4588,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4584,7 +4593,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'NotVesting' | 'AtMaxVestingSchedules' | 'AmountLow' | 'ScheduleIndexOutOfBounds' | 'InvalidScheduleParams';
    }
  
@@ -18954,7 +19008,7 @@ index c035e7d..0769a00 100644
    export interface PalletMultisigMultisig extends Struct {
      readonly when: PalletMultisigTimepoint;
      readonly deposit: u128;
-@@ -4592,7 +4596,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4592,7 +4601,7 @@ declare module '@polkadot/types/lookup' {
      readonly approvals: Vec<AccountId32>;
    }
  
@@ -18963,7 +19017,7 @@ index c035e7d..0769a00 100644
    export interface PalletMultisigError extends Enum {
      readonly isMinimumThreshold: boolean;
      readonly isAlreadyApproved: boolean;
-@@ -4611,13 +4615,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4611,13 +4620,13 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'MinimumThreshold' | 'AlreadyApproved' | 'NoApprovalsNeeded' | 'TooFewSignatories' | 'TooManySignatories' | 'SignatoriesOutOfOrder' | 'SenderInSignatories' | 'NotFound' | 'NotOwner' | 'NoTimepoint' | 'WrongTimepoint' | 'UnexpectedTimepoint' | 'MaxWeightTooLow' | 'AlreadyStored';
    }
  
@@ -18979,7 +19033,7 @@ index c035e7d..0769a00 100644
    export interface PalletCouncilCouncilStage extends Enum {
      readonly isAnnouncing: boolean;
      readonly asAnnouncing: PalletCouncilCouncilStageAnnouncing;
-@@ -4628,23 +4632,23 @@ declare module '@polkadot/types/lookup' {
+@@ -4628,23 +4637,23 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Announcing' | 'Election' | 'Idle';
    }
  
@@ -19007,7 +19061,7 @@ index c035e7d..0769a00 100644
    export interface PalletCouncilCouncilMember extends Struct {
      readonly stakingAccountId: AccountId32;
      readonly rewardAccountId: AccountId32;
-@@ -4654,7 +4658,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4654,7 +4663,7 @@ declare module '@polkadot/types/lookup' {
      readonly unpaidReward: u128;
    }
  
@@ -19016,7 +19070,7 @@ index c035e7d..0769a00 100644
    export interface PalletCouncilCandidate extends Struct {
      readonly stakingAccountId: AccountId32;
      readonly rewardAccountId: AccountId32;
-@@ -4664,7 +4668,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4664,7 +4673,7 @@ declare module '@polkadot/types/lookup' {
      readonly noteHash: Option<H256>;
    }
  
@@ -19025,7 +19079,7 @@ index c035e7d..0769a00 100644
    export interface PalletCouncilError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isBadOrigin: boolean;
-@@ -4693,7 +4697,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4693,7 +4702,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'BadOrigin' | 'CantCandidateNow' | 'CantReleaseStakeNow' | 'CandidacyStakeTooLow' | 'CantCandidateTwice' | 'ConflictingStake' | 'StakeStillNeeded' | 'NoStake' | 'InsufficientBalanceForStaking' | 'CantVoteForYourself' | 'MemberIdNotMatchAccount' | 'InvalidAccountToStakeReuse' | 'NotCandidatingNow' | 'CantWithdrawCandidacyNow' | 'NotCouncilor' | 'InsufficientFundsForFundingRequest' | 'ZeroBalanceFundRequest' | 'RepeatedFundRequestAccount' | 'EmptyFundingRequests' | 'InsufficientTokensForFunding' | 'ZeroTokensFunding' | 'CandidateDoesNotExist' | 'InsufficientBalanceForTransfer';
    }
  
@@ -19034,7 +19088,7 @@ index c035e7d..0769a00 100644
    export interface PalletReferendumReferendumStage extends Enum {
      readonly isInactive: boolean;
      readonly isVoting: boolean;
-@@ -4703,7 +4707,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4703,7 +4712,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Inactive' | 'Voting' | 'Revealing';
    }
  
@@ -19043,7 +19097,7 @@ index c035e7d..0769a00 100644
    export interface PalletReferendumReferendumStageVoting extends Struct {
      readonly started: u32;
      readonly winningTargetCount: u32;
-@@ -4711,7 +4715,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4711,7 +4720,7 @@ declare module '@polkadot/types/lookup' {
      readonly endsAt: u32;
    }
  
@@ -19052,7 +19106,7 @@ index c035e7d..0769a00 100644
    export interface PalletReferendumReferendumStageRevealing extends Struct {
      readonly started: u32;
      readonly winningTargetCount: u32;
-@@ -4720,7 +4724,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4720,7 +4729,7 @@ declare module '@polkadot/types/lookup' {
      readonly endsAt: u32;
    }
  
@@ -19061,7 +19115,7 @@ index c035e7d..0769a00 100644
    export interface PalletReferendumCastVote extends Struct {
      readonly commitment: H256;
      readonly cycleId: u64;
-@@ -4728,7 +4732,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4728,7 +4737,7 @@ declare module '@polkadot/types/lookup' {
      readonly voteFor: Option<u64>;
    }
  
@@ -19070,7 +19124,7 @@ index c035e7d..0769a00 100644
    export interface PalletReferendumError extends Enum {
      readonly isBadOrigin: boolean;
      readonly isReferendumNotRunning: boolean;
-@@ -4743,10 +4747,11 @@ declare module '@polkadot/types/lookup' {
+@@ -4743,10 +4752,11 @@ declare module '@polkadot/types/lookup' {
      readonly isUnstakingVoteInSameCycle: boolean;
      readonly isSaltTooLong: boolean;
      readonly isUnstakingForbidden: boolean;
@@ -19084,7 +19138,7 @@ index c035e7d..0769a00 100644
    export interface PalletMembershipMembershipObject extends Struct {
      readonly handleHash: H256;
      readonly rootAccount: AccountId32;
-@@ -4755,13 +4760,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4755,13 +4765,13 @@ declare module '@polkadot/types/lookup' {
      readonly invites: u32;
    }
  
@@ -19100,7 +19154,7 @@ index c035e7d..0769a00 100644
    export interface PalletMembershipError extends Enum {
      readonly isNotEnoughBalanceToBuyMembership: boolean;
      readonly isControllerAccountRequired: boolean;
-@@ -4784,10 +4789,11 @@ declare module '@polkadot/types/lookup' {
+@@ -4784,10 +4794,11 @@ declare module '@polkadot/types/lookup' {
      readonly isInsufficientBalanceToCoverStake: boolean;
      readonly isGifLockExceedsCredit: boolean;
      readonly isInsufficientBalanceToGift: boolean;
@@ -19114,7 +19168,7 @@ index c035e7d..0769a00 100644
    export interface PalletForumCategory extends Struct {
      readonly titleHash: H256;
      readonly descriptionHash: H256;
-@@ -4799,7 +4805,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4799,7 +4810,7 @@ declare module '@polkadot/types/lookup' {
      readonly stickyThreadIds: BTreeSet<u64>;
    }
  
@@ -19123,7 +19177,7 @@ index c035e7d..0769a00 100644
    export interface PalletForumThread extends Struct {
      readonly categoryId: u64;
      readonly authorId: u64;
-@@ -4807,7 +4813,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4807,7 +4818,7 @@ declare module '@polkadot/types/lookup' {
      readonly numberOfEditablePosts: u64;
    }
  
@@ -19132,7 +19186,7 @@ index c035e7d..0769a00 100644
    export interface PalletForumPost extends Struct {
      readonly threadId: u64;
      readonly textHash: H256;
-@@ -4816,7 +4822,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4816,7 +4827,7 @@ declare module '@polkadot/types/lookup' {
      readonly lastEdited: u32;
    }
  
@@ -19141,7 +19195,7 @@ index c035e7d..0769a00 100644
    export interface PalletForumError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isOriginNotForumLead: boolean;
-@@ -4848,12 +4854,12 @@ declare module '@polkadot/types/lookup' {
+@@ -4848,12 +4859,12 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'OriginNotForumLead' | 'ForumUserIdNotMatchAccount' | 'ModeratorIdNotMatchAccount' | 'AccountDoesNotMatchThreadAuthor' | 'ThreadDoesNotExist' | 'ModeratorModerateOriginCategory' | 'ModeratorModerateDestinationCategory' | 'ThreadMoveInvalid' | 'ThreadNotBeingUpdated' | 'InsufficientBalanceForThreadCreation' | 'CannotDeleteThreadWithOutstandingPosts' | 'PostDoesNotExist' | 'AccountDoesNotMatchPostAuthor' | 'InsufficientBalanceForPost' | 'CategoryNotBeingUpdated' | 'AncestorCategoryImmutable' | 'MaxValidCategoryDepthExceeded' | 'CategoryDoesNotExist' | 'CategoryModeratorDoesNotExist' | 'CategoryNotEmptyThreads' | 'CategoryNotEmptyCategories' | 'ModeratorCantDeleteCategory' | 'ModeratorCantUpdateCategory' | 'MapSizeLimit' | 'PathLengthShouldBeGreaterThanZero' | 'MaxNumberOfStickiedThreadsExceeded';
    }
  
@@ -19156,7 +19210,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyBountyRecord extends Struct {
      readonly creationParams: PalletBountyBountyParametersBoundedBTreeSet;
      readonly totalFunding: u128;
-@@ -4862,7 +4868,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4862,7 +4873,7 @@ declare module '@polkadot/types/lookup' {
      readonly hasUnpaidOracleReward: bool;
    }
  
@@ -19165,7 +19219,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyBountyParametersBoundedBTreeSet extends Struct {
      readonly oracle: PalletBountyBountyActor;
      readonly contractType: PalletBountyAssuranceContractTypeBoundedBTreeSet;
-@@ -4873,7 +4879,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4873,7 +4884,7 @@ declare module '@polkadot/types/lookup' {
      readonly fundingType: PalletBountyFundingType;
    }
  
@@ -19174,7 +19228,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyAssuranceContractTypeBoundedBTreeSet extends Enum {
      readonly isOpen: boolean;
      readonly isClosed: boolean;
-@@ -4881,7 +4887,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4881,7 +4892,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Open' | 'Closed';
    }
  
@@ -19183,7 +19237,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyBountyMilestone extends Enum {
      readonly isCreated: boolean;
      readonly asCreated: {
-@@ -4898,13 +4904,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4898,13 +4909,13 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Created' | 'BountyMaxFundingReached' | 'WorkSubmitted' | 'Terminated' | 'JudgmentSubmitted';
    }
  
@@ -19199,7 +19253,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyEntryRecord extends Struct {
      readonly memberId: u64;
      readonly stakingAccountId: AccountId32;
-@@ -4912,7 +4918,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4912,7 +4923,7 @@ declare module '@polkadot/types/lookup' {
      readonly workSubmitted: bool;
    }
  
@@ -19208,7 +19262,7 @@ index c035e7d..0769a00 100644
    export interface PalletBountyError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isMinFundingAmountCannotBeGreaterThanMaxAmount: boolean;
-@@ -4952,7 +4958,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4952,7 +4963,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'MinFundingAmountCannotBeGreaterThanMaxAmount' | 'BountyDoesntExist' | 'SwitchOracleOriginIsRoot' | 'InvalidStageUnexpectedFunding' | 'InvalidStageUnexpectedNoFundingContributed' | 'InvalidStageUnexpectedCancelled' | 'InvalidStageUnexpectedWorkSubmission' | 'InvalidStageUnexpectedJudgment' | 'InvalidStageUnexpectedSuccessfulBountyWithdrawal' | 'InvalidStageUnexpectedFailedBountyWithdrawal' | 'InsufficientBalanceForBounty' | 'NoBountyContributionFound' | 'InsufficientBalanceForStake' | 'ConflictingStakes' | 'WorkEntryDoesntExist' | 'CherryLessThenMinimumAllowed' | 'CannotSubmitWorkToClosedContractBounty' | 'ClosedContractMemberListIsEmpty' | 'ClosedContractMemberListIsTooLarge' | 'ClosedContractMemberNotFound' | 'InvalidOracleMemberId' | 'InvalidStakingAccountForMember' | 'ZeroWinnerReward' | 'TotalRewardShouldBeEqualToTotalFunding' | 'EntrantStakeIsLessThanMininum' | 'FundingAmountCannotBeZero' | 'FundingPeriodCannotBeZero' | 'WinnerShouldHasWorkSubmission' | 'InvalidContributorActorSpecified' | 'InvalidOracleActorSpecified' | 'InvalidEntrantWorkerSpecified' | 'InvalidCreatorActorSpecified' | 'WorkEntryDoesntBelongToWorker' | 'OracleRewardAlreadyWithdrawn';
    }
  
@@ -19217,7 +19271,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentVideoRecord extends Struct {
      readonly inChannel: u64;
      readonly nftStatus: Option<PalletContentNftTypesOwnedNft>;
-@@ -4960,7 +4966,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4960,7 +4971,7 @@ declare module '@polkadot/types/lookup' {
      readonly videoStateBloatBond: PalletCommonBloatBondRepayableBloatBond;
    }
  
@@ -19226,7 +19280,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentNftTypesOwnedNft extends Struct {
      readonly owner: PalletContentNftTypesNftOwner;
      readonly transactionalStatus: PalletContentNftTypesTransactionalStatusRecord;
-@@ -4968,7 +4974,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4968,7 +4979,7 @@ declare module '@polkadot/types/lookup' {
      readonly openAuctionsNonce: u64;
    }
  
@@ -19235,7 +19289,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentNftTypesTransactionalStatusRecord extends Enum {
      readonly isIdle: boolean;
      readonly isInitiatedOfferToMember: boolean;
-@@ -4982,7 +4988,7 @@ declare module '@polkadot/types/lookup' {
+@@ -4982,7 +4993,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Idle' | 'InitiatedOfferToMember' | 'EnglishAuction' | 'OpenAuction' | 'BuyNow';
    }
  
@@ -19244,7 +19298,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentNftTypesEnglishAuctionRecord extends Struct {
      readonly startingPrice: u128;
      readonly buyNowPrice: Option<u128>;
-@@ -4994,13 +5000,13 @@ declare module '@polkadot/types/lookup' {
+@@ -4994,13 +5005,13 @@ declare module '@polkadot/types/lookup' {
      readonly topBid: Option<PalletContentNftTypesEnglishAuctionBid>;
    }
  
@@ -19260,7 +19314,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentNftTypesOpenAuctionRecord extends Struct {
      readonly startingPrice: u128;
      readonly buyNowPrice: Option<u128>;
-@@ -5010,7 +5016,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5010,7 +5021,7 @@ declare module '@polkadot/types/lookup' {
      readonly start: u32;
    }
  
@@ -19269,7 +19323,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentNftTypesNftOwner extends Enum {
      readonly isChannelOwner: boolean;
      readonly isMember: boolean;
-@@ -5018,21 +5024,21 @@ declare module '@polkadot/types/lookup' {
+@@ -5018,21 +5029,21 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ChannelOwner' | 'Member';
    }
  
@@ -19294,7 +19348,7 @@ index c035e7d..0769a00 100644
    export interface PalletContentErrorsError extends Enum {
      readonly isChannelStateBloatBondChanged: boolean;
      readonly isVideoStateBloatBondChanged: boolean;
-@@ -5162,10 +5168,11 @@ declare module '@polkadot/types/lookup' {
+@@ -5162,10 +5173,11 @@ declare module '@polkadot/types/lookup' {
      readonly isPatronageCanOnlyBeClaimedForMemberOwnedChannels: boolean;
      readonly isChannelTransfersBlockedDuringRevenueSplits: boolean;
      readonly isChannelTransfersBlockedDuringTokenSales: boolean;
@@ -19308,7 +19362,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageBagRecord extends Struct {
      readonly storedBy: BTreeSet<u64>;
      readonly distributedBy: BTreeSet<PalletStorageDistributionBucketIdRecord>;
-@@ -5173,7 +5180,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5173,7 +5185,7 @@ declare module '@polkadot/types/lookup' {
      readonly objectsNumber: u64;
    }
  
@@ -19317,7 +19371,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageStorageBucketRecord extends Struct {
      readonly operatorStatus: PalletStorageStorageBucketOperatorStatus;
      readonly acceptingNewBags: bool;
-@@ -5181,7 +5188,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5181,7 +5193,7 @@ declare module '@polkadot/types/lookup' {
      readonly assignedBags: u64;
    }
  
@@ -19326,7 +19380,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageStorageBucketOperatorStatus extends Enum {
      readonly isMissing: boolean;
      readonly isInvitedStorageWorker: boolean;
-@@ -5191,13 +5198,13 @@ declare module '@polkadot/types/lookup' {
+@@ -5191,13 +5203,13 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Missing' | 'InvitedStorageWorker' | 'StorageWorker';
    }
  
@@ -19342,7 +19396,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageDataObject extends Struct {
      readonly accepted: bool;
      readonly stateBloatBond: PalletCommonBloatBondRepayableBloatBond;
-@@ -5205,12 +5212,12 @@ declare module '@polkadot/types/lookup' {
+@@ -5205,12 +5217,12 @@ declare module '@polkadot/types/lookup' {
      readonly ipfsContentId: Bytes;
    }
  
@@ -19357,7 +19411,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageDistributionBucketRecord extends Struct {
      readonly acceptingNewBags: bool;
      readonly distributing: bool;
-@@ -5219,7 +5226,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5219,7 +5231,7 @@ declare module '@polkadot/types/lookup' {
      readonly assignedBags: u64;
    }
  
@@ -19366,7 +19420,7 @@ index c035e7d..0769a00 100644
    export interface PalletStorageError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isInvalidCidLength: boolean;
-@@ -5289,7 +5296,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5289,7 +5301,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'InvalidCidLength' | 'NoObjectsOnUpload' | 'StorageBucketDoesntExist' | 'StorageBucketIsNotBoundToBag' | 'StorageBucketIsBoundToBag' | 'NoStorageBucketInvitation' | 'StorageProviderAlreadySet' | 'StorageProviderMustBeSet' | 'DifferentStorageProviderInvited' | 'InvitedStorageProvider' | 'StorageBucketIdCollectionsAreEmpty' | 'StorageBucketsNumberViolatesDynamicBagCreationPolicy' | 'DistributionBucketsViolatesDynamicBagCreationPolicy' | 'EmptyContentId' | 'ZeroObjectSize' | 'InvalidStateBloatBondSourceAccount' | 'InvalidStorageProvider' | 'InsufficientBalance' | 'DataObjectDoesntExist' | 'UploadingBlocked' | 'DataObjectIdCollectionIsEmpty' | 'SourceAndDestinationBagsAreEqual' | 'DataObjectBlacklisted' | 'BlacklistSizeLimitExceeded' | 'VoucherMaxObjectSizeLimitExceeded' | 'VoucherMaxObjectNumberLimitExceeded' | 'StorageBucketObjectNumberLimitReached' | 'StorageBucketObjectSizeLimitReached' | 'InsufficientTreasuryBalance' | 'CannotDeleteNonEmptyStorageBucket' | 'DataObjectIdParamsAreEmpty' | 'StorageBucketsPerBagLimitTooLow' | 'StorageBucketsPerBagLimitTooHigh' | 'StorageBucketPerBagLimitExceeded' | 'StorageBucketDoesntAcceptNewBags' | 'DynamicBagExists' | 'DynamicBagDoesntExist' | 'StorageProviderOperatorDoesntExist' | 'DataSizeFeeChanged' | 'DataObjectStateBloatBondChanged' | 'CannotDeleteNonEmptyDynamicBag' | 'MaxDistributionBucketFamilyNumberLimitExceeded' | 'DistributionBucketFamilyDoesntExist' | 'DistributionBucketDoesntExist' | 'DistributionBucketIdCollectionsAreEmpty' | 'DistributionBucketDoesntAcceptNewBags' | 'MaxDistributionBucketNumberPerBagLimitExceeded' | 'DistributionBucketIsNotBoundToBag' | 'DistributionBucketIsBoundToBag' | 'DistributionBucketsPerBagLimitTooLow' | 'DistributionBucketsPerBagLimitTooHigh' | 'DistributionProviderOperatorDoesntExist' | 'DistributionProviderOperatorAlreadyInvited' | 'DistributionProviderOperatorSet' | 'NoDistributionBucketInvitation' | 'MustBeDistributionProviderOperatorForBucket' | 'MaxNumberOfPendingInvitationsLimitForDistributionBucketReached' | 'MaxNumberOfOperatorsPerDistributionBucketReached' | 'DistributionFamilyBoundToBagCreationPolicy' | 'MaxDataObjectSizeExceeded' | 'InvalidTransactorAccount' | 'NumberOfStorageBucketsOutsideOfAllowedContraints' | 'NumberOfDistributionBucketsOutsideOfAllowedContraints' | 'CallDisabled';
    }
  
@@ -19375,7 +19429,7 @@ index c035e7d..0769a00 100644
    export interface PalletProjectTokenAccountData extends Struct {
      readonly vestingSchedules: BTreeMap<PalletProjectTokenVestingSource, PalletProjectTokenVestingSchedule>;
      readonly amount: u128;
-@@ -5299,13 +5306,13 @@ declare module '@polkadot/types/lookup' {
+@@ -5299,13 +5311,13 @@ declare module '@polkadot/types/lookup' {
      readonly lastSaleTotalPurchasedAmount: Option<ITuple<[u32, u128]>>;
    }
  
@@ -19391,7 +19445,7 @@ index c035e7d..0769a00 100644
    export interface PalletProjectTokenVestingSchedule extends Struct {
      readonly linearVestingStartBlock: u32;
      readonly linearVestingDuration: u32;
-@@ -5314,22 +5321,22 @@ declare module '@polkadot/types/lookup' {
+@@ -5314,22 +5326,22 @@ declare module '@polkadot/types/lookup' {
      readonly burnedAmount: u128;
    }
  
@@ -19417,7 +19471,7 @@ index c035e7d..0769a00 100644
    export interface PalletProjectTokenRevenueSplitState extends Enum {
      readonly isInactive: boolean;
      readonly isActive: boolean;
-@@ -5337,38 +5344,38 @@ declare module '@polkadot/types/lookup' {
+@@ -5337,38 +5349,38 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Inactive' | 'Active';
    }
  
@@ -19461,7 +19515,7 @@ index c035e7d..0769a00 100644
      readonly isTokenIssuanceNotInIdleState: boolean;
      readonly isInsufficientJoyBalance: boolean;
      readonly isJoyTransferSubjectToDusting: boolean;
-@@ -5393,6 +5400,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5393,6 +5405,7 @@ declare module '@polkadot/types/lookup' {
      readonly isSaleCapPerMemberIsZero: boolean;
      readonly isSaleUnitPriceIsZero: boolean;
      readonly isSalePurchaseAmountIsZero: boolean;
@@ -19469,7 +19523,7 @@ index c035e7d..0769a00 100644
      readonly isRevenueSplitTimeToStartTooShort: boolean;
      readonly isRevenueSplitDurationTooShort: boolean;
      readonly isRevenueSplitAlreadyActiveForToken: boolean;
-@@ -5408,10 +5416,16 @@ declare module '@polkadot/types/lookup' {
+@@ -5408,10 +5421,16 @@ declare module '@polkadot/types/lookup' {
      readonly isRevenueSplitRateIsZero: boolean;
      readonly isBurnAmountIsZero: boolean;
      readonly isBurnAmountGreaterThanAccountTokensAmount: boolean;
@@ -19488,7 +19542,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsEngineProposal extends Struct {
      readonly parameters: PalletProposalsEngineProposalParameters;
      readonly proposerId: u64;
-@@ -5423,7 +5437,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5423,7 +5442,7 @@ declare module '@polkadot/types/lookup' {
      readonly stakingAccountId: Option<AccountId32>;
    }
  
@@ -19497,7 +19551,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsEngineProposalParameters extends Struct {
      readonly votingPeriod: u32;
      readonly gracePeriod: u32;
-@@ -5435,7 +5449,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5435,7 +5454,7 @@ declare module '@polkadot/types/lookup' {
      readonly constitutionality: u32;
    }
  
@@ -19506,7 +19560,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsEngineVotingResults extends Struct {
      readonly abstentions: u32;
      readonly approvals: u32;
-@@ -5443,7 +5457,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5443,7 +5462,7 @@ declare module '@polkadot/types/lookup' {
      readonly slashes: u32;
    }
  
@@ -19515,7 +19569,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsEngineError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isEmptyTitleProvided: boolean;
-@@ -5471,14 +5485,14 @@ declare module '@polkadot/types/lookup' {
+@@ -5471,14 +5490,14 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'EmptyTitleProvided' | 'EmptyDescriptionProvided' | 'TitleIsTooLong' | 'DescriptionIsTooLong' | 'ProposalNotFound' | 'ProposalFinalized' | 'AlreadyVoted' | 'NotAuthor' | 'MaxActiveProposalNumberExceeded' | 'EmptyStake' | 'StakeShouldBeEmpty' | 'StakeDiffersFromRequired' | 'InvalidParameterApprovalThreshold' | 'InvalidParameterSlashingThreshold' | 'RequireRootOrigin' | 'ProposalHasVotes' | 'ZeroExactExecutionBlock' | 'InvalidExactExecutionBlock' | 'InsufficientBalanceForStake' | 'ConflictingStakes' | 'InvalidStakingAccountForMember' | 'MaxDispatchableCallCodeSizeExceeded';
    }
  
@@ -19532,7 +19586,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsDiscussionThreadModeBoundedBTreeSet extends Enum {
      readonly isOpen: boolean;
      readonly isClosed: boolean;
-@@ -5486,14 +5500,14 @@ declare module '@polkadot/types/lookup' {
+@@ -5486,14 +5505,14 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Open' | 'Closed';
    }
  
@@ -19549,7 +19603,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsDiscussionError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isThreadDoesntExist: boolean;
-@@ -5508,7 +5522,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5508,7 +5527,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'ThreadDoesntExist' | 'PostDoesntExist' | 'RequireRootOrigin' | 'CannotPostOnClosedThread' | 'NotAuthorOrCouncilor' | 'MaxWhiteListSizeExceeded' | 'WhitelistedMemberDoesNotExist' | 'InsufficientBalanceForPost' | 'CannotDeletePost';
    }
  
@@ -19558,7 +19612,7 @@ index c035e7d..0769a00 100644
    export interface PalletProposalsCodexError extends Enum {
      readonly isSignalProposalIsEmpty: boolean;
      readonly isRuntimeProposalIsEmpty: boolean;
-@@ -5539,7 +5553,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5539,7 +5558,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'SignalProposalIsEmpty' | 'RuntimeProposalIsEmpty' | 'InvalidFundingRequestProposalBalance' | 'InvalidValidatorCount' | 'RequireRootOrigin' | 'InvalidCouncilElectionParameterCouncilSize' | 'InvalidCouncilElectionParameterCandidacyLimit' | 'InvalidCouncilElectionParameterMinVotingStake' | 'InvalidCouncilElectionParameterNewTermDuration' | 'InvalidCouncilElectionParameterMinCouncilStake' | 'InvalidCouncilElectionParameterRevealingPeriod' | 'InvalidCouncilElectionParameterVotingPeriod' | 'InvalidCouncilElectionParameterAnnouncingPeriod' | 'InvalidWorkingGroupBudgetCapacity' | 'InvalidSetLeadParameterCannotBeCouncilor' | 'SlashingStakeIsZero' | 'DecreasingStakeIsZero' | 'InsufficientFundsForBudgetUpdate' | 'InvalidFundingRequestProposalNumberOfAccount' | 'InvalidFundingRequestProposalRepeatedAccount' | 'InvalidChannelPayoutsProposalMinCashoutExceedsMaxCashout' | 'InvalidLeadWorkerId' | 'InvalidLeadOpeningId' | 'InvalidLeadApplicationId' | 'InvalidProposalId' | 'ArithmeticError';
    }
  
@@ -19567,7 +19621,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupOpening extends Struct {
      readonly openingType: PalletWorkingGroupOpeningType;
      readonly created: u32;
-@@ -5549,7 +5563,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5549,7 +5568,7 @@ declare module '@polkadot/types/lookup' {
      readonly creationStake: u128;
    }
  
@@ -19576,7 +19630,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupJobApplication extends Struct {
      readonly roleAccountId: AccountId32;
      readonly rewardAccountId: AccountId32;
-@@ -5559,7 +5573,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5559,7 +5578,7 @@ declare module '@polkadot/types/lookup' {
      readonly openingId: u64;
    }
  
@@ -19585,7 +19639,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupGroupWorker extends Struct {
      readonly memberId: u64;
      readonly roleAccountId: AccountId32;
-@@ -5572,7 +5586,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5572,7 +5591,7 @@ declare module '@polkadot/types/lookup' {
      readonly createdAt: u32;
    }
  
@@ -19594,7 +19648,7 @@ index c035e7d..0769a00 100644
    export interface PalletWorkingGroupErrorsError extends Enum {
      readonly isArithmeticError: boolean;
      readonly isStakeBalanceCannotBeZero: boolean;
-@@ -5609,7 +5623,7 @@ declare module '@polkadot/types/lookup' {
+@@ -5609,7 +5628,7 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'ArithmeticError' | 'StakeBalanceCannotBeZero' | 'OpeningDoesNotExist' | 'CannotHireMultipleLeaders' | 'WorkerApplicationDoesNotExist' | 'MaxActiveWorkerNumberExceeded' | 'SuccessfulWorkerApplicationDoesNotExist' | 'CannotHireLeaderWhenLeaderExists' | 'IsNotLeadAccount' | 'CurrentLeadNotSet' | 'WorkerDoesNotExist' | 'InvalidMemberOrigin' | 'SignerIsNotWorkerRoleAccount' | 'BelowMinimumStakes' | 'InsufficientBalanceToCoverStake' | 'ApplicationStakeDoesntMatchOpening' | 'OriginIsNotApplicant' | 'WorkerIsLeaving' | 'CannotRewardWithZero' | 'InvalidStakingAccountForMember' | 'ConflictStakesOnAccount' | 'WorkerHasNoReward' | 'UnstakingPeriodLessThanMinimum' | 'CannotSpendZero' | 'InsufficientBudgetForSpending' | 'NoApplicationsProvided' | 'CannotDecreaseStakeDeltaGreaterThanStake' | 'ApplicationsNotForOpening' | 'WorkerStorageValueTooLong' | 'InsufficientTokensForFunding' | 'ZeroTokensFunding' | 'InsufficientBalanceForTransfer';
    }
  
@@ -19603,7 +19657,7 @@ index c035e7d..0769a00 100644
    export interface SpRuntimeMultiSignature extends Enum {
      readonly isEd25519: boolean;
      readonly asEd25519: SpCoreEd25519Signature;
-@@ -5620,31 +5634,31 @@ declare module '@polkadot/types/lookup' {
+@@ -5620,31 +5639,31 @@ declare module '@polkadot/types/lookup' {
      readonly type: 'Ed25519' | 'Sr25519' | 'Ecdsa';
    }
  
