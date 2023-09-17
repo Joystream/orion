@@ -12,11 +12,9 @@ import {
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
   ChannelCreated,
-  ChannelRecipient,
   ChannelCreatedEventData,
   ChannelFundsWithdrawn,
   YppUnverified,
-  MemberRecipient,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -35,18 +33,15 @@ import {
   parseContentActor,
   getChannelOwnerAccount,
   getAccountForMember,
-  parseChannelTitle,
 } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification } from '../../utils/notification/helpers'
 import {
-  channelCreatedLink,
-  channelCreatedText,
-  channelFundsWithdrawnLink,
-  fundsWithdrawnFromChannelText,
-} from '../../utils/notification'
+  CreatorRecipientParams,
+  MemberRecipientParams,
+  addNotification,
+} from '../../utils/notification/helpers'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -135,13 +130,9 @@ export async function processChannelCreatedEvent({
 
     const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
     await addNotification(
-      overlay.getEm(),
+      overlay,
       ownerAccount,
-      new ChannelCreated({
-        recipient: new MemberRecipient({ memberHandle: ownerMember.handle }),
-        channelId: channel.id,
-        channelTitle: parseChannelTitle(channel),
-      }),
+      new MemberRecipientParams(new ChannelCreated({}), ownerMember.id),
       event
     )
   }
@@ -365,13 +356,13 @@ export async function processChannelFundsWithdrawnEvent({
 
   const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
 
+  const notificationData = new ChannelFundsWithdrawn({
+    amount,
+  })
   await addNotification(
     overlay.getEm(),
     channelOwnerAccount,
-    new ChannelFundsWithdrawn({
-      recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
-      amount,
-    }),
+    new CreatorRecipientParams(notificationData, channel.id),
     entityEvent
   )
 }

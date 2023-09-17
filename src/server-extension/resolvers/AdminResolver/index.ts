@@ -31,7 +31,6 @@ import {
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
 import {
-  ChannelRecipient,
   NftFeaturedOnMarketPlace,
   Video,
   VideoCategory,
@@ -55,12 +54,9 @@ import { AppAction } from '@joystream/metadata-protobuf'
 import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
-import {
-  getChannelOwnerAccount,
-  parseChannelTitle,
-  parseVideoTitle,
-} from '../../../mappings/content/utils'
+import { getChannelOwnerAccount, parseVideoTitle } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
+import { CreatorRecipientParams } from '../../../utils/notification/helpers'
 
 @Resolver()
 export class AdminResolver {
@@ -192,16 +188,16 @@ export class AdminResolver {
     // if category for video is defined then send notification as otherwise full notificatino info won't be defined
     const category = video?.category
     if (video?.channel && category) {
+      const notificationData = new VideoFeaturedAsCategoryHero({
+        categoryId: category?.id || '',
+        videoTitle: parseVideoTitle(video),
+        categoryName: category?.name || '',
+      })
       const account = await getChannelOwnerAccount(em, video.channel)
       await addNotification(
         em,
         account,
-        new VideoFeaturedAsCategoryHero({
-          recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-          categoryId: category?.id || '',
-          videoTitle: parseVideoTitle(video),
-          categoryName: category?.name || '',
-        })
+        new CreatorRecipientParams(notificationData, video.channel.id)
       )
     }
 
@@ -252,15 +248,15 @@ export class AdminResolver {
         const category = await em
           .getRepository(VideoCategory)
           .findOneByOrFail({ id: args.categoryId })
+        const notificationData = new VideoFeaturedOnCategoryPage({
+          categoryId: category.id,
+          categoryName: category.name || '??',
+          videoTitle: parseVideoTitle(video),
+        })
         await addNotification(
           em,
           creatorAccount,
-          new VideoFeaturedOnCategoryPage({
-            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-            categoryId: category.id,
-            categoryName: category.name || '??',
-            videoTitle: parseVideoTitle(video),
-          })
+          new CreatorRecipientParams(notificationData, video.channel.id)
         )
       }
     }
@@ -344,17 +340,15 @@ export class AdminResolver {
           relations: { video: { id: true, title: true, channel: true } },
         })
         if (featuredNft?.video?.channel) {
+          const notificationData = new NftFeaturedOnMarketPlace({
+            videoId: featuredNft.video.id,
+            videoTitle: parseVideoTitle(featuredNft.video),
+          })
           const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
           await addNotification(
             em,
             channelOwnerAccount,
-            new NftFeaturedOnMarketPlace({
-              recipient: new ChannelRecipient({
-                channelTitle: parseChannelTitle(featuredNft.video.channel),
-              }),
-              videoId: featuredNft.video.id,
-              videoTitle: parseVideoTitle(featuredNft.video),
-            })
+            new CreatorRecipientParams(notificationData, featuredNft.video.channel.id)
           )
         }
       }

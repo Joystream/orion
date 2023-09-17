@@ -17,7 +17,6 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
-  ChannelRecipient,
   Comment,
   CommentCreatedEventData,
   CommentPostedToVideo,
@@ -28,13 +27,11 @@ import {
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
-  MemberRecipient,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
   MetaprotocolTransactionResultCommentEdited,
   MetaprotocolTransactionResultOK,
-  Channel,
   ReactionToComment,
   Video,
   VideoCategory,
@@ -57,12 +54,14 @@ import {
 import {
   getAccountForMember,
   getChannelOwnerMemberByChannelId,
-  getChannelTitleById,
   memberHandleById,
-  parseChannelTitle,
   parseVideoTitle,
 } from './utils'
-import { addNotification } from '../../utils/notification/helpers'
+import {
+  CreatorRecipientParams,
+  MemberRecipientParams,
+  addNotification,
+} from '../../utils/notification/helpers'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -245,23 +244,22 @@ async function processVideoReaction(
       const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
       if (channelOwnerMemberId) {
         const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
-        const channel = await overlay.getRepository(Channel).getById(video.channelId)
-        const recipient = new ChannelRecipient({
-          channelTitle: parseChannelTitle(channel as Flat<Channel>),
-        })
-        const notificationType =
+        const notificationData =
           reactionType === VideoReactionOptions.LIKE
             ? new VideoLiked({
-                recipient,
                 videoId: video.id,
                 videoTitle: parseVideoTitle(video),
               })
             : new VideoDisliked({
-                recipient,
                 videoId: video.id,
                 videoTitle: parseVideoTitle(video),
               })
-        await addNotification(overlay.getEm(), channelOwnerAccount, notificationType)
+        await addNotification(
+          overlay.getEm(),
+          channelOwnerAccount,
+          new CreatorRecipientParams(notificationData, video.channelId),
+          event
+        )
       }
     }
   }
@@ -396,18 +394,16 @@ export async function processReactCommentMessage(
 
     // add notification
     if (comment.authorId) {
-      const commentAuthorMemberHandle = await memberHandleById(overlay, comment.authorId)
-      const memberHandle = await memberHandleById(overlay, memberId)
       const commentAuthorAccount = await getAccountForMember(overlay.getEm(), comment.authorId)
+      const notificationData = new ReactionToComment({
+        commentId: comment.id,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+      })
       await addNotification(
         overlay.getEm(),
         commentAuthorAccount,
-        new ReactionToComment({
-          recipient: new MemberRecipient({ memberHandle: commentAuthorMemberHandle }),
-          memberHandle,
-          videoId: video.id,
-          videoTitle: parseVideoTitle(video),
-        }),
+        new MemberRecipientParams(notificationData, comment.authorId),
         event
       )
     }
@@ -507,37 +503,35 @@ export async function processCreateCommentMessage(
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
     if (parentComment.authorId !== comment.authorId && comment.authorId) {
-      const authorHandle = await memberHandleById(overlay, comment.authorId)
-      const channelTitle = await getChannelTitleById(overlay, channelId)
       const authorAccount = await getAccountForMember(overlay.getEm(), parentComment.authorId)
+      const notificationData = new CommentReply({
+        commentId: comment.id,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+      })
       await addNotification(
         overlay.getEm(),
         authorAccount,
-        new CommentReply({
-          recipient: new ChannelRecipient({ channelTitle }),
-          memberHandle: authorHandle,
-          videoId: video.id,
-          videoTitle: parseVideoTitle(video),
-        })
+        new MemberRecipientParams(notificationData, comment.authorId),
+        event
       )
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
     if (channelOwnerMemberId && channelOwnerMemberId !== comment.authorId) {
-      const channelOwnerHandle = await memberHandleById(overlay, channelOwnerMemberId)
       const channelOwnerAccount = await getAccountForMember(overlay.getEm(), channelOwnerMemberId)
       const authorId = assertNotNull(comment.authorId)
       const authorHandle = await memberHandleById(overlay, authorId)
+      const notificationData = new CommentPostedToVideo({
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        memberHandle: authorHandle,
+      })
       await addNotification(
         overlay.getEm(),
         channelOwnerAccount,
-        new CommentPostedToVideo({
-          recipient: new MemberRecipient({ memberHandle: channelOwnerHandle }),
-          memberHandle: authorHandle,
-          videoId: video.id,
-          videoTitle: parseVideoTitle(video),
-        }),
+        new CreatorRecipientParams(notificationData, channelOwnerMemberId),
         event
       )
     }

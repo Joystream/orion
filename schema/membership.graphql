@@ -51,4 +51,7 @@ type Membership @entity {
 
   "Number of channels ever created by this member"
   totalChannelsCreated: Int!
+
+  "reference to the notifications for this membership"
+  creatorRecipient: [MemberRecipient!]! @derivedFrom(field: "membership")
 }

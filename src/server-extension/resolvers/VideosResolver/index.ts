@@ -9,15 +9,7 @@ import {
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import {
-  VideoViewEvent,
-  Video,
-  Report,
-  Exclusion,
-  Account,
-  VideoExcluded,
-  ChannelRecipient,
-} from '../../../model'
+import { VideoViewEvent, Video, Report, Exclusion, Account, VideoExcluded } from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -46,8 +38,8 @@ import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { OperatorOnly } from '../middleware'
-import { addNotification } from '../../../utils/notification/helpers'
-import { parseChannelTitle, parseVideoTitle } from '../../../mappings/content/utils'
+import { CreatorRecipientParams, addNotification } from '../../../utils/notification/helpers'
+import { parseVideoTitle } from '../../../mappings/content/utils'
 
 @Resolver()
 export class VideosResolver {
@@ -356,13 +348,13 @@ export class VideosResolver {
       const channelOwnerMemberId = video.channel.ownerMemberId
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+        const notificationData = new VideoExcluded({
+          videoTitle: parseVideoTitle(video),
+        })
         await addNotification(
           em,
           account,
-          new VideoExcluded({
-            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-            videoTitle: parseVideoTitle(video),
-          })
+          new CreatorRecipientParams(notificationData, video.channel.id)
         )
       }
 

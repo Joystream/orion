@@ -13,7 +13,6 @@ import {
   Event,
   VideoCreatedEventData,
   VideoPosted,
-  MemberRecipient,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
@@ -125,14 +124,12 @@ export async function processVideoCreatedEvent({
     data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
   })
 
-  const notifier = (handle: string) =>
-    new VideoPosted({
-      recipient: new MemberRecipient({ memberHandle: handle }),
-      channelTitle: parseChannelTitle(channel),
-      videoTitle: parseVideoTitle(video),
-      videoId: video.id,
-    })
-  await notifyChannelFollowers(overlay, channel.id, notifier, eventEntity)
+  const notificationData = new VideoPosted({
+    channelTitle: parseChannelTitle(channel),
+    videoTitle: parseVideoTitle(video),
+    videoId: video.id,
+  })
+  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
