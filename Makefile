@@ -25,6 +25,7 @@ dbgen:
 
 codegen:
 	@npm run generate:schema || true
+	@npm run generate:network-tests || true
 	@npx squid-typeorm-codegen
 
 

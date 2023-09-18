@@ -8,6 +8,7 @@
     "generate:schema": "./scripts/generate-schema-file.sh",
     "generate:types:auth-api": "npx openapi-typescript ./src/auth-server/openapi.yml -o ./src/auth-server/generated/api-types.ts -c ./prettierrc.js",
     "generate:docs:auth-api": "rm -rf ./src/auth-server/docs/* && npx openapi-generator-cli generate -i ./src/auth-server/openapi.yml -g markdown -o ./src/auth-server/docs",
+    "generate:network-tests": "npm run codegen --workspace=network-tests",
     "build": "npm run generate:schema; rm -rf lib && tsc && ./scripts/copyfiles.sh",
     "lint": "eslint --ext .ts ./src",
     "format": "prettier --write .",
@@ -21,6 +22,7 @@
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
+    "tests:mappings": "npm run run-all --workspace=network-tests",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
   },
@@ -103,5 +105,8 @@
     "supertest": "^6.3.3",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.8.2"
-  }
+  },
+  "workspaces": [
+    "network-tests"
+  ]
 }

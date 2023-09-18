@@ -14,3 +14,8 @@ src/model/generated/.DS_STORE
 /scripts/orion-v1-migration/data
 /db/export.json*
 .DS_STORE
+
+# network tests
+network-tests/graphql/generated
+network-tests/node_modules
+network-tests/lib
