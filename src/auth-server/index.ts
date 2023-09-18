@@ -3,7 +3,7 @@ import cors from 'cors'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { HttpError } from 'express-openapi-validator/dist/framework/types'
 import path from 'path'
-import { AuthApiError, UnauthorizedError } from './errors'
+import { AuthApiError } from './errors'
 import { createLogger } from '@subsquid/logger'
 import { authenticate, getCorsOrigin } from '../utils/auth'
 import cookieParser from 'cookie-parser'
@@ -19,9 +19,6 @@ export const app = express()
 function authHandler(type: 'header' | 'cookie') {
   return async (req: express.Request) => {
     const authContext = await authenticate(req, type)
-    if (!authContext) {
-      throw new UnauthorizedError()
-    }
     if (req.res) {
       req.res.locals.authContext = authContext
     }

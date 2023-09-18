@@ -82,7 +82,7 @@ export const createAccount: (
         isEmailConfirmed: false,
         registeredAt: new Date(),
         isBlocked: false,
-        userId: authContext.user.id,
+        userId: authContext?.user.id,
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
       })

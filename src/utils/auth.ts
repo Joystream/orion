@@ -105,7 +105,7 @@ sessionCache.on('expired', (sessionId: string, cachedData: CachedSessionData) =>
   })
 })
 
-export type AuthContext = Session
+export type AuthContext = Session | null
 
 export async function getSessionIdFromHeader(req: Request): Promise<string | undefined> {
   authLogger.trace(`Authorization header: ${JSON.stringify(req.headers.authorization, null, 2)}`)
@@ -121,32 +121,30 @@ export async function getSessionIdFromCookie(req: Request): Promise<string | und
 export async function authenticate(
   req: Request,
   authType: 'cookie' | 'header'
-): Promise<AuthContext | false> {
+): Promise<AuthContext> {
   const em = await globalEm
   const sessionId =
     authType === 'cookie' ? await getSessionIdFromCookie(req) : await getSessionIdFromHeader(req)
-  if (!sessionId) {
-    authLogger.debug(`Recieved a request w/ no sessionId provided. AuthType: ${authType}.`)
-    return false
-  }
-  authLogger.trace(`Authenticating... SessionId: ${sessionId}`)
 
-  const session = await findActiveSession(req, em, { id: sessionId })
-  if (session) {
-    const cachedSessionData = sessionCache.get<CachedSessionData>(sessionId)
-    if (cachedSessionData) {
-      cachedSessionData.lastActivity = new Date()
-      authLogger.trace(
-        `Updated last activity of session ${sessionId} to ${cachedSessionData.lastActivity.toISOString()}`
-      )
-    } else {
-      await tryToProlongSession(session.id, new Date())
+  if (sessionId) {
+    authLogger.trace(`Authenticating... SessionId: ${sessionId}`)
+
+    const session = await findActiveSession(req, em, { id: sessionId })
+    if (session) {
+      const cachedSessionData = sessionCache.get<CachedSessionData>(sessionId)
+      if (cachedSessionData) {
+        cachedSessionData.lastActivity = new Date()
+        authLogger.trace(
+          `Updated last activity of session ${sessionId} to ${cachedSessionData.lastActivity.toISOString()}`
+        )
+      } else {
+        await tryToProlongSession(session.id, new Date())
+      }
+      return session
     }
-    return session
   }
-  authLogger.warn(`Cannot authenticate user. Session not found or expired: ${sessionId}`)
-
-  return false
+  authLogger.debug(`Recieved a request w/ no sessionId provided. AuthType: ${authType}.`)
+  return null
 }
 
 export async function getOrCreateSession(

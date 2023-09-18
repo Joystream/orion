@@ -4,6 +4,7 @@ import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
+import { NextEntityId } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -72,6 +73,11 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
+
+  private globalCountersMigration = {
+    // destination version : [global counters names]
+    '3.0.1': ['Account'],
+  }
 
   private migrations: Migrations = {
     '3.0.0': migrateExportDataToV300,
@@ -157,7 +163,8 @@ export class OffchainState {
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
       )
     }
-    const data = this.prepareExportData(JSON.parse(fs.readFileSync(exportFilePath, 'utf-8')), em)
+    const exportFile = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const data = this.prepareExportData(exportFile, em)
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
       if (!values.length) {
@@ -226,6 +233,10 @@ export class OffchainState {
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
+    // migrate counters for NextEntityId
+    const { orionVersion } = exportFile
+    await this.migrateCounters(orionVersion, em)
+
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
     fs.renameSync(exportFilePath, renamedExportFilePath)
@@ -242,5 +253,25 @@ export class OffchainState {
     const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
+  }
+
+  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
+    const migrationData = Object.entries(this.globalCountersMigration).sort(
+      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
+    ) // sort in increasing order
+
+    for (const [version, counters] of migrationData) {
+      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
+        this.logger.info(`Migrating global counters to version ${version}`)
+        for (const entityName of counters) {
+          // build query that gets the entityName with the highest id
+          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
+          const latestId = parseInt(rowNumber[0].count)
+
+          this.logger.info(`Setting next id for ${entityName} to ${latestId + 1}`)
+          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
+        }
+      }
+    }
   }
 }

@@ -27,7 +27,7 @@ import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly } from '../middleware'
+import { AccountOnly, UserOnly } from '../middleware'
 
 @Resolver()
 export class ChannelsResolver {
@@ -242,6 +242,7 @@ export class ChannelsResolver {
     })
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,

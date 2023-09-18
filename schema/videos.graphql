@@ -125,7 +125,7 @@ type Video @entity {
   trailerVideoForToken: Token
 
   "Video relevance score based on the views, reactions, comments and update date"
-  videoRelevance: Float!
+  videoRelevance: Float! @index
 }
 
 type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {

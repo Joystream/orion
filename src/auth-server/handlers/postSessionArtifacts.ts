@@ -21,10 +21,13 @@ export const postSessionArtifacts: (
   try {
     const { authContext: session } = res.locals
     const em = await globalEm
+    if (!session?.id) {
+      throw new UnauthorizedError('Cannot save session artifacts for empty session')
+    }
     const existingArtifacts = await em
       .getRepository(SessionEncryptionArtifacts)
       .findOneBy({ sessionId: session.id })
-    if (!session.account) {
+    if (!session?.account) {
       throw new UnauthorizedError('Cannot save session artifacts for anonymous session')
     }
     if (existingArtifacts) {
