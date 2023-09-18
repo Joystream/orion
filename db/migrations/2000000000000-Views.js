@@ -66,11 +66,11 @@ module.exports = class Views2000000000000 {
       notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
-      trailer_video: [
-        `EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`,
-        `EXISTS(SELECT 1 FROM "video" WHERE "id="video_id")`
-      ],
-      token: [`EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`],
+      // TODO: fix this relationship
+      // trailer_video: [
+      //   `EXISTS(SELECT 1 FROM "creator_token" WHERE "id"="token_id")`,
+      //   `EXISTS(SELECT 1 FROM "video" WHERE "id="video_id")`
+      // ],
       revenue_share: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       benefit: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       amm_curve: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
@@ -81,6 +81,7 @@ module.exports = class Views2000000000000 {
       amm_transaction: [`EXISTS(SELECT 1 FROM "amm_curve" WHERE "id"="amm_id")`],
       token_account: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
       token_channel: [`EXISTS(SELECT 1 FROM "token" WHERE "id"="token_id")`],
+      creator_token: [`EXISTS(SELECT 1 FROM "token_channel" WHERE "id"="token_id")`],
       vested_account: [`EXISTS(SELECT 1 FROM "token_account" WHERE "id"="account_id")`],
       vesting_schedule: [`EXISTS(SELECT 1 FROM "token")`], // hide vesting if there is at least one token
       revenue_share_participation: [`EXISTS(SELECT 1 FROM "revenue_share" WHERE "id"="revenue_share_id")`],
