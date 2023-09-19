@@ -8,6 +8,9 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { CREATOR_BALANCE, FIRST_HOLDER_BALANCE } from '../../consts'
+import { Utils } from 'src/utils'
+import { TokenMetadata } from '@joystream/metadata-protobuf'
+import Long from 'long'
 
 export default async function issueCreatorToken({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -70,11 +73,23 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
   )
 
   // issue creator token
+  const tokenMetadata = new TokenMetadata({
+    name: 'test name',
+    description: 'test descrption',
+    symbol: 'test',
+    whitelistApplicationApplyLink: 'https://test.com',
+    whitelistApplicationNote: 'test note',
+    trailerVideoId: Long.fromNumber(0),
+    benefits: [],
+  })
+  const metadataBytes = Utils.metadataToBytes(TokenMetadata, tokenMetadata)
+
   const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
     initialAllocation,
     transferPolicy,
     patronageRate,
     revenueSplitRate,
+    metadataBytes,
   })
 
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(
@@ -83,7 +98,8 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
     channelOwnerAddress,
     contentActor,
     channelId,
-    crtParams
+    crtParams,
+    'test'
   )
   await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
   const tokenId = issueCreatorTokenFixture.getTokenId()

@@ -3324,6 +3324,21 @@ index 79612c9..dd7db96 100644
      name: string;
      decode(binary: Uint8Array): AnyMessage<T>;
      encode(obj: T): {
+diff --git a/node_modules/@joystream/metadata-protobuf/proto/Membership.proto b/node_modules/@joystream/metadata-protobuf/proto/Membership.proto
+index f12644d..cda8600 100644
+--- a/node_modules/@joystream/metadata-protobuf/proto/Membership.proto
++++ b/node_modules/@joystream/metadata-protobuf/proto/Membership.proto
+@@ -25,5 +25,10 @@ message MembershipMetadata {
+     optional ResourceType type = 1;
+     optional string value = 2;
+   }
++  
+   repeated ExternalResource externalResources = 5;
++  
++  optional string validatorAccount = 6;
+ }
++
++
 diff --git a/node_modules/@joystream/metadata-protobuf/proto/Token.proto b/node_modules/@joystream/metadata-protobuf/proto/Token.proto
 new file mode 100644
 index 0000000..7c48473

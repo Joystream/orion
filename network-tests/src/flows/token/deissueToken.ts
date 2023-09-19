@@ -76,7 +76,8 @@ export default async function deissueCreatorTokenFlow({
     channelOwnerAddress,
     contentActor,
     channelId,
-    crtParams
+    crtParams,
+    'test'
   )
   await new FixtureRunner(issueCreatorTokenFixture).run()
 

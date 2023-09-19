@@ -9,13 +9,13 @@ import {
   PalletProjectTokenTokenIssuanceParameters,
 } from '@polkadot/types/lookup'
 import { assert } from 'chai'
-import { TokenStatus } from '../../../graphql/generated/schema'
+import { Token, TokenStatus } from '../../../graphql/generated/schema'
 import { BN } from 'bn.js'
 import { Utils } from '../../utils'
 import { u64 } from '@polkadot/types/primitive'
+import { TokenMetadata } from '@joystream/metadata-protobuf'
 import {
   TokenFieldsFragment,
-  GetTokenById,
   TokenAccountFieldsFragment,
 } from '../../../graphql/generated/operations'
 import { Maybe } from 'src/graphql/generated/schema'
@@ -24,6 +24,7 @@ type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssu
 
 export class IssueCreatorTokenFixture extends StandardizedFixture {
   protected creatorAddress: string
+  protected metadata: TokenMetadata | undefined
   protected contentActor: PalletContentPermissionsContentActor
   protected channelId: number
   protected crtParams: PalletProjectTokenTokenIssuanceParameters
@@ -35,13 +36,15 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     creatorAddress: string,
     contentActor: PalletContentPermissionsContentActor,
     channelId: number,
-    crtParams: PalletProjectTokenTokenIssuanceParameters
+    crtParams: PalletProjectTokenTokenIssuanceParameters,
+    metadata: TokenMetadata
   ) {
     super(api, query)
     this.creatorAddress = creatorAddress
     this.contentActor = contentActor
     this.channelId = channelId
     this.crtParams = crtParams
+    this.metadata = metadata
   }
 
   public getTokenId(): u64 {
@@ -99,10 +102,13 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.revenueShareRatioPermill, revenueSplitRate.toNumber())
     assert.equal(qToken!.totalSupply, totalSupply.toString())
     assert.equal(qToken!.annualCreatorReward, patronageRate.toNumber())
-    // assert.equal(qToken!.createdAt, new Date(this.events[0].blockTimestamp * 1000))
     assert.equal(qToken!.isInviteOnly, transferPolicy.isPermissioned)
     assert.equal(qToken!.accountsNum, initialAllocation.size)
     assert.equal(qToken!.deissued, false)
+
+    if (this.metadata) {
+      assert.equal(qToken!.symbol, this.metadata.symbol)
+    }
 
     qAccounts.forEach((qAccount, i) => {
       assert.isNotNull(qAccount)
