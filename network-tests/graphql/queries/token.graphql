@@ -13,6 +13,9 @@ fragment TokenFields on CreatorToken {
   status
   symbol
   totalSupply
+  accounts {
+    id
+  }
   accountsNum
   avatar {
     ... on TokenAvatarObject {

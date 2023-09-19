@@ -1,6 +1,5 @@
 import { EventHandlerContext } from '../../utils/events'
 import {
-  Token,
   TokenAccount,
   TokenStatus,
   VestingSchedule,
@@ -13,10 +12,6 @@ import {
   AmmTransactionType,
   VestedSale,
   RevenueShareParticipation,
-  Benefit,
-  TokenAvatarUri,
-  Video,
-  TrailerVideo,
   InitialIssuanceVestingSource,
   SaleVestingSource,
   CreatorToken,

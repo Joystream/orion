@@ -9,6 +9,7 @@ import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { CreateChannelFixture } from '../../fixtures/content'
 import { getStorageBucketsAccordingToPolicy } from '../content/createChannel'
+import { assert } from 'console'
 
 export default async function deissueCreatorTokenFlow({
   api,
@@ -51,7 +52,8 @@ export default async function deissueCreatorTokenFlow({
   // issuer membership
   const initialAllocation = api.createType('BTreeMap<u64, PalletProjectTokenTokenAllocation>')
   const symbol = blake2AsHex('test2')
-  const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', 'Permissioned')
+  const transferPolicy = api.createType('PalletProjectTokenTransferPolicyParams', 'Permissionless')
+  assert(transferPolicy.isPermissionless)
   const revenueSplitRate = api.createType('Permill', new BN(10))
   const patronageRate = api.createType('Perquintill', new BN(15))
   const contentActor: PalletContentPermissionsContentActor = api.createType(

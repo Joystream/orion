@@ -36,7 +36,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
     job('create Channel', createChannel).requires(storage)
   )
 
-  // job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
+  job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
   job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)

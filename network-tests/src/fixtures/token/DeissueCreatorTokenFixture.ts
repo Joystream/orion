@@ -51,10 +51,10 @@ export class DeissueCreatorTokenFixture extends StandardizedFixture {
     const [tokenId] = this.events[0].event.data
 
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
-    qToken = await this.query.getTokenById(tokenId)
     await Utils.until(
       'wait for deissue token handler effect to be written to the Store',
       async () => {
+        qToken = await this.query.getTokenById(tokenId)
         return !!qToken && qToken!.deissued
       }
     )

@@ -78,12 +78,13 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       qToken = await this.query.getTokenById(tokenId)
       return !!qToken
     })
+
+    const accountIds = qToken!.accounts.map((account) => account.id)
     await Utils.until('waiting for issue token handler to finalize accounts', async () => {
       qAccounts = await Promise.all(
-        initialMembers.map(async (memberId) => {
-          return await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
-        })
+        accountIds.map(async (id) => await this.query.getTokenAccountById(id))
       )
+      console.log(qAccounts.toLocaleString())
       return qAccounts.every((qAccount) => !!qAccount)
     })
 
