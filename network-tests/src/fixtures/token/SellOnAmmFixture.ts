@@ -76,7 +76,7 @@ export class SellOnAmmFixture extends StandardizedFixture {
     const qToken = await this.query.getTokenById(_tokenId)
     assert.isNotNull(qToken)
     this.supplyPre = new BN(qToken!.totalSupply)
-    const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
+    const [{ id: ammId }] = qToken!.ammCurves
     const qAmmCurve = await this.query.getAmmById(ammId)
     this.burnedByAmmPre = new BN(qAmmCurve!.burnedByAmm)
   }
@@ -94,7 +94,7 @@ export class SellOnAmmFixture extends StandardizedFixture {
       return currSupply < this.supplyPre! && currAmount < this.amountPre!
     })
 
-    const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
+    const [{ id: ammId }] = qToken!.ammCurves
     const qAmmCurve = await this.query.getAmmById(ammId)
     assert.isNotNull(qAmmCurve)
     const qTransaction = qAmmCurve!.transactions.find((qTx) => {

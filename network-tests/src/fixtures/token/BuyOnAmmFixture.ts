@@ -96,7 +96,7 @@ export class BuyOnAmmFixture extends StandardizedFixture {
       }
     })
 
-    const ammId = qToken!.id + (qToken!.ammNonce - 1).toString()
+    const [{ id: ammId }] = qToken!.ammCurves
     const qAmmCurve = await this.query.getAmmById(ammId)
 
     const qTransaction = qAmmCurve!.transactions.find((qTx) => {

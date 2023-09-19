@@ -56,7 +56,7 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
 
     assert.isNotNull(qToken)
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
     const qRevenueShare = await this.query.retryQuery(() =>
       this.query.getRevenueShareById(revenueShareId)
     )
@@ -72,7 +72,7 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
       qToken = await this.query.getTokenById(tokenId)
       return !!qToken
     })
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
     await Utils.until('waiting for revenue share to be fetched', async () => {
       qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
       return !!qRevenueShare

@@ -81,9 +81,9 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
       assert.equal(qSale!.startBlock.toString(), newStart.unwrap().toString())
     }
     if (newDuration.isSome) {
-      assert.equal(qSale!.durationInBlocks.toString(), newDuration.unwrap().toString())
+      const newEnd = qSale!.startBlock + newDuration.unwrap().toNumber()
+      assert.equal(qSale!.endsAt.toString(), newEnd.toString())
     }
-    assert.equal(qSale!.endsAt, qSale!.durationInBlocks + qSale!.startBlock)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

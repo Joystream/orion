@@ -82,7 +82,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     })
 
     assert.isNotNull(qToken)
-    assert.equal(qToken!.annualCreatorReward, newRate.toString())
+    assert.equal(qToken!.annualCreatorReward, newRate.toNumber())
   }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

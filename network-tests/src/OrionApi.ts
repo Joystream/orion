@@ -114,7 +114,7 @@ export class OrionApi {
     return this.uniqueEntitySubscription<
       GetTokenByIdSubscription,
       GetTokenByIdSubscriptionVariables
-    >(GetTokenById, { id: id.toString() }, 'tokenById')
+    >(GetTokenById, { id: id.toString() }, 'creatorTokenById')
   }
 
   public async getTokenAccountById(

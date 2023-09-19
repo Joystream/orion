@@ -74,7 +74,7 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
 
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
     let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
     await Utils.until('waiting for revenue share to be fetched', async () => {
       qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
@@ -84,7 +84,6 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.token.id, tokenId.toString())
     assert.equal(qRevenueShare!.startingAt.toString(), startBlock.toString())
-    assert.equal(qRevenueShare!.duration.toString(), duration.toString())
     assert.equal(qRevenueShare!.endsAt.toString(), startBlock.add(duration).toString())
     assert.equal(qRevenueShare!.claimed, '0')
     assert.equal(qRevenueShare!.finalized, false)

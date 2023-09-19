@@ -69,7 +69,8 @@ export class ActivateAmmFixture extends StandardizedFixture {
       qToken = await this.query.getTokenById(tokenId)
       return !!qToken && qToken!.status === TokenStatus.Market
     })
-    const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
+
+    const [{ id: ammId }] = qToken!.ammCurves
     await Utils.until('waiting for token to be saved', async () => {
       qAmm = await this.query.getAmmById(ammId)
       return !!qAmm

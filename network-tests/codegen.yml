@@ -1,7 +1,7 @@
 overwrite: true
 
 schema:
-  - './graphql/schema.graphql'
+  - 'http://localhost:4350/graphql'
 
 documents:
   - './graphql/queries/*.graphql'

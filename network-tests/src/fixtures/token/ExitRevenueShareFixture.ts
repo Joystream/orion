@@ -54,7 +54,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
     const qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
     assert.isNotNull(qRevenueShare)
 
@@ -95,7 +95,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     const participantsNumPost = this.participantsNumPre! - 1
     const stakedAmountPost = this.stakedAmountPre!.sub(unstakedAmount.toBn())
 
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
     let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
     await Utils.until('waiting for revenue share to be fetched', async () => {
       qRevenueShare = await this.query.getRevenueShareById(revenueShareId)

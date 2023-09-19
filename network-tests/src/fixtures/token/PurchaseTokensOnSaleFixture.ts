@@ -130,7 +130,6 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
 
     assert(qSaleTx !== undefined)
     assert.equal(qSaleTx!.quantity, amountPurchased.toString())
-    assert.equal(qSaleTx!.pricePaid, qSale!.pricePerUnit)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

@@ -88,7 +88,6 @@ export class JoinWhitelistFixture extends StandardizedFixture {
     assert.equal(qAccount!.member.id, memberId.toString())
     assert.equal(qAccount!.stakedAmount, '0')
     assert.equal(qAccount!.token.id, tokenId.toString())
-    assert.equal(qAccount!.whitelisted!, true)
     assert.equal(qAccount!.deleted, false)
   }
 }

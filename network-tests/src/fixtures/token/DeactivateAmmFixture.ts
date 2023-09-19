@@ -79,7 +79,7 @@ export class DeactivateAmmFixture extends StandardizedFixture {
     assert.isNotNull(qToken)
     assert.equal(qToken!.totalSupply, supplyPost.toString())
 
-    const ammId = tokenId.toString() + (qToken!.ammNonce - 1).toString()
+    const [{ id: ammId }] = qToken!.ammCurves
     await Utils.until('waiting for token to be fetched', async () => {
       qAmm = await this.query.getAmmById(ammId)
       return !!qAmm

@@ -86,7 +86,6 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     }
     assert.equal(qSale!.tokensSold, '0')
     assert.equal(qSale!.startBlock.toString(), startBlock.toString())
-    assert.equal(qSale!.durationInBlocks.toString(), duration.toString())
     assert.equal(qSale!.endsAt.toString(), end.toString())
     assert.equal(qSale!.fundsSourceAccount.id, fundsSourceAccount)
     assert.equal(qSale!.tokenSaleAllocation, quantityLeft.toString())

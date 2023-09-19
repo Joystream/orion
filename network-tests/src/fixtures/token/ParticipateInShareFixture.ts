@@ -59,7 +59,7 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     const qToken = await this.query.getTokenById(tokenId)
 
     assert.isNotNull(qToken)
-    const [{ id: revenueShareId }] = qToken!.revenueShare
+    const [{ id: revenueShareId }] = qToken!.revenueShares
 
     let qRevenueShareParticipation: Maybe<RevenueShareParticipationFieldsFragment> | undefined =
       null

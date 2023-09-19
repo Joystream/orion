@@ -5,7 +5,7 @@ fragment MemberFields on Membership {
   controllerAccount
 }
 
-fragment TokenFields on Token {
+fragment TokenFields on CreatorToken {
   id
   createdAt
   deissued
@@ -35,13 +35,14 @@ fragment TokenFields on Token {
     displayOrder
   }
   annualCreatorReward
-  ammNonce
-  revenueShareRatioPercent
-  revenueShareNonce
-  revenueShare {
+  revenueShareRatioPermill
+  revenueShares {
     id
   }
   description
+  ammCurves {
+    id
+  }
 }
 
 fragment RevenueShareParticipationFields on RevenueShareParticipation {
@@ -67,7 +68,6 @@ fragment TokenAccountFields on TokenAccount {
   }
   stakedAmount
   totalAmount
-  whitelisted
   deleted
 }
 
@@ -76,7 +76,6 @@ fragment RevenueShareFields on RevenueShare {
   startingAt
   finalized
   endsAt
-  duration
   createdIn
   claimed
   allocation
@@ -114,7 +113,6 @@ fragment VestingScheduleFields on VestingSchedule {
 fragment SaleFields on Sale {
   id
   endsAt
-  durationInBlocks
   createdIn
   finalized
   id
@@ -135,7 +133,6 @@ fragment SaleFields on Sale {
   transactions {
     createdIn
     id
-    pricePaid
     quantity
     account {
       id
@@ -206,7 +203,7 @@ fragment AmmTranactionFields on AmmTransaction {
 }
 
 subscription getTokenById($id: String!) {
-  tokenById(id: $id) {
+  creatorTokenById(id: $id) {
     ...TokenFields
   }
 }
