@@ -107,7 +107,7 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
 
     if (this.metadata) {
       assert.equal(qToken!.description, this.metadata.description)
-      assert.equal(qToken!.trailerVideo!.videoId, this.metadata.trailerVideoId!.toString())
+      assert.equal(qToken!.trailerVideo!.video.id, this.metadata.trailerVideoId!.toString())
 
       assert.isNotNull(qToken!.benefits)
       const benefits = qToken!.benefits!

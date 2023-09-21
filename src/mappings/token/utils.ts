@@ -13,7 +13,8 @@ import {
   Video,
 } from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
-import { isArray, isSet, isString, uniqueId } from 'lodash'
+import { isSet } from '@joystream/metadata-protobuf/utils'
+import { uniqueId } from '../../utils/crypto'
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
@@ -218,11 +219,11 @@ export async function processTokenMetadata(
   overlay: EntityManagerOverlay,
   isUpdate: boolean
 ) {
-  if (isString(metadata.description)) {
+  if (isSet(metadata.description)) {
     token.description = metadata.description
   }
 
-  if (isArray(metadata.benefits)) {
+  if (isSet(metadata.benefits)) {
     for (const benefit of metadata.benefits) {
       if (benefit.displayOrder !== null) {
         // remove existing benefit with the same display order (if exists)
@@ -249,27 +250,27 @@ export async function processTokenMetadata(
     }
   }
 
-  if (isString(metadata.whitelistApplicationNote)) {
+  if (isSet(metadata.whitelistApplicationNote)) {
     token.whitelistApplicantNote = metadata.whitelistApplicationNote || null
   }
 
-  if (isString(metadata.whitelistApplicationApplyLink)) {
+  if (isSet(metadata.whitelistApplicationApplyLink)) {
     token.whitelistApplicantLink = metadata.whitelistApplicationApplyLink || null
   }
 
-  if (isString(metadata.avatarUri)) {
+  if (isSet(metadata.avatarUri)) {
     token.avatar = metadata.avatarUri ? new TokenAvatarUri({ avatarUri: metadata.avatarUri }) : null
   }
 
-  if (isString(metadata.symbol)) {
+  if (isSet(metadata.symbol)) {
     token.symbol = metadata.symbol
   } else {
     if (!isUpdate) {
-      token.symbol = uniqueId() // create artificial unique symbol in case it's not provided
+      token.symbol = uniqueId(32) // create artificial unique symbol in case it's not provided
     }
   }
 
-  if (isString(metadata.trailerVideoId)) {
+  if (isSet(metadata.trailerVideoId)) {
     const video = await overlay.getRepository(Video).getById(metadata.trailerVideoId)
     if (video) {
       const trailerVideoRepository = overlay.getRepository(TrailerVideo)

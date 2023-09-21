@@ -1,4 +1,10 @@
-import { TokenMetadata, ITokenMetadata } from '@joystream/metadata-protobuf'
+import {
+  TokenMetadata,
+  UpdateTokenMetadata,
+  ITokenMetadata,
+  IUpdateTokenMetadata,
+  CreatorTokenIssuerRemarked,
+} from '@joystream/metadata-protobuf'
 import { StandardizedFixture } from '../../Fixture'
 import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
@@ -39,7 +45,12 @@ export class CreatorRemarkFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const metadataBytes = Utils.metadataToBytes(TokenMetadata, this.metadata)
+    const remarkMetadata = {
+      updateTokenMetadata: {
+        newMetadata: this.metadata,
+      },
+    }
+    const metadataBytes = Utils.metadataToBytes(CreatorTokenIssuerRemarked, remarkMetadata)
     const actor = this.api.createType('PalletContentPermissionsContentActor', {
       Member: this.creatorMemberId,
     })
@@ -59,10 +70,10 @@ export class CreatorRemarkFixture extends StandardizedFixture {
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     await Utils.until('waiting for creator token remark handle to be completed', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      return !!qToken && qToken!.description !== null
+      return !!qToken && qToken!.description === this.metadata.description
     })
     assert.equal(qToken!.description, this.metadata.description)
-    assert.equal(qToken!.trailerVideo!.id, this.metadata.trailerVideoId!.toString())
+    assert.equal(qToken!.trailerVideo!.video.id, this.metadata.trailerVideoId!.toString())
 
     assert.isNotNull(qToken!.benefits)
     const benefits = qToken!.benefits!
