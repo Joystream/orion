@@ -61,13 +61,16 @@ export class CreatorRemarkFixture extends StandardizedFixture {
       qToken = await this.query.getTokenById(tokenId)
       return !!qToken && qToken!.description !== null
     })
-    assert.isNotNull(qToken!.benefits)
-    const [benefit] = qToken!.benefits!
     assert.equal(qToken!.description, this.metadata.description)
     assert.equal(qToken!.trailerVideo!.id, this.metadata.trailerVideoId!.toString())
-    assert.equal(benefit!.title, this.metadata.benefits![0].title)
-    assert.equal(benefit!.emojiCode, this.metadata.benefits![0].emoji)
-    assert.equal(benefit!.displayOrder, this.metadata.benefits![0].displayOrder)
-    assert.equal(benefit!.description, this.metadata.benefits![0].description)
+
+    assert.isNotNull(qToken!.benefits)
+    const benefits = qToken!.benefits!
+    benefits.forEach((benefit, i) => {
+      assert.equal(benefit!.title, this.metadata.benefits![i].title)
+      assert.equal(benefit!.emojiCode, this.metadata.benefits![i].emoji)
+      assert.equal(benefit!.displayOrder, this.metadata.benefits![i].displayOrder)
+      assert.equal(benefit!.description, this.metadata.benefits![i].description)
+    })
   }
 }

@@ -27,7 +27,11 @@ import {
   VestingScheduleData,
 } from './utils'
 import { deserializeMetadata } from '../utils'
-import { SaleMetadata, CreatorTokenIssuerRemarked } from '@joystream/metadata-protobuf'
+import {
+  SaleMetadata,
+  CreatorTokenIssuerRemarked,
+  TokenMetadata,
+} from '@joystream/metadata-protobuf'
 import { isSet } from 'lodash'
 
 export async function processTokenIssuedEvent({
@@ -36,7 +40,13 @@ export async function processTokenIssuedEvent({
   event: {
     asV2002: [
       tokenId,
-      { initialAllocation, transferPolicy, patronageRate, revenueSplitRate, metadata },
+      {
+        initialAllocation,
+        transferPolicy,
+        patronageRate,
+        revenueSplitRate,
+        metadata: metadataBytes,
+      },
     ],
   },
 }: EventHandlerContext<'ProjectToken.TokenIssued'>) {
@@ -82,6 +92,7 @@ export async function processTokenIssuedEvent({
     }
   }
 
+  const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
   await processTokenMetadata(token, metadata, overlay, false)
 }
 

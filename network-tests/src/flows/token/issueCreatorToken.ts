@@ -8,9 +8,36 @@ import { blake2AsHex } from '@polkadot/util-crypto'
 import { PalletContentPermissionsContentActor } from '@polkadot/types/lookup'
 import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { CREATOR_BALANCE, FIRST_HOLDER_BALANCE } from '../../consts'
-import { Utils } from 'src/utils'
+import { Utils } from '../../utils'
 import { TokenMetadata } from '@joystream/metadata-protobuf'
 import Long from 'long'
+
+export function getTokenMetadata(): TokenMetadata {
+  // issue creator token
+  const tokenMetadata = new TokenMetadata({
+    name: 'test name',
+    description: 'test descrption',
+    symbol: 'test',
+    whitelistApplicationApplyLink: 'https://test.com',
+    whitelistApplicationNote: 'test note',
+    trailerVideoId: Long.fromNumber(0),
+    benefits: [
+      {
+        title: 'benefit title 1',
+        description: 'benefit description 1',
+        emoji: '😀',
+        displayOrder: 1,
+      },
+      {
+        title: 'benefit title 2',
+        description: 'benefit description 2',
+        emoji: '😇',
+        displayOrder: 2,
+      },
+    ],
+  })
+  return tokenMetadata
+}
 
 export default async function issueCreatorToken({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:issue-creatorToken')
@@ -72,24 +99,13 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
     { Member: channelOwnerMemberId }
   )
 
-  // issue creator token
-  const tokenMetadata = new TokenMetadata({
-    name: 'test name',
-    description: 'test descrption',
-    symbol: 'test',
-    whitelistApplicationApplyLink: 'https://test.com',
-    whitelistApplicationNote: 'test note',
-    trailerVideoId: Long.fromNumber(0),
-    benefits: [],
-  })
-  const metadataBytes = Utils.metadataToBytes(TokenMetadata, tokenMetadata)
-
+  const tokenMetadata = getTokenMetadata()
   const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
     initialAllocation,
     transferPolicy,
     patronageRate,
     revenueSplitRate,
-    metadataBytes,
+    metadata: Utils.metadataToBytes(TokenMetadata, tokenMetadata),
   })
 
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(
@@ -99,7 +115,7 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
     contentActor,
     channelId,
     crtParams,
-    'test'
+    tokenMetadata
   )
   await new FixtureRunner(issueCreatorTokenFixture).runWithQueryNodeChecks()
   const tokenId = issueCreatorTokenFixture.getTokenId()

@@ -49,7 +49,7 @@ export function generateParamsFromAccountId(
   return {
     root_account: accountId,
     controller_account: accountId,
-    handle: `handle${accountId.substring(0, 14)}`,
+    handle: `handle-${accountId.substring(0, 14)}-${Date.now()}`,
     name,
     about,
     avatarUri,

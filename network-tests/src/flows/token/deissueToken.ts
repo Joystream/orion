@@ -10,12 +10,11 @@ import { BuyMembershipHappyCaseFixture } from '../../fixtures/membership'
 import { CreateChannelFixture } from '../../fixtures/content'
 import { getStorageBucketsAccordingToPolicy } from '../content/createChannel'
 import { assert } from 'console'
+import { getTokenMetadata } from './issueCreatorToken'
+import { TokenMetadata } from '@joystream/metadata-protobuf'
+import { Utils } from '../../utils'
 
-export default async function deissueCreatorTokenFlow({
-  api,
-  query,
-  lock,
-}: FlowProps): Promise<void> {
+export default async function deissueCreatorTokenFlow({ api, query }: FlowProps): Promise<void> {
   const debug = extendDebug('flow:deissue-creatorToken')
   debug('Started')
   api.enableDebugTxLogs()
@@ -62,12 +61,14 @@ export default async function deissueCreatorTokenFlow({
   )
 
   // issue creator token
+  const tokenMetadata = getTokenMetadata()
   const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
     initialAllocation,
     symbol,
     transferPolicy,
     patronageRate,
     revenueSplitRate,
+    metadata: Utils.metadataToBytes(TokenMetadata, tokenMetadata),
   })
 
   const issueCreatorTokenFixture = new IssueCreatorTokenFixture(
@@ -77,7 +78,7 @@ export default async function deissueCreatorTokenFlow({
     contentActor,
     channelId,
     crtParams,
-    'test'
+    tokenMetadata
   )
   await new FixtureRunner(issueCreatorTokenFixture).run()
 

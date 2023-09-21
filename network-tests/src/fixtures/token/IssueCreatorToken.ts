@@ -18,7 +18,7 @@ import {
   TokenFieldsFragment,
   TokenAccountFieldsFragment,
 } from '../../../graphql/generated/operations'
-import { Maybe } from 'src/graphql/generated/schema'
+import { Maybe } from '../../../graphql/generated/schema'
 
 type TokenIssuedEventDetails = EventDetails<EventType<'projectToken', 'TokenIssued'>>
 
@@ -82,12 +82,11 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
       return !!qToken
     })
 
-    const accountIds = qToken!.accounts.map((account) => account.id)
+    const accountIds = qToken!.accounts.map((account: any) => account.id)
     await Utils.until('waiting for issue token handler to finalize accounts', async () => {
       qAccounts = await Promise.all(
-        accountIds.map(async (id) => await this.query.getTokenAccountById(id))
+        accountIds.map(async (id: any) => await this.query.getTokenAccountById(id))
       )
-      console.log(qAccounts.toLocaleString())
       return qAccounts.every((qAccount) => !!qAccount)
     })
 
@@ -107,7 +106,18 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.deissued, false)
 
     if (this.metadata) {
-      assert.equal(qToken!.symbol, this.metadata.symbol)
+      assert.equal(qToken!.description, this.metadata.description)
+      assert.equal(qToken!.trailerVideo!.videoId, this.metadata.trailerVideoId!.toString())
+
+      assert.isNotNull(qToken!.benefits)
+      const benefits = qToken!.benefits!
+
+      benefits.forEach((benefit, i) => {
+        assert.equal(benefit!.title, this.metadata!.benefits![i].title)
+        assert.equal(benefit!.emojiCode, this.metadata!.benefits![i].emoji)
+        assert.equal(benefit!.displayOrder, this.metadata!.benefits![i].displayOrder)
+        assert.equal(benefit!.description, this.metadata!.benefits![i].description)
+      })
     }
 
     qAccounts.forEach((qAccount, i) => {

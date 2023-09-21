@@ -30,6 +30,7 @@ fragment TokenFields on CreatorToken {
   }
   trailerVideo {
     id
+    videoId
   }
   benefits {
     emojiCode
