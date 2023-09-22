@@ -57,6 +57,7 @@ import {
   Membership,
   Event,
   DirectChannelPaymentByMember,
+  ChannelRecipient,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
@@ -75,7 +76,6 @@ import {
   MetaNumberProps,
 } from './utils'
 import { addNotification } from '../../utils/notification'
-import { CreatorRecipientParams } from '../../utils/notification/helpers'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -658,14 +658,11 @@ export async function processChannelPaymentFromMember(
   })
 
   const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  const notificationData = new DirectChannelPaymentByMember({
-    amount,
-    payerHandle: member.handle,
-  })
   await addNotification(
     overlay.getEm(),
     ownerAccount,
-    new CreatorRecipientParams(notificationData, channel.id),
+    new ChannelRecipient({ channel: channel.id }),
+    new DirectChannelPaymentByMember({ amount, payerHandle: member.handle }),
     event
   )
 

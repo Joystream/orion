@@ -8,12 +8,10 @@ import {
   Event,
   Unread,
   NotificationInAppDelivery,
-  CreatorNotificationData,
-  MemberNotificationData,
   NotificationEmailDelivery,
   EmailDeliveryStatus,
-  CreatorRecipient,
-  MemberRecipient,
+  RecipientType,
+  NotificationType,
 } from '../../model'
 import { getNextIdForEntity } from '../nextEntityId'
 import { Flat } from 'lodash'
@@ -22,26 +20,6 @@ import { uniqueId } from '../crypto'
 
 export const RUNTIME_NOTIFICATION_ID_TAG = 'RuntimeNotification'
 export const OFFCHAIN_NOTIFICATION_ID_TAG = 'OffchainNotification'
-
-export class CreatorRecipientParams {
-  constructor(data: CreatorNotificationData, channelId: string) {
-    this.data = data
-    this.channelId = channelId
-  }
-
-  public data: CreatorNotificationData
-  public channelId: string
-}
-
-export class MemberRecipientParams {
-  constructor(data: MemberNotificationData, memberId: string) {
-    this.data = data
-    this.memberId = memberId
-  }
-
-  public data: MemberNotificationData
-  public memberId: string
-}
 
 function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
@@ -87,7 +65,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
 
 export function preferencesForNotification(
   preferences: AccountNotificationPreferences,
-  notificationType: CreatorNotificationData | MemberNotificationData
+  notificationType: NotificationType
 ): NotificationPreference {
   switch (notificationType.isTypeOf) {
     case 'ChannelExcluded':
@@ -152,16 +130,20 @@ export function preferencesForNotification(
 async function addOffChainNotification(
   em: EntityManager,
   account: Flat<Account>,
-  notificationType: CreatorRecipientParams | MemberRecipientParams
+  recipient: RecipientType,
+  notificationType: NotificationType
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
 
-  const notification = createNotification(nextNotificationId.toString(), account.id)
+  const notification = createNotification(
+    nextNotificationId.toString(),
+    account.id,
+    recipient,
+    notificationType
+  )
 
-  await createNotificationRecipient(em, notification.id, notificationType)
-
-  const pref = preferencesForNotification(account.notificationPreferences, notificationType.data)
+  const pref = preferencesForNotification(account.notificationPreferences, notificationType)
   await deliverNotifications(em, notification, pref)
 
   await saveNextNotificationId(em, nextNotificationId + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
@@ -172,7 +154,8 @@ async function addOffChainNotification(
 async function addRuntimeNotification(
   overlay: EntityManagerOverlay,
   account: Flat<Account>,
-  notificationType: CreatorRecipientParams | MemberRecipientParams,
+  recipient: RecipientType,
+  notificationType: NotificationType,
   event: Event
 ) {
   // get notification Id from orion_db in any case
@@ -188,12 +171,16 @@ async function addRuntimeNotification(
     return
   }
 
-  const notification = createNotification(nextNotificationId.toString(), account.id, event)
+  const notification = createNotification(
+    nextNotificationId.toString(),
+    account.id,
+    recipient,
+    notificationType,
+    event
+  )
   overlay.getRepository(Notification).new(notification)
 
-  await createNotificationRecipient(em, notification.id, notificationType)
-
-  const pref = preferencesForNotification(account.notificationPreferences, notificationType.data)
+  const pref = preferencesForNotification(account.notificationPreferences, notificationType)
   await deliverNotifications(overlay, notification as Flat<Notification>, pref)
 
   await saveNextNotificationId(em, nextNotificationId + 1, RUNTIME_NOTIFICATION_ID_TAG)
@@ -261,23 +248,32 @@ async function deliverNotifications(
 
 // the logic is such that the notification is created (inserted) only once in orion_db
 // to keep this invariant true that when the processor is restarted we need deterministic identifiers to fetch existing notifications
-const createNotification = (nextNotificationId: string, accountId: string, event?: Event) => {
+const createNotification = (
+  nextNotificationId: string,
+  accountId: string,
+  recipient: RecipientType,
+  notificationType: NotificationType,
+  event?: Event
+) => {
   const id = event
     ? 'RuntimeNotification' + '-' + nextNotificationId.toString()
     : 'OffChainNotification' + '-' + nextNotificationId.toString()
   return new Notification({
-    id: id,
-    accountId: accountId,
+    id,
+    accountId,
+    notificationType,
+    recipient,
     status: new Unread(),
     eventId: event?.id,
-    createdAt: new Date(),
+    createdAt: event?.timestamp ?? new Date(),
   })
 }
 
 export const addNotification = async (
   store: EntityManagerOverlay | EntityManager,
   account: Flat<Account> | null,
-  notificationType: CreatorRecipientParams | MemberRecipientParams,
+  recipient: RecipientType,
+  notificationType: NotificationType,
   event?: Event
 ) => {
   if (!account) {
@@ -287,9 +283,15 @@ export const addNotification = async (
     return
   }
   if (event) {
-    await addRuntimeNotification(store as EntityManagerOverlay, account, notificationType, event)
+    await addRuntimeNotification(
+      store as EntityManagerOverlay,
+      account,
+      recipient,
+      notificationType,
+      event
+    )
   } else {
-    await addOffChainNotification(store as EntityManager, account, notificationType)
+    await addOffChainNotification(store as EntityManager, account, recipient, notificationType)
   }
 }
 
@@ -303,39 +305,4 @@ async function saveNextNotificationId(
     nextId: nextNotificationId,
   })
   await em.save(nextEntityId)
-}
-
-const createNotificationRecipient = async (
-  store: EntityManagerOverlay | EntityManager,
-  notificationId: string,
-  notificationType: CreatorRecipientParams | MemberRecipientParams
-) => {
-  const recipient =
-    notificationType instanceof CreatorRecipientParams
-      ? new CreatorRecipient({
-          id: uniqueId(32),
-          notificationId: notificationId,
-          channelId: (notificationType as CreatorRecipientParams).channelId,
-          data: (notificationType as CreatorRecipientParams).data,
-        })
-      : new MemberRecipient({
-          id: uniqueId(32),
-          notificationId: notificationId,
-          membershipId: (notificationType as MemberRecipientParams).memberId,
-          data: (notificationType as MemberRecipientParams).data,
-        })
-
-  if (store instanceof EntityManagerOverlay) {
-    if (recipient instanceof CreatorRecipient) {
-      ;(store as EntityManagerOverlay).getRepository(CreatorRecipient).new({
-        ...recipient,
-      })
-    } else {
-      ;(store as EntityManagerOverlay).getRepository(MemberRecipient).new({
-        ...recipient,
-      })
-    }
-  } else {
-    await (store as EntityManager).save(recipient)
-  }
 }

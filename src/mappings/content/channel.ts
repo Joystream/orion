@@ -15,6 +15,8 @@ import {
   ChannelCreatedEventData,
   ChannelFundsWithdrawn,
   YppUnverified,
+  MemberRecipient,
+  ChannelRecipient,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -37,11 +39,7 @@ import {
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import {
-  CreatorRecipientParams,
-  MemberRecipientParams,
-  addNotification,
-} from '../../utils/notification/helpers'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -132,7 +130,8 @@ export async function processChannelCreatedEvent({
     await addNotification(
       overlay,
       ownerAccount,
-      new MemberRecipientParams(new ChannelCreated({}), ownerMember.id),
+      new MemberRecipient({ membership: ownerMember.id }),
+      new ChannelCreated({}),
       event
     )
   }
@@ -356,13 +355,11 @@ export async function processChannelFundsWithdrawnEvent({
 
   const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
 
-  const notificationData = new ChannelFundsWithdrawn({
-    amount,
-  })
   await addNotification(
     overlay.getEm(),
     channelOwnerAccount,
-    new CreatorRecipientParams(notificationData, channel.id),
+    new ChannelRecipient({ channel: channel.id }),
+    new ChannelFundsWithdrawn({ amount }),
     entityEvent
   )
 }
