@@ -70,6 +70,7 @@ export class CreatorRemarkFixture extends StandardizedFixture {
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     await Utils.until('waiting for creator token remark handle to be completed', async () => {
       qToken = await this.query.getTokenById(tokenId)
+      console.log('description: token vs expected', qToken?.description, this.metadata.description)
       return !!qToken && qToken!.description === this.metadata.description
     })
     assert.equal(qToken!.description, this.metadata.description)

@@ -15,6 +15,8 @@ import {
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
 import { isSet } from '@joystream/metadata-protobuf/utils'
 import { uniqueId } from '../../utils/crypto'
+import { ITokenMetadata } from '@joystream/metadata-protobuf'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
@@ -215,10 +217,13 @@ export async function processValidatedTransfers(
 
 export async function processTokenMetadata(
   token: Flat<CreatorToken>,
-  metadata: any,
+  metadata: DecodedMetadataObject<ITokenMetadata>,
   overlay: EntityManagerOverlay,
   isUpdate: boolean
 ) {
+  if (!metadata) {
+    return
+  }
   if (isSet(metadata.description)) {
     token.description = metadata.description
   }
@@ -236,15 +241,17 @@ export async function processTokenMetadata(
         }
 
         // if the benefit title is null, it means we want to remove the benefit
-        if (benefit.title !== null) {
-          overlay.getRepository(Benefit).new({
+        if (isSet(benefit.title)) {
+          const benefitEntity = overlay.getRepository(Benefit).new({
             id: overlay.getRepository(Benefit).getNewEntityId(),
             title: benefit.title,
-            description: benefit.description,
             emojiCode: benefit.emoji,
             displayOrder: benefit.displayOrder,
             tokenId: token.id,
           })
+          if (isSet(benefit.description)) {
+            benefitEntity.description = benefit.description
+          }
         }
       }
     }
@@ -274,8 +281,11 @@ export async function processTokenMetadata(
     const video = await overlay.getRepository(Video).getById(metadata.trailerVideoId)
     if (video) {
       const trailerVideoRepository = overlay.getRepository(TrailerVideo)
-      const oldTrailer = await trailerVideoRepository.getOneByRelationOrFail('tokenId', token.id)
-      trailerVideoRepository.remove(oldTrailer)
+      const oldTrailer = await trailerVideoRepository.getOneByRelation('tokenId', token.id)
+      console.log('old trailer', oldTrailer)
+      if (oldTrailer) {
+        trailerVideoRepository.remove(oldTrailer)
+      }
 
       const id = overlay.getRepository(TrailerVideo).getNewEntityId()
       overlay.getRepository(TrailerVideo).new({
@@ -284,6 +294,7 @@ export async function processTokenMetadata(
         videoId: video.id,
       })
       token.trailerVideoId = id
+      video.trailerVideoForTokenId = id
     }
   }
 }

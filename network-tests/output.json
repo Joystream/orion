@@ -27,11 +27,15 @@
     "j4Tromj4p3AXVp79TKDr4gP9Bu6k8asCZwXrY4D4eG7NCiZwx": 24,
     "j4TWd8gh29UVUzmSMqZRkqAMAq5GZGir6QTdfLMBXrSR1HLHU": 25,
     "j4S1H23ULmzFSSWbHe6XHaSkiizw7wS1q2GFMDhb7CjuGDSLV": 26,
-    "j4SghRZfvwnaSwfREAnTGbdhpuqRir1oPue8zW1hArR33NToJ": 27
+    "j4SghRZfvwnaSwfREAnTGbdhpuqRir1oPue8zW1hArR33NToJ": 27,
+    "j4X5Ze8NeAXiTHyN2nJhNUu8g2orhLivZh2d3S8uGQxfWyB7r": 28,
+    "j4UsLGNtMSuLmpZ9vAuLut1ueooGcfrWR5WwxeqqmjEfa98tH": 29,
+    "j4WB4Dac7mfdDQdx4Gs5nW7VhBfQSwokpeunD122rnv1GxSKN": 30,
+    "j4SKskGjdaQz6h69A6TxUvUpEsnUqe87ZBTbGZBf6ig2PP9HE": 31
   },
   "keyIds": {
     "start": 0,
-    "final": 28,
+    "final": 32,
     "custom": [
       "Councillor//0",
       "Councillor//1",
@@ -39,7 +43,9 @@
       "Councillor//3",
       "Councillor//4",
       "worker//Content//0",
-      "worker//Storage//0"
+      "worker//Storage//0",
+      "worker//Storage//1",
+      "//Colossus1"
     ]
   },
   "miniSecret": "",

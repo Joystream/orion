@@ -11,8 +11,10 @@ import { CREATOR_BALANCE, FIRST_HOLDER_BALANCE } from '../../consts'
 import { Utils } from '../../utils'
 import { TokenMetadata } from '@joystream/metadata-protobuf'
 import Long from 'long'
+import { Api } from 'src/Api'
 
-export function getTokenMetadata(): TokenMetadata {
+export async function getTokenMetadata(api: Api): Promise<TokenMetadata> {
+  const videoId = (await api.query.content.nextVideoId()).subn(1)
   // issue creator token
   const tokenMetadata = new TokenMetadata({
     name: 'test name',
@@ -20,7 +22,7 @@ export function getTokenMetadata(): TokenMetadata {
     symbol: 'test',
     whitelistApplicationApplyLink: 'https://test.com',
     whitelistApplicationNote: 'test note',
-    trailerVideoId: Long.fromNumber(0),
+    trailerVideoId: Long.fromNumber(videoId.toNumber()),
     benefits: [
       {
         title: 'benefit title 1',
@@ -99,7 +101,7 @@ export default async function issueCreatorToken({ api, query }: FlowProps): Prom
     { Member: channelOwnerMemberId }
   )
 
-  const tokenMetadata = getTokenMetadata()
+  const tokenMetadata = await getTokenMetadata(api)
   const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
     initialAllocation,
     transferPolicy,

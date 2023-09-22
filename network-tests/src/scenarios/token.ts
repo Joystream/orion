@@ -39,7 +39,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   job('Deissue Token Flow', deissueCreatorTokenFlow).requires(requiredBasicSetup)
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
-  // job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)
+  job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)
   // const issuerTransferJob = job(
   //   'Issuer Transfer With Existing Account And Vesting',
   //   issuerTransferWithExistingAccountAndVestingFlow

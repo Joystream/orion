@@ -32,7 +32,7 @@ import {
   CreatorTokenIssuerRemarked,
   TokenMetadata,
 } from '@joystream/metadata-protobuf'
-import { isSet } from 'lodash'
+import { isSet } from '@joystream/metadata-protobuf/utils'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -93,7 +93,9 @@ export async function processTokenIssuedEvent({
   }
 
   const metadata = deserializeMetadata(TokenMetadata, metadataBytes)
-  await processTokenMetadata(token, metadata, overlay, false)
+  if (metadata) {
+    await processTokenMetadata(token, metadata, overlay, false)
+  }
 }
 
 export async function processCreatorTokenIssuedEvent({
@@ -544,7 +546,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
     return
   }
   const metadata = creatorRemarked.updateTokenMetadata
-  if (metadata === null && metadata!.newMetadata === null) {
+  if (isSet(metadata?.newMetadata)) {
     return
   }
 

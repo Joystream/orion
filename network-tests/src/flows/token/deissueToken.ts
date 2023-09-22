@@ -61,7 +61,7 @@ export default async function deissueCreatorTokenFlow({ api, query }: FlowProps)
   )
 
   // issue creator token
-  const tokenMetadata = getTokenMetadata()
+  const tokenMetadata = await getTokenMetadata(api)
   const crtParams = api.createType('PalletProjectTokenTokenIssuanceParameters', {
     initialAllocation,
     symbol,
