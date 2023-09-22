@@ -193,6 +193,68 @@ export class NotificationResolver {
       return toOutputGQL(account.notificationPreferences)
     })
   }
+
+  @Query(() => NotificationsResult)
+  @UseMiddleware(AccountOnly)
+  async getInAppNotifications(
+    @Ctx() ctx: Context,
+    @Arg('channelId', { nullable: true }) channelId?: string
+  ): Promise<NotificationsResult> {
+    const em = await this.em()
+    if (!ctx.account) {
+      throw new Error('Account not specified')
+    }
+    const account = assertNotNull(ctx.account)
+    const isCreator = channelId ? true : false
+
+    return withHiddenEntities(em, async () => {
+      let whereCond = `
+        WHERE "n"."accountId" = "${account.id} AND "n"."status" = "Unread"
+      `
+      if (isCreator) {
+        whereCond + ` AND "channel"."id" = "${channelId}"`
+      }
+
+      const extraJoin = isCreator
+        ? `
+        LEFT JOIN "creator_notification" as cr ON "r"."id" = "cr"."recipient_id"
+        LEFT JOIN "channel" ON "cr"."channel_id" = "channel"."id"
+      `
+        : `
+        LEFT JOIN "member_notification" as mn ON "r"."id" = "mn"."recipient_id"
+        LEFT JOIN "membership" ON "mn"."membership_id" = "membership"."id"
+      `
+
+      let selection = `
+        SELECT "n".*
+      `
+      if (isCreator) {
+        selection += `, "channel"."id" as "channel_id"`
+      } else {
+        selection += `, "membership"."handle" as "member_handle"`
+      }
+
+      const queryResult = await em.query(
+        `
+        ${selection}
+        FROM "notification_in_app_delivery" as nd
+        LEFT JOIN "notification" as n ON "nd"."notification_id" = "n"."id"
+        LEFT JOIN "recipient" as r ON "n"."recipient_id" = "r"."id"
+        ${extraJoin}
+        ${whereCond}
+        `
+      )
+
+      return queryResult.map((result: any) => {
+        return {
+          notificationId: result.id,
+          accountId: result.accountId,
+          createdAt: result.createdAt,
+          recipient: result.recipient,
+        }
+      })
+    })
+  }
 }
 
 // Helper function to update notification preferences
