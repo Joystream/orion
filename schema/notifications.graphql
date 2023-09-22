@@ -45,6 +45,9 @@ type Notification @entity {
   "Member that should recieve the notification"
   account: Account!
 
+  "type of the notification, used for"
+  notificationType: NotificationType!
+
   "related event for on chain notifications"
   event: Event
 
@@ -54,42 +57,23 @@ type Notification @entity {
   "timestamp"
   createdAt: DateTime!
 
-  "reference to the creator for which the notification might be for"
-  creatorRecipient: [CreatorRecipient!]! @derivedFrom(field: "notification")
-
-  "reference to the member for which the notification might be for"
-  memberRecipient: [MemberRecipient!]! @derivedFrom(field: "notification")
+  "recipient"
+  recipient: RecipientType!
 }
 
-type MemberRecipient @entity {
-  "uuid"
-  id: ID!
+union RecipientType = MemberRecipient | ChannelRecipient
 
-  "notification"
-  notification: Notification!
-
+type MemberRecipient @variant {
   "membership"
   membership: Membership!
-
-  "member notification data"
-  data: MemberNotificationData!
 }
 
-type CreatorRecipient @entity {
-  "uuid"
-  id: ID!
-
-  "notification"
-  notification: Notification!
-
+type ChannelRecipient @variant {
   "channel"
   channel: Channel!
-
-  "creator notification data"
-  data: CreatorNotificationData!
 }
 
-union CreatorNotificationData =
+union NotificationType =
     ChannelSuspended
   | ChannelVerified
   | ChannelExcluded
@@ -109,9 +93,7 @@ union CreatorNotificationData =
   | EnglishAuctionSettled
   | ChannelFundsWithdrawn
   | BidMadeCompletingAuction
-
-union MemberNotificationData =
-    ChannelCreated
+  | ChannelCreated
   | CommentReply
   | ReactionToComment
   | VideoPosted

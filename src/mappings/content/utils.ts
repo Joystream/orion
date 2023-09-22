@@ -54,8 +54,9 @@ import {
   Membership,
   NewAuctionBid,
   NftRoyaltyPaid,
-  CreatorNotificationData,
-  MemberNotificationData,
+  MemberRecipient,
+  NotificationType,
+  ChannelRecipient,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -75,7 +76,6 @@ import { createType } from '@joystream/types'
 import { EntityManager } from 'typeorm'
 import BN from 'bn.js'
 import { addNotification } from '../../utils/notification'
-import { CreatorRecipientParams, MemberRecipientParams } from '../../utils/notification/helpers'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -713,16 +713,17 @@ export async function addNewBidNotification(
   if (previousTopBid?.bidderId) {
     const outbiddedMemberId = previousTopBid.bidderId
     const outbiddedMemberAccount = await getAccountForMember(overlay.getEm(), outbiddedMemberId)
-    const notificationData = new HigherBidPlaced({
+
+    const notificationData = {
       newBidderHandle: newTopBidderHandle,
       videoId,
       videoTitle,
-    })
-
+    }
     await addNotification(
       overlay.getEm(),
       outbiddedMemberAccount,
-      new MemberRecipientParams(notificationData, outbiddedMemberId),
+      new MemberRecipient({ membership: outbiddedMemberId }),
+      new HigherBidPlaced(notificationData),
       event
     )
   }
@@ -741,7 +742,7 @@ export async function addNewBidNotification(
 export async function notifyChannelFollowers(
   overlay: EntityManagerOverlay,
   channelId: string,
-  notificationData: MemberNotificationData,
+  notificationType: NotificationType,
   event: Event
 ) {
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
@@ -749,7 +750,8 @@ export async function notifyChannelFollowers(
     await addNotification(
       overlay.getEm(),
       followerAccount,
-      new MemberRecipientParams(notificationData, followerAccount.membershipId),
+      new MemberRecipient({ membership: followerAccount.membershipId }),
+      notificationType,
       event
     )
   }
@@ -760,20 +762,21 @@ export async function notifyBiddersOnAuctionCompletion(
   biddersMemberIds: string[],
   winnerId: bigint,
   notifier: {
-    won: (memberHandle: string) => MemberNotificationData
-    lost: (memberHandle: string) => MemberNotificationData
+    won: (memberHandle: string) => NotificationType
+    lost: (memberHandle: string) => NotificationType
   },
   event: Event
 ) {
   for (const bidderId of biddersMemberIds.filter((id) => id)) {
     const account = await getAccountForMember(overlay.getEm(), bidderId)
-    const notificationData =
+    const notificationType =
       bidderId === winnerId.toString() ? notifier.won(bidderId) : notifier.lost(bidderId)
 
     await addNotification(
       overlay.getEm(),
       account,
-      new MemberRecipientParams(notificationData, bidderId),
+      new MemberRecipient({ membership: bidderId }),
+      notificationType,
       event
     )
   }
@@ -785,8 +788,8 @@ export type PageLinkData = {
 }
 
 export type AuctionNotifiers = {
-  won: () => MemberNotificationData
-  lost: () => MemberNotificationData
+  won: () => NotificationType
+  lost: () => NotificationType
 }
 
 export const openAuctionNotifiers = async (
@@ -828,7 +831,7 @@ export const englishAuctionNotifiers = async (
 export async function maybeNotifyNftCreator(
   overlay: EntityManagerOverlay,
   nftOwner: NftOwner,
-  notificationData: CreatorNotificationData,
+  notificationType: NotificationType,
   event: Event
 ): Promise<void> {
   if (nftOwner.isTypeOf === 'NftOwnerChannel') {
@@ -838,7 +841,8 @@ export async function maybeNotifyNftCreator(
     await addNotification(
       overlay.getEm(),
       nftOwnerAccount,
-      new CreatorRecipientParams(notificationData, channelId),
+      new ChannelRecipient({ channel: channelId }),
+      notificationType,
       event
     )
   }
@@ -852,15 +856,16 @@ export async function addRoyaltyPaymentNotification(
 ): Promise<void> {
   const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
   const creatorAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  const notificationData = new NftRoyaltyPaid({
+  const notificationData = {
     amount: royaltyPrice,
     videoId: video.id,
     videoTitle: parseVideoTitle(video),
-  })
+  }
   await addNotification(
     overlay.getEm(),
     creatorAccount,
-    new CreatorRecipientParams(notificationData, channel.id),
+    new ChannelRecipient({ channel: channel.id }),
+    new NftRoyaltyPaid(notificationData),
     event
   )
 }

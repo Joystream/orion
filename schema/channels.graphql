@@ -64,9 +64,6 @@ type Channel @entity {
 
   "Channel Ypp Status: either unverified , verified or suspended"
   yppStatus: ChannelYppStatus!
-
-  "reference to the notifications for this channel"
-  creatorRecipient: [CreatorRecipient!]! @derivedFrom(field: "channel")
 }
 
 union ChannelYppStatus = YppUnverified | YppVerified | YppSuspended

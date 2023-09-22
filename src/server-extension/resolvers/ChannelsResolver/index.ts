@@ -39,6 +39,7 @@ import {
   ChannelSuspended,
   YppVerified,
   YppSuspended,
+  ChannelRecipient,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -52,7 +53,6 @@ import { AccountOnly, OperatorOnly } from '../middleware'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
-import { CreatorRecipientParams } from '../../../utils/notification/helpers'
 
 @Resolver()
 export class ChannelsResolver {
@@ -232,13 +232,11 @@ export class ChannelsResolver {
         const followerMembership = await em
           .getRepository(Membership)
           .findOneByOrFail({ id: ctx.account.membershipId })
-        const notificationData = new NewChannelFollower({
-          followerHandle: assertNotNull(followerMembership.handle),
-        })
         await addNotification(
           em,
           ownerAccount,
-          new CreatorRecipientParams(notificationData, channel.id)
+          new ChannelRecipient({ channel: channel.id }),
+          new NewChannelFollower({ followerHandle: assertNotNull(followerMembership.handle) })
         )
       }
 
@@ -373,8 +371,12 @@ export class ChannelsResolver {
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
         const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        const notificationData = new ChannelSuspended({})
-        await addNotification(em, account, new CreatorRecipientParams(notificationData, channel.id))
+        await addNotification(
+          em,
+          account,
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelSuspended({})
+        )
       }
 
       return {
@@ -425,7 +427,8 @@ export class ChannelsResolver {
         await addNotification(
           em,
           account,
-          new CreatorRecipientParams(new ChannelVerified({}), channel.id)
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelVerified({})
         )
       }
 
@@ -482,7 +485,8 @@ export class ChannelsResolver {
         await addNotification(
           em,
           account,
-          new CreatorRecipientParams(new ChannelExcluded({}), channel.id)
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelExcluded({})
         )
       }
 
