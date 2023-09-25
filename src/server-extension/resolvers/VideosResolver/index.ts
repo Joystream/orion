@@ -45,9 +45,9 @@ import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
-import { OperatorOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification'
 import { parseVideoTitle } from '../../../mappings/content/utils'
+import { UserOnly, OperatorOnly } from '../middleware'
 
 @Resolver()
 export class VideosResolver {
@@ -196,6 +196,7 @@ export class VideosResolver {
     return result as VideosConnection
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => AddVideoViewResult)
   async addVideoView(
     @Arg('videoId', () => String, { nullable: false }) videoId: string,
@@ -262,6 +263,7 @@ export class VideosResolver {
     })
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => VideoReportInfo)
   async reportVideo(
     @Args() { videoId, rationale }: ReportVideoArgs,

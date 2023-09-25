@@ -49,7 +49,7 @@ import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly, OperatorOnly } from '../middleware'
+import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
 import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
@@ -285,6 +285,7 @@ export class ChannelsResolver {
     })
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,

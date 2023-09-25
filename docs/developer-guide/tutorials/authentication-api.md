@@ -130,9 +130,7 @@ A session can expire:
 
 ## Accessing the GraphQL API
 
-All requests to the GraphQL api should be [authenticated requests](#sessions-and-authenticated-requests), regardless of whether they are queries or mutations.
-
-Of course different requests may still require different privileges, ie. some mutations like `setSupportedCategories` will be only accessible for _root user_ etc., while other mutations may only be accessible for _Gateway account owners_.
+Different requests may still require different privileges, ie. some mutations like `setSupportedCategories` will be only accessible for _root user_ etc., while other mutations may only be accessible for _Gateway account owners_.
 
 ## Authentication API interactions
 

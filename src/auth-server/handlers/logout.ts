@@ -2,6 +2,7 @@ import express from 'express'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { components } from '../generated/api-types'
+import { BadRequestError } from '../errors'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -16,6 +17,9 @@ export const logout: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const { authContext: session } = res.locals
+    if (!session) {
+      throw new BadRequestError('No session to logout found.')
+    }
     const em = await globalEm
     session.expiry = new Date()
     await em.save(session)
