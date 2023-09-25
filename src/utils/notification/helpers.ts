@@ -7,7 +7,6 @@ import {
   Notification,
   Event,
   Unread,
-  NotificationInAppDelivery,
   NotificationEmailDelivery,
   EmailDeliveryStatus,
   RecipientType,
@@ -144,7 +143,11 @@ async function addOffChainNotification(
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
-  await deliverNotifications(em, notification, pref)
+  notification.inApp = pref.inAppEnabled
+
+  if (pref.emailEnabled) {
+    await createEmailNotification(em, notification)
+  }
 
   await saveNextNotificationId(em, nextNotificationId + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
 
@@ -181,32 +184,15 @@ async function addRuntimeNotification(
   overlay.getRepository(Notification).new(notification)
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
-  await deliverNotifications(overlay, notification as Flat<Notification>, pref)
+  notification.inApp = pref.inAppEnabled
+
+  if (pref.emailEnabled) {
+    await createEmailNotification(em, notification)
+  }
 
   await saveNextNotificationId(em, nextNotificationId + 1, RUNTIME_NOTIFICATION_ID_TAG)
 
   return notification.id
-}
-
-// notification in app delivery is also created once and then migrated
-async function createInAppNotification(
-  store: EntityManagerOverlay | EntityManager,
-  notification: Flat<Notification>
-) {
-  const notificationDelivery = new NotificationInAppDelivery({
-    id: uniqueId(32),
-    notificationId: notification.id,
-  })
-  if (store instanceof EntityManagerOverlay) {
-    ;(store as EntityManagerOverlay).getRepository(NotificationInAppDelivery).new({
-      ...notificationDelivery,
-    })
-  } else {
-    const inAppNotification = new NotificationInAppDelivery({
-      ...notificationDelivery,
-    })
-    await (store as EntityManager).save(inAppNotification)
-  }
 }
 
 // notification email delivery is also created once and then migrated
@@ -229,20 +215,6 @@ async function createEmailNotification(
       ...notificationDelivery,
     })
     await (store as EntityManager).save(inAppNotification)
-  }
-}
-
-async function deliverNotifications(
-  store: EntityManagerOverlay | EntityManager,
-  notification: Flat<Notification>,
-  { inAppEnabled, emailEnabled }: NotificationPreference
-) {
-  if (inAppEnabled) {
-    await createInAppNotification(store, notification)
-  }
-
-  if (emailEnabled) {
-    await createEmailNotification(store, notification)
   }
 }
 

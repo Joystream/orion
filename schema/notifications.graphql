@@ -1,12 +1,3 @@
-# timestamp for in app delivery is not needed, since it is the same as the notification creation timestamp
-type NotificationInAppDelivery @entity {
-  "Autoincremented"
-  id: ID!
-
-  "the notification being delivered"
-  notification: Notification!
-}
-
 type NotificationEmailDelivery @entity {
   "Autoincremented"
   id: ID!
@@ -53,6 +44,9 @@ type Notification @entity {
 
   "status"
   status: ReadOrUnread!
+
+  "wether this notification should be displayed in app"
+  inApp: Boolean!
 
   "timestamp"
   createdAt: DateTime!
