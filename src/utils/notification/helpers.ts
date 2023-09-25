@@ -273,7 +273,7 @@ async function saveNextNotificationId(
   entityName: string
 ) {
   const nextEntityId = new NextEntityId({
-    entityName: entityName,
+    entityName,
     nextId: nextNotificationId,
   })
   await em.save(nextEntityId)

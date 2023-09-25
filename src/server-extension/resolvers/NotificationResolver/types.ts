@@ -1,7 +1,5 @@
 import { Field, ArgsType, InputType, ObjectType } from 'type-graphql'
 import { AccountNotificationPreferences, NotificationPreference } from '../../../model'
-import { DateTime } from '@subsquid/graphql-server'
-import { createUnionType } from 'type-graphql'
 
 @ArgsType()
 export class NotificationArgs {
