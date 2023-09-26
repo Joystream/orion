@@ -28,8 +28,6 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
   return new AccountNotificationPreferences({
     channelExcludedFromApp: notificationPrefAllTrue(),
     videoExcludedFromApp: notificationPrefAllTrue(),
-    videoFeaturedAsHero: notificationPrefAllTrue(),
-    videoFeaturedOnCategoryPage: notificationPrefAllTrue(),
     nftFeaturedOnMarketPlace: notificationPrefAllTrue(),
     newChannelFollower: notificationPrefAllTrue(),
     videoCommentCreated: notificationPrefAllTrue(),
@@ -71,10 +69,6 @@ export function preferencesForNotification(
       return preferences.channelExcludedFromApp
     case 'VideoExcluded':
       return preferences.videoExcludedFromApp
-    case 'VideoFeaturedAsCategoryHero':
-      return preferences.videoFeaturedAsHero
-    case 'VideoFeaturedOnCategoryPage':
-      return preferences.videoFeaturedOnCategoryPage
     case 'NftFeaturedOnMarketPlace':
       return preferences.nftFeaturedOnMarketPlace
     case 'NewChannelFollower':

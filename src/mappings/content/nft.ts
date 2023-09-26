@@ -51,9 +51,12 @@ import {
   EnglishAuctionSettled,
   BidMadeCompletingAuction,
   NftOfferedEventData,
+  Account,
+  MemberRecipient,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { assertNotNull } from '@subsquid/substrate-processor'
+import { addNotification } from '../../utils/notification'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -662,6 +665,19 @@ export async function processNftBoughtEvent({
     price,
   })
   await maybeNotifyNftCreator(overlay, previousNftOwner, notificationData, event)
+  if (previousNftOwner.isTypeOf === 'NftOwnerMember') {
+    // case when previous owner is a member
+    const previousNftOwnerAccount = await overlay
+      .getRepository(Account)
+      .getOneByRelation('membershipId', previousNftOwner.member)
+    await addNotification(
+      overlay,
+      previousNftOwnerAccount ? (previousNftOwnerAccount as Account) : null,
+      new MemberRecipient({ membership: previousNftOwner.member }),
+      notificationData,
+      event
+    )
+  }
 
   if (nft.creatorRoyalty) {
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, price)

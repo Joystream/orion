@@ -40,12 +40,6 @@ export class AccountNotificationPreferencesInput {
   videoExcludedFromApp: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoFeaturedAsHero: NotificationPreference
-
-  @Field(() => NotificationPreferenceGQL, { nullable: true })
-  videoFeaturedOnCategoryPage: NotificationPreference
-
-  @Field(() => NotificationPreferenceGQL, { nullable: true })
   nftFeaturedOnMarketPlace: NotificationPreference
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
@@ -139,12 +133,6 @@ export class AccountNotificationPreferencesOutput
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
   videoExcludedFromApp: NotificationPreference
-
-  @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoFeaturedAsHero: NotificationPreference
-
-  @Field(() => NotificationPreferenceOutput, { nullable: false })
-  videoFeaturedOnCategoryPage: NotificationPreference
 
   @Field(() => NotificationPreferenceOutput, { nullable: false })
   nftFeaturedOnMarketPlace: NotificationPreference
@@ -243,8 +231,6 @@ export function toOutputGQL(
   return {
     channelExcludedFromApp: preferences.channelExcludedFromApp,
     videoExcludedFromApp: preferences.videoExcludedFromApp,
-    videoFeaturedAsHero: preferences.videoFeaturedAsHero,
-    videoFeaturedOnCategoryPage: preferences.videoFeaturedOnCategoryPage,
     nftFeaturedOnMarketPlace: preferences.nftFeaturedOnMarketPlace,
     newChannelFollower: preferences.newChannelFollower,
     videoCommentCreated: preferences.videoCommentCreated,

@@ -120,8 +120,6 @@ type AccountNotificationPreferences {
   # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design:
   channelExcludedFromApp: NotificationPreference!
   videoExcludedFromApp: NotificationPreference!
-  videoFeaturedAsHero: NotificationPreference!
-  videoFeaturedOnCategoryPage: NotificationPreference!
   nftFeaturedOnMarketPlace: NotificationPreference!
   newChannelFollower: NotificationPreference!
   videoCommentCreated: NotificationPreference!

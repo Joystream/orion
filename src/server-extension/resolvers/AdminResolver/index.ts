@@ -35,9 +35,7 @@ import {
   NftFeaturedOnMarketPlace,
   Video,
   VideoCategory,
-  VideoFeaturedAsCategoryHero,
   VideoFeaturedInCategory,
-  VideoFeaturedOnCategoryPage,
   VideoHero as VideoHeroEntity,
 } from '../../../model'
 import { GraphQLResolveInfo } from 'graphql'
@@ -180,28 +178,6 @@ export class AdminResolver {
       video: new Video({ id: args.videoId }),
     })
 
-    const [video] = await em.getRepository(Video).find({
-      where: { id: args.videoId },
-      relations: { channel: true, category: true },
-      take: 1,
-    })
-    // if category for video is defined then send notification as otherwise full notificatino info won't be defined
-    const category = video?.category
-    if (video?.channel && category) {
-      const notificationData = {
-        categoryId: category?.id || '',
-        videoTitle: parseVideoTitle(video),
-        categoryName: category?.name || '',
-      }
-      const account = await getChannelOwnerAccount(em, video.channel)
-      await addNotification(
-        em,
-        account,
-        new ChannelRecipient({ channel: video.channel.id }),
-        new VideoFeaturedAsCategoryHero(notificationData)
-      )
-    }
-
     await em.save(videoHero)
 
     return { id }
@@ -235,33 +211,6 @@ export class AdminResolver {
         })
     )
     await em.save(newRows)
-
-    for (const { videoId } of args.videos) {
-      const video = (
-        await em.getRepository(Video).find({
-          where: { id: videoId },
-          relations: { channel: true },
-          take: 1,
-        })
-      )?.[0]
-      if (video?.channel?.id) {
-        const creatorAccount = await getChannelOwnerAccount(em, video.channel)
-        const category = await em
-          .getRepository(VideoCategory)
-          .findOneByOrFail({ id: args.categoryId })
-        const notificationData = {
-          categoryId: category.id,
-          categoryName: category.name || '??',
-          videoTitle: parseVideoTitle(video),
-        }
-        await addNotification(
-          em,
-          creatorAccount,
-          new ChannelRecipient({ channel: video.channel.id }),
-          new VideoFeaturedOnCategoryPage(notificationData)
-        )
-      }
-    }
 
     return {
       categoryId,

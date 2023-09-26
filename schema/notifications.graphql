@@ -73,8 +73,6 @@ union NotificationType =
   | ChannelExcluded
   | VideoExcluded
   | NewChannelFollower
-  | VideoFeaturedOnCategoryPage
-  | VideoFeaturedAsCategoryHero
   | NewAuctionBid
   | NftFeaturedOnMarketPlace
   | CommentPostedToVideo
@@ -112,28 +110,6 @@ type NftFeaturedOnMarketPlace @variant {
   videoTitle: String!
 }
 
-type VideoFeaturedOnCategoryPage @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "category name used for notification text"
-  categoryName: String!
-
-  "category id used for notification text"
-  categoryId: String!
-}
-
-type VideoFeaturedAsCategoryHero @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "category name used for notification text"
-  categoryName: String!
-
-  "category id used for notification text"
-  categoryId: String!
-}
-
 type ChannelVerified @variant {
   phantom: Int
 }
@@ -161,6 +137,9 @@ type CommentPostedToVideo @variant {
 
   "commenter handle for text"
   memberHandle: String!
+
+  "id for the comment used for the link"
+  comentId: String!
 }
 
 type VideoLiked @variant {
@@ -169,6 +148,9 @@ type VideoLiked @variant {
 
   "video title for notification text"
   videoTitle: String!
+
+  "handle for the member that dropped the like"
+  memberHandle: String!
 }
 
 type VideoDisliked @variant {
@@ -177,6 +159,9 @@ type VideoDisliked @variant {
 
   "video title for notification text"
   videoTitle: String!
+
+  "handle for the member that dropped the dislike"
+  memberHandle: String!
 }
 
 type NftPurchased @variant {
@@ -281,6 +266,9 @@ type VideoPosted @variant {
   "channel title for notification text"
   channelTitle: String!
 
+  "id for the channel used in link construction"
+  channelId: String!
+
   "video Id used for link"
   videoId: String!
 }
@@ -288,6 +276,9 @@ type VideoPosted @variant {
 type NewAuction @variant {
   "channel title for notification text"
   channelTitle: String!
+
+  "channel id for notification link"
+  channelId: String!
 
   "video title for notification text"
   videoTitle: String!
@@ -319,6 +310,9 @@ type NewNftOnSale @variant {
 
   "video Id used for link"
   videoId: String!
+
+  "channel id for notification link"
+  channelId: String!
 }
 
 type HigherBidPlaced @variant {

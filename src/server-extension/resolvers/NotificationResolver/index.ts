@@ -69,14 +69,6 @@ export class NotificationResolver {
         account.notificationPreferences.videoExcludedFromApp
       )
       maybeUpdateNotificationPreference(
-        newPreferences.videoFeaturedAsHero,
-        account.notificationPreferences.videoFeaturedAsHero
-      )
-      maybeUpdateNotificationPreference(
-        newPreferences.videoFeaturedOnCategoryPage,
-        account.notificationPreferences.videoFeaturedOnCategoryPage
-      )
-      maybeUpdateNotificationPreference(
         newPreferences.nftFeaturedOnMarketPlace,
         account.notificationPreferences.nftFeaturedOnMarketPlace
       )
