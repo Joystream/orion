@@ -448,58 +448,66 @@ export class ChannelsResolver {
     @Args() { channelId, rationale }: ExcludeChannelArgs
   ): Promise<ExcludeChannelResult> {
     const em = await this.em()
-
-    return withHiddenEntities(em, async () => {
-      const channel = await em.findOne(Channel, {
-        where: { id: channelId },
-      })
-
-      if (!channel) {
-        throw new Error(`Channel by id ${channelId} not found!`)
-      }
-      const existingExclusion = await em.findOne(Exclusion, {
-        where: { channelId: channel.id, videoId: IsNull() },
-      })
-      // If exclusion already exists - return its data with { created: false }
-      if (existingExclusion) {
-        return {
-          id: existingExclusion.id,
-          channelId: channel.id,
-          created: false,
-          createdAt: existingExclusion.timestamp,
-          rationale: existingExclusion.rationale,
-        }
-      }
-      // If exclusion doesn't exist, create a new one
-      const newExclusion = new Exclusion({
-        id: uniqueId(8),
-        channelId: channel.id,
-        rationale,
-        timestamp: new Date(),
-      })
-      channel.isExcluded = true
-      await em.save(newExclusion)
-
-      // in case account exist deposit notification
-      const channelOwnerMemberId = channel.ownerMemberId
-      if (channelOwnerMemberId) {
-        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        await addNotification(
-          em,
-          account,
-          new MemberRecipient({ membership: channelOwnerMemberId }),
-          new ChannelExcluded({})
-        )
-      }
-
-      return {
-        id: newExclusion.id,
-        channelId: channel.id,
-        videoId: null,
-        created: true,
-        createdAt: newExclusion.timestamp,
-        rationale,
-      }
-    })
+    return await excludeChannelInner(em, channelId, rationale)
   }
+}
+
+// TODO: this is a fix for allowing unit testing, should be removed after introducing proper mocking
+export const excludeChannelInner = async (
+  em: EntityManager,
+  channelId: string,
+  rationale: string
+): Promise<ExcludeChannelResult> => {
+  return withHiddenEntities(em, async () => {
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+    const existingExclusion = await em.findOne(Exclusion, {
+      where: { channelId: channel.id, videoId: IsNull() },
+    })
+    // If exclusion already exists - return its data with { created: false }
+    if (existingExclusion) {
+      return {
+        id: existingExclusion.id,
+        channelId: channel.id,
+        created: false,
+        createdAt: existingExclusion.timestamp,
+        rationale: existingExclusion.rationale,
+      }
+    }
+    // If exclusion doesn't exist, create a new one
+    const newExclusion = new Exclusion({
+      id: uniqueId(8),
+      channelId: channel.id,
+      rationale,
+      timestamp: new Date(),
+    })
+    channel.isExcluded = true
+    await em.save([newExclusion, channel])
+
+    // in case account exist deposit notification
+    const channelOwnerMemberId = channel.ownerMemberId
+    if (channelOwnerMemberId) {
+      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      await addNotification(
+        em,
+        account,
+        new ChannelRecipient({ channel: channel.id }),
+        new ChannelExcluded({})
+      )
+    }
+
+    return {
+      id: newExclusion.id,
+      channelId: channel.id,
+      videoId: null,
+      created: true,
+      createdAt: newExclusion.timestamp,
+      rationale,
+    }
+  })
 }

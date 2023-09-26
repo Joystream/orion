@@ -130,7 +130,7 @@ async function addOffChainNotification(
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
 
   const notification = createNotification(
-    nextNotificationId.toString(),
+    OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
     account.id,
     recipient,
     notificationType
@@ -138,14 +138,13 @@ async function addOffChainNotification(
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
   notification.inApp = pref.inAppEnabled
+  await em.save(notification)
 
   if (pref.emailEnabled) {
     await createEmailNotification(em, notification)
   }
 
   await saveNextNotificationId(em, nextNotificationId + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
-
-  await em.save(notification)
 }
 
 async function addRuntimeNotification(
@@ -169,7 +168,7 @@ async function addRuntimeNotification(
   }
 
   const notification = createNotification(
-    nextNotificationId.toString(),
+    RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
     account.id,
     recipient,
     notificationType,
@@ -215,15 +214,12 @@ async function createEmailNotification(
 // the logic is such that the notification is created (inserted) only once in orion_db
 // to keep this invariant true that when the processor is restarted we need deterministic identifiers to fetch existing notifications
 const createNotification = (
-  nextNotificationId: string,
+  id: string,
   accountId: string,
   recipient: RecipientType,
   notificationType: NotificationType,
   event?: Event
 ) => {
-  const id = event
-    ? 'RuntimeNotification' + '-' + nextNotificationId.toString()
-    : 'OffChainNotification' + '-' + nextNotificationId.toString()
   return new Notification({
     id,
     accountId,

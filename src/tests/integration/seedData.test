@@ -1,0 +1,51 @@
+import { expect } from 'chai'
+import { ConfigVariable, config } from '../../utils/config'
+import { Account, Channel } from '../../model'
+import { globalEm } from '../../utils/globalEm'
+import { EntityManager, Equal } from 'typeorm'
+import _ from 'lodash'
+import * as fs from 'fs'
+import path from 'path'
+import { clearDb, populateDbWithSeedData } from './testUtils'
+
+describe('Database seed data tests', () => {
+  let em: EntityManager
+
+  describe('seed data database population', () => {
+    // populate the database with seed data
+    before(async () => {
+      em = await globalEm
+      await populateDbWithSeedData()
+    })
+
+    // check that seed date exists
+    it('check that seed membership data exists', async () => {
+      const result = await em
+        .getRepository(Account)
+        .findOne({ where: { id: '1' }, relations: { membership: true } })
+      expect(result).to.not.be.null
+      expect(result?.membership.id).to.equal('1')
+    })
+
+    it('check that seed channel data exists', async () => {
+      const result = await em
+        .getRepository(Channel)
+        .findOne({ where: { id: '1' }, relations: { videos: true } })
+      expect(result).to.not.be.null
+      expect(result?.rewardAccount).to.equal(`test-reward-account-1`)
+      expect(result?.videos).to.have.length.above(0)
+      expect(result?.videos[0].id).to.equal('1')
+    })
+  })
+
+  describe('database cleanup', () => {
+    before(async () => {
+      await clearDb()
+    })
+    it('should clear the database', async () => {
+      const accounts = await em.getRepository(Account).find({})
+
+      expect(accounts).to.be.empty
+    })
+  })
+})

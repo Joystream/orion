@@ -16,4 +16,4 @@ if ! [[ "$(docker container inspect -f '{{.State.Running}}' orion_db)" = "true" 
 fi
 
 # Run the tests
-npx ts-mocha "./src/auth-server/tests/*.ts" -e 'process.env.DEBUG = "true"' --timeout 60000 --exit
+npx ts-mocha "./src/tests/integration/*.ts" --timeout 60000 --exit

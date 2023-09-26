@@ -55,6 +55,7 @@ import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { getChannelOwnerAccount, parseVideoTitle } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
+import { set } from 'lodash'
 
 @Resolver()
 export class AdminResolver {
@@ -266,49 +267,7 @@ export class AdminResolver {
     @Args() { featuredNftsIds }: SetFeaturedNftsInput
   ): Promise<SetFeaturedNftsResult> {
     const em = await this.em()
-    let newNumberOfNftsFeatured = 0
-
-    await em
-      .createQueryBuilder()
-      .update(`admin.owned_nft`)
-      .set({ is_featured: false })
-      .where({ is_featured: true })
-      .execute()
-
-    if (featuredNftsIds.length) {
-      const result = await em
-        .createQueryBuilder()
-        .update(`admin.owned_nft`)
-        .set({ is_featured: true })
-        .where({ id: In(featuredNftsIds) })
-        .execute()
-      newNumberOfNftsFeatured = result.affected || 0
-
-      // fetch all featured nfts and deposit notification for their creators
-      for (const featuredNftId of featuredNftsIds) {
-        const featuredNft = await em.getRepository('OwnedNft').findOne({
-          where: { id: featuredNftId },
-          relations: { video: { id: true, title: true, channel: true } },
-        })
-        if (featuredNft?.video?.channel) {
-          const notificationData = {
-            videoId: featuredNft.video.id,
-            videoTitle: parseVideoTitle(featuredNft.video),
-          }
-          const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
-          await addNotification(
-            em,
-            channelOwnerAccount,
-            new ChannelRecipient({ channel: featuredNft.video.channel.id }),
-            new NftFeaturedOnMarketPlace(notificationData)
-          )
-        }
-      }
-    }
-
-    return {
-      newNumberOfNftsFeatured,
-    }
+    return await setFeaturedNftsInner(em, featuredNftsIds)
   }
 
   @UseMiddleware(OperatorOnly)
@@ -387,5 +346,51 @@ export class AdminResolver {
     const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
     const signature = ed25519Sign(message, appKeypair)
     return { signature: u8aToHex(signature) }
+  }
+}
+
+export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: string[]) => {
+  let newNumberOfNftsFeatured = 0
+
+  await em
+    .createQueryBuilder()
+    .update(`admin.owned_nft`)
+    .set({ is_featured: false })
+    .where({ is_featured: true })
+    .execute()
+
+  if (featuredNftsIds.length) {
+    const result = await em
+      .createQueryBuilder()
+      .update(`admin.owned_nft`)
+      .set({ is_featured: true })
+      .where({ id: In(featuredNftsIds) })
+      .execute()
+    newNumberOfNftsFeatured = result.affected || 0
+
+    // fetch all featured nfts and deposit notification for their creators
+    for (const featuredNftId of featuredNftsIds) {
+      const featuredNft = await em.getRepository('OwnedNft').findOne({
+        where: { id: featuredNftId },
+        relations: { video: { id: true, title: true, channel: true } },
+      })
+      if (featuredNft?.video?.channel) {
+        const notificationData = {
+          videoId: featuredNft.video.id,
+          videoTitle: parseVideoTitle(featuredNft.video),
+        }
+        const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
+        await addNotification(
+          em,
+          channelOwnerAccount,
+          new ChannelRecipient({ channel: featuredNft.video.channel.id }),
+          new NftFeaturedOnMarketPlace(notificationData)
+        )
+      }
+    }
+  }
+
+  return {
+    newNumberOfNftsFeatured,
   }
 }
