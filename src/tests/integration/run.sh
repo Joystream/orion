@@ -15,5 +15,11 @@ if ! [[ "$(docker container inspect -f '{{.State.Running}}' orion_db)" = "true" 
     make migrate
 fi
 
+cleanup() {
+    docker-compose down -v
+}
+
 # Run the tests
 npx ts-mocha "./src/tests/integration/*.ts" --timeout 60000 --exit
+
+trap cleanup EXIT
