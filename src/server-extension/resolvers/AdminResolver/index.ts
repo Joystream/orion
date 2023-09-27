@@ -372,7 +372,7 @@ export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: s
     for (const featuredNftId of featuredNftsIds) {
       const featuredNft = await em.getRepository('OwnedNft').findOne({
         where: { id: featuredNftId },
-        relations: { video: { id: true, title: true, channel: true } },
+        relations: { video: { channel: true } },
       })
       if (featuredNft?.video?.channel) {
         const notificationData = {

@@ -8,6 +8,9 @@ import {
   YppUnverified,
   Notification,
   NotificationEmailDelivery,
+  OwnedNft,
+  NftOwnerChannel,
+  TransactionalStatusIdle,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 import { globalEm } from '../../utils/globalEm'
@@ -70,7 +73,16 @@ export async function populateDbWithSeedData() {
       viewsNum: 1,
       videoRelevance: 0,
     })
-    await em.save([video, channel])
+    const nft = new OwnedNft({
+      id: video.id,
+      videoId: video.id,
+      creatorRoyalty: null,
+      owner: new NftOwnerChannel({ channel: channel.id }),
+      createdAt: new Date(),
+      isFeatured: false,
+      transactionalStatus: new TransactionalStatusIdle(),
+    })
+    await em.save([channel, video, nft])
   }
 }
 
@@ -78,6 +90,7 @@ export async function clearDb(): Promise<void> {
   const em = await globalEm
   await em.getRepository(NotificationEmailDelivery).delete({})
   await em.getRepository(Notification).delete({})
+  await em.getRepository(OwnedNft).delete({})
   await em.getRepository(Video).delete({})
   await em.getRepository(Channel).delete({})
   await em.getRepository(Account).delete({})
