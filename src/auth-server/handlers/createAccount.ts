@@ -22,7 +22,7 @@ export const createAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      payload: { email, memberId, joystreamAccountId },
+      payload: { email, memberId, joystreamAccountId, referrerChannelId },
     } = req.body
     const { authContext } = res.locals
     const em = await globalEm
@@ -88,6 +88,7 @@ export const createAccount: (
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
         notificationPreferences,
+        referrerChannelId: referrerChannelId || null,
       })
 
       await em.save([

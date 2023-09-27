@@ -1,5 +1,5 @@
-module.exports = class Data1695644668950 {
-    name = 'Data1695644668950'
+module.exports = class Data1695827100689 {
+    name = 'Data1695827100689'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -97,7 +97,7 @@ module.exports = class Data1695644668950 {
         await db.query(`CREATE TABLE "notification" ("id" character varying NOT NULL, "account_id" character varying, "notification_type" jsonb NOT NULL, "event_id" character varying, "status" jsonb NOT NULL, "in_app" boolean NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "recipient" jsonb NOT NULL, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_6bfa96ab97f1a09d73091294ef" ON "notification" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_122be1f0696e0255acf95f9e33" ON "notification" ("event_id") `)
-        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "user_id" character varying NOT NULL, "email" text NOT NULL, "is_email_confirmed" boolean NOT NULL, "is_blocked" boolean NOT NULL, "registered_at" TIMESTAMP WITH TIME ZONE NOT NULL, "membership_id" character varying NOT NULL, "joystream_account" text NOT NULL, "notification_preferences" jsonb NOT NULL, CONSTRAINT "Account_joystreamAccount" UNIQUE ("joystream_account") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_membership" UNIQUE ("membership_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_email" UNIQUE ("email") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_user" UNIQUE ("user_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_efef1e5fdbe318a379c06678c5" UNIQUE ("user_id"), CONSTRAINT "REL_601b93655bcbe73cb58d8c80cd" UNIQUE ("membership_id"), CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "account" ("id" character varying NOT NULL, "user_id" character varying NOT NULL, "email" text NOT NULL, "is_email_confirmed" boolean NOT NULL, "is_blocked" boolean NOT NULL, "registered_at" TIMESTAMP WITH TIME ZONE NOT NULL, "membership_id" character varying NOT NULL, "joystream_account" text NOT NULL, "notification_preferences" jsonb NOT NULL, "referrer_channel_id" text, CONSTRAINT "Account_joystreamAccount" UNIQUE ("joystream_account") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_membership" UNIQUE ("membership_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_email" UNIQUE ("email") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "Account_user" UNIQUE ("user_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_efef1e5fdbe318a379c06678c5" UNIQUE ("user_id"), CONSTRAINT "REL_601b93655bcbe73cb58d8c80cd" UNIQUE ("membership_id"), CONSTRAINT "PK_54115ee388cdb6d86bb4bf5b2ea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_efef1e5fdbe318a379c06678c5" ON "account" ("user_id") `)
         await db.query(`CREATE INDEX "IDX_4c8f96ccf523e9a3faefd5bdd4" ON "account" ("email") `)
         await db.query(`CREATE INDEX "IDX_601b93655bcbe73cb58d8c80cd" ON "account" ("membership_id") `)

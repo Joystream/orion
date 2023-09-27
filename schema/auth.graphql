@@ -114,6 +114,9 @@ type Account @entity {
 
   "notification preferences for the account"
   notificationPreferences: AccountNotificationPreferences!
+
+  "ID of the channel which referred the user to the platform"
+  referrerChannelId: String
 }
 
 type AccountNotificationPreferences {
