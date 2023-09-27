@@ -87,8 +87,9 @@ export async function processVideoCreatedEvent({
       if (entity.entryAppId && appAction.metadata) {
         const appActionMetadata = deserializeMetadata(AppActionMetadata, appAction.metadata)
 
-        appActionMetadata?.videoId &&
+        if (appActionMetadata?.videoId) {
           integrateMeta(entity, { ytVideoId: appActionMetadata.videoId }, ['ytVideoId'])
+        }
       }
       return processVideoMetadata(
         overlay,

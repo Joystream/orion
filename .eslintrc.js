@@ -16,6 +16,7 @@ module.exports = {
     'standard',
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:chai-friendly/recommended',
     'plugin:prettier/recommended',
     'prettier',
   ],

@@ -191,7 +191,7 @@ describe('notifications tests', () => {
         .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre)
       const account = await overlay
         .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', channel?.ownerMemberId!)
+        .getOneByRelationOrFail('membershipId', channel!.ownerMemberId!)
       // complete the missing checks as above
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('NewAuctionBid')
