@@ -44,7 +44,7 @@ jobs:
       - name: Run tests
         run: npm run tests:auth-api
   notifications:
-    name: Auth API tests
+    name: orion_db<->service tests for Q&A failing notifications
     needs: [migrations]
     runs-on: ${{ matrix.os }}
     strategy:
