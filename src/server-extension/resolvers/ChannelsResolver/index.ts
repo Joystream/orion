@@ -40,7 +40,6 @@ import {
   YppVerified,
   YppSuspended,
   ChannelRecipient,
-  MemberRecipient,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -51,7 +50,6 @@ import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
-import { getChannelOwnerAccount } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 
@@ -99,7 +97,6 @@ export class ChannelsResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
@@ -179,7 +176,6 @@ export class ChannelsResolver {
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }

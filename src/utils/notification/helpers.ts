@@ -154,8 +154,8 @@ async function addRuntimeNotification(
   notificationType: NotificationType,
   event: Event
 ) {
-  // get notification Id from orion_db in any case
   const em = overlay.getEm()
+  // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, RUNTIME_NOTIFICATION_ID_TAG)
 
   // check that on-notification is not already present in orion_db in case the processor has been restarted (but not orion_db)
@@ -180,7 +180,7 @@ async function addRuntimeNotification(
   notification.inApp = pref.inAppEnabled
 
   if (pref.emailEnabled) {
-    await createEmailNotification(em, notification)
+    await createEmailNotification(overlay, notification)
   }
 
   await saveNextNotificationId(em, nextNotificationId + 1, RUNTIME_NOTIFICATION_ID_TAG)

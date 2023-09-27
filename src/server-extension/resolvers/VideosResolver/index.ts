@@ -175,7 +175,6 @@ export class VideosResolver {
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql
-    console.log('connectionQuery', connectionQuerySql)
 
     const result = await ctx.openreader.executeQuery(connectionQuery)
 
@@ -189,7 +188,6 @@ export class VideosResolver {
       )
       // Override the raw `sql` string in `countQuery` with the modified query
       ;(countQuery as { sql: string }).sql = countQuerySql
-      console.log('countQuery', countQuerySql)
       result.totalCount = await ctx.openreader.executeQuery(countQuery)
     }
 

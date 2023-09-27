@@ -54,9 +54,8 @@ import { AppAction } from '@joystream/metadata-protobuf'
 import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
-import { getChannelOwnerAccount, parseVideoTitle } from '../../../mappings/content/utils'
+import { parseVideoTitle } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
-import { set } from 'lodash'
 
 @Resolver()
 export class AdminResolver {

@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { Account, Channel, OwnedNft } from '../../model'
+import { Account, Auction, AuctionTypeEnglish, Channel, OwnedNft } from '../../model'
 import { globalEm } from '../../utils/globalEm'
 import { EntityManager } from 'typeorm'
 import _ from 'lodash'
@@ -45,6 +45,17 @@ describe('Database seed data tests', () => {
         expect(result!.creatorRoyalty).to.be.undefined
         expect(result!.transactionalStatus?.isTypeOf).to.equal('TransactionalStatusIdle')
         expect(result!.lastSalePrice).to.be.undefined
+      })
+      it('checks that auction data exist', async () => {
+        const result = await em
+          .getRepository(Auction)
+          .findOne({ where: { id: '1' }, relations: { bids: true } })
+        expect(result).to.not.be.null
+        expect(result?.nftId).to.equal('5')
+        expect(result?.auctionType.isTypeOf).to.equal('AuctionTypeEnglish')
+        expect((result?.auctionType as AuctionTypeEnglish).duration).to.equal(100)
+        expect((result?.auctionType as AuctionTypeEnglish).extensionPeriod).to.equal(10)
+        expect(result?.bids).to.have.length(5)
       })
     })
   })

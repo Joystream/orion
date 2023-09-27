@@ -11,9 +11,14 @@ import {
   OwnedNft,
   NftOwnerChannel,
   TransactionalStatusIdle,
+  Auction,
+  AuctionTypeEnglish,
+  Bid,
+  TransactionalStatusAuction,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 import { globalEm } from '../../utils/globalEm'
+import { SubstrateBlock } from '@subsquid/substrate-processor'
 
 // TODO: refactor this using the Builder pattern
 export async function populateDbWithSeedData() {
@@ -83,13 +88,56 @@ export async function populateDbWithSeedData() {
       transactionalStatus: new TransactionalStatusIdle(),
     })
     await em.save([channel, video, nft])
+    if (i === 5) {
+      const auction = new Auction({
+        id: '1',
+        nftId: nft.id,
+        startingPrice: BigInt(100),
+        buyNowPrice: BigInt(1000),
+        auctionType: new AuctionTypeEnglish({
+          duration: 100,
+          extensionPeriod: 10,
+          minimalBidStep: BigInt(10),
+          plannedEndAtBlock: 101, // start + duration
+        }),
+        startsAtBlock: 1,
+        isCanceled: false,
+        isCompleted: false,
+      })
+      await em.save(auction)
+      nft.transactionalStatus = new TransactionalStatusAuction({ auction: auction.id })
+      await em.save(nft)
+      const bids = []
+      for (let j = 0; j < 5; ++j) {
+        const newBid = new Bid({
+          id: `${i}-${j}`,
+          createdAt: new Date(),
+          auctionId: auction.id,
+          nftId: nft.id,
+          bidderId: j.toString(),
+          amount: BigInt(100 + j * 10),
+          createdInBlock: j + 1,
+          isCanceled: false,
+          indexInBlock: j,
+        })
+        await em.save(newBid)
+        bids.push(newBid)
+      }
+      auction.bids = bids
+      auction.topBidId = bids[4].id
+      await em.save(auction)
+    }
   }
 }
 
 export async function clearDb(): Promise<void> {
   const em = await globalEm
+  await auctionTearDown(em)
+
   await em.getRepository(NotificationEmailDelivery).delete({})
   await em.getRepository(Notification).delete({})
+  await em.getRepository(Bid).delete({})
+  await em.getRepository(Auction).delete({})
   await em.getRepository(OwnedNft).delete({})
   await em.getRepository(Video).delete({})
   await em.getRepository(Channel).delete({})
@@ -97,3 +145,63 @@ export async function clearDb(): Promise<void> {
   await em.getRepository(Membership).delete({})
   await em.getRepository(User).delete({})
 }
+
+export const auctionTearDown = async (em: EntityManager) => {
+  const auction = await em
+    .getRepository(Auction)
+    .findOneOrFail({ where: { id: '1' }, relations: { topBid: true, bids: true } })
+  auction.topBid = null
+  auction.topBidId = null
+  auction.bids = []
+  await em.save(auction)
+}
+
+export class TestBlock implements SubstrateBlock {
+  id: string
+  height: number
+  hash: string
+  parentHash: string
+  extrinsics: any[]
+  events: any[]
+  timestamp: number
+  specId: string
+  extrinsicsRoot: string
+  stateRoot: string
+  constructor(
+    id: string,
+    height: number,
+    hash: string,
+    parentHash: string,
+    extrinsics: any[],
+    events: any[],
+    timestamp: number,
+    specId: string,
+    extrinsicsRoot: string,
+    stateRoot: string
+  ) {
+    this.id = id
+    this.height = height
+    this.hash = hash
+    this.parentHash = parentHash
+    this.extrinsics = extrinsics
+    this.events = events
+    this.timestamp = timestamp
+    this.specId = specId
+    this.extrinsicsRoot = extrinsicsRoot
+    this.stateRoot = stateRoot
+  }
+}
+
+export const defaultTestBlock = () =>
+  new TestBlock(
+    '1-0x1234',
+    1,
+    '0x1234',
+    '0x1234',
+    [],
+    [],
+    Date.now(),
+    'test-spec',
+    '0x1234',
+    '0x1234'
+  )

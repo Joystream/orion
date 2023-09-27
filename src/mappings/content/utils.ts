@@ -52,7 +52,6 @@ import {
   EnglishAuctionWon,
   EnglishAuctionLost,
   Membership,
-  NewAuctionBid,
   NftRoyaltyPaid,
   MemberRecipient,
   NotificationType,

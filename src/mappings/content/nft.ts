@@ -58,7 +58,6 @@ import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils
 import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay } from '../../utils/overlay'
-import { over } from 'lodash'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -791,8 +790,4 @@ export const auctionBidMadeInner = async (
   // Add nft history and activities entry
   addNftHistoryEntry(overlay, nft.id, event.id)
   addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
-
-  if (process.env.DEBUG === 'true' || process.env.DEBUG === '1') {
-    await overlay.updateDatabase()
-  }
 }
