@@ -657,9 +657,9 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+  const ownerAccount = await getChannelOwnerAccount(overlay, channel)
   await addNotification(
-    overlay.getEm(),
+    overlay,
     ownerAccount,
     new ChannelRecipient({ channel: channel.id }),
     new DirectChannelPaymentByMember({ amount, payerHandle: member.handle }),

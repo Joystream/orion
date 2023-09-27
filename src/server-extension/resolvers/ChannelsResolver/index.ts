@@ -224,7 +224,9 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
 
-      const ownerAccount = await getChannelOwnerAccount(em, channel)
+      const ownerAccount = channel.ownerMemberId
+        ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })
+        : null
       if (ownerAccount) {
         if (!ctx.account) {
           // account not null because of the UseMiddleware(AccountOnly) decorator

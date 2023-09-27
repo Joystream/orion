@@ -55,8 +55,10 @@ import {
   MemberRecipient,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
-import { assertNotNull } from '@subsquid/substrate-processor'
+import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
 import { addNotification } from '../../utils/notification'
+import { EntityManagerOverlay } from '../../utils/overlay'
+import { over } from 'lodash'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -177,49 +179,15 @@ export async function processAuctionBidMadeEvent({
     asV1000: [memberId, videoId, bidAmount],
   },
 }: EventHandlerContext<'Content.AuctionBidMade'>): Promise<void> {
-  // create a new bid
-  const { bid, auction, previousTopBid } = await createBid(
+  await auctionBidMadeInner(
     overlay,
     block,
     indexInBlock,
+    extrinsicHash,
     memberId.toString(),
     videoId.toString(),
     bidAmount
   )
-  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
-
-  // extend auction duration when needed
-  if (
-    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' &&
-    auction.auctionType.plannedEndAtBlock - auction.auctionType.extensionPeriod <= block.height
-  ) {
-    auction.auctionType.plannedEndAtBlock += auction.auctionType.extensionPeriod
-  }
-
-  // add new event
-  const event = overlay.getRepository(Event).new({
-    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
-    data: new AuctionBidMadeEventData({
-      bid: bid.id,
-      nftOwner: nft.owner,
-    }),
-  })
-
-  // Notify outbidded member & nft owner (if he's creator)
-  const newTopBidderHandle = await memberHandleById(overlay, memberId.toString())
-  const videoTitle = parseVideoTitle(
-    await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
-  )
-  await addNewBidNotification(overlay, nft.owner, previousTopBid, event, {
-    videoId: videoId.toString(),
-    videoTitle,
-    newTopBidderHandle,
-    bidAmount,
-  })
-
-  // Add nft history and activities entry
-  addNftHistoryEntry(overlay, nft.id, event.id)
-  addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
 }
 
 export async function processAuctionBidCanceledEvent({
@@ -769,4 +737,62 @@ export async function processNftSlingedBackToTheOriginalArtistEvent({
   nft.owner = new NftOwnerChannel({ channel: assertNotNull(video.channelId) })
 
   // FIXME: No event?
+}
+
+export const auctionBidMadeInner = async (
+  overlay: EntityManagerOverlay,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  extrinsicHash: string | undefined,
+  memberId: string,
+  videoId: string,
+  bidAmount: bigint
+) => {
+  // create a new bid
+  const { bid, auction, previousTopBid } = await createBid(
+    overlay,
+    block,
+    indexInBlock,
+    memberId.toString(),
+    videoId.toString(),
+    bidAmount
+  )
+  const nft = await overlay.getRepository(OwnedNft).getByIdOrFail(videoId.toString())
+
+  // extend auction duration when needed
+  if (
+    auction.auctionType.isTypeOf === 'AuctionTypeEnglish' &&
+    auction.auctionType.plannedEndAtBlock - auction.auctionType.extensionPeriod <= block.height
+  ) {
+    auction.auctionType.plannedEndAtBlock += auction.auctionType.extensionPeriod
+  }
+
+  // add new event
+  const event = overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new AuctionBidMadeEventData({
+      bid: bid.id,
+      nftOwner: nft.owner,
+    }),
+  })
+
+  // Notify outbidded member & nft owner (if he's creator)
+  const newTopBidderHandle = await memberHandleById(overlay, memberId.toString())
+  const videoTitle = parseVideoTitle(
+    await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
+  )
+  await addNewBidNotification(overlay, nft.owner, previousTopBid, event, {
+    videoId: videoId.toString(),
+    videoTitle,
+    newTopBidderHandle,
+    bidAmount,
+  })
+
+  // Add nft history and activities entry
+  addNftHistoryEntry(overlay, nft.id, event.id)
+  addNftActivity(overlay, [bid.bidderId, previousTopBid?.bidderId], event.id)
+
+  if (process.env.DEBUG === 'true' || process.env.DEBUG === '1') {
+    await overlay.updateDatabase()
+  }
 }

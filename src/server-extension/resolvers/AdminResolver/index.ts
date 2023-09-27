@@ -31,6 +31,7 @@ import {
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
 import {
+  Account,
   ChannelRecipient,
   NftFeaturedOnMarketPlace,
   Video,
@@ -379,7 +380,11 @@ export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: s
           videoId: featuredNft.video.id,
           videoTitle: parseVideoTitle(featuredNft.video),
         }
-        const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
+        const channelOwnerAccount = featuredNft.video.channel.ownerMemberId
+          ? await em
+              .getRepository(Account)
+              .findOneBy({ membershipId: featuredNft.video.channel.ownerMemberId })
+          : null
         await addNotification(
           em,
           channelOwnerAccount,
