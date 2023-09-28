@@ -55,6 +55,7 @@ import {
   CreatorReceivesAuctionBid,
   AuctionWon,
   AuctionLost,
+  AuctionType,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -792,15 +793,21 @@ export type AuctionNotifiers = {
   lost: () => NotificationType
 }
 
-export const auctionNotifiers = (videoId: string, videoTitle: string): AuctionNotifiers => {
+export const auctionNotifiers = (
+  videoId: string,
+  videoTitle: string,
+  auctionType: AuctionType
+): AuctionNotifiers => {
   return {
     won: () =>
       new AuctionWon({
+        type: auctionType,
         videoId,
         videoTitle,
       }),
     lost: () =>
       new AuctionLost({
+        type: auctionType,
         videoId,
         videoTitle,
       }),
