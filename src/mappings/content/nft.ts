@@ -50,6 +50,7 @@ import {
   NftOfferedEventData,
   Account,
   MemberRecipient,
+  AuctionTypeOpen,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
@@ -307,7 +308,7 @@ export async function processEnglishAuctionSettledEvent({
     overlay,
     biddersMemberIds as string[],
     winnerId,
-    auctionNotifiers(video.id, parseVideoTitle(video)),
+    auctionNotifiers(video.id, parseVideoTitle(video), auction.auctionType),
     event
   )
 
@@ -342,7 +343,7 @@ export async function processBidMadeCompletingAuctionEvent({
   )
 
   // finish auction and transfer ownership
-  const { nft, winningBid, previousNftOwner } = await finishAuction(
+  const { nft, auction, winningBid, previousNftOwner } = await finishAuction(
     overlay,
     videoId.toString(),
     block
@@ -369,7 +370,7 @@ export async function processBidMadeCompletingAuctionEvent({
     overlay,
     biddersMemberIds as string[],
     memberId,
-    auctionNotifiers(video.id, parseVideoTitle(video)),
+    auctionNotifiers(video.id, parseVideoTitle(video), auction.auctionType),
     event
   )
 
@@ -393,7 +394,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   },
 }: EventHandlerContext<'Content.OpenAuctionBidAccepted'>): Promise<void> {
   // finish auction
-  const { previousNftOwner, winningBid, nft, auctionBids } = await finishAuction(
+  const { previousNftOwner, auction, winningBid, nft, auctionBids } = await finishAuction(
     overlay,
     videoId.toString(),
     block,
@@ -425,7 +426,7 @@ export async function processOpenAuctionBidAcceptedEvent({
     overlay,
     biddersMemberIds.filter((id) => id) as string[],
     winnerId,
-    auctionNotifiers(video.id, parseVideoTitle(video)),
+    auctionNotifiers(video.id, parseVideoTitle(video), auction.auctionType),
     event
   )
 
