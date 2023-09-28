@@ -73,7 +73,6 @@ union NotificationType =
   | ChannelExcluded
   | VideoExcluded
   | NewChannelFollower
-  | NewAuctionBid
   | NftFeaturedOnMarketPlace
   | CommentPostedToVideo
   | VideoLiked
@@ -289,20 +288,6 @@ type NewAuction @variant {
 
   "video Id used for link"
   videoId: String!
-}
-
-type NewAuctionBid @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-
-  "bidder handle for notification text"
-  bidderHandle: String!
-
-  "bid amount"
-  amount: BigInt!
 }
 
 type NewNftOnSale @variant {
