@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { DeliveryStatus, EmailDeliveryStatus, FailedDelivery } from '../../model'
+import { EmailDeliveryAttempt, EmailDeliveryStatus, NotificationEmailDelivery } from '../../model'
 import { EntityManager } from 'typeorm'
 import { clearDb, populateDbWithSeedData } from './testUtils'
 import { globalEm } from '../../utils/globalEm'
@@ -18,32 +18,29 @@ describe('Scheduler', () => {
     await populateDbWithSeedData(em)
   })
 
-  // afterEach(async () => {
-  //   await clearDb(em)
-  // })
-
-  xit('should change EmailDeliveryStatus.deliveryStatus when success', async () => {
-    await sendNew()
-
-    const result = await em
-      .getRepository(EmailDeliveryStatus)
-      .findOneByOrFail({ notificationDelivery: { notification: { id: okNotificationId } } })
-    expect(result.deliveryStatus).to.equal(DeliveryStatus.SUCCESS)
+  afterEach(async () => {
+    await clearDb(em)
   })
 
-  xit('should create SuccessReport when successful', async () => {
-    await sendNew()
+  describe('case success at first attempt', () => {
+    let emailDelivery: NotificationEmailDelivery
+    before(async () => {
+      await sendNew()
 
-    const result = await em.getRepository(EmailDeliveryStatus).findOneOrFail({
-      where: { notificationDelivery: { notification: { id: okNotificationId } } },
-      relations: { successDelivery: true },
+      emailDelivery = await em
+        .getRepository(NotificationEmailDelivery)
+        .findOneByOrFail({ notification: { id: okNotificationId } })
+    })
+    it('should change email delivery to discard when success', async () => {
+      expect(emailDelivery.discard).to.be.true
     })
 
-    expect(result.successDelivery).to.not.be.empty
-    expect(result.successDelivery[0]).to.have.property('id')
-    expect(result.successDelivery[0]).to.have.property('timestamp').to.be.not.null
+    it('should create a successful attempt', async () => {
+      expect(emailDelivery.attempts[-1].notificationDeliveryId).to.equal(emailDelivery.id)
+      expect(emailDelivery.attempts[-1].status.isTypeOf).to.equal('SuccessfulDelivery')
+    })
   })
-  xit('should change EmailDeliveryStatus.deliveryStatus when failure', async () => {
+  it('should change EmailDeliveryStatus.deliveryStatus when failure', async () => {
     await sendNew()
 
     const result = await em
@@ -51,7 +48,7 @@ describe('Scheduler', () => {
       .findOneByOrFail({ notificationDelivery: { notification: { id: errNotificationId } } })
     expect(result.deliveryStatus).to.equal(DeliveryStatus.FAILURE)
   })
-  xit('should create FailureReport when failure', async () => {
+  it('should create FailureReport when failure', async () => {
     await sendNew()
 
     const result = await em.getRepository(EmailDeliveryStatus).findOneOrFail({
@@ -64,7 +61,7 @@ describe('Scheduler', () => {
     expect(result.failedDelivery[0]).to.have.property('timestamp').to.be.not.null
     expect(result.failedDelivery[0]).to.have.property('errorStatus').to.be.not.null
   })
-  xit('should keep EmailDeliveryStatus.deliveryStatus to failure on a failed second attempt', async () => {
+  it('should keep EmailDeliveryStatus.deliveryStatus to failure on a failed second attempt', async () => {
     await sendNew()
 
     await sendFailed()
@@ -91,7 +88,7 @@ describe('Scheduler', () => {
     expect(result[1]).to.have.property('timestamp').to.be.not.null
     expect(result[1]).to.have.property('errorStatus').to.be.not.null
   })
-  xit('should set the EmailDeliveryStatus.deliveryStatus to Discard after N attempts', async () => {
+  it('should set the EmailDeliveryStatus.deliveryStatus to Discard after N attempts', async () => {
     await sendNew() // first attempt
     const maxAttempts = await getMaxAttempts(em)
 
@@ -105,7 +102,7 @@ describe('Scheduler', () => {
 
     expect(result.deliveryStatus).to.equal(DeliveryStatus.DISCARD)
   })
-  xit('should create at most N FailureReports after more than N attempts', async () => {
+  it('should create at most N FailureReports after more than N attempts', async () => {
     await sendNew()
     const maxAttempts = await getMaxAttempts(em)
 
