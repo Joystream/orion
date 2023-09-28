@@ -228,7 +228,11 @@ type ChannelFundsWithdrawn @variant {
 }
 
 type ChannelCreated @variant {
-  phantom: Int
+  "id for link construction"
+  channelId: String!
+
+  "title for link construction"
+  channelTitle: String!
 }
 
 type CommentReply @variant {

@@ -131,7 +131,7 @@ export async function processChannelCreatedEvent({
       overlay,
       ownerAccount,
       new MemberRecipient({ membership: ownerMember.id }),
-      new ChannelCreated({}),
+      new ChannelCreated({ channelId: channel.id, channelTitle: channel.title || '??' }),
       event
     )
   }
