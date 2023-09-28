@@ -169,7 +169,7 @@ describe('notifications tests', () => {
       expect(nft.isFeatured).to.be.true
     })
   })
-  describe('should add notification for creator receiving a new auction bid', () => {
+  describe('New bid made', () => {
     let nft: OwnedNft
     let overlay: EntityManagerOverlay
     const memberId = '5'
