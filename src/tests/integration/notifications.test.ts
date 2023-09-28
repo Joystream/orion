@@ -164,58 +164,65 @@ describe('notifications tests', () => {
       expect(nft.isFeatured).to.be.true
     })
   })
-  it('should add notification for creator receiving a new auction bid', async () => {
-    const memberId = '6'
+  describe('should add notification for creator receiving a new auction bid', () => {
+    let nft: OwnedNft
+    let overlay: EntityManagerOverlay
+    const memberId = '5'
+    const outbiddedMember = '4'
     const videoId = '5'
-    const bidAmount = BigInt(100000)
-    const nextNotificationIdPre = await getNextNotificationId(em, true)
-    const nft = await em.getRepository(OwnedNft).findOneByOrFail({ videoId })
-    const overlay = await createOverlay()
+    let nextNotificationIdPre: number
 
-    await auctionBidMadeInner(
-      overlay,
-      defaultTestBlock(),
-      100,
-      undefined,
-      memberId,
-      videoId,
-      bidAmount
-    )
+    before(async () => {
+      const bidAmount = BigInt(100000)
+      nextNotificationIdPre = await getNextNotificationId(em, true)
+      nft = await em.getRepository(OwnedNft).findOneByOrFail({ videoId })
+      overlay = await createOverlay()
 
+      await auctionBidMadeInner(
+        overlay,
+        defaultTestBlock(),
+        100,
+        undefined,
+        memberId,
+        videoId,
+        bidAmount
+      )
+    })
+    it('should deposit notification for member outbidded', async () => {
+      const notification = await overlay
+        .getRepository(Notification)
+        .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre)
+      const account = await overlay
+        .getRepository(Account)
+        .getOneByRelationOrFail('membershipId', outbiddedMember)
+
+      expect(notification).not.to.be.null
+      expect(notification!.notificationType.isTypeOf).to.equal('HigherBidPlaced')
+      expect(notification!.status.isTypeOf).to.equal('Unread')
+      expect(notification!.inApp).to.be.true
+      expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
+      expect((notification!.recipient as MemberRecipient).membership).to.equal(outbiddedMember)
+      expect(notification?.accountId).to.equal(account?.id)
+    })
     it('should deposit notification for creator receiving a new auction bid', async () => {
       const channel = await em
         .getRepository(Channel)
         .findOneBy({ id: (nft.owner as NftOwnerChannel).channel })
       const notification = await overlay
         .getRepository(Notification)
-        .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre)
+        .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + (nextNotificationIdPre + 1))
       const account = await overlay
         .getRepository(Account)
         .getOneByRelationOrFail('membershipId', channel!.ownerMemberId!)
+
       // complete the missing checks as above
       expect(notification).not.to.be.null
-      expect(notification!.notificationType.isTypeOf).to.equal('NewAuctionBid')
+      expect(notification!.notificationType.isTypeOf).to.equal('CreatorReceivesAuctionBid')
       expect(notification!.status.isTypeOf).to.equal('Unread')
       expect(notification!.inApp).to.be.true
       expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
       expect(channel).not.to.be.null
       expect((notification!.recipient as ChannelRecipient).channel).to.equal(channel!.id)
-      expect(notification?.accountId).to.equal(account?.id)
-    })
-    it('should deposit notificatino for memeber outbidded', async () => {
-      const notification = await overlay
-        .getRepository(Notification)
-        .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + (nextNotificationIdPre + 1))
-      const account = await overlay
-        .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', memberId)
-      // complete the missing checks as above
-      expect(notification).not.to.be.null
-      expect(notification!.notificationType.isTypeOf).to.equal('HigherBidPlaced')
-      expect(notification!.status.isTypeOf).to.equal('Unread')
-      expect(notification!.inApp).to.be.true
-      expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
-      expect((notification!.recipient as MemberRecipient).membership).to.equal(memberId)
       expect(notification?.accountId).to.equal(account?.id)
     })
   })

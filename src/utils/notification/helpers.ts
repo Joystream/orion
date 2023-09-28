@@ -115,6 +115,8 @@ export function preferencesForNotification(
       return preferences.auctionLost
     case 'OpenAuctionWon':
       return preferences.auctionWon
+    case 'HigherBidPlaced':
+      return preferences.higherBidThanYoursMade
     default:
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
@@ -174,10 +176,10 @@ async function addRuntimeNotification(
     notificationType,
     event
   )
-  overlay.getRepository(Notification).new(notification)
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
   notification.inApp = pref.inAppEnabled
+  overlay.getRepository(Notification).new(notification)
 
   if (pref.emailEnabled) {
     await createEmailNotification(overlay, notification)

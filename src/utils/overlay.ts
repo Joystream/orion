@@ -264,7 +264,9 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     const entity = new this.EntityClass(entityFields)
     // normalize the input (remove UTF-8 null characters)
     this.normalizeInput(entity)
-    Logger.get().debug(`Creating new ${this.entityName}: ${entity.id}`)
+    if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
+      Logger.get().debug(`Creating new ${this.entityName}: ${entity.id}`)
+    }
     // Entities with the same id will override existing ones (!)
     this.cached.set(entity.id, { entity, state: CachedEntityState.ToBeSaved })
     return entity
@@ -301,10 +303,12 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     const logger = Logger.get()
     const toBeSaved = this.getAllToBeSaved()
     if (toBeSaved.length) {
-      logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
-      logger.debug(
-        `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
-      )
+      if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
+        logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
+        logger.debug(
+          `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
+        )
+      }
       await this.repository.save(toBeSaved)
     }
   }
