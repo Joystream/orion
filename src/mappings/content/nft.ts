@@ -47,7 +47,6 @@ import {
   NewAuction,
   NewNftOnSale,
   NftPurchased,
-  BidMadeCompletingAuction,
   NftOfferedEventData,
   Account,
   MemberRecipient,
@@ -373,16 +372,6 @@ export async function processBidMadeCompletingAuctionEvent({
     auctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
-
-  // notify previous owner if he's a channel owner
-  const winnerHandle = await memberHandleById(overlay, memberId.toString())
-  const notificationData = new BidMadeCompletingAuction({
-    videoId: video.id,
-    videoTitle: parseVideoTitle(video),
-    amount: winningBid.amount,
-    bidderHandle: winnerHandle,
-  })
-  await maybeNotifyNftCreator(overlay, previousNftOwner, notificationData, event)
 
   if (nft.creatorRoyalty) {
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)

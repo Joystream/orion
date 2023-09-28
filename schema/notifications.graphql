@@ -82,7 +82,6 @@ union NotificationType =
   | NftRoyaltyPaid # royaltiy received
   | DirectChannelPaymentByMember # channel payment received
   | ChannelFundsWithdrawn # channel funds withdrawn
-  | BidMadeCompletingAuction
   | ChannelCreated # channel created
   | CommentReply # reply to comment
   | ReactionToComment # reaction to comment
@@ -92,9 +91,6 @@ union NotificationType =
   | HigherBidPlaced # higher bid than yours made
   | AuctionWon # auction won
   | AuctionLost # auction lost
-# | NftOffered
-# | EnglishAuctionSettled
-
 type ChannelSuspended @variant {
   phantom: Int
 }
