@@ -80,6 +80,7 @@ export interface components {
         memberId: string
         email: string
         encryptionArtifacts?: components['schemas']['EncryptionArtifacts']
+        referrerChannelId?: string
       }
     }
     ChangeAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
