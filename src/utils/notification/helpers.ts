@@ -79,8 +79,6 @@ export function preferencesForNotification(
       return preferences.videoLiked
     case 'VideoDisliked':
       return preferences.videoDisliked
-    case 'EnglishAuctionSettled':
-      return preferences.timedAuctionExpired
     case 'ChannelSuspended':
       return preferences.yppChannelSuspended
     case 'ChannelVerified':
@@ -107,17 +105,13 @@ export function preferencesForNotification(
       return preferences.newNftOnAuction
     case 'NewNftOnSale':
       return preferences.newNftOnSale
-    case 'EnglishAuctionLost':
-      return preferences.auctionLost
-    case 'EnglishAuctionWon':
-      return preferences.auctionWon
-    case 'OpenAuctionLost':
-      return preferences.auctionLost
-    case 'OpenAuctionWon':
-      return preferences.auctionWon
     case 'HigherBidPlaced':
       return preferences.higherBidThanYoursMade
-    default:
+    case 'AuctionWon':
+      return preferences.auctionLost
+    case 'AuctionLost':
+      return preferences.auctionWon
+    default: // all the remaining notifications (v2 scope) are not enabled by default
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
 }

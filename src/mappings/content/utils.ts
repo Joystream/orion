@@ -47,16 +47,14 @@ import {
   ChannelFollow,
   Account,
   HigherBidPlaced,
-  OpenAuctionWon,
-  OpenAuctionLost,
-  EnglishAuctionWon,
-  EnglishAuctionLost,
   Membership,
   NftRoyaltyPaid,
   MemberRecipient,
   NotificationType,
   ChannelRecipient,
   CreatorReceivesAuctionBid,
+  AuctionWon,
+  AuctionLost,
 } from '../../model'
 import { criticalError } from '../../utils/misc'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -794,36 +792,15 @@ export type AuctionNotifiers = {
   lost: () => NotificationType
 }
 
-export const openAuctionNotifiers = async (
-  videoId: string,
-  videoTitle: string
-): Promise<AuctionNotifiers> => {
+export const auctionNotifiers = (videoId: string, videoTitle: string): AuctionNotifiers => {
   return {
     won: () =>
-      new OpenAuctionWon({
+      new AuctionWon({
         videoId,
         videoTitle,
       }),
     lost: () =>
-      new OpenAuctionLost({
-        videoId,
-        videoTitle,
-      }),
-  }
-}
-
-export const englishAuctionNotifiers = async (
-  videoId: string,
-  videoTitle: string
-): Promise<AuctionNotifiers> => {
-  return {
-    won: () =>
-      new EnglishAuctionWon({
-        videoId,
-        videoTitle,
-      }),
-    lost: () =>
-      new EnglishAuctionLost({
+      new AuctionLost({
         videoId,
         videoTitle,
       }),

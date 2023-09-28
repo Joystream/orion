@@ -68,34 +68,32 @@ type ChannelRecipient @variant {
 }
 
 union NotificationType =
-    ChannelSuspended
-  | ChannelVerified
-  | ChannelExcluded
-  | VideoExcluded
-  | NewChannelFollower
-  | NftFeaturedOnMarketPlace
-  | CommentPostedToVideo
-  | VideoLiked
-  | VideoDisliked
-  | NftPurchased
-  | CreatorReceivesAuctionBid
-  | NftRoyaltyPaid
-  | DirectChannelPaymentByMember
-  | EnglishAuctionSettled
-  | ChannelFundsWithdrawn
+    ChannelExcluded # channel excluded from app
+  | VideoExcluded # video excluded from app
+  | NftFeaturedOnMarketPlace # nft featured on marketplace
+  | NewChannelFollower # new channel follower
+  | CommentPostedToVideo # video comment created
+  | VideoLiked # video liked
+  | VideoDisliked # video disliked
+  | ChannelVerified # ypp channel verified
+  | ChannelSuspended # ypp channel suspended
+  | NftPurchased # nft bought
+  | CreatorReceivesAuctionBid # bid made on nft
+  | NftRoyaltyPaid # royaltiy received
+  | DirectChannelPaymentByMember # channel payment received
+  | ChannelFundsWithdrawn # channel funds withdrawn
   | BidMadeCompletingAuction
-  | ChannelCreated
-  | CommentReply
-  | ReactionToComment
-  | VideoPosted
-  | NewAuction
-  | NewNftOnSale
-  | HigherBidPlaced
-  | EnglishAuctionWon
-  | EnglishAuctionLost
-  | OpenAuctionWon
-  | OpenAuctionLost
-  | NftOffered
+  | ChannelCreated # channel created
+  | CommentReply # reply to comment
+  | ReactionToComment # reaction to comment
+  | VideoPosted # video posted (by followed channel)
+  | NewAuction # new nft on auction
+  | NewNftOnSale # new nft on sale
+  | HigherBidPlaced # higher bid than yours made
+  | AuctionWon # auction won
+  | AuctionLost # auction lost
+# | NftOffered
+# | EnglishAuctionSettled
 
 type ChannelSuspended @variant {
   phantom: Int
@@ -315,7 +313,7 @@ type HigherBidPlaced @variant {
   newBidderHandle: String!
 }
 
-type EnglishAuctionWon @variant {
+type AuctionWon @variant {
   "video title for notification text"
   videoTitle: String!
 
@@ -323,23 +321,7 @@ type EnglishAuctionWon @variant {
   videoId: String!
 }
 
-type EnglishAuctionLost @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-}
-
-type OpenAuctionWon @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-}
-
-type OpenAuctionLost @variant {
+type AuctionLost @variant {
   "video title for notification text"
   videoTitle: String!
 

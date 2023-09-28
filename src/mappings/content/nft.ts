@@ -3,10 +3,10 @@ import { criticalError } from '../../utils/misc'
 import {
   addNewBidNotification,
   addRoyaltyPaymentNotification,
+  auctionNotifiers,
   computeRoyalty,
   createAuction,
   createBid,
-  englishAuctionNotifiers,
   findTopBid,
   finishAuction,
   getChannelTitleById,
@@ -16,7 +16,6 @@ import {
   memberHandleById,
   notifyBiddersOnAuctionCompletion,
   notifyChannelFollowers,
-  openAuctionNotifiers,
   parseContentActor,
   parseVideoTitle,
   processNft,
@@ -48,7 +47,6 @@ import {
   NewAuction,
   NewNftOnSale,
   NftPurchased,
-  EnglishAuctionSettled,
   BidMadeCompletingAuction,
   NftOfferedEventData,
   Account,
@@ -306,27 +304,13 @@ export async function processEnglishAuctionSettledEvent({
   // Notify all bidders (winner & losers) just once
   const biddersMemberIds = [...new Set(auctionBids.map((bid) => bid.bidderId).filter((id) => id))]
   const video = await overlay.getRepository(Video).getByIdOrFail(videoId.toString())
-  const notifiers =
-    auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
-      ? await englishAuctionNotifiers(video.id, parseVideoTitle(video))
-      : await openAuctionNotifiers(video.id, parseVideoTitle(video))
-
   await notifyBiddersOnAuctionCompletion(
     overlay,
     biddersMemberIds as string[],
     winnerId,
-    notifiers,
+    auctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
-
-  // notify previous nft owner if he's a channel owner (i.e. creator)
-  const videoTitle = parseVideoTitle(video)
-  const notificationData = new EnglishAuctionSettled({
-    videoId: video.id,
-    videoTitle,
-    price: winningBid.amount,
-  })
-  await maybeNotifyNftCreator(overlay, previousNftOwner, notificationData, event)
 
   if (nft.creatorRoyalty) {
     const royaltyPrice = computeRoyalty(nft.creatorRoyalty, winningBid.amount)
@@ -386,7 +370,7 @@ export async function processBidMadeCompletingAuctionEvent({
     overlay,
     biddersMemberIds as string[],
     memberId,
-    await openAuctionNotifiers(video.id, parseVideoTitle(video)),
+    auctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
 
@@ -452,7 +436,7 @@ export async function processOpenAuctionBidAcceptedEvent({
     overlay,
     biddersMemberIds.filter((id) => id) as string[],
     winnerId,
-    await openAuctionNotifiers(video.id, parseVideoTitle(video)),
+    auctionNotifiers(video.id, parseVideoTitle(video)),
     event
   )
 
