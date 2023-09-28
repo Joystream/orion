@@ -40,6 +40,7 @@ import {
   YppVerified,
   YppSuspended,
   ChannelRecipient,
+  MemberRecipient,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -494,7 +495,7 @@ export const excludeChannelInner = async (
       await addNotification(
         em,
         account,
-        new ChannelRecipient({ channel: channel.id }),
+        new MemberRecipient({ membership: channelOwnerMemberId }),
         new ChannelExcluded({})
       )
     }

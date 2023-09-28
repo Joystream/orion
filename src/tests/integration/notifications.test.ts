@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
+import { clearDb, defaultTestBlock, populateDbWithSeedData } from './testUtils'
 import { globalEm } from '../../utils/globalEm'
 import { excludeChannelInner } from '../../server-extension/resolvers/ChannelsResolver'
 import {
@@ -45,6 +45,9 @@ describe('notifications tests', () => {
     em = await globalEm
     await populateDbWithSeedData()
   })
+  after(async () => {
+    await clearDb()
+  })
   describe('exclude channel', () => {
     it('exclude channel should deposit notification', async () => {
       const channelId = '1'
@@ -66,8 +69,10 @@ describe('notifications tests', () => {
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelExcluded')
       expect(notification!.status.isTypeOf).to.equal('Unread')
       expect(notification!.inApp).to.be.true
-      expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
-      expect((notification!.recipient as ChannelRecipient).channel).to.equal(channel?.id)
+      expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
+      expect((notification!.recipient as MemberRecipient).membership).to.equal(
+        channel?.ownerMemberId
+      )
       expect(nextNotificationIdPost.toString()).to.equal((nextNotificationIdPre + 1).toString())
       expect(notification?.accountId).to.equal(account?.id)
     })
