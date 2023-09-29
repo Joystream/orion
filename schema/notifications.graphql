@@ -13,7 +13,7 @@ type NotificationEmailDelivery @entity {
 }
 
 type EmailDeliveryAttempt @entity {
-  "Autoincremented"
+  "UUID"
   id: ID!
 
   "notification Fk"

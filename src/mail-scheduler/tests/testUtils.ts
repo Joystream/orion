@@ -1,83 +1,79 @@
-import { EntityManager } from 'typeorm'
 import {
   Membership,
   User,
   Notification,
   Account,
   Unread,
-  ChannelCreated,
   MemberRecipient,
   NotificationEmailDelivery,
-  FailedDelivery,
-  EmailDeliveryStatus,
-  SuccessfulDelivery,
   GatewayConfig,
+  AuctionWon,
+  EmailDeliveryAttempt,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
+import { globalEm } from '../../utils/globalEm'
+import { idStringFromNumber } from '../../utils/misc'
+import { RUNTIME_NOTIFICATION_ID_TAG } from '../../utils/notification/helpers'
+import { uniqueId } from '../../utils/crypto'
 
-export async function populateDbWithSeedData(em: EntityManager) {
-  // put contents of ./seedData.json in a variable
-  const seedData = require('./seedData.json')
-  for (const _member of seedData.memberships) {
-    const member = new Membership({
-      ..._member,
+export const NUM_ENTITIES = 3
+
+export async function populateDbWithSeedData() {
+  const em = await globalEm
+  for (let i = 0; i < NUM_ENTITIES; i++) {
+    // create memberships
+    const member: Membership = await em.getRepository(Membership).save({
+      id: i.toString(),
+      createdAt: new Date(),
+      metadata: {
+        id: `metadat-id-${i}`,
+      },
+      bannedFromChannels: [],
+      totalChannelsCreated: 0,
+      handle: `handle-${i}`,
+      controllerAccount: `j4${i}7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf`,
+      channels: [],
     })
-    await em.save(member)
-  }
-  for (const _user of seedData.users) {
-    const user = new User({
-      ..._user,
+    // create users
+    const user = await em.getRepository(User).save({
+      isRoot: false,
+      id: i.toString(),
     })
-    await em.save(user)
-  }
-  for (const _account of seedData.accounts) {
-    const account = new Account({
-      ..._account,
+    // create accounts
+    const account = await em.getRepository(Account).save({
+      id: idStringFromNumber(i),
+      userId: user.id,
+      email: `incorrect${i}@example.com`,
+      isEmailConfirmed: false,
+      isBlocked: false,
+      registeredAt: member.createdAt,
+      membershipId: member.id,
+      joystreamAccount: member.controllerAccount,
       notificationPreferences: defaultNotificationPreferences(),
     })
-    await em.save(account)
-  }
-  for (const _notification of seedData.notifications) {
-    const notification = new Notification({
-      ..._notification,
-      status: new Unread({}),
+    // create notifications
+    const notification = await em.getRepository(Notification).save({
+      id: RUNTIME_NOTIFICATION_ID_TAG + '-' + i.toString(),
+      accountId: account.id,
+      status: new Unread(),
       createdAt: new Date(),
-      notificationType: new ChannelCreated({
-        channelId: _notification.notificationType.channelId,
-        channelTitle: _notification.notificationType.channelTitle,
-        recipient: new MemberRecipient({
-          memberHandle: _notification.notificationType.recipient.memberHandle,
-        }),
-      }),
+      recipient: new MemberRecipient({ membership: member.id }),
+      notificationType: new AuctionWon({ videoId: uniqueId(), videoTitle: 'test' }),
+      inApp: true,
     })
-    await em.save(notification)
-  }
-  for (const _notificationEmailDelivery of seedData.notificationEmailDeliveries) {
-    const notificationEmailDelivery = new NotificationEmailDelivery({
-      ..._notificationEmailDelivery,
-    })
-    await em.save(notificationEmailDelivery)
-  }
-  for (const _emailDeliveryStatus of seedData.emailDeliveryStatuses) {
-    const emailDeliveryStatus = new EmailDeliveryStatus({
-      ..._emailDeliveryStatus,
-    })
-    await em.save(emailDeliveryStatus)
-  }
-  for (const _config of seedData.gatewayConfigs) {
-    const config = new GatewayConfig({
-      ..._config,
-    })
-    await em.save(config)
-  }
 
-  return em
+    await em.getRepository(NotificationEmailDelivery).save({
+      id: uniqueId(),
+      notificationId: notification.id,
+      attempts: [],
+      discard: false,
+    })
+  }
 }
 
-export async function clearDb(em: EntityManager): Promise<void> {
-  await em.getRepository(SuccessfulDelivery).delete({})
-  await em.getRepository(FailedDelivery).delete({})
-  await em.getRepository(EmailDeliveryStatus).delete({})
+export async function clearDb(): Promise<void> {
+  const em = await globalEm
+  await em.getRepository(EmailDeliveryAttempt).delete({})
   await em.getRepository(NotificationEmailDelivery).delete({})
   await em.getRepository(Notification).delete({})
   await em.getRepository(Account).delete({})

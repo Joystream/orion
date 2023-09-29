@@ -7,15 +7,17 @@ cd $SCRIPT_PATH/../../..
 if ! [[ "$(docker container inspect -f '{{.State.Running}}' orion_db)" = "true" ]]; then
     docker network create joystream_default || true
     docker-compose up -d orion_db
-    until docker-compose logs orion_db | grep "database system is ready to accept connections"; do
-        docker-compose logs --tail 10 orion_db
-        echo "Waiting for the db to be ready..."
+    until docker-compose logs orion_db | grep "database system is ready to accept connections" >/dev/null; do
         sleep 1
     done
-    make migrate
+    make migrate >/dev/null
 fi
 
-# Run the tests
-npx ts-mocha "./src/mail-scheduler/tests/*.test.ts" --timeout 60000 --exit
+cleanup() {
+    docker-compose down -v
+}
 
-# docker stop orion_db && docker rm orion_db >/dev/null
+# Run the tests
+npx ts-mocha "./src/mail-scheduler/tests/*.ts" --timeout 60000 --exit
+
+trap cleanup EXIT

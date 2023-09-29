@@ -72,9 +72,6 @@ module.exports = class Views2000000000000 {
       exclusion: ['FALSE'],
       session: ['FALSE'],
       notification_email_delivery: ['FALSE'],
-      successful_delivery: ['FALSE'],
-      failed_delivery: ['FALSE'],
-      notification_in_app_delivery: ['FALSE'],
       channel_verification: ['FALSE'],
       channel_suspension: ['FALSE'],
       user: ['FALSE'],
@@ -82,6 +79,7 @@ module.exports = class Views2000000000000 {
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
+      email_delivery_attempt: ['FALSE'],
       // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
       // notification: ['FALSE'],
     }

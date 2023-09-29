@@ -1,105 +1,52 @@
 import { ConfigVariable, config } from '../utils/config'
+import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
+import { EntityManager } from 'typeorm'
 import { globalEm } from '../utils/globalEm'
-import { DeliveryStatus, NotificationEmailDelivery } from '../model'
-import { EntityManager, Equal } from 'typeorm'
-import {
-  createMailContent,
-  executeMailDelivery,
-  partitionDeliveriesByEmail,
-  updateDeliveryStatuses,
-  updateFailedDeliveryStatuses,
-} from './utils'
+import { uniqueId } from '../utils/crypto'
+import { executeMailDelivery } from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
   const maxAttempts = await config.get(ConfigVariable.EmailNotificationDeliveryMaxAttempts, em)
   return maxAttempts
 }
 
-export async function getFailedDeliveries(
-  em: EntityManager,
-  deliveryId: string
-): Promise<FailedDelivery[]> {
-  return await em.getRepository(FailedDelivery).findBy({ deliveryId })
-}
-
-export async function findDeliveriesByStatus(
-  em: EntityManager,
-  status: DeliveryStatus
-): Promise<EmailDeliveryStatus[]> {
-  const result = await em.getRepository(EmailDeliveryStatus).find({
+export async function mailsToDeliver(em: EntityManager): Promise<NotificationEmailDelivery[]> {
+  const result = await em.getRepository(NotificationEmailDelivery).find({
     where: {
-      deliveryStatus: Equal(status),
+      discard: false,
     },
     relations: {
-      notificationDelivery: {
-        notification: { account: true },
-      },
+      notification: { account: true },
+      attempts: true,
     },
   })
   return result
 }
 
-// Function to send new data
-export async function sendNew() {
+export async function deliverEmails() {
   const em = await globalEm
-  const newEmailDeliveries = await findDeliveriesByStatus(em, DeliveryStatus.UNSENT)
+  const newEmailDeliveries = await mailsToDeliver(em)
   for (const notificationDelivery of newEmailDeliveries) {
-    const toAccount = notificationDelivery.notificationDelivery.notification.account
-    const notification = notificationDelivery.notificationDelivery.notification
+    const toAccount = notificationDelivery.notification.account
     const appName = await config.get(ConfigVariable.AppName, em)
-    const content = await createMailContent(em, toAccount, appName, notification)
-    const wasSuccessful = await executeMailDelivery(
-      appName,
-      em,
-      toAccount,
-      content,
-      notificationDelivery.id
-    )
-    if (wasSuccessful) {
-      notificationDelivery.deliveryStatus = DeliveryStatus.SUCCESS
+    const content = '' // await createMailContent(em, toAccount, appName, notification)
+    const attempts = notificationDelivery.attempts
+    const status = await executeMailDelivery(appName, em, toAccount, content)
+    const newAttempt = new EmailDeliveryAttempt({
+      id: uniqueId(),
+      timestamp: new Date(),
+      status,
+    })
+    attempts.push(newAttempt)
+    notificationDelivery.attempts = attempts
+    if (status.isTypeOf === 'EmailSuccess') {
+      notificationDelivery.discard = true
     } else {
-      notificationDelivery.deliveryStatus = DeliveryStatus.FAILURE
+      if (attempts.length >= (await getMaxAttempts(em))) {
+        notificationDelivery.discard = true
+      }
     }
+    await em.save(newAttempt)
   }
   await em.save(newEmailDeliveries)
 }
-
-// Function to send failed data
-export async function sendFailed() {
-  const em = await globalEm
-  const failedEmailDeliveries = await findDeliveriesByStatus(em, DeliveryStatus.FAILURE)
-  const maxAttempts = await getMaxAttempts(em)
-  if (maxAttempts === 0) {
-    throw Error('maxAttempts cannot be 0')
-  }
-
-  for (const notificationDelivery of failedEmailDeliveries) {
-    const toAccount = notificationDelivery.notificationDelivery.notification.account
-    const notification = notificationDelivery.notificationDelivery.notification
-    const appName = await config.get(ConfigVariable.AppName, em)
-    const content = await createMailContent(em, toAccount, appName, notification)
-    const wasSuccessful = await executeMailDelivery(
-      appName,
-      em,
-      toAccount,
-      content,
-      notificationDelivery.id
-    )
-    if (wasSuccessful) {
-      notificationDelivery.deliveryStatus = DeliveryStatus.SUCCESS
-    } else {
-      const failedDeliveries = await getFailedDeliveries(em, notificationDelivery.id)
-      if (failedDeliveries.length === maxAttempts) {
-        notificationDelivery.deliveryStatus = DeliveryStatus.DISCARD
-      } else {
-        notificationDelivery.deliveryStatus = DeliveryStatus.FAILURE
-      }
-    }
-
-    await em.save(notificationDelivery)
-  }
-}
-
-// Schedule the tasks
-// schedule.scheduleJob('0 12 * * *', sendNew) // Everyday at 12:00 PM
-// schedule.scheduleJob('0 0,12 * * *', sendFailed) // Everyday at 12:00 AM and 12:00 PM

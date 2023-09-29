@@ -1,121 +1,159 @@
 import { expect } from 'chai'
-import { EmailDeliveryAttempt, EmailDeliveryStatus, NotificationEmailDelivery } from '../../model'
-import { EntityManager } from 'typeorm'
+import { NotificationEmailDelivery, Notification } from '../../model'
 import { clearDb, populateDbWithSeedData } from './testUtils'
 import { globalEm } from '../../utils/globalEm'
-import { getFailedDeliveries, getMaxAttempts, sendFailed, sendNew } from '..'
+import { getMaxAttempts, deliverEmails } from '..'
+import { EntityManager } from 'typeorm'
+import { RUNTIME_NOTIFICATION_ID_TAG } from '../../utils/notification/helpers'
+
+const getDeliveryFromNotificationId = async (em: EntityManager, notificationId: string) => {
+  const res = await em.getRepository(NotificationEmailDelivery).findOneOrFail({
+    where: { notification: { id: notificationId } },
+    relations: { attempts: true },
+  })
+  return res
+}
+
+const correctRecipientAccountEmail = async (em: EntityManager, notificationId: string) => {
+  const accountId = (await em.getRepository(Notification).findOneByOrFail({ id: notificationId }))
+    .accountId
+  const account = await em.getRepository('Account').findOneByOrFail({ id: accountId })
+  account.email = `correct-${accountId}@example.com`
+  await em.save(account)
+}
 
 describe('Scheduler', () => {
-  const okNotificationId = 'OnChainNotification-1'
-  const errNotificationId = 'OnChainNotification-2'
+  const okNotificationId = RUNTIME_NOTIFICATION_ID_TAG + '-0'
+  const errNotificationId = RUNTIME_NOTIFICATION_ID_TAG + '-1'
+  const okAtSecondNotificationId = RUNTIME_NOTIFICATION_ID_TAG + '-2'
+  let successfulDelivery: NotificationEmailDelivery
+  let failingDelivery: NotificationEmailDelivery
+  let successfulAtSecondDelivery: NotificationEmailDelivery
   let em: EntityManager
+  let maxAttempts: number
 
   before(async () => {
     em = await globalEm
+    maxAttempts = await getMaxAttempts(em)
+    await populateDbWithSeedData()
   })
 
-  beforeEach(async () => {
-    await populateDbWithSeedData(em)
+  after(async () => {
+    await clearDb()
   })
 
-  afterEach(async () => {
-    await clearDb(em)
-  })
-
-  describe('case success at first attempt', () => {
-    let emailDelivery: NotificationEmailDelivery
+  describe('1️⃣ first run of deliverEmails', () => {
     before(async () => {
-      await sendNew()
-
-      emailDelivery = await em
-        .getRepository(NotificationEmailDelivery)
-        .findOneByOrFail({ notification: { id: okNotificationId } })
+      await correctRecipientAccountEmail(em, okNotificationId)
+      await deliverEmails()
+      successfulDelivery = await getDeliveryFromNotificationId(em, okNotificationId)
+      failingDelivery = await getDeliveryFromNotificationId(em, errNotificationId)
+      successfulAtSecondDelivery = await getDeliveryFromNotificationId(em, okAtSecondNotificationId)
     })
-    it('should change email delivery to discard when success', async () => {
-      expect(emailDelivery.discard).to.be.true
+    describe('successful delivery case: 👍', () => {
+      it('should change email delivery to discard when success', async () => {
+        expect(successfulDelivery.discard).to.be.true
+      })
+      it('should create a successful attempt', async () => {
+        expect(successfulDelivery.attempts).to.have.lengthOf(1)
+        expect(successfulDelivery.attempts[0].notificationDeliveryId).to.equal(
+          successfulDelivery.id
+        )
+        expect(successfulDelivery.attempts[0].status.isTypeOf).to.equal('EmailSuccess')
+      })
     })
-
-    it('should create a successful attempt', async () => {
-      expect(emailDelivery.attempts[-1].notificationDeliveryId).to.equal(emailDelivery.id)
-      expect(emailDelivery.attempts[-1].status.isTypeOf).to.equal('SuccessfulDelivery')
+    describe('failing delivery case: 👎', () => {
+      it('should keep email delivery discard to false', () => {
+        expect(failingDelivery.discard).to.be.false
+      })
+      it('should create a failed attempt', () => {
+        expect(failingDelivery.attempts).to.have.lengthOf(1)
+        expect(failingDelivery.attempts[0].notificationDeliveryId).to.equal(failingDelivery.id)
+        expect(failingDelivery.attempts[0].status.isTypeOf).to.equal('EmailFailure')
+      })
     })
-  })
-  it('should change EmailDeliveryStatus.deliveryStatus when failure', async () => {
-    await sendNew()
-
-    const result = await em
-      .getRepository(EmailDeliveryStatus)
-      .findOneByOrFail({ notificationDelivery: { notification: { id: errNotificationId } } })
-    expect(result.deliveryStatus).to.equal(DeliveryStatus.FAILURE)
-  })
-  it('should create FailureReport when failure', async () => {
-    await sendNew()
-
-    const result = await em.getRepository(EmailDeliveryStatus).findOneOrFail({
-      where: { notificationDelivery: { notification: { id: errNotificationId } } },
-      relations: { failedDelivery: true },
+    describe('successful at second attempt delivery case: 👎', () => {
+      it('should keep email delivery discard to false', () => {
+        expect(successfulAtSecondDelivery.discard).to.be.false
+      })
+      it('should create a failed attempt', () => {
+        expect(successfulAtSecondDelivery.attempts).to.have.lengthOf(1)
+        expect(successfulAtSecondDelivery.attempts[0].notificationDeliveryId).to.equal(
+          successfulAtSecondDelivery.id
+        )
+        expect(successfulAtSecondDelivery.attempts[0].status.isTypeOf).to.equal('EmailFailure')
+      })
     })
-
-    expect(result.failedDelivery).to.not.be.empty
-    expect(result.failedDelivery[0]).to.have.property('id')
-    expect(result.failedDelivery[0]).to.have.property('timestamp').to.be.not.null
-    expect(result.failedDelivery[0]).to.have.property('errorStatus').to.be.not.null
-  })
-  it('should keep EmailDeliveryStatus.deliveryStatus to failure on a failed second attempt', async () => {
-    await sendNew()
-
-    await sendFailed()
-
-    const result = await em
-      .getRepository(EmailDeliveryStatus)
-      .findOneByOrFail({ notificationDelivery: { notification: { id: errNotificationId } } })
-
-    expect(result.deliveryStatus).to.equal(DeliveryStatus.FAILURE)
-  })
-  it('should create another FailureReport when failure on retry', async () => {
-    await sendNew()
-
-    await sendFailed()
-
-    const delivery = await em
-      .getRepository(EmailDeliveryStatus)
-      .findOneByOrFail({ notificationDelivery: { notification: { id: errNotificationId } } })
-
-    const result = await getFailedDeliveries(em, delivery.id)
-
-    expect(result).to.have.lengthOf(2)
-    expect(result[1]).to.have.property('id')
-    expect(result[1]).to.have.property('timestamp').to.be.not.null
-    expect(result[1]).to.have.property('errorStatus').to.be.not.null
-  })
-  it('should set the EmailDeliveryStatus.deliveryStatus to Discard after N attempts', async () => {
-    await sendNew() // first attempt
-    const maxAttempts = await getMaxAttempts(em)
-
-    for (let i = 0; i < maxAttempts - 1; i++) {
-      await sendFailed()
-    }
-
-    const result = await em
-      .getRepository(EmailDeliveryStatus)
-      .findOneByOrFail({ notificationDelivery: { notification: { id: errNotificationId } } })
-
-    expect(result.deliveryStatus).to.equal(DeliveryStatus.DISCARD)
-  })
-  it('should create at most N FailureReports after more than N attempts', async () => {
-    await sendNew()
-    const maxAttempts = await getMaxAttempts(em)
-
-    // trying maxAttempts + 1 times
-    for (let i = 0; i < maxAttempts; i++) {
-      await sendFailed()
-    }
-
-    const result = await em.getRepository(EmailDeliveryStatus).findOneOrFail({
-      where: { notificationDelivery: { notification: { id: errNotificationId } } },
-      relations: { failedDelivery: true },
+    describe('2️⃣ second run of deliverEmails', () => {
+      before(async () => {
+        await correctRecipientAccountEmail(em, okAtSecondNotificationId)
+        await deliverEmails()
+        failingDelivery = await getDeliveryFromNotificationId(em, errNotificationId)
+        successfulAtSecondDelivery = await getDeliveryFromNotificationId(
+          em,
+          okAtSecondNotificationId
+        )
+      })
+      describe('failing delivery case: 👎', () => {
+        it('should keep email delivery discard to false', () => {
+          expect(failingDelivery.discard).to.be.false
+        })
+        it('should create another failed attempt', () => {
+          expect(failingDelivery.attempts).to.have.lengthOf(2)
+          expect(failingDelivery.attempts[0].notificationDeliveryId).to.equal(failingDelivery.id)
+          expect(failingDelivery.attempts[0].status.isTypeOf).to.equal('EmailFailure')
+          expect(failingDelivery.attempts[1].status.isTypeOf).to.equal('EmailFailure')
+        })
+      })
+      describe('successful at second delivery case: 👍', () => {
+        it('should change email delivery to discard when success', async () => {
+          expect(successfulAtSecondDelivery.discard).to.be.true
+        })
+        it('should create a new successful attempt', async () => {
+          expect(successfulAtSecondDelivery.attempts).to.have.lengthOf(2)
+          expect(successfulAtSecondDelivery.attempts[1].notificationDeliveryId).to.equal(
+            successfulAtSecondDelivery.id
+          )
+          expect(successfulAtSecondDelivery.attempts[1].status.isTypeOf).to.equal('EmailSuccess')
+        })
+      })
+      describe('3️⃣ MAX_ATTEMPTS - 2 runs of deliverEmails', () => {
+        before(async () => {
+          const maxAttempts = await getMaxAttempts(em)
+          expect(maxAttempts).to.be.greaterThan(2)
+          for (let i = 0; i < maxAttempts - 2; i++) {
+            await deliverEmails()
+          }
+          failingDelivery = await getDeliveryFromNotificationId(em, errNotificationId)
+        })
+        describe('failing delivery case: 👎', () => {
+          it('should set the email delivery discard to true after MAX_ATTEMPTS', async () => {
+            expect(failingDelivery.discard).to.be.true
+          })
+          it('should create MAX_ATTEMPTS failed attempts', async () => {
+            const attemptsStatus = failingDelivery.attempts.map(
+              (attempt) => attempt.status.isTypeOf
+            )
+            expect(failingDelivery.attempts).to.have.lengthOf(maxAttempts)
+            expect(attemptsStatus.every((status) => status === 'EmailFailure')).to.be.true
+          })
+        })
+        describe('4️⃣ one more run of deliverEmails', () => {
+          before(async () => {
+            await deliverEmails()
+            failingDelivery = await getDeliveryFromNotificationId(em, errNotificationId)
+          })
+          describe('failing delivery case: 👎', () => {
+            it('should not create more MAX_ATTEMPTS failed attempts', async () => {
+              const attemptsStatus = failingDelivery.attempts.map(
+                (attempt) => attempt.status.isTypeOf
+              )
+              expect(failingDelivery.attempts).to.have.lengthOf(maxAttempts)
+              expect(attemptsStatus.every((status) => status === 'EmailFailure')).to.be.true
+            })
+          })
+        })
+      })
     })
-
-    expect(result.failedDelivery).to.have.lengthOf(maxAttempts)
   })
 })
