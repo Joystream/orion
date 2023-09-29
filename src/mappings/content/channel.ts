@@ -12,11 +12,11 @@ import {
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
   ChannelCreated,
-  ChannelRecipient,
   ChannelCreatedEventData,
   ChannelFundsWithdrawn,
   YppUnverified,
   MemberRecipient,
+  ChannelRecipient,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -35,18 +35,11 @@ import {
   parseContentActor,
   getChannelOwnerAccount,
   getAccountForMember,
-  parseChannelTitle,
 } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification } from '../../utils/notification/helpers'
-import {
-  channelCreatedLink,
-  channelCreatedText,
-  channelFundsWithdrawnLink,
-  fundsWithdrawnFromChannelText,
-} from '../../utils/notification'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -133,15 +126,12 @@ export async function processChannelCreatedEvent({
       data: new ChannelCreatedEventData({ channel: channel.id }),
     })
 
-    const ownerAccount = await getAccountForMember(overlay.getEm(), ownerMember.id)
+    const ownerAccount = await getAccountForMember(overlay, ownerMember.id)
     await addNotification(
-      overlay.getEm(),
+      overlay,
       ownerAccount,
-      new ChannelCreated({
-        recipient: new MemberRecipient({ memberHandle: ownerMember.handle }),
-        channelId: channel.id,
-        channelTitle: parseChannelTitle(channel),
-      }),
+      new MemberRecipient({ membership: ownerMember.id }),
+      new ChannelCreated({ channelId: channel.id, channelTitle: channel.title || '??' }),
       event
     )
   }
@@ -363,15 +353,13 @@ export async function processChannelFundsWithdrawnEvent({
     }),
   })
 
-  const channelOwnerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
 
   await addNotification(
-    overlay.getEm(),
+    overlay,
     channelOwnerAccount,
-    new ChannelFundsWithdrawn({
-      recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
-      amount,
-    }),
+    new ChannelRecipient({ channel: channel.id }),
+    new ChannelFundsWithdrawn({ amount }),
     entityEvent
   )
 }

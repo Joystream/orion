@@ -74,7 +74,6 @@ import {
   EntityAssetsMap,
   getChannelOwnerAccount,
   MetaNumberProps,
-  parseChannelTitle,
 } from './utils'
 import { addNotification } from '../../utils/notification'
 
@@ -658,16 +657,12 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  const ownerAccount = await getChannelOwnerAccount(overlay.getEm(), channel)
-  const channelTitle = parseChannelTitle(channel)
+  const ownerAccount = await getChannelOwnerAccount(overlay, channel)
   await addNotification(
-    overlay.getEm(),
+    overlay,
     ownerAccount,
-    new DirectChannelPaymentByMember({
-      recipient: new ChannelRecipient({ channelTitle }),
-      amount,
-      payerHandle: member.handle,
-    }),
+    new ChannelRecipient({ channel: channel.id }),
+    new DirectChannelPaymentByMember({ amount, payerHandle: member.handle }),
     event
   )
 

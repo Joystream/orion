@@ -1,4 +1,5 @@
 import { Field, ObjectType } from 'type-graphql'
+import { AccountNotificationPreferencesOutput } from '../NotificationResolver/types'
 
 @ObjectType()
 export class FollowedChannel {
@@ -28,4 +29,7 @@ export class AccountData {
 
   @Field(() => [FollowedChannel], { nullable: false })
   followedChannels: FollowedChannel[]
+
+  @Field(() => AccountNotificationPreferencesOutput, { nullable: true })
+  preferences?: AccountNotificationPreferencesOutput
 }

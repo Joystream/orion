@@ -1,12 +1,3 @@
-# timestamp for in app delivery is not needed, since it is the same as the notification creation timestamp
-type NotificationInAppDelivery @entity {
-  "Autoincremented"
-  id: ID!
-
-  "the notification being delivered"
-  notification: Notification!
-}
-
 type NotificationEmailDelivery @entity {
   "Autoincremented"
   id: ID!
@@ -54,58 +45,54 @@ type Notification @entity {
   "status"
   status: ReadOrUnread!
 
+  "wether this notification should be displayed in app"
+  inApp: Boolean!
+
   "timestamp"
   createdAt: DateTime!
+
+  "recipient"
+  recipient: RecipientType!
 }
 
 union RecipientType = MemberRecipient | ChannelRecipient
 
-type MemberRecipient {
-  "member handle"
-  memberHandle: String!
+type MemberRecipient @variant {
+  "membership"
+  membership: Membership!
 }
 
-type ChannelRecipient {
-  "channel title"
-  channelTitle: String!
+type ChannelRecipient @variant {
+  "channel"
+  channel: Channel!
 }
 
 union NotificationType =
-    ChannelSuspended
-  | ChannelVerified
-  | ChannelExcluded
-  | VideoExcluded
-  | NewChannelFollower
-  | VideoFeaturedOnCategoryPage
-  | VideoFeaturedAsCategoryHero
-  | NftFeaturedOnMarketPlace
-  | CommentPostedToVideo
-  | VideoLiked
-  | VideoDisliked
-  | NftPurchased
-  | CreatorReceivesAuctionBid
-  | NftRoyaltyPaid
-  | DirectChannelPaymentByMember
-  | EnglishAuctionSettled
-  | ChannelFundsWithdrawn
-  | ChannelCreated
-  | CommentReply
-  | ReactionToComment
-  | VideoPosted
-  | NewAuctionBid
-  | NewAuction
-  | NewNftOnSale
-  | HigherBidPlaced
-  | EnglishAuctionWon
-  | EnglishAuctionLost
-  | OpenAuctionWon
-  | OpenAuctionLost
-  | NftOffered
-  | BidMadeCompletingAuction
-
+    ChannelExcluded # channel excluded from app
+  | VideoExcluded # video excluded from app
+  | NftFeaturedOnMarketPlace # nft featured on marketplace
+  | NewChannelFollower # new channel follower
+  | CommentPostedToVideo # video comment created
+  | VideoLiked # video liked
+  | VideoDisliked # video disliked
+  | ChannelVerified # ypp channel verified
+  | ChannelSuspended # ypp channel suspended
+  | NftPurchased # nft bought
+  | CreatorReceivesAuctionBid # bid made on nft
+  | NftRoyaltyPaid # royaltiy received
+  | DirectChannelPaymentByMember # channel payment received
+  | ChannelFundsWithdrawn # channel funds withdrawn
+  | ChannelCreated # channel created
+  | CommentReply # reply to comment
+  | ReactionToComment # reaction to comment
+  | VideoPosted # video posted (by followed channel)
+  | NewAuction # new nft on auction
+  | NewNftOnSale # new nft on sale
+  | HigherBidPlaced # higher bid than yours made
+  | AuctionWon # auction won
+  | AuctionLost # auction lost
 type ChannelSuspended @variant {
-  "recipient also used for text production"
-  recipient: RecipientType!
+  phantom: Int
 }
 
 type NftFeaturedOnMarketPlace @variant {
@@ -114,63 +101,24 @@ type NftFeaturedOnMarketPlace @variant {
 
   "video title for notification text"
   videoTitle: String!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type VideoFeaturedOnCategoryPage @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "category name used for notification text"
-  categoryName: String!
-
-  "category id used for notification text"
-  categoryId: String!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type VideoFeaturedAsCategoryHero @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "category name used for notification text"
-  categoryName: String!
-
-  "category id used for notification text"
-  categoryId: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type ChannelVerified @variant {
-  "recipient"
-  recipient: RecipientType!
+  phantom: Int
 }
 
 type ChannelExcluded @variant {
-  "recipient also used for text production"
-  recipient: RecipientType!
+  phantom: Int
 }
 
 type VideoExcluded @variant {
   "video title used for notification text"
   videoTitle: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type NewChannelFollower @variant {
   "follower member handle for link"
   followerHandle: String!
-
-  "recipient also used for text production"
-  recipient: RecipientType!
 }
 
 type CommentPostedToVideo @variant {
@@ -183,8 +131,8 @@ type CommentPostedToVideo @variant {
   "commenter handle for text"
   memberHandle: String!
 
-  "recipient"
-  recipient: RecipientType!
+  "id for the comment used for the link"
+  comentId: String!
 }
 
 type VideoLiked @variant {
@@ -194,8 +142,8 @@ type VideoLiked @variant {
   "video title for notification text"
   videoTitle: String!
 
-  "recipient"
-  recipient: RecipientType!
+  "handle for the member that dropped the like"
+  memberHandle: String!
 }
 
 type VideoDisliked @variant {
@@ -205,8 +153,8 @@ type VideoDisliked @variant {
   "video title for notification text"
   videoTitle: String!
 
-  "recipient"
-  recipient: RecipientType!
+  "handle for the member that dropped the dislike"
+  memberHandle: String!
 }
 
 type NftPurchased @variant {
@@ -221,9 +169,6 @@ type NftPurchased @variant {
 
   "price paid"
   price: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type CreatorReceivesAuctionBid @variant {
@@ -238,9 +183,6 @@ type CreatorReceivesAuctionBid @variant {
 
   "bid amount"
   amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type NftOffered @variant {
@@ -252,9 +194,6 @@ type NftOffered @variant {
 
   "offering amount"
   amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type DirectChannelPaymentByMember @variant {
@@ -263,9 +202,6 @@ type DirectChannelPaymentByMember @variant {
 
   "amount paid"
   amount: BigInt!
-
-  "recipient, contains also channel title"
-  recipient: RecipientType!
 }
 
 type EnglishAuctionSettled @variant {
@@ -277,31 +213,25 @@ type EnglishAuctionSettled @variant {
 
   "price paid"
   price: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type ChannelFundsWithdrawn @variant {
   "amount"
   amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type ChannelCreated @variant {
-  "channelId for link"
+  "id for link construction"
   channelId: String!
 
-  "channel title for notification text"
+  "title for link construction"
   channelTitle: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type CommentReply @variant {
+  "comment Id for the link"
+  commentId: String!
+
   "video Id used for link"
   videoId: String!
 
@@ -310,12 +240,12 @@ type CommentReply @variant {
 
   "member who replied"
   memberHandle: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type ReactionToComment @variant {
+  "commentId for link"
+  commentId: String!
+
   "video Id used for link"
   videoId: String!
 
@@ -324,9 +254,6 @@ type ReactionToComment @variant {
 
   "member who replied"
   memberHandle: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type VideoPosted @variant {
@@ -336,42 +263,25 @@ type VideoPosted @variant {
   "channel title for notification text"
   channelTitle: String!
 
+  "id for the channel used in link construction"
+  channelId: String!
+
   "video Id used for link"
   videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type NewAuction @variant {
   "channel title for notification text"
   channelTitle: String!
 
+  "channel id for notification link"
+  channelId: String!
+
   "video title for notification text"
   videoTitle: String!
 
   "video Id used for link"
   videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type NewAuctionBid @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-
-  "bidder handle for notification text"
-  bidderHandle: String!
-
-  "bid amount"
-  amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type NewNftOnSale @variant {
@@ -384,8 +294,8 @@ type NewNftOnSale @variant {
   "video Id used for link"
   videoId: String!
 
-  "recipient"
-  recipient: RecipientType!
+  "channel id for notification link"
+  channelId: String!
 }
 
 type HigherBidPlaced @variant {
@@ -397,53 +307,28 @@ type HigherBidPlaced @variant {
 
   "new bidder handle "
   newBidderHandle: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
-type EnglishAuctionWon @variant {
+type AuctionWon @variant {
+  "Auction type"
+  type: AuctionType!
+
   "video title for notification text"
   videoTitle: String!
 
   "video Id used for link"
   videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
-type EnglishAuctionLost @variant {
+type AuctionLost @variant {
+  "Auction type"
+  type: AuctionType!
+
   "video title for notification text"
   videoTitle: String!
 
   "video Id used for link"
   videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type OpenAuctionWon @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
-}
-
-type OpenAuctionLost @variant {
-  "video title for notification text"
-  videoTitle: String!
-
-  "video Id used for link"
-  videoId: String!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 # design addition: for bid made completing auction so that channel owner is properly notified
@@ -459,9 +344,6 @@ type BidMadeCompletingAuction @variant {
 
   "bid amount"
   amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }
 
 type NftRoyaltyPaid @variant {
@@ -473,7 +355,4 @@ type NftRoyaltyPaid @variant {
 
   "bid amount"
   amount: BigInt!
-
-  "recipient"
-  recipient: RecipientType!
 }

@@ -31,13 +31,12 @@ import {
 import { config, ConfigVariable } from '../../../utils/config'
 import { OperatorOnly } from '../middleware'
 import {
+  Account,
   ChannelRecipient,
   NftFeaturedOnMarketPlace,
   Video,
   VideoCategory,
-  VideoFeaturedAsCategoryHero,
   VideoFeaturedInCategory,
-  VideoFeaturedOnCategoryPage,
   VideoHero as VideoHeroEntity,
 } from '../../../model'
 import { GraphQLResolveInfo } from 'graphql'
@@ -55,11 +54,7 @@ import { AppAction } from '@joystream/metadata-protobuf'
 import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
-import {
-  getChannelOwnerAccount,
-  parseChannelTitle,
-  parseVideoTitle,
-} from '../../../mappings/content/utils'
+import { parseVideoTitle } from '../../../mappings/content/utils'
 import { addNotification } from '../../../utils/notification'
 
 @Resolver()
@@ -184,27 +179,6 @@ export class AdminResolver {
       video: new Video({ id: args.videoId }),
     })
 
-    const [video] = await em.getRepository(Video).find({
-      where: { id: args.videoId },
-      relations: { channel: true, category: true },
-      take: 1,
-    })
-    // if category for video is defined then send notification as otherwise full notificatino info won't be defined
-    const category = video?.category
-    if (video?.channel && category) {
-      const account = await getChannelOwnerAccount(em, video.channel)
-      await addNotification(
-        em,
-        account,
-        new VideoFeaturedAsCategoryHero({
-          recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-          categoryId: category?.id || '',
-          videoTitle: parseVideoTitle(video),
-          categoryName: category?.name || '',
-        })
-      )
-    }
-
     await em.save(videoHero)
 
     return { id }
@@ -238,32 +212,6 @@ export class AdminResolver {
         })
     )
     await em.save(newRows)
-
-    for (const { videoId } of args.videos) {
-      const video = (
-        await em.getRepository(Video).find({
-          where: { id: videoId },
-          relations: { channel: true },
-          take: 1,
-        })
-      )?.[0]
-      if (video?.channel?.id) {
-        const creatorAccount = await getChannelOwnerAccount(em, video.channel)
-        const category = await em
-          .getRepository(VideoCategory)
-          .findOneByOrFail({ id: args.categoryId })
-        await addNotification(
-          em,
-          creatorAccount,
-          new VideoFeaturedOnCategoryPage({
-            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(video.channel) }),
-            categoryId: category.id,
-            categoryName: category.name || '??',
-            videoTitle: parseVideoTitle(video),
-          })
-        )
-      }
-    }
 
     return {
       categoryId,
@@ -319,50 +267,7 @@ export class AdminResolver {
     @Args() { featuredNftsIds }: SetFeaturedNftsInput
   ): Promise<SetFeaturedNftsResult> {
     const em = await this.em()
-    let newNumberOfNftsFeatured = 0
-
-    await em
-      .createQueryBuilder()
-      .update(`admin.owned_nft`)
-      .set({ is_featured: false })
-      .where({ is_featured: true })
-      .execute()
-
-    if (featuredNftsIds.length) {
-      const result = await em
-        .createQueryBuilder()
-        .update(`admin.owned_nft`)
-        .set({ is_featured: true })
-        .where({ id: In(featuredNftsIds) })
-        .execute()
-      newNumberOfNftsFeatured = result.affected || 0
-
-      // fetch all featured nfts and deposit notification for their creators
-      for (const featuredNftId of featuredNftsIds) {
-        const featuredNft = await em.getRepository('OwnedNft').findOne({
-          where: { id: featuredNftId },
-          relations: { video: { id: true, title: true, channel: true } },
-        })
-        if (featuredNft?.video?.channel) {
-          const channelOwnerAccount = await getChannelOwnerAccount(em, featuredNft.video.channel)
-          await addNotification(
-            em,
-            channelOwnerAccount,
-            new NftFeaturedOnMarketPlace({
-              recipient: new ChannelRecipient({
-                channelTitle: parseChannelTitle(featuredNft.video.channel),
-              }),
-              videoId: featuredNft.video.id,
-              videoTitle: parseVideoTitle(featuredNft.video),
-            })
-          )
-        }
-      }
-    }
-
-    return {
-      newNumberOfNftsFeatured,
-    }
+    return await setFeaturedNftsInner(em, featuredNftsIds)
   }
 
   @UseMiddleware(OperatorOnly)
@@ -441,5 +346,55 @@ export class AdminResolver {
     const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
     const signature = ed25519Sign(message, appKeypair)
     return { signature: u8aToHex(signature) }
+  }
+}
+
+export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: string[]) => {
+  let newNumberOfNftsFeatured = 0
+
+  await em
+    .createQueryBuilder()
+    .update(`admin.owned_nft`)
+    .set({ is_featured: false })
+    .where({ is_featured: true })
+    .execute()
+
+  if (featuredNftsIds.length) {
+    const result = await em
+      .createQueryBuilder()
+      .update(`admin.owned_nft`)
+      .set({ is_featured: true })
+      .where({ id: In(featuredNftsIds) })
+      .execute()
+    newNumberOfNftsFeatured = result.affected || 0
+
+    // fetch all featured nfts and deposit notification for their creators
+    for (const featuredNftId of featuredNftsIds) {
+      const featuredNft = await em.getRepository('OwnedNft').findOne({
+        where: { id: featuredNftId },
+        relations: { video: { channel: true } },
+      })
+      if (featuredNft?.video?.channel) {
+        const notificationData = {
+          videoId: featuredNft.video.id,
+          videoTitle: parseVideoTitle(featuredNft.video),
+        }
+        const channelOwnerAccount = featuredNft.video.channel.ownerMemberId
+          ? await em
+              .getRepository(Account)
+              .findOneBy({ membershipId: featuredNft.video.channel.ownerMemberId })
+          : null
+        await addNotification(
+          em,
+          channelOwnerAccount,
+          new ChannelRecipient({ channel: featuredNft.video.channel.id }),
+          new NftFeaturedOnMarketPlace(notificationData)
+        )
+      }
+    }
+  }
+
+  return {
+    newNumberOfNftsFeatured,
   }
 }

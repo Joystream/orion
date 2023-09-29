@@ -69,14 +69,6 @@ export class NotificationResolver {
         account.notificationPreferences.videoExcludedFromApp
       )
       maybeUpdateNotificationPreference(
-        newPreferences.videoFeaturedAsHero,
-        account.notificationPreferences.videoFeaturedAsHero
-      )
-      maybeUpdateNotificationPreference(
-        newPreferences.videoFeaturedOnCategoryPage,
-        account.notificationPreferences.videoFeaturedOnCategoryPage
-      )
-      maybeUpdateNotificationPreference(
         newPreferences.nftFeaturedOnMarketPlace,
         account.notificationPreferences.nftFeaturedOnMarketPlace
       )
@@ -101,12 +93,20 @@ export class NotificationResolver {
         account.notificationPreferences.yppChannelSuspended
       )
       maybeUpdateNotificationPreference(
+        newPreferences.yppSignupSuccessful,
+        account.notificationPreferences.yppSignupSuccessful
+      )
+      maybeUpdateNotificationPreference(
         newPreferences.yppChannelVerified,
         account.notificationPreferences.yppChannelVerified
       )
       maybeUpdateNotificationPreference(
         newPreferences.nftBought,
         account.notificationPreferences.nftBought
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.timedAuctionExpired,
+        account.notificationPreferences.timedAuctionExpired
       )
       maybeUpdateNotificationPreference(
         newPreferences.bidMadeOnNft,
@@ -157,12 +157,12 @@ export class NotificationResolver {
         account.notificationPreferences.newNftOnSale
       )
       maybeUpdateNotificationPreference(
-        newPreferences.higherBidThanYoursMade,
-        account.notificationPreferences.higherBidThanYoursMade
+        newPreferences.timedAuctionExpired,
+        account.notificationPreferences.timedAuctionExpired
       )
       maybeUpdateNotificationPreference(
-        newPreferences.auctionExpired,
-        account.notificationPreferences.timedAuctionExpired
+        newPreferences.higherBidThanYoursMade,
+        account.notificationPreferences.higherBidThanYoursMade
       )
       maybeUpdateNotificationPreference(
         newPreferences.auctionWon,

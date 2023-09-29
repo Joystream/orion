@@ -3,5 +3,5 @@ export {
   preferencesForNotification,
   addNotification,
 } from './helpers'
-export * from './notificationTexts'
-export * from './notificationLinks'
+// export * from './notificationTexts'
+// export * from './notificationLinks'

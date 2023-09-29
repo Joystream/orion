@@ -31,7 +31,6 @@ import {
   Report,
   Membership,
   Exclusion,
-  ChannelRecipient,
   NewChannelFollower,
   ChannelExcluded,
   ChannelVerified,
@@ -40,6 +39,8 @@ import {
   ChannelSuspended,
   YppVerified,
   YppSuspended,
+  ChannelRecipient,
+  MemberRecipient,
 } from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
@@ -49,19 +50,8 @@ import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly, OperatorOnly } from '../middleware'
-import { getChannelOwnerAccount, parseChannelTitle } from '../../../mappings/content/utils'
-import {
-  addNotification,
-  channelExcludedLink,
-  channelExcludedText,
-  channelSuspendedLink,
-  channelSuspendedViaYPPText,
-  channelVerifiedLink,
-  channelVerifiedViaYPPText,
-  newChannelFollowerLink,
-  newChannelFollowerText,
-} from '../../../utils/notification'
+import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
+import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 
 @Resolver()
@@ -108,7 +98,6 @@ export class ChannelsResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
@@ -188,7 +177,6 @@ export class ChannelsResolver {
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
@@ -233,7 +221,9 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
 
-      const ownerAccount = await getChannelOwnerAccount(em, channel)
+      const ownerAccount = channel.ownerMemberId
+        ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })
+        : null
       if (ownerAccount) {
         if (!ctx.account) {
           // account not null because of the UseMiddleware(AccountOnly) decorator
@@ -242,14 +232,11 @@ export class ChannelsResolver {
         const followerMembership = await em
           .getRepository(Membership)
           .findOneByOrFail({ id: ctx.account.membershipId })
-        const channelTitle = parseChannelTitle(channel)
         await addNotification(
           em,
           ownerAccount,
-          new NewChannelFollower({
-            recipient: new ChannelRecipient({ channelTitle }),
-            followerHandle: assertNotNull(followerMembership.handle),
-          })
+          new ChannelRecipient({ channel: channel.id }),
+          new NewChannelFollower({ followerHandle: assertNotNull(followerMembership.handle) })
         )
       }
 
@@ -298,6 +285,7 @@ export class ChannelsResolver {
     })
   }
 
+  @UseMiddleware(UserOnly)
   @Mutation(() => ChannelReportInfo)
   async reportChannel(
     @Args() { channelId, rationale }: ReportChannelArgs,
@@ -387,9 +375,8 @@ export class ChannelsResolver {
         await addNotification(
           em,
           account,
-          new ChannelSuspended({
-            recipient: new ChannelRecipient({ channelTitle: channel.title || '' }),
-          })
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelSuspended({})
         )
       }
 
@@ -441,9 +428,8 @@ export class ChannelsResolver {
         await addNotification(
           em,
           account,
-          new ChannelVerified({
-            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
-          })
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelVerified({})
         )
       }
 
@@ -461,59 +447,66 @@ export class ChannelsResolver {
     @Args() { channelId, rationale }: ExcludeChannelArgs
   ): Promise<ExcludeChannelResult> {
     const em = await this.em()
-
-    return withHiddenEntities(em, async () => {
-      const channel = await em.findOne(Channel, {
-        where: { id: channelId },
-      })
-
-      if (!channel) {
-        throw new Error(`Channel by id ${channelId} not found!`)
-      }
-      const existingExclusion = await em.findOne(Exclusion, {
-        where: { channelId: channel.id, videoId: IsNull() },
-      })
-      // If exclusion already exists - return its data with { created: false }
-      if (existingExclusion) {
-        return {
-          id: existingExclusion.id,
-          channelId: channel.id,
-          created: false,
-          createdAt: existingExclusion.timestamp,
-          rationale: existingExclusion.rationale,
-        }
-      }
-      // If exclusion doesn't exist, create a new one
-      const newExclusion = new Exclusion({
-        id: uniqueId(8),
-        channelId: channel.id,
-        rationale,
-        timestamp: new Date(),
-      })
-      channel.isExcluded = true
-      await em.save(newExclusion)
-
-      // in case account exist deposit notification
-      const channelOwnerMemberId = channel.ownerMemberId
-      if (channelOwnerMemberId) {
-        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        await addNotification(
-          em,
-          account,
-          new ChannelExcluded({
-            recipient: new ChannelRecipient({ channelTitle: parseChannelTitle(channel) }),
-          })
-        )
-      }
-
-      return {
-        id: newExclusion.id,
-        channelId: channel.id,
-        videoId: null,
-        created: true,
-        createdAt: newExclusion.timestamp,
-        rationale,
-      }
-    })
+    return await excludeChannelInner(em, channelId, rationale)
   }
+}
+
+// TODO: this is a fix for allowing unit testing, should be removed after introducing proper mocking
+export const excludeChannelInner = async (
+  em: EntityManager,
+  channelId: string,
+  rationale: string
+): Promise<ExcludeChannelResult> => {
+  return withHiddenEntities(em, async () => {
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+    const existingExclusion = await em.findOne(Exclusion, {
+      where: { channelId: channel.id, videoId: IsNull() },
+    })
+    // If exclusion already exists - return its data with { created: false }
+    if (existingExclusion) {
+      return {
+        id: existingExclusion.id,
+        channelId: channel.id,
+        created: false,
+        createdAt: existingExclusion.timestamp,
+        rationale: existingExclusion.rationale,
+      }
+    }
+    // If exclusion doesn't exist, create a new one
+    const newExclusion = new Exclusion({
+      id: uniqueId(8),
+      channelId: channel.id,
+      rationale,
+      timestamp: new Date(),
+    })
+    channel.isExcluded = true
+    await em.save([newExclusion, channel])
+
+    // in case account exist deposit notification
+    const channelOwnerMemberId = channel.ownerMemberId
+    if (channelOwnerMemberId) {
+      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      await addNotification(
+        em,
+        account,
+        new MemberRecipient({ membership: channelOwnerMemberId }),
+        new ChannelExcluded({})
+      )
+    }
+
+    return {
+      id: newExclusion.id,
+      channelId: channel.id,
+      videoId: null,
+      created: true,
+      createdAt: newExclusion.timestamp,
+      rationale,
+    }
+  })
 }
