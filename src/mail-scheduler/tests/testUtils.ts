@@ -9,6 +9,7 @@ import {
   GatewayConfig,
   AuctionWon,
   EmailDeliveryAttempt,
+  AuctionTypeOpen,
 } from '../../model'
 import { defaultNotificationPreferences } from '../../utils/notification'
 import { globalEm } from '../../utils/globalEm'
@@ -58,7 +59,11 @@ export async function populateDbWithSeedData() {
       status: new Unread(),
       createdAt: new Date(),
       recipient: new MemberRecipient({ membership: member.id }),
-      notificationType: new AuctionWon({ videoId: uniqueId(), videoTitle: 'test' }),
+      notificationType: new AuctionWon({
+        type: new AuctionTypeOpen({ bidLockDuration: 10 }),
+        videoId: uniqueId(),
+        videoTitle: 'test',
+      }),
       inApp: true,
     })
 
