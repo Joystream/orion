@@ -5,7 +5,7 @@ import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId } from '../model'
+import { NextEntityId, YppUnverified } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -78,12 +78,17 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
 }
 
 function migrateExportDataToV310(data: ExportedData): ExportedData {
-  // account will find himself with all notification pref. enabled by default
   data.Account?.values.forEach((account) => {
+    // account will find himself with all notification pref. enabled by default
     account.notificationPreferences = defaultNotificationPreferences()
+    // referrer channel id is set to null
+    account.referrerChannelId = null
   })
 
-  // Channel.isVerified = false by default
+  // all channels will start as unverified
+  data.Channel?.values.forEach((channel) => {
+    channel.yppStatus = new YppUnverified({})
+  })
 
   return data
 }
