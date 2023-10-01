@@ -77,6 +77,7 @@
     "@graphql-codegen/typescript": "^1.22.0",
     "@graphql-codegen/typescript-document-nodes": "^2.2.11",
     "@graphql-codegen/typescript-operations": "^1.17.16",
+    "@joystream/cli": "^1.2.0",
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
     "@subsquid/typeorm-codegen": "^0.3.1",
