@@ -26,7 +26,6 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Notification: true,
-  NotificationInAppDelivery: true,
   NotificationEmailDelivery: true,
   Token: true,
   Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status'],
@@ -281,6 +280,8 @@ export class OffchainState {
   }
 
   private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
+    //@todo
+    //TODO (^3.2.0): use better migration logic for migrating Ids OFFCHAIN_NOTIFICATION_ID_TAG + nextId & RUNTIME_NOTIFICATION_ID_TAG + nextId
     const migrationData = Object.entries(this.globalCountersMigration).sort(
       ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
     ) // sort in increasing order
