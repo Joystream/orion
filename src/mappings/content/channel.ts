@@ -11,6 +11,7 @@ import {
   ChannelRewardClaimedEventData,
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
+  ChannelAssetsDeletedByModeratorEventData,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -26,6 +27,7 @@ import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActo
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { ContentChannelAssetsDeletedByModeratorEvent } from '../../types/events'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -152,6 +154,28 @@ export async function processChannelDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
+}
+
+export async function processChannelAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, channelId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.ChannelAssetsDeletedByModerator'>): Promise<void> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new ChannelAssetsDeletedByModeratorEventData({
+      channel: channel.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processChannelVisibilitySetByModeratorEvent({
