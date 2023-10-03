@@ -6,7 +6,7 @@
 import { Store } from '@subsquid/typeorm-store'
 import AsyncLock from 'async-lock'
 import _, { isObject } from 'lodash'
-import { EntityManager, FindOptionsWhere, In, Not, Repository } from 'typeorm'
+import { EntityManager, FindOptionsWhere, In, Not, Repository, SimpleConsoleLogger } from 'typeorm'
 import { Logger } from '../logger'
 import { NextEntityId } from '../model/NextEntityId'
 import { criticalError, idStringFromNumber } from './misc'
@@ -259,6 +259,8 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return result
   }
 
+  // invalidate cache line
+
   // Creates a new entity of given type and schedules it for insertion.
   new(entityFields: Partial<Flat<E>>): Flat<E> {
     const entity = new this.EntityClass(entityFields)
@@ -359,6 +361,11 @@ export class EntityManagerOverlay {
     return this.em
   }
 
+  // reason: during migration the overlay would write to the database the old nextId
+  public invalidateRepository(entityName: string) {
+    this.repositories.delete(entityName)
+  }
+
   // Create an entity repository overlay or load already cached one
   public getRepository<E extends AnyEntity>(entityClass: Constructor<E>): RepositoryOverlay<E> {
     const loadedRepository = this.repositories.get(entityClass.name)
@@ -368,6 +375,7 @@ export class EntityManagerOverlay {
     }
     const originalRepository = this.em.getRepository(entityClass)
     const nextEntityId = this.nextEntityIds.find((v) => v.entityName === entityClass.name)
+    console.log(`🚨 Creating repository overlay for ${entityClass.name} with id ${nextEntityId}`)
     const repositoryOverlay = new RepositoryOverlay(
       entityClass,
       originalRepository,

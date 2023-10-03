@@ -88,7 +88,7 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
-import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager, migrateCounters } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
 
@@ -282,6 +282,11 @@ async function processEvent<EventName extends EventNames>(
 }
 
 async function afterDbUpdate(em: EntityManager) {
+  await em.query(`DO $$
+  BEGIN
+    RAISE INFO 'overlay updating orion_db';
+  END;
+  $$;`)
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
   await videoRelevanceManager.updateVideoRelevanceValue(em)
@@ -323,6 +328,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      await migrateCounters.migrateCounters(overlay)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }

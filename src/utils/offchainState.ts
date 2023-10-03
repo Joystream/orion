@@ -85,9 +85,9 @@ function migrateExportDataToV310(data: ExportedData): ExportedData {
   })
 
   // all channels will start as unverified
-  data.Channel?.values.forEach((channel) => {
-    channel.yppStatus = new YppUnverified({})
-  })
+  // data.Channel?.values.forEach((channel) => {
+  // channel.yppStatus = new YppUnverified()
+  // })
 
   return data
 }
@@ -98,6 +98,7 @@ export class OffchainState {
 
   private globalCountersMigration = {
     // destination version : [global counters names]
+    '3.0.1': ['Account'],
     '3.1.0': ['Account'],
   }
 
@@ -257,10 +258,6 @@ export class OffchainState {
       )
     }
 
-    // migrate counters for NextEntityId
-    const { orionVersion } = exportFile
-    await this.migrateCounters(orionVersion, em)
-
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
     fs.renameSync(exportFilePath, renamedExportFilePath)
@@ -280,7 +277,6 @@ export class OffchainState {
   }
 
   private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    //@todo
     //TODO (^3.2.0): use better migration logic for migrating Ids OFFCHAIN_NOTIFICATION_ID_TAG + nextId & RUNTIME_NOTIFICATION_ID_TAG + nextId
     const migrationData = Object.entries(this.globalCountersMigration).sort(
       ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
@@ -291,9 +287,9 @@ export class OffchainState {
         this.logger.info(`Migrating global counters to version ${version}`)
         for (const entityName of counters) {
           // build query that gets the entityName with the highest id
-          const results = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
-          const latestId = results[0]?.id || 0
-          await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
+          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
+          const latestId = parseInt(rowNumber[0].count)
+          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
         }
       }
     }
