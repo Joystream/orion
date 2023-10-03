@@ -5,7 +5,6 @@ import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId, YppUnverified } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -95,12 +94,6 @@ function migrateExportDataToV310(data: ExportedData): ExportedData {
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
-
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.0.1': ['Account'],
-    '3.1.0': ['Account'],
-  }
 
   private migrations: Migrations = {
     '3.1.0': migrateExportDataToV310,
@@ -274,24 +267,5 @@ export class OffchainState {
     const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
-  }
-
-  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    //TODO (^3.2.0): use better migration logic for migrating Ids OFFCHAIN_NOTIFICATION_ID_TAG + nextId & RUNTIME_NOTIFICATION_ID_TAG + nextId
-    const migrationData = Object.entries(this.globalCountersMigration).sort(
-      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
-    ) // sort in increasing order
-
-    for (const [version, counters] of migrationData) {
-      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-        this.logger.info(`Migrating global counters to version ${version}`)
-        for (const entityName of counters) {
-          // build query that gets the entityName with the highest id
-          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
-          const latestId = parseInt(rowNumber[0].count)
-          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
-        }
-      }
-    }
   }
 }

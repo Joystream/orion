@@ -11,7 +11,7 @@ export class NextEntityIdManager {
     if (this._migrationDone) {
       return
     }
-    //TODO (^3.2.0): use better migration logic for migrating Ids OFFCHAIN_NOTIFICATION_ID_TAG + nextId & RUNTIME_NOTIFICATION_ID_TAG + nextId
+    // TODO (^3.2.0): use better migration logic for migrating Ids OFFCHAIN_NOTIFICATION_ID_TAG + nextId & RUNTIME_NOTIFICATION_ID_TAG + nextId
     const em = overlay.getEm()
     for (const entityName of this.entities) {
       // build query that gets the entityName with the highest id

@@ -42,7 +42,7 @@ describe('Migration from 3.0.1 to 3.1.0', () => {
     })
   })
   describe('Channels are migrated properly', () => {
-    let aliceChannelId = '1'
+    const aliceChannelId = '1'
     let aliceChannel: Channel
     before(async () => {
       aliceChannel = await em.getRepository(Channel).findOneByOrFail({ id: aliceChannelId })

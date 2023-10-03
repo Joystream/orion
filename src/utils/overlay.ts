@@ -6,7 +6,7 @@
 import { Store } from '@subsquid/typeorm-store'
 import AsyncLock from 'async-lock'
 import _, { isObject } from 'lodash'
-import { EntityManager, FindOptionsWhere, In, Not, Repository, SimpleConsoleLogger } from 'typeorm'
+import { EntityManager, FindOptionsWhere, In, Not, Repository } from 'typeorm'
 import { Logger } from '../logger'
 import { NextEntityId } from '../model/NextEntityId'
 import { criticalError, idStringFromNumber } from './misc'

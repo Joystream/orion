@@ -21,6 +21,7 @@
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
+    "tests:migrations": "./src/tests/migrations/run.sh",
     "tests:notifications": "./src/tests/integration/run.sh",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
