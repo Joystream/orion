@@ -269,6 +269,7 @@ describe('notifications tests', () => {
         event,
       })
 
+      const nextNotificationId = await getNextNotificationId(em, true)
       const notification = await overlay
         .getRepository(Notification)
         .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + notificationId.toString())
@@ -276,6 +277,7 @@ describe('notifications tests', () => {
       expect(notification.notificationType.isTypeOf).to.equal('VideoLiked')
       expect(notification!.status.isTypeOf).to.equal('Unread')
       expect(notification!.inApp).to.be.true
+      expect(nextNotificationId.toString()).to.equal((notificationId + 1).toString())
       expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
     })
   })
