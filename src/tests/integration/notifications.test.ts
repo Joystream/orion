@@ -18,6 +18,7 @@ import {
   Notification,
   OwnedNft,
   Video,
+  VideoLiked,
 } from '../../model'
 import { expect } from 'chai'
 import {
@@ -275,6 +276,8 @@ describe('notifications tests', () => {
         .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + notificationId.toString())
 
       expect(notification.notificationType.isTypeOf).to.equal('VideoLiked')
+      const notificationData = notification.notificationType as VideoLiked
+      expect(notificationData.videoId).to.equal('1')
       expect(notification!.status.isTypeOf).to.equal('Unread')
       expect(notification!.inApp).to.be.true
       expect(nextNotificationId.toString()).to.equal((notificationId + 1).toString())
