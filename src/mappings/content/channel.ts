@@ -27,7 +27,6 @@ import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActo
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
-import { ContentChannelAssetsDeletedByModeratorEvent } from '../../types/events'
 
 export async function processChannelCreatedEvent({
   overlay,
