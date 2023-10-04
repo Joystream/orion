@@ -51,6 +51,7 @@ import {
   processChannelRewardUpdatedEvent,
   processChannelFundsWithdrawnEvent,
   processChannelRewardClaimedAndWithdrawnEvent,
+  processChannelAssetsDeletedByModeratorEvent,
 } from './mappings/content/channel'
 import {
   processVideoCreatedEvent,
@@ -58,6 +59,7 @@ import {
   processVideoDeletedEvent,
   processVideoDeletedByModeratorEvent,
   processVideoVisibilitySetByModeratorEvent,
+  processVideoAssetsDeletedByModeratorEvent,
 } from './mappings/content/video'
 import {
   processOpenAuctionStartedEvent,
@@ -193,11 +195,13 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.VideoUpdated': processVideoUpdatedEvent,
   'Content.VideoDeleted': processVideoDeletedEvent,
   'Content.VideoDeletedByModerator': processVideoDeletedByModeratorEvent,
+  'Content.VideoAssetsDeletedByModerator': processVideoAssetsDeletedByModeratorEvent,
   'Content.VideoVisibilitySetByModerator': processVideoVisibilitySetByModeratorEvent,
   'Content.ChannelCreated': processChannelCreatedEvent,
   'Content.ChannelUpdated': processChannelUpdatedEvent,
   'Content.ChannelDeleted': processChannelDeletedEvent,
   'Content.ChannelDeletedByModerator': processChannelDeletedByModeratorEvent,
+  'Content.ChannelAssetsDeletedByModerator': processChannelAssetsDeletedByModeratorEvent,
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,

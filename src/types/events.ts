@@ -164,6 +164,29 @@ export class ContentChannelAgentRemarkedEvent {
     }
 }
 
+export class ContentChannelAssetsDeletedByModeratorEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.ChannelAssetsDeletedByModerator')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.ChannelAssetsDeletedByModerator') === 'f4c7c11dc109020978738fadcb5d4de0d532e2db61ee2c06f4cd2a2e97d0fc83'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint[], Uint8Array] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
 export class ContentChannelCreatedEvent {
     private readonly _chain: Chain
     private readonly event: Event
@@ -666,6 +689,29 @@ export class ContentOpenAuctionStartedEvent {
     }
 
     get asV1000(): [v1000.ContentActor, bigint, v1000.OpenAuctionParamsRecord, bigint] {
+        assert(this.isV1000)
+        return this._chain.decodeEvent(this.event)
+    }
+}
+
+export class ContentVideoAssetsDeletedByModeratorEvent {
+    private readonly _chain: Chain
+    private readonly event: Event
+
+    constructor(ctx: EventContext)
+    constructor(ctx: ChainContext, event: Event)
+    constructor(ctx: EventContext, event?: Event) {
+        event = event || ctx.event
+        assert(event.name === 'Content.VideoAssetsDeletedByModerator')
+        this._chain = ctx._chain
+        this.event = event
+    }
+
+    get isV1000(): boolean {
+        return this._chain.getEventHash('Content.VideoAssetsDeletedByModerator') === '14b77a8c7d1aeffb21964d60e341eb69dff798d1e4b2806fb41efccd54b8221e'
+    }
+
+    get asV1000(): [v1000.ContentActor, bigint, bigint[], boolean, Uint8Array] {
         assert(this.isV1000)
         return this._chain.decodeEvent(this.event)
     }

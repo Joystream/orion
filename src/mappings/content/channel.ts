@@ -11,6 +11,7 @@ import {
   ChannelRewardClaimedEventData,
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
+  ChannelAssetsDeletedByModeratorEventData,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
 import {
@@ -152,6 +153,28 @@ export async function processChannelDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
+}
+
+export async function processChannelAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, channelId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.ChannelAssetsDeletedByModerator'>): Promise<void> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new ChannelAssetsDeletedByModeratorEventData({
+      channel: channel.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processChannelVisibilitySetByModeratorEvent({

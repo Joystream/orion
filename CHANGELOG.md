@@ -1,3 +1,7 @@
+# 3.1.0
+### Additions
+- Implements mappings for `Content.VideoAssetsDeletedByModerator` and `Content.ChannelAssetsDeletedByModerator` runtime events
+
 # 3.0.1
 ### Misc
 - add migration for the `Account` id field

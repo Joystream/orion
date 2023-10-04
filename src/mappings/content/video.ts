@@ -6,11 +6,28 @@ import {
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { Channel, Video, VideoViewEvent } from '../../model'
+import {
+  Channel,
+  Event,
+  Video,
+  VideoAssetsDeletedByModeratorEventData,
+  VideoViewEvent,
+} from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import {
+  deserializeMetadata,
+  genericEventFields,
+  u8aToBytes,
+  videoRelevanceManager,
+} from '../utils'
 import { processVideoMetadata } from './metadata'
-import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
+import {
+  deleteVideo,
+  encodeAssets,
+  parseContentActor,
+  processAppActionMetadata,
+  processNft,
+} from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processVideoCreatedEvent({
@@ -167,6 +184,28 @@ export async function processVideoDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
   await deleteVideo(overlay, contentId)
+}
+
+export async function processVideoAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, contentId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.VideoAssetsDeletedByModerator'>): Promise<void> {
+  const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new VideoAssetsDeletedByModeratorEventData({
+      video: video.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processVideoVisibilitySetByModeratorEvent({
