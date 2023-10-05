@@ -11,7 +11,6 @@
       />
       <mj-image align="center" />
       <mj-column padding="0" />
-      <mj-class name="footer-part" background-color="#000000" />
       <mj-class name="big" font-size="14px" line-height="20px" />
       <mj-class name="bold" font-weight="600" />
       <mj-class name="link" inner-padding="0" background-color="transparent" />
@@ -26,11 +25,17 @@
     </mj-attributes>
   </mj-head>
 
-  <mj-body>
-    <!-- Hero -->
-    <mj-section background-color="#4038FF" padding="0">
-      <mj-column>
-        <mj-image src="{{ app.logo }}" alt="{{ app.name }}" padding="4px" width="194px"></mj-image>
+  <mj-body background-color="#DAE2EB">
+    <!-- Header -->
+    <mj-section padding="24px 0 0">
+      <mj-column background-color="#4038FF">
+        <mj-image
+          src="{{ app.logo }}"
+          alt="{{ app.name }}"
+          width="194px"
+          height="96px"
+          padding="4px"
+        ></mj-image>
       </mj-column>
     </mj-section>
 
@@ -51,25 +56,36 @@
         <mj-group>
           <!-- Avatar -->
           <mj-column vertical-align="middle" width="10%">
-            <mj-text padding="0" align="center">
+            <mj-button mj-class="link" href="{{ notification.link }}" align="center" padding="0">
               <div
-                style="width: 40px; height: 40px; border-radius: 50%; display: inline-block; background-image: url({{ notification.avatar }}); background-size: contain; background-repeat: no-repeat;"
+                style="width: 40px; height: 40px; border-radius: 50%; display: inline-block; background-image: url({{ notification.avatar }}); background-size: contain; background-repeat: no-repeat; background-color: #4038FF;"
               >
                 <div
-                  style="width: 12px; height: 12px; border-radius: 50%; border: solid 2px #DAE2EB; margin: 16px 0 0 24px; padding: 6px; background-color: {{ notification.iconColor }};"
+                  style="width: 12px; height: 12px; border-radius: 50%; border: solid 2px #DAE2EB; margin: 16px 0 0 24px; padding: 6px; background-color: {{ notification.iconColor }}; overflow: hidden"
                 >
-                  <img style="width: 12px" src="{{ notification.icon }}" alt="notification icon" />
+                  <img
+                    style="width: 12px; height: 12px"
+                    src="{{ notification.icon }}"
+                    alt="notification icon"
+                  />
                 </div>
               </div>
-            </mj-text>
+            </mj-button>
           </mj-column>
 
           <!-- Text -->
           <mj-column vertical-align="middle" width="90%">
-            <mj-button mj-class="link" href="{{ notification.link }}" padding="0 0 0 15px">
+            <mj-button mj-class="link" href="{{ notification.link }}" padding="0 0 0 20px">
               {{ notification.text }}
             </mj-button>
-            <mj-text padding="4px 15px 0" color="#52616B">{{ notification.date }}</mj-text>
+            <mj-button
+              mj-class="link"
+              href="{{ notification.link }}"
+              padding="4px 0 0 20px"
+              color="#52616B"
+            >
+              {{ notification.date }}
+            </mj-button>
           </mj-column>
         </mj-group>
       </mj-section>
@@ -93,19 +109,20 @@
     </mj-wrapper>
 
     <!-- Footer -->
-    <mj-section mj-class="footer-part" padding="0">
-      <mj-column>
+    <mj-section padding="0">
+      <mj-column background-color="#000000">
         <mj-image
           src="{{ app.logoAlt }}"
           alt="{{ app.name }}"
-          padding="0px"
           width="96px"
+          height="88px"
+          padding="0px"
         ></mj-image>
       </mj-column>
     </mj-section>
 
-    <mj-section mj-class="footer-part" padding="0">
-      <mj-group>
+    <mj-section padding="0">
+      <mj-group background-color="#000000">
         <mj-column>
           <mj-button
             mj-class="link footer-link"
@@ -124,8 +141,8 @@
       </mj-group>
     </mj-section>
 
-    <mj-section mj-class="footer-part" padding="16px 16px 24px">
-      <mj-column>
+    <mj-section padding="0 0 24px">
+      <mj-column background-color="#000000" padding="16px 16px 24px">
         <mj-text color="#FFFFFF" align="center" padding="0">
           You can
           <a href="{{ app.unsubscribeLink }}" target="_blank" style="color: currentColor">
