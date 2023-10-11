@@ -15,7 +15,8 @@ type LinkType =
 
 export const getNotificationLink = async (
   em: EntityManager,
-  { type, params = [] }: { type: LinkType; params?: string[] }
+  type: LinkType,
+  params: string[] = []
 ): Promise<string> => {
   switch (type) {
     case 'video-page':
