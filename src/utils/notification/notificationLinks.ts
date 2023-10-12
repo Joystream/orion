@@ -23,7 +23,7 @@ export const getNotificationLink = async (
       return await getLink(em, `video/${params[0]}`, { commentId: params[1] })
 
     case 'nft-page':
-      return await getLink(em, `video/${params[0]}`)
+      return await getLink(em, `video/${params[0]}`, { nftWidget: true })
 
     case 'channel-page':
       return await getLink(em, `channel/${params[0]}`)
@@ -48,7 +48,11 @@ export const getNotificationLink = async (
   }
 }
 
-const getLink = async (em: EntityManager, pathname: string, query?: Record<string, string>) => {
+const getLink = async (
+  em: EntityManager,
+  pathname: string,
+  query?: Record<string, string | boolean>
+) => {
   const domain = await config.get(ConfigVariable.AppRootDomain, em) // expected like "gleev.xyz"
   const basePath = `https://${join(domain, pathname)}`
 
@@ -56,7 +60,7 @@ const getLink = async (em: EntityManager, pathname: string, query?: Record<strin
 
   const queryParams = new URLSearchParams()
   Object.entries(query).forEach(([key, value]) => {
-    if (typeof value !== 'undefined') queryParams.set(key, value)
+    if (typeof value !== 'undefined') queryParams.set(key, String(value))
   })
   return `${basePath}?${queryParams.toString()}`
 }
