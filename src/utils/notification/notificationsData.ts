@@ -13,88 +13,104 @@ type NotificationData = {
 
 export const getNotificationData = async (
   em: EntityManager,
-  { notificationType: notif, recipient }: Notification
+  { notificationType, recipient }: Notification
 ): Promise<NotificationData> => {
   const recipientId =
     recipient.isTypeOf === 'MemberRecipient' ? recipient.membership : recipient.channel
 
-  switch (notif.isTypeOf) {
+  switch (notificationType.isTypeOf) {
     //
     // Member notifications events
     //
 
     // Generic
-    case 'ChannelCreated':
+    case 'ChannelCreated': {
+      const { channelId, channelTitle } = notificationType
       return {
         icon: getNotificationIcon('bell'),
-        link: await getNotificationLink(em, 'channel-page', [notif.channelId]),
-        avatar: await getNotificationAvatar(em, 'channelId', notif.channelId),
-        text: `New channel created: “$${notif.channelTitle}“`,
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `New channel created: “${channelTitle}“`,
       }
+    }
 
     // Engagement
-    case 'CommentReply':
+    case 'CommentReply': {
+      const { videoId, videoTitle, commentId, memberHandle } = notificationType
       return {
         icon: getNotificationIcon('follow'),
-        link: await getNotificationLink(em, 'video-page', [notif.videoId, notif.commentId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.memberHandle),
-        text: `${notif.memberHandle} replied to your comment under the video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        text: `${memberHandle} replied to your comment under the video: “${videoTitle}”`,
       }
-    case 'ReactionToComment':
+    }
+    case 'ReactionToComment': {
+      const { videoId, videoTitle, commentId, memberHandle } = notificationType
       return {
         icon: getNotificationIcon('reaction'),
-        link: await getNotificationLink(em, 'video-page', [notif.videoId, notif.commentId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.memberHandle),
-        text: `${notif.memberHandle} reacted to your comment on the video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        text: `${memberHandle} reacted to your comment on the video: “${videoTitle}”`,
       }
+    }
 
     // Followed channels
-    case 'VideoPosted':
+    case 'VideoPosted': {
+      const { videoId, videoTitle, channelTitle, channelId } = notificationType
       return {
         icon: getNotificationIcon('video'),
-        link: await getNotificationLink(em, 'video-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'channelId', notif.channelId),
-        text: `${notif.channelTitle} posted a new video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'video-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} posted a new video: “${videoTitle}”`,
       }
-    case 'NewNftOnSale':
+    }
+    case 'NewNftOnSale': {
+      const { videoId, videoTitle, channelTitle, channelId } = notificationType
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'channelId', notif.channelId),
-        text: `${notif.channelTitle} started the sale of NFT: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started the sale of NFT: “${videoTitle}”`,
       }
-    case 'NewAuction':
+    }
+    case 'NewAuction': {
+      const { videoId, videoTitle, channelTitle, channelId } = notificationType
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'channelId', notif.channelId),
-        text: `${notif.channelTitle} started an auction for NFT: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started an auction for NFT: “${videoTitle}”`,
       }
+    }
 
     // NFT
-    case 'HigherBidPlaced':
+    case 'HigherBidPlaced': {
+      const { videoId, videoTitle, newBidderHandle } = notificationType
       return {
         icon: getNotificationIcon('nft-alt'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.newBidderHandle),
-        text: `${notif.newBidderHandle} placed a higher bid in the auction for NFT: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', newBidderHandle),
+        text: `${newBidderHandle} placed a higher bid in the auction for NFT: “${videoTitle}”`,
       }
+    }
     case 'AuctionWon': {
-      const auctionText = notif.type.isTypeOf === 'AuctionTypeOpen' ? 'an open' : 'a timed'
+      const { videoId, videoTitle, type } = notificationType
+      const auctionText = type.isTypeOf === 'AuctionTypeOpen' ? 'an open' : 'a timed'
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
-        text: `You won ${auctionText} auction for NFT: “${notif.videoTitle}”`,
+        text: `You won ${auctionText} auction for NFT: “${videoTitle}”`,
       }
     }
     case 'AuctionLost': {
-      const auctionText = notif.type.isTypeOf === 'AuctionTypeOpen' ? 'an open' : 'a timed'
+      const { videoId, videoTitle, type } = notificationType
+      const auctionText = type.isTypeOf === 'AuctionTypeOpen' ? 'an open' : 'a timed'
       return {
         icon: getNotificationIcon('nft-alt'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
-        text: `You lost ${auctionText} auction for NFT: “${notif.videoTitle}”. Withdraw your bid`,
+        text: `You lost ${auctionText} auction for NFT: “${videoTitle}”. Withdraw your bid`,
       }
     }
 
@@ -112,105 +128,145 @@ export const getNotificationData = async (
         text: `Your channel “${channel?.title}” is excluded from App`,
       }
     }
-    case 'VideoExcluded':
+    case 'VideoExcluded': {
+      const { videoTitle } = notificationType
       return {
         icon: getNotificationIcon('warning'),
         link: await getNotificationLink(em, 'term-of-sevice-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
-        text: `Your video is excluded from App: “$${notif.videoTitle}”`,
+        text: `Your video is excluded from App: “${videoTitle}”`,
       }
-    case 'NftFeaturedOnMarketPlace':
+    }
+    case 'NftFeaturedOnMarketPlace': {
+      const { videoTitle } = notificationType
       return {
         icon: getNotificationIcon('bell'),
         link: await getNotificationLink(em, 'marketplace-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
-        text: `Your NFT was featured in the marketplace featured section: “$${notif.videoTitle}”`,
+        text: `Your NFT was featured in the marketplace featured section: “${videoTitle}”`,
       }
+    }
 
     // Engagement
-    case 'NewChannelFollower':
+    case 'NewChannelFollower': {
+      const { followerHandle } = notificationType
       return {
         icon: getNotificationIcon('follow'),
-        link: await getNotificationLink(em, 'member-page', [notif.followerHandle]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.followerHandle),
-        text: `${notif.followerHandle} followed your channel`,
+        link: await getNotificationLink(em, 'member-page', [followerHandle]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', followerHandle),
+        text: `${followerHandle} followed your channel`,
       }
-    case 'CommentPostedToVideo':
+    }
+    case 'CommentPostedToVideo': {
+      const { videoId, videoTitle, memberHandle } = notificationType
       return {
         icon: getNotificationIcon('follow'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.memberHandle),
-        text: `${notif.memberHandle} left a comment on your video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        text: `${memberHandle} left a comment on your video: “${videoTitle}”`,
       }
-    case 'VideoLiked':
+    }
+    case 'VideoLiked': {
+      const { videoId, videoTitle, memberHandle } = notificationType
       return {
         icon: getNotificationIcon('like'),
-        link: await getNotificationLink(em, 'video-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.memberHandle),
-        text: `{/*notification.memberHandle*/ 'Someone'} liked your video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'video-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        text: `${memberHandle} liked your video: “${videoTitle}”`,
       }
-    case 'VideoDisliked':
+    }
+    case 'VideoDisliked': {
+      const { videoId, videoTitle, memberHandle } = notificationType
       return {
         icon: getNotificationIcon('dislike'),
-        link: await getNotificationLink(em, 'video-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.memberHandle),
-        text: `{/*notification.memberHandle*/ 'Someone'} disliked your video: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'video-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        text: `${memberHandle} disliked your video: “${videoTitle}”`,
       }
+    }
 
     // Youtube Partnership Program
-    case 'ChannelVerified':
+    case 'ChannelVerified': {
       return {
         icon: getNotificationIcon('bell'),
         link: await getNotificationLink(em, 'ypp-dashboard'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your channel got verified in our Youtube Partnership Program`,
       }
-    case 'ChannelSuspended':
+    }
+    case 'ChannelSuspended': {
       return {
         icon: getNotificationIcon('warning'),
         link: await getNotificationLink(em, 'ypp-dashboard'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your channel got suspended in our Youtube Partnership Program`,
       }
+    }
 
     // NFTs Auctions
-    case 'NftPurchased':
+    case 'NftPurchased': {
+      const { videoId, videoTitle, buyerHandle, price } = notificationType
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.buyerHandle),
-        text: `${notif.buyerHandle} purchased for <NumberFormat as="span" value=${notif.price} format="short" withToken withDenomination="before" /> your NFT: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', buyerHandle),
+        text: `${buyerHandle} purchased for ${formatJOY(price)} your NFT: “${videoTitle}”`,
       }
-    case 'NftRoyaltyPaid':
+    }
+    case 'NftRoyaltyPaid': {
+      const { videoId, videoTitle, amount } = notificationType
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
-        text: `You received <NumberFormat as="span" value=${notif.amount} format="short" withToken withDenomination="before" /> royalties from your NFT: “${notif.videoTitle}”`,
+        text: `You received ${formatJOY(amount)} royalties from your NFT: “${videoTitle}”`,
       }
-    case 'CreatorReceivesAuctionBid':
+    }
+    case 'CreatorReceivesAuctionBid': {
+      const { videoId, videoTitle, amount, bidderHandle } = notificationType
       return {
         icon: getNotificationIcon('nft'),
-        link: await getNotificationLink(em, 'nft-page', [notif.videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.bidderHandle),
-        text: `${notif.bidderHandle} placed a bid of <NumberFormat as="span" value=${notif.amount} format="short" withToken withDenomination="before" /> for your NFT: “${notif.videoTitle}”`,
+        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', bidderHandle),
+        text: `${bidderHandle} placed a bid of ${formatJOY(amount)} for your NFT: “${videoTitle}”`,
       }
+    }
 
     // Payouts
-    case 'DirectChannelPaymentByMember':
+    case 'DirectChannelPaymentByMember': {
+      const { amount, payerHandle } = notificationType
       return {
         icon: getNotificationIcon('payout'),
-        link: await getNotificationLink(em, 'member-page', [notif.payerHandle]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', notif.payerHandle),
-        text: `${notif.payerHandle} transferred <NumberFormat as="span" value=${notif.amount} format="short" withToken withDenomination="before" /> to
-            your channel`,
+        link: await getNotificationLink(em, 'member-page', [payerHandle]),
+        avatar: await getNotificationAvatar(em, 'membershipHandle', payerHandle),
+        text: `${payerHandle} transferred ${formatJOY(amount)} to your channel`,
       }
-    case 'ChannelFundsWithdrawn':
+    }
+    case 'ChannelFundsWithdrawn': {
+      const { amount } = notificationType
       return {
         icon: getNotificationIcon('payout'),
         link: await getNotificationLink(em, 'payments-page'),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
-        text: `<NumberFormat as="span" value=${notif.amount} format="short" withToken withDenomination="before" /> were withdrawn from your channel account`,
+        text: `${formatJOY(amount)} were withdrawn from your channel account`,
       }
+    }
   }
 }
+
+const JOY_DECIMAL = 10
+const formatJOY = (hapiAmount: bigint): string => {
+  const [intPart, decPart] = splitInt(String(hapiAmount), JOY_DECIMAL)
+  const formatedIntPart = chunkFromEnd(intPart, 3).join(' ')
+  const roundedDecPart = Math.round(Number(splitInt(decPart, 2).join('.')))
+  const joyAmount = Number(`${formatedIntPart}.${roundedDecPart}`) || Number(`0.${decPart}`)
+  return `${joyAmount} $JOY`
+}
+const splitInt = (numStr: string, decimal: number) => {
+  return [numStr.slice(0, -decimal) ?? '0', numStr.slice(-decimal).padStart(decimal)]
+}
+const chunkFromEnd = (str: string, interval: number): string[] =>
+  Array.from({ length: Math.floor((str.length - 1) / interval) }).reduce(
+    ([head, ...tail]: string[]) => [head.slice(0, -interval), head.slice(-interval), ...tail],
+    [str]
+  )
