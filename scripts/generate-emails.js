@@ -7,7 +7,7 @@ const mjml2html = require('mjml')
 const { compile } = require('handlebars')
 
 const ghRaw = 'https://raw.githubusercontent.com/Joystream'
-const gleevLogos = `${ghRaw}/design/master/logo/gleev`
+const gleevLogos = `${ghRaw}/atlas-notification-assets/main/logos/gleev`
 const gleevRoot = 'https://atlas-git-fork-thesan-feature-orion-notifications-joystream.vercel.app'
 const contexts = {
   gleev: {
@@ -17,8 +17,8 @@ const contexts = {
     app: {
       name: 'Gleev',
       nameAlt: 'Gleev.xyz',
-      logo: `${gleevLogos}/gleev-viewer/horizontal/color/light/margin/png/gleev-logo%401x.png`,
-      logoAlt: `${gleevLogos}/gleev-viewer/icon/color/light/margin/png/gleev-logo%401x.png`,
+      logo: `${gleevLogos}/header-viewer.png`,
+      logoAlt: `${gleevLogos}/footer.png`,
       homeLink: gleevRoot,
       notificationLink: `${gleevRoot}/notifications/member`,
       unsubscribeLink: `${gleevRoot}/member/settings?tab=Notifications`,
@@ -29,7 +29,7 @@ const contexts = {
       link: `${gleevRoot}/video/1?commentId=METAPROTOCOL-OLYMPIA-3882-2`,
       date: '07 Jul 2023 at 10:41',
       avatar: `${ghRaw}/founding-members/main/avatars/primary-avatar/1.png`,
-      icon: `${ghRaw}/atlas/master/packages/atlas/src/assets/icons/svgs/action-council.svg`,
+      icon: `${ghRaw}/atlas-notification-assets/main/icons/follow.png`,
       iconColor: '#5A58FF',
     },
   },
@@ -40,7 +40,7 @@ const contexts = {
       subTitle: 'Has a new notifications:',
       app: {
         name: 'Studio',
-        logo: `${gleevLogos}/gleev-studio/color/light/margin/png/studio-logo%401x.png`,
+        logo: `${gleevLogos}/header-studio.png`,
         notificationPage: `${gleevRoot}/studio/notifications/channel`,
         unsubscribeLink: `${gleevRoot}/studio/channel?tab=Notifications`,
       },

@@ -60,15 +60,11 @@
               <div
                 style="width: 40px; height: 40px; border-radius: 50%; display: inline-block; background-image: url({{ notification.avatar }}); background-size: contain; background-repeat: no-repeat; background-color: #4038FF;"
               >
-                <div
-                  style="width: 12px; height: 12px; border-radius: 50%; border: solid 2px #DAE2EB; margin: 16px 0 0 24px; padding: 6px; background-color: {{ notification.iconColor }}; overflow: hidden"
-                >
-                  <img
-                    style="width: 12px; height: 12px"
-                    src="{{ notification.icon }}"
-                    alt="notification icon"
-                  />
-                </div>
+                <img
+                  style="width: 24px; height: 24px; margin: 16px 0 0 24px"
+                  src="{{ notification.icon }}"
+                  alt="notification icon"
+                />
               </div>
             </mj-button>
           </mj-column>
