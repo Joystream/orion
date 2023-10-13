@@ -258,8 +258,10 @@ const JOY_DECIMAL = 10
 const formatJOY = (hapiAmount: bigint): string => {
   const [intPart, decPart] = splitInt(String(hapiAmount), JOY_DECIMAL)
   const formatedIntPart = chunkFromEnd(intPart, 3).join(' ')
-  const roundedDecPart = Math.round(Number(splitInt(decPart, 2).join('.')))
-  const joyAmount = Number(`${formatedIntPart}.${roundedDecPart}`) || Number(`0.${decPart}`)
+  const roundedDec = Math.round(Number(splitInt(decPart, 2).join('.')))
+  const _decPart = formatedIntPart === '0' && roundedDec === 0 ? Number(decPart) : roundedDec
+  const joyAmount = _decPart ? `${formatedIntPart}.${_decPart}` : formatedIntPart
+
   return `${joyAmount} $JOY`
 }
 const splitInt = (numStr: string, decimal: number) => {
