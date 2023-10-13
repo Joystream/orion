@@ -4,7 +4,7 @@ import { getNotificationAvatar } from './notificationAvatars'
 import { getNotificationIcon } from './notificationIcons'
 import { getNotificationLink } from './notificationLinks'
 
-type NotificationData = {
+export type NotificationData = {
   icon: string
   link: string
   avatar: string

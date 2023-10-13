@@ -95,7 +95,7 @@
         <mj-column>
           <mj-button
             mj-class="big bold"
-            href="{{ app.notificationPage }}"
+            href="{{ app.notificationLink }}"
             padding="0"
             inner-padding="16px"
             background-color="#4038FF"
@@ -126,7 +126,7 @@
         <mj-column>
           <mj-button
             mj-class="link footer-link"
-            href="{{ app.homepage }}"
+            href="{{ app.homeLink }}"
             align="right"
             border-right="solid 1px #C2E0FF33"
           >

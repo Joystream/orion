@@ -19,8 +19,8 @@ const contexts = {
       nameAlt: 'Gleev.xyz',
       logo: `${gleevLogos}/gleev-viewer/horizontal/color/light/margin/png/gleev-logo%401x.png`,
       logoAlt: `${gleevLogos}/gleev-viewer/icon/color/light/margin/png/gleev-logo%401x.png`,
-      homepage: gleevRoot,
-      notificationPage: `${gleevRoot}/notifications/member`,
+      homeLink: gleevRoot,
+      notificationLink: `${gleevRoot}/notifications/member`,
       unsubscribeLink: `${gleevRoot}/member/settings?tab=Notifications`,
     },
 
