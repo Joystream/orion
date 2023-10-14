@@ -1,5 +1,5 @@
-import { EntityManager } from 'typeorm'
-import { Channel, MemberMetadata, Membership } from '../../model'
+import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { Channel, MemberMetadata } from '../../model'
 
 const PLACEHOLDER = 'https://example.com/avatar.png'
 
@@ -19,12 +19,10 @@ export const getNotificationAvatar = async (
     return avatar.resolvedUrls[0]
   }
 
-  const id =
-    type === 'membershipId'
-      ? param
-      : (await em.getRepository(Membership).findOneBy({ handle: param }))?.id
+  const where: FindOptionsWhere<MemberMetadata> =
+    type === 'membershipId' ? { id: param } : { member: { handle: param } }
 
-  const member = id ? await em.getRepository(MemberMetadata).findOneBy({ id }) : undefined
+  const member = await em.getRepository(MemberMetadata).findOneBy(where)
   const avatar = member?.avatar
 
   // AvatarObject is not yet supported
