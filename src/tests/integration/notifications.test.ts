@@ -10,6 +10,7 @@ import {
   Account,
   Channel,
   ChannelRecipient,
+  CommentPostedToVideo,
   Exclusion,
   MemberRecipient,
   NextEntityId,
@@ -32,6 +33,7 @@ import { EntityManagerOverlay } from '../../utils/overlay'
 import { Store } from '@subsquid/typeorm-store'
 import { processMemberRemarkedEvent } from '../../mappings/membership'
 import Long from 'long'
+import { backwardCompatibleMetaID } from '../../mappings/utils'
 
 const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Bytes => {
   return createType('Bytes', '0x' + Buffer.from(metaClass.encode(obj).finish()).toString('hex'))
@@ -282,6 +284,59 @@ describe('notifications tests', () => {
       expect(notification!.inApp).to.be.true
       expect(nextNotificationId.toString()).to.equal((notificationId + 1).toString())
       expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
+    })
+  })
+  describe('Comment Posted To Video', () => {
+    let notificationId: number
+    const block = { timestamp: 123456 } as any
+    const indexInBlock = 1
+    const extrinsicHash = '0x1234567890abcdef'
+    const metadataMessage: IMemberRemarked = {
+      createComment: {
+        videoId: Long.fromNumber(1),
+        parentCommentId: null,
+        body: 'test',
+      },
+    }
+    const event = {
+      isV2001: true,
+      asV2001: ['2', metadataToBytes(MemberRemarked, metadataMessage), undefined], // avoid comment author == creator
+    } as any
+    before(async () => {
+      overlay = await createOverlay()
+      notificationId = await getNextNotificationId(em, true)
+    })
+    it('should process comment to video and deposit notification', async () => {
+      await processMemberRemarkedEvent({
+        overlay,
+        block,
+        indexInBlock,
+        extrinsicHash,
+        event,
+      })
+
+      const nextNotificationId = await getNextNotificationId(em, true)
+      const notification = await overlay
+        .getRepository(Notification)
+        .getByIdOrFail(RUNTIME_NOTIFICATION_ID_TAG + '-' + notificationId.toString())
+
+      it('notification type is comment posted to video', () => {
+        expect(notification.notificationType.isTypeOf).to.equal('CommentPostedToVideo')
+      })
+      it('notification data for comment posted to video should be ok', () => {
+        const notificationData = notification.notificationType as CommentPostedToVideo
+        expect(notificationData.videoId).to.equal('1')
+        expect(notificationData.comentId).to.equal(backwardCompatibleMetaID(block, indexInBlock))
+        expect(notificationData.memberHandle).to.equal('handle-2')
+        expect(notificationData.videoTitle).to.equal('test-video-1')
+      })
+
+      it('general notification creation setting should be as default', () => {
+        expect(notification!.status.isTypeOf).to.equal('Unread')
+        expect(notification!.inApp).to.be.true
+        expect(nextNotificationId.toString()).to.equal((notificationId + 1).toString())
+        expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
+      })
     })
   })
 })

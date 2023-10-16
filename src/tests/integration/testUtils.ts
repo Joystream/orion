@@ -65,6 +65,7 @@ export async function populateDbWithSeedData() {
     })
     const video = new Video({
       id: i.toString(),
+      title: `test-video-${i}`,
       createdAt: new Date(),
       channelId: channel.id,
       isCensored: false,
