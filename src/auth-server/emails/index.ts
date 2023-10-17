@@ -1,6 +1,7 @@
 import { compile } from 'handlebars'
 import fs from 'fs'
 import path from 'path'
+import { NotificationData } from '../../utils/notification/notificationsData'
 
 function getEmailTemplateData<T>(templatePath: string): (data: T) => string {
   const fullPath = path.join(__dirname, 'templates/' + templatePath)
@@ -23,10 +24,20 @@ export function registerEmailContent(data: RegisterEmailTemplateData): string {
 }
 
 export type NotificationEmailTemplateData = {
-  notificationText: string
-  notificationLink: string
-  preferencePageLink: string
-  appName: string
+  title: string
+  subTitle: string
+
+  app: {
+    name: string
+    nameAlt: string
+    logo: string
+    logoAlt: string
+    homeLink: string
+    notificationLink: string
+    unsubscribeLink: string
+  }
+
+  notification: NotificationData
 }
 export function notificationEmailContent(data: NotificationEmailTemplateData): string {
   return getEmailTemplateData<NotificationEmailTemplateData>('notification.html.mst')(data)

@@ -29,7 +29,7 @@ export async function deliverEmails() {
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
     const appName = await config.get(ConfigVariable.AppName, em)
-    const content = '' // await createMailContent(em, toAccount, appName, notification)
+    const content = '' // await createMailContent(em, appName, notification)
     const attempts = notificationDelivery.attempts
     const status = await executeMailDelivery(appName, em, toAccount, content)
     const newAttempt = new EmailDeliveryAttempt({

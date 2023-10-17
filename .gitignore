@@ -8,6 +8,8 @@
 /.vscode
 /.idea
 src/model/generated
+src/auth-server/emails/templates/*.mst
+src/auth-server/emails/templates/preview
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data
