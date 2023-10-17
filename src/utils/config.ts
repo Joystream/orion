@@ -1,6 +1,7 @@
 import { EntityManager } from 'typeorm'
 import { GatewayConfig } from '../model'
 import { withHiddenEntities } from './sql'
+import { string } from '../model/generated/marshal'
 
 export enum ConfigVariable {
   SupportNoCategoryVideo = 'SUPPORT_NO_CATEGORY_VIDEOS',
@@ -21,6 +22,9 @@ export enum ConfigVariable {
   EmailConfirmationTokenRateLimit = 'EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT',
   AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
   EmailNotificationDeliveryMaxAttempts = 'EMAIL_NOTIFICATION_DELIVERY_MAX_ATTEMPTS',
+  AppAssetStorage = 'APP_ASSET_STORAGE',
+  AppNameAlt = 'APP_NAME_ALT',
+  NotificationAssetRoot = 'NOTIFICATION_ASSET_ROOT',
 }
 
 const boolType = {
@@ -62,6 +66,9 @@ export const configVariables = {
   [ConfigVariable.EmailConfirmationTokenRateLimit]: intType,
   [ConfigVariable.AppRootDomain]: stringType,
   [ConfigVariable.EmailNotificationDeliveryMaxAttempts]: intType,
+  [ConfigVariable.AppAssetStorage]: stringType,
+  [ConfigVariable.AppNameAlt]: stringType,
+  [ConfigVariable.NotificationAssetRoot]: stringType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>

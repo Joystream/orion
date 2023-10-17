@@ -1,4 +1,5 @@
 import { EntityManager } from 'typeorm'
+import { ConfigVariable, config } from '../config'
 
 type NotificationIconType =
   | 'like'
@@ -12,10 +13,10 @@ type NotificationIconType =
   | 'reaction'
   | 'video'
 
-// TODO get the notifiaction url from `await config.get(ConfigVariable.NotificationAssetRoot, em)`
-const NOTIFICATION_ASSET_ROOT =
-  'https://raw.githubusercontent.com/Joystream/atlas-notification-assets/main/icons'
 export const getNotificationIcon = async (
   em: EntityManager,
   icon: NotificationIconType
-): Promise<string> => `${NOTIFICATION_ASSET_ROOT}/${icon}.png`
+): Promise<string> => {
+  const notificationAssetRoot = await config.get(ConfigVariable.AppRootDomain, em)
+  return `${notificationAssetRoot}/${icon}.png`
+}

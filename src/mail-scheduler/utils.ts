@@ -55,9 +55,8 @@ export async function createMailContent(
       : `${appRoot}/studio/channel?tab=Notifications`
   const name = appKey === 'viewer' ? appName : 'Studio'
 
-  // TODO get these from the store:
-  const appAssetStorage = `https://raw.githubusercontent.com/Joystream/atlas-notification-assets/main/logos/gleev`
-  const appNameAlt = 'Gleev.xyz'
+  const appAssetStorage = await config.get(ConfigVariable.AppAssetStorage, em)
+  const appNameAlt = await config.get(ConfigVariable.AppNameAlt, em)
 
   const content = notificationEmailContent({
     ...(await getMessage(em, notification)),
