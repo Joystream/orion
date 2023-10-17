@@ -395,6 +395,7 @@ export async function processReactCommentMessage(
         commentId: comment.id,
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberHandle: await memberHandleById(overlay, memberId),
       }
       await addNotification(
         overlay,
@@ -505,6 +506,7 @@ export async function processCreateCommentMessage(
         commentId: comment.id,
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberHandle: await memberHandleById(overlay, memberId),
       }
       await addNotification(
         overlay,
