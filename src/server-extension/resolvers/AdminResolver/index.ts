@@ -18,6 +18,12 @@ import {
   SetFeaturedNftsResult,
   SetKillSwitchInput,
   SetMaxAttemptsOnMailDeliveryInput,
+  SetNewAppAssetStorageInput,
+  SetNewAppAssetStorageResult,
+  SetNewAppNameAltInput,
+  SetNewAppNameAltResult,
+  SetNewNotificationAssetRootInput,
+  SetNewNotificationAssetRootResult,
   SetRootDomainInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -61,6 +67,34 @@ import { addNotification } from '../../../utils/notification'
 export class AdminResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewAppAssetStorageResult)
+  async setAppAssetStorage(
+    @Args() args: SetNewAppAssetStorageInput
+  ): Promise<SetNewAppAssetStorageResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppAssetStorage, args.newAppAssetStorage, em)
+    return { newAppAssetStorage: args.newAppAssetStorage }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewAppNameAltResult)
+  async setAppNameAlt(@Args() args: SetNewAppNameAltInput): Promise<SetNewAppNameAltResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppNameAlt, args.newAppNameAlt, em)
+    return { newAppNameAlt: args.newAppNameAlt }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewNotificationAssetRootResult)
+  async setNewNotificationAssetRoot(
+    @Args() args: SetNewNotificationAssetRootInput
+  ): Promise<SetNewNotificationAssetRootResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.NotificationAssetRoot, args.newNotificationAssetRoot, em)
+    return { newNotificationAssetRoot: args.newNotificationAssetRoot }
+  }
 
   @UseMiddleware(OperatorOnly)
   @Mutation(() => VideoWeights)

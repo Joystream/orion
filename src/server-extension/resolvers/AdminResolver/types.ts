@@ -261,3 +261,57 @@ export class SetFeaturedNftsResult {
   })
   newNumberOfNftsFeatured?: number
 }
+
+@ArgsType()
+export class SetNewAppAssetStorageInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link to be set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ObjectType()
+export class SetNewAppAssetStorageResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link just set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ArgsType()
+export class SetNewAppNameAltInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative to be set',
+  })
+  newAppNameAlt!: string
+}
+
+@ObjectType()
+export class SetNewAppNameAltResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative just set',
+  })
+  newAppNameAlt!: string
+}
+
+@ArgsType()
+export class SetNewNotificationAssetRootInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link to be set',
+  })
+  newNotificationAssetRoot!: string
+}
+
+@ObjectType()
+export class SetNewNotificationAssetRootResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link just set',
+  })
+  newNotificationAssetRoot!: string
+}
