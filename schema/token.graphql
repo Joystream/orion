@@ -38,8 +38,8 @@ type CreatorToken @entity {
   "access status invite only vs anyone"
   isInviteOnly: Boolean!
 
-  "creator annual revenue permill (minted)"
-  annualCreatorReward: Int!
+  "creator annual revenue (minted)"
+  annualCreatorRewardPermill: Int!
 
   "revenue share ratio between creator and holder"
   revenueShareRatioPermill: Int!
@@ -364,8 +364,8 @@ type VestingSchedule @entity {
   "counter"
   id: ID!
 
-  "% of amount vested immediately after cliff period"
-  cliffPercent: Int!
+  "Permill of amount vested immediately after cliff period"
+  cliffRatioPermill: Int!
 
   "vesting duration in blocks"
   vestingDurationBlocks: Int!

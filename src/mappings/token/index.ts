@@ -61,7 +61,7 @@ export async function processTokenIssuedEvent({
     createdAt: new Date(block.timestamp),
     totalSupply,
     revenueShareRatioPermill: revenueSplitRate,
-    annualCreatorReward: patronageRate,
+    annualCreatorRewardPermill: patronageRate,
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
@@ -78,7 +78,7 @@ export async function processTokenIssuedEvent({
         id: vestingData.id,
         cliffBlock: vestingData.cliffBlock,
         cliffDurationBlocks: vestingData.cliffDuration,
-        cliffPercent: vestingData.cliffPercent,
+        cliffRatioPermill: vestingData.cliffPercent,
         endsAt: vestingData.endsAt,
         vestingDurationBlocks: vestingData.duration,
       })
@@ -218,7 +218,7 @@ export async function processTokenSaleInitializedEvent({
       endsAt: vestingData.endsAt,
       cliffBlock: vestingData.cliffBlock,
       vestingDurationBlocks: vestingData.duration,
-      cliffPercent: vestingData.cliffPercent,
+      cliffRatioPermill: vestingData.cliffPercent,
       cliffDurationBlocks: vestingData.cliffDuration,
     })
 
@@ -250,9 +250,9 @@ export async function processPatronageRateDecreasedToEvent({
 }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   if (typeof newRate === 'number') {
-    token.annualCreatorReward = newRate
+    token.annualCreatorRewardPermill = newRate
   } else {
-    token.annualCreatorReward = Number(newRate.toString())
+    token.annualCreatorRewardPermill = Number(newRate.toString())
   }
 }
 
