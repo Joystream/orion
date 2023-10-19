@@ -1,5 +1,5 @@
-module.exports = class Data1695044397977 {
-    name = 'Data1695044397977'
+module.exports = class Data1697723507572 {
+    name = 'Data1697723507572'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -115,13 +115,13 @@ module.exports = class Data1695044397977 {
         await db.query(`CREATE INDEX "IDX_7eb550061f81d70d7c14b9368a" ON "trailer_video" ("token_id", "video_id") `)
         await db.query(`CREATE TABLE "benefit" ("id" character varying NOT NULL, "token_id" character varying, "emoji_code" text, "title" text NOT NULL, "description" text NOT NULL, "display_order" integer NOT NULL, CONSTRAINT "Benefit_token_displayOrder" UNIQUE ("token_id", "display_order") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_c024dccb30e6f4702adffe884d1" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_77ac3c1669ee14648626b078f9" ON "benefit" ("token_id", "display_order") `)
-        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "trailer_video_id" character varying, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward_permill" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "trailer_video_id" character varying, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_790a6fc1f7aad3711c0672bb6b" ON "creator_token" ("symbol") `)
         await db.query(`CREATE INDEX "IDX_dbdcc45cd234841c4ffdafbdfa" ON "creator_token" ("trailer_video_id") `)
         await db.query(`CREATE INDEX "IDX_aabe40376c0eb47772b52780b1" ON "creator_token" ("current_amm_sale_id") `)
         await db.query(`CREATE INDEX "IDX_5eca884f8728ff8f0c6a389c24" ON "creator_token" ("current_sale_id") `)
         await db.query(`CREATE INDEX "IDX_e30b9944186aeb1e86707e1705" ON "creator_token" ("current_renvenue_share_id") `)
-        await db.query(`CREATE TABLE "vesting_schedule" ("id" character varying NOT NULL, "cliff_percent" integer NOT NULL, "vesting_duration_blocks" integer NOT NULL, "cliff_duration_blocks" integer NOT NULL, "ends_at" integer NOT NULL, "cliff_block" integer NOT NULL, CONSTRAINT "PK_4818b05532ed9058110ed5b5b13" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "vesting_schedule" ("id" character varying NOT NULL, "cliff_ratio_permill" integer NOT NULL, "vesting_duration_blocks" integer NOT NULL, "cliff_duration_blocks" integer NOT NULL, "ends_at" integer NOT NULL, "cliff_block" integer NOT NULL, CONSTRAINT "PK_4818b05532ed9058110ed5b5b13" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "vested_account" ("id" character varying NOT NULL, "vesting_id" character varying, "account_id" character varying, "total_vesting_amount" numeric NOT NULL, "vesting_source" jsonb NOT NULL, CONSTRAINT "PK_23d64323d1b1b14ccbdb6ed2a64" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_745ee4e6a2dfd5de65fb8b9f44" ON "vested_account" ("vesting_id") `)
         await db.query(`CREATE INDEX "IDX_6a0600f53023dca2c43b99a097" ON "vested_account" ("account_id") `)
