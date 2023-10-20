@@ -546,7 +546,7 @@ export async function processCreatorTokenIssuerRemarkedEvent({
     return
   }
   const metadata = creatorRemarked.updateTokenMetadata
-  if (isSet(metadata?.newMetadata)) {
+  if (!isSet(metadata?.newMetadata)) {
     return
   }
 

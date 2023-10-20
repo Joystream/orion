@@ -65,7 +65,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
       return !!qToken
     })
     assert.isNotNull(qToken)
-    this.previousRate = new BN(qToken!.annualCreatorReward)
+    this.previousRate = new BN(qToken!.annualCreatorRewardPermill)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
@@ -74,7 +74,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     await Utils.until('waiting for patronage rate to be updated in DB', async () => {
       qToken = await this.query.getTokenById(tokenId)
       if (!!qToken) {
-        const currentRate = new BN(qToken!.annualCreatorReward)
+        const currentRate = new BN(qToken!.annualCreatorRewardPermill)
         return !currentRate.eq(this.previousRate!)
       } else {
         return false
@@ -82,7 +82,7 @@ export class DecreasePatronageRateFixture extends StandardizedFixture {
     })
 
     assert.isNotNull(qToken)
-    assert.equal(qToken!.annualCreatorReward, newRate.toNumber())
+    assert.equal(qToken!.annualCreatorRewardPermill, newRate.toNumber())
   }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

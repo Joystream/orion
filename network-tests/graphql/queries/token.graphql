@@ -33,6 +33,9 @@ fragment TokenFields on CreatorToken {
     video {
       id
     }
+    token {
+      id
+    }
   }
   benefits {
     emojiCode
@@ -40,7 +43,7 @@ fragment TokenFields on CreatorToken {
     description
     displayOrder
   }
-  annualCreatorReward
+  annualCreatorRewardPermill
   revenueShareRatioPermill
   revenueShares {
     id
@@ -99,7 +102,7 @@ fragment RevenueShareFields on RevenueShare {
 fragment VestingScheduleFields on VestingSchedule {
   id
   endsAt
-  cliffPercent
+  cliffRatioPermill
   cliffDurationBlocks
   cliffBlock
   accounts {

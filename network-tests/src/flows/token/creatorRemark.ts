@@ -14,7 +14,6 @@ export default async function creatorRemarkFlow({ api, query }: FlowProps): Prom
   let metadataToken = await getTokenMetadata(api)
   metadataToken.description = 'description changed'
   metadataToken.name = 'name changed'
-  console.log('remark metadata', metadataToken)
   const creatorRemarkFixture = new CreatorRemarkFixture(
     api,
     query,

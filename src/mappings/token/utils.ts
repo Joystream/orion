@@ -282,7 +282,10 @@ export async function processTokenMetadata(
     if (video) {
       const trailerVideoRepository = overlay.getRepository(TrailerVideo)
       const oldTrailer = await trailerVideoRepository.getOneByRelation('tokenId', token.id)
-      console.log('old trailer', oldTrailer)
+      if (oldTrailer?.videoId === metadata.trailerVideoId) {
+        // makes no sense to update the same trailer video
+        return
+      }
       if (oldTrailer) {
         trailerVideoRepository.remove(oldTrailer)
       }
@@ -293,8 +296,6 @@ export async function processTokenMetadata(
         tokenId: token.id,
         videoId: video.id,
       })
-      token.trailerVideoId = id
-      video.trailerVideoForTokenId = id
     }
   }
 }

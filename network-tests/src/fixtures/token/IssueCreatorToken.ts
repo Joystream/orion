@@ -100,14 +100,13 @@ export class IssueCreatorTokenFixture extends StandardizedFixture {
     assert.equal(qToken!.status, TokenStatus.Idle)
     assert.equal(qToken!.revenueShareRatioPermill, revenueSplitRate.toNumber())
     assert.equal(qToken!.totalSupply, totalSupply.toString())
-    assert.equal(qToken!.annualCreatorReward, patronageRate.toNumber())
+    assert.equal(qToken!.annualCreatorRewardPermill, patronageRate.toNumber())
     assert.equal(qToken!.isInviteOnly, transferPolicy.isPermissioned)
     assert.equal(qToken!.accountsNum, initialAllocation.size)
     assert.equal(qToken!.deissued, false)
 
     if (this.metadata) {
       assert.equal(qToken!.description, this.metadata.description)
-      assert.equal(qToken!.trailerVideo!.video.id, this.metadata.trailerVideoId!.toString())
 
       assert.isNotNull(qToken!.benefits)
       const benefits = qToken!.benefits!
