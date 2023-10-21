@@ -250,11 +250,16 @@ export class AssetsResolver {
 
   @FieldResolver(() => [String])
   async resolvedUrls(@Root() object: StorageDataObject, @Ctx() ctx: Context): Promise<string[]> {
+    if (!object.storageBag) {
+      throw new Error(
+        'incorrect query: to use resolvedUrls make sure to add storageBag.id into query for StorageDataObject'
+      )
+    }
     const clientLoc = await getClientLoc(ctx)
     const limit = await getResolvedUrlsLimit(ctx)
     // The resolvedUrl field is initially populated with the object ID
     const [objectId] = object.resolvedUrls
-    if (!object.storageBag || !objectId) {
+    if (!object.storageBag?.id || !objectId) {
       return []
     }
     const buckets = await distributionBucketsCache.getBucketsByBagId(object.storageBag.id)
