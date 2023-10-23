@@ -3,7 +3,7 @@ import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
 import { EntityManager } from 'typeorm'
 import { globalEm } from '../utils/globalEm'
 import { uniqueId } from '../utils/crypto'
-import { executeMailDelivery } from './utils'
+import { createMailContent, executeMailDelivery } from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
   const maxAttempts = await config.get(ConfigVariable.EmailNotificationDeliveryMaxAttempts, em)
@@ -26,10 +26,11 @@ export async function mailsToDeliver(em: EntityManager): Promise<NotificationEma
 export async function deliverEmails() {
   const em = await globalEm
   const newEmailDeliveries = await mailsToDeliver(em)
+  const maxAttempts = await getMaxAttempts(em)
+  const appName = await config.get(ConfigVariable.AppName, em)
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
-    const appName = await config.get(ConfigVariable.AppName, em)
-    const content = '' // await createMailContent(em, appName, notification)
+    const content = await createMailContent(em, appName, notificationDelivery.notification)
     const attempts = notificationDelivery.attempts
     const status = await executeMailDelivery(appName, em, toAccount, content)
     const newAttempt = new EmailDeliveryAttempt({
@@ -42,7 +43,7 @@ export async function deliverEmails() {
     if (status.isTypeOf === 'EmailSuccess') {
       notificationDelivery.discard = true
     } else {
-      if (attempts.length >= (await getMaxAttempts(em))) {
+      if (attempts.length >= maxAttempts) {
         notificationDelivery.discard = true
       }
     }
