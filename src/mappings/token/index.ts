@@ -538,7 +538,7 @@ export async function processUserParticipatedInSplitEvent({
 export async function processCreatorTokenIssuerRemarkedEvent({
   overlay,
   event: {
-    asV2002: [tokenId, _, metadataBytes],
+    asV2002: [_, tokenId, metadataBytes],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssuerRemarked'>) {
   const creatorRemarked = deserializeMetadata(CreatorTokenIssuerRemarked, metadataBytes)
