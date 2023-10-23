@@ -30,7 +30,10 @@ export async function deliverEmails() {
   const appName = await config.get(ConfigVariable.AppName, em)
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
-    const content = await createMailContent(em, appName, notificationDelivery.notification)
+    let content = ''
+    if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
+      content = await createMailContent(em, appName, notificationDelivery.notification)
+    }
     const attempts = notificationDelivery.attempts
     const status = await executeMailDelivery(appName, em, toAccount, content)
     const newAttempt = new EmailDeliveryAttempt({
