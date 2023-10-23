@@ -282,11 +282,6 @@ async function processEvent<EventName extends EventNames>(
 }
 
 async function afterDbUpdate(em: EntityManager) {
-  await em.query(`DO $$
-  BEGIN
-    RAISE INFO 'overlay updating orion_db';
-  END;
-  $$;`)
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
   await videoRelevanceManager.updateVideoRelevanceValue(em)

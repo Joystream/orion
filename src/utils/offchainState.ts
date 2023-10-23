@@ -83,10 +83,7 @@ function migrateExportDataToV310(data: ExportedData): ExportedData {
     account.referrerChannelId = null
   })
 
-  // all channels will start as unverified
-  // data.Channel?.values.forEach((channel) => {
-  // channel.yppStatus = new YppUnverified()
-  // })
+  // all channels will start as unverified because they are re-synched from mappings
 
   return data
 }

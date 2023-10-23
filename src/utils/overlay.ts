@@ -375,7 +375,6 @@ export class EntityManagerOverlay {
     }
     const originalRepository = this.em.getRepository(entityClass)
     const nextEntityId = this.nextEntityIds.find((v) => v.entityName === entityClass.name)
-    console.log(`🚨 Creating repository overlay for ${entityClass.name} with id ${nextEntityId}`)
     const repositoryOverlay = new RepositoryOverlay(
       entityClass,
       originalRepository,
