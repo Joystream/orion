@@ -5,7 +5,6 @@ import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -26,7 +25,6 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Notification: true,
-  NotificationInAppDelivery: true,
   NotificationEmailDelivery: true,
   Token: true,
   Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status'],
@@ -78,12 +76,14 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
 }
 
 function migrateExportDataToV310(data: ExportedData): ExportedData {
-  // account will find himself with all notification pref. enabled by default
   data.Account?.values.forEach((account) => {
+    // account will find himself with all notification pref. enabled by default
     account.notificationPreferences = defaultNotificationPreferences()
+    // referrer channel id is set to null
+    account.referrerChannelId = null
   })
 
-  // Channel.isVerified = false by default
+  // all channels will start as unverified because they are re-synched from mappings
 
   return data
 }
@@ -91,11 +91,6 @@ function migrateExportDataToV310(data: ExportedData): ExportedData {
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
-
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.1.0': ['Account'],
-  }
 
   private migrations: Migrations = {
     '3.1.0': migrateExportDataToV310,
@@ -253,10 +248,6 @@ export class OffchainState {
       )
     }
 
-    // migrate counters for NextEntityId
-    const { orionVersion } = exportFile
-    await this.migrateCounters(orionVersion, em)
-
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
     fs.renameSync(exportFilePath, renamedExportFilePath)
@@ -273,23 +264,5 @@ export class OffchainState {
     const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
-  }
-
-  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    const migrationData = Object.entries(this.globalCountersMigration).sort(
-      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
-    ) // sort in increasing order
-
-    for (const [version, counters] of migrationData) {
-      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-        this.logger.info(`Migrating global counters to version ${version}`)
-        for (const entityName of counters) {
-          // build query that gets the entityName with the highest id
-          const results = await em.query(`SELECT id FROM ${entityName} ORDER BY id DESC LIMIT 1`)
-          const latestId = results[0]?.id || 0
-          await em.save(new NextEntityId({ entityName, nextId: Number(latestId) + 1 }))
-        }
-      }
-    }
   }
 }
