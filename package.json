@@ -24,6 +24,7 @@
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
     "tests:mail-scheduler": "./src/mail-scheduler/tests/run-tests.sh",
+    "tests:migrations": "./src/tests/migrations/run.sh",
     "tests:notifications": "./src/tests/integration/run.sh",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
@@ -82,6 +83,7 @@
     "@graphql-codegen/typescript": "^1.22.0",
     "@graphql-codegen/typescript-document-nodes": "^2.2.11",
     "@graphql-codegen/typescript-operations": "^1.17.16",
+    "@joystream/cli": "^1.2.0",
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
     "@subsquid/typeorm-codegen": "^0.3.1",

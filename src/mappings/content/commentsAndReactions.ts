@@ -241,8 +241,9 @@ async function processVideoReaction(
     if (video.channelId) {
       const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
       if (channelOwnerMemberId) {
+        const memberHandle = await memberHandleById(overlay, memberId)
         const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
-        const reactionData = { videoId: video.id, videoTitle: parseVideoTitle(video) }
+        const reactionData = { videoId: video.id, videoTitle: parseVideoTitle(video), memberHandle }
         const reaction =
           reactionType === VideoReactionOptions.LIKE
             ? new VideoLiked(reactionData)
@@ -394,6 +395,7 @@ export async function processReactCommentMessage(
         commentId: comment.id,
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberHandle: await memberHandleById(overlay, memberId),
       }
       await addNotification(
         overlay,
@@ -504,6 +506,7 @@ export async function processCreateCommentMessage(
         commentId: comment.id,
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberHandle: await memberHandleById(overlay, memberId),
       }
       await addNotification(
         overlay,
@@ -524,6 +527,7 @@ export async function processCreateCommentMessage(
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
         memberHandle: authorHandle,
+        comentId: comment.id,
       }
       await addNotification(
         overlay,

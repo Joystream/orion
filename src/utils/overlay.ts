@@ -259,6 +259,8 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return result
   }
 
+  // invalidate cache line
+
   // Creates a new entity of given type and schedules it for insertion.
   new(entityFields: Partial<Flat<E>>): Flat<E> {
     const entity = new this.EntityClass(entityFields)
@@ -357,6 +359,11 @@ export class EntityManagerOverlay {
 
   public getEm() {
     return this.em
+  }
+
+  // reason: during migration the overlay would write to the database the old nextId
+  public invalidateRepository(entityName: string) {
+    this.repositories.delete(entityName)
   }
 
   // Create an entity repository overlay or load already cached one
