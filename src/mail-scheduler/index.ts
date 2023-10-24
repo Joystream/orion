@@ -54,3 +54,16 @@ export async function deliverEmails() {
   }
   await em.save(newEmailDeliveries)
 }
+
+export async function main() {
+  await deliverEmails()
+}
+
+// invoke the main function and wait for the resolved value
+main()
+  .then(() => {
+    console.log('Email delivery finished')
+  })
+  .catch((err) => {
+    console.error('Email delivery failed', err)
+  })
