@@ -79,6 +79,7 @@ module.exports = class Views2000000000000 {
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
+      email_delivery_attempt: ['FALSE'],
       // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
       // notification: ['FALSE'],
     }

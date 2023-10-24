@@ -30,7 +30,7 @@ export async function sgSendMail({ from, to, subject, content }: SendMailArgs) {
     subject,
     html: content,
   })
-  mailerLogger.info(`E-mail sent:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`)
+  // mailerLogger.info(`E-mail sent:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`)
 
   return clientResponse
 }

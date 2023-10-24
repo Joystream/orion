@@ -23,15 +23,15 @@ export class SetVideoWeightsInput {
 }
 
 @ArgsType()
-export class SetNotificationCenterPathInput {
-  @Field(() => String, { nullable: false })
-  newPath!: string
+export class SetMaxAttemptsOnMailDeliveryInput {
+  @Field(() => Int, { nullable: false })
+  newMaxAttempts!: number
 }
 
 @ObjectType()
-export class NotificationCenterPath {
-  @Field(() => Boolean, { nullable: false })
-  isApplied!: boolean
+export class MaxAttemptsOnMailDelivery {
+  @Field(() => Int, { nullable: false })
+  maxAttempts!: number
 }
 
 @ArgsType()
@@ -260,4 +260,58 @@ export class SetFeaturedNftsResult {
     description: 'The updated number of nft that are now explicitly featured by the Gateway',
   })
   newNumberOfNftsFeatured?: number
+}
+
+@ArgsType()
+export class SetNewAppAssetStorageInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link to be set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ObjectType()
+export class SetNewAppAssetStorageResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link just set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ArgsType()
+export class SetNewAppNameAltInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative to be set',
+  })
+  newAppNameAlt!: string
+}
+
+@ObjectType()
+export class SetNewAppNameAltResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative just set',
+  })
+  newAppNameAlt!: string
+}
+
+@ArgsType()
+export class SetNewNotificationAssetRootInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link to be set',
+  })
+  newNotificationAssetRoot!: string
+}
+
+@ObjectType()
+export class SetNewNotificationAssetRootResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link just set',
+  })
+  newNotificationAssetRoot!: string
 }

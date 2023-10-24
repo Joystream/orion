@@ -6,13 +6,34 @@ type NotificationEmailDelivery @entity {
   notification: Notification!
 
   "notification delivery status"
-  deliveryStatus: EmailDeliveryStatus!
+  attempts: [EmailDeliveryAttempt!]! @derivedFrom(field: "notificationDelivery")
+
+  "mark as discard after max attempts or successful attempt"
+  discard: Boolean!
 }
 
-enum EmailDeliveryStatus {
-  Unsent
-  Success
-  Failure
+type EmailDeliveryAttempt @entity {
+  "UUID"
+  id: ID!
+
+  "notification Fk"
+  notificationDelivery: NotificationEmailDelivery!
+
+  "delivery status"
+  status: DeliveryStatus!
+
+  "datetime"
+  timestamp: DateTime!
+}
+
+union DeliveryStatus = EmailSuccess | EmailFailure
+
+type EmailSuccess @variant {
+  phantom: Int
+}
+
+type EmailFailure @variant {
+  errorStatus: String!
 }
 
 type Read {

@@ -1,5 +1,5 @@
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
+import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx, Int } from 'type-graphql'
 import { EntityManager, In, Not } from 'typeorm'
 import {
   AppActionSignatureInput,
@@ -9,7 +9,7 @@ import {
   ExcludeContentResult,
   GeneratedSignature,
   KillSwitch,
-  NotificationCenterPath,
+  MaxAttemptsOnMailDelivery,
   RestoreContentArgs,
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
@@ -17,7 +17,13 @@ import {
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
-  SetNotificationCenterPathInput,
+  SetMaxAttemptsOnMailDeliveryInput,
+  SetNewAppAssetStorageInput,
+  SetNewAppAssetStorageResult,
+  SetNewAppNameAltInput,
+  SetNewAppNameAltResult,
+  SetNewNotificationAssetRootInput,
+  SetNewNotificationAssetRootResult,
   SetRootDomainInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
@@ -63,6 +69,34 @@ export class AdminResolver {
   constructor(private em: () => Promise<EntityManager>) {}
 
   @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewAppAssetStorageResult)
+  async setAppAssetStorage(
+    @Args() args: SetNewAppAssetStorageInput
+  ): Promise<SetNewAppAssetStorageResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppAssetStorage, args.newAppAssetStorage, em)
+    return { newAppAssetStorage: args.newAppAssetStorage }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewAppNameAltResult)
+  async setAppNameAlt(@Args() args: SetNewAppNameAltInput): Promise<SetNewAppNameAltResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppNameAlt, args.newAppNameAlt, em)
+    return { newAppNameAlt: args.newAppNameAlt }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetNewNotificationAssetRootResult)
+  async setNewNotificationAssetRoot(
+    @Args() args: SetNewNotificationAssetRootInput
+  ): Promise<SetNewNotificationAssetRootResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.NotificationAssetRoot, args.newNotificationAssetRoot, em)
+    return { newNotificationAssetRoot: args.newNotificationAssetRoot }
+  }
+
+  @UseMiddleware(OperatorOnly)
   @Mutation(() => VideoWeights)
   async setVideoWeights(@Args() args: SetVideoWeightsInput): Promise<VideoWeights> {
     const em = await this.em()
@@ -82,13 +116,16 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly)
-  @Mutation(() => NotificationCenterPath)
+  @Mutation(() => Int)
   async setNewNotificationCenterPath(
-    @Args() args: SetNotificationCenterPathInput
-  ): Promise<AppRootDomain> {
+    @Args() args: SetMaxAttemptsOnMailDeliveryInput
+  ): Promise<MaxAttemptsOnMailDelivery> {
     const em = await this.em()
-    await config.set(ConfigVariable.NotificationCenterPath, args.newPath, em)
-    return { isApplied: true }
+    if (args.newMaxAttempts < 1) {
+      throw new Error('Max attempts cannot be less than 1')
+    }
+    await config.set(ConfigVariable.EmailNotificationDeliveryMaxAttempts, args.newMaxAttempts, em)
+    return { maxAttempts: args.newMaxAttempts }
   }
 
   @UseMiddleware(OperatorOnly)

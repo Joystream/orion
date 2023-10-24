@@ -8,7 +8,6 @@ import {
   Event,
   Unread,
   NotificationEmailDelivery,
-  EmailDeliveryStatus,
   RecipientType,
   NotificationType,
 } from '../../model'
@@ -194,7 +193,8 @@ async function createEmailNotification(
   const notificationDelivery = new NotificationEmailDelivery({
     id: uniqueId(32),
     notificationId: notification.id,
-    deliveryStatus: EmailDeliveryStatus.Unsent,
+    attempts: [],
+    discard: false,
   })
 
   if (store instanceof EntityManagerOverlay) {
