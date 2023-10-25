@@ -1,3 +1,6 @@
+import { config as dontenvConfig } from 'dotenv'
+import path from 'path'
+
 import { ConfigVariable, config } from '../utils/config'
 import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
 import { EntityManager } from 'typeorm'
@@ -59,7 +62,6 @@ export async function main() {
   await deliverEmails()
 }
 
-// invoke the main function and wait for the resolved value
 main()
   .then(() => {
     console.log('Email delivery finished')

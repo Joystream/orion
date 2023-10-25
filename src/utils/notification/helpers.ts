@@ -202,10 +202,7 @@ async function createEmailNotification(
       ...notificationDelivery,
     })
   } else {
-    const inAppNotification = new NotificationEmailDelivery({
-      ...notificationDelivery,
-    })
-    await (store as EntityManager).save(inAppNotification)
+    await (store as EntityManager).save(notificationDelivery)
   }
 }
 
