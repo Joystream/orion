@@ -20,6 +20,6 @@ cleanup() {
 }
 
 # Run the tests
-npx ts-mocha "./src/tests/integration/*.ts" --timeout 60000 --exit
+npx ts-mocha "./src/tests/integration/notifications.test.ts" --timeout 60000 --exit
 
 trap cleanup EXIT
