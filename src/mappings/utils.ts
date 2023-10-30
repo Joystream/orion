@@ -16,6 +16,7 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
+import isValidUTF8 from 'utf-8-validate'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
@@ -24,7 +25,9 @@ videoRelevanceManager.init(1000 * 60 * 60)
 export const JOYSTREAM_SS58_PREFIX = 126
 
 export function bytesToString(b: Uint8Array): string {
-  return Buffer.from(b).toString()
+  const buffer = Buffer.from(b) // assumes default utf-8 encoding
+  // Use the utf-8-validate library to check if the Buffer contains valid UTF-8 data
+  return isValidUTF8(buffer) ? buffer.toString('utf-8') : buffer.toString()
 }
 
 export function deserializeMetadata<T>(

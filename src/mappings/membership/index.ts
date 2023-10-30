@@ -20,16 +20,18 @@ export async function processNewMember({
   | 'Members.MembershipGifted'
 >) {
   const [memberId, params] = 'isV2001' in event && event.isV2001 ? event.asV2001 : event.asV1000
-  const { controllerAccount, handle, metadata: metadataBytes } = params
+  const { controllerAccount, handle: handleBytes, metadata: metadataBytes } = params
   const metadata = deserializeMetadata(MembershipMetadata, metadataBytes)
 
   const member = overlay.getRepository(Membership).new({
     createdAt: new Date(block.timestamp),
     id: memberId.toString(),
     controllerAccount: toAddress(controllerAccount),
-    handle: handle && bytesToString(handle),
     totalChannelsCreated: 0,
   })
+  if (handleBytes) {
+    updateMemberHandle(member as Membership, handleBytes)
+  }
 
   if (metadata) {
     await processMembershipMetadata(overlay, member.id, metadata)
@@ -57,7 +59,7 @@ export async function processMemberProfileUpdatedEvent({
   const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
 
   if (newHandle) {
-    member.handle = newHandle.toString()
+    updateMemberHandle(member as Membership, newHandle)
   }
 
   if (newMetadata) {
@@ -66,6 +68,11 @@ export async function processMemberProfileUpdatedEvent({
       await processMembershipMetadata(overlay, member.id, metadataUpdate)
     }
   }
+}
+
+function updateMemberHandle(member: Membership, newHandle: Uint8Array) {
+  member.handleRaw = '0x' + Buffer.from(newHandle).toString('hex')
+  member.handle = bytesToString(newHandle)
 }
 
 export async function processMemberRemarkedEvent({

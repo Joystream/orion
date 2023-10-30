@@ -31,8 +31,11 @@ type Membership @entity {
   "Timestamp of the block the membership was created at"
   createdAt: DateTime!
 
-  "The unique handle chosen by member"
-  handle: String! @unique
+  "The handle coming from decoded handleRaw if possible"
+  handle: String!
+
+  "The handle chosen by member coming from event deposit"
+  handleRaw: String! @unique
 
   "Member's metadata"
   metadata: MemberMetadata @derivedFrom(field: "member")
