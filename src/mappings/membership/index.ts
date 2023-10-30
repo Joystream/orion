@@ -1,3 +1,4 @@
+import { u8aToHex } from '@polkadot/util'
 import {
   Event,
   Membership,
@@ -71,7 +72,7 @@ export async function processMemberProfileUpdatedEvent({
 }
 
 function updateMemberHandle(member: Membership, newHandle: Uint8Array) {
-  member.handleRaw = '0x' + Buffer.from(newHandle).toString('hex')
+  member.handleRaw = '0x' + u8aToHex(newHandle)
   member.handle = bytesToString(newHandle)
 }
 

@@ -27,7 +27,7 @@ export const JOYSTREAM_SS58_PREFIX = 126
 export function bytesToString(b: Uint8Array): string {
   const buffer = Buffer.from(b) // assumes default utf-8 encoding
   // Use the utf-8-validate library to check if the Buffer contains valid UTF-8 data
-  return isValidUTF8(buffer) ? buffer.toString('utf-8') : buffer.toString()
+  return isValidUTF8(buffer) ? buffer.toString('utf-8') : '0x' + buffer.toString('hex')
 }
 
 export function deserializeMetadata<T>(
