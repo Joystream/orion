@@ -72,7 +72,7 @@ export async function processMemberProfileUpdatedEvent({
 }
 
 function updateMemberHandle(member: Membership, newHandle: Uint8Array) {
-  member.handleRaw = '0x' + u8aToHex(newHandle)
+  member.handleRaw = u8aToHex(newHandle)
   member.handle = bytesToString(newHandle)
 }
 
