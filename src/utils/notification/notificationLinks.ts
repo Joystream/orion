@@ -29,7 +29,7 @@ export const getNotificationLink = async (
       return await getLink(em, `channel/${params[0]}`)
 
     case 'member-page':
-      return await getLink(em, `member/${params[0]}`)
+      return await getLink(em, `member/id/${params[0]}`)
 
     case 'category-page':
       return await getLink(em, `category/${params[0]}`)

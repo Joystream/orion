@@ -149,10 +149,10 @@ export const getNotificationData = async (
 
     // Engagement
     case 'NewChannelFollower': {
-      const { followerHandle } = notificationType
+      const { followerId, followerHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'follow'),
-        link: await getNotificationLink(em, 'member-page', [followerHandle]),
+        link: await getNotificationLink(em, 'member-page', [followerId]),
         avatar: await getNotificationAvatar(em, 'membershipHandle', followerHandle),
         text: `${followerHandle} followed your channel`,
       }
@@ -234,10 +234,10 @@ export const getNotificationData = async (
 
     // Payouts
     case 'DirectChannelPaymentByMember': {
-      const { amount, payerHandle } = notificationType
+      const { amount, payerId, payerHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'payout'),
-        link: await getNotificationLink(em, 'member-page', [payerHandle]),
+        link: await getNotificationLink(em, 'member-page', [payerId]),
         avatar: await getNotificationAvatar(em, 'membershipHandle', payerHandle),
         text: `${payerHandle} transferred ${formatJOY(amount)} to your channel`,
       }
