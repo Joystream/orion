@@ -64,8 +64,10 @@ export class TransferFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const accountId = this.tokenId.toString() + this.sourceMemberId.toString()
-    const qAccount = await this.query.getTokenAccountById(accountId)
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      this.api.createType('u64', this.tokenId),
+      this.sourceMemberId
+    )
 
     if (qAccount === null) {
       this.srcAmountPre = new BN(0)
@@ -76,12 +78,14 @@ export class TransferFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
-    const accountId = tokenId.toString() + sourceMemberId.toString()
 
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('waiting for transfers to be committed', async () => {
-      qAccount = await this.query.getTokenAccountById(accountId)
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+        tokenId,
+        sourceMemberId.toNumber()
+      )
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.srcAmountPre!)
     })
@@ -95,8 +99,7 @@ export class TransferFixture extends StandardizedFixture {
 
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
-        const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.getTokenAccountById(destAccountId)
+        const qDestAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId)
         assert.isNotNull(qDestAccount)
         return qDestAccount!.totalAmount
       })

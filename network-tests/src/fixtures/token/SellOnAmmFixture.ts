@@ -66,8 +66,9 @@ export class SellOnAmmFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
     assert.notEqual(this.amount, new BN(0))
-    const qAccount = await this.query.getTokenAccountById(
-      this.tokenId.toString() + this.memberId.toString()
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      this.api.createType('u64', this.tokenId),
+      this.memberId
     )
 
     assert.isNotNull(qAccount)
@@ -88,7 +89,7 @@ export class SellOnAmmFixture extends StandardizedFixture {
 
     await Utils.until('waiting for sell on amm effects to take place', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       const currSupply = new BN(qToken!.totalSupply)
       const currAmount = new BN(qAccount!.totalAmount)
       return currSupply < this.supplyPre! && currAmount < this.amountPre!

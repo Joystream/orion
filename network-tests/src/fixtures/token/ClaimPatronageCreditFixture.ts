@@ -59,8 +59,9 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
     const qToken = await this.query.getTokenById(tokenId)
-    const qAccount = await this.query.getTokenAccountById(
-      tokenId.toString() + this.creatorMemberId.toString()
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      tokenId,
+      this.creatorMemberId
     )
     this.supplyPre = new BN(qToken!.totalSupply)
     this.amountPre = new BN(qAccount!.totalAmount)
@@ -72,7 +73,7 @@ export class ClaimPatronageCreditFixture extends StandardizedFixture {
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('claim patronage handler finalized', async () => {
-      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       qToken = await this.query.getTokenById(tokenId)
 
       assert.isNotNull(qToken)

@@ -58,11 +58,11 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     ).creatorTokenId.unwrap()
     const token = await this.api.query.projectToken.tokenInfoById(tokenId)
     const saleNonce = token.nextSaleId.subn(1)
-    const { tokensSource } = token.sale.unwrap()
     const saleId = tokenId.toString() + saleNonce.toString()
     let qSale = await this.query.getSaleById(saleId.toString())
-    const qFundsSource = await this.query.getTokenAccountById(
-      tokenId.toString() + tokensSource.toString()
+    const qFundsSource = await this.query.getTokenAccountByTokenIdAndMemberId(
+      tokenId,
+      this.creatorMemberId
     )
 
     assert.isNotNull(qSale)

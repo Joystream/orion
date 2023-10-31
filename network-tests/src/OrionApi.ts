@@ -118,6 +118,17 @@ export class OrionApi {
     >(GetTokenById, { id: id.toString() }, 'creatorTokenById')
   }
 
+  public async getTokenAccountByTokenIdAndMemberId(
+    tokenId: TokenId,
+    memberId: number
+  ): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
+    const qToken = await this.getTokenById(tokenId)
+    const { id: accountId } = qToken!.accounts.find(
+      (account: any) => account.member.id.toString() === memberId.toString()
+    )!
+    return await this.getTokenAccountById(accountId)
+  }
+
   public async getTokenAccountById(
     id: string
   ): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
@@ -138,10 +149,8 @@ export class OrionApi {
 
   public async getRevenueShareParticpationById(
     shareId: string,
-    tokenId: TokenId,
-    memberId: u64
+    accountId: string
   ): Promise<Maybe<RevenueShareParticipationFieldsFragment> | undefined> {
-    const accountId = tokenId.toString() + memberId.toString()
     return this.uniqueEntitySubscription<
       GetRevenueShareParticipationByIdSubscription,
       GetRevenueShareParticipationByIdSubscriptionVariables

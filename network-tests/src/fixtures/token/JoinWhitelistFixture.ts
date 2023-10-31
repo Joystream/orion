@@ -75,7 +75,7 @@ export class JoinWhitelistFixture extends StandardizedFixture {
 
     await Utils.until('waiting for joinwhitelst handler to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       return !!qToken && !!qAccount
     })
 

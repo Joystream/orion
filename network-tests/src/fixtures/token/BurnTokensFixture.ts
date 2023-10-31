@@ -42,8 +42,9 @@ export class BurnTokensFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.getTokenById(_tokenId)
-    const qAccount = await this.query.getTokenAccountById(
-      this.tokenId.toString() + this.fromMemberId.toString()
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      _tokenId,
+      this.fromMemberId
     )
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
@@ -75,7 +76,7 @@ export class BurnTokensFixture extends StandardizedFixture {
 
     await Utils.until('waiting for burn token fixture to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(tokenId.toString() + memberId.toString())
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       return new BN(qAccount!.totalAmount).lt(this.accountAmountPre!)
     })
 

@@ -15,6 +15,9 @@ fragment TokenFields on CreatorToken {
   totalSupply
   accounts {
     id
+    member {
+      id
+    }
   }
   accountsNum
   avatar {

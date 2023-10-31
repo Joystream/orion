@@ -48,9 +48,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
   public async preExecHook(): Promise<void> {
     const _tokenId = this.api.createType('u64', this.tokenId)
     const qToken = await this.query.getTokenById(_tokenId)
-    const qAccount = await this.query.getTokenAccountById(
-      _tokenId.toString() + this.memberId.toString()
-    )
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(_tokenId, this.memberId)
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
@@ -85,11 +83,10 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
-    const accountId = tokenId.toString() + memberId.toString()
     await Utils.until('waiting for exit revenue split handler to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(accountId)
-      return !!qToken && !!qAccount
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
+      return Boolean(qToken) && Boolean(qAccount)
     })
 
     const participantsNumPost = this.participantsNumPre! - 1

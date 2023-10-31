@@ -50,14 +50,11 @@ export class DustAccountFixture extends StandardizedFixture {
     const [tokenId, memberId] = this.events[0].event.data
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
-    const accountId = tokenId.toString() + memberId.toString()
     await Utils.until('waiting for dust account handler to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountById(accountId)
-      return !!qToken && !!qAccount
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
+      return Boolean(qToken) && Boolean(qAccount)
     })
-    assert.isNotNull(qToken, `Token ${tokenId} not found`)
-    assert.isNotNull(qAccount, `Account ${accountId} not found`)
 
     const nodeAccountNumber = (
       await this.api.query.projectToken.tokenInfoById(tokenId)

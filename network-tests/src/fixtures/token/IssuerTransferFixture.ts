@@ -70,19 +70,23 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const accountId = tokenId.toString() + this.sourceMemberId.toString()
-    const qAccount = await this.query.getTokenAccountById(accountId)
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      tokenId,
+      this.sourceMemberId
+    )
     this.sourceAmountPre = new BN(qAccount!.totalAmount)
   }
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, sourceMemberId, validatedTransfers] = this.events[0].event.data
 
-    const accountId = tokenId.toString() + sourceMemberId.toString()
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('waiting for issuer tranfer handler to be completed', async () => {
-      qAccount = await this.query.getTokenAccountById(accountId)
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+        tokenId,
+        sourceMemberId.toNumber()
+      )
       const currentAmount = new BN(qAccount!.totalAmount)
       return currentAmount.lt(this.sourceAmountPre!)
     })
@@ -96,9 +100,11 @@ export class IssuerTransferFixture extends StandardizedFixture {
 
     const observedAmounts = await Promise.all(
       this.outputs.map(async ([memberId]) => {
-        const destAccountId = tokenId.toString() + memberId.toString()
-        const qDestAccount = await this.query.getTokenAccountById(destAccountId)
-        assert.isNotNull(qDestAccount)
+        let qDestAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+        await Utils.until('waiting for issuer tranfer recipient to recieve funds', async () => {
+          qDestAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId)
+          return Boolean(qDestAccount)
+        })
         return qDestAccount!.totalAmount
       })
     )

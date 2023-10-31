@@ -69,7 +69,10 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
     const end = startBlock.add(duration)
     const saleId = tokenId.toString() + saleNonce.toString()
-    const fundsSourceAccount = tokenId.toString() + tokensSource.toString()
+    const fundsSourceAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      tokenId,
+      this.creatorMemberId
+    )
 
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qSale: Maybe<SaleFieldsFragment> | undefined = null
@@ -87,7 +90,7 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.tokensSold, '0')
     assert.equal(qSale!.startBlock.toString(), startBlock.toString())
     assert.equal(qSale!.endsAt.toString(), end.toString())
-    assert.equal(qSale!.fundsSourceAccount.id, fundsSourceAccount)
+    assert.equal(qSale!.fundsSourceAccount.id, fundsSourceAccount!.id) // funds from the sale are taken from the creator's account
     assert.equal(qSale!.tokenSaleAllocation, quantityLeft.toString())
 
     if (tokenSale.vestingScheduleParams.isSome) {

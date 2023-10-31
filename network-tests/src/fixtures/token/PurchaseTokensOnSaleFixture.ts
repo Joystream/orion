@@ -57,8 +57,10 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    const accountId = this.tokenId.toString() + this.memberId.toString()
-    const qAccount = await this.query.getTokenAccountById(accountId)
+    const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
+      this.api.createType('u64', this.tokenId),
+      this.memberId
+    )
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
     } else {
@@ -94,15 +96,14 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     ).amount
 
     const saleId = tokenId.toString() + saleNonce.toString()
-    const accountId = tokenId.toString() + memberId.toString()
 
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
     let qSale: Maybe<SaleFieldsFragment> | undefined = null
 
     await Utils.until('waiting for token sale to be update', async () => {
-      qAccount = await this.query.getTokenAccountById(accountId)
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       qSale = await this.query.getSaleById(saleId)
-      if (!!qAccount) {
+      if (Boolean(qAccount)) {
         const currentAmount = new BN(qAccount!.totalAmount)
         const currentTokensSold = new BN(qSale!.tokensSold)
         return currentAmount.gt(this.amountPre!) && currentTokensSold.gt(this.tokenSoldPre!)
@@ -117,15 +118,15 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     if (qSale!.vestedSale) {
       const vestingId = qSale!.vestedSale.vesting.id
       // query vested account
-      const id = accountId + vestingId
+      const id = qAccount!.id + vestingId
       const qVestedAccount = await this.query.getVestedAccountById(id)
       assert.isNotNull(qVestedAccount)
-      assert.equal(qVestedAccount!.account.id, accountId)
+      assert.equal(qVestedAccount!.account.id, qAccount!.id)
       assert.equal(qVestedAccount!.vesting.id, vestingId)
     }
 
     const qSaleTx = qSale!.transactions.find((tx) => {
-      return tx.account.id === accountId
+      return tx.account.id === qAccount!.id
     })
 
     assert(qSaleTx !== undefined)
