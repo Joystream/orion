@@ -78,6 +78,7 @@ export class OffchainState {
     // destination version : [global counters names]
     '3.0.1': ['Account'],
     '3.0.2': ['Account'],
+    '3.0.3': ['Account'],
   }
 
   private migrations: Migrations = {
