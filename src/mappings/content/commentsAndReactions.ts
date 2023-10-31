@@ -243,7 +243,12 @@ async function processVideoReaction(
       if (channelOwnerMemberId) {
         const memberHandle = await memberHandleById(overlay, memberId)
         const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
-        const reactionData = { videoId: video.id, videoTitle: parseVideoTitle(video), memberHandle }
+        const reactionData = {
+          videoId: video.id,
+          videoTitle: parseVideoTitle(video),
+          memberId,
+          memberHandle,
+        }
         const reaction =
           reactionType === VideoReactionOptions.LIKE
             ? new VideoLiked(reactionData)
@@ -395,6 +400,7 @@ export async function processReactCommentMessage(
         commentId: comment.id,
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberId,
         memberHandle: await memberHandleById(overlay, memberId),
       }
       await addNotification(
@@ -526,6 +532,7 @@ export async function processCreateCommentMessage(
       const notificationData = {
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
+        memberId: authorId,
         memberHandle: authorHandle,
         comentId: comment.id,
       }

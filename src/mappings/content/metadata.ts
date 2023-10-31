@@ -662,7 +662,7 @@ export async function processChannelPaymentFromMember(
     overlay,
     ownerAccount,
     new ChannelRecipient({ channel: channel.id }),
-    new DirectChannelPaymentByMember({ amount, payerHandle: member.handle }),
+    new DirectChannelPaymentByMember({ amount, payerId: member.id, payerHandle: member.handle }),
     event
   )
 

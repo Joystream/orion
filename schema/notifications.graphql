@@ -138,7 +138,10 @@ type VideoExcluded @variant {
 }
 
 type NewChannelFollower @variant {
-  "follower member handle for link"
+  "follower member id for the avatar and the link"
+  followerId: String!
+
+  "follower member handle for the text"
   followerHandle: String!
 }
 
@@ -148,6 +151,9 @@ type CommentPostedToVideo @variant {
 
   "video Id used for link"
   videoId: String!
+
+  "commenter id for the avatar"
+  memberId: String!
 
   "commenter handle for text"
   memberHandle: String!
@@ -163,6 +169,9 @@ type VideoLiked @variant {
   "video title for notification text"
   videoTitle: String!
 
+  "id for the member that dropped the like"
+  memberId: String!
+
   "handle for the member that dropped the like"
   memberHandle: String!
 }
@@ -174,6 +183,9 @@ type VideoDisliked @variant {
   "video title for notification text"
   videoTitle: String!
 
+  "id for the member that dropped the dislike"
+  memberId: String!
+
   "handle for the member that dropped the dislike"
   memberHandle: String!
 }
@@ -184,6 +196,9 @@ type NftPurchased @variant {
 
   "video title for notification text"
   videoTitle: String!
+
+  "buyer id for notification the avatar"
+  buyerId: String!
 
   "buyer handle for notification text"
   buyerHandle: String!
@@ -198,6 +213,9 @@ type CreatorReceivesAuctionBid @variant {
 
   "video title used for notification text"
   videoTitle: String!
+
+  "bidder id for notification the avatar"
+  bidderId: String!
 
   "bidder handle for notification text"
   bidderHandle: String!
@@ -218,6 +236,9 @@ type NftOffered @variant {
 }
 
 type DirectChannelPaymentByMember @variant {
+  "payer id"
+  payerId: String!
+
   "payer handle"
   payerHandle: String!
 
@@ -274,6 +295,9 @@ type ReactionToComment @variant {
   videoTitle: String!
 
   "member who replied"
+  memberId: String!
+
+  "member who replied"
   memberHandle: String!
 }
 
@@ -325,6 +349,9 @@ type HigherBidPlaced @variant {
 
   "video Id used for link"
   videoId: String!
+
+  "new bidder id"
+  newBidderId: String!
 
   "new bidder handle "
   newBidderHandle: String!

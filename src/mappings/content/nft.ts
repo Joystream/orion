@@ -602,6 +602,7 @@ export async function processNftBoughtEvent({
   const notificationData = new NftPurchased({
     videoId: video.id,
     videoTitle: parseVideoTitle(video),
+    buyerId: memberId.toString(),
     buyerHandle,
     price,
   })
@@ -757,6 +758,7 @@ export const auctionBidMadeInner = async (
   await addNewBidNotification(overlay, nft.owner, previousTopBid, event, {
     videoId: videoId.toString(),
     videoTitle,
+    newTopBidderId: memberId.toString(),
     newTopBidderHandle,
     bidAmount,
   })
