@@ -281,6 +281,9 @@ type CommentReply @variant {
   videoTitle: String!
 
   "member who replied"
+  memberId: String!
+
+  "member who replied"
   memberHandle: String!
 }
 
