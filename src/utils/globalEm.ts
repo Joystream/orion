@@ -21,8 +21,7 @@ const source = new DataSource(config)
 
 async function initGlobalEm() {
   try {
-    console.log(process.env.DB_PORT)
-    console.log(config)
+    globalEmLogger.info(`Initializing database connection with config...`)
     await source.initialize()
   } catch (e) {
     globalEmLogger.error(`Error during database connection initialization: ${String(e)}`)

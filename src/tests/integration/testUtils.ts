@@ -29,6 +29,7 @@ export async function populateDbWithSeedData() {
       id: i.toString(),
       controllerAccount: `controller-account-${i}`,
       handle: `handle-${i}`,
+      handleRaw: '0x' + Buffer.from(`handle-${i}`).toString('hex'),
       totalChannelsCreated: 0,
     })
     const user = new User({

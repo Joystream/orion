@@ -32,6 +32,7 @@ export async function populateDbWithSeedData() {
       bannedFromChannels: [],
       totalChannelsCreated: 0,
       handle: `handle-${i}`,
+      handleRaw: '0x' + Buffer.from(`handle-${i}`).toString('hex'),
       controllerAccount: `j4${i}7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf`,
       channels: [],
     })

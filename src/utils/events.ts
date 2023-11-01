@@ -78,11 +78,13 @@ export const eventConstructors = {
   'Content.VideoCreated': ContentVideoCreatedEvent,
   'Content.VideoUpdated': ContentVideoUpdatedEvent,
   'Content.VideoDeleted': ContentVideoDeletedEvent,
+  // Deprecated in runtime spec version 2002 (nara), but still required for Orion processing from genesis block
   'Content.VideoDeletedByModerator': ContentVideoDeletedByModeratorEvent,
   'Content.VideoVisibilitySetByModerator': ContentVideoVisibilitySetByModeratorEvent,
   'Content.ChannelCreated': ContentChannelCreatedEvent,
   'Content.ChannelUpdated': ContentChannelUpdatedEvent,
   'Content.ChannelDeleted': ContentChannelDeletedEvent,
+  // Deprecated in runtime spec version 2002 (nara), but still required for Orion processing from genesis block
   'Content.ChannelDeletedByModerator': ContentChannelDeletedByModeratorEvent,
   'Content.ChannelVisibilitySetByModerator': ContentChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': ContentChannelOwnerRemarkedEvent,

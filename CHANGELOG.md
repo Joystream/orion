@@ -1,3 +1,9 @@
+# 3.1.0
+This release adds notifications to the orion infrastructure...
+
+# 3.0.2
+### Bug Fixes:
+- Store membership handles both as utf-8 string and raw bytes - [#4950](https://github.com/Joystream/joystream/pull/4950)
 # 3.0.1
 ### Misc
 - add migration for the `Account` id field
