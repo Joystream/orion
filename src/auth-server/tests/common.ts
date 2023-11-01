@@ -121,11 +121,13 @@ export async function signedAction<T extends components['schemas']['ActionExecut
 
 async function insertFakeMember(controllerAccount: string) {
   const em = await globalEm
+  const handle = uniqueId()
   return em.getRepository(Membership).save({
     createdAt: new Date(),
     id: uniqueId(),
     controllerAccount,
     handle: uniqueId(),
+    handleRaw: '0x' + Buffer.from(handle).toString('hex'),
     totalChannelsCreated: 0,
   })
 }

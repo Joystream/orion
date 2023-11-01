@@ -1,5 +1,5 @@
-module.exports = class Data1698141186233 {
-    name = 'Data1698141186233'
+module.exports = class Data1698832298051 {
+    name = 'Data1698832298051'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -90,8 +90,8 @@ module.exports = class Data1698141186233 {
         await db.query(`CREATE TABLE "auction_whitelisted_member" ("id" character varying NOT NULL, "auction_id" character varying, "member_id" character varying, CONSTRAINT "AuctionWhitelistedMember_auction_member" UNIQUE ("auction_id", "member_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_f20264ca8e878696fbc25f11bd5" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_d5ae4854487c7658b64225be30" ON "auction_whitelisted_member" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_5468573a96fa51c03743de5912" ON "auction_whitelisted_member" ("auction_id", "member_id") `)
-        await db.query(`CREATE TABLE "membership" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "handle" text NOT NULL, "controller_account" text NOT NULL, "total_channels_created" integer NOT NULL, CONSTRAINT "Membership_handle" UNIQUE ("handle") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_83c1afebef3059472e7c37e8de8" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_1298811c0de5f11198fd43df72" ON "membership" ("handle") `)
+        await db.query(`CREATE TABLE "membership" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "handle" text NOT NULL, "handle_raw" text NOT NULL, "controller_account" text NOT NULL, "total_channels_created" integer NOT NULL, CONSTRAINT "Membership_handleRaw" UNIQUE ("handle_raw") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_83c1afebef3059472e7c37e8de8" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_0c5b879f9f2ca57a774f74f7f0" ON "membership" ("handle_raw") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
         await db.query(`CREATE TABLE "notification" ("id" character varying NOT NULL, "account_id" character varying, "notification_type" jsonb NOT NULL, "event_id" character varying, "status" jsonb NOT NULL, "in_app" boolean NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "recipient" jsonb NOT NULL, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`)
@@ -312,7 +312,7 @@ module.exports = class Data1698141186233 {
         await db.query(`DROP INDEX "public"."IDX_d5ae4854487c7658b64225be30"`)
         await db.query(`DROP INDEX "public"."IDX_5468573a96fa51c03743de5912"`)
         await db.query(`DROP TABLE "membership"`)
-        await db.query(`DROP INDEX "public"."IDX_1298811c0de5f11198fd43df72"`)
+        await db.query(`DROP INDEX "public"."IDX_0c5b879f9f2ca57a774f74f7f0"`)
         await db.query(`DROP TABLE "event"`)
         await db.query(`DROP INDEX "public"."IDX_8f3f220c4e717207d841d4e6d4"`)
         await db.query(`DROP TABLE "notification"`)
