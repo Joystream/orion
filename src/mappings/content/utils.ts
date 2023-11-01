@@ -700,6 +700,7 @@ export async function getAccountsForBidders(
 export type NewBidNotificationMetadata = {
   videoId: string
   videoTitle: string
+  newTopBidderId: string
   newTopBidderHandle: string
   bidAmount: bigint
 }
@@ -709,13 +710,14 @@ export async function addNewBidNotification(
   owner: NftOwner,
   previousTopBid: Flat<Bid> | undefined | null,
   event: Event,
-  { videoId, videoTitle, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
+  { videoId, videoTitle, newTopBidderId, newTopBidderHandle, bidAmount }: NewBidNotificationMetadata
 ) {
   if (previousTopBid?.bidderId) {
     const outbiddedMemberId = previousTopBid.bidderId
     const outbiddedMemberAccount = await getAccountForMember(overlay, outbiddedMemberId)
 
     const notificationData = {
+      newBidderId: newTopBidderId,
       newBidderHandle: newTopBidderHandle,
       videoId,
       videoTitle,
@@ -732,6 +734,7 @@ export async function addNewBidNotification(
   if (owner.isTypeOf === 'NftOwnerChannel') {
     const notificationData = new CreatorReceivesAuctionBid({
       amount: bidAmount,
+      bidderId: newTopBidderId,
       bidderHandle: newTopBidderHandle,
       videoId,
       videoTitle,

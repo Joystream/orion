@@ -1,11 +1,11 @@
-import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { EntityManager } from 'typeorm'
 import { Channel, MemberMetadata } from '../../model'
 
 const PLACEHOLDER = 'https://example.com/avatar.png'
 
 export const getNotificationAvatar = async (
   em: EntityManager,
-  type: 'channelId' | 'membershipId' | 'membershipHandle',
+  type: 'channelId' | 'membershipId',
   param: string
 ): Promise<string> => {
   if (type === 'channelId') {
@@ -19,10 +19,7 @@ export const getNotificationAvatar = async (
     return avatar.resolvedUrls[0]
   }
 
-  const where: FindOptionsWhere<MemberMetadata> =
-    type === 'membershipId' ? { id: param } : { member: { handle: param } }
-
-  const member = await em.getRepository(MemberMetadata).findOneBy(where)
+  const member = await em.getRepository(MemberMetadata).findOneBy({ id: param })
   const avatar = member?.avatar
 
   // AvatarObject is not yet supported

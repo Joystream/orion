@@ -236,7 +236,10 @@ export class ChannelsResolver {
           em,
           ownerAccount,
           new ChannelRecipient({ channel: channel.id }),
-          new NewChannelFollower({ followerHandle: assertNotNull(followerMembership.handle) })
+          new NewChannelFollower({
+            followerId: assertNotNull(followerMembership.id),
+            followerHandle: assertNotNull(followerMembership.handle),
+          })
         )
       }
 

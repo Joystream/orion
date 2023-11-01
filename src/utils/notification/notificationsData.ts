@@ -36,20 +36,20 @@ export const getNotificationData = async (
 
     // Engagement
     case 'CommentReply': {
-      const { videoId, videoTitle, commentId, memberHandle } = notificationType
+      const { videoId, videoTitle, commentId, memberId, memberHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'follow'),
         link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} replied to your comment under the video: “${videoTitle}”`,
       }
     }
     case 'ReactionToComment': {
-      const { videoId, videoTitle, commentId, memberHandle } = notificationType
+      const { videoId, videoTitle, commentId, memberId, memberHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'reaction'),
         link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} reacted to your comment on the video: “${videoTitle}”`,
       }
     }
@@ -85,11 +85,11 @@ export const getNotificationData = async (
 
     // NFT
     case 'HigherBidPlaced': {
-      const { videoId, videoTitle, newBidderHandle } = notificationType
+      const { videoId, videoTitle, newBidderId, newBidderHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'nft-alt'),
         link: await getNotificationLink(em, 'nft-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', newBidderHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', newBidderId),
         text: `${newBidderHandle} placed a higher bid in the auction for NFT: “${videoTitle}”`,
       }
     }
@@ -149,38 +149,38 @@ export const getNotificationData = async (
 
     // Engagement
     case 'NewChannelFollower': {
-      const { followerHandle } = notificationType
+      const { followerId, followerHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'follow'),
-        link: await getNotificationLink(em, 'member-page', [followerHandle]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', followerHandle),
+        link: await getNotificationLink(em, 'member-page', [followerId]),
+        avatar: await getNotificationAvatar(em, 'membershipId', followerId),
         text: `${followerHandle} followed your channel`,
       }
     }
     case 'CommentPostedToVideo': {
-      const { videoId, videoTitle, memberHandle } = notificationType
+      const { videoId, videoTitle, memberId, memberHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'follow'),
         link: await getNotificationLink(em, 'nft-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} left a comment on your video: “${videoTitle}”`,
       }
     }
     case 'VideoLiked': {
-      const { videoId, videoTitle, memberHandle } = notificationType
+      const { videoId, videoTitle, memberId, memberHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'like'),
         link: await getNotificationLink(em, 'video-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} liked your video: “${videoTitle}”`,
       }
     }
     case 'VideoDisliked': {
-      const { videoId, videoTitle, memberHandle } = notificationType
+      const { videoId, videoTitle, memberId, memberHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'dislike'),
         link: await getNotificationLink(em, 'video-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', memberHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} disliked your video: “${videoTitle}”`,
       }
     }
@@ -205,11 +205,11 @@ export const getNotificationData = async (
 
     // NFTs Auctions
     case 'NftPurchased': {
-      const { videoId, videoTitle, buyerHandle, price } = notificationType
+      const { videoId, videoTitle, buyerId, buyerHandle, price } = notificationType
       return {
         icon: await getNotificationIcon(em, 'nft'),
         link: await getNotificationLink(em, 'nft-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', buyerHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', buyerId),
         text: `${buyerHandle} purchased for ${formatJOY(price)} your NFT: “${videoTitle}”`,
       }
     }
@@ -223,22 +223,22 @@ export const getNotificationData = async (
       }
     }
     case 'CreatorReceivesAuctionBid': {
-      const { videoId, videoTitle, amount, bidderHandle } = notificationType
+      const { videoId, videoTitle, amount, bidderId, bidderHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'nft'),
         link: await getNotificationLink(em, 'nft-page', [videoId]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', bidderHandle),
+        avatar: await getNotificationAvatar(em, 'membershipId', bidderId),
         text: `${bidderHandle} placed a bid of ${formatJOY(amount)} for your NFT: “${videoTitle}”`,
       }
     }
 
     // Payouts
     case 'DirectChannelPaymentByMember': {
-      const { amount, payerHandle } = notificationType
+      const { amount, payerId, payerHandle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'payout'),
-        link: await getNotificationLink(em, 'member-page', [payerHandle]),
-        avatar: await getNotificationAvatar(em, 'membershipHandle', payerHandle),
+        link: await getNotificationLink(em, 'member-page', [payerId]),
+        avatar: await getNotificationAvatar(em, 'membershipId', payerId),
         text: `${payerHandle} transferred ${formatJOY(amount)} to your channel`,
       }
     }
