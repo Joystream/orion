@@ -1,0 +1,21 @@
+name: Build and save docker image
+
+on: [push, pull_request]
+
+env:
+  SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: make build-docker
+      - name: Save Docker image
+        run: docker save joystream/orion:latest | gzip > orion.tar.gz
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v3
+        with:
+          name: joystream-orion-docker-${{ env.SHA }}
+          path: orion.tar.gz

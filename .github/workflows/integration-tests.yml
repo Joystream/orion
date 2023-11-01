@@ -1,0 +1,107 @@
+name: Run Orion integration tests
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request_target:
+
+env:
+  INTEGRATION_TESTS_BRANCH: ${{ vars.INTEGRATION_TESTS_BRANCH }}
+  SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.ref_name }}
+    steps:
+      - name: Wait until build-docker-image workflow finishes successfully
+        run: |
+          CONCLUSION="null"
+          while [[ "$CONCLUSION" == "null" ]]
+          do
+            CONCLUSION=$(
+              curl -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-docker-image.yml/runs?head_sha=${{ env.SHA }} \
+                | jq -r '.workflow_runs[0].conclusion'
+            )
+            echo "build-docker-image workflow conclusion: $CONCLUSION"
+            if [[ "$CONCLUSION" == "null" ]]
+            then
+              echo "Waiting for build-docker-image workflow to finish..."
+              sleep 30
+            fi
+          done
+          if [[ "$CONCLUSION" != "success" ]]
+          then
+            echo "build-docker-image workflow failed"
+            exit 1
+          fi
+      - name: Download Orion docker image
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          commit: ${{ env.SHA }}
+          name: joystream-orion-docker-${{ env.SHA }}
+          workflow: build-docker-image.yml
+      - name: Load Orion docker image
+        run: docker load -i orion.tar.gz
+      - name: Fetch integration tests branch from PR comment if provided
+        if: github.event_name == 'pull_request_target'
+        run: |
+          BRANCH=$(
+            curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+              | jq -r '
+                [.[]
+                  | select(
+                    (.author_association = "OWNER") or
+                    (.author_association = "MEMBER") or
+                    (.author_association = "CONTRIBUTOR")
+                  )
+                  | select (.body | test("/set-integration-tests-branch +"))
+                  | .body
+                ][-1]' \
+              | cut -d ' ' -f 2
+          )
+          echo "INTEGRATION_TESTS_BRANCH=$BRANCH" >> $GITHUB_ENV
+      - name: Check-out the integration tests branch
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ vars.INTEGRATION_TESTS_REPO }}
+          ref: ${{ env.INTEGRATION_TESTS_BRANCH }}
+      - name: Get SHA of the checked-out commit
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "INTEGRATION_TESTS_COMMIT=$SHA" >> $GITHUB_ENV
+      - name: Download Joystream node docker image
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.INTEGRATION_TESTS_TOKEN }}
+          commit: ${{ env.INTEGRATION_TESTS_COMMIT }}
+          name_is_regexp: true
+          name: '[0-9a-f]+-joystream-node-docker-image.tar.gz'
+          repo: ${{ vars.INTEGRATION_TESTS_REPO }}
+          workflow: run-network-tests.yml
+      - name: Load Joystream node docker image
+        run: |
+          DOCKER_IMAGE_DIR=$(ls | grep joystream-node-docker-image.tar.gz)
+          JOYSTREAM_RUNTIME_SHA=$(echo $DOCKER_IMAGE_DIR | cut -d '-' -f1)
+          docker load -i "$DOCKER_IMAGE_DIR/joystream-node-docker-image.tar.gz"
+          echo "JOYSTREAM_RUNTIME_SHA=$JOYSTREAM_RUNTIME_SHA" >> $GITHUB_ENV
+      - name: Install packages and dependencies
+        run: yarn build:packages
+      - name: Ensure tests are runnable
+        run: yarn workspace network-tests build
+      - name: Execute network tests
+        id: execute_network_tests
+        run: |
+          export RUNTIME=$JOYSTREAM_RUNTIME_SHA
+          export SKIP_QUERY_NODE_CHECKS=true
+          ./tests/network-tests/run-tests.sh orion
