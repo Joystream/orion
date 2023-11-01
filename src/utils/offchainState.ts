@@ -97,6 +97,7 @@ export class OffchainState {
     // destination version : [global counters names]
     '3.0.1': ['Account'],
     '3.0.2': ['Account'],
+    '3.1.0': ['Account'],
   }
 
   private migrations: Migrations = {
@@ -254,10 +255,6 @@ export class OffchainState {
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
-
-    // migrate counters for NextEntityId
-    const { orionVersion } = exportFile
-    await this.migrateCounters(orionVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)

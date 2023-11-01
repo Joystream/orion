@@ -88,7 +88,7 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
-import { commentCountersManager, videoRelevanceManager, migrateCounters } from './mappings/utils'
+import { commentCountersManager, migrateCounters, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
 
