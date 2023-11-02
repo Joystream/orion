@@ -61,6 +61,9 @@ type Channel @entity {
 
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt
+
+  "Cumulative rewards paid to this channel"
+  cumulativeRewardPaid: BigInt
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
