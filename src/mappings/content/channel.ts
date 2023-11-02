@@ -271,7 +271,7 @@ export async function processChannelRewardUpdatedEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
 }
 
 export async function processChannelRewardClaimedAndWithdrawnEvent({
@@ -296,7 +296,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
 }
 
 export async function processChannelFundsWithdrawnEvent({
