@@ -56,6 +56,7 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+    cumulativeRewardClaimed: 0n,
   })
 
   const ownerMember = channel.ownerMemberId
