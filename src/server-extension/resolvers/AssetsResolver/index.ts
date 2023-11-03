@@ -1,7 +1,6 @@
 import { FieldResolver, Root, ObjectType, Field, Resolver, Ctx } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import {
-  StorageDataObject as DataObjectEntity,
   DistributionBucket,
   DistributionBucketOperatorMetadata,
   DistributionBucketOperatorStatus,
@@ -227,9 +226,18 @@ function getResolvedUrlsLimit(ctx: Context): number {
 }
 
 @ObjectType()
+class StorageBag {
+  @Field()
+  id!: string
+}
+
+@ObjectType()
 export class StorageDataObject {
   @Field()
   id!: string
+
+  @Field()
+  storageBag: StorageBag
 
   @Field(() => [String])
   resolvedUrls: string[]
@@ -242,20 +250,19 @@ export class AssetsResolver {
 
   @FieldResolver(() => [String])
   async resolvedUrls(@Root() object: StorageDataObject, @Ctx() ctx: Context): Promise<string[]> {
-    const em = await this.em()
+    if (!object.storageBag) {
+      throw new Error(
+        'incorrect query: to use resolvedUrls make sure to add storageBag.id into query for StorageDataObject'
+      )
+    }
     const clientLoc = await getClientLoc(ctx)
     const limit = await getResolvedUrlsLimit(ctx)
     // The resolvedUrl field is initially populated with the object ID
     const [objectId] = object.resolvedUrls
-    if (!objectId) {
+    if (!object.storageBag?.id || !objectId) {
       return []
     }
-    const { storageBagId } =
-      (await em.getRepository(DataObjectEntity).findOneBy({ id: objectId })) || {}
-    if (!storageBagId) {
-      return []
-    }
-    const buckets = await distributionBucketsCache.getBucketsByBagId(storageBagId)
+    const buckets = await distributionBucketsCache.getBucketsByBagId(object.storageBag.id)
     const nodes = buckets.flatMap((b) => b.nodes)
     if (clientLoc) {
       sortNodesByClosest(nodes, clientLoc)
