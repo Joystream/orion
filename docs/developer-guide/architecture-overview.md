@@ -12,10 +12,10 @@ Most of the services are part of the [Subsquid framework](https://subsquid.io/),
 - [Polkadot JS](https://polkadot.js.org/docs/) (a set of libraries providing common Substrate utilities)
 - [TypeORM](https://typeorm.io/#/) (ORM used for interacting with the PostgreSQL database)
 - [PostgreSQL](https://www.postgresql.org/docs/14/index.html) (database management system)
-- [TypeGraphQL](https://typegraphql.com/docs/introduction.html) (TypeScript library used for extening Subsquid's GraphQL API with [custom resolvers](https://docs.subsquid.io/develop-a-squid/graphql-api/custom-resolvers/))
+- [TypeGraphQL](https://typegraphql.com/docs/introduction.html) (TypeScript library used for extending Subsquid's GraphQL API with [custom resolvers](https://docs.subsquid.io/develop-a-squid/graphql-api/custom-resolvers/))
 - [Apollo Server](https://www.apollographql.com/docs/apollo-server/) (GraphQL server library used by Subquid)
 - [Express.js](https://expressjs.com/en/4x/api.html) (http server library used by the [auth server](./tutorials/authentication-api.md))
-- [OpenAPI](https://swagger.io/specification/) (API speification standard used for describing the auth server API)
+- [OpenAPI](https://swagger.io/specification/) (API specification standard used for describing the auth server API)
 - [Express OpenAPI validator](https://github.com/cdimascio/express-openapi-validator/wiki/Documentation) (express middleware used by the auth server)
 - [Handlebars](https://handlebarsjs.com/guide/) (e-mail templating engine)
 
