@@ -69,10 +69,9 @@ export class UpdateUpcomingSaleFixture extends StandardizedFixture {
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, newStart, newDuration] = this.events[0].event.data
 
-    const saleId = tokenId.toString() + saleNonce.toString()
     let qSale: Maybe<SaleFieldsFragment> | undefined = null
     await Utils.until('wait for sale to be updated', async () => {
-      qSale = await this.query.getSaleById(saleId)
+      qSale = await this.query.getCurrentSaleForTokenId(tokenId)
       return qSale!.startBlock === this.newStartBlock!.toNumber()
     })
 

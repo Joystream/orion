@@ -1,8 +1,6 @@
 import { FlowProps } from '../../Flow'
 import { extendDebug } from '../../Debugger'
 import { FixtureRunner } from '../../Fixture'
-import { expect } from 'chai'
-import { Resource } from '../../Resources'
 import { BN } from 'bn.js'
 import {
   ActivateAmmFixture,
@@ -35,8 +33,8 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   // amm params
   debug('activate amm')
   const ammParams = api.createType('PalletProjectTokenAmmParams', {
-    slope: api.createType('Permill', new BN(1000)),
-    intercept: api.createType('Permill', new BN(10000)),
+    slope: api.createType('u128', new BN(1000000)),
+    intercept: api.createType('u128', new BN(0)),
   })
   const activateAmmFixture = new ActivateAmmFixture(
     api,
@@ -49,7 +47,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   await new FixtureRunner(activateAmmFixture).runWithQueryNodeChecks()
 
   debug('buy on amm with existing account')
-  const amountBought = new BN(1000)
+  const amountBought = new BN(10)
   const buyOnAmmFixture = new BuyOnAmmFixture(
     api,
     query,
@@ -72,7 +70,7 @@ export default async function ammFlow({ api, query, lock }: FlowProps): Promise<
   await new FixtureRunner(buyOnAmmFixtureWithAccountCreation).runWithQueryNodeChecks()
 
   debug('sell on amm')
-  const amountSold = new BN(1000)
+  const amountSold = new BN(1)
   const sellOnAmmFixture = new SellOnAmmFixture(
     api,
     query,

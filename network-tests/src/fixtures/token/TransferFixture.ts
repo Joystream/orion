@@ -3,7 +3,6 @@ import { SubmittableExtrinsic } from '@polkadot/api/types'
 import { AnyQueryNodeEvent, EventDetails, EventType } from '../../types'
 import { SubmittableResult } from '@polkadot/api'
 import { OrionApi } from '../../OrionApi'
-import { PalletProjectTokenTransfersPayment } from '@polkadot/types/lookup'
 import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
@@ -45,17 +44,13 @@ export class TransferFixture extends StandardizedFixture {
   }
 
   protected async getExtrinsics(): Promise<SubmittableExtrinsic<'promise'>[]> {
-    const outputs: PalletProjectTokenTransfersPayment = this.api.createType(
-      'BTreeMap<u64, ProjectTokenPayment>'
-    )
-    for (const [memberId, payment] of this.outputs) {
-      outputs.set(
-        this.api.createType('u64', memberId),
-        this.api.createType('PalletProjetTokenPayment', { amount: payment })
-      )
-    }
     return [
-      this.api.tx.projectToken.transfer(this.sourceMemberId, this.tokenId, outputs, this.metadata),
+      this.api.tx.projectToken.transfer(
+        this.sourceMemberId,
+        this.tokenId,
+        this.outputs,
+        this.metadata
+      ),
     ]
   }
 

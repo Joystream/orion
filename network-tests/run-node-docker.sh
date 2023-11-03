@@ -72,4 +72,5 @@ docker-compose -f ./docker-compose.node.yml run -d -v ${DATA_PATH}:/spec --name 
   --rpc-methods Unsafe --rpc-cors=all -l runtime \
   --chain /spec/chain-spec-raw.json --pruning=archive --no-telemetry
 
+docker logs joystream-node --tail 15
 echo >&2 "node running"

@@ -15,6 +15,7 @@ import {
   InitialIssuanceVestingSource,
   SaleVestingSource,
   CreatorToken,
+  Account,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
@@ -244,10 +245,9 @@ export async function processTokenSaleInitializedEvent({
 
 export async function processPatronageRateDecreasedToEvent({
   overlay,
-  event: {
-    asV1000: [tokenId, newRate],
-  },
+  event,
 }: EventHandlerContext<'ProjectToken.PatronageRateDecreasedTo'>) {
+  const [tokenId, newRate] = event.isV1000 ? event.asV1000 : event.asV2002
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   if (typeof newRate === 'number') {
     token.annualCreatorRewardPermill = newRate
@@ -396,7 +396,9 @@ export async function processRevenueSplitIssuedEvent({
 }: EventHandlerContext<'ProjectToken.RevenueSplitIssued'>) {
   const endsAt = startBlock + duration
   const id = overlay.getRepository(RevenueShare).getNewEntityId()
-  const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  const token = (await overlay
+    .getRepository(CreatorToken)
+    .getByIdOrFail(tokenId.toString())) as CreatorToken
 
   overlay.getRepository(RevenueShare).new({
     id,
@@ -408,7 +410,7 @@ export async function processRevenueSplitIssuedEvent({
     claimed: BigInt(0),
     startingAt: startBlock,
     endsAt,
-  })
+  }) as RevenueShare
 
   token.currentRenvenueShareId = id
 }
@@ -430,7 +432,6 @@ export async function processAmmDeactivatedEvent({
   },
 }: EventHandlerContext<'ProjectToken.AmmDeactivated'>) {
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
-  token.totalSupply -= burnedAmount
   token.status = TokenStatus.IDLE
 
   const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
@@ -492,6 +493,14 @@ export async function processRevenueSplitLeftEvent({
 }: EventHandlerContext<'ProjectToken.RevenueSplitLeft'>) {
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   account.stakedAmount -= unstakedAmount
+  const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  if (token.currentRenvenueShareId) {
+    // TODO: refactor this as should be true all the times, might be a good idea to panic
+    const revenueShare = await overlay
+      .getRepository(RevenueShare)
+      .getByIdOrFail(token.currentRenvenueShareId!)
+    revenueShare.participantsNum -= 1
+  }
 }
 
 export async function processRevenueSplitFinalizedEvent({

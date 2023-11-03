@@ -12,6 +12,7 @@ import {
   SaleFields,
   SaleFieldsFragment,
   TokenAccountFieldsFragment,
+  TokenFieldsFragment,
 } from 'graphql/generated/operations'
 
 type TokensPurchasedOnSaleEventDetails = EventDetails<
@@ -66,11 +67,9 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     } else {
       this.amountPre = new BN(0)
     }
-    const saleNonce = (
-      await this.api.query.projectToken.tokenInfoById(this.tokenId)
-    ).nextSaleId.subn(1)
-    const saleId = this.tokenId.toString() + saleNonce.toString()
-    const qSale = await this.query.getSaleById(saleId)
+    const qSale = await this.query.getCurrentSaleForTokenId(
+      this.api.createType('u64', this.tokenId)
+    )
 
     assert.isNotNull(qSale)
     this.tokenSoldPre = new BN(qSale!.tokensSold)
@@ -95,14 +94,14 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       await this.api.query.projectToken.accountInfoByTokenAndMember(tokenId, memberId)
     ).amount
 
-    const saleId = tokenId.toString() + saleNonce.toString()
-
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qSale: Maybe<SaleFieldsFragment> | undefined = null
 
     await Utils.until('waiting for token sale to be update', async () => {
       qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
-      qSale = await this.query.getSaleById(saleId)
+      qToken = await this.query.getTokenById(tokenId)
+      qSale = await this.query.getCurrentSaleForTokenId(tokenId)
       if (Boolean(qAccount)) {
         const currentAmount = new BN(qAccount!.totalAmount)
         const currentTokensSold = new BN(qSale!.tokensSold)

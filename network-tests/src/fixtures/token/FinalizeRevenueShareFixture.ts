@@ -53,13 +53,10 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const qToken = await this.query.retryQuery(() => this.query.getTokenById(tokenId))
+    const qToken = await this.query.getTokenById(tokenId)
 
-    assert.isNotNull(qToken)
     const [{ id: revenueShareId }] = qToken!.revenueShares
-    const qRevenueShare = await this.query.retryQuery(() =>
-      this.query.getRevenueShareById(revenueShareId)
-    )
+    const qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.finalized, false)
   }
@@ -68,16 +65,14 @@ export class FinalizeRevenueShareFixture extends StandardizedFixture {
     const [tokenId] = this.events[0].event.data
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
-    await Utils.until('waiting for for token to be fetched', async () => {
+    await Utils.until('waiting for for revenue share to be fetched', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      return !!qToken
-    })
-    const [{ id: revenueShareId }] = qToken!.revenueShares
-    await Utils.until('waiting for revenue share to be fetched', async () => {
+      const [{ id: revenueShareId }] = qToken!.revenueShares
       qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
-      return !!qRevenueShare
+      return Boolean(qRevenueShare) && qRevenueShare!.finalized
     })
     assert.equal(qRevenueShare!.finalized, true)
+    assert.isNull(qToken!.currentRenvenueShare)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

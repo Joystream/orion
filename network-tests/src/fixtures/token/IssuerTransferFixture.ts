@@ -50,12 +50,13 @@ export class IssuerTransferFixture extends StandardizedFixture {
     const actor = this.api.createType('PalletContentPermissionsContentActor', {
       Member: this.sourceMemberId,
     })
-    const outputs = this.api.createType('BTreeMap<u64, PalletProjectTokenPaymentWithVesting>')
-    for (const [memberId, payment] of this.outputs) {
-      outputs.set(this.api.createType('u64', memberId), payment)
-    }
     return [
-      this.api.tx.content.creatorTokenIssuerTransfer(actor, this.channelId, outputs, this.metadata),
+      this.api.tx.content.creatorTokenIssuerTransfer(
+        actor,
+        this.channelId,
+        this.outputs,
+        this.metadata
+      ),
     ]
   }
 
@@ -142,7 +143,7 @@ export class IssuerTransferFixture extends StandardizedFixture {
         assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
         assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
 
-        const id = accountId + vestingId
+        const id = qAccount!.id + vestingId
         const qVestedAccount = await this.query.retryQuery(() =>
           this.query.getVestedAccountById(id)
         )

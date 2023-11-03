@@ -68,7 +68,6 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     const [tokenId, saleNonce, tokenSale] = this.events[0].event.data
     const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
     const end = startBlock.add(duration)
-    const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
       tokenId,
       this.creatorMemberId
@@ -79,7 +78,7 @@ export class InitTokenSaleFixture extends StandardizedFixture {
 
     await Utils.until('waiting for sale to be commited to db', async () => {
       qToken = await this.query.getTokenById(tokenId)
-      qSale = await this.query.getSaleById(saleId.toString())
+      qSale = await this.query.getCurrentSaleForTokenId(tokenId)
       return qToken!.status === TokenStatus.Sale && !!qSale
     })
     assert.equal(qSale!.pricePerUnit, unitPrice.toString())
@@ -109,7 +108,7 @@ export class InitTokenSaleFixture extends StandardizedFixture {
       assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
       assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
       assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
-      assert.equal(qVesting!.vestedSale?.sale.id, saleId.toString())
+      assert.equal(qVesting!.vestedSale?.sale.id, qSale!.id)
       assert.isNotNull(qSale!.vestedSale)
       assert.equal(qSale!.vestedSale!.vesting.id, vestingId)
     }

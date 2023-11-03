@@ -13,6 +13,13 @@ fragment TokenFields on CreatorToken {
   status
   symbol
   totalSupply
+  sales {
+    id
+    endsAt
+  }
+  currentSale {
+    id
+  }
   accounts {
     id
     member {
@@ -51,6 +58,9 @@ fragment TokenFields on CreatorToken {
   revenueShares {
     id
   }
+  currentRenvenueShare {
+    id
+  }
   description
   ammCurves {
     id
@@ -81,6 +91,12 @@ fragment TokenAccountFields on TokenAccount {
   stakedAmount
   totalAmount
   deleted
+  revenueShareParticipation {
+    id
+    revenueShare {
+      id
+    }
+  }
 }
 
 fragment RevenueShareFields on RevenueShare {
@@ -170,11 +186,7 @@ fragment AmmCurvFields on AmmCurve {
   ammSlopeParameter
   ammInitPrice
   transactions {
-    id
-    transactionType
-    pricePerUnit
-    quantity
-    pricePaid
+    ...AmmTransactionFields
   }
 }
 
@@ -205,13 +217,16 @@ fragment ChannelFields on Channel {
   }
 }
 
-fragment AmmTranactionFields on AmmTransaction {
+fragment AmmTransactionFields on AmmTransaction {
   id
   createdIn
   pricePaid
   pricePerUnit
   quantity
   transactionType
+  account {
+    id
+  }
 }
 
 subscription getTokenById($id: String!) {
@@ -270,7 +285,7 @@ subscription getChannelById($id: String!) {
 
 subscription getAmmTransactionById($id: String!) {
   ammTransactionById(id: $id) {
-    ...AmmTranactionFields
+    ...AmmTransactionFields
   }
 }
 

@@ -18,6 +18,7 @@ export class DustAccountFixture extends StandardizedFixture {
   protected creatorAddress
   protected tokenId: number
   protected memberId: number
+  protected accountsPre: number | undefined
   protected events: DustAccountEventDetails[] = []
 
   public constructor(
@@ -40,6 +41,11 @@ export class DustAccountFixture extends StandardizedFixture {
     return [this.api.tx.projectToken.dustAccount(this.tokenId, this.memberId)]
   }
 
+  public async preExecHook() {
+    const qToken = await this.query.getTokenById(this.api.createType('u64', this.tokenId))
+    this.accountsPre = qToken!.accountsNum
+  }
+
   protected async getEventFromResult(result: SubmittableResult): Promise<DustAccountEventDetails> {
     return this.api.getEventDetails(result, 'projectToken', 'AccountDustedBy')
   }
@@ -48,12 +54,17 @@ export class DustAccountFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId] = this.events[0].event.data
+
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
+
     await Utils.until('waiting for dust account handler to be finalized', async () => {
       qToken = await this.query.getTokenById(tokenId)
       qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
-      return Boolean(qToken) && Boolean(qAccount)
+      if (Boolean(qToken && qAccount)) {
+        return qToken!.accountsNum != this.accountsPre! && qAccount!.deleted
+      }
+      return false
     })
 
     const nodeAccountNumber = (

@@ -8,10 +8,8 @@ import {
 import { extendDebug, Debugger } from './Debugger'
 import { Maybe } from './graphql/generated/schema'
 import { TokenId } from './consts'
-import { u64 } from '@polkadot/types/primitive'
 import {
   GetChannelByIdSubscription,
-  AmmTranactionFieldsFragment,
   GetAmmTransactionById,
   GetAmmById,
   AmmCurvFieldsFragment,
@@ -47,6 +45,8 @@ import {
   GetAmmTransactionByIdSubscription,
   ChannelFieldsFragment,
   GetChannelByIdSubscriptionVariables,
+  AmmTransactionFieldsFragment,
+  GetChannelById,
 } from '../graphql/generated/operations'
 
 export class OrionApi {
@@ -123,10 +123,14 @@ export class OrionApi {
     memberId: number
   ): Promise<Maybe<TokenAccountFieldsFragment> | undefined> {
     const qToken = await this.getTokenById(tokenId)
-    const { id: accountId } = qToken!.accounts.find(
+    const qAccountInfo = qToken!.accounts.find(
       (account: any) => account.member.id.toString() === memberId.toString()
-    )!
-    return await this.getTokenAccountById(accountId)
+    )
+    if (Boolean(qAccountInfo)) {
+      return await this.getTokenAccountById(qAccountInfo!.id)
+    } else {
+      return undefined
+    }
   }
 
   public async getTokenAccountById(
@@ -151,14 +155,22 @@ export class OrionApi {
     shareId: string,
     accountId: string
   ): Promise<Maybe<RevenueShareParticipationFieldsFragment> | undefined> {
-    return this.uniqueEntitySubscription<
-      GetRevenueShareParticipationByIdSubscription,
-      GetRevenueShareParticipationByIdSubscriptionVariables
-    >(
-      GetRevenueShareParticipationById,
-      { id: accountId + shareId.toString() },
-      'revenueShareParticipationById'
-    )
+    const account = await this.getTokenAccountById(accountId)
+    if (!Boolean(account?.revenueShareParticipation)) {
+      return undefined
+    }
+    const maybeParticipationInfo = account?.revenueShareParticipation.find((participation) => {
+      return participation.revenueShare.id === shareId
+    })
+    if (!Boolean(maybeParticipationInfo)) {
+      return undefined
+    } else {
+      const { id } = maybeParticipationInfo!
+      return this.uniqueEntitySubscription<
+        GetRevenueShareParticipationByIdSubscription,
+        GetRevenueShareParticipationByIdSubscriptionVariables
+      >(GetRevenueShareParticipationById, { id }, 'revenueShareParticipationById')
+    }
   }
 
   public async getVestingSchedulById(
@@ -187,6 +199,17 @@ export class OrionApi {
     >(GetVestedAccountById, { id }, 'vestedAccountById')
   }
 
+  public async getCurrentSaleForTokenId(
+    tokenId: TokenId
+  ): Promise<Maybe<SaleFieldsFragment> | undefined> {
+    const qToken = await this.getTokenById(tokenId)
+    if (!Boolean(qToken!.currentSale)) {
+      return undefined
+    }
+    const qSale = await this.getSaleById(qToken!.currentSale!.id.toString())
+    return qSale
+  }
+
   public async getAmmById(id: string): Promise<Maybe<AmmCurvFieldsFragment> | undefined> {
     return this.uniqueEntitySubscription<
       GetAmmByIdSubscription,
@@ -196,7 +219,7 @@ export class OrionApi {
 
   public async getAmmTransactionById(
     id: string
-  ): Promise<Maybe<AmmTranactionFieldsFragment> | undefined> {
+  ): Promise<Maybe<AmmTransactionFieldsFragment> | undefined> {
     return this.uniqueEntitySubscription<
       GetAmmTransactionByIdSubscription,
       GetAmmTransactionByIdSubscriptionVariables
@@ -207,6 +230,6 @@ export class OrionApi {
     return this.uniqueEntitySubscription<
       GetChannelByIdSubscription,
       GetChannelByIdSubscriptionVariables
-    >(GetAmmTransactionById, { id }, 'channelById')
+    >(GetChannelById, { id }, 'channelById')
   }
 }

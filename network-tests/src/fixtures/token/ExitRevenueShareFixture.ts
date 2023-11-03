@@ -52,7 +52,7 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     assert.isNotNull(qToken)
     assert.isNotNull(qAccount)
-    const [{ id: revenueShareId }] = qToken!.revenueShares
+    const { id: revenueShareId } = qToken!.currentRenvenueShare!
     const qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
     assert.isNotNull(qRevenueShare)
 
@@ -81,23 +81,22 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, memberId, unstakedAmount] = this.events[0].event.data
-    let qToken: Maybe<TokenFieldsFragment> | undefined = null
-    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
-    await Utils.until('waiting for exit revenue split handler to be finalized', async () => {
-      qToken = await this.query.getTokenById(tokenId)
-      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
-      return Boolean(qToken) && Boolean(qAccount)
-    })
 
     const participantsNumPost = this.participantsNumPre! - 1
     const stakedAmountPost = this.stakedAmountPre!.sub(unstakedAmount.toBn())
 
-    const [{ id: revenueShareId }] = qToken!.revenueShares
+    const qToken = await this.query.getTokenById(tokenId)
+    const { id: revenueShareId } = qToken!.currentRenvenueShare!
+
+    let qAccount: Maybe<TokenAccountFieldsFragment> | undefined = null
     let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
+
     await Utils.until('waiting for revenue share to be fetched', async () => {
+      qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
-      return !!qRevenueShare
+      return Boolean(qRevenueShare) && qRevenueShare!.participantsNum < this.participantsNumPre!
     })
+
     assert.equal(qRevenueShare!.participantsNum, participantsNumPost)
     assert.equal(qAccount!.stakedAmount, stakedAmountPost.toString())
   }

@@ -10,6 +10,7 @@ import { Utils } from '../../utils'
 import { AmmTransactionType } from '../../../graphql/generated/schema'
 import { Maybe } from '../../../graphql/generated/schema'
 import {
+  AmmTransactionFieldsFragment,
   TokenAccountFieldsFragment,
   TokenFieldsFragment,
 } from '../../../graphql/generated/operations'
@@ -92,14 +93,28 @@ export class SellOnAmmFixture extends StandardizedFixture {
       qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(tokenId, memberId.toNumber())
       const currSupply = new BN(qToken!.totalSupply)
       const currAmount = new BN(qAccount!.totalAmount)
-      return currSupply < this.supplyPre! && currAmount < this.amountPre!
+
+      return (
+        currSupply.toString() != this.supplyPre!.toString() &&
+        currAmount.toString() != this.amountPre!.toString()
+      )
     })
 
     const [{ id: ammId }] = qToken!.ammCurves
     const qAmmCurve = await this.query.getAmmById(ammId)
     assert.isNotNull(qAmmCurve)
-    const qTransaction = qAmmCurve!.transactions.find((qTx) => {
-      return qTx !== null && qTx!.transactionType === AmmTransactionType.Sell
+
+    let qTransaction: Maybe<AmmTransactionFieldsFragment> | undefined = null
+    await Utils.until('waiting for sell on amm transaction to be indexed', async () => {
+      qTransaction = qAmmCurve!.transactions.find((qTx) => {
+        assert.isNotNull(qAmmCurve)
+        return (
+          qTx &&
+          qTx!.transactionType === AmmTransactionType.Sell &&
+          qTx!.account.id === qAccount!.id
+        )
+      })
+      return Boolean(qTransaction)
     })
 
     assert.isNotNull(qAccount)
@@ -120,7 +135,7 @@ export class SellOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Sell)
     assert.equal(qTransaction!.quantity, crtBurned.toString())
     assert.equal(qTransaction!.pricePaid, joysRecovered.toString())
-    assert.equal(qTransaction!.pricePerUnit, crtBurned.div(joysRecovered).toString())
+    assert.equal(qTransaction!.pricePerUnit, joysRecovered.div(crtBurned).toString())
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

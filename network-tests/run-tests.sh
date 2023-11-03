@@ -4,14 +4,12 @@ set -e
 SCRIPT_PATH="$(dirname "${BASH_SOURCE[0]}")"
 cd $SCRIPT_PATH
 
+CONTAINER_ID=$(./run-node-docker.sh)
+
 # start orion services
 cd ..
 make up
 cd network-tests
-
-sleep 10
-
-CONTAINER_ID=$(./run-node-docker.sh)
 
 function cleanup() {
     docker logs ${CONTAINER_ID} --tail 15
@@ -22,8 +20,6 @@ function cleanup() {
     docker-compose -f ./docker-compose.node.yml down -v
     docker network rm joystream_default
 }
-
-# trap cleanup EXIT
 
 sleep 3
 

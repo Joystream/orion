@@ -56,10 +56,7 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     const tokenId = (
       await this.api.query.content.channelById(this.channelId)
     ).creatorTokenId.unwrap()
-    const token = await this.api.query.projectToken.tokenInfoById(tokenId)
-    const saleNonce = token.nextSaleId.subn(1)
-    const saleId = tokenId.toString() + saleNonce.toString()
-    let qSale = await this.query.getSaleById(saleId.toString())
+    let qSale = await this.query.getCurrentSaleForTokenId(tokenId)
     const qFundsSource = await this.query.getTokenAccountByTokenIdAndMemberId(
       tokenId,
       this.creatorMemberId
@@ -72,7 +69,7 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
     this.fundsSourceAmountPre = new BN(qFundsSource!.totalAmount)
 
     await Utils.until('waiting for the sale to end', async ({ debug }) => {
-      qSale = await this.query.getSaleById(saleId.toString())
+      qSale = await this.query.getCurrentSaleForTokenId(tokenId)
       let endBlock = qSale!.endsAt
       const currentBlock = (await this.api.getBestBlock()).toNumber()
       return endBlock <= currentBlock
@@ -81,14 +78,21 @@ export class FinalizeTokenSaleFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, saleNonce, quantityLeft] = this.events[0].event.data
-    const saleId = tokenId.toString() + saleNonce.toString()
     const fundsSourceAmountPost = this.fundsSourceAmountPre!.add(quantityLeft)
 
     let qSale: Maybe<SaleFieldsFragment> | undefined = null
     let qFundsSource: Maybe<TokenAccountFieldsFragment> | undefined = null
 
     await Utils.until('waiting for the sale to end', async () => {
-      qSale = await this.query.getSaleById(saleId.toString())
+      const qToken = await this.query.getTokenById(tokenId)
+      // get the sale that has max value for endsAt from qToken.sales
+      const { id: saleId } = qToken?.sales.reduce((prev, curr) => {
+        if (curr.endsAt < prev.endsAt) {
+          curr = prev
+        }
+        return curr
+      }, qToken?.sales[0]!)!
+      qSale = await this.query.getSaleById(saleId)
       qFundsSource = await this.query.getTokenAccountById(qSale!.fundsSourceAccount.id)
 
       const currFundsSourceAmount = new BN(qFundsSource!.totalAmount)

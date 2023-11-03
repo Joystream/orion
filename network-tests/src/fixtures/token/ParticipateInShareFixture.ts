@@ -59,17 +59,19 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     const qToken = await this.query.getTokenById(tokenId)
 
     assert.isNotNull(qToken)
-    const [{ id: revenueShareId }] = qToken!.revenueShares
+    const { id: revenueShareId } = qToken!.currentRenvenueShare!
 
     let qRevenueShareParticipation: Maybe<RevenueShareParticipationFieldsFragment> | undefined =
       null
+    let { id: accountId } = qToken!.accounts.find(
+      (account) => account.member.id === memberId.toString()
+    )!
     await Utils.until('waiting to fetch revenue share participation', async () => {
       qRevenueShareParticipation = await this.query.getRevenueShareParticpationById(
         revenueShareId,
-        tokenId,
-        memberId
+        accountId
       )
-      return !!qRevenueShareParticipation
+      return Boolean(qRevenueShareParticipation)
     })
 
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())

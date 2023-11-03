@@ -40,36 +40,36 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const issueTokenJob = job('Issue Creator Token', issueCreatorToken).after(requiredBasicSetup)
   job('Creator Remark', creatorRemarkFlow).after(issueTokenJob)
   job('Join Whitelist', joinWhitelistFlow).requires(issueTokenJob)
-  // const issuerTransferJob = job(
-  //   'Issuer Transfer With Existing Account And Vesting',
-  //   issuerTransferWithExistingAccountAndVestingFlow
-  // ).after(
-  //   job(
-  //     'Issuer Transfer With Existing Account And No Vesting',
-  //     issuerTransferWithExistingAccountAndNoVestingFlow
-  //   ).requires(
-  //     job(
-  //       'Issuer Transfer With Existing Account And Vesting',
-  //       issuerTransferWithAccountCreationAndVestingFlow
-  //     ).after(
-  //       job(
-  //         'Issuer Transfer With Account Creation And No Vesting',
-  //         issuerTransferWithAccountCreationAndNoVestingFlow
-  //       ).requires(issueTokenJob)
-  //     )
-  //   )
-  // )
-  // const changeToPermissionlessJob = job(
-  //   'Change To Permissionless',
-  //   changeToPermissionlessFlow
-  // ).requires(issuerTransferJob)
-  // job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
-  // const patronageJob = job('Patronage', patronageFlow).requires(issuerTransferJob)
-  // const ammJob = job('Bonding Curve (Amm)', ammFlow)
-  //   .requires(changeToPermissionlessJob)
-  //   .requires(patronageJob)
-  // const saleJob = job('Sales', saleFlow).after(ammJob)
-  // const revenueShareJob = job('Revenue Share', revenueShareFlow).after(saleJob)
-  // const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
-  // job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
+  const issuerTransferJob = job(
+    'Issuer Transfer With Existing Account And Vesting',
+    issuerTransferWithExistingAccountAndVestingFlow
+  ).after(
+    job(
+      'Issuer Transfer With Existing Account And No Vesting',
+      issuerTransferWithExistingAccountAndNoVestingFlow
+    ).requires(
+      job(
+        'Issuer Transfer With Existing Account And Vesting',
+        issuerTransferWithAccountCreationAndVestingFlow
+      ).after(
+        job(
+          'Issuer Transfer With Account Creation And No Vesting',
+          issuerTransferWithAccountCreationAndNoVestingFlow
+        ).requires(issueTokenJob)
+      )
+    )
+  )
+  const changeToPermissionlessJob = job(
+    'Change To Permissionless',
+    changeToPermissionlessFlow
+  ).requires(issuerTransferJob)
+  job('Transfer', holderTransferFlow).after(changeToPermissionlessJob)
+  const patronageJob = job('Patronage', patronageFlow).requires(issuerTransferJob)
+  const ammJob = job('Bonding Curve (Amm)', ammFlow)
+    .requires(changeToPermissionlessJob)
+    .requires(patronageJob)
+  const saleJob = job('Sales', saleFlow).after(ammJob)
+  const revenueShareJob = job('Revenue Share', revenueShareFlow).after(saleJob)
+  const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
+  job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
 })

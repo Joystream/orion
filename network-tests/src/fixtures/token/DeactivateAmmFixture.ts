@@ -18,7 +18,6 @@ export class DeactivateAmmFixture extends StandardizedFixture {
   protected creatorMemberId: number
   protected channelId: number
   protected events: AmmDeactivatedEventDetails[] = []
-  protected supplyPre: BN | undefined
 
   public constructor(
     api: Api,
@@ -59,13 +58,11 @@ export class DeactivateAmmFixture extends StandardizedFixture {
       qToken = await this.query.getTokenById(tokenId)
       return !!qToken
     })
-
-    this.supplyPre = new BN(qToken!.totalSupply)
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
   public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId, burnedAmount] = this.events[0].event.data
+    const [tokenId, _] = this.events[0].event.data
     let qToken: Maybe<TokenFieldsFragment> | undefined = null
     let qAmm: Maybe<AmmCurvFieldsFragment> | undefined = null
 
@@ -74,7 +71,7 @@ export class DeactivateAmmFixture extends StandardizedFixture {
       return !!qToken && qToken.status === TokenStatus.Idle
     })
 
-    const supplyPost = this.supplyPre!.sub(burnedAmount)
+    const supplyPost = (await this.api.query.projectToken.tokenInfoById(tokenId)).totalSupply
 
     assert.isNotNull(qToken)
     assert.equal(qToken!.totalSupply, supplyPost.toString())

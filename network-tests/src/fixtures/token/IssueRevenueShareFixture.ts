@@ -8,7 +8,10 @@ import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
 import { Maybe } from '../../../graphql/generated/schema'
-import { RevenueShareFieldsFragment } from '../../../graphql/generated/operations'
+import {
+  RevenueShareFieldsFragment,
+  TokenFieldsFragment,
+} from '../../../graphql/generated/operations'
 
 type RevenueShareIssuedEventDetails = EventDetails<EventType<'projectToken', 'RevenueSplitIssued'>>
 
@@ -70,15 +73,16 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
 
   public async runQueryNodeChecks(): Promise<void> {
     const [tokenId, startBlock, duration, joyAllocation] = this.events[0].event.data
-    const qToken = await this.query.getTokenById(tokenId)
-
-    assert.isNotNull(qToken)
-
-    const [{ id: revenueShareId }] = qToken!.revenueShares
     let qRevenueShare: Maybe<RevenueShareFieldsFragment> | undefined = null
+    let qToken: Maybe<TokenFieldsFragment> | undefined = null
+
     await Utils.until('waiting for revenue share to be fetched', async () => {
-      qRevenueShare = await this.query.getRevenueShareById(revenueShareId)
-      return !!qRevenueShare
+      qToken = await this.query.getTokenById(tokenId)
+      if (!Boolean(qToken!.currentRenvenueShare)) {
+        return false
+      }
+      qRevenueShare = await this.query.getRevenueShareById(qToken!.currentRenvenueShare!.id)
+      return Boolean(qRevenueShare)
     })
 
     assert.isNotNull(qRevenueShare)

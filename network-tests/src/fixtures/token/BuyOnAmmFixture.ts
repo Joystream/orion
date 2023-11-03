@@ -11,6 +11,7 @@ import { AmmTransactionType } from '../../../graphql/generated/schema'
 import {
   TokenFieldsFragment,
   TokenAccountFieldsFragment,
+  AmmTransactionFieldsFragment,
 } from '../../../graphql/generated/operations'
 import { Maybe } from '../../../graphql/generated/schema'
 
@@ -63,7 +64,7 @@ export class BuyOnAmmFixture extends StandardizedFixture {
   }
 
   public async preExecHook(): Promise<void> {
-    await this.api.treasuryTransferBalance(this.memberAddress, this.amount.muln(10000000))
+    await this.api.treasuryTransferBalance(this.memberAddress, new BN(10000000000))
     const qAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
       this.api.createType('u64', this.tokenId),
       this.memberId
@@ -100,9 +101,15 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     const [{ id: ammId }] = qToken!.ammCurves
     const qAmmCurve = await this.query.getAmmById(ammId)
 
-    const qTransaction = qAmmCurve!.transactions.find((qTx) => {
-      assert.isNotNull(qAmmCurve)
-      return qTx !== null && qTx.transactionType === AmmTransactionType.Buy
+    let qTransaction: Maybe<AmmTransactionFieldsFragment> | undefined = null
+    await Utils.until('waiting for buy on amm transaction to be indexed', async () => {
+      qTransaction = qAmmCurve!.transactions.find((qTx) => {
+        assert.isNotNull(qAmmCurve)
+        return (
+          qTx && qTx!.transactionType === AmmTransactionType.Buy && qTx!.account.id === qAccount!.id
+        )
+      })
+      return Boolean(qTransaction)
     })
 
     assert.isNotNull(qAccount)
@@ -125,7 +132,7 @@ export class BuyOnAmmFixture extends StandardizedFixture {
     assert.equal(qTransaction!.transactionType, AmmTransactionType.Buy)
     assert.equal(qTransaction!.quantity, crtMinted.toString())
     assert.equal(qTransaction!.pricePaid, joysDeposited.toString())
-    assert.equal(qTransaction!.pricePerUnit, crtMinted.div(joysDeposited).toString())
+    assert.equal(qTransaction!.pricePerUnit, joysDeposited.div(crtMinted).toString())
   }
 
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
