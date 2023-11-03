@@ -79,6 +79,7 @@ export class ActivateAmmFixture extends StandardizedFixture {
     assert.equal(qToken!.status, TokenStatus.Market)
     assert.equal(qAmm!.ammInitPrice, intercept.toString())
     assert.equal(qAmm!.ammSlopeParameter, slope.toString())
+    assert.equal(qToken!.lastPrice, qAmm!.ammInitPrice)
     assert.equal(qAmm!.burnedByAmm, '0')
     assert.equal(qAmm!.mintedByAmm, '0')
     assert.equal(qAmm!.finalized, false)

@@ -94,6 +94,9 @@ type CreatorToken @entity {
 
   "number of vested transfer completed"
   numberOfVestedTransferIssued: Int!
+
+  "last unit price available"
+  lastPrice: BigInt
 }
 
 type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
@@ -405,4 +408,7 @@ type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"
 
   "block"
   createdIn: Int!
+
+  "whether the account unstaked funds, recoving the participation"
+  recovered: Boolean!
 }

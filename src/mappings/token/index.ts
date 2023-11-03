@@ -168,7 +168,7 @@ export async function processAmmActivatedEvent({
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.MARKET
   const id = overlay.getRepository(AmmCurve).getNewEntityId()
-  overlay.getRepository(AmmCurve).new({
+  const amm = overlay.getRepository(AmmCurve).new({
     burnedByAmm: BigInt(0),
     mintedByAmm: BigInt(0),
     tokenId: tokenId.toString(),
@@ -177,6 +177,7 @@ export async function processAmmActivatedEvent({
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
+  token.lastPrice = amm.ammInitPrice
   token.currentAmmSaleId = id
 }
 
@@ -232,6 +233,7 @@ export async function processTokenSaleInitializedEvent({
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   token.status = TokenStatus.SALE
   token.currentSaleId = sale.id
+  token.lastPrice = sale.pricePerUnit
 
   if (metadataBytes) {
     const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
@@ -289,7 +291,7 @@ export async function processTokensBoughtOnAmmEvent({
   const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
 
   activeAmm.mintedByAmm += crtMinted
-  overlay.getRepository(AmmTransaction).new({
+  const tx = overlay.getRepository(AmmTransaction).new({
     ammId: activeAmm.id,
     accountId: buyerAccount.id,
     id: overlay.getRepository(AmmTransaction).getNewEntityId(),
@@ -299,6 +301,8 @@ export async function processTokensBoughtOnAmmEvent({
     pricePaid: joysDeposited,
     pricePerUnit: joysDeposited / crtMinted, // truncates decimal values
   })
+
+  token.lastPrice = tx.pricePerUnit
 }
 
 export async function processTokensSoldOnAmmEvent({
@@ -319,7 +323,7 @@ export async function processTokensSoldOnAmmEvent({
   const amm = await overlay.getRepository(AmmCurve).getByIdOrFail(ammId)
   amm.burnedByAmm += crtBurned
 
-  overlay.getRepository(AmmTransaction).new({
+  const tx = overlay.getRepository(AmmTransaction).new({
     ammId,
     accountId: sellerAccount.id,
     id: overlay.getRepository(AmmTransaction).getNewEntityId(),
@@ -329,6 +333,8 @@ export async function processTokensSoldOnAmmEvent({
     pricePaid: joysRecovered,
     pricePerUnit: joysRecovered / crtBurned, // truncates decimal values
   })
+
+  token.lastPrice = tx.pricePerUnit
 }
 
 export async function processTokensPurchasedOnSaleEvent({
@@ -500,6 +506,14 @@ export async function processRevenueSplitLeftEvent({
       .getRepository(RevenueShare)
       .getByIdOrFail(token.currentRenvenueShareId!)
     revenueShare.participantsNum -= 1
+    const qRevenueShareParticipation = (
+      await overlay
+        .getRepository(RevenueShareParticipation)
+        .getManyByRelation('accountId', account.id)
+    ).find((participation) => participation.revenueShareId === revenueShare.id)
+    if (qRevenueShareParticipation) {
+      qRevenueShareParticipation.recovered = true
+    }
   }
 }
 
@@ -540,6 +554,7 @@ export async function processUserParticipatedInSplitEvent({
     stakedAmount,
     earnings: joyDividend,
     createdIn: block.height,
+    recovered: false,
   })
   account.stakedAmount += stakedAmount
 }

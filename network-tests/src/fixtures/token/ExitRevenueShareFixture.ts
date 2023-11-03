@@ -99,5 +99,10 @@ export class ExitRevenueShareFixture extends StandardizedFixture {
 
     assert.equal(qRevenueShare!.participantsNum, participantsNumPost)
     assert.equal(qAccount!.stakedAmount, stakedAmountPost.toString())
+
+    const qRevenueShareParticipation = qAccount!.revenueShareParticipation.find(
+      (rev) => rev.revenueShare.id === qRevenueShare!.id
+    )
+    assert.isTrue(qRevenueShareParticipation?.recovered)
   }
 }

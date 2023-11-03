@@ -77,5 +77,6 @@ export class ParticipateInShareFixture extends StandardizedFixture {
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())
     assert.equal(qRevenueShareParticipation!.earnings, joyDividend.toString())
     assert.equal(qRevenueShareParticipation!.stakedAmount, stakedAmount.toString())
+    assert.isFalse(qRevenueShareParticipation!.recovered)
   }
 }

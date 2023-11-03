@@ -128,6 +128,8 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       return tx.account.id === qAccount!.id
     })
 
+    assert.equal(qSale!.pricePerUnit.toString(), qToken!.lastPrice!.toString())
+
     assert(qSaleTx !== undefined)
     assert.equal(qSaleTx!.quantity, amountPurchased.toString())
   }

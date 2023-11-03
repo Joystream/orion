@@ -7,6 +7,7 @@ fragment MemberFields on Membership {
 
 fragment TokenFields on CreatorToken {
   id
+  lastPrice
   createdAt
   deissued
   isInviteOnly
@@ -69,9 +70,13 @@ fragment TokenFields on CreatorToken {
 
 fragment RevenueShareParticipationFields on RevenueShareParticipation {
   id
+  revenueShare {
+    id
+  }
   createdIn
   earnings
   stakedAmount
+  recovered
   account {
     id
     member {
@@ -92,10 +97,7 @@ fragment TokenAccountFields on TokenAccount {
   totalAmount
   deleted
   revenueShareParticipation {
-    id
-    revenueShare {
-      id
-    }
+    ...RevenueShareParticipationFields
   }
 }
 

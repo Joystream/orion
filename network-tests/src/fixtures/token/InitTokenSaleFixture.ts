@@ -92,6 +92,8 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.fundsSourceAccount.id, fundsSourceAccount!.id) // funds from the sale are taken from the creator's account
     assert.equal(qSale!.tokenSaleAllocation, quantityLeft.toString())
 
+    assert.equal(qSale!.pricePerUnit.toString(), qToken!.lastPrice!.toString())
+
     if (tokenSale.vestingScheduleParams.isSome) {
       const { linearVestingDuration, cliffAmountPercentage, blocksBeforeCliff } =
         tokenSale.vestingScheduleParams.unwrap()

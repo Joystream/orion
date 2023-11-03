@@ -68,7 +68,7 @@ scenario('Creator Token Test Suite', async ({ job }) => {
   const ammJob = job('Bonding Curve (Amm)', ammFlow)
     .requires(changeToPermissionlessJob)
     .requires(patronageJob)
-  const saleJob = job('Sales', saleFlow).after(ammJob)
+  const saleJob = job('Sales', saleFlow).requires(ammJob)
   const revenueShareJob = job('Revenue Share', revenueShareFlow).after(saleJob)
   const burnTokensJob = job('Burn Tokens From Holder', burnTokens).after(revenueShareJob)
   job('Dust Empty Account', dustAccountFlow).requires(burnTokensJob)
