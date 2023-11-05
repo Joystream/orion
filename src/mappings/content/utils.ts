@@ -658,6 +658,21 @@ export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
   return royaltyPrice
 }
 
+export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
+  overlay: EntityManagerOverlay,
+  nft: Flat<OwnedNft>
+) {
+  const video = await overlay.getRepository(Video).getByIdOrFail(nft.videoId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
+  if (nft.owner.isTypeOf === 'NftOwnerChannel') {
+    increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
+  } else {
+    if (nft.creatorRoyalty) {
+      const royaltyAmount = computeRoyalty(nft.creatorRoyalty, assertNotNull(nft.lastSalePrice))
+      increaseChannelCumulativeRevenue(channel, royaltyAmount)
+    }
+  }
+}
 export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount: bigint): void {
   channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
 }

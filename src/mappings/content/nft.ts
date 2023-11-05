@@ -7,6 +7,7 @@ import {
   finishAuction,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
+  maybeIncreaseChannelCumulativeRevenueAfterNft,
   parseContentActor,
   processNft,
 } from './utils'
@@ -273,6 +274,7 @@ export async function processEnglishAuctionSettledEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -324,6 +326,7 @@ export async function processBidMadeCompletingAuctionEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -369,6 +372,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -428,6 +432,7 @@ export async function processOfferAcceptedEvent({
     // set last sale
     nft.lastSalePrice = price
     nft.lastSaleDate = new Date(block.timestamp)
+    await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
   }
 
   // update NFT's transactional status
@@ -505,6 +510,7 @@ export async function processNftBoughtEvent({
   // set last sale
   nft.lastSalePrice = price
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // update NFT's transactional status
   nft.transactionalStatus = new TransactionalStatusIdle()
