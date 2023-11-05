@@ -22,7 +22,13 @@ import {
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
-import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActor } from './utils'
+import {
+  processAppActionMetadata,
+  deleteChannel,
+  encodeAssets,
+  parseContentActor,
+  increaseChannelCumulativeRevenue,
+} from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -57,6 +63,7 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+    cumulativeRevenue: 0,
   })
 
   const ownerMember = channel.ownerMemberId
@@ -272,6 +279,7 @@ export async function processChannelRewardUpdatedEvent({
   })
 
   channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelRewardClaimedAndWithdrawnEvent({
@@ -297,6 +305,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
   })
 
   channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelFundsWithdrawnEvent({

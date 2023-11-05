@@ -1,6 +1,11 @@
 import { Resolver, Query, Args } from 'type-graphql'
 import { EntityManager } from 'typeorm'
-import { GetShareDividendsResult, GetShareDividensArgs } from './types'
+import {
+  GetCumulativeHistoricalShareAllocationArgs,
+  GetCumulativeHistoricalShareAllocationResult,
+  GetShareDividendsResult,
+  GetShareDividensArgs,
+} from './types'
 import { CreatorToken, RevenueShare } from '../../../model'
 
 @Resolver()
@@ -30,6 +35,26 @@ export class TokenResolver {
     const dividendJoyAmount = (BigInt(stakingAmount) / totalSupply) * allocation
     return {
       dividendJoyAmount: Number(dividendJoyAmount),
+    }
+  }
+
+  @Query(() => GetCumulativeHistoricalShareAllocationResult)
+  async getCumulativeHistoricalShareAllocation(
+    @Args() { tokenId }: GetCumulativeHistoricalShareAllocationArgs
+  ): Promise<GetCumulativeHistoricalShareAllocationResult> {
+    const em = await this.em()
+    const token = await em
+      .getRepository(CreatorToken)
+      .findOne({ where: { id: tokenId }, relations: { revenueShares: true } })
+    if (!token) {
+      throw new Error('Token not found')
+    }
+    let cumulativeAllocationAmount = BigInt(0)
+    for (const share of token.revenueShares) {
+      cumulativeAllocationAmount += share.allocation
+    }
+    return {
+      cumulativeHistoricalAllocation: Number(cumulativeAllocationAmount),
     }
   }
 }

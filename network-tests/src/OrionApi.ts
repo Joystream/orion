@@ -47,6 +47,8 @@ import {
   GetChannelByIdSubscriptionVariables,
   AmmTransactionFieldsFragment,
   GetChannelById,
+  GetShareDividend,
+  GetCumulativeHistoricalShareAllocationForToken,
 } from '../graphql/generated/operations'
 
 export class OrionApi {
@@ -79,6 +81,28 @@ export class OrionApi {
   ): Promise<SubscriptionT[keyof SubscriptionT] | null> {
     return new Promise((resolve) => {
       this.apolloClient.subscribe({ query, variables }).subscribe(({ data }) => {
+        resolve(data ? data[resultKey] : null)
+      })
+    })
+  }
+
+  /**
+   * Run query from query
+   *
+   * @param query - actual query
+   * @param variables - query parameters
+   * @param resultKey - helps result parsing
+   */
+  public async runQuery<
+    QueryT extends { [k: string]: Maybe<Record<string, unknown>> },
+    VariablesT extends Record<string, unknown>
+  >(
+    query: DocumentNode,
+    variables: VariablesT,
+    resultKey: keyof QueryT
+  ): Promise<QueryT[keyof QueryT] | null> {
+    return new Promise((resolve) => {
+      this.apolloClient.query({ query, variables }).then(({ data }) => {
         resolve(data ? data[resultKey] : null)
       })
     })
@@ -231,5 +255,35 @@ export class OrionApi {
       GetChannelByIdSubscription,
       GetChannelByIdSubscriptionVariables
     >(GetChannelById, { id }, 'channelById')
+  }
+
+  public async getShareDividend(
+    tokenId: string,
+    stakingAmount: number
+  ): Promise<number | undefined> {
+    const result = await this.runQuery(
+      GetShareDividend,
+      { tokenId, stakingAmount },
+      'getShareDividend'
+    )
+    console.log('🚨 result from getShareDividend query')
+    console.log(result)
+    return result?.dividendJoyAmount ? (result.dividendJoyAmount as number) : undefined
+  }
+
+  public async getCumulativeHistoricalAllocationForToken(
+    tokenId: string
+  ): Promise<number | undefined> {
+    const result = await this.runQuery(
+      GetCumulativeHistoricalShareAllocationForToken,
+      { tokenId },
+      'getCumulativeHistoricalShareAllocation'
+    )
+    console.log('🚨 result from getCumulativeHistoricalAllocation query')
+    console.log(result)
+    console.log(result?.cumulativeHistoricalAllocation)
+    return result?.cumulativeHistoricalAllocation
+      ? (result.cumulativeHistoricalAllocation as number)
+      : undefined
   }
 }

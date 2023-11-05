@@ -651,3 +651,7 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
       : null
   ).toU8a()
 }
+
+export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount: bigint): void {
+  channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
+}

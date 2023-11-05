@@ -74,9 +74,16 @@ export class ParticipateInShareFixture extends StandardizedFixture {
       return Boolean(qRevenueShareParticipation)
     })
 
+    const dividendAmountResolved = await this.query.getShareDividend(
+      this.tokenId.toString(),
+      stakedAmount.toNumber()
+    )
+
     assert.equal(qRevenueShareParticipation!.account.member.id, memberId.toString())
     assert.equal(qRevenueShareParticipation!.earnings, joyDividend.toString())
     assert.equal(qRevenueShareParticipation!.stakedAmount, stakedAmount.toString())
     assert.isFalse(qRevenueShareParticipation!.recovered)
+    assert.isDefined(dividendAmountResolved)
+    assert.equal(qRevenueShareParticipation!.earnings, dividendAmountResolved!.toString())
   }
 }

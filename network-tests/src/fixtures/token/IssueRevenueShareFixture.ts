@@ -85,6 +85,10 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
       return Boolean(qRevenueShare)
     })
 
+    const cumulativeAllocationAmount = await this.query.getCumulativeHistoricalAllocationForToken(
+      tokenId.toString()
+    )
+
     assert.isNotNull(qRevenueShare)
     assert.equal(qRevenueShare!.token.id, tokenId.toString())
     assert.equal(qRevenueShare!.startingAt.toString(), startBlock.toString())
@@ -93,6 +97,8 @@ export class IssueRevenueShareFixture extends StandardizedFixture {
     assert.equal(qRevenueShare!.finalized, false)
     assert.equal(qRevenueShare!.participantsNum, 0)
     assert.equal(qRevenueShare!.allocation, joyAllocation.toString())
+    assert.isDefined(cumulativeAllocationAmount)
+    assert.equal(cumulativeAllocationAmount!.toString(), qRevenueShare!.allocation)
   }
 
   protected assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}

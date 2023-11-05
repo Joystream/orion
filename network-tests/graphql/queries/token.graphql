@@ -296,3 +296,14 @@ subscription getMemberById($id: String!) {
     ...MemberFields
   }
 }
+
+query getShareDividend($tokenId: String!, $stakingAmount: Int!) {
+  getShareDividend(stakingAmount: $stakingAmount, tokenId: $tokenId) {
+    dividendJoyAmount
+  }
+}
+query getCumulativeHistoricalShareAllocationForToken($tokenId: String!) {
+  getCumulativeHistoricalShareAllocation(tokenId: $tokenId) {
+    cumulativeHistoricalAllocation
+  }
+}

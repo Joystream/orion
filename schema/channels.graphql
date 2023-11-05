@@ -67,6 +67,9 @@ type Channel @entity {
 
   "Token issued by channel if any"
   creatorToken: TokenChannel @derivedFrom(field: "channel")
+
+  "Cumulative total revenue coming from nft sales + member payments + council payouts"
+  cumulativeRevenue: BigInt!
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

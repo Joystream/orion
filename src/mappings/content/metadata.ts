@@ -65,7 +65,14 @@ import {
   metaprotocolTransactionFailure,
   videoRelevanceManager,
 } from '../utils'
-import { AsDecoded, ASSETS_MAP, EntityAssetProps, EntityAssetsMap, MetaNumberProps } from './utils'
+import {
+  AsDecoded,
+  ASSETS_MAP,
+  EntityAssetProps,
+  EntityAssetsMap,
+  increaseChannelCumulativeRevenue,
+  MetaNumberProps,
+} from './utils'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -646,6 +653,8 @@ export async function processChannelPaymentFromMember(
       amount,
     }),
   })
+
+  increaseChannelCumulativeRevenue(channel, amount)
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,
