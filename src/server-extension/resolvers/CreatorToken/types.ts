@@ -26,3 +26,21 @@ export class GetCumulativeHistoricalShareAllocationResult {
   @Field(() => Int, { nullable: false })
   cumulativeHistoricalAllocation!: number
 }
+
+@ArgsType()
+export class GetAccountTransferrableBalanceArgs {
+  @Field(() => String, { nullable: false })
+  tokenId!: string
+
+  @Field(() => String, { nullable: false })
+  memberId!: string
+
+  @Field(() => Int, { nullable: false })
+  currentBlockHeight!: number
+}
+
+@ObjectType()
+export class GetAccountTransferrableBalanceResult {
+  @Field(() => Int, { nullable: false })
+  transferrableCrtAmount!: number
+}
