@@ -88,7 +88,8 @@ export async function processTokenIssuedEvent({
         newAccount,
         vestingData.id,
         allocation.amount,
-        new InitialIssuanceVestingSource()
+        new InitialIssuanceVestingSource(),
+        block.height
       )
     }
   }
@@ -372,7 +373,8 @@ export async function processTokensPurchasedOnSaleEvent({
       buyerAccount,
       vestingForSale.vestingId,
       amountPurchased,
-      new SaleVestingSource()
+      new SaleVestingSource(),
+      block.height
     )
   }
 }

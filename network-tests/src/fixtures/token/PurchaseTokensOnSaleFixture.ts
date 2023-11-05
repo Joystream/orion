@@ -7,12 +7,13 @@ import { Api } from '../../Api'
 import BN from 'bn.js'
 import { assert } from 'chai'
 import { Utils } from '../../utils'
-import { Maybe } from '../../../graphql/generated/schema'
+import { Maybe, VestedAccount } from '../../../graphql/generated/schema'
 import {
   SaleFields,
   SaleFieldsFragment,
   TokenAccountFieldsFragment,
   TokenFieldsFragment,
+  VestedAccountFieldsFragment,
 } from 'graphql/generated/operations'
 
 type TokensPurchasedOnSaleEventDetails = EventDetails<
@@ -26,6 +27,7 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
   protected amount: BN
   protected events: TokensPurchasedOnSaleEventDetails[] = []
   protected amountPre: BN | undefined
+  protected vestingSchedulesPre: VestedAccountFieldsFragment[] | undefined
   protected tokenSoldPre: BN | undefined
 
   public constructor(
@@ -74,6 +76,8 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.isNotNull(qSale)
     this.tokenSoldPre = new BN(qSale!.tokensSold)
 
+    this.vestingSchedulesPre = qAccount!.vestingSchedules
+
     await Utils.until('waiting for sale to start', async () => {
       const token = await this.api.query.projectToken.tokenInfoById(this.tokenId)
       const currentBlock = await this.api.getBestBlock()
@@ -115,13 +119,12 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.equal(qSale!.tokensSold, tokenSoldPost.toString())
 
     if (qSale!.vestedSale) {
-      const vestingId = qSale!.vestedSale.vesting.id
-      // query vested account
-      const id = qAccount!.id + vestingId
-      const qVestedAccount = await this.query.getVestedAccountById(id)
-      assert.isNotNull(qVestedAccount)
-      assert.equal(qVestedAccount!.account.id, qAccount!.id)
-      assert.equal(qVestedAccount!.vesting.id, vestingId)
+      const vestingSchedulestPost = qAccount!.vestingSchedules
+      assert.equal(vestingSchedulestPost.length, this.vestingSchedulesPre!.length + 1)
+      const latestVestingSchedule = qAccount!.vestingSchedules.sort((a, b) =>
+        a.acquiredAt > b.acquiredAt ? -1 : 1
+      )[0]
+      assert.equal(qSale!.vestedSale.vesting.id, latestVestingSchedule.id, 'vesting id mismatch')
     }
 
     const qSaleTx = qSale!.transactions.find((tx) => {

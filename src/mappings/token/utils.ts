@@ -88,7 +88,8 @@ export async function addVestingScheduleToAccount(
   account: Flat<TokenAccount>,
   vestingId: string,
   amount: bigint,
-  vestingSource: VestingSource
+  vestingSource: VestingSource,
+  currentBlock: number
 ) {
   const existingVestingSchedulesForAccount = await overlay
     .getRepository(VestedAccount)
@@ -115,6 +116,7 @@ export async function addVestingScheduleToAccount(
       vestingId,
       totalVestingAmount: amount,
       vestingSource: vestingSource,
+      acquiredAt: currentBlock,
     })
   }
 }
@@ -209,7 +211,8 @@ export async function processValidatedTransfers(
         destinationAccount,
         vestingScheduleId,
         validatedPaymentWithVesting.payment.amount,
-        new IssuerTransferVestingSource()
+        new IssuerTransferVestingSource(),
+        blockHeight
       )
     }
   }

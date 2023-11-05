@@ -96,6 +96,9 @@ fragment TokenAccountFields on TokenAccount {
   stakedAmount
   totalAmount
   deleted
+  vestingSchedules {
+    ...VestedAccountFields
+  }
   revenueShareParticipation {
     ...RevenueShareParticipationFields
   }
@@ -172,8 +175,15 @@ fragment SaleFields on Sale {
 
 fragment VestedAccountFields on VestedAccount {
   id
+  totalVestingAmount
+  acquiredAt
   vesting {
     id
+    cliffRatioPermill
+    vestingDurationBlocks
+    cliffDurationBlocks
+    endsAt
+    cliffBlock
   }
   account {
     id

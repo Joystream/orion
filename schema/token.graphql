@@ -349,6 +349,9 @@ type VestedAccount @entity {
 
   "vesting source"
   vestingSource: VestingSource!
+
+  "acquired at block"
+  acquiredAt: Int!
 }
 
 type SaleVestingSource @variant {
