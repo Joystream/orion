@@ -124,7 +124,20 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
       const latestVestingSchedule = qAccount!.vestingSchedules.sort((a, b) =>
         a.acquiredAt > b.acquiredAt ? -1 : 1
       )[0]
-      assert.equal(qSale!.vestedSale.vesting.id, latestVestingSchedule.id, 'vesting id mismatch')
+      assert.equal(
+        qSale!.vestedSale.vesting.id,
+        latestVestingSchedule.vesting.id,
+        'vesting id mismatch'
+      )
+
+      const bestBlock = await this.api.getBestBlock()
+      const transferrableBalance = await this.query.getAccountTransferrableBalance(
+        tokenId.toString(),
+        memberId.toString(),
+        bestBlock.toNumber()
+      )
+      assert.isDefined(transferrableBalance)
+      this.checkTransferrableBalance(BigInt(transferrableBalance!), bestBlock.toNumber(), qAccount!)
     }
 
     const qSaleTx = qSale!.transactions.find((tx) => {
@@ -137,5 +150,29 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.equal(qSaleTx!.quantity, amountPurchased.toString())
   }
 
+  private checkTransferrableBalance(
+    transferrableBalance: bigint,
+    block: number,
+    qAccount: TokenAccountFieldsFragment
+  ) {
+    let lockedCrtAmount = BigInt(0)
+    for (const { vesting: schedule, totalVestingAmount } of qAccount.vestingSchedules) {
+      if (schedule.endsAt < block) {
+        const remainingBlocks = schedule.endsAt - block
+        const postCliffAmount =
+          (BigInt(totalVestingAmount) * BigInt(schedule.cliffRatioPermill)) / BigInt(1000000)
+        const locked =
+          (postCliffAmount * BigInt(remainingBlocks)) / BigInt(schedule.vestingDurationBlocks)
+        lockedCrtAmount += locked
+      }
+    }
+    const expectedTransferrable =
+      BigInt(qAccount.totalAmount) - this.bigintMax(BigInt(qAccount.stakedAmount), lockedCrtAmount)
+
+    assert.equal(transferrableBalance.toString(), expectedTransferrable.toString())
+  }
+  private bigintMax(a: bigint, b: bigint): bigint {
+    return a > b ? a : b
+  }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }

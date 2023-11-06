@@ -317,3 +317,16 @@ query getCumulativeHistoricalShareAllocationForToken($tokenId: String!) {
     cumulativeHistoricalAllocation
   }
 }
+query getAccountTransferrableBalance(
+  $tokenId: String!
+  $memberId: String!
+  $currentBlockHeight: Int!
+) {
+  getAccountTransferrableBalance(
+    currentBlockHeight: $currentBlockHeight
+    memberId: $memberId
+    tokenId: $tokenId
+  ) {
+    transferrableCrtAmount
+  }
+}

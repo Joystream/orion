@@ -65,8 +65,9 @@ export class InitTokenSaleFixture extends StandardizedFixture {
   }
 
   public async runQueryNodeChecks(): Promise<void> {
-    const [tokenId, saleNonce, tokenSale] = this.events[0].event.data
-    const { quantityLeft, unitPrice, capPerMember, startBlock, duration, tokensSource } = tokenSale
+    const [tokenId, , tokenSale] = this.events[0].event.data
+    const eventBlock = this.events[0].blockNumber
+    const { quantityLeft, unitPrice, capPerMember, startBlock, duration } = tokenSale
     const end = startBlock.add(duration)
     const fundsSourceAccount = await this.query.getTokenAccountByTokenIdAndMemberId(
       tokenId,
@@ -97,10 +98,14 @@ export class InitTokenSaleFixture extends StandardizedFixture {
     if (tokenSale.vestingScheduleParams.isSome) {
       const { linearVestingDuration, cliffAmountPercentage, blocksBeforeCliff } =
         tokenSale.vestingScheduleParams.unwrap()
-      const cliffBlock = this.bestBlock!.add(blocksBeforeCliff.toBn())
+      const cliffBlock = new BN(eventBlock).add(blocksBeforeCliff.toBn())
       const endBlock = cliffBlock.add(linearVestingDuration.toBn())
       const vestingId =
-        cliffBlock.toString() + linearVestingDuration.toString() + cliffAmountPercentage.toString()
+        cliffBlock.toString() +
+        '-' +
+        linearVestingDuration.toString() +
+        '-' +
+        cliffAmountPercentage.toString()
 
       let qVesting: Maybe<VestingScheduleFieldsFragment> | undefined = null
       await Utils.until('waiting for vesting to be fetched', async () => {
@@ -108,7 +113,11 @@ export class InitTokenSaleFixture extends StandardizedFixture {
         return !!qVesting
       })
       assert.equal(qVesting!.cliffBlock.toString(), cliffBlock.toString())
-      assert.equal(qVesting!.cliffDurationBlocks.toString(), linearVestingDuration.toString())
+
+      assert.equal(
+        (qVesting!.endsAt - qVesting!.cliffDurationBlocks - eventBlock).toString(),
+        linearVestingDuration.toString()
+      )
       assert.equal(qVesting!.endsAt.toString(), endBlock.toString())
       assert.equal(qVesting!.vestedSale?.sale.id, qSale!.id)
       assert.isNotNull(qSale!.vestedSale)

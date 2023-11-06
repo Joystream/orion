@@ -31,11 +31,17 @@ export default async function saleFlow({ api, query, lock }: FlowProps): Promise
   // sale params
   debug('issue token sale')
   const startsAt = (await api.getBestBlock()).addn(100)
+  const vestingScheduleParams = {
+    linearVestingDuration: api.createType('u32', 100),
+    blocksBeforeCliff: api.createType('u32', 0),
+    cliffAmountPercentage: api.createType('u32', 0),
+  }
   const saleParams = api.createType('PalletProjectTokenTokenSaleParams', {
     unitPrice: api.createType('u128', new BN(1)),
     upperBoundQuantity: api.createType('u128', SALE_ALLOCATION),
     duration: api.createType('u32', new BN(10)),
     capPerMember: api.createType('Option<u128>', SALE_ALLOCATION.divn(10)),
+    vestingScheduleParams,
     startsAt,
   })
   const initTokenSaleFixture = new InitTokenSaleFixture(

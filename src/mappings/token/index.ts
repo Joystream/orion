@@ -373,7 +373,7 @@ export async function processTokensPurchasedOnSaleEvent({
       buyerAccount,
       vestingForSale.vestingId,
       amountPurchased,
-      new SaleVestingSource(),
+      new SaleVestingSource({ sale: sale.id }),
       block.height
     )
   }

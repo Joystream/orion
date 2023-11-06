@@ -49,6 +49,7 @@ import {
   GetChannelById,
   GetShareDividend,
   GetCumulativeHistoricalShareAllocationForToken,
+  GetAccountTransferrableBalance,
 } from '../graphql/generated/operations'
 
 export class OrionApi {
@@ -282,6 +283,22 @@ export class OrionApi {
     )
     if (result?.cumulativeHistoricalAllocation !== undefined) {
       return result.cumulativeHistoricalAllocation as number
+    }
+    return undefined
+  }
+
+  public async getAccountTransferrableBalance(
+    tokenId: string,
+    memberId: string,
+    currentBlockHeight: number
+  ): Promise<number | undefined> {
+    const result = await this.runQuery(
+      GetAccountTransferrableBalance,
+      { tokenId, memberId, currentBlockHeight },
+      'getAccountTransferrableBalance'
+    )
+    if (result?.transferrableCrtAmount !== undefined) {
+      return result.transferrableCrtAmount as number
     }
     return undefined
   }
