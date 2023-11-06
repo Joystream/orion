@@ -647,7 +647,7 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  channel.cumulativeRewardPaid += amount
+  channel.cumulativeReward += amount
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,
