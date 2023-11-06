@@ -279,8 +279,6 @@ export class OrionApi {
       { tokenId },
       'getCumulativeHistoricalShareAllocation'
     )
-    console.log('🚨 result from getCumulativeHistoricalAllocation query')
-    console.log(result)
     console.log(result?.cumulativeHistoricalAllocation)
     return result?.cumulativeHistoricalAllocation
       ? (result.cumulativeHistoricalAllocation as number)
