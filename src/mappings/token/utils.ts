@@ -232,18 +232,16 @@ export async function processTokenMetadata(
   }
 
   if (isSet(metadata.benefits)) {
+    // remove all current bnefits
+    const existingBenefit = await overlay
+      .getRepository(Benefit)
+      .getManyByRelation('tokenId', token.id)
+    if (existingBenefit !== undefined) {
+      overlay.getRepository(Benefit).remove(...existingBenefit)
+    }
+
     for (const benefit of metadata.benefits) {
       if (benefit.displayOrder !== null) {
-        // remove existing benefit with the same display order (if exists)
-        const existingBenefit = (
-          await overlay.getRepository(Benefit).getManyByRelation('tokenId', token.id)
-        ).find((b) => b.displayOrder === benefit.displayOrder)
-
-        if (existingBenefit !== undefined) {
-          overlay.getRepository(Benefit).remove(existingBenefit)
-        }
-
-        // if the benefit title is null, it means we want to remove the benefit
         if (isSet(benefit.title)) {
           const benefitEntity = overlay.getRepository(Benefit).new({
             id: overlay.getRepository(Benefit).getNewEntityId(),
@@ -299,6 +297,12 @@ export async function processTokenMetadata(
         tokenId: token.id,
         videoId: video.id,
       })
+    }
+  } else {
+    const trailerVideoRepository = overlay.getRepository(TrailerVideo)
+    const oldTrailer = await trailerVideoRepository.getOneByRelation('tokenId', token.id)
+    if (oldTrailer) {
+      trailerVideoRepository.remove(oldTrailer)
     }
   }
 }
