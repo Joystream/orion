@@ -66,8 +66,10 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     )
     if (qAccount) {
       this.amountPre = new BN(qAccount!.totalAmount)
+      this.vestingSchedulesPre = qAccount!.vestingSchedules
     } else {
       this.amountPre = new BN(0)
+      this.vestingSchedulesPre = []
     }
     const qSale = await this.query.getCurrentSaleForTokenId(
       this.api.createType('u64', this.tokenId)
@@ -75,8 +77,6 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
 
     assert.isNotNull(qSale)
     this.tokenSoldPre = new BN(qSale!.tokensSold)
-
-    this.vestingSchedulesPre = qAccount!.vestingSchedules
 
     await Utils.until('waiting for sale to start', async () => {
       const token = await this.api.query.projectToken.tokenInfoById(this.tokenId)

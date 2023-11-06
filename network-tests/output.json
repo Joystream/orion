@@ -32,19 +32,20 @@
     "j4UsLGNtMSuLmpZ9vAuLut1ueooGcfrWR5WwxeqqmjEfa98tH": 29,
     "j4WB4Dac7mfdDQdx4Gs5nW7VhBfQSwokpeunD122rnv1GxSKN": 30,
     "j4SKskGjdaQz6h69A6TxUvUpEsnUqe87ZBTbGZBf6ig2PP9HE": 31,
-    "j4W39HLCpNHCfYz6ozh6uUqfhTbEdkJ2u8tbr5Cm8KRDbccea": 32
+    "j4W39HLCpNHCfYz6ozh6uUqfhTbEdkJ2u8tbr5Cm8KRDbccea": 32,
+    "j4WfaiKniQ3kXz3WBzP2gfsubftANLKSoh6fcSXMuvoe5f8i8": 33
   },
   "keyIds": {
     "start": 0,
-    "final": 33,
+    "final": 34,
     "custom": [
       "Councillor//0",
       "Councillor//1",
       "Councillor//2",
       "Councillor//3",
       "Councillor//4",
-      "worker//Storage//0",
       "worker//Content//0",
+      "worker//Storage//0",
       "worker//Storage//1",
       "//Colossus1"
     ]

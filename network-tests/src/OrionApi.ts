@@ -266,9 +266,10 @@ export class OrionApi {
       { tokenId, stakingAmount },
       'getShareDividend'
     )
-    console.log('🚨 result from getShareDividend query')
-    console.log(result)
-    return result?.dividendJoyAmount ? (result.dividendJoyAmount as number) : undefined
+    if (result?.dividendJoyAmount !== undefined) {
+      return result.dividendJoyAmount as number
+    }
+    return undefined
   }
 
   public async getCumulativeHistoricalAllocationForToken(
@@ -279,9 +280,9 @@ export class OrionApi {
       { tokenId },
       'getCumulativeHistoricalShareAllocation'
     )
-    console.log(result?.cumulativeHistoricalAllocation)
-    return result?.cumulativeHistoricalAllocation
-      ? (result.cumulativeHistoricalAllocation as number)
-      : undefined
+    if (result?.cumulativeHistoricalAllocation !== undefined) {
+      return result.cumulativeHistoricalAllocation as number
+    }
+    return undefined
   }
 }
