@@ -93,3 +93,52 @@ index 6fb0711..89e3d3d 100644
      });
      return (0, util_internal_http_server_1.listen)(server, options.port);
  }
+diff --git a/node_modules/@subsquid/openreader/lib/sql/query.d.ts.map b/node_modules/@subsquid/openreader/lib/sql/query.d.ts.map
+index 7f7c281..ad39c31 100644
+--- a/node_modules/@subsquid/openreader/lib/sql/query.d.ts.map
++++ b/node_modules/@subsquid/openreader/lib/sql/query.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"query.d.ts","sourceRoot":"","sources":["../../src/sql/query.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAC,OAAO,EAAC,MAAM,YAAY,CAAA;AACvC,OAAO,KAAK,EAAC,YAAY,EAAE,KAAK,EAAC,MAAM,YAAY,CAAA;AACnD,OAAO,EAKH,sBAAsB,EACtB,uBAAuB,EAC1B,MAAM,kBAAkB,CAAA;AACzB,OAAO,KAAK,EAAC,SAAS,EAAE,YAAY,EAAC,MAAM,cAAc,CAAA;AACzD,OAAO,KAAK,EAAC,KAAK,EAAC,MAAM,UAAU,CAAA;AAMnC,MAAM,WAAW,KAAK,CAAC,CAAC;IACpB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAA;IACpB,QAAQ,CAAC,MAAM,EAAE,OAAO,EAAE,CAAA;IAC1B,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,CAAC,CAAA;CACxB;AAGD,qBAAa,SAAU,YAAW,KAAK,CAAC,GAAG,EAAE,CAAC;IAQtC,OAAO,CAAC,MAAM;IAPlB,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EACR,MAAM,EAAE,SAAS,EACzB,IAAI,EAAE,YAAY;IAWtB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,GAAG,EAAE;CAO5B;AAGD,qBAAa,eAAe;IAQpB,OAAO,CAAC,MAAM;IAPlB,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,UAAU,EAAE,MAAM,EACV,MAAM,EAAE,YAAY,EAAE,EAC9B,EAAE,EAAE,MAAM;IAYd,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,GAAG;CAI1B;AAGD,qBAAa,UAAW,YAAW,KAAK,CAAC,MAAM,CAAC;IAC5C,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EAChB,KAAK,CAAC,EAAE,KAAK;IAMjB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,MAAM;CAG7B;AAGD,qBAAa,eAAgB,YAAW,KAAK,CAAC,uBAAuB,CAAC;IAClE,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;IACtC,OAAO,CAAC,MAAM,CAAI;IAClB,OAAO,CAAC,KAAK,CAAM;IACnB,OAAO,CAAC,QAAQ,CAAC,CAAW;IAC5B,OAAO,CAAC,UAAU,CAAC,CAAS;IAC5B,OAAO,CAAC,QAAQ,CAAC,CAAS;IAC1B,OAAO,CAAC,UAAU,CAAC,CAAS;gBAGxB,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EAChB,GAAG,EAAE,sBAAsB,CAAC,SAAS,CAAC;IA+B1C,OAAO,CAAC,iBAAiB;IAUzB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,uBAAuB;IA8B3C,OAAO,CAAC,WAAW;IAUnB,OAAO,CAAC,aAAa;CAQxB"}
+\ No newline at end of file
++{"version":3,"file":"query.d.ts","sourceRoot":"","sources":["../../src/sql/query.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,EAAC,OAAO,EAAC,MAAM,YAAY,CAAA;AACvC,OAAO,KAAK,EAAC,YAAY,EAAE,KAAK,EAAC,MAAM,YAAY,CAAA;AACnD,OAAO,EAKH,sBAAsB,EACtB,uBAAuB,EAC1B,MAAM,kBAAkB,CAAA;AACzB,OAAO,KAAK,EAAC,SAAS,EAAE,YAAY,EAAC,MAAM,cAAc,CAAA;AACzD,OAAO,KAAK,EAAC,KAAK,EAAC,MAAM,UAAU,CAAA;AAMnC,MAAM,WAAW,KAAK,CAAC,CAAC;IACpB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAA;IACpB,QAAQ,CAAC,MAAM,EAAE,OAAO,EAAE,CAAA;IAC1B,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,CAAC,CAAA;CACxB;AAGD,qBAAa,SAAU,YAAW,KAAK,CAAC,GAAG,EAAE,CAAC;IAQtC,OAAO,CAAC,MAAM;IAPlB,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EACR,MAAM,EAAE,SAAS,EACzB,IAAI,EAAE,YAAY;IAWtB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,GAAG,EAAE;CAO5B;AAGD,qBAAa,eAAe;IAQpB,OAAO,CAAC,MAAM;IAPlB,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,UAAU,EAAE,MAAM,EACV,MAAM,EAAE,YAAY,EAAE,EAC9B,EAAE,EAAE,MAAM;IAYd,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,GAAG;CAI1B;AAGD,qBAAa,UAAW,YAAW,KAAK,CAAC,MAAM,CAAC;IAC5C,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;gBAGlC,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EAChB,KAAK,CAAC,EAAE,KAAK;IAMjB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,MAAM;CAG7B;AAGD,qBAAa,eAAgB,YAAW,KAAK,CAAC,uBAAuB,CAAC;IAClE,SAAgB,GAAG,EAAE,MAAM,CAAA;IAC3B,SAAgB,MAAM,EAAE,OAAO,EAAE,CAAK;IACtC,OAAO,CAAC,MAAM,CAAI;IAClB,OAAO,CAAC,KAAK,CAAM;IACnB,OAAO,CAAC,QAAQ,CAAC,CAAW;IAC5B,OAAO,CAAC,UAAU,CAAC,CAAS;IAC5B,OAAO,CAAC,QAAQ,CAAC,CAAS;IAC1B,OAAO,CAAC,UAAU,CAAC,CAAS;gBAGxB,KAAK,EAAE,KAAK,EACZ,OAAO,EAAE,OAAO,EAChB,QAAQ,EAAE,MAAM,EAChB,GAAG,EAAE,sBAAsB,CAAC,SAAS,CAAC;IA8C1C,OAAO,CAAC,iBAAiB;IAUzB,GAAG,CAAC,IAAI,EAAE,GAAG,EAAE,EAAE,GAAG,uBAAuB;IA8B3C,OAAO,CAAC,WAAW;IAUnB,OAAO,CAAC,aAAa;CAQxB"}
+\ No newline at end of file
+diff --git a/node_modules/@subsquid/openreader/lib/sql/query.js b/node_modules/@subsquid/openreader/lib/sql/query.js
+index c00a15f..014b776 100644
+--- a/node_modules/@subsquid/openreader/lib/sql/query.js
++++ b/node_modules/@subsquid/openreader/lib/sql/query.js
+@@ -72,9 +72,18 @@ class ConnectionQuery {
+             limit: this.limit + 1
+         };
+         let printer;
++        let wherePrinter;
+         if (model[typeName].kind == 'entity') {
+             (0, assert_1.default)(req.edgeNode == null || Array.isArray(req.edgeNode));
+-            printer = new printer_1.EntitySqlPrinter(model, dialect, typeName, this.params, args, req.edgeNode);
++            const idField = req.edgeNode?.find(eN => eN.field === 'id');
++            if (idField) {
++                wherePrinter = new printer_1.EntitySqlPrinter(model, dialect, typeName, this.params, {
++                    where: args.where,
++                    offset: args.offset,
++                    limit: args.limit
++                }, [idField]);
++            }
++            printer = new printer_1.EntitySqlPrinter(model, dialect, typeName, this.params, idField ? { orderBy: req.orderBy } : args, req.edgeNode);
+         }
+         else {
+             (0, assert_1.default)(req.edgeNode == null || !Array.isArray(req.edgeNode));
+@@ -82,7 +91,14 @@ class ConnectionQuery {
+         }
+         if (req.edgeNode) {
+             this.edgeNode = req.edgeNode;
+-            this.sql = printer.print();
++            if (wherePrinter) {
++                const mainPrinter = printer.print().split('ORDER BY');
++                mainPrinter[0] = `${mainPrinter[0]} WHERE "${(0, util_1.toTable)(typeName)}"."id" IN (${wherePrinter.print()})`;
++                this.sql = mainPrinter.join(' ORDER BY');
++            }
++            else {
++                this.sql = printer.print();
++            }
+         }
+         else {
+             this.sql = printer.printAsCount();
