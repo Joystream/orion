@@ -91,6 +91,7 @@ export async function processOpenAuctionStartedEvent({
   if (video.channelId) {
     const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notificationData = new NewAuction({
+      channelId: video.channelId,
       channelTitle,
       videoId: video.id,
       videoTitle: parseVideoTitle(video),
@@ -138,6 +139,7 @@ export async function processEnglishAuctionStartedEvent({
   if (video.channelId) {
     const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notificationData = new NewAuction({
+      channelId: video.channelId,
       channelTitle,
       videoId: video.id,
       videoTitle: parseVideoTitle(video),
@@ -547,6 +549,7 @@ export async function processNftSellOrderMadeEvent({
   if (video?.channelId) {
     const channelTitle = await getChannelTitleById(overlay, video.channelId)
     const notificationData = new NewNftOnSale({
+      channelId: video.channelId,
       channelTitle,
       videoId: video.id,
       videoTitle: parseVideoTitle(video),
