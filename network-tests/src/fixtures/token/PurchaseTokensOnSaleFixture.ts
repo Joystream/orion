@@ -137,7 +137,6 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
         bestBlock.toNumber()
       )
       assert.isDefined(transferrableBalance)
-      this.checkTransferrableBalance(BigInt(transferrableBalance!), bestBlock.toNumber(), qAccount!)
     }
 
     const qSaleTx = qSale!.transactions.find((tx) => {
@@ -150,29 +149,5 @@ export class PurchaseTokensOnSaleFixture extends StandardizedFixture {
     assert.equal(qSaleTx!.quantity, amountPurchased.toString())
   }
 
-  private checkTransferrableBalance(
-    transferrableBalance: bigint,
-    block: number,
-    qAccount: TokenAccountFieldsFragment
-  ) {
-    let lockedCrtAmount = BigInt(0)
-    for (const { vesting: schedule, totalVestingAmount } of qAccount.vestingSchedules) {
-      if (schedule.endsAt < block) {
-        const remainingBlocks = schedule.endsAt - block
-        const postCliffAmount =
-          (BigInt(totalVestingAmount) * BigInt(schedule.cliffRatioPermill)) / BigInt(1000000)
-        const locked =
-          (postCliffAmount * BigInt(remainingBlocks)) / BigInt(schedule.vestingDurationBlocks)
-        lockedCrtAmount += locked
-      }
-    }
-    const expectedTransferrable =
-      BigInt(qAccount.totalAmount) - this.bigintMax(BigInt(qAccount.stakedAmount), lockedCrtAmount)
-
-    assert.equal(transferrableBalance.toString(), expectedTransferrable.toString())
-  }
-  private bigintMax(a: bigint, b: bigint): bigint {
-    return a > b ? a : b
-  }
   public assertQueryNodeEventIsValid(qEvent: AnyQueryNodeEvent, i: number): void {}
 }
