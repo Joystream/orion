@@ -9,7 +9,7 @@ import {
   GetShareDividensArgs,
 } from './types'
 import { CreatorToken, RevenueShare, TokenAccount } from '../../../model'
-import { bigint } from '../../../model/generated/marshal'
+import { computeTransferrableAmount } from './services'
 
 @Resolver()
 export class TokenResolver {
@@ -82,26 +82,4 @@ export class TokenResolver {
       transferrableCrtAmount: Number(computeTransferrableAmount(tokenAccount, block)),
     }
   }
-}
-
-const bigintMax = (a: bigint, b: bigint): bigint => {
-  return a > b ? a : b
-}
-
-export const computeTransferrableAmount = (tokenAccount: TokenAccount, block: number): bigint => {
-  let lockedCrtAmount = BigInt(0)
-  for (const { vesting: schedule, totalVestingAmount } of tokenAccount.vestingSchedules) {
-    if (block < schedule.cliffBlock) {
-      continue
-    }
-    if (schedule.endsAt < block) {
-      const remainingBlocks = schedule.endsAt - block
-      const postCliffAmount =
-        (totalVestingAmount * BigInt(schedule.cliffRatioPermill)) / BigInt(1000000)
-      const locked =
-        (postCliffAmount * BigInt(remainingBlocks)) / BigInt(schedule.vestingDurationBlocks)
-      lockedCrtAmount += locked
-    }
-  }
-  return tokenAccount.totalAmount - bigintMax(lockedCrtAmount, tokenAccount.stakedAmount)
 }

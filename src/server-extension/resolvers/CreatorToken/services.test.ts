@@ -1,5 +1,5 @@
-import { computeTransferrableAmount } from '.'
 import { expect } from 'chai'
+import { computeTransferrableAmount } from './services'
 
 describe('Creator Token Services', () => {
   describe('Transferrable Balance computation', () => {
