@@ -1,3 +1,8 @@
+# 3.0.3
+### Optimisation:
+- Solves n+1 query issue on the `AssetResolver` `resolvedUrls` field resolver, by reusing `storageBagId` field if available. Resulting in faster query times and inpacting home page loading speed for front end application significantly. This fix involves only the `orion_graphql-server` microservice
+### Misc
+- adds `http://localhost:3000` and `http://127.0.0.1:3000` as authorized CORS origins for local front end testing 
 # 3.0.2
 ### Bug Fixes:
 - Store membership handles both as utf-8 string and raw bytes - [#4950](https://github.com/Joystream/joystream/pull/4950)

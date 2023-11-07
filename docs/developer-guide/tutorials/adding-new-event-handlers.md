@@ -86,7 +86,7 @@ channelById.title = 'New title'
 overlay.getRepository(Channel).remove(channelById)
 ```
 
-It is imporant to understand that although the `overlay` will always provide access to the latest state, you may recieve stale state if you try to query the database directly:
+It is important to understand that although the `overlay` will always provide access to the latest state, you may receive stale state if you try to query the database directly:
   
 ```typescript
 overlay.getRepository(Channel).new({

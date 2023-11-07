@@ -51,7 +51,7 @@ The process of adding such config variable will consist of the following steps:
 
     @Resolver()
     export class AdminResolver {
-      // Set by depenency injection
+      // Set by dependency injection
       constructor(private em: () => Promise<EntityManager>) {}
       // ...
       @UseMiddleware(OperatorOnly)

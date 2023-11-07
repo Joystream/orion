@@ -3,13 +3,13 @@
 - **_Client App_** - the application which uses Orion as a backend, responsible for authenticating the user via the Auth API,
 - **_Auth API_** - Orion's authentication REST API, separate from the Orion GraphQL API
 - **_GraphQL API_** - Orion's GraphQL API, exposing all the GraphQL queries and mutations, accessible only by authenticated users, 
-- **_User_** - any user of the _Client App_ / Orion, regarldess of whether they have a registered Gateway account or not,
+- **_User_** - any user of the _Client App_ / Orion, regardless of whether they have a registered Gateway account or not,
 - **_Anonymous user_** - a user who either doesn't have a Gateway account or is not logged in to a Gateway account and therefore uses [anonymous authentication](#anonymous-auth).
-- **_Root user_** - a special kind of a user, typically a gateway operator, with extra privileges to execute certain _GraphQL API_ queries and mutations. It is initially created during database migration step based on the environment variables provided by the gateway administrator.
+- **_Root user_** - a special kind of user, typically a gateway operator, with extra privileges to execute certain _GraphQL API_ queries and mutations. It is initially created during database migration step based on the environment variables provided by the gateway administrator.
 - **_Gateway account owner_** - _User_ that has registered and owns a Gateway account.
-- **_Authenticated request_** - a request which inlcudes a valid session cookie (as described [here](#sessions-and-authenticated-requests)) and can therefore be associated with an existing, active session (stored in Orion's database).
+- **_Authenticated request_** - a request which includes a valid session cookie (as described [here](#sessions-and-authenticated-requests)) and can therefore be associated with an existing, active session (stored in Orion's database).
 - **_Authentication request_** - a request to perform the authentication and start a new session (either `POST /login` or `POST /anonymous-auth`).
-- **_Gateway account_** - an account that exists in Orion's database and can be logged in to, not to be confused with _Blockchain account_ or _Blockchain membership_. Each _Gateway account_ is associated with exactly one _Blockchain account_ (which can be chnaged via `POST /change-account` endpoint) and exactly one _Blockchain membership_ (which is immutable).
+- **_Gateway account_** - an account that exists in Orion's database and can be logged in to, not to be confused with _Blockchain account_ or _Blockchain membership_. Each _Gateway account_ is associated with exactly one _Blockchain account_ (which can be changed via `POST /change-account` endpoint) and exactly one _Blockchain membership_ (which is immutable).
 - **_Blockchain account_** - an account that exists on the Joystream blockchain and can be identified with an address, such as `j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf` for example. A _Blockchain account_ can be associated with exactly one _Gateway account_.
 - **_Blockchain membership_** - a [membership created on a Joystream blockchain](https://handbook.joystream.org/system/memberships), which can be identified with a `handle`. A _Blockchain membership_ can be associated with exactly one _Gateway account_.
 
@@ -17,7 +17,7 @@
 
 Orion's auth API is a REST API, separate from the GraphQL API (the main Orion API), which is being secured by it.
 
-This approach can also be called [_out-of-band_ authenticaiton](https://cloudcity.io/blog/2021/08/22/GraphQL-Authentication-Why-out-of-band-authentication-is-better-than-in-band/), to distinguish it from _in-band_ authentiation, which would be an authentication implemented as part of the same GraphQL api that is being secured by it. 
+This approach can also be called [_out-of-band_ authenticaiton](https://cloudcity.io/blog/2021/08/22/GraphQL-Authentication-Why-out-of-band-authentication-is-better-than-in-band/), to distinguish it from _in-band_ authentication, which would be an authentication implemented as part of the same GraphQL api that is being secured by it. 
 
 The Auth API implementation can be found in the [`src/auth-server`](../../../src/auth-server/) directory.
 
@@ -46,7 +46,7 @@ Some example functionality that can be enabled for an _anonymous_ `User`s (not a
 
 We may choose not to provide all of those features to _anonymous_ Users, but it should be possible to at least collect the user activity data, which can later be preserved once the user creates an account (and becomes a _gateway account owner_), because of the `User` <=> `Account` association.
 
-**Importat:** `id` of a `User` that has been associated with an `Account` can no longer be used to authenticate as _anonymous user_ (ie. cannot be used for [anonymous authentication](#anonymous-auth))!
+**Important:** `id` of a `User` that has been associated with an `Account` can no longer be used to authenticate as _anonymous user_ (ie. cannot be used for [anonymous authentication](#anonymous-auth))!
 
 ### `Session` entity
 
@@ -82,7 +82,7 @@ A token has an expiry date which depends on the Orion configuration (see: [Confi
 
 Those configuration variables can be set as part of the environment, for more details about config variables see [Config variables](./config-variables.md). 
 
-- `OPERATOR_SECRET` - a secret string used as an identifier of the _Root user_, which is created during the database migration step. **Important:** Anyone who knows this secret can authenticate as the _Root user_ (Gateway operator) and access the restriced queries and mutations!
+- `OPERATOR_SECRET` - a secret string used as an identifier of the _Root user_, which is created during the database migration step. **Important:** Anyone who knows this secret can authenticate as the _Root user_ (Gateway operator) and access the restricted queries and mutations!
 - `SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES` - after how many minutes does the session expire in case they are no [authenticated requests](#sessions-and-authenticated-requests) associated with the session being performed.
 - `SESSION_MAX_DURATION_HOURS` - after how many hours does the session expire regardless of whether there were any recent [authenticated requests](#sessions-and-authenticated-requests) associated with the session performed.
 - `SENDGRID_API_KEY` - API key for the Sendgrid API, used for sending e-mails to the _Gateway account owners_ by Orion (currently only for the purpose of e-mail confirmation)
@@ -118,7 +118,7 @@ It is required that:
 
 This basically means that `ip`, `brower`, `os` and `device` should not change during the course of a given session. In case any of those change, a re-authentication is required.
 
-This solution makes it possible to track the activitiy of a given `User` more accurately and adds additional layer of security, as even a stolen session cookie would be useless unless the attacker can make requests from the user's ip.
+This solution makes it possible to track the activity of a given `User` more accurately and adds additional layer of security, as even a stolen session cookie would be useless unless the attacker can make requests from the user's ip.
 
 ### Session expiry
 
@@ -217,7 +217,7 @@ POST /api/v1/anonymous-auth
     - `joystreamAccountId` is the address of the keypair generated from `seed` (see step _2._)
     - `memberId` must be the id of the on-chain membership created in step _3._ (the membership must be already processed by Orion)
     - `gatewayName` must match the `APP_NAME` environment variable
-    - `timestamp` must be current timestamp in miliseconds
+    - `timestamp` must be current timestamp in milliseconds
     - `action` must be `createAccount`
     - `email` must be the e-mail provided by the user in step _2._
     - `encryptionArtifacts` must be the same as the ones generated in step _2._
@@ -269,10 +269,10 @@ POST /api/v1/anonymous-auth
     }
     ```
     Where:
-    - `signature` is a signature over `JSON.stringify(pyaload)`
+    - `signature` is a signature over `JSON.stringify(payload)`
     - `joystreamAccountId` is the address of the account from the decrypted seed 
     - `gatewayName` must match the `APP_NAME` environment variable
-    - `timestamp` must be current timestamp in miliseconds
+    - `timestamp` must be current timestamp in milliseconds
     - `action` must be `login`
 
     In response you'll get the `accountId` of the logged in account. You can always check the data associated with the logged in account using the [`accountData` GraphQL query](#retrieve-logged-in-gateway-account-data).  
@@ -301,7 +301,7 @@ In order to do this:
 
 You can change the _Blockchain account_ and remove or update _EncryptionArtifacts_ associated with the _Gateway account_ at the same time using [`POST /change-account`](../../../src/auth-server/docs/Apis/DefaultApi.md#change-account) endpoint.
 
-There are 2 main use-cases for this:
+There are 2 main use cases for this:
 1. **Migrating from password-based authentication to a more secure external signer authentication**: In this case you usually change the _Blockchain account_ and remove the _EncryptionArtifacts_ (ie. not provide the `newArtifacts` field in the request)
 2. **Changing the account's password**: In this case you can either change the _EncryptionArtifacts_, but keep the old _Blockchain account_ or change both (in which case you need to migrate the assets and the membership to the new account first)
 
@@ -324,10 +324,10 @@ POST /api/v1/change-account
 }
 ```
 Where:
-- `signature` is a signature over `JSON.stringify(pyaload)` (from the **new** _Blockchain account_)
+- `signature` is a signature over `JSON.stringify(payload)` (from the **new** _Blockchain account_)
 - `joystreamAccountId` is the address of the new _Blockchain account_ (can be the same as the currently used one)
 - `gatewayName` must match the `APP_NAME` environment variable
-- `timestamp` must be current timestamp in miliseconds
+- `timestamp` must be current timestamp in milliseconds
 - `action` must be `changeAccount`
 - `gatewayAccountId` must be the `accountId` of the logged in _Gateway account_ (as provided by the server in response to `POST /api/v1/login` or `accountData` GraphQL query)
 - `newArtifacts` optionally, the new _EncryptionArtifacts_ if password-authentication is still being used
