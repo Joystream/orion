@@ -9,6 +9,7 @@ import {
   GetShareDividensArgs,
 } from './types'
 import { CreatorToken, RevenueShare, TokenAccount } from '../../../model'
+import { bigint } from '../../../model/generated/marshal'
 
 @Resolver()
 export class TokenResolver {
@@ -77,26 +78,30 @@ export class TokenResolver {
     if (!tokenAccount) {
       throw new Error('Token account not found')
     }
-    let lockedCrtAmount = BigInt(0)
-    for (const { vesting: schedule, totalVestingAmount } of tokenAccount.vestingSchedules) {
-      if (schedule.endsAt < block) {
-        const remainingBlocks = schedule.endsAt - block
-        const postCliffAmount =
-          (totalVestingAmount * BigInt(schedule.cliffRatioPermill)) / BigInt(1000000)
-        const locked =
-          (postCliffAmount * BigInt(remainingBlocks)) / BigInt(schedule.vestingDurationBlocks)
-        lockedCrtAmount += locked
-      }
-    }
-
-    const transferrable =
-      tokenAccount.totalAmount - this.bigintMax(lockedCrtAmount, tokenAccount.stakedAmount)
     return {
-      transferrableCrtAmount: Number(transferrable),
+      transferrableCrtAmount: Number(computeTransferrableAmount(tokenAccount, block)),
     }
   }
+}
 
-  private bigintMax(a: bigint, b: bigint): bigint {
-    return a > b ? a : b
+const bigintMax = (a: bigint, b: bigint): bigint => {
+  return a > b ? a : b
+}
+
+export const computeTransferrableAmount = (tokenAccount: TokenAccount, block: number): bigint => {
+  let lockedCrtAmount = BigInt(0)
+  for (const { vesting: schedule, totalVestingAmount } of tokenAccount.vestingSchedules) {
+    if (block < schedule.cliffBlock) {
+      continue
+    }
+    if (schedule.endsAt < block) {
+      const remainingBlocks = schedule.endsAt - block
+      const postCliffAmount =
+        (totalVestingAmount * BigInt(schedule.cliffRatioPermill)) / BigInt(1000000)
+      const locked =
+        (postCliffAmount * BigInt(remainingBlocks)) / BigInt(schedule.vestingDurationBlocks)
+      lockedCrtAmount += locked
+    }
   }
+  return tokenAccount.totalAmount - bigintMax(lockedCrtAmount, tokenAccount.stakedAmount)
 }
