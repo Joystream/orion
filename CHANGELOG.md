@@ -1,3 +1,9 @@
+# 3.0.4
+
+### Misc
+- sum channels rewards into a new `Channel.cumulativeReward` field
+- start `Channel.cumulativeRewardClaimed` at zero instead of null
+
 # 3.0.3
 ### Optimisation:
 - Solves n+1 query issue on the `AssetResolver` `resolvedUrls` field resolver, by reusing `storageBagId` field if available. Resulting in faster query times and inpacting home page loading speed for front end application significantly. This fix involves only the `orion_graphql-server` microservice
