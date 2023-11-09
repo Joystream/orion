@@ -62,6 +62,8 @@ export async function populateDbWithSeedData() {
       followsNum: 0,
       videoViewsNum: 0,
       totalVideosCreated: 0,
+      cumulativeReward: BigInt(0),
+      cumulativeRewardClaimed: BigInt(0),
       yppStatus: new YppUnverified(),
     })
     const video = new Video({
