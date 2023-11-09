@@ -24,7 +24,7 @@ export async function executeMailDelivery(
   const resp = await sendGridSend({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to: toAccount.email,
-    subject: `New notification from ${appName}!`,
+    subject: `New notification from ${appName}`,
     content,
   })
   const className = Object.prototype.toString.call(resp)
