@@ -232,6 +232,8 @@ export function getCorsOrigin(): (RegExp | string)[] | boolean {
 
   const corsOrigin = [
     `https://${rootDomain}`,
+    `http://localhost:3000`,
+    `http://127.0.0.1:3000`,
     new RegExp(`https://.+\\.${rootDomain.replace('.', '\\.')}$`),
   ]
 

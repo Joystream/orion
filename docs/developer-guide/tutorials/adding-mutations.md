@@ -1,9 +1,9 @@
 ## Adding mutations
 
 Adding new mutations is generally similar to [adding custom queries](./adding-custom-queries.md).
-The baisc idea is that you add new method to a [custom resolver](https://docs.subsquid.io/graphql-api/custom-resolvers/), decorated with `@Mutation` [TypeGraphQL](https://typegraphql.com/) decorator.
+The basic idea is that you add new method to a [custom resolver](https://docs.subsquid.io/graphql-api/custom-resolvers/), decorated with `@Mutation` [TypeGraphQL](https://typegraphql.com/) decorator.
 
-However, usually when thinking about implementing mutations we need to consider the execution context. Most of the mutations will require some specific permissions, for example, they will only be available for the gateway operator or useres with registered accounts.
+However, usually when thinking about implementing mutations we need to consider the execution context. Most of the mutations will require some specific permissions, for example, they will only be available for the gateway operator or users with registered accounts.
 
 Another important thing to keep in mind when implementing mutations is the [visibility of the entities](./entity-visibility.md).
 
@@ -25,7 +25,7 @@ import { AccountOnly } from '../middleware'
 
 @Resolver()
 export class VideosResolver {
-  // Set by depenency injection
+  // Set by dependency injection
   constructor(private em: () => Promise<EntityManager>) {}
   // ...
   // Adding this middleware will prevent anyone who doesn't have an account from accessing
