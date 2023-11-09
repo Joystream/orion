@@ -75,15 +75,13 @@ export class AdminResolver {
 
   @UseMiddleware(OperatorOnly(OperatorPermission.REVOKE_OPERATOR_PERMISSIONS))
   @Mutation(() => Boolean)
-  async revokePermission(@Args() args: RevokeOperatorPermissionsInput): Promise<Boolean> {
+  async revokePermission(@Args() args: RevokeOperatorPermissionsInput): Promise<boolean> {
     const em = await this.em()
     const user = await em.findOne(User, { where: { id: args.userId } })
     if (!user) {
       throw new Error('User not found')
     }
 
-    // Filter out permissions that are to be revoked
-    const permissionNames = Object.values(OperatorPermission)
     user.permissions = (user.permissions || []).filter((perm) => !args.permissions.includes(perm))
 
     await em.save(user)
