@@ -4,7 +4,7 @@ We can divide the data stored in Orion's database into 2 categories:
 - **Chain data**: the data that is a result of processing the Joystream blockchain events. This data, even if lost, can be reconstructed given an archival Joystream node endpoint or a Subsquid archive endpoint.
 - **Offchain data**: the data specific to a given Gateway, which cannot be reconstructed from the chain data. It includes: categories supported by the Gateway and other Gateway configuration values, video views, channel follows, user accounts, other authentication data etc.
 
-Making changes to the [input schema](./updating-schema.md), intoducing [new event handlers](./adding-new-event-handlers.md) or updating the existing event handlers, will usually require all the Joystream blockchain events to be reprocessed by Orion and the _Chain data_ to be reconstructed from scratch. At the same time, we usually want to preserve the _Offchain data_.
+Making changes to the [input schema](./updating-schema.md), introducing [new event handlers](./adding-new-event-handlers.md) or updating the existing event handlers, will usually require all the Joystream blockchain events to be reprocessed by Orion and the _Chain data_ to be reconstructed from scratch. At the same time, we usually want to preserve the _Offchain data_.
 
 To support that, Orion provides the `OffchainState` service ([`src/utils/offchainState.ts`](../../../src/utils/offchainState.ts)), which is responsible for exporting and importing the _Offchain data_ during [Orion upgrades](../../operator-guide/tutorials/upgrading-orion.md) which involve event reprocessing.
 
@@ -98,12 +98,12 @@ Suppose that a new release of Orion is coming: `2.3.0` (we're assuming that the 
 ```diff
 type Session @entity {
   # ...
--  "Operating system (as deterimned based on user-agent header)"
+-  "Operating system (as determined based on user-agent header)"
 -  os: String!
-+  "Operating system name (as deterimned based on user-agent header)"
++  "Operating system name (as determined based on user-agent header)"
 +  osName: String!
 +
-+  "Operating system version (as deterimned based on user-agent header)"
++  "Operating system version (as determined based on user-agent header)"
 +  osVersion: String!
 }
 ```
