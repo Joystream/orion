@@ -17,6 +17,6 @@ export const getNotificationIcon = async (
   em: EntityManager,
   icon: NotificationIconType
 ): Promise<string> => {
-  const notificationAssetRoot = await config.get(ConfigVariable.AppRootDomain, em)
-  return `${notificationAssetRoot}/${icon}.png`
+  const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
+  return `${notificationAssetRoot}/icons/${icon}.png`
 }
