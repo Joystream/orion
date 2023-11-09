@@ -31,21 +31,25 @@ export class VideoRelevanceManager {
         commentsWeight,
         reactionsWeight,
         [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
+        defaultChannelWeight,
       ] = await config.get(ConfigVariable.RelevanceWeights, em)
       await em.query(`
         WITH weighted_timestamp AS (
     SELECT 
-        id,
+        "video"."id",
         (
-          extract(epoch from created_at)*${joystreamTimestampWeight} +
-          COALESCE(extract(epoch from published_before_joystream), extract(epoch from created_at))*${ytTimestampWeight}
-        ) / ${joystreamTimestampWeight + ytTimestampWeight} as wtEpoch
+          extract(epoch from video.created_at)*${joystreamTimestampWeight} +
+          COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
+        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight} as wtEpoch,
+        "channel"."channel_weight" as CW
     FROM 
         "video" 
+        INNER JOIN
+          "channel" ON "video"."channel_id" = "channel"."id"
         ${
           forceUpdateAll
             ? ''
-            : `WHERE "id" IN (${[...this.videosToUpdate.values()]
+            : `WHERE "video"."id" IN (${[...this.videosToUpdate.values()]
                 .map((id) => `'${id}'`)
                 .join(', ')})`
         }
@@ -54,10 +58,12 @@ export class VideoRelevanceManager {
         "video"
     SET
         "video_relevance" = ROUND(
-        (extract(epoch from now()) - wtEpoch) / (60 * 60 * 24) * ${newnessWeight * -1} +
+      (
+        (extract(epoch from now()) - wtEpoch) / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} +
         (views_num * ${viewsWeight}) +
         (comments_count * ${commentsWeight}) +
-        (reactions_count * ${reactionsWeight}), 
+        (reactions_count * ${reactionsWeight})
+      ) * COALESCE(CW, ${defaultChannelWeight}),
             2)
     FROM
         weighted_timestamp

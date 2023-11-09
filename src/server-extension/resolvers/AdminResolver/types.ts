@@ -21,10 +21,37 @@ export class SetVideoWeightsInput {
 
   @Field(() => Float, { nullable: false })
   ytTimestampSubWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  defaultChannelWeight!: number
 }
 
 @ObjectType()
 export class VideoWeights {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
+}
+
+@InputType()
+export class ChannelWeightInput {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => Float, { nullable: false })
+  weight!: number
+}
+
+@ArgsType()
+export class SetChannelsWeightsArgs {
+  @Field(() => [ChannelWeightInput], { nullable: false })
+  inputs!: ChannelWeightInput[]
+}
+
+@ObjectType()
+export class ChannelWeight {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
   @Field(() => Boolean, { nullable: false })
   isApplied!: boolean
 }
