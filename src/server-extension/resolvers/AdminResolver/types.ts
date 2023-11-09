@@ -1,5 +1,6 @@
-import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { AppAction } from '@joystream/metadata-protobuf'
+import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
+import { OperatorPermission } from '../../../model'
 
 @ArgsType()
 export class SetVideoWeightsInput {
@@ -236,4 +237,32 @@ export class SetFeaturedNftsResult {
     description: 'The updated number of nft that are now explicitly featured by the Gateway',
   })
   newNumberOfNftsFeatured?: number
+}
+
+registerEnumType(OperatorPermission, { name: 'OperatorPermission' })
+
+@ArgsType()
+export class GrantOperatorPermissionsInput {
+  @Field(() => String, {
+    description: 'ID of the user that should be granted operator permissions',
+  })
+  userId: string
+
+  @Field(() => [OperatorPermission], {
+    description: 'List of permissions that should be granted to the user',
+  })
+  permissions!: OperatorPermission[]
+}
+
+@ArgsType()
+export class RevokeOperatorPermissionsInput {
+  @Field(() => String, {
+    description: 'ID of the user whose operator permissions should be revoked',
+  })
+  userId: string
+
+  @Field(() => [OperatorPermission], {
+    description: 'List of operator permissions that should be revoked for the user',
+  })
+  permissions!: OperatorPermission[]
 }
