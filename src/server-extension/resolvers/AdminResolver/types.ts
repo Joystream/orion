@@ -271,11 +271,13 @@ registerEnumType(OperatorPermission, { name: 'OperatorPermission' })
 @ArgsType()
 export class GrantOperatorPermissionsInput {
   @Field(() => String, {
+    nullable: true,
     description: 'ID of the user that should be granted operator permissions',
   })
-  userId: string
+  userId!: string
 
   @Field(() => [OperatorPermission], {
+    nullable: true,
     description: 'List of permissions that should be granted to the user',
   })
   permissions!: OperatorPermission[]
@@ -284,12 +286,20 @@ export class GrantOperatorPermissionsInput {
 @ArgsType()
 export class RevokeOperatorPermissionsInput {
   @Field(() => String, {
+    nullable: true,
     description: 'ID of the user whose operator permissions should be revoked',
   })
-  userId: string
+  userId!: string
 
   @Field(() => [OperatorPermission], {
+    nullable: true,
     description: 'List of operator permissions that should be revoked for the user',
   })
   permissions!: OperatorPermission[]
+}
+
+@ObjectType()
+export class GrantOrRevokeOperatorPermissionsResult {
+  @Field(() => [OperatorPermission])
+  newPermissions!: OperatorPermission[]
 }
