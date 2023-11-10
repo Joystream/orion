@@ -1,8 +1,12 @@
 <mjml>
   <mj-head>
+    <mj-font
+      name="IBM Plex Sans"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600"
+    />
     <mj-attributes>
       <mj-all
-        font-family="sans"
+        font-family="'IBM Plex Sans', sans-serif"
         font-size="12px"
         line-height="16px"
         color="#000000"
@@ -19,16 +23,16 @@
         font-size="14px"
         inner-padding="0 10px"
         font-weight="600"
-        color="#FFFFFF"
+        color="#000000"
         padding="0"
       />
     </mj-attributes>
   </mj-head>
 
-  <mj-body background-color="#DAE2EB">
+  <mj-body>
     <!-- Header -->
     <mj-section padding="24px 0 0">
-      <mj-column background-color="#4038FF">
+      <mj-column>
         <mj-image
           src="{{ app.logo }}"
           alt="{{ app.name }}"
@@ -44,7 +48,7 @@
       <!-- Greeting -->
       <mj-section padding="0">
         <mj-column>
-          <mj-text mj-class="bold" padding="0" font-size="18px" line-height="24px">
+          <mj-text mj-class="bold" padding="0" font-size="24px" line-height="24px">
             {{ title }}
           </mj-text>
           <mj-text mj-class="big" padding="8px 0 24px 0">{{ subTitle }}</mj-text>
@@ -71,7 +75,12 @@
 
           <!-- Text -->
           <mj-column vertical-align="middle" width="90%">
-            <mj-button mj-class="link" href="{{ notification.link }}" padding="0 0 0 20px">
+            <mj-button
+              mj-class="link"
+              href="{{ notification.link }}"
+              padding="0 0 0 20px"
+              font-weight="500"
+            >
               {{ notification.text }}
             </mj-button>
             <mj-button
@@ -79,6 +88,7 @@
               href="{{ notification.link }}"
               padding="4px 0 0 20px"
               color="#52616B"
+              font-weight="500"
             >
               {{ notification.date }}
             </mj-button>
@@ -106,19 +116,19 @@
 
     <!-- Footer -->
     <mj-section padding="0">
-      <mj-column background-color="#000000">
+      <mj-column background-color="#DAE2EB">
         <mj-image
           src="{{ app.logoAlt }}"
           alt="{{ app.name }}"
-          width="96px"
-          height="88px"
-          padding="0px"
+          width="35px"
+          height="30px"
+          padding="24px 0 10px"
         ></mj-image>
       </mj-column>
     </mj-section>
 
     <mj-section padding="0">
-      <mj-group background-color="#000000">
+      <mj-group background-color="#DAE2EB">
         <mj-column>
           <mj-button
             mj-class="link footer-link"
@@ -138,8 +148,8 @@
     </mj-section>
 
     <mj-section padding="0 0 24px">
-      <mj-column background-color="#000000" padding="16px 16px 24px">
-        <mj-text color="#FFFFFF" align="center" padding="0">
+      <mj-column background-color="#DAE2EB" padding="16px 16px 24px">
+        <mj-text color="#343D44" align="center" padding="0">
           You can
           <a href="{{ app.unsubscribeLink }}" target="_blank" style="color: currentColor">
             unsubscribe
