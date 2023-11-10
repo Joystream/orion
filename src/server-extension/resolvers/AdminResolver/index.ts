@@ -32,6 +32,7 @@ import {
   ExcludeContentResult,
   GeneratedSignature,
   GrantOperatorPermissionsInput,
+  GrantOrRevokeOperatorPermissionsResult,
   KillSwitch,
   RestoreContentArgs,
   RestoreContentResult,
@@ -58,8 +59,10 @@ export class AdminResolver {
   constructor(private em: () => Promise<EntityManager>) {}
 
   @UseMiddleware(OperatorOnly(OperatorPermission.GRANT_OPERATOR_PERMISSIONS))
-  @Mutation(() => Boolean)
-  async grantPermissions(@Args() args: GrantOperatorPermissionsInput): Promise<boolean> {
+  @Mutation(() => GrantOrRevokeOperatorPermissionsResult)
+  async grantPermissions(
+    @Args() args: GrantOperatorPermissionsInput
+  ): Promise<GrantOrRevokeOperatorPermissionsResult> {
     const em = await this.em()
     const user = await em.findOne(User, { where: { id: args.userId } })
     if (!user) {
@@ -70,12 +73,14 @@ export class AdminResolver {
     user.permissions = Array.from(new Set([...(user.permissions || []), ...args.permissions]))
 
     await em.save(user)
-    return true
+    return { newPermissions: user.permissions }
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.REVOKE_OPERATOR_PERMISSIONS))
-  @Mutation(() => Boolean)
-  async revokePermission(@Args() args: RevokeOperatorPermissionsInput): Promise<boolean> {
+  @Mutation(() => GrantOrRevokeOperatorPermissionsResult)
+  async revokePermission(
+    @Args() args: RevokeOperatorPermissionsInput
+  ): Promise<GrantOrRevokeOperatorPermissionsResult> {
     const em = await this.em()
     const user = await em.findOne(User, { where: { id: args.userId } })
     if (!user) {
@@ -85,7 +90,7 @@ export class AdminResolver {
     user.permissions = (user.permissions || []).filter((perm) => !args.permissions.includes(perm))
 
     await em.save(user)
-    return true
+    return { newPermissions: user.permissions }
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_VIDEO_WEIGHTS))
