@@ -43,4 +43,4 @@ cleanup() {
 # Run the tests
 npx ts-mocha "./src/tests/migrations/*.ts" --timeout 60000 --exit
 
-trap cleanup EXIT
+# trap cleanup EXIT

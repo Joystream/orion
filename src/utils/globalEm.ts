@@ -19,7 +19,16 @@ const config = {
 
 const source = new DataSource(config)
 
+let threadCount = 1
+let access = true
+
 async function initGlobalEm() {
+  if (access) {
+    access = false
+    console.log('🚨🚨🚨🚨🚨 event loop thread count: 🚨🚨🚨🚨🚨', threadCount)
+    threadCount++
+    access = true
+  }
   try {
     globalEmLogger.info(`Initializing database connection with config...`)
     await source.initialize()
