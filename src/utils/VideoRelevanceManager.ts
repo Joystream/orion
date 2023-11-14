@@ -33,6 +33,7 @@ export class VideoRelevanceManager {
         [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
         defaultChannelWeight,
       ] = await config.get(ConfigVariable.RelevanceWeights, em)
+      const channelWeight = defaultChannelWeight ?? 1
       await em.query(`
         WITH weighted_timestamp AS (
     SELECT 
@@ -63,7 +64,7 @@ export class VideoRelevanceManager {
         (views_num * ${viewsWeight}) +
         (comments_count * ${commentsWeight}) +
         (reactions_count * ${reactionsWeight})
-      ) * COALESCE(CW, ${defaultChannelWeight}),
+      ) * COALESCE(CW, ${channelWeight}),
             2)
     FROM
         weighted_timestamp
