@@ -1,3 +1,8 @@
+# 3.1.0
+
+- Adds supports for new permissions model for gateway operator users. Now the root user can assign/revoke operator permission/s to users using `grantPermissions` & `revokePermissions` mutations
+- Adds new `setVideoWeights` operator mutation to set weight/bias for any channel/s which will be used to calculate the Atlas homepage video relevance scores
+   
 # 3.0.4
 
 ### Misc

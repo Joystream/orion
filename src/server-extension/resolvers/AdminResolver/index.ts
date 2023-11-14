@@ -10,9 +10,10 @@ import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
 import { Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
-import { EntityManager, In, Not } from 'typeorm'
+import { EntityManager, In, Not, UpdateResult } from 'typeorm'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import {
+  Channel,
   OperatorPermission,
   User,
   Video,
@@ -27,6 +28,7 @@ import { OperatorOnly } from '../middleware'
 import { model } from '../model'
 import {
   AppActionSignatureInput,
+  ChannelWeight,
   ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
@@ -39,6 +41,7 @@ import {
   RevokeOperatorPermissionsInput,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
+  SetChannelsWeightsArgs,
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
@@ -105,11 +108,45 @@ export class AdminResolver {
         args.commentsWeight,
         args.reactionsWeight,
         [args.joysteamTimestampSubWeight, args.ytTimestampSubWeight],
+        args.defaultChannelWeight,
       ],
       em
     )
     await videoRelevanceManager.updateVideoRelevanceValue(em, true)
     return { isApplied: true }
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CHANNEL_WEIGHTS))
+  @Mutation(() => [ChannelWeight])
+  async setChannelsWeights(@Args() { inputs }: SetChannelsWeightsArgs): Promise<ChannelWeight[]> {
+    const em = await this.em()
+
+    const results: ChannelWeight[] = []
+
+    // Process each SetChannelWeightInput
+    for (const weightInput of inputs) {
+      const { channelId, weight } = weightInput
+
+      // Update the channel weight in the database
+      const updateResult: UpdateResult = await em.transaction(
+        async (transactionalEntityManager) => {
+          return transactionalEntityManager
+            .createQueryBuilder()
+            .update(Channel)
+            .set({ channelWeight: weight })
+            .where('id = :id', { id: channelId })
+            .execute()
+        }
+      )
+
+      // Push the result into the results array
+      results.push({
+        channelId,
+        isApplied: !!updateResult.affected,
+      })
+    }
+
+    return results
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_KILL_SWITCH))
