@@ -80,7 +80,7 @@ export class OffchainState {
     '3.0.2': ['Account'],
     '3.0.3': ['Account'],
     '3.0.4': ['Account'],
-    '3.0.5': ['Account'],
+    '3.1.0': ['Account'],
   }
 
   private migrations: Migrations = {
