@@ -3,7 +3,7 @@ type Channel @entity {
   id: ID!
 
   "Timestamp of the block the channel was created at"
-  createdAt: DateTime!
+  createdAt: DateTime! @index
 
   "Current member-owner of the channel (if owned by a member)"
   ownerMember: Membership

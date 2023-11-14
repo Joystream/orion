@@ -10,8 +10,7 @@ services:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: squid
     ports:
-      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
-      - '[::1]:${DB_PORT}:${DB_PORT}'
+      - '${DB_PORT}:${DB_PORT}'
     command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
     shm_size: 1g
     volumes:
