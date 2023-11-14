@@ -1,10 +1,10 @@
-import { EntityManager } from 'typeorm'
-import fs from 'fs'
-import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
-import { uniqueId } from './crypto'
+import fs from 'fs'
+import path from 'path'
+import { EntityManager } from 'typeorm'
 import { NextEntityId } from '../model'
+import { uniqueId } from './crypto'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -22,7 +22,7 @@ const exportedStateMap = {
   User: true,
   Account: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -80,6 +80,7 @@ export class OffchainState {
     '3.0.2': ['Account'],
     '3.0.3': ['Account'],
     '3.0.4': ['Account'],
+    '3.1.0': ['Account'],
   }
 
   private migrations: Migrations = {

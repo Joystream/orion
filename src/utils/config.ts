@@ -47,7 +47,8 @@ export const configVariables = {
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerUserTimeLimit]: intType,
   [ConfigVariable.VideoRelevanceViewsTick]: intType,
-  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number, [number, number]]>(),
+  [ConfigVariable.RelevanceWeights]:
+    jsonType<[number, number, number, number, [number, number], number]>(),
   [ConfigVariable.AppPrivateKey]: stringType,
   [ConfigVariable.SessionMaxDurationHours]: intType,
   [ConfigVariable.SessionExpiryAfterInactivityMinutes]: intType,

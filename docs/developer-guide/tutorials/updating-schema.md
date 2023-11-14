@@ -25,7 +25,7 @@ In order to do that, you'll need to:
 4. Re-generate the `*-Data.js` migration inside `db/migrations`:
     ```bash
     # First, remove the old migration file(s)
-    rm db/migrations/*-Data.js
+    `rm db/migrations/*-Data.js`
     # Start PostgreSQL database service
     # Make sure it's an empty database! If the service is already running you should first run:
     # docker-compose down -v
