@@ -3,7 +3,7 @@ type Channel @entity {
   id: ID!
 
   "Timestamp of the block the channel was created at"
-  createdAt: DateTime!
+  createdAt: DateTime! @index
 
   "Current member-owner of the channel (if owned by a member)"
   ownerMember: Membership
@@ -64,6 +64,9 @@ type Channel @entity {
 
   "Cumulative rewards paid to this channel"
   cumulativeReward: BigInt!
+
+  "Weight/Bias of the channel affecting video relevance in the Homepage"
+  channelWeight: Float
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {

@@ -1,9 +1,27 @@
+enum OperatorPermission {
+  GRANT_OPERATOR_PERMISSIONS
+  REVOKE_OPERATOR_PERMISSIONS
+  SET_VIDEO_WEIGHTS
+  SET_CHANNEL_WEIGHTS
+  SET_KILL_SWITCH
+  SET_VIDEO_VIEW_PER_USER_TIME_LIMIT
+  SET_VIDEO_HERO
+  SET_CATEGORY_FEATURED_VIDEOS
+  SET_SUPPORTED_CATEGORIES
+  SET_FEATURED_NFTS
+  EXCLUDE_CONTENT
+  RESTORE_CONTENT
+}
+
 type User @entity {
   "Unique identifier (32-byte string, securely random)"
   id: ID!
 
   "Whether the user has root (gateway operator) privileges"
   isRoot: Boolean!
+
+  "List of all the gateway operator permissions that this user has"
+  permissions: [OperatorPermission!]
 
   "The account associated with the user (if any)"
   account: Account @derivedFrom(field: "user")

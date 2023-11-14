@@ -1,17 +1,47 @@
+import { generateAppActionCommitment } from '@joystream/js/utils'
+import { AppAction } from '@joystream/metadata-protobuf'
+import { hexToU8a, isHex, u8aToHex } from '@polkadot/util'
+import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
+import { Context } from '@subsquid/openreader/lib/context'
+import { getObjectSize } from '@subsquid/openreader/lib/limit.size'
+import { parseObjectTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
+import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver, UseMiddleware, Info, Ctx } from 'type-graphql'
-import { EntityManager, In, Not } from 'typeorm'
+import { Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
+import { EntityManager, In, Not, UpdateResult } from 'typeorm'
+import { videoRelevanceManager } from '../../../mappings/utils'
+import {
+  Channel,
+  OperatorPermission,
+  User,
+  Video,
+  VideoCategory,
+  VideoFeaturedInCategory,
+  VideoHero as VideoHeroEntity,
+} from '../../../model'
+import { ConfigVariable, config } from '../../../utils/config'
+import { withHiddenEntities } from '../../../utils/sql'
+import { VideoHero } from '../baseTypes'
+import { OperatorOnly } from '../middleware'
+import { model } from '../model'
 import {
   AppActionSignatureInput,
+  ChannelWeight,
   ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
   GeneratedSignature,
+  GrantOperatorPermissionsInput,
+  GrantOrRevokeOperatorPermissionsResult,
   KillSwitch,
   RestoreContentArgs,
   RestoreContentResult,
+  RevokeOperatorPermissionsInput,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
+  SetChannelsWeightsArgs,
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
@@ -24,36 +54,49 @@ import {
   VideoViewPerUserTimeLimit,
   VideoWeights,
 } from './types'
-import { config, ConfigVariable } from '../../../utils/config'
-import { OperatorOnly } from '../middleware'
-import {
-  Video,
-  VideoCategory,
-  VideoFeaturedInCategory,
-  VideoHero as VideoHeroEntity,
-} from '../../../model'
-import { GraphQLResolveInfo } from 'graphql'
-import { Context } from '@subsquid/openreader/lib/context'
-import { parseObjectTree } from '@subsquid/openreader/lib/opencrud/tree'
-import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
-import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
-import { getObjectSize } from '@subsquid/openreader/lib/limit.size'
-import { VideoHero } from '../baseTypes'
-import { model } from '../model'
-import { ed25519PairFromString, ed25519Sign } from '@polkadot/util-crypto'
-import { u8aToHex, hexToU8a, isHex } from '@polkadot/util'
-import { generateAppActionCommitment } from '@joystream/js/utils'
-import { AppAction } from '@joystream/metadata-protobuf'
-import { withHiddenEntities } from '../../../utils/sql'
 import { processCommentsCensorshipStatusUpdate } from './utils'
-import { videoRelevanceManager } from '../../../mappings/utils'
 
 @Resolver()
 export class AdminResolver {
-  // Set by depenency injection
+  // Set by dependency injection
   constructor(private em: () => Promise<EntityManager>) {}
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.GRANT_OPERATOR_PERMISSIONS))
+  @Mutation(() => GrantOrRevokeOperatorPermissionsResult)
+  async grantPermissions(
+    @Args() args: GrantOperatorPermissionsInput
+  ): Promise<GrantOrRevokeOperatorPermissionsResult> {
+    const em = await this.em()
+    const user = await em.findOne(User, { where: { id: args.userId } })
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Add only new permissions that the user doesn't have yet
+    user.permissions = Array.from(new Set([...(user.permissions || []), ...args.permissions]))
+
+    await em.save(user)
+    return { newPermissions: user.permissions }
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.REVOKE_OPERATOR_PERMISSIONS))
+  @Mutation(() => GrantOrRevokeOperatorPermissionsResult)
+  async revokePermission(
+    @Args() args: RevokeOperatorPermissionsInput
+  ): Promise<GrantOrRevokeOperatorPermissionsResult> {
+    const em = await this.em()
+    const user = await em.findOne(User, { where: { id: args.userId } })
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    user.permissions = (user.permissions || []).filter((perm) => !args.permissions.includes(perm))
+
+    await em.save(user)
+    return { newPermissions: user.permissions }
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_VIDEO_WEIGHTS))
   @Mutation(() => VideoWeights)
   async setVideoWeights(@Args() args: SetVideoWeightsInput): Promise<VideoWeights> {
     const em = await this.em()
@@ -65,6 +108,7 @@ export class AdminResolver {
         args.commentsWeight,
         args.reactionsWeight,
         [args.joysteamTimestampSubWeight, args.ytTimestampSubWeight],
+        args.defaultChannelWeight,
       ],
       em
     )
@@ -72,7 +116,40 @@ export class AdminResolver {
     return { isApplied: true }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CHANNEL_WEIGHTS))
+  @Mutation(() => [ChannelWeight])
+  async setChannelsWeights(@Args() { inputs }: SetChannelsWeightsArgs): Promise<ChannelWeight[]> {
+    const em = await this.em()
+
+    const results: ChannelWeight[] = []
+
+    // Process each SetChannelWeightInput
+    for (const weightInput of inputs) {
+      const { channelId, weight } = weightInput
+
+      // Update the channel weight in the database
+      const updateResult: UpdateResult = await em.transaction(
+        async (transactionalEntityManager) => {
+          return transactionalEntityManager
+            .createQueryBuilder()
+            .update(Channel)
+            .set({ channelWeight: weight })
+            .where('id = :id', { id: channelId })
+            .execute()
+        }
+      )
+
+      // Push the result into the results array
+      results.push({
+        channelId,
+        isApplied: !!updateResult.affected,
+      })
+    }
+
+    return results
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_KILL_SWITCH))
   @Mutation(() => KillSwitch)
   async setKillSwitch(@Args() args: SetKillSwitchInput): Promise<KillSwitch> {
     const em = await this.em()
@@ -86,7 +163,7 @@ export class AdminResolver {
     return { isKilled: await config.get(ConfigVariable.KillSwitch, em) }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_VIDEO_VIEW_PER_USER_TIME_LIMIT))
   @Mutation(() => VideoViewPerUserTimeLimit)
   async setVideoViewPerUserTimeLimit(
     @Args() args: SetVideoViewPerUserTimeLimitInput
@@ -133,7 +210,7 @@ export class AdminResolver {
     return ctx.openreader.executeQuery(entityByIdQuery)
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_VIDEO_HERO))
   @Mutation(() => SetVideoHeroResult)
   async setVideoHero(@Args() args: SetVideoHeroInput): Promise<SetVideoHeroResult> {
     const em = await this.em()
@@ -156,7 +233,7 @@ export class AdminResolver {
     return { id }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CATEGORY_FEATURED_VIDEOS))
   @Mutation(() => SetCategoryFeaturedVideosResult)
   async setCategoryFeaturedVideos(
     @Args() args: SetCategoryFeaturedVideosArgs
@@ -192,7 +269,7 @@ export class AdminResolver {
     }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_SUPPORTED_CATEGORIES))
   @Mutation(() => SetSupportedCategoriesResult)
   async setSupportedCategories(
     @Args()
@@ -233,7 +310,7 @@ export class AdminResolver {
     }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_FEATURED_NFTS))
   @Mutation(() => SetFeaturedNftsResult)
   async setFeaturedNfts(
     @Args() { featuredNftsIds }: SetFeaturedNftsInput
@@ -263,7 +340,7 @@ export class AdminResolver {
     }
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.EXCLUDE_CONTENT))
   @Mutation(() => ExcludeContentResult)
   async excludeContent(
     @Args()
@@ -289,7 +366,7 @@ export class AdminResolver {
     })
   }
 
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly(OperatorPermission.RESTORE_CONTENT))
   @Mutation(() => RestoreContentResult)
   async restoreContent(
     @Args()
