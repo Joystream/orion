@@ -460,6 +460,7 @@ describe('notifications tests', () => {
         it('notification type is reply to comment', () => {
           expect(notification).not.to.be.null
           expect(notification!.notificationType.isTypeOf).to.equal('CommentReply')
+          expect(notification?.accountId).to.equal('2')
         })
         it('notification data for comment reply should be ok', () => {
           const notificationData = notification!.notificationType as CommentReply

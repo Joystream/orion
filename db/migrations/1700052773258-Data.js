@@ -1,5 +1,5 @@
-module.exports = class Data1699537206830 {
-    name = 'Data1699537206830'
+module.exports = class Data1700052773258 {
+    name = 'Data1700052773258'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -15,7 +15,7 @@ module.exports = class Data1699537206830 {
         await db.query(`CREATE TABLE "nft_featuring_request" ("id" character varying NOT NULL, "user_id" character varying, "nft_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_d0b1ccb74336b30b9575387d328" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_519be2a41216c278c35f254dcb" ON "nft_featuring_request" ("user_id") `)
         await db.query(`CREATE INDEX "IDX_76d87e26cce72ac2e7ffa28dfb" ON "nft_featuring_request" ("nft_id") `)
-        await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "is_root" boolean NOT NULL, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "user" ("id" character varying NOT NULL, "is_root" boolean NOT NULL, "permissions" character varying(34) array, CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "storage_bucket" ("id" character varying NOT NULL, "operator_status" jsonb NOT NULL, "accepting_new_bags" boolean NOT NULL, "data_objects_size_limit" numeric NOT NULL, "data_object_count_limit" numeric NOT NULL, "data_objects_count" numeric NOT NULL, "data_objects_size" numeric NOT NULL, CONSTRAINT "PK_97cd0c3fe7f51e34216822e5f91" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "storage_bucket_bag" ("id" character varying NOT NULL, "storage_bucket_id" character varying, "bag_id" character varying, CONSTRAINT "StorageBucketBag_storageBucket_bag" UNIQUE ("storage_bucket_id", "bag_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9d54c04557134225652d566cc82" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_aaf00b2c7d0cba49f97da14fbb" ON "storage_bucket_bag" ("bag_id") `)
@@ -37,7 +37,8 @@ module.exports = class Data1699537206830 {
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
-        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric NOT NULL, "cumulative_reward" numeric NOT NULL, "ypp_status" jsonb NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric NOT NULL, "cumulative_reward" numeric NOT NULL, "channel_weight" numeric, "ypp_status" jsonb NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_a4752a0a0899dedc4d18077dd0" ON "channel" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_25c85bc448b5e236a4c1a5f789" ON "channel" ("owner_member_id") `)
         await db.query(`CREATE INDEX "IDX_a77e12f3d8c6ced020e179a5e9" ON "channel" ("cover_photo_id") `)
         await db.query(`CREATE INDEX "IDX_6997e94413b3f2f25a84e4a96f" ON "channel" ("avatar_photo_id") `)
@@ -259,6 +260,7 @@ module.exports = class Data1699537206830 {
         await db.query(`DROP INDEX "public"."IDX_f36adbb7b096ceeb6f3e80ad14"`)
         await db.query(`DROP INDEX "public"."IDX_c9cc395bbc485f70a15be64553"`)
         await db.query(`DROP TABLE "channel"`)
+        await db.query(`DROP INDEX "public"."IDX_a4752a0a0899dedc4d18077dd0"`)
         await db.query(`DROP INDEX "public"."IDX_25c85bc448b5e236a4c1a5f789"`)
         await db.query(`DROP INDEX "public"."IDX_a77e12f3d8c6ced020e179a5e9"`)
         await db.query(`DROP INDEX "public"."IDX_6997e94413b3f2f25a84e4a96f"`)
