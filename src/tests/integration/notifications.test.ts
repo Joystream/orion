@@ -10,7 +10,9 @@ import {
   Account,
   Channel,
   ChannelRecipient,
+  Comment,
   CommentPostedToVideo,
+  CommentReply,
   Exclusion,
   MemberRecipient,
   NextEntityId,
@@ -30,7 +32,7 @@ import {
 import { excludeVideoInner } from '../../server-extension/resolvers/VideosResolver'
 import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
 import { auctionBidMadeInner } from '../../mappings/content/nft'
-import { EntityManagerOverlay } from '../../utils/overlay'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { Store } from '@subsquid/typeorm-store'
 import { processMemberRemarkedEvent } from '../../mappings/membership'
 import Long from 'long'
@@ -42,8 +44,8 @@ dontenvConfig({
   path: path.resolve(__dirname, './.env'),
 })
 
-const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Bytes => {
-  return createType('Bytes', '0x' + Buffer.from(metaClass.encode(obj).finish()).toString('hex'))
+const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Uint8Array => {
+  return Buffer.from(metaClass.encode(obj).finish())
 }
 
 const getNextNotificationId = async (em: EntityManager, onchain: boolean) => {
@@ -67,7 +69,7 @@ describe('notifications tests', () => {
     em = await globalEm
     await populateDbWithSeedData()
   })
-  describe('exclude channel', () => {
+  describe('👉 Exclude channel', () => {
     let notificationId: string
     it('exclude channel should deposit notification', async () => {
       const channelId = '1'
@@ -118,7 +120,7 @@ describe('notifications tests', () => {
       expect(channel!.isExcluded).to.be.true
     })
   })
-  describe('exclude video', () => {
+  describe('👉 Exclude video', () => {
     let notificationId: string
     it('exclude video should deposit notification', async () => {
       const videoId = '1'
@@ -171,7 +173,7 @@ describe('notifications tests', () => {
       expect(video!.isExcluded).to.be.true
     })
   })
-  describe('set nft as featured', () => {
+  describe('👉 Set nft as featured', () => {
     let notificationId: string
     it('feature nfts should deposit notification and set nft as featured', async () => {
       const nftId = '1'
@@ -217,7 +219,7 @@ describe('notifications tests', () => {
       expect(notificationEmailDelivery!.attempts).to.be.undefined
     })
   })
-  describe('New bid made', () => {
+  describe('👉 New bid made', () => {
     let nft: OwnedNft
     const memberId = '5'
     const outbiddedMember = '4'
@@ -288,19 +290,17 @@ describe('notifications tests', () => {
       expect((notification!.recipient as ChannelRecipient).channel).to.equal(channel!.id)
       expect(notification?.accountId).to.equal(account?.id)
     })
-    describe('notification email entity should be correctly to db', () => {
+    it('notification email entity should be correctly deposited on overlay', async () => {
       let notificationEmailDelivery: NotificationEmailDelivery | null
-      it('notification email entity should be correctly deposited on overlay', async () => {
-        notificationEmailDelivery = (await overlay
-          .getRepository(NotificationEmailDelivery)
-          .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
-        expect(notificationEmailDelivery).not.to.be.null
-        expect(notificationEmailDelivery!.discard).to.be.false
-        expect(notificationEmailDelivery!.attempts).to.be.empty
-      })
+      notificationEmailDelivery = (await overlay
+        .getRepository(NotificationEmailDelivery)
+        .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
+      expect(notificationEmailDelivery).not.to.be.null
+      expect(notificationEmailDelivery!.discard).to.be.false
+      expect(notificationEmailDelivery!.attempts).to.be.empty
     })
   })
-  describe('Video Liked', () => {
+  describe('👉 Video Liked', () => {
     let notificationId: string
     let nextNotificationIdPre: number
     const block = { timestamp: 123456 } as any
@@ -343,24 +343,23 @@ describe('notifications tests', () => {
       expect(nextNotificationId.toString()).to.equal((nextNotificationIdPre + 1).toString())
       expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
     })
-    describe('notification email entity should be correctly to db', () => {
+    it('notification email entity should be correctly deposited on overlay', async () => {
       let notificationEmailDelivery: NotificationEmailDelivery | null
-      it('notification email entity should be correctly deposited on overlay', async () => {
-        notificationEmailDelivery = (await overlay
-          .getRepository(NotificationEmailDelivery)
-          .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
-        expect(notificationEmailDelivery).not.to.be.null
-        expect(notificationEmailDelivery!.discard).to.be.false
-        expect(notificationEmailDelivery!.attempts).to.be.empty
-      })
+      notificationEmailDelivery = (await overlay
+        .getRepository(NotificationEmailDelivery)
+        .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
+      expect(notificationEmailDelivery).not.to.be.null
+      expect(notificationEmailDelivery!.discard).to.be.false
+      expect(notificationEmailDelivery!.attempts).to.be.empty
     })
   })
-  describe('Comment Posted To Video', () => {
+  describe('👉 Comment Posted To Video', () => {
     let nextNotificationIdPre: number
     let notificationId: string
     const block = { timestamp: 123456 } as any
     const indexInBlock = 1
     const extrinsicHash = '0x1234567890abcdef'
+    const commentId = backwardCompatibleMetaID(block, indexInBlock)
     const metadataMessage: IMemberRemarked = {
       createComment: {
         videoId: Long.fromNumber(1),
@@ -398,7 +397,7 @@ describe('notifications tests', () => {
       it('notification data for comment posted to video should be ok', () => {
         const notificationData = notification!.notificationType as CommentPostedToVideo
         expect(notificationData.videoId).to.equal('1')
-        expect(notificationData.comentId).to.equal(backwardCompatibleMetaID(block, indexInBlock))
+        expect(notificationData.comentId).to.equal(commentId)
         expect(notificationData.memberHandle).to.equal('handle-2')
         expect(notificationData.videoTitle).to.equal('test-video-1')
       })
@@ -409,9 +408,78 @@ describe('notifications tests', () => {
         expect(nextNotificationId.toString()).to.equal((nextNotificationIdPre + 1).toString())
         expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
       })
-      describe('notification email entity should be correctly to db', () => {
+      it('notification email entity should be correctly deposited on overlay', async () => {
         let notificationEmailDelivery: NotificationEmailDelivery | null
+        notificationEmailDelivery = (await overlay
+          .getRepository(NotificationEmailDelivery)
+          .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
+        expect(notificationEmailDelivery).not.to.be.null
+        expect(notificationEmailDelivery!.discard).to.be.false
+        expect(notificationEmailDelivery!.attempts).to.be.empty
+      })
+    })
+    describe('👉 Reply To Comment', () => {
+      let nextNotificationIdPre: number
+      let notificationId: string
+      const block = { timestamp: 123457 } as any
+      const indexInBlock = 1
+      const metadataMessage = {
+        createComment: {
+          videoId: Long.fromNumber(1),
+          parentCommentId: commentId,
+          body: 'reply test',
+        },
+      }
+      const event = {
+        isV2001: true,
+        asV2001: ['3', metadataToBytes(MemberRemarked, metadataMessage!), undefined],
+      } as any
+
+      before(async () => {
+        nextNotificationIdPre = await getNextNotificationId(em, true)
+        notificationId = RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre.toString()
+
+        await processMemberRemarkedEvent({
+          overlay,
+          block,
+          indexInBlock,
+          extrinsicHash,
+          event,
+        })
+      })
+
+      describe('should process reply to comment and deposit notification', () => {
+        let nextNotificationId: number
+        before(async () => {
+          nextNotificationId = await getNextNotificationId(em, true)
+          notification = (await overlay
+            .getRepository(Notification)
+            .getByIdOrFail(notificationId)) as Notification | null
+        })
+
+        it('notification type is reply to comment', () => {
+          expect(notification).not.to.be.null
+          expect(notification!.notificationType.isTypeOf).to.equal('CommentReply')
+        })
+        it('notification data for comment reply should be ok', () => {
+          const notificationData = notification!.notificationType as CommentReply
+          expect(notificationData.videoId).to.equal('1')
+          expect(notificationData.memberHandle).to.equal('handle-3')
+          expect(notificationData.commentId).to.equal(backwardCompatibleMetaID(block, indexInBlock))
+          expect(notificationData.videoTitle).to.equal('test-video-1')
+          expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
+          expect((notification!.recipient as MemberRecipient).membership).to.equal(
+            '2',
+            'member recipient should be parent comment author'
+          )
+        })
+        it('general notification creation setting should be as default', () => {
+          expect(notification!.status.isTypeOf).to.equal('Unread')
+          expect(notification!.inApp).to.be.true
+          expect(nextNotificationId.toString()).to.equal((nextNotificationIdPre + 1).toString())
+        })
         it('notification email entity should be correctly deposited on overlay', async () => {
+          let notificationEmailDelivery: NotificationEmailDelivery | null
           notificationEmailDelivery = (await overlay
             .getRepository(NotificationEmailDelivery)
             .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
