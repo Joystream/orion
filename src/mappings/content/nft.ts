@@ -50,7 +50,6 @@ import {
   NftOfferedEventData,
   Account,
   MemberRecipient,
-  AuctionTypeOpen,
 } from '../../model'
 import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'

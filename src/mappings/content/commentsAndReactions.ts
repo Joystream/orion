@@ -513,7 +513,7 @@ export async function processCreateCommentMessage(
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
         memberHandle: await memberHandleById(overlay, memberId),
-        memberId: memberId,
+        memberId,
       }
       await addNotification(
         overlay,

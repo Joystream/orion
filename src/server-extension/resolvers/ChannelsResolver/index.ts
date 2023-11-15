@@ -339,7 +339,7 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => SuspendChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async suspendChannel(@Args() { channelId }: SuspendChannelArgs): Promise<SuspendChannelResult> {
     const em = await this.em()
 
@@ -392,7 +392,7 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => VerifyChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
     const em = await this.em()
 
@@ -445,7 +445,7 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => ExcludeChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async excludeChannel(
     @Args() { channelId, rationale }: ExcludeChannelArgs
   ): Promise<ExcludeChannelResult> {
