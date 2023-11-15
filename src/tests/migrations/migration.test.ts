@@ -14,7 +14,7 @@ const queryAccount = async (membershipId: string, em: EntityManager) => {
   })
 }
 
-describe('Migration from 3.0.2 to 3.1.0', () => {
+describe('Migration from 3.0.2 to 3.2.0', () => {
   let em: EntityManager
   const aliceMembershipId = '16'
   const bobMembershipId = '17'
