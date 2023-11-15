@@ -1,9 +1,7 @@
 import { EntityManager } from 'typeorm'
-import { createType } from '@joystream/types'
-import { Bytes } from '@polkadot/types'
 import { IMemberRemarked, ReactVideo, MemberRemarked } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass } from '@joystream/metadata-protobuf/types'
-import { clearDb, defaultTestBlock, populateDbWithSeedData } from './testUtils'
+import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
 import { globalEm } from '../../utils/globalEm'
 import {
   excludeChannelService,
@@ -14,7 +12,6 @@ import {
   Channel,
   ChannelRecipient,
   ChannelVerification,
-  Comment,
   CommentPostedToVideo,
   CommentReply,
   Exclusion,
@@ -35,7 +32,7 @@ import {
 } from '../../utils/notification/helpers'
 import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
 import { auctionBidMadeInner } from '../../mappings/content/nft'
-import { EntityManagerOverlay, Flat } from '../../utils/overlay'
+import { EntityManagerOverlay } from '../../utils/overlay'
 import { Store } from '@subsquid/typeorm-store'
 import { processMemberRemarkedEvent } from '../../mappings/membership'
 import Long from 'long'
@@ -342,8 +339,7 @@ describe('notifications tests', () => {
       expect(notification?.accountId).to.equal(account?.id)
     })
     it('notification email entity should be correctly deposited on overlay', async () => {
-      let notificationEmailDelivery: NotificationEmailDelivery | null
-      notificationEmailDelivery = (await overlay
+      const notificationEmailDelivery = (await overlay
         .getRepository(NotificationEmailDelivery)
         .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
       expect(notificationEmailDelivery).not.to.be.null
@@ -395,8 +391,7 @@ describe('notifications tests', () => {
       expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
     })
     it('notification email entity should be correctly deposited on overlay', async () => {
-      let notificationEmailDelivery: NotificationEmailDelivery | null
-      notificationEmailDelivery = (await overlay
+      const notificationEmailDelivery = (await overlay
         .getRepository(NotificationEmailDelivery)
         .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
       expect(notificationEmailDelivery).not.to.be.null
@@ -460,8 +455,7 @@ describe('notifications tests', () => {
         expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
       })
       it('notification email entity should be correctly deposited on overlay', async () => {
-        let notificationEmailDelivery: NotificationEmailDelivery | null
-        notificationEmailDelivery = (await overlay
+        const notificationEmailDelivery = (await overlay
           .getRepository(NotificationEmailDelivery)
           .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
         expect(notificationEmailDelivery).not.to.be.null
@@ -531,8 +525,7 @@ describe('notifications tests', () => {
           expect(nextNotificationId.toString()).to.equal((nextNotificationIdPre + 1).toString())
         })
         it('notification email entity should be correctly deposited on overlay', async () => {
-          let notificationEmailDelivery: NotificationEmailDelivery | null
-          notificationEmailDelivery = (await overlay
+          const notificationEmailDelivery = (await overlay
             .getRepository(NotificationEmailDelivery)
             .getOneByRelation('notificationId', notificationId)) as NotificationEmailDelivery | null
           expect(notificationEmailDelivery).not.to.be.null
