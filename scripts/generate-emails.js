@@ -7,8 +7,9 @@ const mjml2html = require('mjml')
 const { compile } = require('handlebars')
 
 const ghRaw = 'https://raw.githubusercontent.com/Joystream'
-const gleevLogos = `${ghRaw}/atlas-notification-assets/main/logos/gleev`
-const gleevRoot = 'https://atlas-git-fork-thesan-feature-orion-notifications-joystream.vercel.app'
+const emailAssets = 'https://eu-central-1.linodeobjects.com/atlas-assets/email'
+const gleevLogos = `${emailAssets}/logos/gleev`
+const gleevRoot = 'https://atlas-git-notifications-joystream.vercel.app'
 const contexts = {
   gleev: {
     title: 'Hi alice,',
@@ -29,7 +30,7 @@ const contexts = {
       link: `${gleevRoot}/video/1?commentId=METAPROTOCOL-OLYMPIA-3882-2`,
       date: '07 Jul 2023 at 10:41',
       avatar: `${ghRaw}/founding-members/main/avatars/primary-avatar/1.png`,
-      icon: `${ghRaw}/atlas-notification-assets/main/icons/follow.png`,
+      icon: `${emailAssets}/icons/follow.png`,
       iconColor: '#5A58FF',
     },
   },

@@ -1,7 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { Channel, MemberMetadata } from '../../model'
-
-const PLACEHOLDER = 'https://example.com/avatar.png'
+import { ConfigVariable, config } from '../config'
 
 export const getNotificationAvatar = async (
   em: EntityManager,
@@ -13,7 +12,8 @@ export const getNotificationAvatar = async (
     const avatar = channel?.avatarPhoto
 
     if (!avatar || !avatar.isAccepted || !avatar.resolvedUrls[0]) {
-      return PLACEHOLDER
+      const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
+      return `${notificationAssetRoot}/placeholder/avatar.png`
     }
 
     return avatar.resolvedUrls[0]
@@ -24,7 +24,8 @@ export const getNotificationAvatar = async (
 
   // AvatarObject is not yet supported
   if (!avatar || avatar.isTypeOf === 'AvatarObject') {
-    return PLACEHOLDER
+    const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
+    return `${notificationAssetRoot}/placeholder/avatar.png`
   }
 
   return avatar.avatarUri

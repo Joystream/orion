@@ -24,7 +24,7 @@ export async function executeMailDelivery(
   const resp = await sendGridSend({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to: toAccount.email,
-    subject: `New notification from ${appName}!`,
+    subject: `New notification from ${appName}`,
     content,
   })
   const className = Object.prototype.toString.call(resp)
@@ -56,6 +56,7 @@ export async function createMailContent(
   const name = appKey === 'viewer' ? appName : 'Studio'
 
   const appAssetStorage = await config.get(ConfigVariable.AppAssetStorage, em)
+  const logosAssetsRoot = `${appAssetStorage}/logos/${appName.toLowerCase()}`
   const appNameAlt = await config.get(ConfigVariable.AppNameAlt, em)
 
   const content = notificationEmailContent({
@@ -63,8 +64,8 @@ export async function createMailContent(
     app: {
       name,
       nameAlt: appNameAlt,
-      logo: `${appAssetStorage}/header-${appKey}.png`,
-      logoAlt: `${appAssetStorage}/footer.png`,
+      logo: `${logosAssetsRoot}/header-${appKey}.png`,
+      logoAlt: `${logosAssetsRoot}/footer.png`,
       homeLink: appRoot,
       notificationLink,
       unsubscribeLink,
