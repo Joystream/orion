@@ -5,11 +5,15 @@ import { IMemberRemarked, ReactVideo, MemberRemarked } from '@joystream/metadata
 import { AnyMetadataClass } from '@joystream/metadata-protobuf/types'
 import { clearDb, defaultTestBlock, populateDbWithSeedData } from './testUtils'
 import { globalEm } from '../../utils/globalEm'
-import { excludeChannelInner } from '../../server-extension/resolvers/ChannelsResolver'
+import {
+  excludeChannelService,
+  verifyChannelService,
+} from '../../server-extension/resolvers/ChannelsResolver'
 import {
   Account,
   Channel,
   ChannelRecipient,
+  ChannelVerification,
   Comment,
   CommentPostedToVideo,
   CommentReply,
@@ -29,7 +33,6 @@ import {
   OFFCHAIN_NOTIFICATION_ID_TAG,
   RUNTIME_NOTIFICATION_ID_TAG,
 } from '../../utils/notification/helpers'
-import { excludeVideoInner } from '../../server-extension/resolvers/VideosResolver'
 import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
 import { auctionBidMadeInner } from '../../mappings/content/nft'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
@@ -39,6 +42,7 @@ import Long from 'long'
 import { backwardCompatibleMetaID } from '../../mappings/utils'
 import { config as dontenvConfig } from 'dotenv'
 import path from 'path'
+import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
 
 dontenvConfig({
   path: path.resolve(__dirname, './.env'),
@@ -69,6 +73,53 @@ describe('notifications tests', () => {
     em = await globalEm
     await populateDbWithSeedData()
   })
+  describe('👉 YPP Verify channel', () => {
+    let notificationId: string
+    it('verify channel should deposit notification', async () => {
+      const channelId = '1'
+      const nextNotificationIdPre = await getNextNotificationId(em, false)
+      notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
+      await verifyChannelService(em, channelId)
+
+      notification = await em.getRepository(Notification).findOneBy({
+        id: notificationId,
+      })
+      const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
+      const nextNotificationIdPost = await getNextNotificationId(em, false)
+      const account = await em
+        .getRepository(Account)
+        .findOneBy({ membershipId: channel!.ownerMemberId! })
+      expect(notification).not.to.be.null
+      expect(channel).not.to.be.null
+      expect(notification!.notificationType.isTypeOf).to.equal('ChannelVerified')
+      expect(notification!.status.isTypeOf).to.equal('Unread')
+      expect(notification!.inApp).to.be.true
+      expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
+      expect((notification!.recipient as ChannelRecipient).channel).to.equal(channel.id)
+      expect(nextNotificationIdPost.toString()).to.equal((nextNotificationIdPre + 1).toString())
+      expect(notification?.accountId).to.equal(account?.id)
+    })
+    it('notification email entity should be correctly deposited', async () => {
+      const notificationEmailDelivery = await em
+        .getRepository(NotificationEmailDelivery)
+        .findOneBy({ notificationId })
+      expect(notificationEmailDelivery).not.to.be.null
+      expect(notificationEmailDelivery!.discard).to.be.false
+      expect(notificationEmailDelivery!.attempts).to.be.undefined
+    })
+    it('verify channel should mark channel as excluded with entity inserted', async () => {
+      const channelId = '2'
+
+      await verifyChannelService(em, channelId)
+
+      const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
+      const channelVerification = await em
+        .getRepository(ChannelVerification)
+        .findOneBy({ channelId })
+      expect(channelVerification).not.to.be.null
+      expect(channel!.yppStatus.isTypeOf).to.be.equal('YppVerified')
+    })
+  })
   describe('👉 Exclude channel', () => {
     let notificationId: string
     it('exclude channel should deposit notification', async () => {
@@ -76,7 +127,7 @@ describe('notifications tests', () => {
       const rationale = 'test-rationale'
       const nextNotificationIdPre = await getNextNotificationId(em, false)
       notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
-      await excludeChannelInner(em, channelId, rationale)
+      await excludeChannelService(em, channelId, rationale)
 
       notification = await em.getRepository(Notification).findOneBy({
         id: notificationId,
@@ -110,7 +161,7 @@ describe('notifications tests', () => {
       const channelId = '2'
       const rationale = 'test-rationale'
 
-      await excludeChannelInner(em, channelId, rationale)
+      await excludeChannelService(em, channelId, rationale)
 
       const channel = await em.getRepository(Channel).findOneBy({ id: channelId })
       const exclusion = await em.getRepository(Exclusion).findOneBy({ channelId })
@@ -128,7 +179,7 @@ describe('notifications tests', () => {
       const nextNotificationIdPre = await getNextNotificationId(em, false)
       const notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
 
-      await excludeVideoInner(em, videoId, rationale)
+      await excludeVideoService(em, videoId, rationale)
 
       notification = await em.getRepository(Notification).findOneBy({
         id: notificationId,
@@ -163,7 +214,7 @@ describe('notifications tests', () => {
       const videoId = '2'
       const rationale = 'test-rationale'
 
-      await excludeVideoInner(em, videoId, rationale)
+      await excludeVideoService(em, videoId, rationale)
 
       const video = await em.getRepository(Video).findOneBy({ id: videoId })
       const exclusion = await em.getRepository(Exclusion).findOneBy({ videoId })

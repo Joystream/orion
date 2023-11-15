@@ -316,11 +316,15 @@ export class VideosResolver {
   @Mutation(() => ExcludeVideoInfo)
   @UseMiddleware(OperatorOnly())
   async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {
-    return excludeVideoInner(await this.em(), videoId, rationale)
+    return excludeVideoService(await this.em(), videoId, rationale)
   }
 }
 
-export const excludeVideoInner = async (em: EntityManager, videoId: string, rationale: string) => {
+export const excludeVideoService = async (
+  em: EntityManager,
+  videoId: string,
+  rationale: string
+) => {
   return withHiddenEntities(em, async () => {
     const video = await em.findOne(Video, {
       where: { id: videoId },
