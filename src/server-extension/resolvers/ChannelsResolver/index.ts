@@ -53,6 +53,7 @@ import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
+import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
 
 @Resolver()
 export class ChannelsResolver {
@@ -452,7 +453,7 @@ export const excludeChannelService = async (
         em,
         account,
         new MemberRecipient({ membership: channelOwnerMemberId }),
-        new ChannelExcluded({})
+        new ChannelExcluded({ channelTitle: channel.title ?? FALLBACK_CHANNEL_TITLE })
       )
     }
 

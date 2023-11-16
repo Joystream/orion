@@ -120,12 +120,12 @@ export const getNotificationData = async (
 
     // Content moderation and featuring
     case 'ChannelExcluded': {
-      const channel = await em.getRepository(Channel).findOneBy({ id: recipientId })
+      const { channelTitle } = notificationType
       return {
         icon: await getNotificationIcon(em, 'warning'),
         link: await getNotificationLink(em, 'term-of-sevice-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
-        text: `Your channel “${channel?.title}” is excluded from App`,
+        text: `Your channel “${channelTitle}” is excluded from App`,
       }
     }
     case 'VideoExcluded': {

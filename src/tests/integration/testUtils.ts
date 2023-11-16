@@ -52,6 +52,7 @@ export async function populateDbWithSeedData() {
   for (let i = 0; i < 10; i++) {
     const channel = new Channel({
       id: i.toString(),
+      title: `test-channel-${i}`,
       isCensored: false,
       isExcluded: false,
       createdAt: new Date(),

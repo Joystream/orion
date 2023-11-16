@@ -10,6 +10,7 @@ import {
 import {
   Account,
   Channel,
+  ChannelExcluded,
   ChannelRecipient,
   ChannelVerification,
   CommentPostedToVideo,
@@ -138,6 +139,9 @@ describe('notifications tests', () => {
       expect(channel).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelExcluded')
       expect(notification!.status.isTypeOf).to.equal('Unread')
+      expect((notification!.notificationType as ChannelExcluded).channelTitle).to.equal(
+        `test-channel-${channelId}`
+      )
       expect(notification!.inApp).to.be.true
       expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
       expect((notification!.recipient as MemberRecipient).membership).to.equal(
