@@ -62,6 +62,8 @@ jobs:
         run: make prepare
       - name: Run tests
         run: npm run tests:notifications
+      - name: Run utils tests
+        run: npm run tests:notifications-utils
   mail-scheduler:
     name: Mail scheduler tests
     needs: [migrations]

@@ -255,7 +255,7 @@ export const getNotificationData = async (
 }
 
 const JOY_DECIMAL = 10
-const formatJOY = (hapiAmount: bigint): string => {
+export const formatJOY = (hapiAmount: bigint | number): string => {
   const [intPart, decPart] = splitInt(String(hapiAmount), JOY_DECIMAL)
   const formatedIntPart = chunkFromEnd(intPart, 3).join(' ') || '0'
 
@@ -264,17 +264,17 @@ const formatJOY = (hapiAmount: bigint): string => {
     typeof decSize === 'undefined'
       ? ''
       : decSize <= 2 || intPart
-      ? roundDecPart(decPart, 2)
-      : roundDecPart(decPart, decSize)
+      ? roundDecPart(decPart, 2).replace(/00/, '')
+      : roundDecPart(decPart, decSize).replace(/0+$/, '')
 
   const joyAmount = roundedDec ? `${formatedIntPart}.${roundedDec}` : formatedIntPart
 
   return `${joyAmount} $JOY`
 }
 const roundDecPart = (decPart: string, decSize: number) =>
-  String(Math.round(Number(splitInt(decPart.replace(/^0+/, ''), JOY_DECIMAL - decSize).join('.'))))
-    .padStart(decSize, '0')
-    .replace(/0+$/, '')
+  String(
+    Math.round(Number(splitInt(decPart.replace(/^0+/, ''), JOY_DECIMAL - decSize).join('.')))
+  ).padStart(decSize, '0')
 
 const splitInt = (numStr: string, decimalSize: number) => {
   if (decimalSize === 0) return [numStr, '0']
