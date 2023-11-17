@@ -115,7 +115,7 @@
     </mj-wrapper>
 
     <!-- Footer -->
-    <mj-section padding="0">
+    <mj-section padding="0" background-color="#DAE2EB" full-width="full-width">
       <mj-column background-color="#DAE2EB">
         <mj-image
           src="{{ app.logoAlt }}"
@@ -127,8 +127,8 @@
       </mj-column>
     </mj-section>
 
-    <mj-section padding="0">
-      <mj-group background-color="#DAE2EB">
+    <mj-section padding="0" background-color="#DAE2EB" full-width="full-width">
+      <mj-group>
         <mj-column>
           <mj-button
             mj-class="link footer-link"
@@ -147,7 +147,7 @@
       </mj-group>
     </mj-section>
 
-    <mj-section padding="0 0 24px">
+    <mj-section padding="0 0 24px" background-color="#DAE2EB" full-width="full-width">
       <mj-column background-color="#DAE2EB" padding="16px 16px 24px">
         <mj-text color="#343D44" align="center" padding="0">
           You can
