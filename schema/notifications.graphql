@@ -125,11 +125,13 @@ type NftFeaturedOnMarketPlace @variant {
 }
 
 type ChannelVerified @variant {
+  "no data needed as recipient is channel"
   phantom: Int
 }
 
 type ChannelExcluded @variant {
-  phantom: Int
+  "title for the channel used for notification text"
+  channelTitle: String!
 }
 
 type VideoExcluded @variant {

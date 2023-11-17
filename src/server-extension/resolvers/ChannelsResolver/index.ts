@@ -53,6 +53,7 @@ import { uniqueId } from '../../../utils/crypto'
 import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
+import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
 
 @Resolver()
 export class ChannelsResolver {
@@ -339,7 +340,7 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => SuspendChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async suspendChannel(@Args() { channelId }: SuspendChannelArgs): Promise<SuspendChannelResult> {
     const em = await this.em()
 
@@ -392,70 +393,23 @@ export class ChannelsResolver {
   }
 
   @Mutation(() => VerifyChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
     const em = await this.em()
-
-    return withHiddenEntities(em, async () => {
-      const channel = await em.findOne(Channel, {
-        where: { id: channelId },
-      })
-
-      if (!channel) {
-        throw new Error(`Channel by id ${channelId} not found!`)
-      }
-      // If channel already verified - return its data
-      if (channel.yppStatus.isTypeOf === 'YppVerified') {
-        const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
-          where: { channelId: channel.id },
-        })
-        return {
-          id: existingVerification.id,
-          channelId: channel.id,
-          createdAt: existingVerification.timestamp,
-        }
-      }
-      // othewise create new verification
-      const newVerification = new ChannelVerification({
-        id: uniqueId(),
-        channelId: channel.id,
-        timestamp: new Date(),
-      })
-      channel.yppStatus = new YppVerified({ verification: newVerification.id })
-      await em.save([newVerification, channel])
-
-      // in case account exist deposit notification
-      const channelOwnerMemberId = channel.ownerMemberId
-      if (channelOwnerMemberId) {
-        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        await addNotification(
-          em,
-          account,
-          new ChannelRecipient({ channel: channel.id }),
-          new ChannelVerified({})
-        )
-      }
-
-      return {
-        id: newVerification.id,
-        channelId: channel.id,
-        createdAt: newVerification.timestamp,
-      }
-    })
+    return await verifyChannelService(em, channelId)
   }
 
   @Mutation(() => ExcludeChannelResult)
-  @UseMiddleware(OperatorOnly)
+  @UseMiddleware(OperatorOnly())
   async excludeChannel(
     @Args() { channelId, rationale }: ExcludeChannelArgs
   ): Promise<ExcludeChannelResult> {
     const em = await this.em()
-    return await excludeChannelInner(em, channelId, rationale)
+    return await excludeChannelService(em, channelId, rationale)
   }
 }
 
-// TODO: this is a fix for allowing unit testing, should be removed after introducing proper mocking
-export const excludeChannelInner = async (
+export const excludeChannelService = async (
   em: EntityManager,
   channelId: string,
   rationale: string
@@ -499,7 +453,7 @@ export const excludeChannelInner = async (
         em,
         account,
         new MemberRecipient({ membership: channelOwnerMemberId }),
-        new ChannelExcluded({})
+        new ChannelExcluded({ channelTitle: channel.title ?? FALLBACK_CHANNEL_TITLE })
       )
     }
 
@@ -510,6 +464,55 @@ export const excludeChannelInner = async (
       created: true,
       createdAt: newExclusion.timestamp,
       rationale,
+    }
+  })
+}
+
+export const verifyChannelService = async (em: EntityManager, channelId: string) => {
+  return withHiddenEntities(em, async () => {
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+    // If channel already verified - return its data
+    if (channel.yppStatus.isTypeOf === 'YppVerified') {
+      const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
+        where: { channelId: channel.id },
+      })
+      return {
+        id: existingVerification.id,
+        channelId: channel.id,
+        createdAt: existingVerification.timestamp,
+      }
+    }
+    // othewise create new verification
+    const newVerification = new ChannelVerification({
+      id: uniqueId(),
+      channelId: channel.id,
+      timestamp: new Date(),
+    })
+    channel.yppStatus = new YppVerified({ verification: newVerification.id })
+    await em.save([newVerification, channel])
+
+    // in case account exist deposit notification
+    const channelOwnerMemberId = channel.ownerMemberId
+    if (channelOwnerMemberId) {
+      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      await addNotification(
+        em,
+        account,
+        new ChannelRecipient({ channel: channel.id }),
+        new ChannelVerified({})
+      )
+    }
+
+    return {
+      id: newVerification.id,
+      channelId: channel.id,
+      createdAt: newVerification.timestamp,
     }
   })
 }

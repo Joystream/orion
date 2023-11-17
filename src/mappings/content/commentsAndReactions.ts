@@ -513,11 +513,13 @@ export async function processCreateCommentMessage(
         videoId: video.id,
         videoTitle: parseVideoTitle(video),
         memberHandle: await memberHandleById(overlay, memberId),
+        memberId,
       }
+      const memberRecipientId = parentComment.authorId || undefined
       await addNotification(
         overlay,
         authorAccount,
-        new MemberRecipient({ membership: comment.authorId }),
+        new MemberRecipient({ membership: memberRecipientId }),
         new CommentReply(notificationData),
         event
       )

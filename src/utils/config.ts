@@ -1,7 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { GatewayConfig } from '../model'
 import { withHiddenEntities } from './sql'
-import { string } from '../model/generated/marshal'
 
 export enum ConfigVariable {
   SupportNoCategoryVideo = 'SUPPORT_NO_CATEGORY_VIDEOS',
@@ -53,7 +52,8 @@ export const configVariables = {
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerUserTimeLimit]: intType,
   [ConfigVariable.VideoRelevanceViewsTick]: intType,
-  [ConfigVariable.RelevanceWeights]: jsonType<[number, number, number, number, [number, number]]>(),
+  [ConfigVariable.RelevanceWeights]:
+    jsonType<[number, number, number, number, [number, number], number]>(),
   [ConfigVariable.AppPrivateKey]: stringType,
   [ConfigVariable.SessionMaxDurationHours]: intType,
   [ConfigVariable.SessionExpiryAfterInactivityMinutes]: intType,

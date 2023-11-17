@@ -52,6 +52,7 @@ export async function populateDbWithSeedData() {
   for (let i = 0; i < 10; i++) {
     const channel = new Channel({
       id: i.toString(),
+      title: `test-channel-${i}`,
       isCensored: false,
       isExcluded: false,
       createdAt: new Date(),
@@ -62,8 +63,8 @@ export async function populateDbWithSeedData() {
       followsNum: 0,
       videoViewsNum: 0,
       totalVideosCreated: 0,
-      cumulativeReward: BigInt(0),
-      cumulativeRewardClaimed: BigInt(0),
+      cumulativeRewardClaimed: 0n,
+      cumulativeReward: 0n,
       yppStatus: new YppUnverified(),
     })
     const video = new Video({

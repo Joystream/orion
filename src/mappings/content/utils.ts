@@ -866,11 +866,11 @@ export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
 }
 
 export function parseChannelTitle(channel: Flat<Channel>): string {
-  return channel.title || '??'
+  return channel.title || FALLBACK_CHANNEL_TITLE
 }
 
 export function parseVideoTitle(video: Flat<Video>): string {
-  return video.title || '??'
+  return video.title || FALLBACK_VIDEO_TITLE
 }
 
 export async function memberHandleById(
@@ -886,3 +886,6 @@ export async function getChannelTitleById(overlay: EntityManagerOverlay, channel
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
   return parseChannelTitle(channel)
 }
+
+export const FALLBACK_CHANNEL_TITLE = '??'
+export const FALLBACK_VIDEO_TITLE = '??'

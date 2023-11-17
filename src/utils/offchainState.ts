@@ -1,8 +1,8 @@
-import { EntityManager } from 'typeorm'
-import fs from 'fs'
-import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import fs from 'fs'
+import path from 'path'
+import { EntityManager } from 'typeorm'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
 import { NextEntityId } from '../model'
@@ -28,7 +28,7 @@ const exportedStateMap = {
   Notification: true,
   NotificationEmailDelivery: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -76,7 +76,7 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
   return data
 }
 
-function migrateExportDataToV310(data: ExportedData): ExportedData {
+function migrateExportDataToV320(data: ExportedData): ExportedData {
   data.Account?.values.forEach((account) => {
     // account will find himself with all notification pref. enabled by default
     account.notificationPreferences = defaultNotificationPreferences()
@@ -100,10 +100,11 @@ export class OffchainState {
     '3.0.3': ['Account'],
     '3.0.4': ['Account'],
     '3.1.0': ['Account'],
+    '3.2.0': ['Account'],
   }
 
   private migrations: Migrations = {
-    '3.1.0': migrateExportDataToV310,
+    '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
 
