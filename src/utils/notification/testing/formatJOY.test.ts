@@ -9,6 +9,8 @@ describe('formatJOY', () => {
     expect(formatJOY(10)).to.equal('0.000000001 $JOY')
     expect(formatJOY(94)).to.equal('0.000000009 $JOY')
     expect(formatJOY(95)).to.equal('0.00000001 $JOY')
+    expect(formatJOY(100000000)).to.equal('0.01 $JOY')
+    expect(formatJOY(1000000000)).to.equal('0.10 $JOY')
 
     expect(formatJOY(1_0000000000)).to.equal('1 $JOY')
     expect(formatJOY(1_0100000000)).to.equal('1.01 $JOY')

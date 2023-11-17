@@ -257,27 +257,20 @@ export const getNotificationData = async (
 const JOY_DECIMAL = 10
 export const formatJOY = (hapiAmount: bigint | number): string => {
   const [intPart, decPart] = splitInt(String(hapiAmount), JOY_DECIMAL)
+
   const formatedIntPart = chunkFromEnd(intPart, 3).join(' ') || '0'
 
-  const decSize = (decPart.match(/[1-9]/)?.index ?? -1) + 1
-  const roundedDec =
-    typeof decSize === 'undefined'
+  const fractionDigits = (decPart.match(/[1-9]/)?.index ?? -1) + 1
+  const roundedDecPart =
+    fractionDigits === 0
       ? ''
-      : decSize <= 2 || intPart
-      ? roundDecPart(decPart, 2).replace(/00/, '')
-      : roundDecPart(decPart, decSize).replace(/0+$/, '')
+      : !intPart && fractionDigits > 2
+      ? roundDecPart(decPart, fractionDigits).replace(/\.?0+$/, '')
+      : roundDecPart(decPart, 2).replace(/^\.00/, '')
 
-  const joyAmount = roundedDec ? `${formatedIntPart}.${roundedDec}` : formatedIntPart
-
-  return `${joyAmount} $JOY`
+  return `${formatedIntPart}${roundedDecPart} $JOY`
 }
-const roundDecPart = (decPart: string, decSize: number) =>
-  String(
-    Math.round(Number(splitInt(decPart.replace(/^0+/, ''), JOY_DECIMAL - decSize).join('.')))
-  ).padStart(decSize, '0')
-
-const splitInt = (numStr: string, decimalSize: number) => {
-  if (decimalSize === 0) return [numStr, '0']
+const splitInt = (numStr: string, decimalSize: number): [string, string] => {
   const intPart = numStr.slice(0, -decimalSize) ?? ''
   const decPart = numStr.slice(-decimalSize).padStart(decimalSize, '0') || '0'
   return [intPart, decPart]
@@ -287,3 +280,5 @@ const chunkFromEnd = (str: string, interval: number): string[] =>
     ([head, ...tail]: string[]) => [head.slice(0, -interval), head.slice(-interval), ...tail],
     [str]
   )
+const roundDecPart = (decPart: string, fractionDigits: number): string =>
+  Number(`.${decPart}`).toFixed(fractionDigits).slice(1)
