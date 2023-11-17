@@ -26,6 +26,7 @@
     "tests:mail-scheduler": "./src/mail-scheduler/tests/run-tests.sh",
     "tests:migrations": "./src/tests/migrations/run.sh",
     "tests:notifications": "./src/tests/integration/run.sh",
+    "tests:notifications-utils": "ts-mocha src/utils/notification/testing/*.test.ts",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
   },

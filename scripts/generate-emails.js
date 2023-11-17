@@ -9,7 +9,7 @@ const { compile } = require('handlebars')
 const ghRaw = 'https://raw.githubusercontent.com/Joystream'
 const emailAssets = 'https://eu-central-1.linodeobjects.com/atlas-assets/email'
 const gleevLogos = `${emailAssets}/logos/gleev`
-const gleevRoot = 'https://atlas-git-notifications-joystream.vercel.app'
+const gleevRoot = 'https://gleev.xyz'
 const contexts = {
   gleev: {
     title: 'Hi alice,',
@@ -42,7 +42,7 @@ const contexts = {
       app: {
         name: 'Studio',
         logo: `${gleevLogos}/header-studio.png`,
-        notificationPage: `${gleevRoot}/studio/notifications/channel`,
+        notificationLink: `${gleevRoot}/studio/notifications/channel`,
         unsubscribeLink: `${gleevRoot}/studio/channel?tab=Notifications`,
       },
     })
