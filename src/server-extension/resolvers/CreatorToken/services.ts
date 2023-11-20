@@ -6,7 +6,15 @@ const bigintMax = (a: bigint, b: bigint): bigint => {
 
 export const computeTransferrableAmount = (tokenAccount: TokenAccount, block: number): bigint => {
   let lockedCrtAmount = BigInt(0)
-  for (const { vesting: schedule, totalVestingAmount } of tokenAccount.vestingSchedules) {
+  const schedules = tokenAccount.vestingSchedules
+  if (!schedules || Array(schedules).length === 0) {
+    if (tokenAccount.stakedAmount) {
+      return tokenAccount.totalAmount - tokenAccount.stakedAmount
+    } else {
+      return tokenAccount.totalAmount
+    }
+  }
+  for (const { vesting: schedule, totalVestingAmount } of schedules) {
     if (block < schedule.cliffBlock) {
       lockedCrtAmount += totalVestingAmount
     } else {
@@ -24,7 +32,6 @@ export const computeTransferrableAmount = (tokenAccount: TokenAccount, block: nu
       }
       // block > schedule.endsAt
     }
-    console.log('lockedcrtAmount', lockedCrtAmount)
   }
   return tokenAccount.totalAmount - bigintMax(lockedCrtAmount, tokenAccount.stakedAmount)
 }

@@ -23,6 +23,7 @@
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
     "tests:mappings": "npm run run-all --workspace=network-tests",
+    "tests:resolvers:token-service": "ts-mocha ./src/server-extension/resolvers/CreatorToken/services.test.ts",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
   },
