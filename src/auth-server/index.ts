@@ -26,6 +26,7 @@ function authHandler(type: 'header' | 'cookie') {
   }
 }
 
+logger.info('Starting auth server')
 app.set('trust proxy', process.env.TRUST_PROXY || false)
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())

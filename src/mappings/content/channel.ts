@@ -23,7 +23,13 @@ import {
 } from '@joystream/metadata-protobuf'
 import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
 import { EventHandlerContext } from '../../utils/events'
-import { processAppActionMetadata, deleteChannel, encodeAssets, parseContentActor } from './utils'
+import {
+  processAppActionMetadata,
+  deleteChannel,
+  encodeAssets,
+  parseContentActor,
+  increaseChannelCumulativeRevenue,
+} from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -31,19 +37,20 @@ import { generateAppActionCommitment } from '@joystream/js/utils'
 export async function processChannelCreatedEvent({
   overlay,
   block,
-  event: {
-    asV1000: [
-      channelId,
-      { owner, dataObjects, channelStateBloatBond },
-      channelCreationParameters,
-      rewardAccount,
-    ],
-  },
+  event,
 }: EventHandlerContext<'Content.ChannelCreated'>) {
+  const [
+    channelId,
+    { owner, dataObjects, channelStateBloatBond },
+    channelCreationParameters,
+    rewardAccount,
+  ] = event.isV1000 ? event.asV1000 : event.asV2002
+
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
     .countBy({ channelId: channelId.toString() })
+
   // create entity
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
@@ -57,6 +64,8 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+    cumulativeRevenue: BigInt(0),
+    cumulativeRewardClaimed: BigInt(0),
   })
 
   const ownerMember = channel.ownerMemberId
@@ -107,10 +116,11 @@ export async function processChannelCreatedEvent({
 export async function processChannelUpdatedEvent({
   overlay,
   block,
-  event: {
-    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
-  },
+  event,
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
+  const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002
+    ? event.asV2002
+    : event.asV1000
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
   //  update metadata if it was changed
@@ -293,6 +303,7 @@ export async function processChannelRewardUpdatedEvent({
   })
 
   channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelRewardClaimedAndWithdrawnEvent({
@@ -318,6 +329,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
   })
 
   channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelFundsWithdrawnEvent({

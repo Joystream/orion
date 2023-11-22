@@ -651,3 +651,28 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
       : null
   ).toU8a()
 }
+
+export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
+  const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
+  const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
+  return royaltyPrice
+}
+
+export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
+  overlay: EntityManagerOverlay,
+  nft: Flat<OwnedNft>
+) {
+  const video = await overlay.getRepository(Video).getByIdOrFail(nft.videoId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
+  if (nft.owner.isTypeOf === 'NftOwnerChannel') {
+    increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
+  } else {
+    if (nft.creatorRoyalty) {
+      const royaltyAmount = computeRoyalty(nft.creatorRoyalty, assertNotNull(nft.lastSalePrice))
+      increaseChannelCumulativeRevenue(channel, royaltyAmount)
+    }
+  }
+}
+export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount: bigint): void {
+  channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
+}

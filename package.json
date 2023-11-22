@@ -8,6 +8,7 @@
     "generate:schema": "./scripts/generate-schema-file.sh",
     "generate:types:auth-api": "npx openapi-typescript ./src/auth-server/openapi.yml -o ./src/auth-server/generated/api-types.ts -c ./prettierrc.js",
     "generate:docs:auth-api": "rm -rf ./src/auth-server/docs/* && npx openapi-generator-cli generate -i ./src/auth-server/openapi.yml -g markdown -o ./src/auth-server/docs",
+    "generate:network-tests": "npm run codegen --workspace=network-tests",
     "build": "npm run generate:schema; rm -rf lib && tsc && ./scripts/copyfiles.sh",
     "lint": "eslint --ext .ts ./src",
     "format": "prettier --write .",
@@ -21,6 +22,8 @@
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
+    "tests:mappings": "npm run run-all --workspace=network-tests",
+    "tests:resolvers:token-service": "ts-mocha ./src/server-extension/resolvers/CreatorToken/services.test.ts",
     "offchain-state:export": "node ./lib/scripts/export.js",
     "get-public-key": "node ./lib/scripts/getPublicKey.js"
   },
@@ -30,7 +33,8 @@
     "@polkadot/types": "8.9.1",
     "@polkadot/util": "9.5.1",
     "@polkadot/util-crypto": "9.5.1",
-    "@joystream/types": "0.20.5"
+    "@joystream/types": "4.0.0",
+    "@joystream/metadata-protobuf": "2.9.0"
   },
   "dependencies": {
     "@joystream/js": "^1.4.0",
@@ -103,5 +107,8 @@
     "supertest": "^6.3.3",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.8.2"
-  }
+  },
+  "workspaces": [
+    "network-tests"
+  ]
 }
