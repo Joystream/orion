@@ -90,7 +90,7 @@ export const getNotificationData = async (
         icon: await getNotificationIcon(em, 'nft-alt'),
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', newBidderId),
-        text: `${newBidderHandle} placed a higher bid in the auction for NFT: “${videoTitle}”`,
+        text: `${newBidderHandle} placed a higher bid in the timed auction for NFT: “${videoTitle}”`,
       }
     }
     case 'AuctionWon': {
