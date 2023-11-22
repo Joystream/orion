@@ -19,3 +19,4 @@ src/model/generated/.DS_STORE
 network-tests/graphql/generated
 network-tests/node_modules
 network-tests/lib
+network-tests/data
