@@ -90,6 +90,32 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
+import {
+  processCreatorTokenIssuedEvent,
+  processTokenDeissuedEvent,
+  processAmmActivatedEvent,
+  processTokensBoughtOnAmmEvent,
+  processTokensSoldOnAmmEvent,
+  processAccountDustedByEvent,
+  processTokenSaleInitializedEvent,
+  processTokensPurchasedOnSaleEvent,
+  processTokenIssuedEvent,
+  processPatronageRateDecreasedToEvent,
+  processPatronageCreditClaimedEvent,
+  processTokenAmountTransferredEvent,
+  processTokenAmountTransferredByIssuerEvent,
+  processUpcomingTokenSaleUpdatedEvent,
+  processRevenueSplitIssuedEvent,
+  processRevenueSplitLeftEvent,
+  processAmmDeactivatedEvent,
+  processMemberJoinedWhitelistEvent,
+  processTokensBurnedEvent,
+  processTransferPolicyChangedToPermissionlessEvent,
+  processTokenSaleFinalizedEvent,
+  processUserParticipatedInSplitEvent,
+  processRevenueSplitFinalizedEvent,
+  processCreatorTokenIssuerRemarkedEvent,
+} from './mappings/token'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
@@ -112,8 +138,7 @@ const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
 const processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
   .addEvent('Content.VideoCreated', defaultEventOptions)
-// By adding other events separately, we sacrifice some type safety,
-// but otherwise the compilation of this file takes forever.
+
 processor.addEvent('Content.VideoUpdated', defaultEventOptions)
 processor.addEvent('Content.VideoDeleted', defaultEventOptions)
 processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
@@ -125,6 +150,7 @@ processor.addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
 processor.addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
 processor.addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
 processor.addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssued', defaultEventOptions)
 processor.addEvent('Content.OpenAuctionStarted', defaultEventOptions)
 processor.addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
 processor.addEvent('Content.NftIssued', defaultEventOptions)
@@ -142,10 +168,6 @@ processor.addEvent('Content.NftBought', defaultEventOptions)
 processor.addEvent('Content.BuyNowCanceled', defaultEventOptions)
 processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
 processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
-processor.addEvent('Content.ChannelPayoutsUpdated', defaultEventOptions)
-processor.addEvent('Content.ChannelRewardUpdated', defaultEventOptions)
-processor.addEvent('Content.ChannelFundsWithdrawn', defaultEventOptions)
-processor.addEvent('Content.ChannelRewardClaimedAndWithdrawn', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -184,6 +206,29 @@ processor.addEvent('Members.MemberInvited', defaultEventOptions)
 processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberRemarked', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferredByIssuer', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.AccountDustedBy', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitLeft', defaultEventOptions)
+processor.addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
+processor.addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions)
+processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssuerRemarked', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -205,6 +250,8 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
+  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -265,6 +312,29 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
+  'ProjectToken.TokenIssued': processTokenIssuedEvent,
+  'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
+  'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
+  'ProjectToken.AmmActivated': processAmmActivatedEvent,
+  'ProjectToken.AmmDeactivated': processAmmDeactivatedEvent,
+  'ProjectToken.TokensBoughtOnAmm': processTokensBoughtOnAmmEvent,
+  'ProjectToken.TokensSoldOnAmm': processTokensSoldOnAmmEvent,
+  'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
+  'ProjectToken.PatronageCreditClaimed': processPatronageCreditClaimedEvent,
+  'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
+  'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
+  'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.TokenAmountTransferredByIssuer': processTokenAmountTransferredByIssuerEvent,
+  'ProjectToken.TokensBurned': processTokensBurnedEvent,
+  'ProjectToken.TokenSaleFinalized': processTokenSaleFinalizedEvent,
+  'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
+  'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
+  'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
+  'ProjectToken.RevenueSplitLeft': processRevenueSplitLeftEvent,
+  'ProjectToken.RevenueSplitFinalized': processRevenueSplitFinalizedEvent,
+  'ProjectToken.UserParticipatedInSplit': processUserParticipatedInSplitEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless':
+    processTransferPolicyChangedToPermissionlessEvent,
 }
 
 const offchainState = new OffchainState()
