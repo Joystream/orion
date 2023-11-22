@@ -15,7 +15,6 @@ import {
   InitialIssuanceVestingSource,
   SaleVestingSource,
   CreatorToken,
-  Account,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
