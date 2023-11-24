@@ -23,62 +23,57 @@ export class VideoRelevanceManager {
     id && this.videosToUpdate.add(id)
   }
 
-  async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {
-    if (this.videosToUpdate.size || forceUpdateAll) {
-      const [
-        newnessWeight,
-        viewsWeight,
-        commentsWeight,
-        reactionsWeight,
-        [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
-        defaultChannelWeight,
-      ] = await config.get(ConfigVariable.RelevanceWeights, em)
-      const channelWeight = defaultChannelWeight ?? 1
-      await em.query(`
-        WITH weighted_timestamp AS (
-    SELECT 
-        "video"."id",
-        (
+  async updateVideoRelevanceValue(em: EntityManager) {
+    const [
+      newnessWeight,
+      viewsWeight,
+      commentsWeight,
+      reactionsWeight,
+      [joystreamTimestampWeight, ytTimestampWeight] = [7, 3],
+      defaultChannelWeight,
+    ] = await config.get(ConfigVariable.RelevanceWeights, em)
+    const channelWeight = defaultChannelWeight ?? 1
+    await em.query(`
+        WITH videos_with_weight AS (
+        SELECT 
+        video.id as videoId,
+        c.id as channelId,
+        (ROUND((
+        (extract(epoch from now()) - 
+        ((
           extract(epoch from video.created_at)*${joystreamTimestampWeight} +
           COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
-        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight} as wtEpoch,
-        "channel"."channel_weight" as CW
-    FROM 
-        "video" 
-        INNER JOIN
-          "channel" ON "video"."channel_id" = "channel"."id"
-        ${
-          forceUpdateAll
-            ? ''
-            : `WHERE "video"."id" IN (${[...this.videosToUpdate.values()]
-                .map((id) => `'${id}'`)
-                .join(', ')})`
-        }
-        )
-    UPDATE 
-        "video"
-    SET
-        "video_relevance" = ROUND(
-      (
-        (extract(epoch from now()) - wtEpoch) / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} +
+        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight})) / ${NEWNESS_SECONDS_DIVIDER} * ${
+      newnessWeight * -1
+    } +
         (views_num * ${viewsWeight}) +
         (comments_count * ${commentsWeight}) +
-        (reactions_count * ${reactionsWeight})
-      ) * COALESCE(CW, ${channelWeight}),
-            2)
-    FROM
-        weighted_timestamp
-    WHERE
-        "video".id = weighted_timestamp.id;
+        (reactions_count * ${reactionsWeight})) * 
+        COALESCE(channel.channel_weight, ${channelWeight}),2)) as videoRelevance
+        FROM video
+        INNER JOIN channel  ON video.channel_id = channel.id),
+        
+        top_channel_score as (
+        SELECT 
+        channel.id as channelId,
+        MAX(videoCte.videoRelevance) as maxChannelRelevance
+        FROM channel
+        INNER JOIN videos_with_weight as videoCte on videoCte.cId = channel.id
+        GROUP BY channel.id)
+        
+        UPDATE video
+        SET video_relevance = COALESCE(xd.maxScore, 1) 
+        FROM videos_with_weight as videoCte
+        LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.cId and topChannelVideo.maxScore = videoCte.videoRelevance
+        WHERE video.id = videoCte.vId;
         `)
-      this.videosToUpdate.clear()
-    }
+    this.videosToUpdate.clear()
   }
 
   private async updateLoop(intervalMs: number): Promise<void> {
     const em = await globalEm
     while (true) {
-      await this.updateVideoRelevanceValue(em, true)
+      await this.updateVideoRelevanceValue(em)
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
