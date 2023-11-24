@@ -186,8 +186,8 @@ export class SuspendChannelArgs {
 
 @ArgsType()
 export class VerifyChannelArgs {
-  @Field(() => String, { nullable: false })
-  channelId!: string
+  @Field(() => [String], { nullable: false })
+  channelIds!: string[]
 }
 
 @ObjectType()

@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, Info, Ctx, UseMiddleware } from 'type-graphql'
-import { EntityManager, IsNull } from 'typeorm'
+import { EntityManager, In, IsNull } from 'typeorm'
 import {
   ChannelNftCollector,
   ChannelNftCollectorsArgs,
@@ -394,9 +394,9 @@ export class ChannelsResolver {
 
   @Mutation(() => VerifyChannelResult)
   @UseMiddleware(OperatorOnly())
-  async verifyChannel(@Args() { channelId }: VerifyChannelArgs): Promise<VerifyChannelResult> {
+  async verifyChannel(@Args() { channelIds }: VerifyChannelArgs): Promise<VerifyChannelResult[]> {
     const em = await this.em()
-    return await verifyChannelService(em, channelId)
+    return await verifyChannelService(em, channelIds)
   }
 
   @Mutation(() => ExcludeChannelResult)
@@ -468,51 +468,55 @@ export const excludeChannelService = async (
   })
 }
 
-export const verifyChannelService = async (em: EntityManager, channelId: string) => {
+export const verifyChannelService = async (em: EntityManager, channelIds: string[]) => {
   return withHiddenEntities(em, async () => {
-    const channel = await em.findOne(Channel, {
-      where: { id: channelId },
+    const channels = await em.getRepository(Channel).find({
+      where: { id: In(channelIds) },
     })
 
-    if (!channel) {
-      throw new Error(`Channel by id ${channelId} not found!`)
-    }
-    // If channel already verified - return its data
-    if (channel.yppStatus.isTypeOf === 'YppVerified') {
-      const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
-        where: { channelId: channel.id },
+    const results = channels
+      .filter((channel) => channel)
+      .map(async (channel) => {
+        // If channel already verified - return its data
+        if (channel.yppStatus.isTypeOf === 'YppVerified') {
+          const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
+            where: { channelId: channel.id },
+          })
+          return {
+            id: existingVerification.id,
+            channelId: channel.id,
+            createdAt: existingVerification.timestamp,
+          }
+        }
+        // othewise create new verification regardless whether the channel was previously verified
+        const newVerification = new ChannelVerification({
+          id: uniqueId(),
+          channelId: channel.id,
+          timestamp: new Date(),
+        })
+        channel.yppStatus = new YppVerified({ verification: newVerification.id })
+        await em.save([newVerification, channel])
+
+        // in case account exist deposit notification
+        const channelOwnerMemberId = channel.ownerMemberId
+        if (channelOwnerMemberId) {
+          const account = await em.findOne(Account, {
+            where: { membershipId: channelOwnerMemberId },
+          })
+          await addNotification(
+            em,
+            account,
+            new ChannelRecipient({ channel: channel.id }),
+            new ChannelVerified({})
+          )
+        }
+
+        return {
+          id: newVerification.id,
+          channelId: channel.id,
+          createdAt: newVerification.timestamp,
+        }
       })
-      return {
-        id: existingVerification.id,
-        channelId: channel.id,
-        createdAt: existingVerification.timestamp,
-      }
-    }
-    // othewise create new verification
-    const newVerification = new ChannelVerification({
-      id: uniqueId(),
-      channelId: channel.id,
-      timestamp: new Date(),
-    })
-    channel.yppStatus = new YppVerified({ verification: newVerification.id })
-    await em.save([newVerification, channel])
-
-    // in case account exist deposit notification
-    const channelOwnerMemberId = channel.ownerMemberId
-    if (channelOwnerMemberId) {
-      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-      await addNotification(
-        em,
-        account,
-        new ChannelRecipient({ channel: channel.id }),
-        new ChannelVerified({})
-      )
-    }
-
-    return {
-      id: newVerification.id,
-      channelId: channel.id,
-      createdAt: newVerification.timestamp,
-    }
+    return await Promise.all(results)
   })
 }
