@@ -322,7 +322,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await offchainState.import(em)
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
-      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      await videoRelevanceManager.updateVideoRelevanceValue(em)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }

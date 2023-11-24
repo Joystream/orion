@@ -112,7 +112,7 @@ export class AdminResolver {
       ],
       em
     )
-    await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+    await videoRelevanceManager.updateVideoRelevanceValue(em)
     return { isApplied: true }
   }
 

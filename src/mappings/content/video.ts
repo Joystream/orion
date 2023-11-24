@@ -8,7 +8,7 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import { Channel, Video, VideoViewEvent } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import { deserializeMetadata, u8aToBytes } from '../utils'
 import { processVideoMetadata } from './metadata'
 import { deleteVideo, encodeAssets, processAppActionMetadata, processNft } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
@@ -42,8 +42,6 @@ export async function processVideoCreatedEvent({
     // First we need to dic by 1k to match postgres epoch (in seconds) then apply the further dividers
     videoRelevance: 0,
   })
-
-  videoRelevanceManager.scheduleRecalcForVideo(videoId)
 
   // fetch related channel and owner
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
