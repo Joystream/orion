@@ -55,6 +55,7 @@ import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
 import pLimit from 'p-limit'
+import pLimit from 'p-limit'
 
 @Resolver()
 export class ChannelsResolver {
