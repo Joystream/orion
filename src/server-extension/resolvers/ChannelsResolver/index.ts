@@ -54,6 +54,7 @@ import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
+import pLimit from 'p-limit'
 
 @Resolver()
 export class ChannelsResolver {
@@ -341,54 +342,64 @@ export class ChannelsResolver {
 
   @Mutation(() => SuspendChannelResult)
   @UseMiddleware(OperatorOnly())
-  async suspendChannel(@Args() { channelId }: SuspendChannelArgs): Promise<SuspendChannelResult> {
+  async suspendChannels(
+    @Args() { channelIds }: SuspendChannelArgs
+  ): Promise<SuspendChannelResult[]> {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
-      const channel = await em.findOne(Channel, {
-        where: { id: channelId },
+      const channels = await em.find(Channel, {
+        where: { id: In(channelIds) },
       })
 
-      if (!channel) {
-        throw new Error(`Channel by id ${channelId} not found!`)
-      }
-      // If channel already suspended - return its data
-      if (channel.yppStatus.isTypeOf === 'YppSuspended') {
-        const existingSuspension = await em.getRepository(ChannelSuspension).findOneOrFail({
-          where: { id: channel.yppStatus.suspension },
-        })
-        return {
-          id: existingSuspension.id,
+      const suspendChannel = async (channel: Channel) => {
+        // If channel already suspended - return its data
+        if (channel.yppStatus.isTypeOf === 'YppSuspended') {
+          const existingSuspension = await em.getRepository(ChannelSuspension).findOneOrFail({
+            where: { id: channel.yppStatus.suspension },
+          })
+          return {
+            id: existingSuspension.id,
+            channelId: channel.id,
+            createdAt: existingSuspension.timestamp,
+          }
+        }
+        // otherwise create a new suspension
+        const newSuspension = new ChannelSuspension({
+          id: uniqueId(),
           channelId: channel.id,
-          createdAt: existingSuspension.timestamp,
+          timestamp: new Date(),
+        })
+        channel.yppStatus = new YppSuspended({ suspension: newSuspension.id })
+        await em.save([newSuspension, channel])
+
+        // in case account exist deposit notification
+        const channelOwnerMemberId = channel.ownerMemberId
+        if (channelOwnerMemberId) {
+          const account = await em.findOne(Account, {
+            where: { membershipId: channelOwnerMemberId },
+          })
+          await addNotification(
+            em,
+            account,
+            new ChannelRecipient({ channel: channel.id }),
+            new ChannelSuspended({})
+          )
+        }
+
+        return {
+          id: newSuspension.id,
+          channelId: channel.id,
+          createdAt: newSuspension.timestamp,
         }
       }
-      // otherwise create a new suspension
-      const newSuspension = new ChannelSuspension({
-        id: uniqueId(),
-        channelId: channel.id,
-        timestamp: new Date(),
-      })
-      channel.yppStatus = new YppSuspended({ suspension: newSuspension.id })
-      await em.save([newSuspension, channel])
 
-      // in case account exist deposit notification
-      const channelOwnerMemberId = channel.ownerMemberId
-      if (channelOwnerMemberId) {
-        const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-        await addNotification(
-          em,
-          account,
-          new ChannelRecipient({ channel: channel.id }),
-          new ChannelSuspended({})
-        )
-      }
-
-      return {
-        id: newSuspension.id,
-        channelId: channel.id,
-        createdAt: newSuspension.timestamp,
-      }
+      const limit = pLimit(5) // Limit to 5 concurrent promises
+      return await Promise.all(
+        channels
+          .filter((channel) => channel)
+          .map((channel) => limit(async () => await suspendChannel(channel)))
+      )
     })
   }
 
@@ -474,49 +485,53 @@ export const verifyChannelService = async (em: EntityManager, channelIds: string
       where: { id: In(channelIds) },
     })
 
-    const results = channels
-      .filter((channel) => channel)
-      .map(async (channel) => {
-        // If channel already verified - return its data
-        if (channel.yppStatus.isTypeOf === 'YppVerified') {
-          const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
-            where: { channelId: channel.id },
-          })
-          return {
-            id: existingVerification.id,
-            channelId: channel.id,
-            createdAt: existingVerification.timestamp,
-          }
-        }
-        // othewise create new verification regardless whether the channel was previously verified
-        const newVerification = new ChannelVerification({
-          id: uniqueId(),
-          channelId: channel.id,
-          timestamp: new Date(),
+    const verifyChannel = async (channel: Channel) => {
+      // If channel already verified - return its data
+      if (channel.yppStatus.isTypeOf === 'YppVerified') {
+        const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
+          where: { channelId: channel.id },
         })
-        channel.yppStatus = new YppVerified({ verification: newVerification.id })
-        await em.save([newVerification, channel])
-
-        // in case account exist deposit notification
-        const channelOwnerMemberId = channel.ownerMemberId
-        if (channelOwnerMemberId) {
-          const account = await em.findOne(Account, {
-            where: { membershipId: channelOwnerMemberId },
-          })
-          await addNotification(
-            em,
-            account,
-            new ChannelRecipient({ channel: channel.id }),
-            new ChannelVerified({})
-          )
-        }
-
         return {
-          id: newVerification.id,
+          id: existingVerification.id,
           channelId: channel.id,
-          createdAt: newVerification.timestamp,
+          createdAt: existingVerification.timestamp,
         }
+      }
+      // othewise create new verification regardless whether the channel was previously verified
+      const newVerification = new ChannelVerification({
+        id: uniqueId(),
+        channelId: channel.id,
+        timestamp: new Date(),
       })
-    return await Promise.all(results)
+      channel.yppStatus = new YppVerified({ verification: newVerification.id })
+      await em.save([newVerification, channel])
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const account = await em.findOne(Account, {
+          where: { membershipId: channelOwnerMemberId },
+        })
+        await addNotification(
+          em,
+          account,
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelVerified({})
+        )
+      }
+
+      return {
+        id: newVerification.id,
+        channelId: channel.id,
+        createdAt: newVerification.timestamp,
+      }
+    }
+
+    const limit = pLimit(5) // Limit to 5 concurrent promises
+    return await Promise.all(
+      channels
+        .filter((channel) => channel)
+        .map((channel) => limit(async () => await verifyChannel(channel)))
+    )
   })
 }
