@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { Channel, MemberMetadata } from '../../model'
+import { Channel, MemberMetadata, StorageDataObject } from '../../model'
 import { ConfigVariable, config } from '../config'
 
 export const getNotificationAvatar = async (
@@ -7,26 +7,33 @@ export const getNotificationAvatar = async (
   type: 'channelId' | 'membershipId',
   param: string
 ): Promise<string> => {
-  if (type === 'channelId') {
-    const channel = await em.getRepository(Channel).findOneBy({ id: param })
-    const avatar = channel?.avatarPhoto
+  switch (type) {
+    case 'channelId': {
+      const channel = await em.getRepository(Channel).findOneBy({ id: param })
 
-    if (!avatar || !avatar.isAccepted || !avatar.resolvedUrls[0]) {
-      const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
-      return `${notificationAssetRoot}/placeholder/avatar.png`
+      if (!channel?.avatarPhotoId) break
+
+      const avatar = await em
+        .getRepository(StorageDataObject)
+        .findOneBy({ id: channel.avatarPhotoId })
+
+      if (!avatar || !avatar.isAccepted || !avatar.resolvedUrls[0]) break
+
+      return avatar.resolvedUrls[0]
     }
 
-    return avatar.resolvedUrls[0]
+    case 'membershipId': {
+      const member = await em.getRepository(MemberMetadata).findOneBy({ id: param })
+      const avatar = member?.avatar
+
+      // AvatarObject is not yet supported
+      if (!avatar || avatar.isTypeOf !== 'AvatarUri') break
+
+      return avatar.avatarUri
+    }
   }
 
-  const member = await em.getRepository(MemberMetadata).findOneBy({ id: param })
-  const avatar = member?.avatar
-
-  // AvatarObject is not yet supported
-  if (!avatar || avatar.isTypeOf === 'AvatarObject') {
-    const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
-    return `${notificationAssetRoot}/placeholder/avatar.png`
-  }
-
-  return avatar.avatarUri
+  // Fallback to a placeholder
+  const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
+  return `${notificationAssetRoot}/placeholder/avatar.png`
 }
