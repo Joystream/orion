@@ -180,8 +180,8 @@ export class ChannelsSearchArgs {
 
 @ArgsType()
 export class SuspendChannelArgs {
-  @Field(() => String, { nullable: false })
-  channelId!: string
+  @Field(() => [String], { nullable: false })
+  channelIds!: string[]
 }
 
 @ArgsType()
