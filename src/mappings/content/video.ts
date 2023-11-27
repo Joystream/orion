@@ -129,6 +129,7 @@ export async function processVideoCreatedEvent({
     channelTitle: parseChannelTitle(channel),
     videoTitle: parseVideoTitle(video),
     videoId: video.id,
+    channelId: channel.id,
   })
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 

@@ -77,7 +77,7 @@ describe('notifications tests', () => {
       const channelId = '1'
       const nextNotificationIdPre = await getNextNotificationId(em, false)
       notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
-      await verifyChannelService(em, channelId)
+      await verifyChannelService(em, [channelId])
 
       notification = await em.getRepository(Notification).findOneBy({
         id: notificationId,
@@ -108,7 +108,7 @@ describe('notifications tests', () => {
     it('verify channel should mark channel as excluded with entity inserted', async () => {
       const channelId = '2'
 
-      await verifyChannelService(em, channelId)
+      await verifyChannelService(em, [channelId])
 
       const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
       const channelVerification = await em
