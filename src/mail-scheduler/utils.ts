@@ -84,14 +84,14 @@ async function getMessage(
       const member = await em.getRepository(Membership).findOneBy({ id: recipient.membership })
       return {
         title: `Hi ${member?.handle ?? ''}`,
-        subTitle: 'You have a new notifications:',
+        subTitle: 'You have a new notification:',
       }
     }
     case 'ChannelRecipient': {
       const channel = await em.getRepository(Channel).findOneBy({ id: recipient.channel })
       return {
         title: `Your channel “${channel?.title}”,`,
-        subTitle: 'Has a new notifications:',
+        subTitle: 'Has a new notification:',
       }
     }
   }

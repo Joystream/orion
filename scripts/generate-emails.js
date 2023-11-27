@@ -13,7 +13,7 @@ const gleevRoot = 'https://gleev.xyz'
 const contexts = {
   gleev: {
     title: 'Hi alice,',
-    subTitle: 'You have a new notifications:',
+    subTitle: 'You have a new notification:',
 
     app: {
       name: 'Gleev',
@@ -38,7 +38,7 @@ const contexts = {
   get studio() {
     return merge({}, this.gleev, {
       title: 'Your channel “Joyblocks”,',
-      subTitle: 'Has a new notifications:',
+      subTitle: 'Has a new notification:',
       app: {
         name: 'Studio',
         logo: `${gleevLogos}/header-studio.png`,
