@@ -1,5 +1,6 @@
 import { EntityManager } from 'typeorm'
 import { Channel, MemberMetadata, StorageDataObject } from '../../model'
+import { getAssetUrls } from '../../server-extension/resolvers/AssetsResolver/utils'
 import { ConfigVariable, config } from '../config'
 
 export const getNotificationAvatar = async (
@@ -10,16 +11,14 @@ export const getNotificationAvatar = async (
   switch (type) {
     case 'channelId': {
       const channel = await em.getRepository(Channel).findOneBy({ id: param })
+      const objectId = channel?.avatarPhotoId
+      if (!objectId) break
 
-      if (!channel?.avatarPhotoId) break
+      const object = await em.getRepository(StorageDataObject).findOneBy({ id: objectId })
+      const avatarUrls = await getAssetUrls(objectId, object?.storageBagId, { limit: 1 })
+      if (!avatarUrls?.[0]) break
 
-      const avatar = await em
-        .getRepository(StorageDataObject)
-        .findOneBy({ id: channel.avatarPhotoId })
-
-      if (!avatar || !avatar.isAccepted || !avatar.resolvedUrls[0]) break
-
-      return avatar.resolvedUrls[0]
+      return avatarUrls[0]
     }
 
     case 'membershipId': {
