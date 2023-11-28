@@ -11,6 +11,12 @@ import {
   ChannelRewardClaimedEventData,
   ChannelRewardClaimedAndWithdrawnEventData,
   ChannelFundsWithdrawnEventData,
+  ChannelCreated,
+  ChannelCreatedEventData,
+  ChannelFundsWithdrawn,
+  YppUnverified,
+  MemberRecipient,
+  ChannelRecipient,
   ChannelAssetsDeletedByModeratorEventData,
 } from '../../model'
 import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
@@ -29,10 +35,13 @@ import {
   encodeAssets,
   parseContentActor,
   increaseChannelCumulativeRevenue,
+  getChannelOwnerAccount,
+  getAccountForMember,
 } from './utils'
 import { Flat } from '../../utils/overlay'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -66,6 +75,9 @@ export async function processChannelCreatedEvent({
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
     cumulativeRewardClaimed: BigInt(0),
+    yppStatus: new YppUnverified(),
+    cumulativeRewardClaimed: 0n,
+    cumulativeReward: 0n,
   })
 
   const ownerMember = channel.ownerMemberId
@@ -110,6 +122,23 @@ export async function processChannelCreatedEvent({
 
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
+    const event = overlay.getRepository(Event).new({
+      id: `${block.height}-${indexInBlock}`,
+      inBlock: block.height,
+      inExtrinsic: extrinsicHash,
+      indexInBlock,
+      timestamp: new Date(block.timestamp),
+      data: new ChannelCreatedEventData({ channel: channel.id }),
+    })
+
+    const ownerAccount = await getAccountForMember(overlay, ownerMember.id)
+    await addNotification(
+      overlay,
+      ownerAccount,
+      new MemberRecipient({ membership: ownerMember.id }),
+      new ChannelCreated({ channelId: channel.id, channelTitle: channel.title || '??' }),
+      event
+    )
   }
 }
 
@@ -344,7 +373,7 @@ export async function processChannelFundsWithdrawnEvent({
   // load channel
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
-  overlay.getRepository(Event).new({
+  const entityEvent = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new ChannelFundsWithdrawnEventData({
       amount,
@@ -353,4 +382,14 @@ export async function processChannelFundsWithdrawnEvent({
       actor: parseContentActor(actor),
     }),
   })
+
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    new ChannelFundsWithdrawn({ amount }),
+    entityEvent
+  )
 }

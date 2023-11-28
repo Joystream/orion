@@ -10,7 +10,9 @@ import {
   Channel,
   Event,
   Video,
+    VideoPosted,
   VideoAssetsDeletedByModeratorEventData,
+  VideoCreatedEventData,
   VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
@@ -25,6 +27,9 @@ import {
   deleteVideo,
   encodeAssets,
   parseContentActor,
+  notifyChannelFollowers,
+  parseChannelTitle,
+  parseVideoTitle,
   processAppActionMetadata,
   processNft,
 } from './utils'
@@ -89,8 +94,9 @@ export async function processVideoCreatedEvent({
       if (entity.entryAppId && appAction.metadata) {
         const appActionMetadata = deserializeMetadata(AppActionMetadata, appAction.metadata)
 
-        appActionMetadata?.videoId &&
+        if (appActionMetadata?.videoId) {
           integrateMeta(entity, { ytVideoId: appActionMetadata.videoId }, ['ytVideoId'])
+        }
       }
       return processVideoMetadata(
         overlay,
@@ -116,6 +122,23 @@ export async function processVideoCreatedEvent({
   }
 
   channel.totalVideosCreated += 1
+
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new VideoCreatedEventData({ channel: channel.id, video: video.id }),
+  })
+
+  const notificationData = new VideoPosted({
+    channelTitle: parseChannelTitle(channel),
+    videoTitle: parseVideoTitle(video),
+    videoId: video.id,
+    channelId: channel.id,
+  })
+  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

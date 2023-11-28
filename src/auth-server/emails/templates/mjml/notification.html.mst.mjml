@@ -1,0 +1,160 @@
+<mjml>
+  <mj-head>
+    <mj-font
+      name="IBM Plex Sans"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600"
+    />
+    <mj-attributes>
+      <mj-all
+        font-family="'IBM Plex Sans', sans-serif"
+        font-size="12px"
+        line-height="16px"
+        color="#000000"
+        align="left"
+        text-align="left"
+      />
+      <mj-image align="center" />
+      <mj-column padding="0" />
+      <mj-class name="big" font-size="14px" line-height="20px" />
+      <mj-class name="bold" font-weight="600" />
+      <mj-class name="link" inner-padding="0" background-color="transparent" />
+      <mj-class
+        name="footer-link"
+        font-size="14px"
+        inner-padding="0 10px"
+        font-weight="600"
+        color="#000000"
+        padding="0"
+      />
+    </mj-attributes>
+  </mj-head>
+
+  <mj-body background-color="#FFFFFF">
+    <mj-wrapper border="1px solid #d6dee7" padding="0">
+      <!-- Header -->
+      <mj-section padding="24px 0 0">
+        <mj-column>
+          <mj-image
+            src="{{ app.logo }}"
+            alt="{{ app.name }}"
+            width="194px"
+            height="96px"
+            padding="4px"
+          ></mj-image>
+        </mj-column>
+      </mj-section>
+
+      <!-- Greeting -->
+      <mj-section padding="24px 16px" text-align="center">
+        <mj-group width="440px">
+          <mj-column>
+            <mj-text mj-class="bold" padding="0" font-size="24px" line-height="24px">
+              {{ title }}
+            </mj-text>
+            <mj-text mj-class="big" padding="8px 0 0">{{ subTitle }}</mj-text>
+          </mj-column>
+        </mj-group>
+      </mj-section>
+
+      <!-- Notification -->
+      <mj-section padding="0 16px" text-align="center">
+        <mj-group background-color="#DAE2EB" width="440px">
+          <!-- Avatar -->
+          <mj-column vertical-align="middle" width="10%" border-radius="4px" padding="16px">
+            <mj-button mj-class="link" href="{{ notification.link }}" align="center" padding="0">
+              <div
+                style="width: 40px; height: 40px; border-radius: 50%; display: inline-block; background-image: url({{ notification.avatar }}); background-size: contain; background-repeat: no-repeat; background-color: #4038FF;"
+              >
+                <img
+                  style="width: 24px; height: 24px; margin: 16px 0 0 24px"
+                  src="{{ notification.icon }}"
+                  alt="notification icon"
+                />
+              </div>
+            </mj-button>
+          </mj-column>
+
+          <!-- Text -->
+          <mj-column vertical-align="middle" width="90%" padding="16px">
+            <mj-button
+              mj-class="link"
+              href="{{ notification.link }}"
+              padding="0 0 0 20px"
+              font-weight="500"
+            >
+              {{ notification.text }}
+            </mj-button>
+            <mj-button
+              mj-class="link"
+              href="{{ notification.link }}"
+              padding="4px 0 0 20px"
+              color="#52616B"
+              font-weight="500"
+            >
+              {{ notification.date }}
+            </mj-button>
+          </mj-column>
+        </mj-group>
+      </mj-section>
+
+      <!-- App link -->
+      <mj-section padding="24px 16px 40px" text-align="center">
+        <mj-group width="440px">
+          <mj-column>
+            <mj-button
+              mj-class="big bold"
+              href="{{ app.notificationLink }}"
+              padding="0"
+              inner-padding="16px"
+              background-color="#4038FF"
+              color="#FFFFFF"
+              border-radius="2px"
+            >
+              View on {{ app.name }}
+            </mj-button>
+          </mj-column>
+        </mj-group>
+      </mj-section>
+
+      <!-- Footer -->
+      <mj-section padding="0" background-color="#DAE2EB" full-width="full-width">
+        <mj-column background-color="#DAE2EB">
+          <mj-image
+            src="{{ app.logoAlt }}"
+            alt="{{ app.name }}"
+            width="35px"
+            height="30px"
+            padding="24px 0 10px"
+          ></mj-image>
+        </mj-column>
+      </mj-section>
+
+      <mj-section padding="0" background-color="#DAE2EB">
+        <mj-group>
+          <mj-column>
+            <mj-button mj-class="link footer-link" href="{{ app.homeLink }}" align="right">
+              {{ app.nameAlt }}
+            </mj-button>
+          </mj-column>
+          <mj-column>
+            <mj-button mj-class="link footer-link" href="https://www.joystream.org/">
+              Joystream.org
+            </mj-button>
+          </mj-column>
+        </mj-group>
+      </mj-section>
+
+      <mj-section padding="0 0 24px" background-color="#DAE2EB" full-width="full-width">
+        <mj-column background-color="#DAE2EB" padding="16px 16px 24px">
+          <mj-text color="#343D44" align="center" padding="0">
+            You can
+            <a href="{{ app.unsubscribeLink }}" target="_blank" style="color: currentColor">
+              unsubscribe
+            </a>
+            anytime.
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+  </mj-body>
+</mjml>

@@ -62,6 +62,7 @@ services:
     environment:
       DB_TYPE: postgres # set to `cockroach` for Cockroach DB
       DB_HOST: archive_db
+      DB_PORT: '12345'
       DB_NAME: 'squid-archive'
       DB_USER: 'postgres'
       DB_PASS: 'postgres'

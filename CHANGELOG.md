@@ -1,7 +1,33 @@
+# 3.2.0
+This release adds notifications to the orion infrastructure...
+
 # 3.1.0
+
 ### Additions
 - Implements mappings for `Content.VideoAssetsDeletedByModerator` and `Content.ChannelAssetsDeletedByModerator` runtime events
+### Entities
+- Adds `User.permission` to the `User` entity, this however doesn't require migration logic.
+- Adds `Channel.channelWeights` in order to boost channel relevance. This value can be set via the `setChannelWeights` mutation
+### Resolvers
+- Adds supports for new permissions model for gateway operator users. Now the root user can assign/revoke operator permission/s to users using `grantPermissions` & `revokePermissions` mutations
+- Adds new `setChannelWeights` operator mutation to set weight/bias for any channel/s which will be used to calculate the Atlas homepage video relevance scores
+### Performance
+- Adds `Video.createdAt` as index in order to speed up Atlas home page queries 
 
+# 3.0.4
+
+### Misc
+- sum channels rewards into a new `Channel.cumulativeReward` field
+- start `Channel.cumulativeRewardClaimed` at zero instead of null
+
+# 3.0.3
+### Optimisation:
+- Solves n+1 query issue on the `AssetResolver` `resolvedUrls` field resolver, by reusing `storageBagId` field if available. Resulting in faster query times and inpacting home page loading speed for front end application significantly. This fix involves only the `orion_graphql-server` microservice
+### Misc
+- adds `http://localhost:3000` and `http://127.0.0.1:3000` as authorized CORS origins for local front end testing 
+# 3.0.2
+### Bug Fixes:
+- Store membership handles both as utf-8 string and raw bytes - [#4950](https://github.com/Joystream/joystream/pull/4950)
 # 3.0.1
 ### Misc
 - add migration for the `Account` id field

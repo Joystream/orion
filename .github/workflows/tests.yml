@@ -2,8 +2,31 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
+  migrations:
+    name: Run migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - name: Create joystream_default network
+        run: docker network create joystream_default
+      - name: Prepare workspace
+        run: make prepare
+      - name: Start db
+        run: docker-compose up -d orion_db
+      - name: Wait for db
+        run: |
+          while ! docker-compose exec -T orion_db pg_isready -U postgres -p 23798; do
+            sleep 1
+          done
+      - name: Run migrations
+        run: make migrate
   auth-api:
     name: Auth API tests
+    needs: [migrations]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,3 +43,62 @@ jobs:
         run: make prepare
       - name: Run tests
         run: npm run tests:auth-api
+  notifications:
+    name: orion_db<->service tests for Q&A failing notifications
+    needs: [migrations]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [16.x]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
+      - name: Prepare workspace
+        run: make prepare
+      - name: Run tests
+        run: npm run tests:notifications
+      - name: Run utils tests
+        run: npm run tests:notifications-utils
+  mail-scheduler:
+    name: Mail scheduler tests
+    needs: [migrations]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [16.x]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
+      - name: Prepare workspace
+        run: make prepare
+      - name: Run tests
+        run: npm run tests:mail-scheduler
+  post-update-migrations:
+    name: Post update migrations tests
+    needs: [migrations]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [16.x]
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
+      - name: Prepare workspace
+        run: make prepare
+      - name: Run tests
+        run: npm run tests:migrations

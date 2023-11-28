@@ -3,12 +3,21 @@ import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from '
 import { EntityManager, MoreThan } from 'typeorm'
 import {
   AddVideoViewResult,
+  ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
-import { VideoViewEvent, Video, Report } from '../../../model'
+import {
+  VideoViewEvent,
+  Video,
+  Report,
+  Exclusion,
+  Account,
+  VideoExcluded,
+  ChannelRecipient,
+} from '../../../model'
 import { ensureArray } from '@subsquid/openreader/lib/util/util'
 import { UserInputError } from 'apollo-server-core'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
@@ -36,7 +45,9 @@ import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
-import { UserOnly } from '../middleware'
+import { addNotification } from '../../../utils/notification'
+import { parseVideoTitle } from '../../../mappings/content/utils'
+import { UserOnly, OperatorOnly } from '../middleware'
 
 @Resolver()
 export class VideosResolver {
@@ -164,7 +175,6 @@ export class VideosResolver {
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql
-    console.log('connectionQuery', connectionQuerySql)
 
     const result = await ctx.openreader.executeQuery(connectionQuery)
 
@@ -178,7 +188,6 @@ export class VideosResolver {
       )
       // Override the raw `sql` string in `countQuery` with the modified query
       ;(countQuery as { sql: string }).sql = countQuerySql
-      console.log('countQuery', countQuerySql)
       result.totalCount = await ctx.openreader.executeQuery(countQuery)
     }
 
@@ -303,4 +312,72 @@ export class VideosResolver {
       }
     })
   }
+
+  @Mutation(() => ExcludeVideoInfo)
+  @UseMiddleware(OperatorOnly())
+  async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {
+    return excludeVideoService(await this.em(), videoId, rationale)
+  }
+}
+
+export const excludeVideoService = async (
+  em: EntityManager,
+  videoId: string,
+  rationale: string
+) => {
+  return withHiddenEntities(em, async () => {
+    const video = await em.findOne(Video, {
+      where: { id: videoId },
+      relations: { channel: true },
+    })
+
+    if (!video) {
+      throw new Error(`Video by id ${videoId} not found!`)
+    }
+
+    const existingExclusion = await em.findOne(Exclusion, {
+      where: { channelId: video.channel.id, videoId },
+    })
+    // If exclusion already exists - return its data with { created: false }
+    if (existingExclusion) {
+      return {
+        id: existingExclusion.id,
+        channelId: video.channel.id,
+        videoId,
+        created: false,
+        createdAt: existingExclusion.timestamp,
+        rationale: existingExclusion.rationale,
+      }
+    }
+    // If exclusion doesn't exist, create a new one
+    const newExclusion = new Exclusion({
+      id: uniqueId(8),
+      channelId: video.channel.id,
+      videoId,
+      rationale,
+      timestamp: new Date(),
+    })
+    video.isExcluded = true
+    await em.save([newExclusion, video])
+
+    // in case account exist deposit notification
+    const channelOwnerMemberId = video.channel.ownerMemberId
+    if (channelOwnerMemberId) {
+      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      await addNotification(
+        em,
+        account,
+        new ChannelRecipient({ channel: video.channel.id }),
+        new VideoExcluded({ videoTitle: parseVideoTitle(video) })
+      )
+    }
+
+    return {
+      id: newExclusion.id,
+      videoId,
+      created: true,
+      createdAt: newExclusion.timestamp,
+      rationale,
+    }
+  })
 }

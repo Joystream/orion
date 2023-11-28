@@ -1,0 +1,411 @@
+type NotificationEmailDelivery @entity {
+  "Autoincremented"
+  id: ID!
+
+  "the notification being delivered"
+  notification: Notification!
+
+  "notification delivery status"
+  attempts: [EmailDeliveryAttempt!]! @derivedFrom(field: "notificationDelivery")
+
+  "mark as discard after max attempts or successful attempt"
+  discard: Boolean!
+}
+
+type EmailDeliveryAttempt @entity {
+  "UUID"
+  id: ID!
+
+  "notification Fk"
+  notificationDelivery: NotificationEmailDelivery!
+
+  "delivery status"
+  status: DeliveryStatus!
+
+  "datetime"
+  timestamp: DateTime!
+}
+
+union DeliveryStatus = EmailSuccess | EmailFailure
+
+type EmailSuccess @variant {
+  phantom: Int
+}
+
+type EmailFailure @variant {
+  errorStatus: String!
+}
+
+type Read {
+  "timestamp"
+  readAt: DateTime!
+}
+
+type Unread {
+  phantom: Int
+}
+
+union ReadOrUnread = Read | Unread
+
+type Notification @entity {
+  # id is computed as follows
+  # - id = 'offchain' ++ '-' ++ 'offchainGlobalCounter' for offchain notifications "
+  # - id = 'onchain' ++ '-' ++ 'onchainGlobalCounter' for runtime related notifications "
+  # to avoid conflicts during migration
+  id: ID!
+
+  "Member that should recieve the notification"
+  account: Account!
+
+  "type of the notification, used for"
+  notificationType: NotificationType!
+
+  "related event for on chain notifications"
+  event: Event
+
+  "status"
+  status: ReadOrUnread!
+
+  "wether this notification should be displayed in app"
+  inApp: Boolean!
+
+  "timestamp"
+  createdAt: DateTime!
+
+  "recipient"
+  recipient: RecipientType!
+}
+
+union RecipientType = MemberRecipient | ChannelRecipient
+
+type MemberRecipient @variant {
+  "membership"
+  membership: Membership!
+}
+
+type ChannelRecipient @variant {
+  "channel"
+  channel: Channel!
+}
+
+union NotificationType =
+    ChannelExcluded # channel excluded from app
+  | VideoExcluded # video excluded from app
+  | NftFeaturedOnMarketPlace # nft featured on marketplace
+  | NewChannelFollower # new channel follower
+  | CommentPostedToVideo # video comment created
+  | VideoLiked # video liked
+  | VideoDisliked # video disliked
+  | ChannelVerified # ypp channel verified
+  | ChannelSuspended # ypp channel suspended
+  | NftPurchased # nft bought
+  | CreatorReceivesAuctionBid # bid made on nft
+  | NftRoyaltyPaid # royaltiy received
+  | DirectChannelPaymentByMember # channel payment received
+  | ChannelFundsWithdrawn # channel funds withdrawn
+  | ChannelCreated # channel created
+  | CommentReply # reply to comment
+  | ReactionToComment # reaction to comment
+  | VideoPosted # video posted (by followed channel)
+  | NewAuction # new nft on auction
+  | NewNftOnSale # new nft on sale
+  | HigherBidPlaced # higher bid than yours made
+  | AuctionWon # auction won
+  | AuctionLost # auction lost
+type ChannelSuspended @variant {
+  phantom: Int
+}
+
+type NftFeaturedOnMarketPlace @variant {
+  "videoId used for link construction"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+}
+
+type ChannelVerified @variant {
+  "no data needed as recipient is channel"
+  phantom: Int
+}
+
+type ChannelExcluded @variant {
+  "title for the channel used for notification text"
+  channelTitle: String!
+}
+
+type VideoExcluded @variant {
+  "video title used for notification text"
+  videoTitle: String!
+}
+
+type NewChannelFollower @variant {
+  "follower member id for the avatar and the link"
+  followerId: String!
+
+  "follower member handle for the text"
+  followerHandle: String!
+}
+
+type CommentPostedToVideo @variant {
+  "video title used for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "commenter id for the avatar"
+  memberId: String!
+
+  "commenter handle for text"
+  memberHandle: String!
+
+  "id for the comment used for the link"
+  comentId: String!
+}
+
+type VideoLiked @variant {
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "id for the member that dropped the like"
+  memberId: String!
+
+  "handle for the member that dropped the like"
+  memberHandle: String!
+}
+
+type VideoDisliked @variant {
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "id for the member that dropped the dislike"
+  memberId: String!
+
+  "handle for the member that dropped the dislike"
+  memberHandle: String!
+}
+
+type NftPurchased @variant {
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "buyer id for notification the avatar"
+  buyerId: String!
+
+  "buyer handle for notification text"
+  buyerHandle: String!
+
+  "price paid"
+  price: BigInt!
+}
+
+type CreatorReceivesAuctionBid @variant {
+  "videoId used for notification link"
+  videoId: String!
+
+  "video title used for notification text"
+  videoTitle: String!
+
+  "bidder id for notification the avatar"
+  bidderId: String!
+
+  "bidder handle for notification text"
+  bidderHandle: String!
+
+  "bid amount"
+  amount: BigInt!
+}
+
+type NftOffered @variant {
+  "videoId used for notification link"
+  videoId: String!
+
+  "video title used for notification text"
+  videoTitle: String!
+
+  "offering amount"
+  amount: BigInt!
+}
+
+type DirectChannelPaymentByMember @variant {
+  "payer id"
+  payerId: String!
+
+  "payer handle"
+  payerHandle: String!
+
+  "amount paid"
+  amount: BigInt!
+}
+
+type EnglishAuctionSettled @variant {
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "price paid"
+  price: BigInt!
+}
+
+type ChannelFundsWithdrawn @variant {
+  "amount"
+  amount: BigInt!
+}
+
+type ChannelCreated @variant {
+  "id for link construction"
+  channelId: String!
+
+  "title for link construction"
+  channelTitle: String!
+}
+
+type CommentReply @variant {
+  "comment Id for the link"
+  commentId: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "member who replied"
+  memberId: String!
+
+  "member who replied"
+  memberHandle: String!
+}
+
+type ReactionToComment @variant {
+  "commentId for link"
+  commentId: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "member who replied"
+  memberId: String!
+
+  "member who replied"
+  memberHandle: String!
+}
+
+type VideoPosted @variant {
+  "video title for notification text"
+  videoTitle: String!
+
+  "channel title for notification text"
+  channelTitle: String!
+
+  "id for the channel used in link construction"
+  channelId: String!
+
+  "video Id used for link"
+  videoId: String!
+}
+
+type NewAuction @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "channel id for notification link"
+  channelId: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+}
+
+type NewNftOnSale @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "channel id for notification link"
+  channelId: String!
+}
+
+type HigherBidPlaced @variant {
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "new bidder id"
+  newBidderId: String!
+
+  "new bidder handle "
+  newBidderHandle: String!
+}
+
+type AuctionWon @variant {
+  "Auction type"
+  type: AuctionType!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+}
+
+type AuctionLost @variant {
+  "Auction type"
+  type: AuctionType!
+
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+}
+
+# design addition: for bid made completing auction so that channel owner is properly notified
+type BidMadeCompletingAuction @variant {
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "bidder handle for notification text"
+  bidderHandle: String!
+
+  "bid amount"
+  amount: BigInt!
+}
+
+type NftRoyaltyPaid @variant {
+  "video title for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "bid amount"
+  amount: BigInt!
+}

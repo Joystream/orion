@@ -56,6 +56,8 @@ import {
   MemberBannedFromChannelEventData,
   Membership,
   Event,
+  DirectChannelPaymentByMember,
+  ChannelRecipient,
 } from '../../model'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
@@ -71,8 +73,10 @@ import {
   EntityAssetProps,
   EntityAssetsMap,
   increaseChannelCumulativeRevenue,
+  getChannelOwnerAccount,
   MetaNumberProps,
 } from './utils'
+import { addNotification } from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -643,7 +647,7 @@ export async function processChannelPaymentFromMember(
     paymentContext.channel = channel.id
   }
 
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new ChannelPaymentMadeEventData({
       payer: member.id,
@@ -654,8 +658,16 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  increaseChannelCumulativeRevenue(channel, amount)
+  const ownerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    ownerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    new DirectChannelPaymentByMember({ amount, payerId: member.id, payerHandle: member.handle }),
+    event
+  )
 
+  increaseChannelCumulativeRevenue(channel, amount)
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,
   })

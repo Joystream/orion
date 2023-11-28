@@ -1,9 +1,10 @@
-import { EntityManager } from 'typeorm'
-import fs from 'fs'
-import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import fs from 'fs'
+import path from 'path'
+import { EntityManager } from 'typeorm'
 import { uniqueId } from './crypto'
+import { defaultNotificationPreferences } from './notification/helpers'
 import { NextEntityId } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
@@ -12,6 +13,9 @@ const exportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
+  Exclusion: true,
+  ChannelVerification: true,
+  ChannelSuspension: true,
   GatewayConfig: true,
   NftFeaturingRequest: true,
   VideoHero: true,
@@ -21,8 +25,10 @@ const exportedStateMap = {
   Session: true,
   User: true,
   Account: true,
+  Notification: true,
+  NotificationEmailDelivery: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -70,6 +76,19 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
   return data
 }
 
+function migrateExportDataToV320(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    // account will find himself with all notification pref. enabled by default
+    account.notificationPreferences = defaultNotificationPreferences()
+    // referrer channel id is set to null
+    account.referrerChannelId = null
+  })
+
+  // all channels will start as unverified because they are re-synched from mappings
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
@@ -77,9 +96,15 @@ export class OffchainState {
   private globalCountersMigration = {
     // destination version : [global counters names]
     '3.0.1': ['Account'],
+    '3.0.2': ['Account'],
+    '3.0.3': ['Account'],
+    '3.0.4': ['Account'],
+    '3.1.0': ['Account'],
+    '3.2.0': ['Account'],
   }
 
   private migrations: Migrations = {
+    '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
 
@@ -147,7 +172,7 @@ export class OffchainState {
   public prepareExportData(exportState: ExportedState, em: EntityManager): ExportedData {
     let { data } = exportState
     Object.entries(this.migrations)
-      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b))
+      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)) // sort in increasing order
       .forEach(([version, fn]) => {
         if (this.versionToNumber(exportState.orionVersion || '0') < this.versionToNumber(version)) {
           this.logger.info(`Migrating export data to version ${version}`)
@@ -233,9 +258,6 @@ export class OffchainState {
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
-    // migrate counters for NextEntityId
-    const { orionVersion } = exportFile
-    await this.migrateCounters(orionVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)

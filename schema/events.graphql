@@ -18,17 +18,6 @@ type Event @entity {
   data: EventData!
 }
 
-type Notification @entity {
-  "Autoincremented"
-  id: ID!
-
-  "Member that should recieve the notification"
-  member: Membership!
-
-  "The notification event"
-  event: Event!
-}
-
 type NftHistoryEntry @entity {
   "Autoincremented"
   id: ID!
@@ -52,11 +41,15 @@ type NftActivity @entity {
 }
 
 union EventData =
-    CommentCreatedEventData
+    ChannelCreatedEventData
+  | VideoCreatedEventData
+  | CommentCreatedEventData
+  | CommentReactionEventData
   | CommentTextUpdatedEventData
   | OpenAuctionStartedEventData
   | EnglishAuctionStartedEventData
   | NftIssuedEventData
+  | NftOfferedEventData
   | AuctionBidMadeEventData
   | AuctionBidCanceledEventData
   | AuctionCanceledEventData
@@ -76,6 +69,19 @@ union EventData =
   | MemberBannedFromChannelEventData
   | ChannelAssetsDeletedByModeratorEventData
   | VideoAssetsDeletedByModeratorEventData
+  | VideoReactionEventData
+
+# Needed when adding a new runtime notification
+type CommentReactionEventData {
+  "comment reaction reference"
+  commentReaction: CommentReaction!
+}
+
+# Needed when adding a new runtime notification
+type VideoReactionEventData {
+  "video reaction reference"
+  videoReaction: VideoReaction!
+}
 
 # Atlas use-case: `GetCommentEdits` query
 type CommentCreatedEventData {
@@ -102,11 +108,11 @@ type OpenAuctionStartedEventData {
   "Actor that started this auction."
   actor: ContentActor!
 
-  "Nft owner at the time it was put on an auction."
-  nftOwner: NftOwner!
-
   "Auction started."
   auction: Auction!
+
+  "owner of the NFT being auctioned"
+  nftOwner: NftOwner!
 }
 
 # Atlas use-case: `GetNftActivities` and `GetNftHistory` query
@@ -114,7 +120,7 @@ type EnglishAuctionStartedEventData {
   "Actor that started this auction."
   actor: ContentActor!
 
-  "Nft owner at the time it was put on an auction."
+  "owner of the NFT being auctioned"
   nftOwner: NftOwner!
 
   "Auction started."
@@ -133,7 +139,7 @@ type NftIssuedEventData {
   nftOwner: NftOwner!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type AuctionBidMadeEventData {
   "The bid that was submitted "
   bid: Bid!
@@ -166,7 +172,13 @@ type AuctionCanceledEventData {
   auction: Auction!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Use case Notification event deposit
+type NftOfferedEventData {
+  "Nft owner at the time the nft was offered"
+  nftOwner: NftOwner!
+}
+
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type EnglishAuctionSettledEventData {
   "English auction winning bid"
   winningBid: Bid!
@@ -175,7 +187,7 @@ type EnglishAuctionSettledEventData {
   previousNftOwner: NftOwner!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type BidMadeCompletingAuctionEventData {
   "Bid that completed the auction"
   winningBid: Bid!
@@ -211,7 +223,7 @@ type NftSellOrderMadeEventData {
   price: BigInt!
 }
 
-# Atlas use-case: `GetNftActivities`, `GetNftHistory` and `GetNotifications` query
+# Atlas use-case: `GetNftActivities`, `GetNftHistory`
 type NftBoughtEventData {
   "The NFT that was bought"
   nft: OwnedNft!
@@ -251,6 +263,19 @@ type BuyNowPriceUpdatedEventData {
 
   "New sell order price."
   newPrice: BigInt!
+}
+
+type ChannelCreatedEventData {
+  "channel just created"
+  channel: Channel!
+}
+
+type VideoCreatedEventData {
+  "channel the video lives in"
+  channel: Channel!
+
+  "video just created"
+  video: Video!
 }
 
 type MetaprotocolTransactionResultCommentCreated {
