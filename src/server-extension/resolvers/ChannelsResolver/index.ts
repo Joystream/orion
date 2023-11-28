@@ -340,7 +340,7 @@ export class ChannelsResolver {
     })
   }
 
-  @Mutation(() => SuspendChannelResult)
+  @Mutation(() => [SuspendChannelResult])
   @UseMiddleware(OperatorOnly())
   async suspendChannels(
     @Args() { channelIds }: SuspendChannelArgs
@@ -395,10 +395,9 @@ export class ChannelsResolver {
       }
 
       const limit = pLimit(5) // Limit to 5 concurrent promises
+      const existingChannels = channels.filter((channel) => channel)
       return await Promise.all(
-        channels
-          .filter((channel) => channel)
-          .map((channel) => limit(async () => await suspendChannel(channel)))
+        existingChannels.map((channel) => limit(async () => await suspendChannel(channel)))
       )
     })
   }
@@ -528,10 +527,9 @@ export const verifyChannelService = async (em: EntityManager, channelIds: string
     }
 
     const limit = pLimit(5) // Limit to 5 concurrent promises
+    const existingChannels = channels.filter((channel) => channel)
     return await Promise.all(
-      channels
-        .filter((channel) => channel)
-        .map((channel) => limit(async () => await verifyChannel(channel)))
+      existingChannels.map((channel) => limit(async () => await verifyChannel(channel)))
     )
   })
 }
