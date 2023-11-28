@@ -263,3 +263,32 @@ async function saveNextNotificationId(
   })
   await em.save(nextEntityId)
 }
+
+const JOY_DECIMAL = 10
+export const formatJOY = (hapiAmount: bigint | number): string => {
+  const [intPart, decPart] = splitInt(String(hapiAmount), JOY_DECIMAL)
+
+  const formatedIntPart = chunkFromEnd(intPart, 3).join(' ') || '0'
+
+  const fractionDigits = (decPart.match(/[1-9]/)?.index ?? -1) + 1
+  const roundedDecPart =
+    fractionDigits === 0
+      ? ''
+      : !intPart && fractionDigits > 2
+      ? roundDecPart(decPart, fractionDigits).replace(/\.?0+$/, '')
+      : roundDecPart(decPart, 2).replace(/^\.00/, '')
+
+  return `${formatedIntPart}${roundedDecPart} $JOY`
+}
+const splitInt = (numStr: string, decimalSize: number): [string, string] => {
+  const intPart = numStr.slice(0, -decimalSize) ?? ''
+  const decPart = numStr.slice(-decimalSize).padStart(decimalSize, '0') || '0'
+  return [intPart, decPart]
+}
+const chunkFromEnd = (str: string, interval: number): string[] =>
+  Array.from({ length: Math.floor((str.length - 1) / interval) }).reduce(
+    ([head, ...tail]: string[]) => [head.slice(0, -interval), head.slice(-interval), ...tail],
+    [str]
+  )
+const roundDecPart = (decPart: string, fractionDigits: number): string =>
+  Number(`.${decPart}`).toFixed(fractionDigits).slice(1)
