@@ -530,7 +530,6 @@ export const verifyChannelService = async (em: EntityManager, channelIds: string
     const existingChannels = channels.filter((channel) => channel)
     return await Promise.all(
       existingChannels.map((channel) => limit(async () => await verifyChannel(channel)))
-
     )
   })
 }
