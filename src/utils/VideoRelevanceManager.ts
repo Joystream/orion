@@ -27,23 +27,23 @@ export class VideoRelevanceManager {
       defaultChannelWeight,
     ] = await config.get(ConfigVariable.RelevanceWeights, em)
     const channelWeight = defaultChannelWeight ?? 1
+    const wtEpoch = `((
+          extract(epoch from video.created_at)*${joystreamTimestampWeight} +
+          COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
+        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight})`
+
     await em.query(`
         WITH videos_with_weight AS (
         SELECT 
         video.id as videoId,
         channel.id as channelId,
         (ROUND((
-        (extract(epoch from now()) - 
-        ((
-          extract(epoch from video.created_at)*${joystreamTimestampWeight} +
-          COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
-        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight})) / ${NEWNESS_SECONDS_DIVIDER} * ${
-      newnessWeight * -1
-    } +
-        (views_num * ${viewsWeight}) +
-        (comments_count * ${commentsWeight}) +
-        (reactions_count * ${reactionsWeight})) * 
-        COALESCE(channel.channel_weight, ${channelWeight}),2)) as videoRelevance
+        (extract(epoch from now()) - ${wtEpoch})
+        / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} 
+        + (views_num * ${viewsWeight}) 
+        + (comments_count * ${commentsWeight}) 
+        + (reactions_count * ${reactionsWeight})) 
+        * COALESCE(channel.channel_weight, ${channelWeight}),2)) as videoRelevance
         FROM video
         INNER JOIN channel  ON video.channel_id = channel.id),
         
