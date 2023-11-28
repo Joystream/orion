@@ -31,7 +31,7 @@ export class VideoRelevanceManager {
         WITH videos_with_weight AS (
         SELECT 
         video.id as videoId,
-        c.id as channelId,
+        channel.id as channelId,
         (ROUND((
         (extract(epoch from now()) - 
         ((
@@ -52,14 +52,14 @@ export class VideoRelevanceManager {
         channel.id as channelId,
         MAX(videoCte.videoRelevance) as maxChannelRelevance
         FROM channel
-        INNER JOIN videos_with_weight as videoCte on videoCte.cId = channel.id
+        INNER JOIN videos_with_weight as videoCte on videoCte.channelId = channel.id
         GROUP BY channel.id)
         
         UPDATE video
-        SET video_relevance = COALESCE(topChannelVideo.maxScore, 1) 
+        SET video_relevance = COALESCE(topChannelVideo.maxChannelRelevance, 1) 
         FROM videos_with_weight as videoCte
-        LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.cId and topChannelVideo.maxScore = videoCte.videoRelevance
-        WHERE video.id = videoCte.vId;
+        LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.channelId and topChannelVideo.maxChannelRelevance = videoCte.videoRelevance
+        WHERE video.id = videoCte.videoId;
         `)
   }
 
