@@ -241,25 +241,28 @@ async function processVideoReaction(
     if (video.channelId) {
       const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
       if (channelOwnerMemberId) {
-        const memberHandle = await memberHandleById(overlay, memberId)
-        const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
-        const reactionData = {
-          videoId: video.id,
-          videoTitle: parseVideoTitle(video),
-          memberId,
-          memberHandle,
+        if (channelOwnerMemberId !== memberId) {
+          // don't notify channel owner if he's the one who reacted
+          const memberHandle = await memberHandleById(overlay, memberId)
+          const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
+          const reactionData = {
+            videoId: video.id,
+            videoTitle: parseVideoTitle(video),
+            memberId,
+            memberHandle,
+          }
+          const reaction =
+            reactionType === VideoReactionOptions.LIKE
+              ? new VideoLiked(reactionData)
+              : new VideoDisliked(reactionData)
+          await addNotification(
+            overlay,
+            channelOwnerAccount,
+            new ChannelRecipient({ channel: video.channelId }),
+            reaction,
+            event
+          )
         }
-        const reaction =
-          reactionType === VideoReactionOptions.LIKE
-            ? new VideoLiked(reactionData)
-            : new VideoDisliked(reactionData)
-        await addNotification(
-          overlay,
-          channelOwnerAccount,
-          new ChannelRecipient({ channel: video.channelId }),
-          reaction,
-          event
-        )
       }
     }
   }
