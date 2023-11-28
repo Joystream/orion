@@ -395,8 +395,8 @@ export async function processReactCommentMessage(
       }),
     })
 
-    // add notification
-    if (comment.authorId) {
+    // add notification if comment author is not the member who reacted
+    if (memberId !== comment.authorId && comment.authorId) {
       const commentAuthorAccount = await getAccountForMember(overlay, comment.authorId)
 
       const notificationData = {
