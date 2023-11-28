@@ -46,6 +46,8 @@ import { addNotification } from '../../utils/notification'
 export async function processChannelCreatedEvent({
   overlay,
   block,
+  extrinsicHash,
+  indexInBlock,
   event,
 }: EventHandlerContext<'Content.ChannelCreated'>) {
   const [
@@ -74,7 +76,6 @@ export async function processChannelCreatedEvent({
     videoViewsNum: 0,
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
-    cumulativeRewardClaimed: BigInt(0),
     yppStatus: new YppUnverified(),
     cumulativeRewardClaimed: 0n,
     cumulativeReward: 0n,

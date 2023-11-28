@@ -884,12 +884,6 @@ export async function addRoyaltyPaymentNotification(
   )
 }
 
-export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
-  const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
-  const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
-  return royaltyPrice
-}
-
 export function parseChannelTitle(channel: Flat<Channel>): string {
   return channel.title || FALLBACK_CHANNEL_TITLE
 }
