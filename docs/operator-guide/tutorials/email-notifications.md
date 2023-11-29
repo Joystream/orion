@@ -5,6 +5,7 @@ This feature has been introduced in Orion starting from version 3.2.0
 The current implementation uses a chron job for executing the
 `src/lib/mail-scheduler/index.js` script at every specified interval.
 One execution of the above script file will make all the pending email notifications to be send. The plan in the future is to combine all the email for a particular account in a digest form.
+It's important to remark that currently we only support [Sendgrid](https://sendgrid.com) as transactional email service
 
 ## Sendgrid configuration
 Configure the `.env` variables with:
