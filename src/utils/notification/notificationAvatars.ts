@@ -6,10 +6,10 @@ import { getAssetUrls } from '../../server-extension/resolvers/AssetsResolver/ut
 import { ConfigVariable, config } from '../config'
 
 export const getNotificationAvatar = memoize(
-  async (em: EntityManager, type: 'channelId' | 'membershipId', param: string): Promise<string> => {
+  async (em: EntityManager, type: 'channelId' | 'membershipId', id: string): Promise<string> => {
     switch (type) {
       case 'channelId': {
-        const channel = await em.getRepository(Channel).findOneBy({ id: param })
+        const channel = await em.getRepository(Channel).findOneBy({ id })
         const objectId = channel?.avatarPhotoId
         if (!objectId) break
 
@@ -21,7 +21,7 @@ export const getNotificationAvatar = memoize(
       }
 
       case 'membershipId': {
-        const member = await em.getRepository(MemberMetadata).findOneBy({ id: param })
+        const member = await em.getRepository(MemberMetadata).findOneBy({ id })
         const avatar = member?.avatar
 
         // AvatarObject is not yet supported
@@ -34,5 +34,6 @@ export const getNotificationAvatar = memoize(
     // Fallback to a placeholder
     const notificationAssetRoot = await config.get(ConfigVariable.AppAssetStorage, em)
     return `${notificationAssetRoot}/placeholder/avatar.png`
-  }
+  },
+  (_, type, id) => `${type}:${id}`
 )
