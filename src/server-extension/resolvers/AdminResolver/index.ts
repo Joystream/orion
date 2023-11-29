@@ -173,7 +173,6 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly())
-  @Mutation(() => AppRootDomain)
   @Mutation(() => Int)
   async setNewNotificationCenterPath(
     @Args() args: SetMaxAttemptsOnMailDeliveryInput
