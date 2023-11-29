@@ -13,6 +13,8 @@ If you're on a Linux server you can use the [convinience script](https://docs.do
 
 You will also need to own a domain where you'll be hosting your Orion instance. In this guide we'll be using `mygateway.com` as an example domain. To be able to use subdomains like `auth.mygateway.com` and `query.mygateway.com` you need to make sure that your domain is either configured with a [wildcard DNS record](https://developers.cloudflare.com/dns/manage-dns-records/reference/wildcard-dns-records/) or that you have added a separate DNS record for each of the subdomains.
 
+You will also need a sendgrid account with an api key in order to have email notifications being send.
+
 ## Step-by-step guide
 
 1. Copy the `.env`, `docker-compose.yml`, `postgres.conf` and `Caddyfile` from the [`examples`](../examples/) directory to your server.
@@ -21,6 +23,7 @@ You will also need to own a domain where you'll be hosting your Orion instance. 
     1. Fill in all the secrets (`OPERATOR_SECRET`, `APP_PRIVATE_KEY`, `COOKIE_SECRET`) with proper, randomly generated values
     1. **Make sure that `ORION_ENV` is set to `production`!**
     1. Set `GATEWAY_ROOT_DOMAIN` to your Gateway's root domain, in our example case it'll be `mygateway.com`
+    1. Configure the email notification scheduler chron job in order to have notification delivery via email (see: [Email Notifications](./email-notifications.md))
 1. Prepare a production build of the Atlas app. Assuming you have already cloned the Atlas repository and configured the environment variables inside `packages/atlas/src/.env` as described in the [Atlas operator guide](https://github.com/Joystream/atlas/blob/master/docs/operator-guide.md), you'll also need to:
     1. Make sure the `VITE_ENV` value is set to `production`
     1. Set `VITE_PRODUCTION_ORION_AUTH_URL` to your Orion Auth API endpoint (`https://auth.mygateway.com/api/v1` in our example case)
