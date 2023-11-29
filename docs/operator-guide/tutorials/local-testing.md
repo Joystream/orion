@@ -127,6 +127,11 @@ Below you can find a list of all tutorials that explain how to perform various a
 - [Excluding (censoring) content](./tutorials/excluding-content.md)
 - [Featuring content](./tutorials/featuring-content.md)
 
+### Email notifications scheduler
+
+In order to allow notification delivery via email, follow the steps detailed in [Email Notifications](./email-notifications.md).
+
+
 ## Testing with Atlas
 
 You can test your local Orion instance with the local Atlas dev server, launched via `yarn atlas:dev`.

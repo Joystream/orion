@@ -8,30 +8,18 @@ import {
 import _ from 'lodash'
 import { globalEm } from '../../../utils/globalEm'
 import { performance } from 'perf_hooks'
-import urljoin from 'url-join'
 import { Context } from '@subsquid/openreader/lib/context'
-import haversineDistance from 'haversine-distance'
-import { createLogger, Logger } from '@subsquid/logger'
+import { Logger } from '@subsquid/logger'
 
-const rootLogger = createLogger('api:assets')
+import {
+  BucketsById,
+  Coordinates,
+  DistributionBucketCachedData,
+  DistributionBucketIdsByBagId,
+} from './types'
+import { getAssetUrls, locationLogger, rootLogger } from './utils'
 
-type Coordinates = {
-  lat: number
-  lon: number
-}
-type NodeData = {
-  location?: Coordinates
-  endpoint: string
-}
-
-type DistributionBucketCachedData = {
-  nodes: NodeData[]
-}
-
-type DistributionBucketIdsByBagId = Map<string, string[]>
-type BucketsById = Map<string, DistributionBucketCachedData>
-
-class DistributionBucketsCache {
+export class DistributionBucketsCache {
   protected bucketIdsByBagId: DistributionBucketIdsByBagId
   protected bucketsById: BucketsById
   protected em: EntityManager
@@ -172,11 +160,6 @@ class DistributionBucketsCache {
   }
 }
 
-const distributionBucketsCache = new DistributionBucketsCache()
-distributionBucketsCache.init(6000)
-
-const locationLogger = rootLogger.child('location')
-
 function isValidLat(lat: number | undefined): lat is number {
   if (lat === undefined) {
     return false
@@ -189,21 +172,6 @@ function isValidLon(lon: number | undefined): lon is number {
     return false
   }
   return !Number.isNaN(lon) && lon >= -180 && lon <= 180
-}
-
-function getDistance(node: NodeData, clientLoc: Coordinates) {
-  return node.location ? haversineDistance(clientLoc, node.location) : Infinity
-}
-
-function sortNodesByClosest(nodes: NodeData[], clientLoc: Coordinates): void {
-  nodes.sort((nodeA, nodeB) => getDistance(nodeA, clientLoc) - getDistance(nodeB, clientLoc))
-  nodes.forEach((n) => {
-    locationLogger.trace(
-      `Node: ${JSON.stringify(n)}, Client loc: ${JSON.stringify(
-        clientLoc
-      )}, Distance: ${getDistance(n, clientLoc)}`
-    )
-  })
 }
 
 function getClientLoc(ctx: Context): Coordinates | undefined {
@@ -255,23 +223,13 @@ export class AssetsResolver {
         'incorrect query: to use resolvedUrls make sure to add storageBag.id into query for StorageDataObject'
       )
     }
-    const clientLoc = await getClientLoc(ctx)
-    const limit = await getResolvedUrlsLimit(ctx)
+
+    const clientLoc = getClientLoc(ctx)
+    const limit = getResolvedUrlsLimit(ctx)
+
     // The resolvedUrl field is initially populated with the object ID
     const [objectId] = object.resolvedUrls
-    if (!object.storageBag?.id || !objectId) {
-      return []
-    }
-    const buckets = await distributionBucketsCache.getBucketsByBagId(object.storageBag.id)
-    const nodes = buckets.flatMap((b) => b.nodes)
-    if (clientLoc) {
-      sortNodesByClosest(nodes, clientLoc)
-    } else {
-      nodes.sort(() => (_.random(0, 1) ? 1 : -1))
-    }
 
-    return nodes
-      .slice(0, limit || nodes.length)
-      .map((n) => urljoin(n.endpoint, 'api/v1/assets/', objectId))
+    return await getAssetUrls(objectId, object.storageBag.id, { clientLoc, limit })
   }
 }

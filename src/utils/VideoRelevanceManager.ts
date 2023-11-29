@@ -20,7 +20,9 @@ export class VideoRelevanceManager {
   }
 
   scheduleRecalcForVideo(id: string | null | undefined) {
-    id && this.videosToUpdate.add(id)
+    if (id) {
+      this.videosToUpdate.add(id)
+    }
   }
 
   async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {

@@ -63,19 +63,25 @@ module.exports = class Views2000000000000 {
         `("type"->>'channel' IS NULL OR EXISTS(SELECT 1 FROM "channel" WHERE "id"="type"->>'channel'))`,
         `("type"->>'video' IS NULL OR EXISTS(SELECT 1 FROM "video" WHERE "id"="type"->>'video'))`
       ],
-      notification: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
       // HIDDEN entities
       video_view_event: ['FALSE'],
       channel_follow: ['FALSE'],
       report: ['FALSE'],
+      exclusion: ['FALSE'],
       session: ['FALSE'],
+      notification_email_delivery: ['FALSE'],
+      channel_verification: ['FALSE'],
+      channel_suspension: ['FALSE'],
       user: ['FALSE'],
       account: ['FALSE'],
       token: ['FALSE'],
       nft_featuring_request: ['FALSE'],
       gateway_config: ['FALSE'],
+      email_delivery_attempt: ['FALSE'],
+      // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
+      // notification: ['FALSE'],
     }
   }
 

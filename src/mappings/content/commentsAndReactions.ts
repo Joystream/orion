@@ -17,35 +17,49 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
+  ChannelRecipient,
   Comment,
   CommentCreatedEventData,
+  CommentPostedToVideo,
   CommentReaction,
+  CommentReactionEventData,
   CommentReactionsCountByReactionId,
+  CommentReply,
   CommentStatus,
   CommentTextUpdatedEventData,
   Event,
+  MemberRecipient,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
   MetaprotocolTransactionResultCommentEdited,
   MetaprotocolTransactionResultOK,
+  ReactionToComment,
   Video,
   VideoCategory,
+  VideoDisliked,
+  VideoLiked,
   VideoReaction,
+  VideoReactionEventData,
   VideoReactionOptions,
   VideoReactionsCountByReactionType,
 } from '../../model'
 import { config, ConfigVariable } from '../../utils/config'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
-  addNotification,
   backwardCompatibleMetaID,
   genericEventFields,
   metaprotocolTransactionFailure,
   commentCountersManager,
   videoRelevanceManager,
 } from '../utils'
-import { getChannelOwnerMemberByChannelId } from './utils'
+import {
+  getAccountForMember,
+  getChannelOwnerMemberByChannelId,
+  memberHandleById,
+  parseVideoTitle,
+} from './utils'
+import { addNotification } from '../../utils/notification'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -170,9 +184,11 @@ function unexpectedCommentStatusError<T>(
   })
 }
 
-function processVideoReaction(
+async function processVideoReaction(
   overlay: EntityManagerOverlay,
   block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
   memberId: string,
   video: Flat<Video>,
   reactionType: VideoReactionOptions,
@@ -215,12 +231,48 @@ function processVideoReaction(
   } else {
     ++video.reactionsCount
     ++newReactionTypeCounter.count
+    const event = overlay.getRepository(Event).new({
+      ...genericEventFields(overlay, block, indexInBlock, txHash),
+      // add videoreactionevent data as data
+      data: new VideoReactionEventData({
+        videoReaction: videoReaction.id,
+      }),
+    })
+    if (video.channelId) {
+      const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
+      if (channelOwnerMemberId) {
+        if (channelOwnerMemberId !== memberId) {
+          // don't notify channel owner if he's the one who reacted
+          const memberHandle = await memberHandleById(overlay, memberId)
+          const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
+          const reactionData = {
+            videoId: video.id,
+            videoTitle: parseVideoTitle(video),
+            memberId,
+            memberHandle,
+          }
+          const reaction =
+            reactionType === VideoReactionOptions.LIKE
+              ? new VideoLiked(reactionData)
+              : new VideoDisliked(reactionData)
+          await addNotification(
+            overlay,
+            channelOwnerAccount,
+            new ChannelRecipient({ channel: video.channelId }),
+            reaction,
+            event
+          )
+        }
+      }
+    }
   }
 }
 
 export async function processReactVideoMessage(
   overlay: EntityManagerOverlay,
   block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
   memberId: string,
   message: DecodedMetadataObject<IReactVideo>
 ): Promise<MetaprotocolTransactionResult> {
@@ -255,7 +307,16 @@ export async function processReactVideoMessage(
     .getRepository(VideoReaction)
     .getById(videoReactionEntityId({ memberId, videoId }))
 
-  await processVideoReaction(overlay, block, memberId, video, reactionType, existingReaction)
+  await processVideoReaction(
+    overlay,
+    block,
+    indexInBlock,
+    txHash,
+    memberId,
+    video,
+    reactionType,
+    existingReaction
+  )
 
   videoRelevanceManager.scheduleRecalcForVideo(video.id)
 
@@ -264,6 +325,9 @@ export async function processReactVideoMessage(
 
 export async function processReactCommentMessage(
   overlay: EntityManagerOverlay,
+  block: SubstrateBlock,
+  indexInBlock: number,
+  txHash: string | undefined,
   memberId: string,
   message: DecodedMetadataObject<IReactComment>
 ): Promise<MetaprotocolTransactionResult> {
@@ -309,8 +373,9 @@ export async function processReactCommentMessage(
     commentReactionRepository.remove(existingReaction)
   } else {
     // new reaction
+    const id = commentReactionEntityId({ memberId, commentId, reactionId })
     commentReactionRepository.new({
-      id: commentReactionEntityId({ memberId, commentId, reactionId }),
+      id,
       commentId: comment.id,
       reactionId,
       videoId: video.id,
@@ -320,6 +385,35 @@ export async function processReactCommentMessage(
     // increment counters
     ++reactionsCountByReactionId.count
     ++comment.reactionsCount
+
+    // create Event entity
+    const event = overlay.getRepository(Event).new({
+      ...genericEventFields(overlay, block, indexInBlock, txHash),
+      // add commentreactionevent data as data
+      data: new CommentReactionEventData({
+        commentReaction: id,
+      }),
+    })
+
+    // add notification if comment author is not the member who reacted
+    if (memberId !== comment.authorId && comment.authorId) {
+      const commentAuthorAccount = await getAccountForMember(overlay, comment.authorId)
+
+      const notificationData = {
+        commentId: comment.id,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        memberId,
+        memberHandle: await memberHandleById(overlay, memberId),
+      }
+      await addNotification(
+        overlay,
+        commentAuthorAccount,
+        new MemberRecipient({ membership: comment.authorId }),
+        new ReactionToComment(notificationData),
+        event
+      )
+    }
   }
 
   // schedule comment counters update
@@ -405,7 +499,6 @@ export async function processCreateCommentMessage(
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
   videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
 
-  // add CommentCreated event
   const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new CommentCreatedEventData({
@@ -416,14 +509,45 @@ export async function processCreateCommentMessage(
 
   if (parentComment) {
     // Notify parent comment author (unless he's the author of the created comment)
-    if (parentComment.authorId !== comment.authorId) {
-      addNotification(overlay, [parentComment.authorId], event.id)
+    if (parentComment.authorId !== comment.authorId && comment.authorId) {
+      const authorAccount = await getAccountForMember(overlay, parentComment.authorId)
+      const notificationData = {
+        commentId: comment.id,
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        memberHandle: await memberHandleById(overlay, memberId),
+        memberId,
+      }
+      const memberRecipientId = parentComment.authorId || undefined
+      await addNotification(
+        overlay,
+        authorAccount,
+        new MemberRecipient({ membership: memberRecipientId }),
+        new CommentReply(notificationData),
+        event
+      )
     }
   } else {
     // Notify channel owner (unless he's the author of the created comment)
     const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, channelId)
-    if (channelOwnerMemberId !== comment.authorId) {
-      addNotification(overlay, [channelOwnerMemberId], event.id)
+    if (channelOwnerMemberId && channelOwnerMemberId !== comment.authorId) {
+      const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
+      const authorId = assertNotNull(comment.authorId)
+      const authorHandle = await memberHandleById(overlay, authorId)
+      const notificationData = {
+        videoId: video.id,
+        videoTitle: parseVideoTitle(video),
+        memberId: authorId,
+        memberHandle: authorHandle,
+        comentId: comment.id,
+      }
+      await addNotification(
+        overlay,
+        channelOwnerAccount,
+        new ChannelRecipient({ channel: channelId }),
+        new CommentPostedToVideo(notificationData),
+        event
+      )
     }
   }
 

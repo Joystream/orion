@@ -67,6 +67,23 @@ type Channel @entity {
 
   "Weight/Bias of the channel affecting video relevance in the Homepage"
   channelWeight: Float
+
+  "Channel Ypp Status: either unverified , verified or suspended"
+  yppStatus: ChannelYppStatus!
+}
+
+union ChannelYppStatus = YppUnverified | YppVerified | YppSuspended
+
+type YppUnverified {
+  phantom: Int
+}
+
+type YppVerified {
+  verification: ChannelVerification!
+}
+
+type YppSuspended {
+  suspension: ChannelSuspension!
 }
 
 type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
@@ -74,4 +91,26 @@ type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
   id: ID!
   member: Membership!
   channel: Channel!
+}
+
+type ChannelVerification @entity {
+  "unique Id"
+  id: ID!
+
+  "channel verified"
+  channel: Channel!
+
+  "timestamp of verification"
+  timestamp: DateTime!
+}
+
+type ChannelSuspension @entity {
+  "unique Id"
+  id: ID!
+
+  "channel suspended"
+  channel: Channel!
+
+  "timestamp of suspension"
+  timestamp: DateTime!
 }

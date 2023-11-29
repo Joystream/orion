@@ -126,6 +126,61 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
+
+  "runtime notifications"
+  notifications: [Notification!]! @derivedFrom(field: "account")
+
+  "notification preferences for the account"
+  notificationPreferences: AccountNotificationPreferences!
+
+  "ID of the channel which referred the user to the platform"
+  referrerChannelId: String
+}
+
+type AccountNotificationPreferences {
+  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design:
+  channelExcludedFromApp: NotificationPreference!
+  videoExcludedFromApp: NotificationPreference!
+  nftFeaturedOnMarketPlace: NotificationPreference!
+  newChannelFollower: NotificationPreference!
+  videoCommentCreated: NotificationPreference!
+  videoLiked: NotificationPreference!
+  videoDisliked: NotificationPreference!
+  yppChannelVerified: NotificationPreference!
+  yppSignupSuccessful: NotificationPreference! #v2
+  yppChannelSuspended: NotificationPreference!
+  nftBought: NotificationPreference!
+  creatorTimedAuctionExpired: NotificationPreference! #v2
+  bidMadeOnNft: NotificationPreference!
+  royaltyReceived: NotificationPreference!
+  channelPaymentReceived: NotificationPreference!
+  channelReceivedFundsFromWg: NotificationPreference!
+  newPayoutUpdatedByCouncil: NotificationPreference! #v2
+  channelFundsWithdrawn: NotificationPreference!
+
+  # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
+  channelCreated: NotificationPreference!
+  replyToComment: NotificationPreference!
+  reactionToComment: NotificationPreference!
+  videoPosted: NotificationPreference!
+  newNftOnAuction: NotificationPreference!
+  newNftOnSale: NotificationPreference!
+  timedAuctionExpired: NotificationPreference! #v2
+  higherBidThanYoursMade: NotificationPreference!
+  auctionWon: NotificationPreference!
+  auctionLost: NotificationPreference!
+  openAuctionBidCanBeWithdrawn: NotificationPreference! #v2
+  fundsFromCouncilReceived: NotificationPreference! #v2
+  fundsToExternalWalletSent: NotificationPreference! #v2
+  fundsFromWgReceived: NotificationPreference! # v2
+}
+
+type NotificationPreference {
+  "Notification is enabled in the app"
+  inAppEnabled: Boolean!
+
+  "Allows to send email for the notification"
+  emailEnabled: Boolean!
 }
 
 enum TokenType {

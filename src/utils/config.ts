@@ -10,6 +10,7 @@ export enum ConfigVariable {
   VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
   RelevanceWeights = 'RELEVANCE_WEIGHTS',
   AppPrivateKey = 'APP_PRIVATE_KEY',
+  AppRootDomain = 'APP_ROOT_DOMAIN',
   SessionExpiryAfterInactivityMinutes = 'SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES',
   SessionMaxDurationHours = 'SESSION_MAX_DURATION_HOURS',
   SendgridApiKey = 'SENDGRID_API_KEY',
@@ -19,6 +20,10 @@ export enum ConfigVariable {
   EmailConfirmationTokenExpiryTimeHours = 'EMAIL_CONFIRMATION_TOKEN_EXPIRY_TIME_HOURS',
   EmailConfirmationTokenRateLimit = 'EMAIL_CONFIRMATION_TOKEN_RATE_LIMIT',
   AccountOwnershipProofExpiryTimeSeconds = 'ACCOUNT_OWNERSHIP_PROOF_EXPIRY_TIME_SECONDS',
+  EmailNotificationDeliveryMaxAttempts = 'EMAIL_NOTIFICATION_DELIVERY_MAX_ATTEMPTS',
+  AppAssetStorage = 'APP_ASSET_STORAGE',
+  AppNameAlt = 'APP_NAME_ALT',
+  NotificationAssetRoot = 'NOTIFICATION_ASSET_ROOT',
 }
 
 const boolType = {
@@ -59,6 +64,11 @@ export const configVariables = {
   [ConfigVariable.EmailConfirmationTokenExpiryTimeHours]: intType,
   [ConfigVariable.AccountOwnershipProofExpiryTimeSeconds]: intType,
   [ConfigVariable.EmailConfirmationTokenRateLimit]: intType,
+  [ConfigVariable.AppRootDomain]: stringType,
+  [ConfigVariable.EmailNotificationDeliveryMaxAttempts]: intType,
+  [ConfigVariable.AppAssetStorage]: stringType,
+  [ConfigVariable.AppNameAlt]: stringType,
+  [ConfigVariable.NotificationAssetRoot]: stringType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>

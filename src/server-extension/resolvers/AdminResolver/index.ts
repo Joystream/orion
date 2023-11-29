@@ -9,7 +9,7 @@ import { EntityByIdQuery } from '@subsquid/openreader/lib/sql/query'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
-import { Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
+import { Args, Ctx, Info, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, Not, UpdateResult } from 'typeorm'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import {
@@ -18,6 +18,9 @@ import {
   User,
   Video,
   VideoCategory,
+  Account,
+  ChannelRecipient,
+  NftFeaturedOnMarketPlace,
   VideoFeaturedInCategory,
   VideoHero as VideoHeroEntity,
 } from '../../../model'
@@ -25,9 +28,9 @@ import { ConfigVariable, config } from '../../../utils/config'
 import { withHiddenEntities } from '../../../utils/sql'
 import { VideoHero } from '../baseTypes'
 import { OperatorOnly } from '../middleware'
-import { model } from '../model'
 import {
   AppActionSignatureInput,
+  AppRootDomain,
   ChannelWeight,
   ExcludableContentType,
   ExcludeContentArgs,
@@ -36,6 +39,7 @@ import {
   GrantOperatorPermissionsInput,
   GrantOrRevokeOperatorPermissionsResult,
   KillSwitch,
+  MaxAttemptsOnMailDelivery,
   RestoreContentArgs,
   RestoreContentResult,
   RevokeOperatorPermissionsInput,
@@ -45,6 +49,14 @@ import {
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
+  SetMaxAttemptsOnMailDeliveryInput,
+  SetNewAppAssetStorageInput,
+  SetNewAppAssetStorageResult,
+  SetNewAppNameAltInput,
+  SetNewAppNameAltResult,
+  SetNewNotificationAssetRootInput,
+  SetNewNotificationAssetRootResult,
+  SetRootDomainInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
   SetVideoHeroInput,
@@ -54,12 +66,43 @@ import {
   VideoViewPerUserTimeLimit,
   VideoWeights,
 } from './types'
+import { parseVideoTitle } from '../../../mappings/content/utils'
+import { addNotification } from '../../../utils/notification'
 import { processCommentsCensorshipStatusUpdate } from './utils'
+import { model } from '../model'
 
 @Resolver()
 export class AdminResolver {
   // Set by dependency injection
   constructor(private em: () => Promise<EntityManager>) {}
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => SetNewAppAssetStorageResult)
+  async setAppAssetStorage(
+    @Args() args: SetNewAppAssetStorageInput
+  ): Promise<SetNewAppAssetStorageResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppAssetStorage, args.newAppAssetStorage, em)
+    return { newAppAssetStorage: args.newAppAssetStorage }
+  }
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => SetNewAppNameAltResult)
+  async setAppNameAlt(@Args() args: SetNewAppNameAltInput): Promise<SetNewAppNameAltResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppNameAlt, args.newAppNameAlt, em)
+    return { newAppNameAlt: args.newAppNameAlt }
+  }
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => SetNewNotificationAssetRootResult)
+  async setNewNotificationAssetRoot(
+    @Args() args: SetNewNotificationAssetRootInput
+  ): Promise<SetNewNotificationAssetRootResult> {
+    const em = await this.em()
+    await config.set(ConfigVariable.NotificationAssetRoot, args.newNotificationAssetRoot, em)
+    return { newNotificationAssetRoot: args.newNotificationAssetRoot }
+  }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.GRANT_OPERATOR_PERMISSIONS))
   @Mutation(() => GrantOrRevokeOperatorPermissionsResult)
@@ -113,6 +156,41 @@ export class AdminResolver {
       em
     )
     await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+    return { isApplied: true }
+  }
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => Int)
+  async setMaxAttemptsOnMailDelivery(
+    @Args() args: SetMaxAttemptsOnMailDeliveryInput
+  ): Promise<MaxAttemptsOnMailDelivery> {
+    const em = await this.em()
+    if (args.newMaxAttempts < 1) {
+      throw new Error('Max attempts cannot be less than 1')
+    }
+    await config.set(ConfigVariable.EmailNotificationDeliveryMaxAttempts, args.newMaxAttempts, em)
+    return { maxAttempts: args.newMaxAttempts }
+  }
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => AppRootDomain)
+  @Mutation(() => Int)
+  async setNewNotificationCenterPath(
+    @Args() args: SetMaxAttemptsOnMailDeliveryInput
+  ): Promise<MaxAttemptsOnMailDelivery> {
+    const em = await this.em()
+    if (args.newMaxAttempts < 1) {
+      throw new Error('Max attempts cannot be less than 1')
+    }
+    await config.set(ConfigVariable.EmailNotificationDeliveryMaxAttempts, args.newMaxAttempts, em)
+    return { maxAttempts: args.newMaxAttempts }
+  }
+
+  @UseMiddleware(OperatorOnly())
+  @Mutation(() => AppRootDomain)
+  async setNewAppRootDomain(@Args() args: SetRootDomainInput): Promise<AppRootDomain> {
+    const em = await this.em()
+    await config.set(ConfigVariable.AppRootDomain, args.newRootDomain, em)
     return { isApplied: true }
   }
 
@@ -228,6 +306,7 @@ export class AdminResolver {
       heroVideoCutUrl: args.videoCutUrl,
       video: new Video({ id: args.videoId }),
     })
+
     await em.save(videoHero)
 
     return { id }
@@ -316,28 +395,7 @@ export class AdminResolver {
     @Args() { featuredNftsIds }: SetFeaturedNftsInput
   ): Promise<SetFeaturedNftsResult> {
     const em = await this.em()
-    let newNumberOfNftsFeatured = 0
-
-    await em
-      .createQueryBuilder()
-      .update(`admin.owned_nft`)
-      .set({ is_featured: false })
-      .where({ is_featured: true })
-      .execute()
-
-    if (featuredNftsIds.length) {
-      const result = await em
-        .createQueryBuilder()
-        .update(`admin.owned_nft`)
-        .set({ is_featured: true })
-        .where({ id: In(featuredNftsIds) })
-        .execute()
-      newNumberOfNftsFeatured = result.affected || 0
-    }
-
-    return {
-      newNumberOfNftsFeatured,
-    }
+    return await setFeaturedNftsInner(em, featuredNftsIds)
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.EXCLUDE_CONTENT))
@@ -416,5 +474,55 @@ export class AdminResolver {
     const appKeypair = ed25519PairFromString(await config.get(ConfigVariable.AppPrivateKey, em))
     const signature = ed25519Sign(message, appKeypair)
     return { signature: u8aToHex(signature) }
+  }
+}
+
+export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: string[]) => {
+  let newNumberOfNftsFeatured = 0
+
+  await em
+    .createQueryBuilder()
+    .update(`admin.owned_nft`)
+    .set({ is_featured: false })
+    .where({ is_featured: true })
+    .execute()
+
+  if (featuredNftsIds.length) {
+    const result = await em
+      .createQueryBuilder()
+      .update(`admin.owned_nft`)
+      .set({ is_featured: true })
+      .where({ id: In(featuredNftsIds) })
+      .execute()
+    newNumberOfNftsFeatured = result.affected || 0
+
+    // fetch all featured nfts and deposit notification for their creators
+    for (const featuredNftId of featuredNftsIds) {
+      const featuredNft = await em.getRepository('OwnedNft').findOne({
+        where: { id: featuredNftId },
+        relations: { video: { channel: true } },
+      })
+      if (featuredNft?.video?.channel) {
+        const notificationData = {
+          videoId: featuredNft.video.id,
+          videoTitle: parseVideoTitle(featuredNft.video),
+        }
+        const channelOwnerAccount = featuredNft.video.channel.ownerMemberId
+          ? await em
+              .getRepository(Account)
+              .findOneBy({ membershipId: featuredNft.video.channel.ownerMemberId })
+          : null
+        await addNotification(
+          em,
+          channelOwnerAccount,
+          new ChannelRecipient({ channel: featuredNft.video.channel.id }),
+          new NftFeaturedOnMarketPlace(notificationData)
+        )
+      }
+    }
+  }
+
+  return {
+    newNumberOfNftsFeatured,
   }
 }

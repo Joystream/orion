@@ -191,6 +191,10 @@ export async function createAccountAndSignIn(
   seed?: string
 ): Promise<LoggedInAccountInfo> {
   const accountData = await createAccount(email, password, seed)
+  return await signIn(accountData)
+}
+
+export async function signIn(accountData: AccountAccessData): Promise<LoggedInAccountInfo> {
   const keypair = keyring.addFromUri(`//${accountData.seed}`)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {

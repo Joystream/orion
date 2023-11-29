@@ -17,18 +17,20 @@ type SendMailArgs = {
   content: string
 }
 
-export async function sendMail({ from, to, subject, content }: SendMailArgs) {
+export async function sgSendMail({ from, to, subject, content }: SendMailArgs) {
   if (!process.env.SENDGRID_API_KEY) {
     mailerLogger.info(
       `Skipped sending e-mail:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`
     )
     return
   }
-  await sgMail.send({
+  const [clientResponse] = await sgMail.send({
     from,
     to,
     subject,
     html: content,
   })
-  mailerLogger.info(`E-mail sent:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`)
+  // mailerLogger.info(`E-mail sent:\n${JSON.stringify({ from, to, subject, content }, null, 2)}`)
+
+  return clientResponse
 }
