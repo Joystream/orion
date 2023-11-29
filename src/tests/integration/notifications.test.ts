@@ -365,7 +365,7 @@ describe('notifications tests', () => {
     }
     const event = {
       isV2001: true,
-      asV2001: ['1', metadataToBytes(MemberRemarked, metadataMessage), undefined],
+      asV2001: ['3', metadataToBytes(MemberRemarked, metadataMessage), undefined],
     } as any
     before(async () => {
       overlay = await createOverlay()
