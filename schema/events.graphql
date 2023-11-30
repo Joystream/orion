@@ -70,6 +70,12 @@ union EventData =
   | ChannelAssetsDeletedByModeratorEventData
   | VideoAssetsDeletedByModeratorEventData
   | VideoReactionEventData
+  | CreatorTokenIssuedEventData
+  | CreatorTokenMarketStartedEventData
+  | CreatorTokenMarketMintEventData
+  | CreatorTokenMarketBurnEventData
+  | CreatorTokenSaleStartedEventData
+  | CreatorTokenSaleMintEventData
 
 # Needed when adding a new runtime notification
 type CommentReactionEventData {
@@ -445,3 +451,49 @@ type VideoAssetsDeletedByModeratorEventData {
   "why the video assets were deleted"
   rationale: String!
 }
+
+type CreatorTokenIssuedEventData {
+  "Token that was issued"
+  token: CreatorToken
+}
+
+type CreatorTokenMarketStartedEventData {
+  "Token for which market was created"
+  token: CreatorToken
+
+  "Details of the created market"
+  ammCurve: AmmCurve
+}
+
+type CreatorTokenMarketMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happend"
+  ammMintTransaction: AmmTransaction
+}
+
+type CreatorTokenMarketBurnEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happend"
+  ammBurnTransaction: AmmTransaction
+}
+
+type CreatorTokenSaleStartedEventData {
+  "Token for which sale was created"
+  token: CreatorToken
+
+  "Details of the created sale"
+  sale: Sale
+}
+
+type CreatorTokenSaleMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happend"
+  saleTransaction: SaleTransaction
+}
+

@@ -18,11 +18,18 @@ import {
   CreatorTokenIssued,
   CreatorTokenMarketStarted,
   Channel,
+  Event,
   CreatorTokenSaleStarted,
   CreatorTokenMarketMint,
   Membership,
   CreatorTokenMarketBurn,
   CreatorTokenSaleMint,
+  CreatorTokenIssuedEventData,
+  CreatorTokenMarketStartedEventData,
+  CreatorTokenSaleStartedEventData,
+  CreatorTokenMarketMintEventData,
+  CreatorTokenMarketBurnEventData,
+  CreatorTokenSaleMintEventData,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
@@ -111,6 +118,9 @@ export async function processTokenIssuedEvent({
 
 export async function processCreatorTokenIssuedEvent({
   overlay,
+  block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV1000: [, channelId, tokenId],
   },
@@ -123,6 +133,16 @@ export async function processCreatorTokenIssuedEvent({
 
   const token = await overlay.getRepository(CreatorToken).getById(tokenId.toString())
   const channel = await overlay.getRepository(Channel).getById(channelId.toString())
+
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenIssuedEventData({ token: tokenId.toString() }),
+  })
+
   // CreatorTokenIssued event is dispatch after TokenIssued
   if (token && channel) {
     const notificationData = new CreatorTokenIssued({
@@ -130,8 +150,8 @@ export async function processCreatorTokenIssuedEvent({
       channelId: channelId.toString(),
       channelTitle: parseChannelTitle(channel),
     })
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channelId.toString(), notificationData)
+
+    await notifyChannelFollowers(overlay, channelId.toString(), notificationData, eventEntity)
   }
 }
 
@@ -184,6 +204,9 @@ export async function processAccountDustedByEvent({
 
 export async function processAmmActivatedEvent({
   overlay,
+  block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV2002: [tokenId, , { slope, intercept }],
   },
@@ -208,6 +231,15 @@ export async function processAmmActivatedEvent({
   token.lastPrice = amm.ammInitPrice
   token.currentAmmSaleId = id
 
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenMarketStartedEventData({ token: tokenId.toString(), ammCurve: amm.id }),
+  })
+
   if (channel) {
     const notificationData = new CreatorTokenMarketStarted({
       tokenSymbol: parseCreatorTokenSymbol(token),
@@ -215,14 +247,15 @@ export async function processAmmActivatedEvent({
       channelTitle: parseChannelTitle(channel),
     })
 
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channel.id, notificationData)
+    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
 
 export async function processTokenSaleInitializedEvent({
   overlay,
   block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV1000: [tokenId, , tokenSale, metadataBytes],
   },
@@ -278,6 +311,15 @@ export async function processTokenSaleInitializedEvent({
   token.currentSaleId = sale.id
   token.lastPrice = sale.pricePerUnit
 
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenSaleStartedEventData({ token: tokenId.toString(), sale: sale.id }),
+  })
+
   if (metadataBytes) {
     const metadata = deserializeMetadata(SaleMetadata, metadataBytes)
     if (metadata) {
@@ -293,8 +335,8 @@ export async function processTokenSaleInitializedEvent({
       channelId: tokenChannel.channelId,
       channelTitle: parseChannelTitle(channel),
     })
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channel.id, notificationData)
+
+    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
 
@@ -327,6 +369,8 @@ export async function processPatronageCreditClaimedEvent({
 export async function processTokensBoughtOnAmmEvent({
   overlay,
   block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV2002: [tokenId, memberId, crtMinted, joysDeposited],
   },
@@ -362,6 +406,18 @@ export async function processTokensBoughtOnAmmEvent({
 
   token.lastPrice = tx.pricePerUnit
 
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenMarketMintEventData({
+      token: tokenId.toString(),
+      ammMintTransaction: tx.id,
+    }),
+  })
+
   if (channel) {
     const minter = await overlay.getRepository(Membership).getById(memberId.toString())
     const notificationData = new CreatorTokenMarketMint({
@@ -371,14 +427,16 @@ export async function processTokensBoughtOnAmmEvent({
       minterHandle: minter?.handle ?? 'Someone',
       paiedJoyAmount: joysDeposited,
     })
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channel.id, notificationData)
+
+    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
 
 export async function processTokensSoldOnAmmEvent({
   overlay,
   block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV2002: [tokenId, memberId, crtBurned, joysRecovered],
   },
@@ -411,6 +469,18 @@ export async function processTokensSoldOnAmmEvent({
 
   token.lastPrice = tx.pricePerUnit
 
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenMarketBurnEventData({
+      token: tokenId.toString(),
+      ammBurnTransaction: tx.id,
+    }),
+  })
+
   if (channel) {
     const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
     const notificationData = new CreatorTokenMarketBurn({
@@ -420,14 +490,16 @@ export async function processTokensSoldOnAmmEvent({
       burnerHandle: burnerMember?.handle ?? 'Someone',
       receivedJoyAmount: joysRecovered,
     })
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channel.id, notificationData)
+
+    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
 
 export async function processTokensPurchasedOnSaleEvent({
   overlay,
   block,
+  indexInBlock,
+  extrinsicHash,
   event: {
     asV1000: [tokenId, , amountPurchased, memberId],
   },
@@ -448,7 +520,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const sale = await overlay.getRepository(Sale).getByIdOrFail(token.currentSaleId!)
   sale.tokensSold += amountPurchased
 
-  overlay.getRepository(SaleTransaction).new({
+  const tx = overlay.getRepository(SaleTransaction).new({
     id: overlay.getRepository(SaleTransaction).getNewEntityId(),
     quantity: amountPurchased,
     saleId: sale.id,
@@ -457,6 +529,18 @@ export async function processTokensPurchasedOnSaleEvent({
   })
 
   const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', sale.id)
+
+  const eventEntity = overlay.getRepository(Event).new({
+    id: `${block.height}-${indexInBlock}`,
+    inBlock: block.height,
+    inExtrinsic: extrinsicHash,
+    indexInBlock,
+    timestamp: new Date(block.timestamp),
+    data: new CreatorTokenSaleMintEventData({
+      token: tokenId.toString(),
+      saleTransaction: tx.id,
+    }),
+  })
 
   if (vestingForSale !== undefined) {
     await addVestingScheduleToAccount(
@@ -478,8 +562,8 @@ export async function processTokensPurchasedOnSaleEvent({
       minterHandle: minterMember?.handle ?? 'Someone',
       paiedJoyAmount: sale.pricePerUnit * amountPurchased,
     })
-    // todo add event - its runtime notification
-    await notifyChannelFollowers(overlay, channel.id, notificationData)
+
+    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
 
