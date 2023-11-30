@@ -15,6 +15,14 @@ import {
   InitialIssuanceVestingSource,
   SaleVestingSource,
   CreatorToken,
+  CreatorTokenIssued,
+  CreatorTokenMarketStarted,
+  Channel,
+  CreatorTokenSaleStarted,
+  CreatorTokenMarketMint,
+  Membership,
+  CreatorTokenMarketBurn,
+  CreatorTokenSaleMint,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
@@ -22,6 +30,7 @@ import {
   createAccount,
   getTokenAccountByMemberByToken,
   getTokenAccountByMemberByTokenOrFail,
+  parseCreatorTokenSymbol,
   processTokenMetadata,
   processValidatedTransfers,
   VestingScheduleData,
@@ -33,6 +42,7 @@ import {
   TokenMetadata,
 } from '@joystream/metadata-protobuf'
 import { isSet } from '@joystream/metadata-protobuf/utils'
+import { notifyChannelFollowers, parseChannelTitle } from '../content/utils'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -105,11 +115,24 @@ export async function processCreatorTokenIssuedEvent({
     asV1000: [, channelId, tokenId],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssued'>) {
-  overlay.getRepository(TokenChannel).new({
+  await overlay.getRepository(TokenChannel).new({
     id: overlay.getRepository(TokenChannel).getNewEntityId(),
     channelId: channelId.toString(),
     tokenId: tokenId.toString(),
   })
+
+  const token = await overlay.getRepository(CreatorToken).getById(tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(channelId.toString())
+  // CreatorTokenIssued event is dispatch after TokenIssued
+  if (token && channel) {
+    const notificationData = new CreatorTokenIssued({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: channelId.toString(),
+      channelTitle: parseChannelTitle(channel),
+    })
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channelId.toString(), notificationData)
+  }
 }
 
 export async function processTokenAmountTransferredEvent({
@@ -166,6 +189,11 @@ export async function processAmmActivatedEvent({
   },
 }: EventHandlerContext<'ProjectToken.AmmActivated'>) {
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+
   token.status = TokenStatus.MARKET
   const id = overlay.getRepository(AmmCurve).getNewEntityId()
   const amm = overlay.getRepository(AmmCurve).new({
@@ -179,6 +207,17 @@ export async function processAmmActivatedEvent({
   })
   token.lastPrice = amm.ammInitPrice
   token.currentAmmSaleId = id
+
+  if (channel) {
+    const notificationData = new CreatorTokenMarketStarted({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: tokenChannel.channelId,
+      channelTitle: parseChannelTitle(channel),
+    })
+
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channel.id, notificationData)
+  }
 }
 
 export async function processTokenSaleInitializedEvent({
@@ -189,6 +228,10 @@ export async function processTokenSaleInitializedEvent({
   },
 }: EventHandlerContext<'ProjectToken.TokenSaleInitialized'>) {
   const fundsSourceMemberId = tokenSale.tokensSource
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
 
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(
     overlay,
@@ -243,6 +286,16 @@ export async function processTokenSaleInitializedEvent({
       }
     }
   }
+
+  if (channel) {
+    const notificationData = new CreatorTokenSaleStarted({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: tokenChannel.channelId,
+      channelTitle: parseChannelTitle(channel),
+    })
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channel.id, notificationData)
+  }
 }
 
 export async function processPatronageRateDecreasedToEvent({
@@ -279,6 +332,11 @@ export async function processTokensBoughtOnAmmEvent({
   },
 }: EventHandlerContext<'ProjectToken.TokensBoughtOnAmm'>) {
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+
   token.totalSupply += crtMinted
 
   let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
@@ -303,6 +361,19 @@ export async function processTokensBoughtOnAmmEvent({
   })
 
   token.lastPrice = tx.pricePerUnit
+
+  if (channel) {
+    const minter = await overlay.getRepository(Membership).getById(memberId.toString())
+    const notificationData = new CreatorTokenMarketMint({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: tokenChannel.channelId,
+      mintedTokenAmount: crtMinted,
+      minterHandle: minter?.handle ?? 'Someone',
+      paiedJoyAmount: joysDeposited,
+    })
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channel.id, notificationData)
+  }
 }
 
 export async function processTokensSoldOnAmmEvent({
@@ -313,6 +384,10 @@ export async function processTokensSoldOnAmmEvent({
   },
 }: EventHandlerContext<'ProjectToken.TokensSoldOnAmm'>) {
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
   token.totalSupply -= crtBurned
   const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
   const ammId = activeAmm.id
@@ -335,6 +410,19 @@ export async function processTokensSoldOnAmmEvent({
   })
 
   token.lastPrice = tx.pricePerUnit
+
+  if (channel) {
+    const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
+    const notificationData = new CreatorTokenMarketBurn({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: tokenChannel.channelId,
+      burnedTokenAmount: crtBurned,
+      burnerHandle: burnerMember?.handle ?? 'Someone',
+      receivedJoyAmount: joysRecovered,
+    })
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channel.id, notificationData)
+  }
 }
 
 export async function processTokensPurchasedOnSaleEvent({
@@ -344,6 +432,10 @@ export async function processTokensPurchasedOnSaleEvent({
     asV1000: [tokenId, , amountPurchased, memberId],
   },
 }: EventHandlerContext<'ProjectToken.TokensPurchasedOnSale'>) {
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
   let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
@@ -375,6 +467,19 @@ export async function processTokensPurchasedOnSaleEvent({
       new SaleVestingSource({ sale: sale.id }),
       block.height
     )
+  }
+
+  if (channel) {
+    const minterMember = await overlay.getRepository(Membership).getById(memberId.toString())
+    const notificationData = new CreatorTokenSaleMint({
+      tokenSymbol: parseCreatorTokenSymbol(token),
+      channelId: tokenChannel.channelId,
+      mintedTokenAmount: amountPurchased,
+      minterHandle: minterMember?.handle ?? 'Someone',
+      paiedJoyAmount: sale.pricePerUnit * amountPurchased,
+    })
+    // todo add event - its runtime notification
+    await notifyChannelFollowers(overlay, channel.id, notificationData)
   }
 }
 
