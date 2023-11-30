@@ -772,7 +772,7 @@ export async function notifyChannelFollowers(
   overlay: EntityManagerOverlay,
   channelId: string,
   notificationType: NotificationType,
-  event: Event
+  event?: Event
 ) {
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
   for (const followerAccount of followersAccounts) {

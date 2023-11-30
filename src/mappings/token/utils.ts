@@ -18,6 +18,12 @@ import { uniqueId } from '../../utils/crypto'
 import { ITokenMetadata } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 
+export const FALLBACK_TOKEN_SYMBOL = '??'
+
+export function parseCreatorTokenSymbol(token: Flat<CreatorToken>): string {
+  return token.symbol || FALLBACK_TOKEN_SYMBOL
+}
+
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
   const vestedAccountRepository = overlay.getRepository(VestedAccount)
