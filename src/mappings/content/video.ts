@@ -10,7 +10,7 @@ import {
   Channel,
   Event,
   Video,
-    VideoPosted,
+  VideoPosted,
   VideoAssetsDeletedByModeratorEventData,
   VideoCreatedEventData,
   VideoViewEvent,

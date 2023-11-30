@@ -112,6 +112,13 @@ union NotificationType =
   | HigherBidPlaced # higher bid than yours made
   | AuctionWon # auction won
   | AuctionLost # auction lost
+  | CreatorTokenIssued
+  | CreatorTokenMarketStarted
+  | CreatorTokenSaleStarted
+  | CreatorTokenMarketMint
+  | CreatorTokenMarketBurn
+  | CreatorTokenSaleMint
+
 type ChannelSuspended @variant {
   phantom: Int
 }
@@ -409,3 +416,91 @@ type NftRoyaltyPaid @variant {
   "bid amount"
   amount: BigInt!
 }
+
+type CreatorTokenIssued @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenSaleStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenMarketStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenMarketMint @variant {
+  "handle of member that minted tokens"
+  minterHandle: String!
+
+  "amount of tokens that user minted"
+  mintedTokenAmount: BigInt!
+
+  "amount of joy that user used for minting"
+  paiedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenMarketBurn @variant {
+  "handle of member that burned tokens"
+  burnerHandle: String!
+
+  "amount of tokens that user burned"
+  burnedTokenAmount: BigInt!
+
+  "amount of joy that user received for burning"
+  receivedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenSaleMint @variant {
+  "handle of member that minted tokens"
+  minterHandle: String!
+
+  "amount of tokens that user minted"
+  mintedTokenAmount: BigInt!
+
+  "amount of joy that user used for minting"
+  paiedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+
+
+
