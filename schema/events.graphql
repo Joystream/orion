@@ -18,6 +18,18 @@ type Event @entity {
   data: EventData!
 }
 
+
+type FutureNotificationOrionEvent @entity {
+  "notification type that will be created"
+  notificationType: NotificationType!
+
+  "block after which notification should be created"
+  executionBlock: Int!
+
+  "related event for on chain notifications"
+  event: Event
+}
+
 type NftHistoryEntry @entity {
   "Autoincremented"
   id: ID!
@@ -76,6 +88,7 @@ union EventData =
   | CreatorTokenMarketBurnEventData
   | CreatorTokenSaleStartedEventData
   | CreatorTokenSaleMintEventData
+  | CreatorTokenRevenueSplitIssuedEventData
 
 # Needed when adding a new runtime notification
 type CommentReactionEventData {
@@ -497,3 +510,10 @@ type CreatorTokenSaleMintEventData {
   saleTransaction: SaleTransaction
 }
 
+type CreatorTokenRevenueSplitIssuedEventData {
+  "Token for which split was issued"
+  token: CreatorToken
+
+  "Details of the revenue split"
+  revenueShare: RevenueShare
+}
