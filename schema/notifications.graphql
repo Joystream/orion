@@ -118,6 +118,9 @@ union NotificationType =
   | CreatorTokenMarketMint
   | CreatorTokenMarketBurn
   | CreatorTokenSaleMint
+  | CreatorTokenRevenueShareStarted
+  | CreatorTokenRevenueSharePlanned
+  | CreatorTokenRevenueShareEnded
 
 type ChannelSuspended @variant {
   phantom: Int
@@ -499,6 +502,54 @@ type CreatorTokenSaleMint @variant {
 
   "channel Id used for link"
   channelId: String!
+}
+
+type CreatorTokenRevenueShareStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+
+  "id of token"
+  tokenId: String!
+}
+
+type CreatorTokenRevenueSharePlanned @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+}
+
+type CreatorTokenRevenueShareEnded @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+
+  "id of token"
+  tokenId: String!
 }
 
 
