@@ -511,9 +511,6 @@ type CreatorTokenRevenueShareStarted @variant {
   "symbol of the token"
   tokenSymbol: String!
 
-  "channel Id used for link"
-  channelId: String!
-
   "id of created revenue share to verify its' viability in future"
   revenueShareId: String!
 
@@ -528,8 +525,8 @@ type CreatorTokenRevenueSharePlanned @variant {
   "symbol of the token"
   tokenSymbol: String!
 
-  "channel Id used for link"
-  channelId: String!
+  "block on which split is planned to start"
+  plannedAt: Int!
 
   "id of created revenue share to verify its' viability in future"
   revenueShareId: String!
@@ -541,9 +538,6 @@ type CreatorTokenRevenueShareEnded @variant {
 
   "symbol of the token"
   tokenSymbol: String!
-
-  "channel Id used for link"
-  channelId: String!
 
   "id of created revenue share to verify its' viability in future"
   revenueShareId: String!

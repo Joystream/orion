@@ -30,6 +30,10 @@ import {
   CreatorTokenMarketMintEventData,
   CreatorTokenMarketBurnEventData,
   CreatorTokenSaleMintEventData,
+  CreatorTokenRevenueShareStarted,
+  CreatorTokenRevenueSharePlanned,
+  FutureNotificationOrionEvent,
+  CreatorTokenRevenueShareEnded,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
@@ -37,6 +41,7 @@ import {
   createAccount,
   getTokenAccountByMemberByToken,
   getTokenAccountByMemberByTokenOrFail,
+  notifyTokenHolders,
   parseCreatorTokenSymbol,
   processTokenMetadata,
   processValidatedTransfers,
@@ -50,6 +55,7 @@ import {
 } from '@joystream/metadata-protobuf'
 import { isSet } from '@joystream/metadata-protobuf/utils'
 import { notifyChannelFollowers, parseChannelTitle } from '../content/utils'
+import { getCurrentBlockHeight } from '../../notifications-scheduler/utils'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -247,6 +253,7 @@ export async function processAmmActivatedEvent({
       channelTitle: parseChannelTitle(channel),
     })
 
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
     await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
@@ -336,6 +343,7 @@ export async function processTokenSaleInitializedEvent({
       channelTitle: parseChannelTitle(channel),
     })
 
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
     await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
   }
 }
@@ -592,11 +600,16 @@ export async function processRevenueSplitIssuedEvent({
 }: EventHandlerContext<'ProjectToken.RevenueSplitIssued'>) {
   const endsAt = startBlock + duration
   const id = overlay.getRepository(RevenueShare).getNewEntityId()
+  const tokenChannel = await overlay
+    .getRepository(TokenChannel)
+    .getOneByRelationOrFail('tokenId', tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const { lastProcessedBlock } = await getCurrentBlockHeight(overlay.getEm())
   const token = (await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString())) as CreatorToken
 
-  overlay.getRepository(RevenueShare).new({
+  const revenueShare = overlay.getRepository(RevenueShare).new({
     id,
     allocation: joyAllocation,
     tokenId: tokenId.toString(),
@@ -609,6 +622,58 @@ export async function processRevenueSplitIssuedEvent({
   }) as RevenueShare
 
   token.currentRenvenueShareId = id
+
+  // revenue share already started, no need for planned event
+  if (channel && lastProcessedBlock >= startBlock) {
+    const notificationData = new CreatorTokenRevenueShareStarted({
+      revenueShareId: revenueShare.id,
+      tokenId: tokenId.toString(),
+      channelTitle: parseChannelTitle(channel),
+      tokenSymbol: parseCreatorTokenSymbol(token),
+    })
+    // todo add event
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData)
+  }
+
+  if (channel) {
+    const revenueShareStartedNotification = new CreatorTokenRevenueShareStarted({
+      revenueShareId: revenueShare.id,
+      tokenId: tokenId.toString(),
+      channelTitle: parseChannelTitle(channel),
+      tokenSymbol: parseCreatorTokenSymbol(token),
+    })
+    // revenue share is planned for future block
+    if (lastProcessedBlock < startBlock && lastProcessedBlock > 0) {
+      const plannedNotificationData = new CreatorTokenRevenueSharePlanned({
+        revenueShareId: revenueShare.id,
+        channelTitle: parseChannelTitle(channel),
+        plannedAt: startBlock,
+        tokenSymbol: parseCreatorTokenSymbol(token),
+      })
+      await overlay.getRepository(FutureNotificationOrionEvent).new({
+        id: `${revenueShare.id}-${block.height}-rSStart`,
+        executionBlock: startBlock,
+        notificationType: revenueShareStartedNotification,
+      })
+
+      await notifyTokenHolders(overlay.getEm(), tokenId.toString(), plannedNotificationData)
+
+      // revenue share starts at creation
+    } else if (lastProcessedBlock > 0) {
+      await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueShareStartedNotification)
+    }
+
+    await overlay.getRepository(FutureNotificationOrionEvent).new({
+      id: `${revenueShare.id}-${block.height}-rSEnd`,
+      executionBlock: endsAt,
+      notificationType: new CreatorTokenRevenueShareEnded({
+        revenueShareId: revenueShare.id,
+        channelTitle: parseChannelTitle(channel),
+        tokenSymbol: parseCreatorTokenSymbol(token),
+        tokenId: tokenId.toString(),
+      }),
+    })
+  }
 }
 
 export async function processMemberJoinedWhitelistEvent({
