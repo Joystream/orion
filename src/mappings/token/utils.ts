@@ -1,9 +1,13 @@
 import { criticalError } from '../../utils/misc'
 import { Flat, EntityManagerOverlay } from '../../utils/overlay'
 import {
+  Account,
   Benefit,
   CreatorToken,
+  Event,
   IssuerTransferVestingSource,
+  MemberRecipient,
+  NotificationType,
   TokenAccount,
   TokenAvatarUri,
   TrailerVideo,
@@ -17,6 +21,9 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { uniqueId } from '../../utils/crypto'
 import { ITokenMetadata } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { addNotification } from '../../utils/notification'
+import pLimit from 'p-limit'
+import { EntityManager } from 'typeorm'
 
 export const FALLBACK_TOKEN_SYMBOL = '??'
 
@@ -121,7 +128,7 @@ export async function addVestingScheduleToAccount(
       accountId: account.id,
       vestingId,
       totalVestingAmount: amount,
-      vestingSource: vestingSource,
+      vestingSource,
       acquiredAt: currentBlock,
     })
   }
@@ -310,5 +317,43 @@ export async function processTokenMetadata(
     if (oldTrailer) {
       trailerVideoRepository.remove(oldTrailer)
     }
+  }
+}
+
+export async function getHolderAccountsForToken(
+  em: EntityManager,
+  tokenId: string
+): Promise<Account[]> {
+  const holders = await em.getRepository(TokenAccount).findBy({ tokenId })
+
+  const holdersMemberIds = holders
+    .filter((follower) => follower?.memberId)
+    .map((follower) => follower.memberId as string)
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+  const holdersAccounts: (Account | null)[] = await Promise.all(
+    holdersMemberIds.map((membershipId) =>
+      limit(async () => await em.getRepository(Account).findOneBy({ membershipId }))
+    )
+  )
+
+  return holdersAccounts.filter((account) => account) as Account[]
+}
+
+export async function notifyTokenHolders(
+  em: EntityManager,
+  tokenId: string,
+  notificationType: NotificationType,
+  event?: Event
+) {
+  const holdersAccounts = await getHolderAccountsForToken(em, tokenId)
+  for (const holdersAccount of holdersAccounts) {
+    await addNotification(
+      em,
+      holdersAccount,
+      new MemberRecipient({ membership: holdersAccount.membershipId }),
+      notificationType,
+      event
+    )
   }
 }
