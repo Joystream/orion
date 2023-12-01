@@ -34,6 +34,7 @@ import {
   CreatorTokenRevenueSharePlanned,
   FutureNotificationOrionEvent,
   CreatorTokenRevenueShareEnded,
+  ChannelRecipient,
 } from '../../model'
 import {
   addVestingScheduleToAccount,
@@ -54,8 +55,9 @@ import {
   TokenMetadata,
 } from '@joystream/metadata-protobuf'
 import { isSet } from '@joystream/metadata-protobuf/utils'
-import { notifyChannelFollowers, parseChannelTitle } from '../content/utils'
+import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
 import { getCurrentBlockHeight } from '../../notifications-scheduler/utils'
+import { addNotification } from '../../utils/notification'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -436,7 +438,14 @@ export async function processTokensBoughtOnAmmEvent({
       paiedJoyAmount: joysDeposited,
     })
 
-    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+    await addNotification(
+      overlay,
+      channelOwnerAccount,
+      new ChannelRecipient({ channel: channel.id }),
+      notificationData,
+      eventEntity
+    )
   }
 }
 
@@ -499,7 +508,14 @@ export async function processTokensSoldOnAmmEvent({
       receivedJoyAmount: joysRecovered,
     })
 
-    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+    await addNotification(
+      overlay,
+      channelOwnerAccount,
+      new ChannelRecipient({ channel: channel.id }),
+      notificationData,
+      eventEntity
+    )
   }
 }
 
@@ -571,7 +587,14 @@ export async function processTokensPurchasedOnSaleEvent({
       paiedJoyAmount: sale.pricePerUnit * amountPurchased,
     })
 
-    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+    await addNotification(
+      overlay,
+      channelOwnerAccount,
+      new ChannelRecipient({ channel: channel.id }),
+      notificationData,
+      eventEntity
+    )
   }
 }
 
