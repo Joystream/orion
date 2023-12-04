@@ -432,10 +432,10 @@ export async function processTokensBoughtOnAmmEvent({
     const minter = await overlay.getRepository(Membership).getById(memberId.toString())
     const notificationData = new CreatorTokenMarketMint({
       tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: tokenChannel.channelId,
       mintedTokenAmount: crtMinted,
       minterHandle: minter?.handle ?? 'Someone',
       paiedJoyAmount: joysDeposited,
+      minterId: minter?.id,
     })
 
     const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
@@ -502,10 +502,10 @@ export async function processTokensSoldOnAmmEvent({
     const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
     const notificationData = new CreatorTokenMarketBurn({
       tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: tokenChannel.channelId,
       burnedTokenAmount: crtBurned,
       burnerHandle: burnerMember?.handle ?? 'Someone',
       receivedJoyAmount: joysRecovered,
+      burnerId: burnerMember?.id,
     })
 
     const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
@@ -581,10 +581,10 @@ export async function processTokensPurchasedOnSaleEvent({
     const minterMember = await overlay.getRepository(Membership).getById(memberId.toString())
     const notificationData = new CreatorTokenSaleMint({
       tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: tokenChannel.channelId,
       mintedTokenAmount: amountPurchased,
       minterHandle: minterMember?.handle ?? 'Someone',
       paiedJoyAmount: sale.pricePerUnit * amountPurchased,
+      minterId: minterMember?.id,
     })
 
     const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
@@ -646,23 +646,12 @@ export async function processRevenueSplitIssuedEvent({
 
   token.currentRenvenueShareId = id
 
-  // revenue share already started, no need for planned event
-  if (channel && lastProcessedBlock >= startBlock) {
-    const notificationData = new CreatorTokenRevenueShareStarted({
-      revenueShareId: revenueShare.id,
-      tokenId: tokenId.toString(),
-      channelTitle: parseChannelTitle(channel),
-      tokenSymbol: parseCreatorTokenSymbol(token),
-    })
-    // todo add event
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData)
-  }
-
   if (channel) {
     const revenueShareStartedNotification = new CreatorTokenRevenueShareStarted({
       revenueShareId: revenueShare.id,
       tokenId: tokenId.toString(),
       channelTitle: parseChannelTitle(channel),
+      channelId: channel.id,
       tokenSymbol: parseCreatorTokenSymbol(token),
     })
     // revenue share is planned for future block
@@ -670,6 +659,7 @@ export async function processRevenueSplitIssuedEvent({
       const plannedNotificationData = new CreatorTokenRevenueSharePlanned({
         revenueShareId: revenueShare.id,
         channelTitle: parseChannelTitle(channel),
+        channelId: channel.id,
         plannedAt: startBlock,
         tokenSymbol: parseCreatorTokenSymbol(token),
       })

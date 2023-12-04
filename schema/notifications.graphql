@@ -457,6 +457,9 @@ type CreatorTokenMarketMint @variant {
   "handle of member that minted tokens"
   minterHandle: String!
 
+  "id of member that minted tokens"
+  minterId: String!
+
   "amount of tokens that user minted"
   mintedTokenAmount: BigInt!
 
@@ -465,14 +468,14 @@ type CreatorTokenMarketMint @variant {
 
   "symbol of the token"
   tokenSymbol: String!
-
-  "channel Id used for link"
-  channelId: String!
 }
 
 type CreatorTokenMarketBurn @variant {
   "handle of member that burned tokens"
   burnerHandle: String!
+
+  "id of member that burned tokens"
+  burnerId: String!
 
   "amount of tokens that user burned"
   burnedTokenAmount: BigInt!
@@ -482,14 +485,14 @@ type CreatorTokenMarketBurn @variant {
 
   "symbol of the token"
   tokenSymbol: String!
-
-  "channel Id used for link"
-  channelId: String!
 }
 
 type CreatorTokenSaleMint @variant {
   "handle of member that minted tokens"
   minterHandle: String!
+
+  "id of member that minted tokens"
+  minterId: String!
 
   "amount of tokens that user minted"
   mintedTokenAmount: BigInt!
@@ -499,14 +502,14 @@ type CreatorTokenSaleMint @variant {
 
   "symbol of the token"
   tokenSymbol: String!
-
-  "channel Id used for link"
-  channelId: String!
 }
 
 type CreatorTokenRevenueShareStarted @variant {
   "channel title for notification text"
   channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
 
   "symbol of the token"
   tokenSymbol: String!
@@ -522,6 +525,9 @@ type CreatorTokenRevenueSharePlanned @variant {
   "channel title for notification text"
   channelTitle: String!
 
+  "channel title for notification avatar"
+  channelId: String!
+
   "symbol of the token"
   tokenSymbol: String!
 
@@ -535,6 +541,9 @@ type CreatorTokenRevenueSharePlanned @variant {
 type CreatorTokenRevenueShareEnded @variant {
   "channel title for notification text"
   channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
 
   "symbol of the token"
   tokenSymbol: String!
