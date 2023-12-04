@@ -317,6 +317,8 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
     // Importing exported offchain state
     if (block.header.height >= exportBlockNumber && !offchainState.isImported) {
       ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+      // there is no need to recalc video relevance before orion is synced
+      videoRelevanceManager.turnOnVideoRelevanceManager()
       await overlay.updateDatabase()
       const em = overlay.getEm()
       await offchainState.import(em)
