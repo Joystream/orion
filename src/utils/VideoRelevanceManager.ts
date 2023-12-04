@@ -6,7 +6,8 @@ import { globalEm } from './globalEm'
 export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
 
 export class VideoRelevanceManager {
-  private videosToUpdate: Set<string> = new Set()
+  private channelsToUpdate: Set<string> = new Set()
+  private enableVideoRelevance = false
 
   init(intervalMs: number): void {
     this.updateLoop(intervalMs)
@@ -19,11 +20,19 @@ export class VideoRelevanceManager {
       })
   }
 
-  scheduleRecalcForVideo(id: string | null | undefined) {
-    id && this.videosToUpdate.add(id)
+  turnOnVideoRelevanceManager() {
+    this.enableVideoRelevance = true
   }
 
-  async updateVideoRelevanceValue(em: EntityManager) {
+  scheduleRecalcForChannel(id: string | null | undefined) {
+    id && this.channelsToUpdate.add(id)
+  }
+
+  async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {
+    if (!this.enableVideoRelevance) {
+      return
+    }
+
     const [
       newnessWeight,
       viewsWeight,
@@ -51,7 +60,14 @@ export class VideoRelevanceManager {
         + (reactions_count * ${reactionsWeight})) 
         * COALESCE(channel.channel_weight, ${channelWeight}),2)) as videoRelevance
         FROM video
-        INNER JOIN channel  ON video.channel_id = channel.id),
+        INNER JOIN channel  ON video.channel_id = channel.id
+        ${
+          forceUpdateAll || this.channelsToUpdate.size === 0
+            ? ''
+            : `WHERE channel.id in (${[...this.channelsToUpdate.values()]
+                .map((id) => `'${id}'`)
+                .join(', ')})`
+        }),
         
         top_channel_score as (
         SELECT 
@@ -67,7 +83,7 @@ export class VideoRelevanceManager {
         LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.channelId and topChannelVideo.maxChannelRelevance = videoCte.videoRelevance
         WHERE video.id = videoCte.videoId;
         `)
-    this.videosToUpdate.clear()
+    this.channelsToUpdate.clear()
   }
 
   private async updateLoop(intervalMs: number): Promise<void> {

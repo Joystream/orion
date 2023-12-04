@@ -10,7 +10,6 @@ export async function processCommentsCensorshipStatusUpdate(em: EntityManager, i
   comments.forEach((c) => {
     manager.scheduleRecalcForComment(c.parentCommentId)
     manager.scheduleRecalcForVideo(c.videoId)
-    videoRelevanceManager.scheduleRecalcForVideo(c.videoId)
   })
   await manager.updateVideoCommentsCounters(em)
   await manager.updateParentRepliesCounters(em)
