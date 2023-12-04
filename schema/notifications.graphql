@@ -554,7 +554,3 @@ type CreatorTokenRevenueShareEnded @variant {
   "id of token"
   tokenId: String!
 }
-
-
-
-

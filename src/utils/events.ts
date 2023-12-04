@@ -205,7 +205,7 @@ export const eventConstructors = {
 } as const
 
 export type EventNames = keyof typeof eventConstructors
-export type EventConstructor<EventName extends EventNames> = typeof eventConstructors[EventName]
+export type EventConstructor<EventName extends EventNames> = (typeof eventConstructors)[EventName]
 export type EventInstance<EventName extends EventNames> = InstanceType<EventConstructor<EventName>>
 
 export type EventHandlerContext<EventName extends EventNames> = {

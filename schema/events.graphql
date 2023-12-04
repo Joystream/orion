@@ -18,7 +18,6 @@ type Event @entity {
   data: EventData!
 }
 
-
 type FutureNotificationOrionEvent @entity {
   "notification type that will be created"
   notificationType: NotificationType!
