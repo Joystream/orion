@@ -7,7 +7,11 @@ export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
 
 export class VideoRelevanceManager {
   private channelsToUpdate: Set<string> = new Set()
-  private enableVideoRelevance = false
+  private _isVideoRelevanceEnabled = false
+
+  public get isVideoRelevanceEnabled(): boolean {
+    return this._isVideoRelevanceEnabled
+  }
 
   init(intervalMs: number): void {
     this.updateLoop(intervalMs)
@@ -21,7 +25,7 @@ export class VideoRelevanceManager {
   }
 
   turnOnVideoRelevanceManager() {
-    this.enableVideoRelevance = true
+    this._isVideoRelevanceEnabled = true
   }
 
   scheduleRecalcForChannel(id: string | null | undefined) {
@@ -29,7 +33,7 @@ export class VideoRelevanceManager {
   }
 
   async updateVideoRelevanceValue(em: EntityManager, forceUpdateAll?: boolean) {
-    if (!this.enableVideoRelevance) {
+    if (!this._isVideoRelevanceEnabled || !(this.channelsToUpdate.size || forceUpdateAll)) {
       return
     }
 
@@ -62,12 +66,13 @@ export class VideoRelevanceManager {
         FROM video
         INNER JOIN channel  ON video.channel_id = channel.id
         ${
-          forceUpdateAll || this.channelsToUpdate.size === 0
+          forceUpdateAll
             ? ''
-            : `WHERE channel.id in (${[...this.channelsToUpdate.values()]
+            : `WHERE video.channel_id in (${[...this.channelsToUpdate.values()]
                 .map((id) => `'${id}'`)
                 .join(', ')})`
-        }),
+        }
+        ORDER BY video.id),
         
         top_channel_score as (
         SELECT 
