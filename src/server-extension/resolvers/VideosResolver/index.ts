@@ -34,6 +34,7 @@ import { config, ConfigVariable } from '../../../utils/config'
 import { Context } from '../../check'
 import { isObject } from 'lodash'
 import { has } from '../../../utils/misc'
+import { videoRelevanceManager } from '../../../mappings/utils'
 import { uniqueId } from '../../../utils/crypto'
 import { UserOnly } from '../middleware'
 
@@ -236,7 +237,12 @@ export class VideosResolver {
         videoId,
       })
 
+      const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
+      if (video.viewsNum % tick === 0) {
+        videoRelevanceManager.scheduleRecalcForVideo(videoId)
+      }
       await em.save([video, video.channel, newView])
+      await videoRelevanceManager.updateVideoRelevanceValue(em)
       return {
         videoId,
         viewsNum: video.viewsNum,

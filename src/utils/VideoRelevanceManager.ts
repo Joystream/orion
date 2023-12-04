@@ -6,6 +6,8 @@ import { globalEm } from './globalEm'
 export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
 
 export class VideoRelevanceManager {
+  private videosToUpdate: Set<string> = new Set()
+
   init(intervalMs: number): void {
     this.updateLoop(intervalMs)
       .then(() => {
@@ -15,6 +17,10 @@ export class VideoRelevanceManager {
         console.error(err)
         process.exit(-1)
       })
+  }
+
+  scheduleRecalcForVideo(id: string | null | undefined) {
+    id && this.videosToUpdate.add(id)
   }
 
   async updateVideoRelevanceValue(em: EntityManager) {
@@ -61,6 +67,7 @@ export class VideoRelevanceManager {
         LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.channelId and topChannelVideo.maxChannelRelevance = videoCte.videoRelevance
         WHERE video.id = videoCte.videoId;
         `)
+    this.videosToUpdate.clear()
   }
 
   private async updateLoop(intervalMs: number): Promise<void> {
