@@ -38,41 +38,44 @@ export class VideoRelevanceManager {
       const channelWeight = defaultChannelWeight ?? 1
       await em.query(`
         WITH weighted_timestamp AS (
-    SELECT 
-        "video"."id",
-        (
-          extract(epoch from video.created_at)*${joystreamTimestampWeight} +
-          COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
-        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight} as wtEpoch,
-        "channel"."channel_weight" as CW
-    FROM 
-        "video" 
-        INNER JOIN
-          "channel" ON "video"."channel_id" = "channel"."id"
-        ${
-          forceUpdateAll
-            ? ''
-            : `WHERE "video"."id" IN (${[...this.videosToUpdate.values()]
-                .map((id) => `'${id}'`)
-                .join(', ')})`
-        }
+          SELECT 
+            "video"."id",
+            (
+              extract(epoch from video.created_at)*${joystreamTimestampWeight} +
+              COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
+            ) / ${joystreamTimestampWeight} + ${ytTimestampWeight} as wtEpoch,
+            "channel"."channel_weight" as CW
+          FROM 
+            "video" 
+            INNER JOIN
+              "channel" ON "video"."channel_id" = "channel"."id"
+          ${
+            forceUpdateAll
+              ? ''
+              : `WHERE "video"."id" IN (${[...this.videosToUpdate.values()]
+                  .map((id) => `'${id}'`)
+                  .join(', ')})`
+          }
+          ORDER BY "video"."id" -- Added ORDER BY clause to sort by ID
         )
-    UPDATE 
-        "video"
-    SET
-        "video_relevance" = ROUND(
-      (
-        (extract(epoch from now()) - wtEpoch) / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} +
-        (views_num * ${viewsWeight}) +
-        (comments_count * ${commentsWeight}) +
-        (reactions_count * ${reactionsWeight})
-      ) * COALESCE(CW, ${channelWeight}),
+        UPDATE 
+          "video"
+        SET
+          "video_relevance" = ROUND(
+            (
+              (extract(epoch from now()) - wtEpoch) / ${NEWNESS_SECONDS_DIVIDER} * ${
+        newnessWeight * -1
+      } +
+              (views_num * ${viewsWeight}) +
+              (comments_count * ${commentsWeight}) +
+              (reactions_count * ${reactionsWeight})
+            ) * COALESCE(CW, ${channelWeight}),
             2)
-    FROM
-        weighted_timestamp
-    WHERE
-        "video".id = weighted_timestamp.id;
-        `)
+        FROM
+          weighted_timestamp
+        WHERE
+          "video".id = weighted_timestamp.id
+      `)
       this.videosToUpdate.clear()
     }
   }
