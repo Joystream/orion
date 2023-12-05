@@ -93,7 +93,6 @@ export class VideoCategoriesResolver {
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }

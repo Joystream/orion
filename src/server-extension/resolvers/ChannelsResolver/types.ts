@@ -2,6 +2,7 @@ import { ArgsType, Field, ObjectType, InputType, Int, registerEnumType } from 't
 import { Channel, ChannelWhereInput, ChannelOrderByInput, Membership } from '../baseTypes'
 import { MaxLength } from 'class-validator'
 import { EntityReportInfo } from '../commonTypes'
+import { DateTime } from '@subsquid/graphql-server'
 
 @ObjectType()
 export class ExtendedChannel {
@@ -175,4 +176,56 @@ export class ChannelsSearchArgs {
 
   @Field(() => Int, { nullable: true })
   limit?: number
+}
+
+@ArgsType()
+export class SuspendChannelArgs {
+  @Field(() => [String], { nullable: false })
+  channelIds!: string[]
+}
+
+@ArgsType()
+export class VerifyChannelArgs {
+  @Field(() => [String], { nullable: false })
+  channelIds!: string[]
+}
+
+@ObjectType()
+export class SuspendChannelResult {
+  @Field(() => String, { nullable: false })
+  id!: string
+
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => DateTime, { nullable: false })
+  createdAt!: Date
+}
+
+@ObjectType()
+export class VerifyChannelResult {
+  @Field(() => String, { nullable: false })
+  id!: string
+
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => DateTime, { nullable: false })
+  createdAt!: Date
+}
+
+@ArgsType()
+export class ExcludeChannelArgs {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => String, { nullable: false })
+  @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
+  rationale!: string
+}
+
+@ObjectType()
+export class ExcludeChannelResult extends EntityReportInfo {
+  @Field(() => String, { nullable: false })
+  channelId!: string
 }

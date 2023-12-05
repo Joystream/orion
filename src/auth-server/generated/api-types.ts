@@ -15,8 +15,6 @@ export interface paths {
   '/artifacts': {
     /** @description Get wallet seed encryption artifacts. */
     get: operations['getArtifacts']
-    /** @description Delete wallet seed encryption artifacts in case they are no longer needed. */
-    delete: operations['deleteArtifacts']
   }
   '/session-artifacts': {
     /** @description Get wallet seed encryption artifacts for the current session. */
@@ -37,7 +35,7 @@ export interface paths {
     post: operations['requestEmailConfirmationToken']
   }
   '/change-account': {
-    /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally save new ones. */
+    /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally set new ones. */
     post: operations['changeAccount']
   }
   '/logout': {
@@ -82,6 +80,7 @@ export interface components {
         memberId: string
         email: string
         encryptionArtifacts?: components['schemas']['EncryptionArtifacts']
+        referrerChannelId?: string
       }
     }
     ChangeAccountRequestData: components['schemas']['ActionExecutionRequestData'] & {
@@ -220,13 +219,7 @@ export interface components {
         'application/json': components['schemas']['GenericErrorResponseData']
       }
     }
-    /** @description No encryption artifacts associated with the current account found. */
-    DeleteArtifactsNotFoundResponse: {
-      content: {
-        'application/json': components['schemas']['GenericErrorResponseData']
-      }
-    }
-    /** @description Account with the provided e-mail address or encryptionArtifacts.id already exists. */
+    /** @description Account with the provided e-mail address already exists. */
     CreateAccountConflictResponse: {
       content: {
         'application/json': components['schemas']['GenericErrorResponseData']
@@ -293,6 +286,8 @@ export interface components {
   pathItems: never
 }
 
+export type $defs = Record<string, never>
+
 export type external = Record<string, never>
 
 export interface operations {
@@ -332,16 +327,6 @@ export interface operations {
       200: components['responses']['GetArtifactsResponse']
       400: components['responses']['GenericBadRequestResponse']
       404: components['responses']['GetArtifactsNotFoundResponse']
-      429: components['responses']['GenericTooManyRequestsResponse']
-      default: components['responses']['GenericInternalServerErrorResponse']
-    }
-  }
-  /** @description Delete wallet seed encryption artifacts in case they are no longer needed. */
-  deleteArtifacts: {
-    responses: {
-      200: components['responses']['GenericOkResponse']
-      401: components['responses']['GenericUnauthorizedResponse']
-      404: components['responses']['DeleteArtifactsNotFoundResponse']
       429: components['responses']['GenericTooManyRequestsResponse']
       default: components['responses']['GenericInternalServerErrorResponse']
     }
@@ -402,7 +387,7 @@ export interface operations {
       default: components['responses']['GenericInternalServerErrorResponse']
     }
   }
-  /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally save new ones. */
+  /** @description Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account's encryption artifacts and optionally set new ones. */
   changeAccount: {
     requestBody: components['requestBodies']['ChangeAccountRequestBody']
     responses: {

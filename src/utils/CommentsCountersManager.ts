@@ -6,11 +6,15 @@ export class CommentCountersManager {
   private commentsToUpdate: Set<string> = new Set()
 
   scheduleRecalcForComment(id: string | null | undefined) {
-    id && this.commentsToUpdate.add(id)
+    if (id) {
+      this.commentsToUpdate.add(id)
+    }
   }
 
   scheduleRecalcForVideo(id: string | null | undefined) {
-    id && this.videosToUpdate.add(id)
+    if (id) {
+      this.videosToUpdate.add(id)
+    }
   }
 
   async updateVideoCommentsCounters(em: EntityManager, forceUpdateAll = false) {

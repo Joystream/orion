@@ -20,11 +20,11 @@ export class VideoRelevanceManager {
 
   async init({
     fullUpdateLoopTime,
-    scheduledUpdateLookTime,
+    scheduledUpdateLoopTime,
   }: VideoRelevanceManagerLoops): Promise<void> {
     const em = await globalEm
 
-    this.updateScheduledLoop(em, scheduledUpdateLookTime)
+    this.updateScheduledLoop(em, scheduledUpdateLoopTime)
       .then(() => {
         /* Do nothing */
       })
