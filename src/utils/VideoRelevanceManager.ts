@@ -7,7 +7,7 @@ export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
 
 type VideoRelevanceManagerLoops = {
   fullUpdateLoopTime: number
-  scheduledUpdateLookTime: number
+  scheduledUpdateLoopTime: number
 }
 
 export class VideoRelevanceManager {
