@@ -19,7 +19,11 @@ import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
-videoRelevanceManager.init(1000 * 60 * 60 * 12)
+// eslint-disable-next-line no-void
+void videoRelevanceManager.init({
+  fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
+  scheduledUpdateLookTime: 1000 * 60 * 10, // 10 mins
+})
 
 export const JOYSTREAM_SS58_PREFIX = 126
 

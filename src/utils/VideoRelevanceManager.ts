@@ -5,6 +5,11 @@ import { globalEm } from './globalEm'
 // constant used to parse seconds from creation
 export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
 
+type VideoRelevanceManagerLoops = {
+  fullUpdateLoopTime: number
+  scheduledUpdateLookTime: number
+}
+
 export class VideoRelevanceManager {
   private channelsToUpdate: Set<string> = new Set()
   private _isVideoRelevanceEnabled = false
@@ -13,8 +18,22 @@ export class VideoRelevanceManager {
     return this._isVideoRelevanceEnabled
   }
 
-  init(intervalMs: number): void {
-    this.updateLoop(intervalMs)
+  async init({
+    fullUpdateLoopTime,
+    scheduledUpdateLookTime,
+  }: VideoRelevanceManagerLoops): Promise<void> {
+    const em = await globalEm
+
+    this.updateScheduledLoop(em, scheduledUpdateLookTime)
+      .then(() => {
+        /* Do nothing */
+      })
+      .catch((err) => {
+        console.error(err)
+        process.exit(-1)
+      })
+
+    this.updateFullUpdateLoop(em, fullUpdateLoopTime)
       .then(() => {
         /* Do nothing */
       })
@@ -91,8 +110,14 @@ export class VideoRelevanceManager {
     this.channelsToUpdate.clear()
   }
 
-  private async updateLoop(intervalMs: number): Promise<void> {
-    const em = await globalEm
+  private async updateScheduledLoop(em: EntityManager, intervalMs: number): Promise<void> {
+    while (true) {
+      await this.updateVideoRelevanceValue(em)
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
+    }
+  }
+
+  private async updateFullUpdateLoop(em: EntityManager, intervalMs: number): Promise<void> {
     while (true) {
       await this.updateVideoRelevanceValue(em)
       await new Promise((resolve) => setTimeout(resolve, intervalMs))

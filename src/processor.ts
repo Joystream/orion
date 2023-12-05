@@ -284,7 +284,6 @@ async function processEvent<EventName extends EventNames>(
 async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
-  await videoRelevanceManager.updateVideoRelevanceValue(em)
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
