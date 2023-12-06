@@ -39,6 +39,7 @@ The ChannelYppStatus can be one of three types: `YppUnverified, YppVerified, Ypp
 - The email delivery is meant (for the moment) to be scheduled via chron job (as explained on operator documentation)
 ## Misc
 - several unit test have been introduced along with CI checks
+- Improved Home page scoring schedule logic
 - Refactored migration logic in order to migrate global account counter, which will be used also to migrate Notifications counters in future releases
 ## Environment
 - Added `EMAIL_NOTIFICATION_DELIVERY_MAX_ATTEMPTS` environment variable to configure the maximum number of attempts to deliver an email notification, before the scheduler stops attending them
