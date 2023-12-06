@@ -14,8 +14,12 @@ import { NextEntityIdManager } from '../utils/NextEntityIdManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
+// eslint-disable-next-line no-void
+void videoRelevanceManager.init({
+  fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
+  scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
+})
 export const migrateCounters = new NextEntityIdManager()
-videoRelevanceManager.init(1000 * 60 * 60)
 
 export const JOYSTREAM_SS58_PREFIX = 126
 

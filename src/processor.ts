@@ -284,7 +284,6 @@ async function processEvent<EventName extends EventNames>(
 async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateVideoCommentsCounters(em)
   await commentCountersManager.updateParentRepliesCounters(em)
-  await videoRelevanceManager.updateVideoRelevanceValue(em)
 }
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
@@ -314,9 +313,18 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
         }
       }
     }
+
+    if (
+      !videoRelevanceManager.isVideoRelevanceEnabled &&
+      block.header.height >= exportBlockNumber
+    ) {
+      videoRelevanceManager.turnOnVideoRelevanceManager()
+    }
+
     // Importing exported offchain state
     if (block.header.height >= exportBlockNumber && !offchainState.isImported) {
       ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+      // there is no need to recalc video relevance before orion is synced
       await overlay.updateDatabase()
       const em = overlay.getEm()
       await offchainState.import(em)

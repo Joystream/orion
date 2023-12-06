@@ -216,6 +216,8 @@ export class AdminResolver {
         }
       )
 
+      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+
       // Push the result into the results array
       results.push({
         channelId,
