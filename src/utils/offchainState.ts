@@ -27,6 +27,7 @@ const exportedStateMap = {
   Account: true,
   Notification: true,
   NotificationEmailDelivery: true,
+  NotificationEmailDeliveryAttempt: true,
   Token: true,
   Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
@@ -258,6 +259,10 @@ export class OffchainState {
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
+
+    // migrate counter values
+    const { exportedVersion } = exportFile
+    await this.migrateCounters(exportedVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)

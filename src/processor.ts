@@ -88,7 +88,7 @@ import { Event } from './types/support'
 import { assertAssignable } from './utils/misc'
 import { EntityManagerOverlay } from './utils/overlay'
 import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
-import { commentCountersManager, migrateCounters, videoRelevanceManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
 
@@ -331,7 +331,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
-      await migrateCounters.migrateCounters(overlay)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }
