@@ -160,6 +160,10 @@ export class OffchainState {
       return { data, blockNumber: blockNumberPost, orionVersion }
     })
 
+    // migrate counters for NextEntityId
+    const { orionVersion } = exportFile
+    await this.migrateCounters(orionVersion, em)
+    
     this.logger.info(`Saving export data to ${exportFilePath}`)
     fs.writeFileSync(exportFilePath, JSON.stringify(exportedState))
     this.logger.info('Done')
