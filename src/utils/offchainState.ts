@@ -260,6 +260,10 @@ export class OffchainState {
       )
     }
 
+    // migrate counter values
+    const { exportedVersion } = exportFile
+    await this.migrateCounters(exportedVersion, em)
+
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
     fs.renameSync(exportFilePath, renamedExportFilePath)

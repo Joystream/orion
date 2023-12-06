@@ -10,7 +10,6 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
-import { NextEntityIdManager } from '../utils/NextEntityIdManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
@@ -19,8 +18,6 @@ void videoRelevanceManager.init({
   fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
   scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
 })
-export const migrateCounters = new NextEntityIdManager()
-
 export const JOYSTREAM_SS58_PREFIX = 126
 
 export function bytesToString(b: Uint8Array): string {
