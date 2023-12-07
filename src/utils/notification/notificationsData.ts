@@ -252,9 +252,6 @@ export const getNotificationData = async (
         text: `${formatJOY(amount)} were withdrawn from your channel account`,
       }
     }
-  }
-}
-
     // CRT
     case 'CreatorTokenIssued': {
       const { channelId, channelTitle, tokenSymbol } = notificationType

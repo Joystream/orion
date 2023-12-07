@@ -1,10 +1,5 @@
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
-module.exports = class Data1701183768842 {
-    name = 'Data1701183768842'
-========
-module.exports = class Data1701263174334 {
-    name = 'Data1701263174334'
->>>>>>>> master:db/migrations/1701263174334-Data.js
+module.exports = class Data1701943292989 {
+    name = 'Data1701943292989'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -42,11 +37,7 @@ module.exports = class Data1701263174334 {
         await db.query(`CREATE TABLE "app" ("id" character varying NOT NULL, "name" text NOT NULL, "owner_member_id" character varying, "website_url" text, "use_uri" text, "small_icon" text, "medium_icon" text, "big_icon" text, "one_liner" text, "description" text, "terms_of_service" text, "platforms" text array, "category" text, "auth_key" text, CONSTRAINT "App_name" UNIQUE ("name") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_9478629fc093d229df09e560aea" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_f36adbb7b096ceeb6f3e80ad14" ON "app" ("name") `)
         await db.query(`CREATE INDEX "IDX_c9cc395bbc485f70a15be64553" ON "app" ("owner_member_id") `)
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
         await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "revenue_share_ratio_percent" integer, "cumulative_revenue" numeric NOT NULL, "cumulative_reward_claimed" numeric NOT NULL, "cumulative_reward" numeric NOT NULL, "channel_weight" numeric, "ypp_status" jsonb NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
-========
-        await db.query(`CREATE TABLE "channel" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "owner_member_id" character varying, "title" text, "description" text, "cover_photo_id" character varying, "avatar_photo_id" character varying, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "language" text, "created_in_block" integer NOT NULL, "reward_account" text NOT NULL, "channel_state_bloat_bond" numeric NOT NULL, "follows_num" integer NOT NULL, "video_views_num" integer NOT NULL, "entry_app_id" character varying, "total_videos_created" integer NOT NULL, "cumulative_reward_claimed" numeric NOT NULL, "cumulative_reward" numeric NOT NULL, "channel_weight" numeric, "ypp_status" jsonb NOT NULL, CONSTRAINT "PK_590f33ee6ee7d76437acf362e39" PRIMARY KEY ("id"))`)
->>>>>>>> master:db/migrations/1701263174334-Data.js
         await db.query(`CREATE INDEX "IDX_a4752a0a0899dedc4d18077dd0" ON "channel" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_25c85bc448b5e236a4c1a5f789" ON "channel" ("owner_member_id") `)
         await db.query(`CREATE INDEX "IDX_a77e12f3d8c6ced020e179a5e9" ON "channel" ("cover_photo_id") `)
@@ -156,6 +147,8 @@ module.exports = class Data1701263174334 {
         await db.query(`CREATE INDEX "IDX_3612880efd8926a17eba5ab0e1" ON "session_encryption_artifacts" ("session_id") `)
         await db.query(`CREATE TABLE "token" ("id" character varying NOT NULL, "type" character varying(18) NOT NULL, "issued_at" TIMESTAMP WITH TIME ZONE NOT NULL, "expiry" TIMESTAMP WITH TIME ZONE NOT NULL, "issued_for_id" character varying, CONSTRAINT "PK_82fae97f905930df5d62a702fc9" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_a6fe18c105f85a63d761ccb078" ON "token" ("issued_for_id") `)
+        await db.query(`CREATE TABLE "future_notification_orion_event" ("id" character varying NOT NULL, "notification_type" jsonb NOT NULL, "execution_block" integer NOT NULL, "event_id" character varying, CONSTRAINT "PK_93f4d7b85e4867c47ada2828f80" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_9f7f80afbee45690f0ebda5228" ON "future_notification_orion_event" ("event_id") `)
         await db.query(`CREATE TABLE "nft_history_entry" ("id" character varying NOT NULL, "nft_id" character varying, "event_id" character varying, CONSTRAINT "PK_9018e80b335a965a54959c4c6e2" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_57f51d35ecab042478fe2e31c1" ON "nft_history_entry" ("nft_id") `)
         await db.query(`CREATE INDEX "IDX_d1a28b178f5d028d048d40ce20" ON "nft_history_entry" ("event_id") `)
@@ -187,7 +180,6 @@ module.exports = class Data1701263174334 {
         await db.query(`CREATE INDEX "IDX_f13d5d785670f46de668575139" ON "channel_verification" ("channel_id") `)
         await db.query(`CREATE TABLE "channel_suspension" ("id" character varying NOT NULL, "channel_id" character varying, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_226679cee9a8d0e5af18f70a1da" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_e30ebff1042c010ff88b87f4f7" ON "channel_suspension" ("channel_id") `)
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
         await db.query(`CREATE TABLE "token_channel" ("id" character varying NOT NULL, "token_id" character varying NOT NULL, "channel_id" character varying NOT NULL, CONSTRAINT "TokenChannel_channel" UNIQUE ("channel_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "TokenChannel_token" UNIQUE ("token_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "TokenChannel_token_channel" UNIQUE ("token_id", "channel_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_7105aa65a2d333bb2f66db129e" UNIQUE ("token_id"), CONSTRAINT "REL_b065bc433d65b0a6874073ea54" UNIQUE ("channel_id"), CONSTRAINT "PK_e5cd0127f70ee171db28af0293c" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7105aa65a2d333bb2f66db129e" ON "token_channel" ("token_id") `)
         await db.query(`CREATE INDEX "IDX_b065bc433d65b0a6874073ea54" ON "token_channel" ("channel_id") `)
@@ -196,8 +188,6 @@ module.exports = class Data1701263174334 {
         await db.query(`CREATE INDEX "IDX_4b0d0d4f6a5ce72247ffe22324" ON "vested_sale" ("sale_id") `)
         await db.query(`CREATE INDEX "IDX_ffa4428b95fc1c0e4df5b5f495" ON "vested_sale" ("vesting_id") `)
         await db.query(`CREATE INDEX "IDX_b2135c373c44a37e4e6842ead5" ON "vested_sale" ("sale_id", "vesting_id") `)
-========
->>>>>>>> master:db/migrations/1701263174334-Data.js
         await db.query(`CREATE TABLE "curator_group" ("id" character varying NOT NULL, "is_active" boolean NOT NULL, CONSTRAINT "PK_0b4c0ab279d72bcbf4e16b65ff1" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "curator" ("id" character varying NOT NULL, CONSTRAINT "PK_5791051a62d2c2dfc593d38ab57" PRIMARY KEY ("id"))`)
         await db.query(`CREATE TABLE "member_metadata" ("id" character varying NOT NULL, "name" text, "avatar" jsonb, "about" text, "member_id" character varying NOT NULL, CONSTRAINT "MemberMetadata_member" UNIQUE ("member_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_e7e4d350f82ae2383894f465ed" UNIQUE ("member_id"), CONSTRAINT "PK_d3fcc374696465f3c0ac3ba8708" PRIMARY KEY ("id"))`)
@@ -280,6 +270,7 @@ module.exports = class Data1701263174334 {
         await db.query(`ALTER TABLE "session" ADD CONSTRAINT "FK_fae5a6b4a57f098e9af8520d499" FOREIGN KEY ("account_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "session_encryption_artifacts" ADD CONSTRAINT "FK_3612880efd8926a17eba5ab0e1a" FOREIGN KEY ("session_id") REFERENCES "session"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "token" ADD CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780" FOREIGN KEY ("issued_for_id") REFERENCES "account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "future_notification_orion_event" ADD CONSTRAINT "FK_9f7f80afbee45690f0ebda52281" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_history_entry" ADD CONSTRAINT "FK_57f51d35ecab042478fe2e31c19" FOREIGN KEY ("nft_id") REFERENCES "owned_nft"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_history_entry" ADD CONSTRAINT "FK_d1a28b178f5d028d048d40ce208" FOREIGN KEY ("event_id") REFERENCES "event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "nft_activity" ADD CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -294,13 +285,10 @@ module.exports = class Data1701263174334 {
         await db.query(`ALTER TABLE "distribution_bucket_operator_metadata" ADD CONSTRAINT "FK_69ec9bdc975b95f7dff94a71069" FOREIGN KEY ("distirbution_bucket_operator_id") REFERENCES "distribution_bucket_operator"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "channel_verification" ADD CONSTRAINT "FK_f13d5d785670f46de668575139c" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "channel_suspension" ADD CONSTRAINT "FK_e30ebff1042c010ff88b87f4f7a" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
         await db.query(`ALTER TABLE "token_channel" ADD CONSTRAINT "FK_7105aa65a2d333bb2f66db129e9" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "token_channel" ADD CONSTRAINT "FK_b065bc433d65b0a6874073ea540" FOREIGN KEY ("channel_id") REFERENCES "channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "vested_sale" ADD CONSTRAINT "FK_4b0d0d4f6a5ce72247ffe223240" FOREIGN KEY ("sale_id") REFERENCES "sale"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "vested_sale" ADD CONSTRAINT "FK_ffa4428b95fc1c0e4df5b5f4952" FOREIGN KEY ("vesting_id") REFERENCES "vesting_schedule"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-========
->>>>>>>> master:db/migrations/1701263174334-Data.js
         await db.query(`ALTER TABLE "member_metadata" ADD CONSTRAINT "FK_e7e4d350f82ae2383894f465ede" FOREIGN KEY ("member_id") REFERENCES "membership"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
     }
 
@@ -450,6 +438,8 @@ module.exports = class Data1701263174334 {
         await db.query(`DROP INDEX "public"."IDX_3612880efd8926a17eba5ab0e1"`)
         await db.query(`DROP TABLE "token"`)
         await db.query(`DROP INDEX "public"."IDX_a6fe18c105f85a63d761ccb078"`)
+        await db.query(`DROP TABLE "future_notification_orion_event"`)
+        await db.query(`DROP INDEX "public"."IDX_9f7f80afbee45690f0ebda5228"`)
         await db.query(`DROP TABLE "nft_history_entry"`)
         await db.query(`DROP INDEX "public"."IDX_57f51d35ecab042478fe2e31c1"`)
         await db.query(`DROP INDEX "public"."IDX_d1a28b178f5d028d048d40ce20"`)
@@ -481,7 +471,6 @@ module.exports = class Data1701263174334 {
         await db.query(`DROP INDEX "public"."IDX_f13d5d785670f46de668575139"`)
         await db.query(`DROP TABLE "channel_suspension"`)
         await db.query(`DROP INDEX "public"."IDX_e30ebff1042c010ff88b87f4f7"`)
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
         await db.query(`DROP TABLE "token_channel"`)
         await db.query(`DROP INDEX "public"."IDX_7105aa65a2d333bb2f66db129e"`)
         await db.query(`DROP INDEX "public"."IDX_b065bc433d65b0a6874073ea54"`)
@@ -490,8 +479,6 @@ module.exports = class Data1701263174334 {
         await db.query(`DROP INDEX "public"."IDX_4b0d0d4f6a5ce72247ffe22324"`)
         await db.query(`DROP INDEX "public"."IDX_ffa4428b95fc1c0e4df5b5f495"`)
         await db.query(`DROP INDEX "public"."IDX_b2135c373c44a37e4e6842ead5"`)
-========
->>>>>>>> master:db/migrations/1701263174334-Data.js
         await db.query(`DROP TABLE "curator_group"`)
         await db.query(`DROP TABLE "curator"`)
         await db.query(`DROP TABLE "member_metadata"`)
@@ -574,6 +561,7 @@ module.exports = class Data1701263174334 {
         await db.query(`ALTER TABLE "session" DROP CONSTRAINT "FK_fae5a6b4a57f098e9af8520d499"`)
         await db.query(`ALTER TABLE "session_encryption_artifacts" DROP CONSTRAINT "FK_3612880efd8926a17eba5ab0e1a"`)
         await db.query(`ALTER TABLE "token" DROP CONSTRAINT "FK_a6fe18c105f85a63d761ccb0780"`)
+        await db.query(`ALTER TABLE "future_notification_orion_event" DROP CONSTRAINT "FK_9f7f80afbee45690f0ebda52281"`)
         await db.query(`ALTER TABLE "nft_history_entry" DROP CONSTRAINT "FK_57f51d35ecab042478fe2e31c19"`)
         await db.query(`ALTER TABLE "nft_history_entry" DROP CONSTRAINT "FK_d1a28b178f5d028d048d40ce208"`)
         await db.query(`ALTER TABLE "nft_activity" DROP CONSTRAINT "FK_18a65713a9fd0715c7a980f5d54"`)
@@ -588,13 +576,10 @@ module.exports = class Data1701263174334 {
         await db.query(`ALTER TABLE "distribution_bucket_operator_metadata" DROP CONSTRAINT "FK_69ec9bdc975b95f7dff94a71069"`)
         await db.query(`ALTER TABLE "channel_verification" DROP CONSTRAINT "FK_f13d5d785670f46de668575139c"`)
         await db.query(`ALTER TABLE "channel_suspension" DROP CONSTRAINT "FK_e30ebff1042c010ff88b87f4f7a"`)
-<<<<<<<< HEAD:db/migrations/1701183768842-Data.js
         await db.query(`ALTER TABLE "token_channel" DROP CONSTRAINT "FK_7105aa65a2d333bb2f66db129e9"`)
         await db.query(`ALTER TABLE "token_channel" DROP CONSTRAINT "FK_b065bc433d65b0a6874073ea540"`)
         await db.query(`ALTER TABLE "vested_sale" DROP CONSTRAINT "FK_4b0d0d4f6a5ce72247ffe223240"`)
         await db.query(`ALTER TABLE "vested_sale" DROP CONSTRAINT "FK_ffa4428b95fc1c0e4df5b5f4952"`)
-========
->>>>>>>> master:db/migrations/1701263174334-Data.js
         await db.query(`ALTER TABLE "member_metadata" DROP CONSTRAINT "FK_e7e4d350f82ae2383894f465ede"`)
     }
 }

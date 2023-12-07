@@ -20,7 +20,7 @@ services:
   orion_processor:
     container_name: orion_processor
     hostname: orion_processor
-    image: node:14
+    image: node:16
     restart: unless-stopped
     env_file:
       - .env
