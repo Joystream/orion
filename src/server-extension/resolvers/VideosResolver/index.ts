@@ -248,10 +248,9 @@ export class VideosResolver {
 
       const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
       if (video.viewsNum % tick === 0) {
-        videoRelevanceManager.scheduleRecalcForVideo(videoId)
+        videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
       }
       await em.save([video, video.channel, newView])
-      await videoRelevanceManager.updateVideoRelevanceValue(em)
       return {
         videoId,
         viewsNum: video.viewsNum,

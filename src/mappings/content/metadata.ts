@@ -65,7 +65,6 @@ import {
   genericEventFields,
   invalidMetadata,
   metaprotocolTransactionFailure,
-  videoRelevanceManager,
 } from '../utils'
 import {
   AsDecoded,
@@ -583,7 +582,6 @@ export async function processModerateCommentMessage(
   // schedule comment counters updates
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
 
   comment.text = ''
   comment.status = CommentStatus.MODERATED
@@ -667,7 +665,8 @@ export async function processChannelPaymentFromMember(
     event
   )
 
-  increaseChannelCumulativeRevenue(channel, amount)
+  channel.cumulativeReward += amount
+
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,
   })

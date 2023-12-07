@@ -241,25 +241,28 @@ async function processVideoReaction(
     if (video.channelId) {
       const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
       if (channelOwnerMemberId) {
-        const memberHandle = await memberHandleById(overlay, memberId)
-        const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
-        const reactionData = {
-          videoId: video.id,
-          videoTitle: parseVideoTitle(video),
-          memberId,
-          memberHandle,
+        if (channelOwnerMemberId !== memberId) {
+          // don't notify channel owner if he's the one who reacted
+          const memberHandle = await memberHandleById(overlay, memberId)
+          const channelOwnerAccount = await getAccountForMember(overlay, channelOwnerMemberId)
+          const reactionData = {
+            videoId: video.id,
+            videoTitle: parseVideoTitle(video),
+            memberId,
+            memberHandle,
+          }
+          const reaction =
+            reactionType === VideoReactionOptions.LIKE
+              ? new VideoLiked(reactionData)
+              : new VideoDisliked(reactionData)
+          await addNotification(
+            overlay,
+            channelOwnerAccount,
+            new ChannelRecipient({ channel: video.channelId }),
+            reaction,
+            event
+          )
         }
-        const reaction =
-          reactionType === VideoReactionOptions.LIKE
-            ? new VideoLiked(reactionData)
-            : new VideoDisliked(reactionData)
-        await addNotification(
-          overlay,
-          channelOwnerAccount,
-          new ChannelRecipient({ channel: video.channelId }),
-          reaction,
-          event
-        )
       }
     }
   }
@@ -315,7 +318,7 @@ export async function processReactVideoMessage(
     existingReaction
   )
 
-  videoRelevanceManager.scheduleRecalcForVideo(video.id)
+  videoRelevanceManager.scheduleRecalcForChannel(channelId)
 
   return new MetaprotocolTransactionResultOK()
 }
@@ -392,8 +395,8 @@ export async function processReactCommentMessage(
       }),
     })
 
-    // add notification
-    if (comment.authorId) {
+    // add notification if comment author is not the member who reacted
+    if (memberId !== comment.authorId && comment.authorId) {
       const commentAuthorAccount = await getAccountForMember(overlay, comment.authorId)
 
       const notificationData = {
@@ -494,7 +497,7 @@ export async function processCreateCommentMessage(
   // schedule comment counters update
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
+  videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
 
   const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
@@ -658,7 +661,7 @@ export async function processDeleteCommentMessage(
   // schedule comment counters update
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
+  videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
 
   // update the comment
   comment.text = ''

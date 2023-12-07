@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { formatJOY } from '../notificationsData'
+import { formatJOY } from '../helpers'
 
 describe('formatJOY', () => {
   it('Parse HAPI amounts into JOY values', () => {

@@ -17,6 +17,8 @@ To learn how to run your own instance of Atlas, please refer to the [Atlas opera
     - [Accessing user reports](./tutorials/reported-content.md)
     - [Excluding (censoring) content](./tutorials/excluding-content.md)
     - [Featuring content](./tutorials/featuring-content.md)
+    - [Backing up Orion database](./tutorials/backups.md)
+    - [Configuring email notifications](./tutorials/email-notifications.md)
 - Production deployment:
     - [Deploying Orion to production](./tutorials/deploying-orion.md)
     - [Upgrading Orion](./tutorials/upgrading-orion.md)

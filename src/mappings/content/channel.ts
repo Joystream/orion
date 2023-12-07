@@ -76,9 +76,9 @@ export async function processChannelCreatedEvent({
     videoViewsNum: 0,
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
-    yppStatus: new YppUnverified(),
     cumulativeRewardClaimed: 0n,
     cumulativeReward: 0n,
+    yppStatus: new YppUnverified(),
   })
 
   const ownerMember = channel.ownerMemberId
@@ -332,7 +332,7 @@ export async function processChannelRewardUpdatedEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
   increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
@@ -358,7 +358,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
   increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 

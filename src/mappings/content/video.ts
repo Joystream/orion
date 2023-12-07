@@ -8,12 +8,12 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  Event,
   Video,
-  VideoPosted,
-  VideoAssetsDeletedByModeratorEventData,
-  VideoCreatedEventData,
   VideoViewEvent,
+  Event,
+  VideoCreatedEventData,
+  VideoAssetsDeletedByModeratorEventData,
+  VideoPosted,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import {
@@ -65,7 +65,7 @@ export async function processVideoCreatedEvent({
     videoRelevance: 0,
   })
 
-  videoRelevanceManager.scheduleRecalcForVideo(videoId)
+  videoRelevanceManager.scheduleRecalcForChannel(channelId.toString())
 
   // fetch related channel and owner
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())

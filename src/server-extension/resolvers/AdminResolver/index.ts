@@ -173,7 +173,6 @@ export class AdminResolver {
   }
 
   @UseMiddleware(OperatorOnly())
-  @Mutation(() => AppRootDomain)
   @Mutation(() => Int)
   async setNewNotificationCenterPath(
     @Args() args: SetMaxAttemptsOnMailDeliveryInput
@@ -216,6 +215,8 @@ export class AdminResolver {
             .execute()
         }
       )
+
+      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
 
       // Push the result into the results array
       results.push({

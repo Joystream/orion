@@ -648,8 +648,8 @@ export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
 }
 
 export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
-  overlay: EntityManagerOverlay,
-  nft: Flat<OwnedNft>
+    overlay: EntityManagerOverlay,
+    nft: Flat<OwnedNft>
 ) {
   const video = await overlay.getRepository(Video).getByIdOrFail(nft.videoId)
   const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
@@ -772,7 +772,7 @@ export async function notifyChannelFollowers(
   overlay: EntityManagerOverlay,
   channelId: string,
   notificationType: NotificationType,
-  event?: Event
+  event: Event
 ) {
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
   for (const followerAccount of followersAccounts) {
