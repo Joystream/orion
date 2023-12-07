@@ -29,16 +29,14 @@ export class DistributionBucketsCache {
     this.logger = rootLogger.child('buckets-cache')
   }
 
-  public init(intervalMs: number): void {
+  public async init(intervalMs: number): Promise<void> {
     this.logger.info(`Initializing distribution buckets cache with ${intervalMs}ms interval...`)
-    this.updateLoop(intervalMs)
-      .then(() => {
-        /* Do nothing */
-      })
-      .catch((err) => {
-        console.error(err)
-        process.exit(-1)
-      })
+    try {
+      await this.updateLoop(intervalMs)
+    } catch (err) {
+      console.error(err)
+      process.exit(-1)
+    }
   }
 
   public getBucketsByBagId(bagId: string): DistributionBucketCachedData[] {
