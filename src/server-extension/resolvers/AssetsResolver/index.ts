@@ -32,7 +32,11 @@ export class DistributionBucketsCache {
   public async init(intervalMs: number): Promise<void> {
     this.logger.info(`Initializing distribution buckets cache with ${intervalMs}ms interval...`)
     try {
-      await this.updateLoop(intervalMs)
+      await new Promise<void>((resolve) => {
+        this.updateLoop(intervalMs, resolve).catch((err) => {
+          throw err
+        })
+      })
     } catch (err) {
       console.error(err)
       process.exit(-1)
@@ -47,8 +51,10 @@ export class DistributionBucketsCache {
     })
   }
 
-  private async updateLoop(intervalMs: number): Promise<void> {
+  private async updateLoop(intervalMs: number, onFirstRun: () => void): Promise<void> {
     this.em = await globalEm
+    let isFirstRun = true
+
     while (true) {
       try {
         this.logger.debug('Reloading distribution buckets and bags cache data...')
@@ -61,6 +67,11 @@ export class DistributionBucketsCache {
         )
         this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
         this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
+
+        if (isFirstRun) {
+          isFirstRun = false
+          onFirstRun()
+        }
       } catch (e) {
         this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
       }
