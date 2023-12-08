@@ -62,7 +62,9 @@ export async function main() {
 main()
   .then(() => {
     console.log('Email delivery finished')
+    process.exit(0)
   })
   .catch((err) => {
     console.error('Email delivery failed', err)
+    process.exit(1)
   })
