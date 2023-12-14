@@ -63,3 +63,7 @@ You will also need a sendgrid account with an api key in order to have email not
 
 That's it! Your gateway should now be available under `https://mygateway.com`!
 If you kept the Auth API playground enabled in your `.env` (`OPENAPI_PLAYGROUND=true`), you can also use `https://auth.mygateway.com/playground` to perform the Operator authentication (as described in _[Local testing](./local-testing.md#authentication)_ tutorial) and then execute Operator queries and mutations through `https://query.mygateway.com/graphql`.
+
+### Email notification setup
+If your orion version is more recent or equal than `3.2.0` then you have the opportunity to allow users to be notified via email for various events. See [here](./email-notifications.md) for a guide on how to setup the email
+scheduling chron job
