@@ -1,6 +1,18 @@
 # Operator email notifications guide
 
-This feature has been introduced in Orion starting from version 3.2.0
+This feature has been introduced in Orion starting from version 3.2.0 and the purpose of this documentation is 
+to instruct a potential gateway operator about how setting up a email notification system using a chron scheduler
+
+## Prerequisite
+Currently in order to have the scheduling working you must clone the orion repo locally via:
+```sh
+    git clone https://github.com/Joystream/orion.git
+```
+and cd-ing into it and installing the dependencies and building using (which assumes you have [npm](https://www.npmjs.com/) installed)
+```sh
+    cd orion
+    make prepare
+```
 
 The current implementation uses a chron job for executing the
 `src/lib/mail-scheduler/index.js` script at every specified interval.
@@ -18,9 +30,14 @@ Configure the `.env` variables with:
 1. Open up the chrontab file with `crontab -e`
 2. Add the following line:
 ```bash
-*/<TIME_INTERVAL_MINUTES> * * * * /home/ubuntu/.volta/bin/node <PATH_TO_ORION_FOLDER>/lib/mail-scheduler/index.js >> <PATH_TO_ORION_FOLDER>/chron_mail_scheduler.log 2>&1
+*/<TIME_INTERVAL_MINUTES> * * * * <NODE_BINARY_PATH> /lib/mail-scheduler/index.js >> <PATH_TO_ORION_FOLDER>/chron_mail_scheduler.log 2>&1
 ```
-replacing the `<PATH_TO_ORION_FOLDER>` with the path to the orion directory cloned for the setup and `<TIME_INTERVAL_MINUTES>` with the desired time interval in minutes. This will make the script to be executed with the desired frequency and it will output the log into a `<PATH_TO_ORION_FOLDER>/chron_mail_scheduler.log` file
+replacing:
+    - `<PATH_TO_ORION_FOLDER>` with the absolute path to the orion directory cloned in the *prerequise* step
+    - `<TIME_INTERVAL_MINUTES>` with the desired time interval in minutes.
+    - `<NODE_BINARY_PATH>`with the absolute path for the node-js binary (which can be obtained by running the shell line `which node`)
+    
+This will make the script to be executed with the desired frequency and it will output the log into a `<PATH_TO_ORION_FOLDER>/chron_mail_scheduler.log` file
 3. save and close the crontab file 
 
 ### Updating the interval value 
