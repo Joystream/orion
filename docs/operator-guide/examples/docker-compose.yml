@@ -98,7 +98,7 @@ services:
     ports:
       - '127.0.0.1:${ARCHIVE_DB_PORT}:${ARCHIVE_DB_PORT}'
       - '[::1]:${ARCHIVE_DB_PORT}:${ARCHIVE_DB_PORT}'
-    command: ['postgres', '-c', 'log_statement=all', '-p', '${DB_PORT}']
+    command: ['postgres', '-c', 'log_statement=all', '-p', '${ARCHIVE_DB_PORT}']
 
   ingest:
     container_name: orion_archive_ingest
@@ -113,7 +113,7 @@ services:
         '20', # allow up to 20 pending requests for the above endpoint (default is 5)
         #  "--start-block", "1000000", # uncomment to specify a non-zero start block
         '--out',
-        'postgres://postgres:postgres@orion_archive_db:${DB_PORT}/squid-archive',
+        'postgres://postgres:postgres@orion_archive_db:${ARCHIVE_DB_PORT}/squid-archive',
       ]
 
   gateway:
@@ -128,7 +128,7 @@ services:
       RUST_LOG: 'actix_web=info,actix_server=info'
     command: [
         '--database-url',
-        'postgres://postgres:postgres@orion_archive_db:${DB_PORT}/squid-archive',
+        'postgres://postgres:postgres@orion_archive_db:${ARCHIVE_DB_PORT}/squid-archive',
         # "--evm-support" # uncomment for chains with Frontier EVM pallet
         # (e.g. Moonbeam/Moonriver or Astar/Shiden)
       ]
