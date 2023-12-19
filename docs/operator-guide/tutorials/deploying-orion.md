@@ -68,7 +68,12 @@ That's it! Your gateway should now be available under `https://mygateway.com`!
 If you kept the Auth API playground enabled in your `.env` (`OPENAPI_PLAYGROUND=true`), you can also use `https://auth.mygateway.com/playground` to perform the Operator authentication (as described in _[Local testing](./local-testing.md#authentication)_ tutorial) and then execute Operator queries and mutations through `https://query.mygateway.com/graphql`.
 
 ### 3. Orion deployment
-Once everything is set up, you can start the Orion services and the Caddy server by running:
+Once everything is set up, you can start:
+a.The Orion services only with:
+    ```bash
+    docker-compose up -d
+    ```
+b.The Orion services and the Caddy server by running:
     ```bash
     docker-compose --profile deploy up -d
     ```
