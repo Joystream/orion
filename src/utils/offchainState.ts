@@ -3,9 +3,9 @@ import assert from 'assert'
 import fs from 'fs'
 import path from 'path'
 import { EntityManager } from 'typeorm'
+import { NextEntityId } from '../model'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -236,6 +236,7 @@ export class OffchainState {
                 })
                 .join(', ')}
             ) AS "data"
+            ORDER BY "id"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
             fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
           )
