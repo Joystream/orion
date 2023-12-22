@@ -21,7 +21,7 @@ export async function getAssetUrls(
 
   if (!distributionBucketsCache) {
     distributionBucketsCache = new DistributionBucketsCache()
-    distributionBucketsCache.init(6000)
+    await distributionBucketsCache.init(6000)
   }
 
   const buckets = distributionBucketsCache.getBucketsByBagId(bagId)
