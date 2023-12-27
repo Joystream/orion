@@ -1,5 +1,5 @@
-module.exports = class Data1699272804825 {
-    name = 'Data1699272804825'
+module.exports = class Data1703692601653 {
+    name = 'Data1703692601653'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -71,7 +71,7 @@ module.exports = class Data1699272804825 {
         await db.query(`CREATE TABLE "amm_transaction" ("id" character varying NOT NULL, "quantity" numeric NOT NULL, "price_paid" numeric NOT NULL, "amm_id" character varying, "account_id" character varying, "price_per_unit" numeric NOT NULL, "transaction_type" character varying(4) NOT NULL, "created_in" integer NOT NULL, CONSTRAINT "PK_783093757a6f260c72ded36d409" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_135d9555d7ea3e45dd78d8aede" ON "amm_transaction" ("amm_id") `)
         await db.query(`CREATE INDEX "IDX_9109e9ce696736e0dd51d90fa7" ON "amm_transaction" ("account_id", "amm_id") `)
-        await db.query(`CREATE TABLE "revenue_share" ("id" character varying NOT NULL, "token_id" character varying, "created_in" integer NOT NULL, "starting_at" integer NOT NULL, "ends_at" integer NOT NULL, "participants_num" integer NOT NULL, "allocation" numeric NOT NULL, "claimed" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_6ef7c4be56b9290db1462885163" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "revenue_share" ("id" character varying NOT NULL, "token_id" character varying, "created_in" integer NOT NULL, "starting_at" integer NOT NULL, "ends_at" integer NOT NULL, "potential_participants_num" integer, "participants_num" integer NOT NULL, "allocation" numeric NOT NULL, "claimed" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_6ef7c4be56b9290db1462885163" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_4e8bfc2037cececc86ba5192ea" ON "revenue_share" ("token_id") `)
         await db.query(`CREATE TABLE "revenue_share_participation" ("id" character varying NOT NULL, "account_id" character varying, "revenue_share_id" character varying, "staked_amount" numeric NOT NULL, "earnings" numeric NOT NULL, "created_in" integer NOT NULL, "recovered" boolean NOT NULL, CONSTRAINT "RevenueShareParticipation_account_revenueShare" UNIQUE ("account_id", "revenue_share_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_a6931d06b217f8055611ea26fc7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_018b86600c0c1228ada1c928be" ON "revenue_share_participation" ("revenue_share_id") `)
