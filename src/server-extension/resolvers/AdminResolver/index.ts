@@ -12,6 +12,8 @@ import {
   RestoreContentResult,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
+  SetFeaturedCrtsInput,
+  SetFeaturedCrtsResult,
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
@@ -260,6 +262,36 @@ export class AdminResolver {
 
     return {
       newNumberOfNftsFeatured,
+    }
+  }
+
+  @UseMiddleware(OperatorOnly)
+  @Mutation(() => SetFeaturedCrtsResult)
+  async setFeaturedCrts(
+    @Args() { featuredCrtsIds }: SetFeaturedCrtsInput
+  ): Promise<SetFeaturedCrtsResult> {
+    const em = await this.em()
+    let newNumberOfCrtsFeatured = 0
+
+    await em
+      .createQueryBuilder()
+      .update(`admin.creator_token`)
+      .set({ is_featured: false })
+      .where({ is_featured: true })
+      .execute()
+
+    if (featuredCrtsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update(`admin.creator_token`)
+        .set({ is_featured: true })
+        .where({ id: In(featuredCrtsIds) })
+        .execute()
+      newNumberOfCrtsFeatured = result.affected || 0
+    }
+
+    return {
+      newNumberOfCrtsFeatured,
     }
   }
 
