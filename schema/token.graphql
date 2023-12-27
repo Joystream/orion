@@ -30,7 +30,7 @@ type CreatorToken @entity {
   totalSupply: BigInt!
 
   "Flag to indicate whether the CRT is featured or not"
-  isFeature: Boolean!
+  isFeatured: Boolean!
 
   "sales issued for this token"
   sales: [Sale!] @derivedFrom(field: "token")

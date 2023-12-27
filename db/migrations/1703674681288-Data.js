@@ -1,5 +1,5 @@
-module.exports = class Data1703671151219 {
-    name = 'Data1703671151219'
+module.exports = class Data1703674681288 {
+    name = 'Data1703674681288'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -91,8 +91,9 @@ module.exports = class Data1703671151219 {
         await db.query(`CREATE INDEX "IDX_5c5d611ec29439dc91eeea287b" ON "sale" ("token_id", "created_in") `)
         await db.query(`CREATE TABLE "benefit" ("id" character varying NOT NULL, "token_id" character varying, "emoji_code" text, "title" text NOT NULL, "description" text NOT NULL, "display_order" integer NOT NULL, CONSTRAINT "Benefit_token_displayOrder" UNIQUE ("token_id", "display_order") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_c024dccb30e6f4702adffe884d1" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_77ac3c1669ee14648626b078f9" ON "benefit" ("token_id", "display_order") `)
-        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward_permill" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, "last_price" numeric, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "is_featured" boolean NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward_permill" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, "last_price" numeric, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_790a6fc1f7aad3711c0672bb6b" ON "creator_token" ("symbol") `)
+        await db.query(`CREATE INDEX "IDX_64480ef90bda6c11650c3f4279" ON "creator_token" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_aabe40376c0eb47772b52780b1" ON "creator_token" ("current_amm_sale_id") `)
         await db.query(`CREATE INDEX "IDX_5eca884f8728ff8f0c6a389c24" ON "creator_token" ("current_sale_id") `)
         await db.query(`CREATE INDEX "IDX_e30b9944186aeb1e86707e1705" ON "creator_token" ("current_renvenue_share_id") `)
@@ -365,6 +366,7 @@ module.exports = class Data1703671151219 {
         await db.query(`DROP INDEX "public"."IDX_77ac3c1669ee14648626b078f9"`)
         await db.query(`DROP TABLE "creator_token"`)
         await db.query(`DROP INDEX "public"."IDX_790a6fc1f7aad3711c0672bb6b"`)
+        await db.query(`DROP INDEX "public"."IDX_64480ef90bda6c11650c3f4279"`)
         await db.query(`DROP INDEX "public"."IDX_aabe40376c0eb47772b52780b1"`)
         await db.query(`DROP INDEX "public"."IDX_5eca884f8728ff8f0c6a389c24"`)
         await db.query(`DROP INDEX "public"."IDX_e30b9944186aeb1e86707e1705"`)
