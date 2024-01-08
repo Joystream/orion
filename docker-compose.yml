@@ -20,7 +20,7 @@ services:
   orion_processor:
     container_name: orion_processor
     hostname: orion_processor
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -40,7 +40,7 @@ services:
   orion_graphql-server:
     container_name: orion_graphql-server
     hostname: orion_graphql-server
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -61,7 +61,7 @@ services:
   orion_auth-api:
     container_name: orion_auth-api
     hostname: orion_auth-api
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
