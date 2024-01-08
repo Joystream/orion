@@ -32,7 +32,7 @@ type TransactionalStatusAuction {
 "Represents NFT details"
 type OwnedNft @entity {
   "Timestamp of the block the NFT was created at"
-  createdAt: DateTime!
+  createdAt: DateTime! @index
 
   "NFT's video"
   video: Video! @unique

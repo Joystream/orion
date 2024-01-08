@@ -12,7 +12,7 @@ type Event @entity {
   indexInBlock: Int!
 
   "Timestamp of the block the event was emitted in"
-  timestamp: DateTime!
+  timestamp: DateTime! @index
 
   "More specific event data, which depends on event type"
   data: EventData!
