@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
+import { EmailDeliveryAttempt, EmailFailure, NotificationEmailDelivery } from '../model'
 import { ConfigVariable, config } from '../utils/config'
 import { uniqueId } from '../utils/crypto'
 import { globalEm } from '../utils/globalEm'
@@ -30,17 +30,22 @@ export async function deliverEmails() {
   const appName = await config.get(ConfigVariable.AppName, em)
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
-    let content = ''
+    let content
     if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
       content = await createMailContent(em, appName, notificationDelivery.notification)
     }
-    const status = await executeMailDelivery(appName, em, toAccount, content)
+    const attempts = notificationDelivery.attempts
+    const status = content
+      ? await executeMailDelivery(appName, em, toAccount, content)
+      : new EmailFailure({
+          errorStatus: 'Failure in Creating mail content',
+        })
+
     const newAttempt = new EmailDeliveryAttempt({
       id: uniqueId(),
       timestamp: new Date(),
       status,
     })
-    const attempts = notificationDelivery.attempts
     attempts.push(newAttempt)
     notificationDelivery.attempts = attempts
     if (status.isTypeOf === 'EmailSuccess') {
@@ -62,7 +67,9 @@ export async function main() {
 main()
   .then(() => {
     console.log('Email delivery finished')
+    process.exit(0)
   })
   .catch((err) => {
     console.error('Email delivery failed', err)
+    process.exit(1)
   })
