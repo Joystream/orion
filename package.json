@@ -13,7 +13,7 @@
     "build": "npm run generate:schema; npm run generate:emails; rm -rf lib && tsc && ./scripts/copyfiles.sh",
     "lint": "eslint --ext .ts ./src",
     "format": "prettier --write .",
-    "checks": "prettier --check . && npm run lint && make codegen && tsc --noEmit --pretty",
+    "checks": "prettier --check . && npm run lint && make typegen && make codegen && tsc --noEmit --pretty",
     "db:migrate": "npx squid-typeorm-migration apply",
     "get-graphql-schema": "./scripts/get-graphql-schema.sh",
     "processor-start": "node -r dotenv-expand/config lib/processor.js",
