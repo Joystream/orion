@@ -1,8 +1,8 @@
-import { ConfigVariable, config } from '../utils/config'
-import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
 import { EntityManager } from 'typeorm'
-import { globalEm } from '../utils/globalEm'
+import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
+import { ConfigVariable, config } from '../utils/config'
 import { uniqueId } from '../utils/crypto'
+import { globalEm } from '../utils/globalEm'
 import { createMailContent, executeMailDelivery } from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
@@ -34,13 +34,13 @@ export async function deliverEmails() {
     if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
       content = await createMailContent(em, appName, notificationDelivery.notification)
     }
-    const attempts = notificationDelivery.attempts
     const status = await executeMailDelivery(appName, em, toAccount, content)
     const newAttempt = new EmailDeliveryAttempt({
       id: uniqueId(),
       timestamp: new Date(),
       status,
     })
+    const attempts = notificationDelivery.attempts
     attempts.push(newAttempt)
     notificationDelivery.attempts = attempts
     if (status.isTypeOf === 'EmailSuccess') {

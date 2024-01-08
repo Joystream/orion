@@ -2,9 +2,8 @@ import { createLogger } from '@subsquid/logger'
 import haversineDistance from 'haversine-distance'
 import { random } from 'lodash'
 import urljoin from 'url-join'
-
-import { Coordinates, NodeData } from './types'
 import { DistributionBucketsCache } from '.'
+import { Coordinates, NodeData } from './types'
 
 export const rootLogger = createLogger('api:assets')
 export const locationLogger = rootLogger.child('location')
@@ -21,7 +20,7 @@ export async function getAssetUrls(
 
   if (!distributionBucketsCache) {
     distributionBucketsCache = new DistributionBucketsCache()
-    distributionBucketsCache.init(6000)
+    await distributionBucketsCache.init(6000)
   }
 
   const buckets = distributionBucketsCache.getBucketsByBagId(bagId)
