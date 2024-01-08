@@ -10,6 +10,8 @@ ADD package-lock.json .
 ADD assets assets
 RUN npm ci
 ADD tsconfig.json .
+ADD typegen.json .
+ADD joystream.jsonl .
 ADD src src
 ADD schema schema
 ADD scripts scripts
