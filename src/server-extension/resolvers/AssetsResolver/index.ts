@@ -33,7 +33,12 @@ export class DistributionBucketsCache {
   public async init(intervalMs: number): Promise<void> {
     this.logger.info(`Initializing distribution buckets cache with ${intervalMs}ms interval...`)
     try {
-      await this.update().then(() => setInterval(() => this.update(), intervalMs))
+      await this.update()
+      setInterval(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        () => this.update(),
+        intervalMs
+      )
     } catch (err) {
       console.error(err)
       process.exit(-1)

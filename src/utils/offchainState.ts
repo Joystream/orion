@@ -20,13 +20,13 @@ type SnakeCaseKeys<T> = {
 }
 
 type ClassConstructors<T> = {
-  [K in keyof T]: T[K] extends Function ? T[K] : never
+  [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
 }
 
 type ExportedStateMap = {
   [K in keyof ClassConstructors<typeof model>]?:
     | true
-    | (keyof SnakeCaseKeys<ClassConstructors<typeof model>[K]['prototype']>)[]
+    | (keyof SnakeCaseKeys<InstanceType<ClassConstructors<typeof model>[K]>>)[]
 }
 
 const exportedStateMap: ExportedStateMap = {
