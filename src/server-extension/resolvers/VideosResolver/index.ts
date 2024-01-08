@@ -6,6 +6,8 @@ import {
   ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
+  UpdateVideoViewArgs,
+  UpdateVideoViewResult,
   VideoReportInfo,
 } from './types'
 import { VideosConnection } from '../baseTypes'
@@ -256,6 +258,51 @@ export class VideosResolver {
         viewsNum: video.viewsNum,
         viewId: newView.id,
         added: true,
+      }
+    })
+  }
+
+  @UseMiddleware(UserOnly)
+  @Mutation(() => AddVideoViewResult)
+  async updateViewPercentage(
+    @Args() { percentage, viewId }: UpdateVideoViewArgs,
+    @Ctx() ctx: Context
+  ): Promise<UpdateVideoViewResult> {
+    const em = await this.em()
+    const { user } = ctx
+
+    return withHiddenEntities(em, async () => {
+      const videoView = await em.findOne(VideoViewEvent, {
+        where: { id: viewId },
+      })
+
+      if (!videoView) {
+        throw new Error('Unable to find given view')
+      }
+
+      if (videoView.userId !== user.id) {
+        throw new Error('Cannot update someones else view')
+      }
+
+      const video = await em.findOneOrFail(Video, {
+        where: {
+          id: videoView?.videoId,
+        },
+      })
+
+      const duration = video.duration ?? 0
+      const maxTimeToUpdate = duration * 1_000 * 1.5
+
+      if (videoView.timestamp.getTime() + maxTimeToUpdate < Date.now()) {
+        throw new Error('View cannot be updated after some time')
+      }
+
+      videoView.videoViewPercentage = percentage
+
+      await em.save(videoView)
+
+      return {
+        updated: true,
       }
     })
   }

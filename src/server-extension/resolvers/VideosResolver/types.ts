@@ -1,7 +1,7 @@
 import { ArgsType, Field, ObjectType, Int } from 'type-graphql'
 import { Video, VideoOrderByInput, VideoWhereInput } from '../baseTypes'
 import { EntityReportInfo } from '../commonTypes'
-import { MaxLength } from 'class-validator'
+import { MaxLength, Max } from 'class-validator'
 
 @ObjectType()
 export class VideosSearchResult {
@@ -67,6 +67,22 @@ export class AddVideoViewResult {
 
   @Field(() => Boolean, { nullable: false })
   added!: boolean
+}
+
+@ArgsType()
+export class UpdateVideoViewArgs {
+  @Field(() => String, { nullable: false })
+  viewId!: string
+
+  @Field(() => Int, { nullable: false })
+  @Max(100, { message: 'View cannot reach over 100%' })
+  percentage!: number
+}
+
+@ObjectType()
+export class UpdateVideoViewResult {
+  @Field(() => Boolean, { nullable: false })
+  updated!: boolean
 }
 
 @ArgsType()
