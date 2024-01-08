@@ -1,5 +1,5 @@
 type NotificationEmailDelivery @entity {
-  "Autoincremented"
+  "UUID"
   id: ID!
 
   "the notification being delivered"
@@ -100,7 +100,7 @@ union NotificationType =
   | ChannelSuspended # ypp channel suspended
   | NftPurchased # nft bought
   | CreatorReceivesAuctionBid # bid made on nft
-  | NftRoyaltyPaid # royaltiy received
+  | NftRoyaltyPaid # royalty received
   | DirectChannelPaymentByMember # channel payment received
   | ChannelFundsWithdrawn # channel funds withdrawn
   | ChannelCreated # channel created

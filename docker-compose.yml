@@ -47,6 +47,7 @@ services:
       - docker.env
     environment:
       - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
     depends_on:
       - orion_db
     volumes:
@@ -68,6 +69,7 @@ services:
       - docker.env
     environment:
       - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
     depends_on:
       - orion_db
     volumes:

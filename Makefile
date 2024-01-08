@@ -12,7 +12,7 @@ build-docker:
 	@docker build . -t joystream/orion
 
 serve:
-	@npx squid-graphql-server --subscriptions
+	@npm run graphql-server-start
 
 serve-auth-api:
 	@npm run auth-server-start

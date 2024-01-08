@@ -45,4 +45,4 @@ CMD ["npm", "run", "processor-start"]
 
 
 FROM squid AS query-node
-CMD ["npm", "run", "query-node-start"]
+CMD ["npm", "run", "graphql-server-start"]
