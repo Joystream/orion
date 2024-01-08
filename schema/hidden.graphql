@@ -10,6 +10,9 @@ type VideoViewEvent @entity {
 
   "Video view event timestamp"
   timestamp: DateTime!
+
+  "Percentage of video viewed"
+  videoViewPercentage: Int!
 }
 
 type Report @entity {

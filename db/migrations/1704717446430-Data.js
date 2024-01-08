@@ -1,11 +1,11 @@
-module.exports = class Data1701263174334 {
-    name = 'Data1701263174334'
+module.exports = class Data1704717446430 {
+    name = 'Data1704717446430'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_822778b4b1ea8e3b60b127cb8b" ON "channel_follow" ("user_id") `)
         await db.query(`CREATE INDEX "IDX_9bc0651dda94437ec18764a260" ON "channel_follow" ("channel_id") `)
-        await db.query(`CREATE TABLE "video_view_event" ("id" character varying NOT NULL, "video_id" text NOT NULL, "user_id" character varying, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_2efd85597a6a7a704fc4d0f7701" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "video_view_event" ("id" character varying NOT NULL, "video_id" text NOT NULL, "user_id" character varying, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "video_view_percentage" integer NOT NULL, CONSTRAINT "PK_2efd85597a6a7a704fc4d0f7701" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_2e29fba63e12a2b1818e0782d7" ON "video_view_event" ("video_id") `)
         await db.query(`CREATE INDEX "IDX_31e1e798ec387ad905cf98d33b" ON "video_view_event" ("user_id") `)
         await db.query(`CREATE TABLE "report" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text, "video_id" text, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "rationale" text NOT NULL, CONSTRAINT "PK_99e4d0bea58cba73c57f935a546" PRIMARY KEY ("id"))`)
