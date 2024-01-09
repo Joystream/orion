@@ -1,4 +1,6 @@
+import sgMail, { ClientResponse, ResponseError } from '@sendgrid/mail'
 import { EntityManager } from 'typeorm'
+import { NotificationEmailTemplateData, notificationEmailContent } from '../auth-server/emails'
 import {
   Account,
   Channel,
@@ -9,9 +11,7 @@ import {
   Notification,
 } from '../model'
 import { ConfigVariable, config } from '../utils/config'
-import sgMail, { ClientResponse, ResponseError } from '@sendgrid/mail'
 import { getNotificationData } from '../utils/notification/notificationsData'
-import { notificationEmailContent, NotificationEmailTemplateData } from '../auth-server/emails'
 
 export const DEFAULT_STATUS_CODE = 'Undefined error code'
 

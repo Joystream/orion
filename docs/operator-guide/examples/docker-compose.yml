@@ -48,7 +48,7 @@ services:
     environment:
       - DB_HOST=orion-db
       - GQL_PORT=${GRAPHQL_API_PORT}
-    command: ['npm', 'run', 'query-node-start']
+    command: ['npm', 'run', 'graphql-server-start']
     ports:
       - '127.0.0.1:${GRAPHQL_API_PORT}:${GRAPHQL_API_PORT}'
   # Orion Authentication API

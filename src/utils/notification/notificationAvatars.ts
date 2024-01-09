@@ -7,28 +7,32 @@ import { ConfigVariable, config } from '../config'
 
 export const getNotificationAvatar = memoize(
   async (em: EntityManager, type: 'channelId' | 'membershipId', id: string): Promise<string> => {
-    switch (type) {
-      case 'channelId': {
-        const channel = await em.getRepository(Channel).findOneBy({ id })
-        const objectId = channel?.avatarPhotoId
-        if (!objectId) break
+    try {
+      switch (type) {
+        case 'channelId': {
+          const channel = await em.getRepository(Channel).findOneBy({ id })
+          const objectId = channel?.avatarPhotoId
+          if (!objectId) break
 
-        const object = await em.getRepository(StorageDataObject).findOneBy({ id: objectId })
-        const avatarUrls = await getAssetUrls(objectId, object?.storageBagId, { limit: 1 })
-        if (!avatarUrls?.[0]) break
+          const object = await em.getRepository(StorageDataObject).findOneBy({ id: objectId })
+          const avatarUrls = await getAssetUrls(objectId, object?.storageBagId, { limit: 1 })
+          if (!avatarUrls?.[0]) break
 
-        return avatarUrls[0]
+          return avatarUrls[0]
+        }
+
+        case 'membershipId': {
+          const member = await em.getRepository(MemberMetadata).findOneBy({ id })
+          const avatar = member?.avatar
+
+          // AvatarObject is not yet supported
+          if (!avatar || avatar.isTypeOf !== 'AvatarUri') break
+
+          return avatar.avatarUri
+        }
       }
-
-      case 'membershipId': {
-        const member = await em.getRepository(MemberMetadata).findOneBy({ id })
-        const avatar = member?.avatar
-
-        // AvatarObject is not yet supported
-        if (!avatar || avatar.isTypeOf !== 'AvatarUri') break
-
-        return avatar.avatarUri
-      }
+    } catch (e) {
+      console.error(e)
     }
 
     // Fallback to a placeholder

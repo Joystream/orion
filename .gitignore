@@ -8,6 +8,7 @@
 /.vscode
 /.idea
 src/model/generated
+src/types/
 src/auth-server/emails/templates/*.mst
 src/auth-server/emails/templates/preview
 /schema.graphql
