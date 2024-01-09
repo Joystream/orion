@@ -115,16 +115,6 @@ export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.0.1': ['Account'],
-    '3.0.2': ['Account'],
-    '3.0.3': ['Account'],
-    '3.0.4': ['Account'],
-    '3.1.0': ['Account'],
-    '3.2.0': ['Account'],
-  }
-
   private migrations: Migrations = {
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
