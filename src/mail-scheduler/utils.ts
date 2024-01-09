@@ -19,12 +19,13 @@ export async function executeMailDelivery(
   appName: string,
   em: EntityManager,
   toAccount: Account,
+  subject: string,
   content: string
 ): Promise<DeliveryStatus> {
   const resp = await sendGridSend({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to: toAccount.email,
-    subject: `New notification from ${appName}`,
+    subject: subject || `New notification from ${appName}`,
     content,
   })
   const className = Object.prototype.toString.call(resp)
@@ -41,7 +42,10 @@ export async function createMailContent(
   em: EntityManager,
   appName: string,
   notification: Notification
-): Promise<string> {
+): Promise<{
+  content: string
+  subject: string
+}> {
   const appRoot = `https://${await config.get(ConfigVariable.AppRootDomain, em)}`
 
   const appKey = notification.recipient.isTypeOf === 'MemberRecipient' ? 'viewer' : 'studio'
@@ -59,6 +63,8 @@ export async function createMailContent(
   const logosAssetsRoot = `${appAssetStorage}/logos/${appName.toLowerCase()}`
   const appNameAlt = await config.get(ConfigVariable.AppNameAlt, em)
 
+  const notificationData = await getNotificationData(em, notification)
+
   const content = notificationEmailContent({
     ...(await getMessage(em, notification)),
     app: {
@@ -70,9 +76,12 @@ export async function createMailContent(
       notificationLink,
       unsubscribeLink,
     },
-    notification: await getNotificationData(em, notification),
+    notification: notificationData,
   })
-  return content
+  return {
+    content,
+    subject: notificationData.subject,
+  }
 }
 
 async function getMessage(
