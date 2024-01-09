@@ -42,10 +42,13 @@ export async function createMailContent(
   em: EntityManager,
   appName: string,
   notification: Notification
-): Promise<{
-  content: string
-  subject: string
-} | undefined> {
+): Promise<
+  | {
+      content: string
+      subject: string
+    }
+  | undefined
+> {
   const appRoot = `https://${await config.get(ConfigVariable.AppRootDomain, em)}`
 
   const appKey = notification.recipient.isTypeOf === 'MemberRecipient' ? 'viewer' : 'studio'
@@ -80,7 +83,7 @@ export async function createMailContent(
     })
     return {
       content,
-      subject: notificationData.subject
+      subject: notificationData.subject,
     }
   } catch (error) {
     console.log(error)
