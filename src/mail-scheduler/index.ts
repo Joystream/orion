@@ -33,21 +33,21 @@ export async function deliverEmails() {
     let content
     let subject
     if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
-      const { subject: notificationSuject, content: notificationContent } = await createMailContent(
+      const result = await createMailContent(
         em,
         appName,
         notificationDelivery.notification
       )
-      content = notificationContent
-      subject = notificationSuject
+      content = result?.content
+      subject = result?.subject
     }
     const attempts = notificationDelivery.attempts
     const status =
       content && subject
         ? await executeMailDelivery(appName, em, toAccount, subject, content)
         : new EmailFailure({
-            errorStatus: 'Failure in Creating mail content',
-          })
+          errorStatus: 'Failure in Creating mail content',
+        })
 
     const newAttempt = new EmailDeliveryAttempt({
       id: uniqueId(),
