@@ -17,6 +17,9 @@ serve:
 serve-auth-api:
 	@npm run auth-server-start
 
+serve-interactions-api:
+	@npm run interactions-server-start
+
 migrate:
 	@npx squid-typeorm-migration apply
 
@@ -45,7 +48,7 @@ up: up-archive up-squid
 
 down-squid:
 	@docker-compose down -v
-	
+
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v
 

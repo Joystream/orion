@@ -79,6 +79,27 @@ services:
     ports:
       - '${AUTH_API_PORT}:${AUTH_API_PORT}'
 
+  orion_interations-api:
+    container_name: orion_interations-api
+    hostname: orion_interations-api
+    image: node:14
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker.env
+    environment:
+      - SQD_TRACE=interactions
+    depends_on:
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: [ 'make', 'serve-interactions-api' ]
+    ports:
+      - '${INTERACTIONS_API_PORT}:${INTERACTIONS_API_PORT}'
+
 volumes:
   orion_db_data:
 

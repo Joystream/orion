@@ -1,0 +1,226 @@
+openapi: 3.0.2
+info:
+  title: Orion authentication API
+  description: Orion API for handling authentication, account creation and related activites
+  contact:
+    email: info@joystream.org
+  license:
+    name: GPL-3.0-only
+    url: 'https://opensource.org/licenses/GPL-3.0'
+  version: 1.0.0
+servers:
+  - url: '/api/v1/'
+paths:
+  /video-consumed:
+    post:
+      operationId: videoConsumed
+      x-eov-operation-handler: videoConsumed
+      description: Dispatches video consumed event to the recommendation service.
+      requestBody:
+        $ref: '#/components/requestBodies/ItemConsumedInteractionBody'
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /video-portion:
+    post:
+      operationId: videoPortion
+      x-eov-operation-handler: videoPortion
+      description: Dispatches video portion event to the recommendation service.
+      requestBody:
+        $ref: '#/components/requestBodies/ItemPortionInteractionBody'
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /video-clicked:
+    post:
+      operationId: videoClicked
+      x-eov-operation-handler: videoClicked
+      description: Dispatches video click event to the recommendation service.
+      requestBody:
+        $ref: '#/components/requestBodies/ItemClickInteractionBody'
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /channel-clicked:
+    post:
+      operationId: channelClicked
+      x-eov-operation-handler: channelClicked
+      description: Dispatches channel click event to the recommendation service.
+      requestBody:
+        $ref: '#/components/requestBodies/ItemClickInteractionBody'
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+  /rate-video:
+    post:
+      operationId: rateVideo
+      x-eov-operation-handler: rateVideo
+      description: Dispatches video rate event to the recommendation service.
+      requestBody:
+        $ref: '#/components/requestBodies/ItemRateInteractionBody'
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/GenericUnauthorizedResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Session ID
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_id
+  requestBodies:
+    ItemRateInteractionBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ItemRateInteractionRequestData'
+    ItemClickInteractionBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ItemClickInteractionRequestData'
+    ItemConsumedInteractionBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ItemConsumedInteractionRequestData'
+    ItemPortionInteractionBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ItemPortionInteractionRequestData'
+  responses:
+    GenericBadRequestResponse:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericInternalServerErrorResponse:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericOkResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericOkResponseData'
+    GenericUnauthorizedResponse:
+      description: Access token (session id) is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+    GenericTooManyRequestsResponse:
+      description: Too many requests sent within a given timeframe.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenericErrorResponseData'
+  schemas:
+    ItemRateInteractionRequestData:
+      type: object
+      properties:
+        itemId:
+          type: string
+        rating:
+          type: number
+        recommId:
+          type: string
+    ItemClickInteractionRequestData:
+      type: object
+      properties:
+        itemId:
+          type: string
+        duration:
+          type: number
+        recommId:
+          type: string
+    ItemConsumedInteractionRequestData:
+      type: object
+      properties:
+        itemId:
+          type: string
+        recommId:
+          type: string
+    ItemPortionInteractionRequestData:
+      type: object
+      properties:
+        itemId:
+          type: string
+        portion:
+          type: number
+        recommId:
+          type: string
+    GenericErrorResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    GenericOkResponseData:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
