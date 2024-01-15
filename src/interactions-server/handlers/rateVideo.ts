@@ -28,7 +28,7 @@ export const rateVideo: (
       throw new BadRequestError('Request missing parameters')
     }
 
-    await recommendationServiceManager.sendItemRating(itemId, session.userId, rating, recommId)
+    await recommendationServiceManager.scheduleItemRating(itemId, session.userId, rating, recommId)
 
     res.status(200).json({ success: true })
   } catch (e) {

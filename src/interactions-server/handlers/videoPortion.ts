@@ -28,7 +28,12 @@ export const videoPortion: (
       throw new BadRequestError('Request missing parameters')
     }
 
-    await recommendationServiceManager.sendViewPortion(itemId, session.userId, portion, recommId)
+    await recommendationServiceManager.scheduleViewPortion(
+      itemId,
+      session.userId,
+      portion,
+      recommId
+    )
 
     res.status(200).json({ success: true })
   } catch (e) {

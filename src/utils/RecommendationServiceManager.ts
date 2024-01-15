@@ -1,5 +1,6 @@
 import { User, Video } from '../model'
 import { ApiClient, requests as ClientRequests } from 'recombee-api-client'
+import { createLogger } from '@subsquid/logger'
 
 type RSVideo = Pick<
   Video,
@@ -17,6 +18,8 @@ type RSVideo = Pick<
 
 type RSUser = Pick<User, 'id'>
 
+const recommendationServiceLogger = createLogger('recommendationsService')
+
 export class RecommendationServiceManager {
   private _videosQueue: ClientRequests.SetItemValues[] = []
   private _usersQueue: ClientRequests.SetUserValues[] = []
@@ -25,10 +28,19 @@ export class RecommendationServiceManager {
   private _consumeInteracionQueue: ClientRequests.AddPurchase[] = []
   private _ratingInteracionQueue: ClientRequests.AddRating[] = []
 
-  private client: ApiClient
+  private client: ApiClient | null = null
+  private _enabled = true
 
-  constructor() {
-    this.client = new ApiClient('db-id', 'priv_key', { region: 'eu-west' })
+  constructor(databaseId?: string) {
+    if (!process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY || !databaseId) {
+      recommendationServiceLogger.error(
+        'RecommendationServiceManager initalized withour required variables'
+      )
+      return
+    }
+    this.client = new ApiClient(databaseId, process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY, {
+      region: 'eu-west',
+    })
   }
 
   async scheduleVideoUpsert(video: RSVideo) {
@@ -56,7 +68,7 @@ export class RecommendationServiceManager {
     this._videosQueue.push(actionObject)
 
     if (this._videosQueue.length >= 100) {
-      // await this.client.send(new ClientRequests.Batch(this._videosQueue))
+      await this.sendBatchRequest(this._videosQueue)
       this._videosQueue.length = 0
     }
   }
@@ -75,14 +87,14 @@ export class RecommendationServiceManager {
     this._usersQueue.push(actionObject)
 
     if (this._usersQueue.length >= 100) {
-      // await this.client.send(new ClientRequests.Batch(this._usersQueue))
+      await this.sendBatchRequest(this._usersQueue)
       this._usersQueue.length = 0
     }
   }
 
   // this interaction has big model value and should we used for
   // reliable interactions like video viewed in 90% or nft of given video bought
-  async sendItemConsumed(itemId: string, userId: string, recommId?: string) {
+  async scheduleItemConsumed(itemId: string, userId: string, recommId?: string) {
     const actionObject = new ClientRequests.AddPurchase(userId, itemId, {
       timestamp: Date.now(),
       cascadeCreate: true,
@@ -92,13 +104,13 @@ export class RecommendationServiceManager {
     this._consumeInteracionQueue.push(actionObject)
 
     if (this._consumeInteracionQueue.length >= 50) {
-      // await this.client.send(new ClientRequests.Batch(this._consumeInteracionQueue))
+      await this.sendBatchRequest(this._consumeInteracionQueue)
       this._consumeInteracionQueue.length = 0
     }
   }
 
   // this interaction should be dispatched when user clicks a video to see it
-  async sendClickEvent(itemId: string, userId: string, duration?: number, recommId?: string) {
+  async scheduleClickEvent(itemId: string, userId: string, duration?: number, recommId?: string) {
     const actionObject = new ClientRequests.AddDetailView(userId, itemId, {
       timestamp: Date.now(),
       cascadeCreate: true,
@@ -109,14 +121,14 @@ export class RecommendationServiceManager {
     this._clickInteracionQueue.push(actionObject)
 
     if (this._clickInteracionQueue.length >= 50) {
-      // await this.client.send(new ClientRequests.Batch(this._clickInteracionQueue))
+      await this.sendBatchRequest(this._clickInteracionQueue)
       this._clickInteracionQueue.length = 0
     }
   }
 
   // this interaction is for user engagement level
   // in Orion it would state how long user has watched the video
-  async sendViewPortion(itemId: string, userId: string, portion: number, recommId?: string) {
+  async scheduleViewPortion(itemId: string, userId: string, portion: number, recommId?: string) {
     const actionObject = new ClientRequests.SetViewPortion(userId, itemId, portion, {
       timestamp: Date.now(),
       cascadeCreate: true,
@@ -126,12 +138,12 @@ export class RecommendationServiceManager {
     this._viewPortionInteracionQueue.push(actionObject)
 
     if (this._viewPortionInteracionQueue.length >= 50) {
-      // await this.client.send(new ClientRequests.Batch(this._viewPortionInteracionQueue))
+      await this.sendBatchRequest(this._viewPortionInteracionQueue)
       this._viewPortionInteracionQueue.length = 0
     }
   }
 
-  async sendItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
+  async scheduleItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
     if (rating < -1 || rating > 1) {
       throw new Error('Rating out of bounds')
     }
@@ -144,10 +156,30 @@ export class RecommendationServiceManager {
     this._ratingInteracionQueue.push(actionObject)
 
     if (this._ratingInteracionQueue.length >= 50) {
-      // await this.client.send(new ClientRequests.Batch(this._ratingInteracionQueue))
+      await this.sendBatchRequest(this._ratingInteracionQueue)
       this._ratingInteracionQueue.length = 0
     }
   }
+
+  async enableSync() {
+    this._ratingInteracionQueue.length = 0
+    this._consumeInteracionQueue.length = 0
+    this._clickInteracionQueue.length = 0
+    this._viewPortionInteracionQueue.length = 0
+    this._videosQueue.length = 0
+    this._usersQueue.length = 0
+
+    this._enabled = true
+  }
+
+  private async sendBatchRequest(requests: ClientRequests.Request[]) {
+    if (!this._enabled) {
+      return
+    }
+    return this.client?.send(new ClientRequests.Batch(requests))
+  }
 }
 
-export const recommendationServiceManager = new RecommendationServiceManager()
+export const recommendationServiceManager = new RecommendationServiceManager(
+  process.env.VIDEO_ITEM_DATABASE_ID
+)
