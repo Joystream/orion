@@ -1,6 +1,7 @@
 import { User, Video } from '../model'
 import { ApiClient, requests as ClientRequests } from 'recombee-api-client'
 import { createLogger } from '@subsquid/logger'
+import { randomUUID } from 'crypto'
 
 type RSVideo = Pick<
   Video,
@@ -181,6 +182,37 @@ export class RecommendationServiceManager {
 
   get isEnabled() {
     return this._enabled
+  }
+
+  async recommendItemsToUser(userId?: string, limit?: number) {
+    const request = new ClientRequests.RecommendItemsToUser(userId ?? randomUUID(), limit ?? 10, {
+      scenario: 'homepage',
+      minRelevance: userId ? 'medium' : 'low',
+      rotationRate: 0.2,
+      cascadeCreate: true,
+    })
+
+    return this.client?.send(request)
+  }
+
+  async recommendNextItems(recommId: string, limit?: number) {
+    const request = new ClientRequests.RecommendNextItems(recommId, limit ?? 10)
+    return this.client?.send(request)
+  }
+
+  async recommendItemsToItem(itemId: string, userId?: string, limit?: number) {
+    const request = new ClientRequests.RecommendItemsToItem(
+      itemId,
+      userId ?? randomUUID(),
+      limit ?? 10,
+      {
+        scenario: 'watch-next',
+        minRelevance: 'medium',
+        rotationRate: 0.2,
+        cascadeCreate: true,
+      }
+    )
+    return this.client?.send(request)
   }
 }
 

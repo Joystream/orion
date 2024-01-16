@@ -40,6 +40,27 @@ export class VideosConnectionArgs {
 }
 
 @ArgsType()
+export class HomepageVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  recommId?: string
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
+}
+
+@ArgsType()
+export class SimiliarVideosQueryArgs {
+  @Field(() => String, { nullable: true })
+  videoId: string
+
+  @Field(() => String, { nullable: true })
+  recommId?: string
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
+}
+
+@ArgsType()
 export class MostViewedVideosConnectionArgs extends VideosConnectionArgs {
   @Field(() => Int, { nullable: true })
   periodDays?: number
