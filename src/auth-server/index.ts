@@ -11,9 +11,11 @@ import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimi
 import swaggerUi, { JsonObject } from 'swagger-ui-express'
 import YAML from 'js-yaml'
 import fs from 'fs'
+import { recommendationServiceManager } from '../utils/RecommendationServiceManager'
 
 export const logger = createLogger('auth-api')
 
+recommendationServiceManager.enableSync()
 export const app = express()
 
 function authHandler(type: 'header' | 'cookie') {
