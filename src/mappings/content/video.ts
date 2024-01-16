@@ -27,6 +27,7 @@ import {
   processNft,
 } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -132,6 +133,7 @@ export async function processVideoCreatedEvent({
     channelId: channel.id,
   })
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+  await recommendationServiceManager.scheduleVideoUpsert(video)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
@@ -179,6 +181,7 @@ export async function processVideoUpdatedEvent({
     )
   }
 
+  await recommendationServiceManager.scheduleVideoUpsert(video)
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }

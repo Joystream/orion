@@ -161,7 +161,7 @@ export class RecommendationServiceManager {
     }
   }
 
-  async enableSync() {
+  enableSync() {
     this._ratingInteracionQueue.length = 0
     this._consumeInteracionQueue.length = 0
     this._clickInteracionQueue.length = 0
@@ -177,6 +177,10 @@ export class RecommendationServiceManager {
       return
     }
     return this.client?.send(new ClientRequests.Batch(requests))
+  }
+
+  get isEnabled() {
+    return this._enabled
   }
 }
 

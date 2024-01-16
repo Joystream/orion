@@ -91,6 +91,7 @@ import { EventNames, EventHandler, eventConstructors, EventInstance } from './ut
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { EntityManager } from 'typeorm'
 import { OffchainState } from './utils/offchainState'
+import { recommendationServiceManager } from './utils/RecommendationServiceManager'
 
 const defaultEventOptions = {
   data: {
@@ -319,6 +320,10 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       block.header.height >= exportBlockNumber
     ) {
       videoRelevanceManager.turnOnVideoRelevanceManager()
+    }
+
+    if (!recommendationServiceManager.isEnabled && block.header.height >= exportBlockNumber) {
+      recommendationServiceManager.enableSync()
     }
 
     // Importing exported offchain state
