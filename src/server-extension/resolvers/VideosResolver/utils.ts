@@ -9,15 +9,9 @@ export function buildRecommendationsVideoQuery(info: GraphQLResolveInfo, ctx: Co
   const tree = getResolveTree(info)
 
   // Extract subsquid-supported Channel fields
-  const videoSubTree = tree.fieldsByTypeName.HomepageVideosConnection.video
+  const videoSubTree = tree.fieldsByTypeName.RecommendedVideosQuery.video
   const videoFields = parseAnyTree(model, 'Video', info.schema, videoSubTree)
 
   // Generate query using subsquid's ListQuery
-  const listQuery = new ListQuery(model, ctx.openreader.dialect, 'Video', videoFields, {})
-
-  return {
-    listQuery,
-    recommId: tree.fieldsByTypeName.HomepageVideosConnection.recommId,
-    numberNextRecommsCalls: tree.fieldsByTypeName.HomepageVideosConnection.numberNextRecommsCalls,
-  }
+  return new ListQuery(model, ctx.openreader.dialect, 'Video', videoFields, {})
 }

@@ -51,7 +51,7 @@ export class VideosResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
-    const { listQuery } = buildRecommendationsVideoQuery(info, ctx)
+    const listQuery = buildRecommendationsVideoQuery(info, ctx)
     // get videosIds from recombee
     let res
 
@@ -97,7 +97,7 @@ export class VideosResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
-    const { listQuery } = buildRecommendationsVideoQuery(info, ctx)
+    const listQuery = buildRecommendationsVideoQuery(info, ctx)
     // get videosIds from recombee
     let res
 
