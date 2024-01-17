@@ -52,25 +52,31 @@ export class VideosResolver {
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
     const listQuery = buildRecommendationsVideoQuery(info, ctx)
-    // get videosIds from recombee
-    let res
+    let recommendationsResponse
+    const getUserRecommendationsPromise = recommendationServiceManager.recommendItemsToUser(
+      ctx.userId ?? undefined,
+      args.limit
+    )
 
     if (args.recommId) {
-      // get next recommendations based on prev recommId
-      res = await recommendationServiceManager.recommendNextItems(args.recommId, args.limit)
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          args.recommId,
+          args.limit
+        )
+      } catch (e) {
+        // if recommId have expired, req will throw an error
+        recommendationsResponse = await getUserRecommendationsPromise
+      }
     } else {
-      // get initial recommendation ids
-      res = await recommendationServiceManager.recommendItemsToUser(
-        ctx.userId ?? undefined,
-        args.limit
-      )
+      recommendationsResponse = await getUserRecommendationsPromise
     }
 
-    if (!res) {
+    if (!recommendationsResponse) {
       throw new Error("Couldn't find recommendations for user")
     }
 
-    const { recommId, numberNextRecommsCalls, recomms } = res
+    const { recommId, numberNextRecommsCalls, recomms } = recommendationsResponse
     const ids = recomms.map((recomm) => recomm.id)
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
@@ -98,26 +104,31 @@ export class VideosResolver {
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
     const listQuery = buildRecommendationsVideoQuery(info, ctx)
-    // get videosIds from recombee
-    let res
+    let recommendationsResponse
+    const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
+      args.videoId,
+      ctx.userId ?? undefined,
+      args.limit
+    )
 
     if (args.recommId) {
-      // get next recommendations based on prev recommId
-      res = await recommendationServiceManager.recommendNextItems(args.recommId, args.limit)
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          args.recommId,
+          args.limit
+        )
+      } catch (e) {
+        recommendationsResponse = await getItemRecommendationsPromise
+      }
     } else {
-      // get initial recommendation ids
-      res = await recommendationServiceManager.recommendItemsToItem(
-        args.videoId,
-        ctx.userId ?? undefined,
-        args.limit
-      )
+      recommendationsResponse = await getItemRecommendationsPromise
     }
 
-    if (!res) {
+    if (!recommendationsResponse) {
       throw new Error("Couldn't find recommendations for user")
     }
 
-    const { recommId, numberNextRecommsCalls, recomms } = res
+    const { recommId, numberNextRecommsCalls, recomms } = recommendationsResponse
     const ids = recomms.map((recomm) => recomm.id)
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
