@@ -322,9 +322,9 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       videoRelevanceManager.turnOnVideoRelevanceManager()
     }
 
-    if (!recommendationServiceManager.isEnabled && block.header.height >= exportBlockNumber) {
-      recommendationServiceManager.enableSync()
-    }
+    // if (!recommendationServiceManager.isEnabled && block.header.height >= exportBlockNumber) {
+    //   recommendationServiceManager.enableSync()
+    // }
 
     // Importing exported offchain state
     if (block.header.height >= exportBlockNumber && !offchainState.isImported) {

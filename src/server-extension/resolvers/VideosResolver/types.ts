@@ -40,24 +40,30 @@ export class VideosConnectionArgs {
 }
 
 @ArgsType()
-export class HomepageVideoQueryArgs {
-  @Field(() => String, { nullable: true })
-  recommId?: string
+export class CommonVideoQueryArgs {
+  @Field(() => VideoWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => [VideoOrderByInput], { nullable: true })
+  orderBy?: VideoOrderByInput[]
 
   @Field(() => Int, { nullable: true })
   limit?: number
 }
 
 @ArgsType()
-export class SimiliarVideosQueryArgs {
+export class HomepageVideoQueryArgs extends CommonVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  recommId?: string
+}
+
+@ArgsType()
+export class SimiliarVideosQueryArgs extends CommonVideoQueryArgs {
   @Field(() => String, { nullable: true })
   videoId: string
 
   @Field(() => String, { nullable: true })
   recommId?: string
-
-  @Field(() => Int, { nullable: true })
-  limit?: number
 }
 
 @ArgsType()

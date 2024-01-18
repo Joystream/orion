@@ -38,6 +38,8 @@ import { UserOnly, OperatorOnly } from '../middleware'
 import { createConnectionQueryFromParams } from '../../../utils/subsquid'
 import { recommendationServiceManager } from '../../../utils/RecommendationServiceManager'
 import { buildRecommendationsVideoQuery } from './utils'
+import { createLogger } from '@subsquid/logger'
+const logger = createLogger('VideosResolver')
 
 @Resolver()
 export class VideosResolver {
@@ -51,18 +53,21 @@ export class VideosResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
-    const listQuery = buildRecommendationsVideoQuery(info, ctx)
+    const { recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+
     let recommendationsResponse
     const getUserRecommendationsPromise = recommendationServiceManager.recommendItemsToUser(
       ctx.userId ?? undefined,
-      args.limit
+      queryArgs.limit
     )
-
-    if (args.recommId) {
+    const { openreader, req, ...rest } = ctx
+    logger.info(`CONTEXT: ${JSON.stringify(rest)}`)
+    if (argsRecommId) {
       try {
         recommendationsResponse = await recommendationServiceManager.recommendNextItems(
-          args.recommId,
-          args.limit
+          argsRecommId,
+          queryArgs.limit
         )
       } catch (e) {
         // if recommId have expired, req will throw an error
@@ -72,27 +77,30 @@ export class VideosResolver {
       recommendationsResponse = await getUserRecommendationsPromise
     }
 
-    if (!recommendationsResponse) {
-      throw new Error("Couldn't find recommendations for user")
+    if (!recommendationsResponse || !recommendationsResponse.recomms.length) {
+      throw new Error('no reccoms')
     }
 
-    const { recommId, numberNextRecommsCalls, recomms } = recommendationsResponse
-    const ids = recomms.map((recomm) => recomm.id)
+    const { recomms, recommId } = recommendationsResponse
+    logger.info(`Received new recommendation with ID: ${recommId} and items: ${recomms.length}`)
 
-    // Override the raw `sql` string in `connectionQuery` with the modified query
+    const ids = recomms.map((recomm) => recomm.id)
     ;(listQuery as { sql: string }).sql = extendClause(
       listQuery.sql,
       'WHERE',
       `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
       'AND'
     )
-
-    const result = await ctx.openreader.executeQuery(listQuery)
+    logger.info(`REsult ${JSON.stringify(listQuery)}`)
+    // const result = await ctx.openreader.executeQuery(listQuery)
+    const em = await this.em()
+    const result = await em.getRepository(Video).query(listQuery.sql)
+    logger.info(`XDDD ${JSON.stringify(result)}`)
 
     return {
       video: result as Video[],
-      recommId,
-      numberNextRecommsCalls,
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
     }
   }
 
@@ -103,19 +111,20 @@ export class VideosResolver {
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ): Promise<RecommendedVideosQuery> {
-    const listQuery = buildRecommendationsVideoQuery(info, ctx)
+    const { videoId, recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+
     let recommendationsResponse
     const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
-      args.videoId,
+      videoId,
       ctx.userId ?? undefined,
-      args.limit
+      queryArgs.limit
     )
-
-    if (args.recommId) {
+    if (argsRecommId) {
       try {
         recommendationsResponse = await recommendationServiceManager.recommendNextItems(
-          args.recommId,
-          args.limit
+          argsRecommId,
+          queryArgs.limit
         )
       } catch (e) {
         recommendationsResponse = await getItemRecommendationsPromise
@@ -124,27 +133,24 @@ export class VideosResolver {
       recommendationsResponse = await getItemRecommendationsPromise
     }
 
-    if (!recommendationsResponse) {
-      throw new Error("Couldn't find recommendations for user")
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms, recommId } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      // Override the raw `sql` string in `connectionQuery` with the modified query
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
     }
-
-    const { recommId, numberNextRecommsCalls, recomms } = recommendationsResponse
-    const ids = recomms.map((recomm) => recomm.id)
-
-    // Override the raw `sql` string in `connectionQuery` with the modified query
-    ;(listQuery as { sql: string }).sql = extendClause(
-      listQuery.sql,
-      'WHERE',
-      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
-      'AND'
-    )
 
     const result = await ctx.openreader.executeQuery(listQuery)
 
     return {
       video: result as Video[],
-      recommId,
-      numberNextRecommsCalls,
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
     }
   }
 
