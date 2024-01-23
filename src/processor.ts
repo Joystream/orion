@@ -320,11 +320,17 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       block.header.height >= exportBlockNumber
     ) {
       videoRelevanceManager.turnOnVideoRelevanceManager()
+      ctx.log.info(`Video relevance service enabled!`)
     }
 
-    // if (!recommendationServiceManager.isEnabled && block.header.height >= exportBlockNumber) {
-    //   recommendationServiceManager.enableSync()
-    // }
+    if (
+      !recommendationServiceManager.isEnabled &&
+      (process.env.FORCE_RECOMMENDATION_DATA_SYNC || block.header.height >= exportBlockNumber)
+    ) {
+      recommendationServiceManager.enableSync()
+      recommendationServiceManager.setMaxVideoQueueSize(100)
+      ctx.log.info(`Recommendations service enabled!`)
+    }
 
     // Importing exported offchain state
     if (block.header.height >= exportBlockNumber && !offchainState.isImported) {

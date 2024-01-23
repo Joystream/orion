@@ -21,3 +21,15 @@ export function buildRecommendationsVideoQuery(
   // Generate query using subsquid's ListQuery
   return new ListQuery(model, ctx.openreader.dialect, 'Video', videoFields, sqlArgs)
 }
+
+export function convertVideoWhereIntoReQlQuery(where: Record<string, any>) {
+  let reQlString = ''
+
+  if (where.category?.id_in) {
+    reQlString += `'category_id' in { ${where.category.id_in
+      .map((id: string) => `"${id}"`)
+      .join(', ')} }`
+  }
+
+  return reQlString
+}

@@ -37,9 +37,7 @@ import { parseVideoTitle } from '../../../mappings/content/utils'
 import { UserOnly, OperatorOnly } from '../middleware'
 import { createConnectionQueryFromParams } from '../../../utils/subsquid'
 import { recommendationServiceManager } from '../../../utils/RecommendationServiceManager'
-import { buildRecommendationsVideoQuery } from './utils'
-import { createLogger } from '@subsquid/logger'
-const logger = createLogger('VideosResolver')
+import { buildRecommendationsVideoQuery, convertVideoWhereIntoReQlQuery } from './utils'
 
 @Resolver()
 export class VideosResolver {
@@ -55,19 +53,24 @@ export class VideosResolver {
   ): Promise<RecommendedVideosQuery> {
     const { recommId: argsRecommId, ...queryArgs } = args
     const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
 
     let recommendationsResponse
     const getUserRecommendationsPromise = recommendationServiceManager.recommendItemsToUser(
       ctx.userId ?? undefined,
-      queryArgs.limit
+      {
+        limit: queryArgs.limit,
+        filterQuery: reQLQuery,
+      }
     )
-    const { openreader, req, ...rest } = ctx
-    logger.info(`CONTEXT: ${JSON.stringify(rest)}`)
     if (argsRecommId) {
       try {
         recommendationsResponse = await recommendationServiceManager.recommendNextItems(
           argsRecommId,
-          queryArgs.limit
+          {
+            limit: queryArgs.limit,
+            filterQuery: reQLQuery,
+          }
         )
       } catch (e) {
         // if recommId have expired, req will throw an error
@@ -77,25 +80,18 @@ export class VideosResolver {
       recommendationsResponse = await getUserRecommendationsPromise
     }
 
-    if (!recommendationsResponse || !recommendationsResponse.recomms.length) {
-      throw new Error('no reccoms')
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
     }
 
-    const { recomms, recommId } = recommendationsResponse
-    logger.info(`Received new recommendation with ID: ${recommId} and items: ${recomms.length}`)
-
-    const ids = recomms.map((recomm) => recomm.id)
-    ;(listQuery as { sql: string }).sql = extendClause(
-      listQuery.sql,
-      'WHERE',
-      `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
-      'AND'
-    )
-    logger.info(`REsult ${JSON.stringify(listQuery)}`)
-    // const result = await ctx.openreader.executeQuery(listQuery)
-    const em = await this.em()
-    const result = await em.getRepository(Video).query(listQuery.sql)
-    logger.info(`XDDD ${JSON.stringify(result)}`)
+    const result = await ctx.openreader.executeQuery(listQuery)
 
     return {
       video: result as Video[],
@@ -113,18 +109,25 @@ export class VideosResolver {
   ): Promise<RecommendedVideosQuery> {
     const { videoId, recommId: argsRecommId, ...queryArgs } = args
     const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
 
     let recommendationsResponse
     const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
       videoId,
       ctx.userId ?? undefined,
-      queryArgs.limit
+      {
+        limit: queryArgs.limit,
+        filterQuery: reQLQuery,
+      }
     )
     if (argsRecommId) {
       try {
         recommendationsResponse = await recommendationServiceManager.recommendNextItems(
           argsRecommId,
-          queryArgs.limit
+          {
+            limit: queryArgs.limit,
+            filterQuery: reQLQuery,
+          }
         )
       } catch (e) {
         recommendationsResponse = await getItemRecommendationsPromise
@@ -134,9 +137,8 @@ export class VideosResolver {
     }
 
     if (recommendationsResponse && recommendationsResponse.recomms.length) {
-      const { recomms, recommId } = recommendationsResponse
+      const { recomms } = recommendationsResponse
       const ids = recomms.map((recomm) => recomm.id)
-      // Override the raw `sql` string in `connectionQuery` with the modified query
       ;(listQuery as { sql: string }).sql = extendClause(
         listQuery.sql,
         'WHERE',
@@ -231,8 +233,6 @@ export class VideosResolver {
         `${arrayPosition} DESC`
       )
     }
-    console.log('wtf', connectionQuerySql)
-    console.log('wtf1', connectionQuery.sql)
 
     // Override the raw `sql` string in `connectionQuery` with the modified query
     ;(connectionQuery as { sql: string }).sql = connectionQuerySql
