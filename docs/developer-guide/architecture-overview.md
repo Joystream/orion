@@ -32,6 +32,7 @@ The services can be divided into 2 main categories:
     - [Squid processor](https://docs.subsquid.io/basics/squid-processor/): It's responsible for processing Joystream blockchain events and creating, updating or deleting the database entities (such as `Channel` or `Video`) accordingly, so that they remain in-sync with the current Joystream chain state.
     - [GraphQL server](https://docs.subsquid.io/graphql-api/overview/): Orion's main GraphQL server which handles all the queries and mutations.
     - [Auth server](../../src/auth-server/docs/README.md): Orion's authentication server (REST API) responsible for handling user authentication.
+    - [Interactions server](../../src/interactions-server/docs/README.md): Orion's interactions proxy server (REST API) responsible for limiting the amount of interactions sent to the recommendations' system.
 
 
 ## Directory structure and important files
