@@ -96,7 +96,7 @@ services:
         source: .
         target: /orion
     working_dir: /orion
-    command: [ 'make', 'serve-interactions-api' ]
+    command: ['make', 'serve-interactions-api']
     ports:
       - '${INTERACTIONS_API_PORT}:${INTERACTIONS_API_PORT}'
 
