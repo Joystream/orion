@@ -328,7 +328,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       (process.env.FORCE_RECOMMENDATION_DATA_SYNC || block.header.height >= exportBlockNumber)
     ) {
       recommendationServiceManager.enableSync()
-      recommendationServiceManager.setMaxVideoQueueSize(100)
       ctx.log.info(`Recommendations service enabled!`)
     }
 
@@ -342,6 +341,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      recommendationServiceManager.setMaxVideoQueueSize(100)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }
