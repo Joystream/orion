@@ -44,6 +44,7 @@ export class RecommendationServiceManager {
 
   // if orion is launched in dev mode, always sync videos
   private _enabled = isDevEnv
+  private _loopInitialized = false
 
   constructor() {
     if (
@@ -97,8 +98,21 @@ export class RecommendationServiceManager {
     this._videosQueue.push(actionObject)
 
     if (this._videosQueue.length >= this._videoQueueMaxSize) {
-      await this.sendBatchRequest(this._videosQueue)
+      const copiedVideosByRef = [...this._videosQueue]
       this._videosQueue.length = 0
+      await this.sendBatchRequest(copiedVideosByRef)
+    }
+  }
+
+  async scheduleVideoDeletion(videoId: string) {
+    const actionObject = new ClientRequests.DeleteItem(videoId)
+
+    this._videosDeleteQueue.push(actionObject)
+
+    if (this._videosDeleteQueue.length >= 100) {
+      const copiedDeleteVideosByRef = [...this._videosDeleteQueue]
+      this._videosDeleteQueue.length = 0
+      await this.sendBatchRequest(copiedDeleteVideosByRef)
     }
   }
 
@@ -118,8 +132,9 @@ export class RecommendationServiceManager {
     this._usersQueue.push(actionObject)
 
     if (this._usersQueue.length >= this._usersQueueMaxSize) {
-      await this.sendBatchRequest(this._usersQueue)
+      const copiedUsersByRefs = [...this._usersQueue]
       this._usersQueue.length = 0
+      await this.sendBatchRequest(copiedUsersByRefs)
     }
   }
 
@@ -139,8 +154,9 @@ export class RecommendationServiceManager {
     this._interactionsQueue.push(actionObject)
 
     if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      await this.sendBatchRequest(this._interactionsQueue)
+      const copiedInteractionsByRef = [...this._interactionsQueue]
       this._interactionsQueue.length = 0
+      await this.sendBatchRequest(copiedInteractionsByRef)
     }
   }
 
@@ -160,8 +176,9 @@ export class RecommendationServiceManager {
     this._interactionsQueue.push(actionObject)
 
     if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      await this.sendBatchRequest(this._interactionsQueue)
+      const copiedInteractionsByRef = [...this._interactionsQueue]
       this._interactionsQueue.length = 0
+      await this.sendBatchRequest(copiedInteractionsByRef)
     }
   }
 
@@ -181,8 +198,9 @@ export class RecommendationServiceManager {
     this._interactionsQueue.push(actionObject)
 
     if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      await this.sendBatchRequest(this._interactionsQueue)
+      const copiedInteractionsByRef = [...this._interactionsQueue]
       this._interactionsQueue.length = 0
+      await this.sendBatchRequest(copiedInteractionsByRef)
     }
   }
 
@@ -205,8 +223,9 @@ export class RecommendationServiceManager {
     this._interactionsQueue.push(actionObject)
 
     if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      await this.sendBatchRequest(this._interactionsQueue)
+      const copiedInteractionsByRef = [...this._interactionsQueue]
       this._interactionsQueue.length = 0
+      await this.sendBatchRequest(copiedInteractionsByRef)
     }
   }
 
@@ -220,8 +239,9 @@ export class RecommendationServiceManager {
     this._interactionsQueue.push(actionObject)
 
     if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      await this.sendBatchRequest(this._interactionsQueue)
+      const copiedInteractionsByRef = [...this._interactionsQueue]
       this._interactionsQueue.length = 0
+      await this.sendBatchRequest(copiedInteractionsByRef)
     }
   }
 
@@ -290,14 +310,35 @@ export class RecommendationServiceManager {
     return this.client?.send(request)
   }
 
-  async scheduleVideoDeletion(videoId: string) {
-    const actionObject = new ClientRequests.DeleteItem(videoId)
+  initBatchLoop() {
+    if (this._loopInitialized) {
+      throw new Error('update loop was initialized more than once')
+    }
+    this._loopInitialized = true
+    this._batchUpdateLoop(5 * 60 * 1_000) // 5mins
+      .then(() => {
+        /* Do nothing */
+      })
+      .catch((err) => {
+        console.error(err)
+        process.exit(-1)
+      })
+  }
 
-    this._videosDeleteQueue.push(actionObject)
-
-    if (this._videosDeleteQueue.length >= 1000) {
-      await this.sendBatchRequest(this._videosDeleteQueue)
+  private async _batchUpdateLoop(intervalMs: number): Promise<void> {
+    while (true) {
+      const batchArray = [
+        ...this._videosQueue,
+        ...this._usersQueue,
+        ...this._interactionsQueue,
+        ...this._videosDeleteQueue,
+      ]
+      this._videosQueue.length = 0
+      this._usersQueue.length = 0
+      this._interactionsQueue.length = 0
       this._videosDeleteQueue.length = 0
+      await this.sendBatchRequest(batchArray)
+      await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
 }
