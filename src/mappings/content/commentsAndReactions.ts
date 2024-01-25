@@ -229,7 +229,7 @@ async function processVideoReaction(
       videoReactionRepository.remove(existingReaction)
 
       if (account) {
-        await recommendationServiceManager.deleteItemRating(video.id, account.userId)
+        recommendationServiceManager.deleteItemRating(video.id, account.userId)
       }
 
       return
@@ -243,7 +243,7 @@ async function processVideoReaction(
     videoReaction.reaction = reactionType
 
     if (account) {
-      await recommendationServiceManager.scheduleItemRating(
+      recommendationServiceManager.scheduleItemRating(
         video.id,
         account.userId,
         reactionType === 'LIKE' ? 1 : -1
@@ -260,7 +260,7 @@ async function processVideoReaction(
       }),
     })
     if (account) {
-      await recommendationServiceManager.scheduleItemRating(
+      recommendationServiceManager.scheduleItemRating(
         video.id,
         account.userId,
         reactionType === 'LIKE' ? 1 : -1

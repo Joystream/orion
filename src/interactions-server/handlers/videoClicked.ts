@@ -35,12 +35,7 @@ export const videoClicked: (
       throw new TooManyRequestsError('Too many requests')
     }
 
-    await recommendationServiceManager.scheduleClickEvent(
-      itemId,
-      session.userId,
-      duration,
-      recommId
-    )
+    recommendationServiceManager.scheduleClickEvent(itemId, session.userId, duration, recommId)
 
     res.status(200).json({ success: true })
   } catch (e) {

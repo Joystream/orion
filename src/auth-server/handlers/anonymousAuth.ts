@@ -35,7 +35,7 @@ export const anonymousAuth: (
           )
 
       if (user && !userId) {
-        await recommendationServiceManager.scheduleUserUpsert({ id: user.id })
+        recommendationServiceManager.scheduleUserUpsert({ id: user.id })
       }
 
       if (!user) {

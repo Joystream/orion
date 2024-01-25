@@ -34,7 +34,7 @@ export const videoConsumed: (
       throw new TooManyRequestsError('Too many requests')
     }
 
-    await recommendationServiceManager.scheduleItemConsumed(itemId, session.userId, recommId)
+    recommendationServiceManager.scheduleItemConsumed(itemId, session.userId, recommId)
 
     res.status(200).json({ success: true })
   } catch (e) {
