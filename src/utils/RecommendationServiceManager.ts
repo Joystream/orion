@@ -30,16 +30,7 @@ const recommendationServiceLogger = createLogger('recommendationsService')
 const isDevEnv = process.env.ORION_ENV === 'development'
 
 export class RecommendationServiceManager {
-  private _videosQueue: ClientRequests.SetItemValues[] = []
-  private _videosDeleteQueue: ClientRequests.DeleteItem[] = []
-  private _usersQueue: ClientRequests.SetUserValues[] = []
-  private _interactionsQueue: ClientRequests.Request[] = []
-
-  // this value will be decreased after export block is reached
-  private _videoQueueMaxSize = 1_000
-  private _usersQueueMaxSize = 100
-  private _interactionsQueueMaxSize = 100
-
+  private _queue: ClientRequests.Request[] = []
   private client: ApiClient | null = null
 
   // if orion is launched in dev mode, always sync videos
@@ -68,14 +59,14 @@ export class RecommendationServiceManager {
     )
   }
 
-  async scheduleVideoUpsert(video: RSVideo) {
+  scheduleVideoUpsert(video: RSVideo) {
     // for dev env sync only up to 20k videos
     if (!this._enabled || (isDevEnv && Number(video.id) > 20_000)) {
       return
     }
 
     const actionObject = new ClientRequests.SetItemValues(
-      video.id,
+      `${video.id}-video`,
       {
         category_id: video.categoryId,
         channel_id: video.channelId,
@@ -94,29 +85,15 @@ export class RecommendationServiceManager {
         cascadeCreate: true,
       }
     )
-
-    this._videosQueue.push(actionObject)
-
-    if (this._videosQueue.length >= this._videoQueueMaxSize) {
-      const copiedVideosByRef = [...this._videosQueue]
-      this._videosQueue.length = 0
-      await this.sendBatchRequest(copiedVideosByRef)
-    }
+    this._queue.push(actionObject)
   }
 
-  async scheduleVideoDeletion(videoId: string) {
+  scheduleVideoDeletion(videoId: string) {
     const actionObject = new ClientRequests.DeleteItem(videoId)
-
-    this._videosDeleteQueue.push(actionObject)
-
-    if (this._videosDeleteQueue.length >= 100) {
-      const copiedDeleteVideosByRef = [...this._videosDeleteQueue]
-      this._videosDeleteQueue.length = 0
-      await this.sendBatchRequest(copiedDeleteVideosByRef)
-    }
+    this._queue.push(actionObject)
   }
 
-  async scheduleUserUpsert(user: RSUser) {
+  scheduleUserUpsert(user: RSUser) {
     if (!this._enabled) {
       return
     }
@@ -128,19 +105,12 @@ export class RecommendationServiceManager {
         cascadeCreate: true,
       }
     )
-
-    this._usersQueue.push(actionObject)
-
-    if (this._usersQueue.length >= this._usersQueueMaxSize) {
-      const copiedUsersByRefs = [...this._usersQueue]
-      this._usersQueue.length = 0
-      await this.sendBatchRequest(copiedUsersByRefs)
-    }
+    this._queue.push(actionObject)
   }
 
   // this interaction has big model value and should we used for
   // reliable interactions like video viewed in 90% or nft of given video bought
-  async scheduleItemConsumed(itemId: string, userId: string, recommId?: string) {
+  scheduleItemConsumed(itemId: string, userId: string, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -150,18 +120,11 @@ export class RecommendationServiceManager {
       cascadeCreate: true,
       recommId,
     })
-
-    this._interactionsQueue.push(actionObject)
-
-    if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      const copiedInteractionsByRef = [...this._interactionsQueue]
-      this._interactionsQueue.length = 0
-      await this.sendBatchRequest(copiedInteractionsByRef)
-    }
+    this._queue.push(actionObject)
   }
 
   // this interaction should be dispatched when user clicks a video to see it
-  async scheduleClickEvent(itemId: string, userId: string, duration?: number, recommId?: string) {
+  scheduleClickEvent(itemId: string, userId: string, duration?: number, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -172,19 +135,12 @@ export class RecommendationServiceManager {
       recommId,
       duration,
     })
-
-    this._interactionsQueue.push(actionObject)
-
-    if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      const copiedInteractionsByRef = [...this._interactionsQueue]
-      this._interactionsQueue.length = 0
-      await this.sendBatchRequest(copiedInteractionsByRef)
-    }
+    this._queue.push(actionObject)
   }
 
   // this interaction is for user engagement level
   // in Orion it would state how long user has watched the video
-  async scheduleViewPortion(itemId: string, userId: string, portion: number, recommId?: string) {
+  scheduleViewPortion(itemId: string, userId: string, portion: number, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -194,17 +150,10 @@ export class RecommendationServiceManager {
       cascadeCreate: true,
       recommId,
     })
-
-    this._interactionsQueue.push(actionObject)
-
-    if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      const copiedInteractionsByRef = [...this._interactionsQueue]
-      this._interactionsQueue.length = 0
-      await this.sendBatchRequest(copiedInteractionsByRef)
-    }
+    this._queue.push(actionObject)
   }
 
-  async scheduleItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
+  scheduleItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -214,43 +163,23 @@ export class RecommendationServiceManager {
     }
     const actionObject = new ClientRequests.AddRating(userId, itemId, rating, {
       timestamp: Date.now(),
-      // this event is synced through processor - false will make sure to avoid creating unsynced videos
-      // in recommendation system for dev instance which only sync 20k videos
-      cascadeCreate: false,
+      cascadeCreate: !isDevEnv,
       recommId,
     })
-
-    this._interactionsQueue.push(actionObject)
-
-    if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      const copiedInteractionsByRef = [...this._interactionsQueue]
-      this._interactionsQueue.length = 0
-      await this.sendBatchRequest(copiedInteractionsByRef)
-    }
+    this._queue.push(actionObject)
   }
 
-  async deleteItemRating(itemId: string, userId: string) {
+  deleteItemRating(itemId: string, userId: string) {
     if (!this._enabled) {
       return
     }
 
     const actionObject = new ClientRequests.DeleteRating(userId, itemId)
-
-    this._interactionsQueue.push(actionObject)
-
-    if (this._interactionsQueue.length >= this._interactionsQueueMaxSize) {
-      const copiedInteractionsByRef = [...this._interactionsQueue]
-      this._interactionsQueue.length = 0
-      await this.sendBatchRequest(copiedInteractionsByRef)
-    }
+    this._queue.push(actionObject)
   }
 
   enableSync() {
     this._enabled = true
-  }
-
-  setMaxVideoQueueSize(size: number) {
-    this._videoQueueMaxSize = size
   }
 
   private async sendBatchRequest(requests: ClientRequests.Request[]) {
@@ -315,7 +244,7 @@ export class RecommendationServiceManager {
       throw new Error('update loop was initialized more than once')
     }
     this._loopInitialized = true
-    this._batchUpdateLoop(5 * 60 * 1_000) // 5mins
+    this._batchUpdateLoop(30 * 1_000) // 5mins
       .then(() => {
         /* Do nothing */
       })
@@ -327,17 +256,11 @@ export class RecommendationServiceManager {
 
   private async _batchUpdateLoop(intervalMs: number): Promise<void> {
     while (true) {
-      const batchArray = [
-        ...this._videosQueue,
-        ...this._usersQueue,
-        ...this._interactionsQueue,
-        ...this._videosDeleteQueue,
-      ]
-      this._videosQueue.length = 0
-      this._usersQueue.length = 0
-      this._interactionsQueue.length = 0
-      this._videosDeleteQueue.length = 0
-      await this.sendBatchRequest(batchArray)
+      if (this._queue.length) {
+        const batchArray = [...this._queue]
+        this._queue.length = 0
+        await this.sendBatchRequest(batchArray)
+      }
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
