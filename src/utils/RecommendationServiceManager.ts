@@ -34,7 +34,7 @@ export class RecommendationServiceManager {
   private client: ApiClient | null = null
 
   // if orion is launched in dev mode, always sync videos
-  private _enabled = isDevEnv
+  private _enabled = false
   private _loopInitialized = false
 
   constructor() {
