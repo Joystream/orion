@@ -195,6 +195,11 @@ export class RecommendationServiceManager {
     return stringToHex(orionUserId)
   }
 
+  // template "{id}-video"
+  systemItemIdToOrion(systemId: string) {
+    return systemId.split('-')[0]
+  }
+
   get isEnabled() {
     return this._enabled
   }
@@ -214,13 +219,39 @@ export class RecommendationServiceManager {
         filter: opts?.filterQuery,
       }
     )
+    const res = await this.client?.send(request)
 
-    return this.client?.send(request)
+    if (!res) {
+      return undefined
+    }
+
+    const mappedRecoms = res.recomms.map((recom) => ({
+      ...recom,
+      id: this.systemItemIdToOrion(recom.id),
+    }))
+
+    return {
+      ...res,
+      recomms: mappedRecoms,
+    }
   }
 
   async recommendNextItems(recommId: string, opts?: CommonOptions) {
     const request = new ClientRequests.RecommendNextItems(recommId, opts?.limit ?? 10)
-    return this.client?.send(request)
+    const res = await this.client?.send(request)
+    if (!res) {
+      return undefined
+    }
+
+    const mappedRecoms = res.recomms.map((recom) => ({
+      ...recom,
+      id: this.systemItemIdToOrion(recom.id),
+    }))
+
+    return {
+      ...res,
+      recomms: mappedRecoms,
+    }
   }
 
   async recommendItemsToItem(itemId: string, userId?: string, opts?: CommonOptions) {
@@ -236,7 +267,22 @@ export class RecommendationServiceManager {
         filter: opts?.filterQuery,
       }
     )
-    return this.client?.send(request)
+
+    const res = await this.client?.send(request)
+
+    if (!res) {
+      return undefined
+    }
+
+    const mappedRecoms = res.recomms.map((recom) => ({
+      ...recom,
+      id: this.systemItemIdToOrion(recom.id),
+    }))
+
+    return {
+      ...res,
+      recomms: mappedRecoms,
+    }
   }
 
   initBatchLoop() {
