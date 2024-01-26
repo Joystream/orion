@@ -183,10 +183,10 @@ export class RecommendationServiceManager {
   }
 
   private async sendBatchRequest(requests: ClientRequests.Request[]) {
-    if (!this._enabled) {
+    if (!this._enabled || !this.client) {
       return
     }
-    const res = await this.client?.send(new ClientRequests.Batch(requests))
+    const res = await this.client.send(new ClientRequests.Batch(requests))
     recommendationServiceLogger.info(`Batch request sent, response: ${JSON.stringify(res)}`)
     return res
   }

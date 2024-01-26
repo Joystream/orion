@@ -229,7 +229,7 @@ async function processVideoReaction(
       videoReactionRepository.remove(existingReaction)
 
       if (account) {
-        recommendationServiceManager.deleteItemRating(video.id, account.userId)
+        recommendationServiceManager.deleteItemRating(`${video.id}-video`, account.userId)
       }
 
       return
@@ -244,7 +244,7 @@ async function processVideoReaction(
 
     if (account) {
       recommendationServiceManager.scheduleItemRating(
-        video.id,
+        `${video.id}-video`,
         account.userId,
         reactionType === 'LIKE' ? 1 : -1
       )
@@ -261,7 +261,7 @@ async function processVideoReaction(
     })
     if (account) {
       recommendationServiceManager.scheduleItemRating(
-        video.id,
+        `${video.id}-video`,
         account.userId,
         reactionType === 'LIKE' ? 1 : -1
       )

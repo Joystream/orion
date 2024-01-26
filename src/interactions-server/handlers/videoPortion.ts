@@ -28,7 +28,12 @@ export const videoPortion: (
       throw new BadRequestError('Request missing parameters')
     }
 
-    recommendationServiceManager.scheduleViewPortion(itemId, session.userId, portion, recommId)
+    recommendationServiceManager.scheduleViewPortion(
+      `${itemId}-video`,
+      session.userId,
+      portion,
+      recommId
+    )
 
     res.status(200).json({ success: true })
   } catch (e) {
