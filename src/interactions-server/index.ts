@@ -14,7 +14,9 @@ import fs from 'fs'
 import { recommendationServiceManager } from '../utils/RecommendationServiceManager'
 
 recommendationServiceManager.enableSync()
-export const logger = createLogger('auth-api')
+recommendationServiceManager.initBatchLoop()
+
+export const logger = createLogger('interactions-api')
 
 export const app = express()
 
