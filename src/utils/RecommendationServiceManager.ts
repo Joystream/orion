@@ -145,11 +145,16 @@ export class RecommendationServiceManager {
       return
     }
 
-    const actionObject = new ClientRequests.SetViewPortion(userId, itemId, portion, {
-      timestamp: Date.now(),
-      cascadeCreate: true,
-      recommId,
-    })
+    const actionObject = new ClientRequests.SetViewPortion(
+      this.mapUserId(userId),
+      itemId,
+      portion,
+      {
+        timestamp: Date.now(),
+        cascadeCreate: true,
+        recommId,
+      }
+    )
     this._queue.push(actionObject)
   }
 
@@ -161,7 +166,7 @@ export class RecommendationServiceManager {
     if (rating < -1 || rating > 1) {
       throw new Error('Rating out of bounds')
     }
-    const actionObject = new ClientRequests.AddRating(userId, itemId, rating, {
+    const actionObject = new ClientRequests.AddRating(this.mapUserId(userId), itemId, rating, {
       timestamp: Date.now(),
       cascadeCreate: !isDevEnv,
       recommId,
