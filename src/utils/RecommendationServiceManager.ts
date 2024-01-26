@@ -116,7 +116,7 @@ export class RecommendationServiceManager {
     }
 
     const actionObject = new ClientRequests.AddPurchase(this.mapUserId(userId), itemId, {
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       cascadeCreate: true,
       recommId,
     })
@@ -130,7 +130,7 @@ export class RecommendationServiceManager {
     }
 
     const actionObject = new ClientRequests.AddDetailView(this.mapUserId(userId), itemId, {
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       cascadeCreate: true,
       recommId,
       duration,
@@ -150,7 +150,7 @@ export class RecommendationServiceManager {
       itemId,
       portion,
       {
-        timestamp: Date.now(),
+        timestamp: new Date().toISOString(),
         cascadeCreate: true,
         recommId,
       }
@@ -167,7 +167,7 @@ export class RecommendationServiceManager {
       throw new Error('Rating out of bounds')
     }
     const actionObject = new ClientRequests.AddRating(this.mapUserId(userId), itemId, rating, {
-      timestamp: Date.now(),
+      timestamp: new Date().toISOString(),
       cascadeCreate: !isDevEnv,
       recommId,
     })
@@ -189,6 +189,9 @@ export class RecommendationServiceManager {
 
   private async sendBatchRequest(requests: ClientRequests.Request[]) {
     if (!this._enabled || !this.client) {
+      recommendationServiceLogger.info(
+        `Unable to send response: ${this.client ? 'service not enabled' : 'missing client'}`
+      )
       return
     }
     const res = await this.client.send(new ClientRequests.Batch(requests))
