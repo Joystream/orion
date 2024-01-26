@@ -23,7 +23,7 @@ type RateLimitsPerRoute = {
 // Global limit is 300 auth API requests per 15 minutes per IP,
 // it applies to all routes that don't have a specific limit set
 export const globalRateLimit: SimpleRateLimit = {
-  windowMinutes: 15,
+  windowMinutes: 5,
   limit: 300,
 }
 
@@ -32,25 +32,25 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
   '/video-clicked': {
     post: {
       windowMinutes: 5,
-      limit: 50,
+      limit: 100,
     },
   },
   '/channel-clicked': {
     post: {
       windowMinutes: 5,
-      limit: 50,
+      limit: 100,
     },
   },
   '/video-consumed': {
     post: {
       windowMinutes: 5,
-      limit: 15,
+      limit: 100,
     },
   },
   '/video-portion': {
     post: {
       windowMinutes: 5,
-      limit: 50,
+      limit: 100,
     },
   },
 }
