@@ -216,7 +216,7 @@ export class RecommendationServiceManager {
         minRelevance: 'low',
         rotationRate: 0.1,
         cascadeCreate: true,
-        filter: opts?.filterQuery,
+        filter: opts?.filterQuery || undefined,
       }
     )
     const res = await this.client?.send(request)
@@ -264,7 +264,7 @@ export class RecommendationServiceManager {
         minRelevance: 'medium',
         rotationRate: 0.2,
         cascadeCreate: true,
-        filter: opts?.filterQuery,
+        filter: opts?.filterQuery || undefined,
       }
     )
 
