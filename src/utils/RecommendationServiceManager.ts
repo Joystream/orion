@@ -222,7 +222,7 @@ export class RecommendationServiceManager {
       {
         scenario: 'homepage',
         minRelevance: 'low',
-        rotationRate: 0.1,
+        rotationRate: 0.4,
         cascadeCreate: true,
         filter: opts?.filterQuery || undefined,
       }
@@ -270,7 +270,7 @@ export class RecommendationServiceManager {
       {
         scenario: 'watch-next',
         minRelevance: 'medium',
-        rotationRate: 0.2,
+        rotationRate: 0.4,
         cascadeCreate: true,
         filter: opts?.filterQuery || undefined,
       }

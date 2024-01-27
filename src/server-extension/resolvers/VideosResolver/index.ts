@@ -113,7 +113,7 @@ export class VideosResolver {
 
     let recommendationsResponse
     const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
-      videoId,
+      `${videoId}-video `,
       ctx.userId ?? undefined,
       {
         limit: queryArgs.limit,
