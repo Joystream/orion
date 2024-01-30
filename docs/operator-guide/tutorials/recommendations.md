@@ -17,3 +17,5 @@ Recombee client is constructed with 2 variables `RECOMMENDATION_SERVICE_PRIVATE_
 `FORCE_RECOMMENDATION_DATA_SYNC` variable is a boolean that indicate whether processor should consider export block height in terms of syncing videos and ratings with recommendations service. 
 If set to true - it will sync all the data for the first block even if last exported block is greater.
 
+If those two values are provided, when you use `make prepare` command, it will set up item properties and segments supported by Orion.
+If you want to run set up script directly use `make setup-recommendations`.

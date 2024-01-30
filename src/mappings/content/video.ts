@@ -133,7 +133,7 @@ export async function processVideoCreatedEvent({
     channelId: channel.id,
   })
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
-  recommendationServiceManager.scheduleVideoUpsert(video)
+  recommendationServiceManager.scheduleVideoUpsert(video as Video)
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
@@ -180,7 +180,7 @@ export async function processVideoUpdatedEvent({
     )
   }
 
-  recommendationServiceManager.scheduleVideoUpsert(video)
+  recommendationServiceManager.scheduleVideoUpsert(video as Video)
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }

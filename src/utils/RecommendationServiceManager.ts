@@ -1,22 +1,25 @@
-import { User, Video } from '../model'
+import { Channel, User, Video } from '../model'
 import { ApiClient, requests as ClientRequests } from 'recombee-api-client'
 import { createLogger } from '@subsquid/logger'
 import { randomUUID } from 'crypto'
 import { stringToHex } from '@polkadot/util'
 
-export type RSVideo = Pick<
-  Video,
-  | 'id'
-  | 'duration'
-  | 'categoryId'
-  | 'commentsCount'
-  | 'createdAt'
-  | 'reactionsCount'
-  | 'viewsNum'
-  | 'channelId'
-  | 'language'
-  | 'title'
->
+export type RSVideo = {
+  comments_count: number
+  timestamp: Date
+  category_id?: string
+  reactions_count: number
+  views_num: number
+  channel_id?: string
+  type: 'video'
+} & Required<Pick<Video, 'duration' | 'language' | 'title'>>
+
+export type RSChannel = {
+  timestamp: Date
+  follows_num: number
+  total_videos_created: number
+  type: 'channel'
+} & Pick<Channel, 'title' | 'description' | 'language'>
 
 type RSUser = Pick<User, 'id'>
 
@@ -59,37 +62,61 @@ export class RecommendationServiceManager {
     )
   }
 
-  scheduleVideoUpsert(video: RSVideo) {
+  scheduleVideoUpsert(video: Video) {
     // for dev env sync only up to 20k videos
     if (!this._enabled || (isDevEnv && Number(video.id) > 20_000)) {
       return
     }
+    const actionObject: RSVideo = {
+      category_id: video.categoryId ?? undefined,
+      channel_id: video.channelId ?? undefined,
+      comments_count: video.commentsCount,
+      duration: video.duration,
+      language: video.language,
+      reactions_count: video.reactionsCount,
+      timestamp: new Date(video.createdAt),
+      title: video.title,
+      views_num: video.viewsNum,
+      // recombee only offers single items table, so it would be good to have type
+      // in case we decide to add new type in the future, like NFT
+      type: 'video',
+    }
 
-    const actionObject = new ClientRequests.SetItemValues(
-      `${video.id}-video`,
-      {
-        category_id: video.categoryId,
-        channel_id: video.channelId,
-        comments_count: video.commentsCount,
-        duration: video.duration,
-        language: video.language,
-        reactions_count: video.reactionsCount,
-        timestamp: new Date(video.createdAt),
-        title: video.title,
-        views_num: video.viewsNum,
-        // recombee only offers single items table, so it would be good to have type
-        // in case we decide to add new type in the future, like NFT
-        type: 'video',
-      },
-      {
-        cascadeCreate: true,
-      }
-    )
-    this._queue.push(actionObject)
+    const request = new ClientRequests.SetItemValues(`${video.id}-video`, actionObject, {
+      cascadeCreate: true,
+    })
+    this._queue.push(request)
   }
 
   scheduleVideoDeletion(videoId: string) {
-    const actionObject = new ClientRequests.DeleteItem(videoId)
+    const actionObject = new ClientRequests.DeleteItem(`${videoId}-video`)
+    this._queue.push(actionObject)
+  }
+
+  scheduleChannelUpsert(channel: Channel) {
+    // for dev env sync only up to 20k videos
+    if (!this._enabled || (isDevEnv && Number(channel.id) > 20_000)) {
+      return
+    }
+
+    const actionObject: RSChannel = {
+      language: channel.language,
+      description: channel.description,
+      title: channel.title,
+      timestamp: channel.createdAt,
+      total_videos_created: channel.totalVideosCreated,
+      follows_num: channel.followsNum,
+      type: 'channel',
+    }
+
+    const request = new ClientRequests.SetItemValues(`${channel.id}-channel`, actionObject, {
+      cascadeCreate: true,
+    })
+    this._queue.push(request)
+  }
+
+  scheduleChannelDeletion(channelId: string) {
+    const actionObject = new ClientRequests.DeleteItem(`${channelId}-channel`)
     this._queue.push(actionObject)
   }
 
