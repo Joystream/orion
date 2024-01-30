@@ -94,7 +94,7 @@ export class RecommendationServiceManager {
   }
 
   scheduleChannelUpsert(channel: Channel) {
-    // for dev env sync only up to 20k videos
+    // for dev env sync only up to 20k channels
     if (!this._enabled || (isDevEnv && Number(channel.id) > 20_000)) {
       return
     }
