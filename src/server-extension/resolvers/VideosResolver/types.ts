@@ -67,6 +67,18 @@ export class SimiliarVideosQueryArgs extends CommonVideoQueryArgs {
 }
 
 @ArgsType()
+export class NextVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  videoId: string
+
+  @Field(() => String, { nullable: true })
+  recommId?: string
+
+  @Field(() => VideoWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+}
+
+@ArgsType()
 export class MostViewedVideosConnectionArgs extends VideosConnectionArgs {
   @Field(() => Int, { nullable: true })
   periodDays?: number

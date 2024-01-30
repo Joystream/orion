@@ -268,6 +268,37 @@ export class RecommendationServiceManager {
       userId ? this.mapUserId(userId) : randomUUID(),
       opts?.limit ?? 10,
       {
+        scenario: 'similar-videos',
+        minRelevance: 'medium',
+        rotationRate: 0.4,
+        cascadeCreate: true,
+        filter: opts?.filterQuery || undefined,
+      }
+    )
+
+    const res = await this.client?.send(request)
+
+    if (!res) {
+      return undefined
+    }
+
+    const mappedRecoms = res.recomms.map((recom) => ({
+      ...recom,
+      id: this.systemItemIdToOrion(recom.id),
+    }))
+
+    return {
+      ...res,
+      recomms: mappedRecoms,
+    }
+  }
+
+  async recommendNextVideo(itemId: string, userId?: string, opts?: CommonOptions) {
+    const request = new ClientRequests.RecommendItemsToItem(
+      itemId,
+      userId ? this.mapUserId(userId) : randomUUID(),
+      opts?.limit ?? 10,
+      {
         scenario: 'watch-next',
         minRelevance: 'medium',
         rotationRate: 0.4,

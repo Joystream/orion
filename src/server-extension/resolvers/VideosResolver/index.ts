@@ -6,6 +6,7 @@ import {
   ExcludeVideoInfo,
   HomepageVideoQueryArgs,
   MostViewedVideosConnectionArgs,
+  NextVideoQueryArgs,
   ReportVideoArgs,
   SimiliarVideosQueryArgs,
   UpdateVideoViewArgs,
@@ -113,7 +114,7 @@ export class VideosResolver {
 
     let recommendationsResponse
     const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
-      `${videoId}-video `,
+      `${videoId}-video`,
       ctx.userId ?? undefined,
       {
         limit: queryArgs.limit,
@@ -126,6 +127,61 @@ export class VideosResolver {
           argsRecommId,
           {
             limit: queryArgs.limit,
+            filterQuery: reQLQuery,
+          }
+        )
+      } catch (e) {
+        recommendationsResponse = await getItemRecommendationsPromise
+      }
+    } else {
+      recommendationsResponse = await getItemRecommendationsPromise
+    }
+
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
+    }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return {
+      video: result as Video[],
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
+    }
+  }
+
+  @Query(() => RecommendedVideosQuery)
+  async nextVideo(
+    @Args()
+    args: NextVideoQueryArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<RecommendedVideosQuery> {
+    const { videoId, recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
+
+    let recommendationsResponse
+    const getItemRecommendationsPromise = recommendationServiceManager.recommendNextVideo(
+      `${videoId}-video`,
+      ctx.userId ?? undefined,
+      {
+        filterQuery: reQLQuery,
+      }
+    )
+
+    if (argsRecommId) {
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          argsRecommId,
+          {
             filterQuery: reQLQuery,
           }
         )
