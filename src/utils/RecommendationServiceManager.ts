@@ -185,6 +185,28 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
+  scheduleItemBookmark(itemId: string, userId: string, recommId?: string) {
+    if (!this._enabled) {
+      return
+    }
+
+    const actionObject = new ClientRequests.AddBookmark(this.mapUserId(userId), itemId, {
+      timestamp: new Date().toISOString(),
+      cascadeCreate: !isDevEnv,
+      recommId,
+    })
+    this._queue.push(actionObject)
+  }
+
+  deleteItemBookmark(itemId: string, userId: string) {
+    if (!this._enabled) {
+      return
+    }
+
+    const actionObject = new ClientRequests.DeleteBookmark(this.mapUserId(userId), itemId)
+    this._queue.push(actionObject)
+  }
+
   scheduleItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
     if (!this._enabled) {
       return
