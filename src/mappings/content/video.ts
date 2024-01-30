@@ -192,6 +192,7 @@ export async function processVideoDeletedEvent({
     asV1000: [, contentId],
   },
 }: EventHandlerContext<'Content.VideoDeleted'>): Promise<void> {
+  recommendationServiceManager.scheduleVideoDeletion(contentId.toString())
   await deleteVideo(overlay, contentId)
 }
 
@@ -201,6 +202,7 @@ export async function processVideoDeletedByModeratorEvent({
     asV1000: [, contentId],
   },
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
+  recommendationServiceManager.scheduleVideoDeletion(contentId.toString())
   await deleteVideo(overlay, contentId)
 }
 
