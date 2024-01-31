@@ -1,8 +1,14 @@
 import { Channel, User, Video } from '../model'
-import { ApiClient, requests as ClientRequests } from 'recombee-api-client'
+import {
+  ApiClient,
+  RecommendationResponse,
+  requests as ClientRequests,
+  SearchResponse,
+} from 'recombee-api-client'
 import { createLogger } from '@subsquid/logger'
 import { randomUUID } from 'crypto'
 import { stringToHex } from '@polkadot/util'
+import { predictLanguage } from './language'
 
 export type RSVideo = {
   comments_count: number
@@ -67,12 +73,14 @@ export class RecommendationServiceManager {
     if (!this._enabled || (isDevEnv && Number(video.id) > 20_000)) {
       return
     }
+
+    const languageText = (video.title ?? '') + (video.description ?? '')
     const actionObject: RSVideo = {
       category_id: video.categoryId ?? undefined,
       channel_id: video.channelId ?? undefined,
       comments_count: video.commentsCount,
       duration: video.duration,
-      language: video.language,
+      language: languageText ? predictLanguage(languageText) : video.language,
       reactions_count: video.reactionsCount,
       timestamp: new Date(video.createdAt),
       title: video.title,
@@ -98,9 +106,10 @@ export class RecommendationServiceManager {
     if (!this._enabled || (isDevEnv && Number(channel.id) > 20_000)) {
       return
     }
+    const languageText = (channel.title ?? '') + (channel.description ?? '')
 
     const actionObject: RSChannel = {
-      language: channel.language,
+      language: languageText ? predictLanguage(languageText) : channel.language,
       description: channel.description,
       title: channel.title,
       timestamp: channel.createdAt,
@@ -257,6 +266,18 @@ export class RecommendationServiceManager {
     return systemId.split('-')[0]
   }
 
+  mapRecommendationResponse(res: RecommendationResponse | SearchResponse) {
+    const mappedRecoms = res.recomms.map((recom) => ({
+      ...recom,
+      id: this.systemItemIdToOrion(recom.id),
+    }))
+
+    return {
+      ...res,
+      recomms: mappedRecoms,
+    }
+  }
+
   get isEnabled() {
     return this._enabled
   }
@@ -282,15 +303,7 @@ export class RecommendationServiceManager {
       return undefined
     }
 
-    const mappedRecoms = res.recomms.map((recom) => ({
-      ...recom,
-      id: this.systemItemIdToOrion(recom.id),
-    }))
-
-    return {
-      ...res,
-      recomms: mappedRecoms,
-    }
+    return this.mapRecommendationResponse(res)
   }
 
   async recommendNextItems(recommId: string, opts?: CommonOptions) {
@@ -300,15 +313,7 @@ export class RecommendationServiceManager {
       return undefined
     }
 
-    const mappedRecoms = res.recomms.map((recom) => ({
-      ...recom,
-      id: this.systemItemIdToOrion(recom.id),
-    }))
-
-    return {
-      ...res,
-      recomms: mappedRecoms,
-    }
+    return this.mapRecommendationResponse(res)
   }
 
   async recommendItemsToItem(itemId: string, userId?: string, opts?: CommonOptions) {
@@ -326,20 +331,11 @@ export class RecommendationServiceManager {
     )
 
     const res = await this.client?.send(request)
-
     if (!res) {
       return undefined
     }
 
-    const mappedRecoms = res.recomms.map((recom) => ({
-      ...recom,
-      id: this.systemItemIdToOrion(recom.id),
-    }))
-
-    return {
-      ...res,
-      recomms: mappedRecoms,
-    }
+    return this.mapRecommendationResponse(res)
   }
 
   async recommendNextVideo(itemId: string, userId?: string, opts?: CommonOptions) {
@@ -362,15 +358,23 @@ export class RecommendationServiceManager {
       return undefined
     }
 
-    const mappedRecoms = res.recomms.map((recom) => ({
-      ...recom,
-      id: this.systemItemIdToOrion(recom.id),
-    }))
+    return this.mapRecommendationResponse(res)
+  }
 
-    return {
-      ...res,
-      recomms: mappedRecoms,
+  async personalizedSearch(userId: string, query: string, type: 'video' | 'channel', limit = 10) {
+    const request = new ClientRequests.SearchItems(this.mapUserId(userId), query, limit, {
+      cascadeCreate: true,
+      scenario: 'search',
+      filter: `itemId' ~ ".*-${type}$"`,
+    })
+
+    const res = await this.client?.send(request)
+
+    if (!res) {
+      return undefined
     }
+
+    return this.mapRecommendationResponse(res)
   }
 
   initBatchLoop() {
