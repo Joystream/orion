@@ -27,6 +27,7 @@ import {
   processNft,
 } from './utils'
 import { generateAppActionCommitment } from '@joystream/js/utils'
+import { predictLanguage } from '../../utils/language'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -113,6 +114,9 @@ export async function processVideoCreatedEvent({
       )
     }
   }
+
+  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
+  video.orionLanguage = predictLanguage(languageText) ?? video.language
 
   channel.totalVideosCreated += 1
 
