@@ -62,6 +62,13 @@ export class ChannelsResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
 
+  // @Query()
+  // async searchChannels(
+  //   @Args() args: ExtendedChannelsArgs,
+  //   @Info() info: GraphQLResolveInfo,
+  //   @Ctx() ctx: Context
+  // ) {}
+
   @Query(() => [ExtendedChannel])
   async extendedChannels(
     @Args() args: ExtendedChannelsArgs,

@@ -117,7 +117,6 @@ export async function processChannelCreatedEvent({
       await processChannelMetadata(overlay, block, channel, metadata, dataObjects)
     }
   }
-  recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
 
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
@@ -163,7 +162,6 @@ export async function processChannelUpdatedEvent({
     } else {
       channelMetadataUpdate = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta)
     }
-    recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
     await processChannelMetadata(
       overlay,
       block,

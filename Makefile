@@ -30,11 +30,13 @@ codegen:
 	@npm run generate:schema || true
 	@npx squid-typeorm-codegen
 
+setup-recommendations:
+	@npm run recommendations:setup
 
 typegen:
 	@npx squid-substrate-typegen typegen.json
 
-prepare: install codegen build
+prepare: install codegen build setup-recommendations
 
 up-squid:
 	@docker network create joystream_default || true

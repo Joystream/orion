@@ -1,5 +1,5 @@
 import { ApiClient, requests } from 'recombee-api-client'
-import { RSChannel, RSVideo } from '../utils/RecommendationServiceManager'
+import { RSVideo } from '../utils/RecommendationServiceManager'
 import dotenv from 'dotenv'
 
 type RecombeePropTypes =
@@ -12,16 +12,14 @@ type RecombeePropTypes =
   | 'image'
   | 'imageList'
 
-type JoinedItemProps = keyof RSChannel | keyof RSVideo
+type JoinedItemProps = keyof RSVideo
 
 const itemPropToType: Record<JoinedItemProps, RecombeePropTypes> = {
-  follows_num: 'int',
-  total_videos_created: 'int',
   title: 'string',
+  channel_title: 'string',
   timestamp: 'timestamp',
   language: 'string',
-  description: 'string',
-  type: 'string',
+  channel_description: 'string',
   reactions_count: 'int',
   category_id: 'string',
   comments_count: 'int',
@@ -54,13 +52,13 @@ async function main() {
   )
 
   // setup segments
-  const segmentsReqs = [
-    new requests.CreateManualReqlSegmentation('item-categories', 'items'),
-    new requests.AddManualReqlSegment('item-categories', 'video', '\'itemId\' ~ ".*-video$"'),
-    new requests.AddManualReqlSegment('item-categories', 'channel', '\'itemId\' ~ ".*-channel"'),
-  ]
+  const segmentsReqs = new requests.CreatePropertyBasedSegmentation(
+    'channel-segmentation',
+    'items',
+    'channel_id'
+  )
 
-  const res = await client.send(new requests.Batch([...itemPropertiesReqs, ...segmentsReqs]))
+  const res = await client.send(new requests.Batch([...itemPropertiesReqs, segmentsReqs]))
   const failedRequests = res.filter((req) => req.code === 400)
 
   if (failedRequests.length) {

@@ -17,15 +17,9 @@ export type RSVideo = {
   reactions_count: number
   views_num: number
   channel_id?: string
-  type: 'video'
+  channel_title?: string
+  channel_description?: string
 } & Required<Pick<Video, 'duration' | 'language' | 'title'>>
-
-export type RSChannel = {
-  timestamp: Date
-  follows_num: number
-  total_videos_created: number
-  type: 'channel'
-} & Pick<Channel, 'title' | 'description' | 'language'>
 
 type RSUser = Pick<User, 'id'>
 
@@ -68,7 +62,7 @@ export class RecommendationServiceManager {
     )
   }
 
-  scheduleVideoUpsert(video: Video) {
+  scheduleVideoUpsert(video: Video, channel: Channel) {
     // for dev env sync only up to 20k videos
     if (!this._enabled || (isDevEnv && Number(video.id) > 20_000)) {
       return
@@ -80,14 +74,13 @@ export class RecommendationServiceManager {
       channel_id: video.channelId ?? undefined,
       comments_count: video.commentsCount,
       duration: video.duration,
-      language: languageText ? predictLanguage(languageText) : video.language,
+      language: predictLanguage(languageText) ?? video.language,
       reactions_count: video.reactionsCount,
       timestamp: new Date(video.createdAt),
       title: video.title,
       views_num: video.viewsNum,
-      // recombee only offers single items table, so it would be good to have type
-      // in case we decide to add new type in the future, like NFT
-      type: 'video',
+      channel_description: channel.description ?? undefined,
+      channel_title: channel.title ?? undefined,
     }
 
     const request = new ClientRequests.SetItemValues(`${video.id}-video`, actionObject, {
@@ -99,29 +92,6 @@ export class RecommendationServiceManager {
   scheduleVideoDeletion(videoId: string) {
     const actionObject = new ClientRequests.DeleteItem(`${videoId}-video`)
     this._queue.push(actionObject)
-  }
-
-  scheduleChannelUpsert(channel: Channel) {
-    // for dev env sync only up to 20k channels
-    if (!this._enabled || (isDevEnv && Number(channel.id) > 20_000)) {
-      return
-    }
-    const languageText = (channel.title ?? '') + (channel.description ?? '')
-
-    const actionObject: RSChannel = {
-      language: languageText ? predictLanguage(languageText) : channel.language,
-      description: channel.description,
-      title: channel.title,
-      timestamp: channel.createdAt,
-      total_videos_created: channel.totalVideosCreated,
-      follows_num: channel.followsNum,
-      type: 'channel',
-    }
-
-    const request = new ClientRequests.SetItemValues(`${channel.id}-channel`, actionObject, {
-      cascadeCreate: true,
-    })
-    this._queue.push(request)
   }
 
   scheduleChannelDeletion(channelId: string) {

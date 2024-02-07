@@ -16,7 +16,7 @@ const lngDetector = new LanguageDetect()
 lngDetector.setLanguageType('iso2')
 
 // Example usage
-export const predictLanguage = (text: string) => {
+export const predictLanguage = (text: string): string | undefined => {
   const cleanedText = cleanString(text)
-  return lngDetector.detect(cleanedText, 1)[0][0]
+  return lngDetector.detect(cleanedText, 1)[0]?.[0]
 }

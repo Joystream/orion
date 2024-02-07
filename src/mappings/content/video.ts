@@ -133,7 +133,7 @@ export async function processVideoCreatedEvent({
     channelId: channel.id,
   })
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
-  recommendationServiceManager.scheduleVideoUpsert(video as Video)
+  recommendationServiceManager.scheduleVideoUpsert(video as Video, channel as Channel)
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
@@ -150,6 +150,10 @@ export async function processVideoUpdatedEvent({
 }: EventHandlerContext<'Content.VideoUpdated'>): Promise<void> {
   const { newMeta, autoIssueNft } = contentUpdateParameters
   const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
+  let channel
+  if (video.channelId) {
+    channel = await overlay.getRepository(Channel).getByIdOrFail(video.channelId)
+  }
 
   const appAction = newMeta && deserializeMetadata(AppAction, newMeta, { skipWarning: true })
 
@@ -180,7 +184,10 @@ export async function processVideoUpdatedEvent({
     )
   }
 
-  recommendationServiceManager.scheduleVideoUpsert(video as Video)
+  if (channel && video) {
+    recommendationServiceManager.scheduleVideoUpsert(video as Video, channel as Channel)
+  }
+
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
