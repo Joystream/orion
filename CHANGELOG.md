@@ -1,3 +1,17 @@
+# 3.2.1
+
+## Misc
+- Added index on timestamp fields on `Video`, `Event` and `OwnedNft` entities
+- update `docker.yml` github workflow to build and publish docker images.
+- added `generate-migrations` makefile command to generate migrations
+- adds OpenTelemetry tracing integration with `graphql-server` and `auth-server`
+- update nodejs version to `node:18`
+
+### Bug Fixes:
+- Extend session based on activity after initial expiry is over.
+- Fix/notification email title.
+- Improves off-chain import/export script
+
 # 3.2.0
 This release adds notifications to the orion infrastructure...
 ## Schema changes

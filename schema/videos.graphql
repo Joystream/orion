@@ -26,7 +26,7 @@ type Video @entity {
   id: ID!
 
   "Timestamp of the block the video was created at"
-  createdAt: DateTime!
+  createdAt: DateTime! @index
 
   "Reference to videos's channel"
   channel: Channel!

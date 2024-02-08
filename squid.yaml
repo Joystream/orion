@@ -42,4 +42,4 @@ deploy:
       KILL_SWITCH_ON: false
       VIDEO_VIEW_PER_USER_TIME_LIMIT: 86400
       MAX_CACHED_ENTITIES: 1000
-    cmd: ['npm', 'run', 'query-node-start']
+    cmd: ['npm', 'run', 'graphql-server-start']

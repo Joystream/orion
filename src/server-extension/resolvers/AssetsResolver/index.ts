@@ -1,16 +1,15 @@
-import { FieldResolver, Root, ObjectType, Field, Resolver, Ctx } from 'type-graphql'
+import { Logger } from '@subsquid/logger'
+import { Context } from '@subsquid/openreader/lib/context'
+import _ from 'lodash'
+import { performance } from 'perf_hooks'
+import { Ctx, Field, FieldResolver, ObjectType, Resolver, Root } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import {
   DistributionBucket,
   DistributionBucketOperatorMetadata,
   DistributionBucketOperatorStatus,
 } from '../../../model'
-import _ from 'lodash'
 import { globalEm } from '../../../utils/globalEm'
-import { performance } from 'perf_hooks'
-import { Context } from '@subsquid/openreader/lib/context'
-import { Logger } from '@subsquid/logger'
-
 import {
   BucketsById,
   Coordinates,
@@ -27,18 +26,23 @@ export class DistributionBucketsCache {
 
   constructor() {
     this.logger = rootLogger.child('buckets-cache')
+    this.bucketIdsByBagId = new Map()
+    this.bucketsById = new Map()
   }
 
-  public init(intervalMs: number): void {
+  public async init(intervalMs: number): Promise<void> {
     this.logger.info(`Initializing distribution buckets cache with ${intervalMs}ms interval...`)
-    this.updateLoop(intervalMs)
-      .then(() => {
-        /* Do nothing */
-      })
-      .catch((err) => {
-        console.error(err)
-        process.exit(-1)
-      })
+    try {
+      await this.update()
+      setInterval(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        () => this.update(),
+        intervalMs
+      )
+    } catch (err) {
+      console.error(err)
+      process.exit(-1)
+    }
   }
 
   public getBucketsByBagId(bagId: string): DistributionBucketCachedData[] {
@@ -49,24 +53,21 @@ export class DistributionBucketsCache {
     })
   }
 
-  private async updateLoop(intervalMs: number): Promise<void> {
-    this.em = await globalEm
-    while (true) {
-      try {
-        this.logger.debug('Reloading distribution buckets and bags cache data...')
-        const start = performance.now()
-        await this.loadData()
-        this.logger.debug(
-          `Reloading distribution buckets and bags cache data took ${(
-            performance.now() - start
-          ).toFixed(2)}ms`
-        )
-        this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
-        this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
-      } catch (e) {
-        this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
-      }
-      await new Promise((resolve) => setTimeout(resolve, intervalMs))
+  private async update(): Promise<void> {
+    try {
+      this.em = await globalEm
+      this.logger.debug('Reloading distribution buckets and bags cache data...')
+      const start = performance.now()
+      await this.loadData()
+      this.logger.debug(
+        `Reloading distribution buckets and bags cache data took ${(
+          performance.now() - start
+        ).toFixed(2)}ms`
+      )
+      this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
+      this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
+    } catch (e) {
+      this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
     }
   }
 

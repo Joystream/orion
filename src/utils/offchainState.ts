@@ -3,13 +3,33 @@ import assert from 'assert'
 import fs from 'fs'
 import path from 'path'
 import { EntityManager } from 'typeorm'
+import * as model from '../model'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId } from '../model'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
-const exportedStateMap = {
+type CamelToSnakeCase<S> = S extends `${infer T}${infer U}`
+  ? T extends Capitalize<T>
+    ? `_${Lowercase<T>}${CamelToSnakeCase<U>}`
+    : `${T}${CamelToSnakeCase<U>}`
+  : S
+
+type SnakeCaseKeys<T> = {
+  [K in keyof T as CamelToSnakeCase<K>]: T[K]
+}
+
+type ClassConstructors<T> = {
+  [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
+}
+
+type ExportedStateMap = {
+  [K in keyof ClassConstructors<typeof model>]?:
+    | true
+    | (keyof SnakeCaseKeys<InstanceType<ClassConstructors<typeof model>[K]>>)[]
+}
+
+const exportedStateMap: ExportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
@@ -27,8 +47,9 @@ const exportedStateMap = {
   Account: true,
   Notification: true,
   NotificationEmailDelivery: true,
-  NotificationEmailDeliveryAttempt: true,
+  EmailDeliveryAttempt: true,
   Token: true,
+  NextEntityId: true,
   Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
@@ -94,16 +115,6 @@ export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.0.1': ['Account'],
-    '3.0.2': ['Account'],
-    '3.0.3': ['Account'],
-    '3.0.4': ['Account'],
-    '3.1.0': ['Account'],
-    '3.2.0': ['Account'],
-  }
-
   private migrations: Migrations = {
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
@@ -137,7 +148,7 @@ export class OffchainState {
                 ? await em
                     .getRepository(entityName)
                     .createQueryBuilder()
-                    .select(['id', ...fields])
+                    .select(['id', ...(fields as unknown as string)])
                     .getRawMany()
                 : await em.getRepository(entityName).find({})
               if (!values.length) {
@@ -236,6 +247,7 @@ export class OffchainState {
                 })
                 .join(', ')}
             ) AS "data"
+            ORDER BY "id"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
             fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
           )
@@ -260,10 +272,6 @@ export class OffchainState {
       )
     }
 
-    // migrate counter values
-    const { exportedVersion } = exportFile
-    await this.migrateCounters(exportedVersion, em)
-
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
     fs.renameSync(exportFilePath, renamedExportFilePath)
@@ -280,25 +288,5 @@ export class OffchainState {
     const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
-  }
-
-  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    const migrationData = Object.entries(this.globalCountersMigration).sort(
-      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
-    ) // sort in increasing order
-
-    for (const [version, counters] of migrationData) {
-      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-        this.logger.info(`Migrating global counters to version ${version}`)
-        for (const entityName of counters) {
-          // build query that gets the entityName with the highest id
-          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
-          const latestId = parseInt(rowNumber[0].count)
-
-          this.logger.info(`Setting next id for ${entityName} to ${latestId + 1}`)
-          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
-        }
-      }
-    }
   }
 }
