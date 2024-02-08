@@ -47,7 +47,10 @@ type Video @entity {
   thumbnailPhoto: StorageDataObject
 
   "Video's main langauge"
-  language: String @index
+  language: String
+
+  "Video's orion langauge"
+  orionLanguage: String @index
 
   "Whether or not Video contains marketing"
   hasMarketing: Boolean

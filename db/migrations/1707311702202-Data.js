@@ -1,5 +1,5 @@
-module.exports = class Data1704732670595 {
-    name = 'Data1704732670595'
+module.exports = class Data1707311702202 {
+    name = 'Data1707311702202'
 
     async up(db) {
         await db.query(`CREATE TABLE "channel_follow" ("id" character varying NOT NULL, "user_id" character varying, "channel_id" text NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_9410df2b9a316af3f0d216f9487" PRIMARY KEY ("id"))`)
@@ -67,11 +67,12 @@ module.exports = class Data1704732670595 {
         await db.query(`CREATE TABLE "video_reaction" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "reaction" character varying(6) NOT NULL, "member_id" character varying, "video_id" character varying, CONSTRAINT "PK_504876585c394f4ab33665dd44b" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_73dda64f53bbc7ec7035d5e7f0" ON "video_reaction" ("member_id") `)
         await db.query(`CREATE INDEX "IDX_436a3836eb47acb5e1e3c88dde" ON "video_reaction" ("video_id") `)
-        await db.query(`CREATE TABLE "video" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "channel_id" character varying, "category_id" character varying, "title" text, "description" text, "duration" integer, "thumbnail_photo_id" character varying, "language" text, "has_marketing" boolean, "published_before_joystream" TIMESTAMP WITH TIME ZONE, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "is_explicit" boolean, "license_id" character varying, "media_id" character varying, "video_state_bloat_bond" numeric NOT NULL, "created_in_block" integer NOT NULL, "is_comment_section_enabled" boolean NOT NULL, "pinned_comment_id" character varying, "comments_count" integer NOT NULL, "is_reaction_feature_enabled" boolean NOT NULL, "reactions_count_by_reaction_id" jsonb, "reactions_count" integer NOT NULL, "views_num" integer NOT NULL, "entry_app_id" character varying, "yt_video_id" text, "video_relevance" numeric NOT NULL, CONSTRAINT "PK_1a2f3856250765d72e7e1636c8e" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "video" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "channel_id" character varying, "category_id" character varying, "title" text, "description" text, "duration" integer, "thumbnail_photo_id" character varying, "language" text, "orion_language" text, "has_marketing" boolean, "published_before_joystream" TIMESTAMP WITH TIME ZONE, "is_public" boolean, "is_censored" boolean NOT NULL, "is_excluded" boolean NOT NULL, "is_explicit" boolean, "license_id" character varying, "media_id" character varying, "video_state_bloat_bond" numeric NOT NULL, "created_in_block" integer NOT NULL, "is_comment_section_enabled" boolean NOT NULL, "pinned_comment_id" character varying, "comments_count" integer NOT NULL, "is_reaction_feature_enabled" boolean NOT NULL, "reactions_count_by_reaction_id" jsonb, "reactions_count" integer NOT NULL, "views_num" integer NOT NULL, "entry_app_id" character varying, "yt_video_id" text, "video_relevance" numeric NOT NULL, CONSTRAINT "PK_1a2f3856250765d72e7e1636c8e" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_fe2b4b6aace15f1b6610830846" ON "video" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_81b11ef99a9db9ef1aed040d75" ON "video" ("channel_id") `)
         await db.query(`CREATE INDEX "IDX_2a5c61f32e9636ee10821e9a58" ON "video" ("category_id") `)
         await db.query(`CREATE INDEX "IDX_8530d052cc79b420f7ce2b4e09" ON "video" ("thumbnail_photo_id") `)
-        await db.query(`CREATE INDEX "IDX_75fbab42a4cb18371b6d5004b0" ON "video" ("language") `)
+        await db.query(`CREATE INDEX "IDX_57b335fa0a960877caf6d2fc29" ON "video" ("orion_language") `)
         await db.query(`CREATE INDEX "IDX_3ec633ae5d0477f512b4ed957d" ON "video" ("license_id") `)
         await db.query(`CREATE INDEX "IDX_2db879ed42e3308fe65e679672" ON "video" ("media_id") `)
         await db.query(`CREATE INDEX "IDX_54f88a7decf7d22fd9bd9fa439" ON "video" ("pinned_comment_id") `)
@@ -83,6 +84,7 @@ module.exports = class Data1704732670595 {
         await db.query(`CREATE INDEX "IDX_e7618559409a903a897164156b" ON "bid" ("bidder_id") `)
         await db.query(`CREATE INDEX "IDX_32cb73025ec49c87f4c594a265" ON "bid" ("previous_top_bid_id") `)
         await db.query(`CREATE TABLE "owned_nft" ("id" character varying NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "video_id" character varying NOT NULL, "owner" jsonb NOT NULL, "transactional_status" jsonb, "creator_royalty" numeric, "last_sale_price" numeric, "last_sale_date" TIMESTAMP WITH TIME ZONE, "is_featured" boolean NOT NULL, CONSTRAINT "OwnedNft_video" UNIQUE ("video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_466896e39b9ec953f4f2545622" UNIQUE ("video_id"), CONSTRAINT "PK_5e0c289b350e863668fff44bb56" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE INDEX "IDX_8c7201ed7d4765dcbcc3609356" ON "owned_nft" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_466896e39b9ec953f4f2545622" ON "owned_nft" ("video_id") `)
         await db.query(`CREATE TABLE "auction" ("id" character varying NOT NULL, "nft_id" character varying, "winning_member_id" character varying, "starting_price" numeric NOT NULL, "buy_now_price" numeric, "auction_type" jsonb NOT NULL, "top_bid_id" character varying, "starts_at_block" integer NOT NULL, "ended_at_block" integer, "is_canceled" boolean NOT NULL, "is_completed" boolean NOT NULL, CONSTRAINT "PK_9dc876c629273e71646cf6dfa67" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_cfb47e97e60c9d1462576f85a8" ON "auction" ("nft_id") `)
@@ -95,6 +97,7 @@ module.exports = class Data1704732670595 {
         await db.query(`CREATE INDEX "IDX_0c5b879f9f2ca57a774f74f7f0" ON "membership" ("handle_raw") `)
         await db.query(`CREATE TABLE "event" ("id" character varying NOT NULL, "in_block" integer NOT NULL, "in_extrinsic" text, "index_in_block" integer NOT NULL, "timestamp" TIMESTAMP WITH TIME ZONE NOT NULL, "data" jsonb NOT NULL, CONSTRAINT "PK_30c2f3bbaf6d34a55f8ae6e4614" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_8f3f220c4e717207d841d4e6d4" ON "event" ("in_extrinsic") `)
+        await db.query(`CREATE INDEX "IDX_2c15918ff289396205521c5f3c" ON "event" ("timestamp") `)
         await db.query(`CREATE TABLE "notification" ("id" character varying NOT NULL, "account_id" character varying, "notification_type" jsonb NOT NULL, "event_id" character varying, "status" jsonb NOT NULL, "in_app" boolean NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "recipient" jsonb NOT NULL, CONSTRAINT "PK_705b6c7cdf9b2c2ff7ac7872cb7" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_6bfa96ab97f1a09d73091294ef" ON "notification" ("account_id") `)
         await db.query(`CREATE INDEX "IDX_122be1f0696e0255acf95f9e33" ON "notification" ("event_id") `)
@@ -290,10 +293,11 @@ module.exports = class Data1704732670595 {
         await db.query(`DROP INDEX "public"."IDX_73dda64f53bbc7ec7035d5e7f0"`)
         await db.query(`DROP INDEX "public"."IDX_436a3836eb47acb5e1e3c88dde"`)
         await db.query(`DROP TABLE "video"`)
+        await db.query(`DROP INDEX "public"."IDX_fe2b4b6aace15f1b6610830846"`)
         await db.query(`DROP INDEX "public"."IDX_81b11ef99a9db9ef1aed040d75"`)
         await db.query(`DROP INDEX "public"."IDX_2a5c61f32e9636ee10821e9a58"`)
         await db.query(`DROP INDEX "public"."IDX_8530d052cc79b420f7ce2b4e09"`)
-        await db.query(`DROP INDEX "public"."IDX_75fbab42a4cb18371b6d5004b0"`)
+        await db.query(`DROP INDEX "public"."IDX_57b335fa0a960877caf6d2fc29"`)
         await db.query(`DROP INDEX "public"."IDX_3ec633ae5d0477f512b4ed957d"`)
         await db.query(`DROP INDEX "public"."IDX_2db879ed42e3308fe65e679672"`)
         await db.query(`DROP INDEX "public"."IDX_54f88a7decf7d22fd9bd9fa439"`)
@@ -305,6 +309,7 @@ module.exports = class Data1704732670595 {
         await db.query(`DROP INDEX "public"."IDX_e7618559409a903a897164156b"`)
         await db.query(`DROP INDEX "public"."IDX_32cb73025ec49c87f4c594a265"`)
         await db.query(`DROP TABLE "owned_nft"`)
+        await db.query(`DROP INDEX "public"."IDX_8c7201ed7d4765dcbcc3609356"`)
         await db.query(`DROP INDEX "public"."IDX_466896e39b9ec953f4f2545622"`)
         await db.query(`DROP TABLE "auction"`)
         await db.query(`DROP INDEX "public"."IDX_cfb47e97e60c9d1462576f85a8"`)
@@ -317,6 +322,7 @@ module.exports = class Data1704732670595 {
         await db.query(`DROP INDEX "public"."IDX_0c5b879f9f2ca57a774f74f7f0"`)
         await db.query(`DROP TABLE "event"`)
         await db.query(`DROP INDEX "public"."IDX_8f3f220c4e717207d841d4e6d4"`)
+        await db.query(`DROP INDEX "public"."IDX_2c15918ff289396205521c5f3c"`)
         await db.query(`DROP TABLE "notification"`)
         await db.query(`DROP INDEX "public"."IDX_6bfa96ab97f1a09d73091294ef"`)
         await db.query(`DROP INDEX "public"."IDX_122be1f0696e0255acf95f9e33"`)
