@@ -284,6 +284,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'channel-page', [channelId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} issued a creator token for their channel called $${tokenSymbol}.`,
+        subject: 'New CRT issued',
       }
     }
     case 'CreatorTokenMarketStarted': {
@@ -293,6 +294,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'channel-page', [channelId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} started a market for $${tokenSymbol} token.`,
+        subject: 'New CRT market',
       }
     }
     case 'CreatorTokenSaleStarted': {
@@ -302,6 +304,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'channel-page', [channelId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} started a sale for $${tokenSymbol} token.`,
+        subject: 'New CRT sale',
       }
     }
     case 'CreatorTokenMarketMint': {
@@ -314,6 +317,7 @@ export const getNotificationData = async (
         text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
           paiedJoyAmount
         )}`,
+        subject: 'New market buy transaction',
       }
     }
     case 'CreatorTokenMarketBurn': {
@@ -326,6 +330,7 @@ export const getNotificationData = async (
         text: `${burnerHandle} sold ${burnedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
           receivedJoyAmount
         )}`,
+        subject: 'New market sell transaction',
       }
     }
 
@@ -339,6 +344,7 @@ export const getNotificationData = async (
         text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token sale for ${formatJOY(
           paiedJoyAmount
         )}`,
+        subject: 'New token sale buy transaction',
       }
     }
     case 'CreatorTokenRevenueSharePlanned': {
@@ -348,6 +354,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'portfolio'),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} planned revenue share for $${tokenSymbol} token starting at block ${plannedAt}`,
+        subject: 'New revenue share planned',
       }
     }
     case 'CreatorTokenRevenueShareStarted': {
@@ -357,6 +364,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'portfolio'),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} started revenue share for $${tokenSymbol} token. Go and claim your share now!`,
+        subject: 'Revenue share started',
       }
     }
     case 'CreatorTokenRevenueShareEnded': {
@@ -366,6 +374,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'portfolio'),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
+        subject: 'Revenue share ended',
       }
     }
   }
