@@ -1,3 +1,11 @@
+# 3.3.0
+
+## Schema
+- `orionLanguage` property has been added.
+
+## Mappings 
+- Language detection is used to populate new property on video update and creation.
+
 # 3.2.1
 
 ## Misc

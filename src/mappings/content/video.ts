@@ -116,7 +116,7 @@ export async function processVideoCreatedEvent({
   }
 
   const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText) ?? video.language
+  video.orionLanguage = predictLanguage(languageText)
 
   channel.totalVideosCreated += 1
 
@@ -182,6 +182,9 @@ export async function processVideoUpdatedEvent({
       newDataObjectIds
     )
   }
+
+  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
+  video.orionLanguage = predictLanguage(languageText)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

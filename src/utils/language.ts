@@ -1,4 +1,4 @@
-import LanguageDetect from 'languagedetect'
+import { detect } from 'tinyld'
 
 function cleanString(input: string): string {
   // Remove symbols, numbers, and emojis
@@ -12,11 +12,8 @@ function cleanString(input: string): string {
   return cleanedString.toLowerCase()
 }
 
-const lngDetector = new LanguageDetect()
-lngDetector.setLanguageType('iso2')
-
 // Example usage
 export const predictLanguage = (text: string): string | undefined => {
   const cleanedText = cleanString(text)
-  return lngDetector.detect(cleanedText, 1)[0]?.[0]
+  return detect(cleanedText) || undefined
 }
