@@ -183,6 +183,9 @@ export async function processVideoUpdatedEvent({
     )
   }
 
+  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
+  video.orionLanguage = predictLanguage(languageText)
+
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
   }
