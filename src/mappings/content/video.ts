@@ -116,7 +116,7 @@ export async function processVideoCreatedEvent({
   }
 
   const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText) ?? video.language
+  video.orionLanguage = predictLanguage(languageText)
 
   channel.totalVideosCreated += 1
 
