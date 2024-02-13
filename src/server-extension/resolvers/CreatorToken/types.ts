@@ -11,8 +11,8 @@ export class GetShareDividensArgs {
 
 @ObjectType()
 export class GetShareDividendsResult {
-  @Field(() => Number, { nullable: false })
-  dividendJoyAmount!: number
+  @Field(() => String, { nullable: false })
+  dividendJoyAmount!: string
 }
 
 @ArgsType()

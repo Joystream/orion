@@ -37,7 +37,7 @@ export class TokenResolver {
 
     const dividendJoyAmount = (BigInt(stakingAmount) * allocation) / totalSupply
     return {
-      dividendJoyAmount: Number(dividendJoyAmount),
+      dividendJoyAmount: dividendJoyAmount.toString(),
     }
   }
 
