@@ -24,14 +24,14 @@ dbgen:
 	@npx squid-typeorm-migration generate
 
 generate-migrations: 
-	@rm db/migrations/*-Data.js || true
 	@docker run -d --name temp_migrations_db \
 		-e POSTGRES_DB=squid \
 		-e POSTGRES_HOST_AUTH_METHOD=trust \
 		-v temp_migrations_db_volume:/var/lib/postgresql/data \
 		-v ./db/postgres.conf:/etc/postgresql/postgresql.conf \
 		-p 5555:5555 postgres:14 postgres -p 5555 || true
-	@export DB_PORT=5555 && sleep 5 && npx squid-typeorm-migration generate
+	@export DB_PORT=5555 && npx squid-typeorm-migration apply --filename *-Data.js || true
+	@export DB_PORT=5555 && npx squid-typeorm-migration generate || true
 	@docker rm temp_migrations_db -vf || true
 	@docker volume rm temp_migrations_db_volume || true
 
