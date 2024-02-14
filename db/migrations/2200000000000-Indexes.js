@@ -1,5 +1,5 @@
-module.exports = class Indexes2000000000000 {
-  name = 'Indexes2000000000000'
+module.exports = class Indexes2200000000000 {
+  name = 'Indexes2200000000000'
 
   async up(db) {
     await db.query(`CREATE INDEX "events_video" ON "admin"."event" USING BTREE (("data"->>'video'));`)
