@@ -1,3 +1,14 @@
+# 3.4.0
+
+
+## Misc
+- patch `@subsquid/typeorm-config` & `@subsquid/typeorm-migration` packages to change `squid-typeorm-migration apply` command to apply a single migrations file too using `--filename` option instead of applying the whole `db/migrations` directory.
+- Regenerate the postgres db migrations.
+
+
+### Bug Fixes:
+- read/write `export.json` file, containing the offchain state, using `big-json` package, instead using Javascript native `JSON.stringify` function which does not work on large JSON objects
+
 # 3.3.0
 
 ## Schema
