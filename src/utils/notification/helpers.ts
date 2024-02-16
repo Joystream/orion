@@ -23,6 +23,10 @@ function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
 }
 
+function notificationPrefAllFalse(): NotificationPreference {
+  return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
+}
+
 export function defaultNotificationPreferences(): AccountNotificationPreferences {
   return new AccountNotificationPreferences({
     channelExcludedFromApp: notificationPrefAllTrue(),
@@ -47,7 +51,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     channelCreated: notificationPrefAllTrue(),
     replyToComment: notificationPrefAllTrue(),
     reactionToComment: notificationPrefAllTrue(),
-    videoPosted: notificationPrefAllTrue(),
+    videoPosted: notificationPrefAllFalse(),
     newNftOnAuction: notificationPrefAllTrue(),
     newNftOnSale: notificationPrefAllTrue(),
     higherBidThanYoursMade: notificationPrefAllTrue(),
