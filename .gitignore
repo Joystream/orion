@@ -15,3 +15,7 @@ src/auth-server/emails/templates/preview
 /db/persisted
 /scripts/orion-v1-migration/data
 /db/export
+/db/migrations_dir*
+
+# LOGS
+chron_mail_scheduler.log
