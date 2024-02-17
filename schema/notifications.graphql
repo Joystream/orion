@@ -1,4 +1,4 @@
-type NotificationEmailDelivery @entity {
+type NotificationEmailDelivery @entity @schema(name: "admin") {
   "UUID"
   id: ID!
 
@@ -12,7 +12,7 @@ type NotificationEmailDelivery @entity {
   discard: Boolean!
 }
 
-type EmailDeliveryAttempt @entity {
+type EmailDeliveryAttempt @entity @schema(name: "admin") {
   "UUID"
   id: ID!
 

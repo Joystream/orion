@@ -1,4 +1,4 @@
-type Channel @entity {
+type Channel @entity @schema(name: "admin") {
   "Runtime entity identifier (EntityId)"
   id: ID!
 
@@ -86,14 +86,17 @@ type YppSuspended {
   suspension: ChannelSuspension!
 }
 
-type BannedMember @entity @index(fields: ["member", "channel"], unique: true) {
+type BannedMember
+  @entity
+  @schema(name: "admin")
+  @index(fields: ["member", "channel"], unique: true) {
   "{memberId}-{channelId}"
   id: ID!
   member: Membership!
   channel: Channel!
 }
 
-type ChannelVerification @entity {
+type ChannelVerification @entity @schema(name: "admin") {
   "unique Id"
   id: ID!
 
@@ -104,7 +107,7 @@ type ChannelVerification @entity {
   timestamp: DateTime!
 }
 
-type ChannelSuspension @entity {
+type ChannelSuspension @entity @schema(name: "admin") {
   "unique Id"
   id: ID!
 
