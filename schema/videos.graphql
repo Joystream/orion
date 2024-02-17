@@ -1,4 +1,4 @@
-type VideoCategory @entity {
+type VideoCategory @entity @schema(name: "admin") {
   "Runtime identifier"
   id: ID!
 
@@ -21,7 +21,7 @@ type VideoCategory @entity {
   createdInBlock: Int!
 }
 
-type Video @entity {
+type Video @entity @schema(name: "admin") {
   "Runtime identifier"
   id: ID!
 
@@ -128,7 +128,10 @@ type Video @entity {
   videoRelevance: Float! @index
 }
 
-type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], unique: true) {
+type VideoFeaturedInCategory
+  @entity
+  @schema(name: "admin")
+  @index(fields: ["category", "video"], unique: true) {
   "{categoryId-videoId}"
   id: ID!
 
@@ -142,7 +145,7 @@ type VideoFeaturedInCategory @entity @index(fields: ["category", "video"], uniqu
   videoCutUrl: String
 }
 
-type VideoHero @entity {
+type VideoHero @entity @schema(name: "admin") {
   "Unique ID"
   id: ID!
 
@@ -162,7 +165,7 @@ type VideoHero @entity {
   activatedAt: DateTime
 }
 
-type VideoMediaMetadata @entity {
+type VideoMediaMetadata @entity @schema(name: "admin") {
   "Unique identifier"
   id: ID!
 
@@ -183,7 +186,7 @@ type VideoMediaMetadata @entity {
   createdInBlock: Int!
 }
 
-type VideoMediaEncoding @entity {
+type VideoMediaEncoding @entity @schema(name: "admin") {
   "Encoding of the video media object"
   codecName: String
 
@@ -194,7 +197,7 @@ type VideoMediaEncoding @entity {
   mimeMediaType: String
 }
 
-type License @entity {
+type License @entity @schema(name: "admin") {
   "Unique identifier"
   id: ID!
 
@@ -208,7 +211,7 @@ type License @entity {
   customText: String
 }
 
-type VideoSubtitle @entity {
+type VideoSubtitle @entity @schema(name: "admin") {
   "{type}-{language}"
   id: ID!
 
@@ -243,7 +246,7 @@ enum VideoReactionOptions {
   UNLIKE
 }
 
-type VideoReaction @entity {
+type VideoReaction @entity @schema(name: "admin") {
   "{memberId}-{videoId}"
   id: ID!
 

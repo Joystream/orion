@@ -1,4 +1,4 @@
-type CommentReaction @entity {
+type CommentReaction @entity @schema(name: "admin") {
   "{memberId}-{commentId}-{reactionId}"
   id: ID!
 
@@ -31,7 +31,7 @@ type CommentReactionsCountByReactionId {
   count: Int!
 }
 
-type Comment @entity {
+type Comment @entity @schema(name: "admin") {
   "METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}"
   id: ID!
 
