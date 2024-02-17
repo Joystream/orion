@@ -66,6 +66,27 @@ function getViewDefinitions(db) {
     ],
     nft_history_entry: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
     nft_activity: [`EXISTS(SELECT 1 FROM "event" WHERE "id"="event_id")`],
+    // *** HIDDEN entities ***
+    // Even though the following entities are hidden by default (because they are part of "admin" schema)
+    // we still define these in the views definitions to create their VIEW in the public schema as they are
+    // exposed by the GRAPHQL API, so that when querying the GRAPHQL API, the response is just empty object
+    // instead of `"relation does not exist"` error.
+    video_view_event: ['FALSE'],
+    channel_follow: ['FALSE'],
+    report: ['FALSE'],
+    exclusion: ['FALSE'],
+    session: ['FALSE'],
+    notification_email_delivery: ['FALSE'],
+    channel_verification: ['FALSE'],
+    channel_suspension: ['FALSE'],
+    user: ['FALSE'],
+    account: ['FALSE'],
+    token: ['FALSE'],
+    nft_featuring_request: ['FALSE'],
+    gateway_config: ['FALSE'],
+    email_delivery_attempt: ['FALSE'],
+    // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
+    // notification: ['FALSE'],
   }
 }
 

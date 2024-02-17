@@ -5,7 +5,7 @@
 
 ## Misc
 - Patch `@subsquid/typeorm-config` & `@subsquid/typeorm-migration` packages to change `squid-typeorm-migration apply` command to apply a single migrations file too using `--filename` option instead of applying the whole `db/migrations` directory.
-- Patch `@subsquid/openreader` and `@subsquid/typeorm-codegen` dependencies to include the db schema `name` too in the generated typeorm/postgres migrations, and an optional `schema` directive to specify the schema of any GRAPHQL entity
+- Patch `@subsquid/openreader` and `@subsquid/typeorm-codegen` dependencies to include the db schema `name` too in the generated typeorm/postgres migrations, and an optional `schema` directive to specify the schema of any GRAPHQL entity.
 
 ## DB Migrations
 - Update `generate-migrations` makefile command. Now the existing `*-Data.js` will not be overwritten, instead a new `*-Data.js` migration file (containing only changes compared to the previous DB state) will be added whenever there are GRAPHQL schema changes. The `*-Views.js` migration file will also be updated whenever the GRAPHQL schema changes.
