@@ -11,23 +11,27 @@ import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
 import { Args, Ctx, Info, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, Not, UpdateResult } from 'typeorm'
+import { parseVideoTitle } from '../../../mappings/content/utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import {
+  Account,
   Channel,
+  ChannelRecipient,
+  NftFeaturedOnMarketPlace,
   OperatorPermission,
+  OwnedNft,
   User,
   Video,
   VideoCategory,
-  Account,
-  ChannelRecipient,
-  NftFeaturedOnMarketPlace,
   VideoFeaturedInCategory,
   VideoHero as VideoHeroEntity,
 } from '../../../model'
 import { ConfigVariable, config } from '../../../utils/config'
+import { addNotification } from '../../../utils/notification'
 import { withHiddenEntities } from '../../../utils/sql'
 import { VideoHero } from '../baseTypes'
 import { OperatorOnly } from '../middleware'
+import { model } from '../model'
 import {
   AppActionSignatureInput,
   AppRootDomain,
@@ -66,10 +70,7 @@ import {
   VideoViewPerUserTimeLimit,
   VideoWeights,
 } from './types'
-import { parseVideoTitle } from '../../../mappings/content/utils'
-import { addNotification } from '../../../utils/notification'
 import { processCommentsCensorshipStatusUpdate } from './utils'
-import { model } from '../model'
 
 @Resolver()
 export class AdminResolver {
@@ -209,7 +210,7 @@ export class AdminResolver {
         async (transactionalEntityManager) => {
           return transactionalEntityManager
             .createQueryBuilder()
-            .update(Channel)
+            .update<Channel>(Channel)
             .set({ channelWeight: weight })
             .where('id = :id', { id: channelId })
             .execute()
@@ -364,14 +365,14 @@ export class AdminResolver {
     if (supportedCategoriesIds) {
       await em
         .createQueryBuilder()
-        .update(`admin.video_category`)
-        .set({ is_supported: false })
+        .update<VideoCategory>(VideoCategory)
+        .set({ isSupported: false })
         .execute()
       if (supportedCategoriesIds.length) {
         const result = await em
           .createQueryBuilder()
-          .update(`admin.video_category`)
-          .set({ is_supported: true })
+          .update<VideoCategory>(VideoCategory)
+          .set({ isSupported: true })
           .where({ id: In(supportedCategoriesIds) })
           .execute()
         newNumberOfCategoriesSupported = result.affected || 0
@@ -483,23 +484,23 @@ export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: s
 
   await em
     .createQueryBuilder()
-    .update(`admin.owned_nft`)
-    .set({ is_featured: false })
-    .where({ is_featured: true })
+    .update<OwnedNft>(OwnedNft)
+    .set({ isFeatured: false })
+    .where({ isFeatured: true })
     .execute()
 
   if (featuredNftsIds.length) {
     const result = await em
       .createQueryBuilder()
-      .update(`admin.owned_nft`)
-      .set({ is_featured: true })
+      .update<OwnedNft>(OwnedNft)
+      .set({ isFeatured: true })
       .where({ id: In(featuredNftsIds) })
       .execute()
     newNumberOfNftsFeatured = result.affected || 0
 
     // fetch all featured nfts and deposit notification for their creators
     for (const featuredNftId of featuredNftsIds) {
-      const featuredNft = await em.getRepository('OwnedNft').findOne({
+      const featuredNft = await em.getRepository<OwnedNft>(OwnedNft).findOne({
         where: { id: featuredNftId },
         relations: { video: { channel: true } },
       })

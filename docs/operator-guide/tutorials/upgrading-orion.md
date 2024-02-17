@@ -22,7 +22,7 @@ Always make sure the versions of Orion and Atlas you're planing to upgrade to ar
 
 1. **Backup the databse** before the upgrade. You can do that by executing the following command on the production server:
     ```bash
-    docker exec orion_db pg_dumpall -U postgres > "orion-production-$(date '+%Y-%m-%d').bak"
+    docker exec orion_db pg_dumpall -U postgres -p 23798 > "orion-production-$(date '+%Y-%m-%d').bak"
     ```
     Make sure the backup file was successfully created in the current directory.
 1. Stop the processor and create [Offchain data export](../../developer-guide/tutorials/preserving-offchain-state.md) file:
