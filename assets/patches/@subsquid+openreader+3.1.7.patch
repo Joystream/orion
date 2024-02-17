@@ -20,6 +20,54 @@ index ccb64b5..faa6199 100644
  }
  //# sourceMappingURL=context.d.ts.map
 \ No newline at end of file
+diff --git a/node_modules/@subsquid/openreader/lib/model.schema.js b/node_modules/@subsquid/openreader/lib/model.schema.js
+index 25be2da..74f14da 100644
+--- a/node_modules/@subsquid/openreader/lib/model.schema.js
++++ b/node_modules/@subsquid/openreader/lib/model.schema.js
+@@ -11,6 +11,7 @@ const model_tools_1 = require("./model.tools");
+ const scalars_1 = require("./scalars");
+ const baseSchema = (0, graphql_1.buildASTSchema)((0, graphql_1.parse)(`
+     directive @entity on OBJECT
++    directive @schema(name: String!) on OBJECT
+     directive @query on INTERFACE
+     directive @derivedFrom(field: String!) on FIELD_DEFINITION
+     directive @unique on FIELD_DEFINITION
+@@ -57,11 +58,12 @@ function addEntityOrJsonObjectOrInterface(model, type) {
+     let properties = {};
+     let interfaces = [];
+     let indexes = type instanceof graphql_1.GraphQLObjectType ? checkEntityIndexes(type) : [];
++    let schema = type instanceof graphql_1.GraphQLObjectType ? checkEntitySchema(type) : undefined;
+     let cardinality = checkEntityCardinality(type);
+     let description = type.description || undefined;
+     switch (kind) {
+         case 'entity':
+-            model[type.name] = { kind, properties, description, interfaces, indexes, ...cardinality };
++            model[type.name] = {kind, properties, description, interfaces, indexes, schema, ...cardinality}
+             break;
+         case 'object':
+             model[type.name] = { kind, properties, description, interfaces };
+@@ -393,6 +395,21 @@ function checkEntityIndexes(type) {
+     });
+     return indexes;
+ }
++function checkEntitySchema(type) {
++    let schema;
++    type.astNode?.directives?.forEach(d => {
++        if (d.name.value != 'schema')
++            return;
++        if (!isEntityType(type))
++            throw new SchemaError(`@schema was applied to ${type.name}, but only entities can have base schema`);
++        let fieldsArg = d.arguments?.find(arg => arg.name.value == 'name');
++        if (fieldsArg == null)
++            throw new SchemaError(`@schema was applied to ${type.name}, but no name were specified`);
++        (0, assert_1.default)(fieldsArg.value.kind == 'StringValue');
++        schema = fieldsArg.value.value;
++    });
++    return schema;
++}
+ function checkDerivedFrom(type, f) {
+     let directives = f.astNode?.directives?.filter(d => d.name.value == 'derivedFrom') || [];
+     if (directives.length == 0)
 diff --git a/node_modules/@subsquid/openreader/lib/server.d.ts b/node_modules/@subsquid/openreader/lib/server.d.ts
 index da31a85..3691776 100644
 --- a/node_modules/@subsquid/openreader/lib/server.d.ts

@@ -1,6 +1,7 @@
 const { randomAsHex } = require("@polkadot/util-crypto")
 const { existsSync } = require("fs")
 const path = require('path')
+const { OffchainState } = require('../../lib/utils/offchainState')
 
 module.exports = class Operator2300000000000 {
   name = 'Operator2300000000000'
@@ -9,7 +10,8 @@ module.exports = class Operator2300000000000 {
     // Support only one operator account at the moment to avoid confusion
     const exportFilePath = path.join(__dirname, '../export/export.json')
     if (existsSync(exportFilePath)) {
-      const exportData = require(exportFilePath)
+      const offchainState = new OffchainState()
+      const exportData = await offchainState.readExportJsonFile(exportFilePath)
       if (exportData.data.User) {
         // If export exists and contains user data, skip this migration
         return

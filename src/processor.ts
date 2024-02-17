@@ -5,92 +5,92 @@ import {
   SubstrateBlock,
 } from '@subsquid/substrate-processor'
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store'
+import { EntityManager } from 'typeorm'
 import { Logger } from './logger'
 import {
-  processStorageBucketCreatedEvent,
-  processStorageBucketInvitationAcceptedEvent,
-  processStorageBucketsUpdatedForBagEvent,
-  processStorageOperatorMetadataSetEvent,
-  processStorageBucketVoucherLimitsSetEvent,
+  processChannelAgentRemarkedEvent,
+  processChannelCreatedEvent,
+  processChannelDeletedByModeratorEvent,
+  processChannelDeletedEvent,
+  processChannelFundsWithdrawnEvent,
+  processChannelOwnerRemarkedEvent,
+  processChannelPayoutsUpdatedEvent,
+  processChannelRewardClaimedAndWithdrawnEvent,
+  processChannelRewardUpdatedEvent,
+  processChannelUpdatedEvent,
+  processChannelVisibilitySetByModeratorEvent,
+} from './mappings/content/channel'
+import {
+  processAuctionBidCanceledEvent,
+  processAuctionBidMadeEvent,
+  processAuctionCanceledEvent,
+  processBidMadeCompletingAuctionEvent,
+  processBuyNowCanceledEvent,
+  processBuyNowPriceUpdatedEvent,
+  processEnglishAuctionSettledEvent,
+  processEnglishAuctionStartedEvent,
+  processNftBoughtEvent,
+  processNftIssuedEvent,
+  processNftSellOrderMadeEvent,
+  processNftSlingedBackToTheOriginalArtistEvent,
+  processOfferAcceptedEvent,
+  processOfferCanceledEvent,
+  processOfferStartedEvent,
+  processOpenAuctionBidAcceptedEvent,
+  processOpenAuctionStartedEvent,
+} from './mappings/content/nft'
+import {
+  processVideoCreatedEvent,
+  processVideoDeletedByModeratorEvent,
+  processVideoDeletedEvent,
+  processVideoUpdatedEvent,
+  processVideoVisibilitySetByModeratorEvent,
+} from './mappings/content/video'
+import {
+  processMemberAccountsUpdatedEvent,
+  processMemberProfileUpdatedEvent,
+  processMemberRemarkedEvent,
+  processNewMember,
+} from './mappings/membership'
+import {
+  processDataObjectsDeletedEvent,
+  processDataObjectsMovedEvent,
+  processDataObjectsUpdatedEvent,
+  processDataObjectsUploadedEvent,
+  processDistributionBucketCreatedEvent,
+  processDistributionBucketDeletedEvent,
+  processDistributionBucketFamilyCreatedEvent,
+  processDistributionBucketFamilyDeletedEvent,
+  processDistributionBucketFamilyMetadataSetEvent,
+  processDistributionBucketInvitationAcceptedEvent,
+  processDistributionBucketInvitationCancelledEvent,
+  processDistributionBucketMetadataSetEvent,
+  processDistributionBucketModeUpdatedEvent,
+  processDistributionBucketOperatorInvitedEvent,
+  processDistributionBucketOperatorRemovedEvent,
+  processDistributionBucketStatusUpdatedEvent,
+  processDistributionBucketsUpdatedForBagEvent,
+  processDynamicBagCreatedEvent,
+  processDynamicBagDeletedEvent,
   processPendingDataObjectsAcceptedEvent,
+  processStorageBucketCreatedEvent,
+  processStorageBucketDeletedEvent,
+  processStorageBucketInvitationAcceptedEvent,
   processStorageBucketInvitationCancelledEvent,
   processStorageBucketOperatorInvitedEvent,
   processStorageBucketOperatorRemovedEvent,
   processStorageBucketStatusUpdatedEvent,
-  processStorageBucketDeletedEvent,
+  processStorageBucketVoucherLimitsSetEvent,
+  processStorageBucketsUpdatedForBagEvent,
+  processStorageOperatorMetadataSetEvent,
   processVoucherChangedEvent,
-  processDynamicBagCreatedEvent,
-  processDynamicBagDeletedEvent,
-  processDataObjectsUploadedEvent,
-  processDataObjectsUpdatedEvent,
-  processDataObjectsMovedEvent,
-  processDataObjectsDeletedEvent,
-  processDistributionBucketCreatedEvent,
-  processDistributionBucketStatusUpdatedEvent,
-  processDistributionBucketDeletedEvent,
-  processDistributionBucketsUpdatedForBagEvent,
-  processDistributionBucketModeUpdatedEvent,
-  processDistributionBucketOperatorInvitedEvent,
-  processDistributionBucketInvitationCancelledEvent,
-  processDistributionBucketInvitationAcceptedEvent,
-  processDistributionBucketMetadataSetEvent,
-  processDistributionBucketOperatorRemovedEvent,
-  processDistributionBucketFamilyCreatedEvent,
-  processDistributionBucketFamilyMetadataSetEvent,
-  processDistributionBucketFamilyDeletedEvent,
 } from './mappings/storage'
-import {
-  processChannelCreatedEvent,
-  processChannelUpdatedEvent,
-  processChannelDeletedEvent,
-  processChannelDeletedByModeratorEvent,
-  processChannelVisibilitySetByModeratorEvent,
-  processChannelOwnerRemarkedEvent,
-  processChannelAgentRemarkedEvent,
-  processChannelPayoutsUpdatedEvent,
-  processChannelRewardUpdatedEvent,
-  processChannelFundsWithdrawnEvent,
-  processChannelRewardClaimedAndWithdrawnEvent,
-} from './mappings/content/channel'
-import {
-  processVideoCreatedEvent,
-  processVideoUpdatedEvent,
-  processVideoDeletedEvent,
-  processVideoDeletedByModeratorEvent,
-  processVideoVisibilitySetByModeratorEvent,
-} from './mappings/content/video'
-import {
-  processOpenAuctionStartedEvent,
-  processEnglishAuctionStartedEvent,
-  processNftIssuedEvent,
-  processAuctionBidMadeEvent,
-  processAuctionBidCanceledEvent,
-  processAuctionCanceledEvent,
-  processEnglishAuctionSettledEvent,
-  processBidMadeCompletingAuctionEvent,
-  processOpenAuctionBidAcceptedEvent,
-  processOfferStartedEvent,
-  processOfferAcceptedEvent,
-  processOfferCanceledEvent,
-  processNftSellOrderMadeEvent,
-  processNftBoughtEvent,
-  processBuyNowCanceledEvent,
-  processBuyNowPriceUpdatedEvent,
-  processNftSlingedBackToTheOriginalArtistEvent,
-} from './mappings/content/nft'
-import {
-  processMemberAccountsUpdatedEvent,
-  processMemberProfileUpdatedEvent,
-  processNewMember,
-  processMemberRemarkedEvent,
-} from './mappings/membership'
-import { Event } from './types/support'
-import { assertAssignable } from './utils/misc'
-import { EntityManagerOverlay } from './utils/overlay'
-import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
-import { EntityManager } from 'typeorm'
+import { Event } from './types/support'
+import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
+import { assertAssignable } from './utils/misc'
 import { OffchainState } from './utils/offchainState'
+import { EntityManagerOverlay } from './utils/overlay'
 
 const defaultEventOptions = {
   data: {
@@ -263,9 +263,6 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberRemarked': processMemberRemarkedEvent,
 }
 
-const offchainState = new OffchainState()
-const exportBlockNumber = offchainState.getExportBlockNumber()
-
 async function processEvent<EventName extends EventNames>(
   ctx: Ctx,
   name: EventName,
@@ -286,8 +283,16 @@ async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateParentRepliesCounters(em)
 }
 
+const offchainState = new OffchainState()
+let exportBlockNumber: number
+
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
+
+  // Get the export block number from the offchain state
+  if (!exportBlockNumber) {
+    exportBlockNumber = await offchainState.getExportBlockNumber()
+  }
 
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
 

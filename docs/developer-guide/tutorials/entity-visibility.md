@@ -28,7 +28,7 @@ SET LOCAL search_path TO admin,public;
 SET LOCAL search_path TO DEFAULT
 ```
 
-Some database users can also have different `search_path` set as their default. If you inspect `db/migrations/2000000000000-Views.js` file, you'll notice that we're creating an `admin` user with the `admin` schema set as the default one. The `admin` user credentials can be configured via `DB_ADMIN_USER` and `DB_ADMIN_PASSWORD` environment variables. 
+Some database users can also have different `search_path` set as their default. If you inspect `db/migrations/1000000000000-Admin.js` file, you'll notice that we're creating an `admin` user with the `admin` schema set as the default one. The `admin` user credentials can be configured via `DB_ADMIN_USER` and `DB_ADMIN_PASSWORD` environment variables. 
 
 The general rules about what schema is being used in which context are as follows:
 - `admin` schema is by default used by Orion's event processor, as it needs to be able to process events related to hidden/censored entities as well.
@@ -38,7 +38,9 @@ The general rules about what schema is being used in which context are as follow
 
 ## Managing entity visibility
 
-In order to adjust the visibility of the data, either because you're introducing new entities / fields or because you'd like to change the existing rules, you can modify the `getViewDefinitions` method in `db/migrations/2000000000000-Views.js`.
+If you want an entity (either one or all of it's fields) to be not part of the `public` schema, then while creating the Graphql definition of given entity decorate it with the `@schema(name: "admin")` directive. This will ensure that the entity/table is part of `admin` schema and so the GraphQL API wont expose any data associated with such entities
+
+Dy decorating the GRAPHQL entity with `@schema(name: "admin")` directive, the entity data will be entirely invisible. To adjust the visibility of the data, either because you want to expose some of the fields, you need to add the visibility rules by modifying the `getViewDefinitions` method in `db/viewDefinitions.js`.
 
 This method returns an object which maps the database table name to one of the following:
 - an **array** of `WHERE` conditions that will be applied to the public view of that table. Those `WHERE` conditions are used to filter out the hidden entities from the public view. They will be joined using `AND` operator. In case you wish to hide the whole table, you can set the conditions to `['FALSE']`, which will result in a view that always returns an empty result set.
@@ -46,7 +48,7 @@ This method returns an object which maps the database table name to one of the f
 
 Suppose you introduced a new `UserOpinion` entity, which will hold user's feedback about the Gateway. The input schema for this entity may look like this:
 ```graphql
-type UserOpinion {
+type UserOpinion @schema(name: "admin") {
   id: ID!
   userAccount: Account!
   opinion: String!
@@ -56,7 +58,7 @@ type UserOpinion {
 }
 ```
 
-Since `Account` is already a hidden entity (it has a view definition with WHERE conditions set to `['FALSE']`), if someone (who's not an authenticated Gateway operator) tries to access the `userAccount` field of `UserOpinion` through a GraphQL API query, they will get an error like this:
+Since `Account` is already a hidden entity (it is decorated with `@schema(name: "admin")` directive), if someone (who's not an authenticated Gateway operator) tries to access the `userAccount` field of `UserOpinion` through a GraphQL API query, they will get an error like this:
 
 ![image](../assets/user-opinions-error.png)
 
