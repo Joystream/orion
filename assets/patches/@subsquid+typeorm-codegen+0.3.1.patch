@@ -1,8 +1,8 @@
 diff --git a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
-index e40f9bc..648e5e8 100644
+index e40f9bc..1055524 100644
 --- a/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
 +++ b/node_modules/@subsquid/typeorm-codegen/lib/codegen.js
-@@ -62,9 +62,17 @@ function generateOrmModels(model, dir) {
+@@ -62,11 +62,19 @@ function generateOrmModels(model, dir) {
          out.line();
          printComment(entity, out);
          entity.indexes?.forEach(index => {
@@ -19,8 +19,11 @@ index e40f9bc..648e5e8 100644
 -            out.line(`@Index_([${index.fields.map(f => `"${f.name}"`).join(', ')}], {unique: ${!!index.unique}})`);
 +            out.line(`@Index_([${index.fields.map(f => `"${f.name}"`).join(', ')}])`);
          });
-         out.line('@Entity_()');
+-        out.line('@Entity_()');
++        out.line(`@Entity_(${entity.schema ? `{schema: "${entity.schema}"}` : ''})`);
          out.block(`export class ${name}`, () => {
+             out.block(`constructor(props?: Partial<${name}>)`, () => {
+                 out.line('Object.assign(this, props)');
 @@ -109,8 +117,8 @@ function generateOrmModels(model, dir) {
                      case 'fk':
                          if (getFieldIndex(entity, key)?.unique) {
