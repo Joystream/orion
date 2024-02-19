@@ -1,5 +1,6 @@
-import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { AppAction } from '@joystream/metadata-protobuf'
+import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
+import { OperatorPermission } from '../../../model'
 
 @ArgsType()
 export class SetVideoWeightsInput {
@@ -20,10 +21,61 @@ export class SetVideoWeightsInput {
 
   @Field(() => Float, { nullable: false })
   ytTimestampSubWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  defaultChannelWeight!: number
+}
+
+@ArgsType()
+export class SetMaxAttemptsOnMailDeliveryInput {
+  @Field(() => Int, { nullable: false })
+  newMaxAttempts!: number
+}
+
+@ObjectType()
+export class MaxAttemptsOnMailDelivery {
+  @Field(() => Int, { nullable: false })
+  maxAttempts!: number
+}
+
+@ArgsType()
+export class SetRootDomainInput {
+  @Field(() => String, { nullable: false })
+  newRootDomain!: string
+}
+
+@ObjectType()
+export class AppRootDomain {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
 }
 
 @ObjectType()
 export class VideoWeights {
+  @Field(() => Boolean, { nullable: false })
+  isApplied!: boolean
+}
+
+@InputType()
+export class ChannelWeightInput {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
+  @Field(() => Float, { nullable: false })
+  weight!: number
+}
+
+@ArgsType()
+export class SetChannelsWeightsArgs {
+  @Field(() => [ChannelWeightInput], { nullable: false })
+  inputs!: ChannelWeightInput[]
+}
+
+@ObjectType()
+export class ChannelWeight {
+  @Field(() => String, { nullable: false })
+  channelId!: string
+
   @Field(() => Boolean, { nullable: false })
   isApplied!: boolean
 }
@@ -236,4 +288,96 @@ export class SetFeaturedNftsResult {
     description: 'The updated number of nft that are now explicitly featured by the Gateway',
   })
   newNumberOfNftsFeatured?: number
+}
+
+@ArgsType()
+export class SetNewAppAssetStorageInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link to be set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ObjectType()
+export class SetNewAppAssetStorageResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app asset storage link just set',
+  })
+  newAppAssetStorage!: string
+}
+
+@ArgsType()
+export class SetNewAppNameAltInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative to be set',
+  })
+  newAppNameAlt!: string
+}
+
+@ObjectType()
+export class SetNewAppNameAltResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The app name alternative just set',
+  })
+  newAppNameAlt!: string
+}
+
+@ArgsType()
+export class SetNewNotificationAssetRootInput {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link to be set',
+  })
+  newNotificationAssetRoot!: string
+}
+
+@ObjectType()
+export class SetNewNotificationAssetRootResult {
+  @Field(() => String, {
+    nullable: false,
+    description: 'The notification asset root link just set',
+  })
+  newNotificationAssetRoot!: string
+}
+
+registerEnumType(OperatorPermission, { name: 'OperatorPermission' })
+
+@ArgsType()
+export class GrantOperatorPermissionsInput {
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID of the user that should be granted operator permissions',
+  })
+  userId!: string
+
+  @Field(() => [OperatorPermission], {
+    nullable: true,
+    description: 'List of permissions that should be granted to the user',
+  })
+  permissions!: OperatorPermission[]
+}
+
+@ArgsType()
+export class RevokeOperatorPermissionsInput {
+  @Field(() => String, {
+    nullable: true,
+    description: 'ID of the user whose operator permissions should be revoked',
+  })
+  userId!: string
+
+  @Field(() => [OperatorPermission], {
+    nullable: true,
+    description: 'List of operator permissions that should be revoked for the user',
+  })
+  permissions!: OperatorPermission[]
+}
+
+@ObjectType()
+export class GrantOrRevokeOperatorPermissionsResult {
+  @Field(() => [OperatorPermission])
+  newPermissions!: OperatorPermission[]
 }

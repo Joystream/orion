@@ -208,7 +208,7 @@ union DataObjectType =
   | DataObjectTypeVideoSubtitle
   | DataObjectTypeChannelPayoutsPayload
 
-type StorageDataObject @entity {
+type StorageDataObject @entity @schema(name: "admin") {
   "Data object runtime id"
   id: ID!
 

@@ -1,38 +1,24 @@
-import { FieldResolver, Root, ObjectType, Field, Resolver, Ctx } from 'type-graphql'
+import { Logger } from '@subsquid/logger'
+import { Context } from '@subsquid/openreader/lib/context'
+import _ from 'lodash'
+import { performance } from 'perf_hooks'
+import { Ctx, Field, FieldResolver, ObjectType, Resolver, Root } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import {
-  StorageDataObject as DataObjectEntity,
   DistributionBucket,
   DistributionBucketOperatorMetadata,
   DistributionBucketOperatorStatus,
 } from '../../../model'
-import _ from 'lodash'
 import { globalEm } from '../../../utils/globalEm'
-import { performance } from 'perf_hooks'
-import urljoin from 'url-join'
-import { Context } from '@subsquid/openreader/lib/context'
-import haversineDistance from 'haversine-distance'
-import { createLogger, Logger } from '@subsquid/logger'
+import {
+  BucketsById,
+  Coordinates,
+  DistributionBucketCachedData,
+  DistributionBucketIdsByBagId,
+} from './types'
+import { getAssetUrls, locationLogger, rootLogger } from './utils'
 
-const rootLogger = createLogger('api:assets')
-
-type Coordinates = {
-  lat: number
-  lon: number
-}
-type NodeData = {
-  location?: Coordinates
-  endpoint: string
-}
-
-type DistributionBucketCachedData = {
-  nodes: NodeData[]
-}
-
-type DistributionBucketIdsByBagId = Map<string, string[]>
-type BucketsById = Map<string, DistributionBucketCachedData>
-
-class DistributionBucketsCache {
+export class DistributionBucketsCache {
   protected bucketIdsByBagId: DistributionBucketIdsByBagId
   protected bucketsById: BucketsById
   protected em: EntityManager
@@ -40,18 +26,23 @@ class DistributionBucketsCache {
 
   constructor() {
     this.logger = rootLogger.child('buckets-cache')
+    this.bucketIdsByBagId = new Map()
+    this.bucketsById = new Map()
   }
 
-  public init(intervalMs: number): void {
+  public async init(intervalMs: number): Promise<void> {
     this.logger.info(`Initializing distribution buckets cache with ${intervalMs}ms interval...`)
-    this.updateLoop(intervalMs)
-      .then(() => {
-        /* Do nothing */
-      })
-      .catch((err) => {
-        console.error(err)
-        process.exit(-1)
-      })
+    try {
+      await this.update()
+      setInterval(
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        () => this.update(),
+        intervalMs
+      )
+    } catch (err) {
+      console.error(err)
+      process.exit(-1)
+    }
   }
 
   public getBucketsByBagId(bagId: string): DistributionBucketCachedData[] {
@@ -62,24 +53,21 @@ class DistributionBucketsCache {
     })
   }
 
-  private async updateLoop(intervalMs: number): Promise<void> {
-    this.em = await globalEm
-    while (true) {
-      try {
-        this.logger.debug('Reloading distribution buckets and bags cache data...')
-        const start = performance.now()
-        await this.loadData()
-        this.logger.debug(
-          `Reloading distribution buckets and bags cache data took ${(
-            performance.now() - start
-          ).toFixed(2)}ms`
-        )
-        this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
-        this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
-      } catch (e) {
-        this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
-      }
-      await new Promise((resolve) => setTimeout(resolve, intervalMs))
+  private async update(): Promise<void> {
+    try {
+      this.em = await globalEm
+      this.logger.debug('Reloading distribution buckets and bags cache data...')
+      const start = performance.now()
+      await this.loadData()
+      this.logger.debug(
+        `Reloading distribution buckets and bags cache data took ${(
+          performance.now() - start
+        ).toFixed(2)}ms`
+      )
+      this.logger.debug(`Buckets cached: ${this.bucketsById.size}`)
+      this.logger.debug(`Bags cached: ${this.bucketIdsByBagId.size}`)
+    } catch (e) {
+      this.logger.error(`Cannot reload the cache: ${e instanceof Error ? e.message : ''}`)
     }
   }
 
@@ -173,11 +161,6 @@ class DistributionBucketsCache {
   }
 }
 
-const distributionBucketsCache = new DistributionBucketsCache()
-distributionBucketsCache.init(6000)
-
-const locationLogger = rootLogger.child('location')
-
 function isValidLat(lat: number | undefined): lat is number {
   if (lat === undefined) {
     return false
@@ -190,21 +173,6 @@ function isValidLon(lon: number | undefined): lon is number {
     return false
   }
   return !Number.isNaN(lon) && lon >= -180 && lon <= 180
-}
-
-function getDistance(node: NodeData, clientLoc: Coordinates) {
-  return node.location ? haversineDistance(clientLoc, node.location) : Infinity
-}
-
-function sortNodesByClosest(nodes: NodeData[], clientLoc: Coordinates): void {
-  nodes.sort((nodeA, nodeB) => getDistance(nodeA, clientLoc) - getDistance(nodeB, clientLoc))
-  nodes.forEach((n) => {
-    locationLogger.trace(
-      `Node: ${JSON.stringify(n)}, Client loc: ${JSON.stringify(
-        clientLoc
-      )}, Distance: ${getDistance(n, clientLoc)}`
-    )
-  })
 }
 
 function getClientLoc(ctx: Context): Coordinates | undefined {
@@ -227,9 +195,18 @@ function getResolvedUrlsLimit(ctx: Context): number {
 }
 
 @ObjectType()
+class StorageBag {
+  @Field()
+  id!: string
+}
+
+@ObjectType()
 export class StorageDataObject {
   @Field()
   id!: string
+
+  @Field()
+  storageBag: StorageBag
 
   @Field(() => [String])
   resolvedUrls: string[]
@@ -242,29 +219,18 @@ export class AssetsResolver {
 
   @FieldResolver(() => [String])
   async resolvedUrls(@Root() object: StorageDataObject, @Ctx() ctx: Context): Promise<string[]> {
-    const em = await this.em()
-    const clientLoc = await getClientLoc(ctx)
-    const limit = await getResolvedUrlsLimit(ctx)
-    // The resolvedUrl field is initially populated with the object ID
-    const [objectId] = object.resolvedUrls
-    if (!objectId) {
-      return []
-    }
-    const { storageBagId } =
-      (await em.getRepository(DataObjectEntity).findOneBy({ id: objectId })) || {}
-    if (!storageBagId) {
-      return []
-    }
-    const buckets = await distributionBucketsCache.getBucketsByBagId(storageBagId)
-    const nodes = buckets.flatMap((b) => b.nodes)
-    if (clientLoc) {
-      sortNodesByClosest(nodes, clientLoc)
-    } else {
-      nodes.sort(() => (_.random(0, 1) ? 1 : -1))
+    if (!object.storageBag) {
+      throw new Error(
+        'incorrect query: to use resolvedUrls make sure to add storageBag.id into query for StorageDataObject'
+      )
     }
 
-    return nodes
-      .slice(0, limit || nodes.length)
-      .map((n) => urljoin(n.endpoint, 'api/v1/assets/', objectId))
+    const clientLoc = getClientLoc(ctx)
+    const limit = getResolvedUrlsLimit(ctx)
+
+    // The resolvedUrl field is initially populated with the object ID
+    const [objectId] = object.resolvedUrls
+
+    return await getAssetUrls(objectId, object.storageBag.id, { clientLoc, limit })
   }
 }

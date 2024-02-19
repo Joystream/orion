@@ -6,7 +6,12 @@ query.{$GATEWAY_ROOT_DOMAIN} {
     reverse_proxy orion-graphql-api:{$GRAPHQL_API_PORT}
 }
 
-{$GATEWAY_ROOT_DOMAIN} {
-    root * /srv/atlas
-    file_server
+archive.{$GATEWAY_ROOT_DOMAIN} {
+    reverse_proxy orion-graphql-api:{$GATEWAY_PORT}
 }
+
+# # Optional: uncomment to serve atlas statically on the server
+# {$GATEWAY_ROOT_DOMAIN} {
+#     root * /srv/atlas
+#     file_server
+# }

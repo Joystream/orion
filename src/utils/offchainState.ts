@@ -1,17 +1,42 @@
-import { EntityManager } from 'typeorm'
-import fs from 'fs'
-import path from 'path'
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import { createParseStream, createStringifyStream } from 'big-json'
+import fs from 'fs'
+import path from 'path'
+import { EntityManager } from 'typeorm'
+import * as model from '../model'
 import { uniqueId } from './crypto'
-import { NextEntityId } from '../model'
+import { defaultNotificationPreferences } from './notification/helpers'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
-const exportedStateMap = {
+type CamelToSnakeCase<S> = S extends `${infer T}${infer U}`
+  ? T extends Capitalize<T>
+    ? `_${Lowercase<T>}${CamelToSnakeCase<U>}`
+    : `${T}${CamelToSnakeCase<U>}`
+  : S
+
+type SnakeCaseKeys<T> = {
+  [K in keyof T as CamelToSnakeCase<K>]: T[K]
+}
+
+type ClassConstructors<T> = {
+  [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
+}
+
+type ExportedStateMap = {
+  [K in keyof ClassConstructors<typeof model>]?:
+    | true
+    | (keyof SnakeCaseKeys<InstanceType<ClassConstructors<typeof model>[K]>>)[]
+}
+
+const exportedStateMap: ExportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
+  Exclusion: true,
+  ChannelVerification: true,
+  ChannelSuspension: true,
   GatewayConfig: true,
   NftFeaturingRequest: true,
   VideoHero: true,
@@ -21,8 +46,12 @@ const exportedStateMap = {
   Session: true,
   User: true,
   Account: true,
+  Notification: true,
+  NotificationEmailDelivery: true,
+  EmailDeliveryAttempt: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num'],
+  NextEntityId: true,
+  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
   Video: ['is_excluded', 'views_num'],
   Comment: ['is_excluded'],
   OwnedNft: ['is_featured'],
@@ -70,16 +99,25 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
   return data
 }
 
+function migrateExportDataToV320(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    // account will find himself with all notification pref. enabled by default
+    account.notificationPreferences = defaultNotificationPreferences()
+    // referrer channel id is set to null
+    account.referrerChannelId = null
+  })
+
+  // all channels will start as unverified because they are re-synched from mappings
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.0.1': ['Account'],
-  }
-
   private migrations: Migrations = {
+    '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
 
@@ -111,7 +149,7 @@ export class OffchainState {
                 ? await em
                     .getRepository(entityName)
                     .createQueryBuilder()
-                    .select(['id', ...fields])
+                    .select(['id', ...(fields as unknown as string)])
                     .getRawMany()
                 : await em.getRepository(entityName).find({})
               if (!values.length) {
@@ -135,7 +173,11 @@ export class OffchainState {
     })
 
     this.logger.info(`Saving export data to ${exportFilePath}`)
-    fs.writeFileSync(exportFilePath, JSON.stringify(exportedState))
+    await new Promise((resolve, reject) => {
+      const writeStream = fs.createWriteStream(exportFilePath)
+      const stringifyStream = createStringifyStream({ body: exportedState })
+      stringifyStream.pipe(writeStream).on('error', reject).on('finish', resolve)
+    })
     this.logger.info('Done')
   }
 
@@ -147,7 +189,7 @@ export class OffchainState {
   public prepareExportData(exportState: ExportedState, em: EntityManager): ExportedData {
     let { data } = exportState
     Object.entries(this.migrations)
-      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b))
+      .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)) // sort in increasing order
       .forEach(([version, fn]) => {
         if (this.versionToNumber(exportState.orionVersion || '0') < this.versionToNumber(version)) {
           this.logger.info(`Migrating export data to version ${version}`)
@@ -163,7 +205,7 @@ export class OffchainState {
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
       )
     }
-    const exportFile = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const exportFile = await this.readExportJsonFile(exportFilePath)
     const data = this.prepareExportData(exportFile, em)
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
@@ -210,6 +252,7 @@ export class OffchainState {
                 })
                 .join(', ')}
             ) AS "data"
+            ORDER BY "id"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
             fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
           )
@@ -233,9 +276,6 @@ export class OffchainState {
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
-    // migrate counters for NextEntityId
-    const { orionVersion } = exportFile
-    await this.migrateCounters(orionVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
@@ -244,34 +284,31 @@ export class OffchainState {
     this.logger.info('Done')
   }
 
-  public getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): number {
+  public async getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): Promise<number> {
     if (!fs.existsSync(exportFilePath)) {
       this.logger.warn(`Export file ${exportFilePath} does not exist`)
       this._isImported = true
       return -1
     }
-    const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const { blockNumber }: ExportedState = await this.readExportJsonFile()
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
   }
 
-  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    const migrationData = Object.entries(this.globalCountersMigration).sort(
-      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
-    ) // sort in increasing order
+  public async readExportJsonFile(filePath = DEFAULT_EXPORT_PATH): Promise<ExportedState> {
+    return new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(filePath)
+      const parseStream = createParseStream()
 
-    for (const [version, counters] of migrationData) {
-      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-        this.logger.info(`Migrating global counters to version ${version}`)
-        for (const entityName of counters) {
-          // build query that gets the entityName with the highest id
-          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
-          const latestId = parseInt(rowNumber[0].count)
+      let exportedState: ExportedState
 
-          this.logger.info(`Setting next id for ${entityName} to ${latestId + 1}`)
-          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
-        }
-      }
-    }
+      parseStream.on('data', (data: ExportedState) => (exportedState = data))
+
+      parseStream.on('end', () => resolve(exportedState))
+
+      parseStream.on('error', (error: Error) => reject(error))
+
+      readStream.pipe(parseStream as any)
+    })
   }
 }

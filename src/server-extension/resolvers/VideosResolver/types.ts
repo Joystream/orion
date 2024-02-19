@@ -78,3 +78,19 @@ export class ReportVideoArgs {
   @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
   rationale!: string
 }
+
+@ArgsType()
+export class ExcludeVideoArgs {
+  @Field(() => String, { nullable: false })
+  videoId!: string
+
+  @Field(() => String, { nullable: false })
+  @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
+  rationale!: string
+}
+
+@ObjectType()
+export class ExcludeVideoInfo extends EntityReportInfo {
+  @Field(() => String, { nullable: false })
+  videoId!: string
+}

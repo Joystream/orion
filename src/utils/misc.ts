@@ -5,7 +5,11 @@ export function assertAssignable<T>(type: T) {
 }
 
 export function criticalError(message: string, metadata?: Record<string, unknown>): never {
-  metadata ? console.error(message, metadata) : console.error(message)
+  if (metadata) {
+    console.error(message, metadata)
+  } else {
+    console.error(message)
+  }
   throw new Error(message)
 }
 
