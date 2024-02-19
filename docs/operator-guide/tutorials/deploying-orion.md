@@ -4,6 +4,8 @@ When deploying Orion to production, you should host it under the same root domai
 
 There are multiple reverse proxy servers that you can use to host Orion in production, like [Nginx](https://www.nginx.com/) or [Caddy](https://caddyserver.com/). In this guide we'll be focusing on Caddy because of its simplicity.
 
+The following guide will allow you to deploy the **latest** version of Orion
+
 ## Prerequisites
 
 On your server, you'll need to have [Docker](https://docs.docker.com/) and `docker-compose` installed (see: [installation instructions](https://docs.docker.com/engine/install/))
@@ -13,14 +15,22 @@ If you're on a Linux server you can use the [convinience script](https://docs.do
 
 You will also need to own a domain where you'll be hosting your Orion instance. In this guide we'll be using `mygateway.com` as an example domain. To be able to use subdomains like `auth.mygateway.com` and `query.mygateway.com` you need to make sure that your domain is either configured with a [wildcard DNS record](https://developers.cloudflare.com/dns/manage-dns-records/reference/wildcard-dns-records/) or that you have added a separate DNS record for each of the subdomains.
 
+You will also need a sendgrid account with an api key in order to have email notifications being send.
+
 ## Step-by-step guide
 
+### 1. Orion setup
 1. Copy the `.env`, `docker-compose.yml`, `postgres.conf` and `Caddyfile` from the [`examples`](../examples/) directory to your server.
 1. Configure the Orion production environment variables. Inside the `.env` file you will find comments describing the meaning of each of the variables. Most importantly make sure to:
     1. Replace all "placeholder" values inside angle brackets (`<>`) with the real values
     1. Fill in all the secrets (`OPERATOR_SECRET`, `APP_PRIVATE_KEY`, `COOKIE_SECRET`) with proper, randomly generated values
     1. **Make sure that `ORION_ENV` is set to `production`!**
     1. Set `GATEWAY_ROOT_DOMAIN` to your Gateway's root domain, in our example case it'll be `mygateway.com`
+    1. (Optional) Configure the email notification scheduler chron job (for Orion >= `3.2.0`) in order to have notification delivery via email (see: [Email Notifications](./email-notifications.md))
+
+### 2. Atlas static Deployment (optional)
+This step is optional in case you are considering using a different deployment service like Vercel for example
+
 1. Prepare a production build of the Atlas app. Assuming you have already cloned the Atlas repository and configured the environment variables inside `packages/atlas/src/.env` as described in the [Atlas operator guide](https://github.com/Joystream/atlas/blob/master/docs/operator-guide.md), you'll also need to:
     1. Make sure the `VITE_ENV` value is set to `production`
     1. Set `VITE_PRODUCTION_ORION_AUTH_URL` to your Orion Auth API endpoint (`https://auth.mygateway.com/api/v1` in our example case)
@@ -53,10 +63,17 @@ You will also need to own a domain where you'll be hosting your Orion instance. 
     ├── docker-compose.yml
     └── postgres.conf
     ```
-1. Once everything is set up, you can start the Orion services and the Caddy server by running:
-    ```bash
-    docker-compose up -d --profile deploy
-    ```
 
 That's it! Your gateway should now be available under `https://mygateway.com`!
 If you kept the Auth API playground enabled in your `.env` (`OPENAPI_PLAYGROUND=true`), you can also use `https://auth.mygateway.com/playground` to perform the Operator authentication (as described in _[Local testing](./local-testing.md#authentication)_ tutorial) and then execute Operator queries and mutations through `https://query.mygateway.com/graphql`.
+
+### 3. Orion deployment
+Once everything is set up, you can start:
+a.The Orion services only with:
+    ```bash
+    docker-compose up -d
+    ```
+b.The Orion services and the Caddy server by running:
+    ```bash
+    docker-compose --profile deploy up -d
+    ```

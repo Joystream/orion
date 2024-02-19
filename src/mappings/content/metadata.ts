@@ -1,11 +1,14 @@
 import {
+  BanOrUnbanMemberFromChannel,
   ChannelMetadata,
   ChannelModeratorRemarked,
   ChannelOwnerRemarked,
+  IBanOrUnbanMemberFromChannel,
   IChannelMetadata,
   IChannelModeratorRemarked,
   IChannelOwnerRemarked,
   ILicense,
+  IMakeChannelPayment,
   IMediaType,
   IModerateComment,
   IPinOrUnpinComment,
@@ -13,16 +16,13 @@ import {
   ISubtitleMetadata,
   IVideoMetadata,
   IVideoReactionsPreference,
+  MakeChannelPayment,
   ModerateComment,
   PinOrUnpinComment,
   PublishedBeforeJoystream,
   SubtitleMetadata,
   VideoMetadata,
   VideoReactionsPreference,
-  IBanOrUnbanMemberFromChannel,
-  BanOrUnbanMemberFromChannel,
-  IMakeChannelPayment,
-  MakeChannelPayment,
 } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
@@ -31,14 +31,19 @@ import {
   isSet,
   isValidLanguageCode,
 } from '@joystream/metadata-protobuf/utils'
-import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
+import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
 import {
   BannedMember,
   Channel,
   ChannelPaymentMadeEventData,
+  ChannelRecipient,
   Comment,
   CommentStatus,
+  DirectChannelPaymentByMember,
+  Event,
   License,
+  MemberBannedFromChannelEventData,
+  Membership,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultChannelPaid,
   MetaprotocolTransactionResultCommentModerated,
@@ -53,25 +58,23 @@ import {
   VideoMediaEncoding,
   VideoMediaMetadata,
   VideoSubtitle,
-  MemberBannedFromChannelEventData,
-  Membership,
-  Event,
 } from '../../model'
+import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,
   genericEventFields,
   invalidMetadata,
   metaprotocolTransactionFailure,
-  videoRelevanceManager,
 } from '../utils'
 import {
-  AsDecoded,
   ASSETS_MAP,
+  AsDecoded,
   EntityAssetProps,
   EntityAssetsMap,
-  increaseChannelCumulativeRevenue,
   MetaNumberProps,
+  getChannelOwnerAccount,
+  increaseChannelCumulativeRevenue,
 } from './utils'
 
 export async function processChannelMetadata(
@@ -579,7 +582,6 @@ export async function processModerateCommentMessage(
   // schedule comment counters updates
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForVideo(comment.videoId)
 
   comment.text = ''
   comment.status = CommentStatus.MODERATED
@@ -643,7 +645,7 @@ export async function processChannelPaymentFromMember(
     paymentContext.channel = channel.id
   }
 
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
     data: new ChannelPaymentMadeEventData({
       payer: member.id,
@@ -655,6 +657,16 @@ export async function processChannelPaymentFromMember(
   })
 
   increaseChannelCumulativeRevenue(channel, amount)
+  const ownerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    ownerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    new DirectChannelPaymentByMember({ amount, payerId: member.id, payerHandle: member.handle }),
+    event
+  )
+
+  channel.cumulativeReward += amount
 
   return new MetaprotocolTransactionResultChannelPaid({
     channelPaid: channel.id,

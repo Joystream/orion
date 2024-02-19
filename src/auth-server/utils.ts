@@ -6,9 +6,9 @@ import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { Account, Token, TokenType } from '../model'
 import { EntityManager } from 'typeorm'
 import { uniqueId } from '../utils/crypto'
-import { sendMail } from '../utils/mail'
-import { registerEmailData } from './emails'
+import { sgSendMail } from '../utils/mail'
 import { formatDate } from '../utils/date'
+import { registerEmailContent } from './emails'
 
 export async function verifyActionExecutionRequest(
   em: EntityManager,
@@ -68,13 +68,16 @@ export async function sendWelcomeEmail(account: Account, em: EntityManager): Pro
   const appName = await config.get(ConfigVariable.AppName, em)
   const confirmEmailRoute = await config.get(ConfigVariable.EmailConfirmationRoute, em)
   const emailConfirmationLink = confirmEmailRoute.replace('{token}', emailConfirmationToken.id)
-  await sendMail({
+
+  const emailContent = registerEmailContent({
+    link: emailConfirmationLink,
+    linkExpiryDate: formatDate(emailConfirmationToken.expiry),
+    appName,
+  })
+  await sgSendMail({
     from: await config.get(ConfigVariable.SendgridFromEmail, em),
     to: account.email,
-    ...registerEmailData({
-      link: emailConfirmationLink,
-      linkExpiryDate: formatDate(emailConfirmationToken.expiry),
-      appName,
-    }),
+    subject: `Welcome to ${appName}!`,
+    content: emailContent,
   })
 }

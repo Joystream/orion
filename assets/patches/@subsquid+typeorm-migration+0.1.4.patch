@@ -1,0 +1,30 @@
+diff --git a/node_modules/@subsquid/typeorm-migration/lib/apply.js b/node_modules/@subsquid/typeorm-migration/lib/apply.js
+index a8dd9c8..999ed2a 100644
+--- a/node_modules/@subsquid/typeorm-migration/lib/apply.js
++++ b/node_modules/@subsquid/typeorm-migration/lib/apply.js
+@@ -29,10 +29,14 @@ const commander_1 = require("commander");
+ const dotenv = __importStar(require("dotenv"));
+ const typeorm_1 = require("typeorm");
+ (0, util_internal_1.runProgram)(async () => {
+-    commander_1.program.description('Apply pending migrations').parse();
++    commander_1.program
++        .description("Apply pending migrations")
++        .option("-f, --filename <type>", "Specify a filename")
++        .parse();
++    const options = commander_1.program.opts();
+     dotenv.config();
+     let connection = new typeorm_1.DataSource({
+-        ...(0, typeorm_config_1.createOrmConfig)(),
++        ...(0, typeorm_config_1.createOrmConfig)({ file: options.filename }),
+         subscribers: [],
+         synchronize: false,
+         migrationsRun: false,
+@@ -41,7 +45,7 @@ const typeorm_1 = require("typeorm");
+     });
+     await connection.initialize();
+     try {
+-        await connection.runMigrations({ transaction: 'all' });
++        await connection.runMigrations({ transaction: "all" });
+     }
+     finally {
+         await connection.destroy().catch(() => null);

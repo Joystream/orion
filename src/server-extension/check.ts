@@ -1,8 +1,8 @@
 import { RequestCheckFunction } from '@subsquid/graphql-server/lib/check'
-import { Context as OpenreaderContext } from '@subsquid/openreader/lib/context'
 import { TypeormOpenreaderContext } from '@subsquid/graphql-server/lib/typeorm'
-import { AuthContext, authenticate } from '../utils/auth'
+import { Context as OpenreaderContext } from '@subsquid/openreader/lib/context'
 import { UnauthorizedError } from 'type-graphql'
+import { AuthContext, authenticate } from '../utils/auth'
 
 export type Context = OpenreaderContext & AuthContext
 
