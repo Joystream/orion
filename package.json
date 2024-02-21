@@ -41,7 +41,7 @@
     "@joystream/types": "0.20.5"
   },
   "dependencies": {
-    "@joystream/js": "^1.4.0",
+    "@joystream/js": "^1.8.0",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/auto-instrumentations-node": "0.37.0",
