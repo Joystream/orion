@@ -118,7 +118,7 @@ export async function processVideoMetadata(
     'hasMarketing',
     'isExplicit',
     'isPublic',
-    'isShort'
+    'isShort',
   ])
 
   await processAssets(overlay, block, assets, video, VideoMetadata, meta, ASSETS_MAP.video)
