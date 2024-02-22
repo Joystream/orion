@@ -1,4 +1,4 @@
-# 3.4.1
+# 3.5.0
 
 ## Schema changes
 - Added `isShort` field to `Video` entity indicating whether a video is a short format, vertical video or not.
