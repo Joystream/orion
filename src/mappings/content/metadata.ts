@@ -1,11 +1,14 @@
 import {
+  BanOrUnbanMemberFromChannel,
   ChannelMetadata,
   ChannelModeratorRemarked,
   ChannelOwnerRemarked,
+  IBanOrUnbanMemberFromChannel,
   IChannelMetadata,
   IChannelModeratorRemarked,
   IChannelOwnerRemarked,
   ILicense,
+  IMakeChannelPayment,
   IMediaType,
   IModerateComment,
   IPinOrUnpinComment,
@@ -13,16 +16,13 @@ import {
   ISubtitleMetadata,
   IVideoMetadata,
   IVideoReactionsPreference,
+  MakeChannelPayment,
   ModerateComment,
   PinOrUnpinComment,
   PublishedBeforeJoystream,
   SubtitleMetadata,
   VideoMetadata,
   VideoReactionsPreference,
-  IBanOrUnbanMemberFromChannel,
-  BanOrUnbanMemberFromChannel,
-  IMakeChannelPayment,
-  MakeChannelPayment,
 } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
@@ -31,14 +31,19 @@ import {
   isSet,
   isValidLanguageCode,
 } from '@joystream/metadata-protobuf/utils'
-import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
+import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
 import {
   BannedMember,
   Channel,
   ChannelPaymentMadeEventData,
+  ChannelRecipient,
   Comment,
   CommentStatus,
+  DirectChannelPaymentByMember,
+  Event,
   License,
+  MemberBannedFromChannelEventData,
+  Membership,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultChannelPaid,
   MetaprotocolTransactionResultCommentModerated,
@@ -53,12 +58,8 @@ import {
   VideoMediaEncoding,
   VideoMediaMetadata,
   VideoSubtitle,
-  MemberBannedFromChannelEventData,
-  Membership,
-  Event,
-  DirectChannelPaymentByMember,
-  ChannelRecipient,
 } from '../../model'
+import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   commentCountersManager,
@@ -67,14 +68,13 @@ import {
   metaprotocolTransactionFailure,
 } from '../utils'
 import {
-  AsDecoded,
   ASSETS_MAP,
+  AsDecoded,
   EntityAssetProps,
   EntityAssetsMap,
-  getChannelOwnerAccount,
   MetaNumberProps,
+  getChannelOwnerAccount,
 } from './utils'
-import { addNotification } from '../../utils/notification'
 
 export async function processChannelMetadata(
   overlay: EntityManagerOverlay,
@@ -118,6 +118,7 @@ export async function processVideoMetadata(
     'hasMarketing',
     'isExplicit',
     'isPublic',
+    'isShort',
   ])
 
   await processAssets(overlay, block, assets, video, VideoMetadata, meta, ASSETS_MAP.video)
