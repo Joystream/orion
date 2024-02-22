@@ -1,3 +1,12 @@
+# 3.5.0
+
+## Schema changes
+- Added `isShort` field to `Video` entity indicating whether a video is a short format, vertical video or not.
+
+## Misc
+- Disable both in App and email notifications for `videoPosted` notifiations type by default.
+- Remove unused `@joystream/metadata-protobuf` patch from assets/patches directory.
+
 # 3.4.0
 
 ## Schema changes
