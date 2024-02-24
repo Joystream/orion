@@ -11,6 +11,7 @@ function getViewDefinitions(db) {
     video: [
       `is_excluded='0'`,
       `is_censored='0'`,
+      `is_public='1'`,
       `EXISTS(SELECT 1 FROM "channel" WHERE "id"="channel_id")`,
       `EXISTS(SELECT 1 FROM "admin"."video_category" WHERE "id"="category_id" AND "is_supported"='1')
           OR (
