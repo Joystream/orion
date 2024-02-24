@@ -1,7 +1,7 @@
-import { ArgsType, Field, ObjectType, Int } from 'type-graphql'
+import { MaxLength } from 'class-validator'
+import { ArgsType, Field, Int, ObjectType } from 'type-graphql'
 import { Video, VideoOrderByInput, VideoWhereInput } from '../baseTypes'
 import { EntityReportInfo } from '../commonTypes'
-import { MaxLength } from 'class-validator'
 
 @ObjectType()
 export class VideosSearchResult {
@@ -93,4 +93,29 @@ export class ExcludeVideoArgs {
 export class ExcludeVideoInfo extends EntityReportInfo {
   @Field(() => String, { nullable: false })
   videoId!: string
+}
+
+@ArgsType()
+export class DumbPublicFeedArgs {
+  @Field(() => VideoWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => Int, {
+    nullable: true,
+    defaultValue: 100,
+    description: 'The number of videos to return',
+  })
+  limit?: number
+}
+
+@ArgsType()
+export class SetPublicFeedArgs {
+  @Field(() => [String], { nullable: false })
+  videoIds!: string[]
+}
+
+@ObjectType()
+export class SetPublicFeedResult {
+  @Field(() => Int)
+  numberOfEntitiesAffected!: number
 }
