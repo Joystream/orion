@@ -11,6 +11,7 @@ enum OperatorPermission {
   SET_FEATURED_NFTS
   EXCLUDE_CONTENT
   RESTORE_CONTENT
+  SET_PUBLIC_FEED_VIDEOS
 }
 
 type User @entity @schema(name: "admin") {

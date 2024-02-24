@@ -129,6 +129,9 @@ type Video @entity @schema(name: "admin") {
 
   "Whether the video is a short format, vertical video (e.g. Youtube Shorts, TikTok, Instagram Reels)"
   isShort: Boolean
+
+  "Optional boolean flag to indicate if the video should be included in the home feed/page."
+  includeInHomeFeed: Boolean
 }
 
 type VideoFeaturedInCategory
