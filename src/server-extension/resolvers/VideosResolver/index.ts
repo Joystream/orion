@@ -21,13 +21,14 @@ import { GraphQLResolveInfo } from 'graphql'
 import { isObject } from 'lodash'
 import 'reflect-metadata'
 import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
-import { EntityManager, MoreThan } from 'typeorm'
+import { EntityManager, In, MoreThan } from 'typeorm'
 import { parseVideoTitle } from '../../../mappings/content/utils'
 import { videoRelevanceManager } from '../../../mappings/utils'
 import {
   Account,
   ChannelRecipient,
   Exclusion,
+  OperatorPermission,
   Report,
   Video,
   VideoExcluded,
@@ -48,6 +49,8 @@ import {
   ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
+  SetPublicFeedArgs,
+  SetPublicFeedResult,
   VideoReportInfo,
 } from './types'
 
@@ -222,6 +225,25 @@ export class VideosResolver {
     const result = await ctx.openreader.executeQuery(listQuery)
 
     return result as VideoReturnType[]
+  }
+
+  @Mutation(() => SetPublicFeedResult)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_PUBLIC_FEED_VIDEOS))
+  async setPublicFeedVideos(@Args() { videoIds }: SetPublicFeedArgs): Promise<SetPublicFeedResult> {
+    const em = await this.em()
+
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update<Video>(Video)
+        .set({ includeInHomeFeed: true })
+        .where({ id: In(videoIds) })
+        .execute()
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @UseMiddleware(UserOnly)
