@@ -1,4 +1,3 @@
-import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
 import {
   RelayConnectionRequest,
   decodeRelayConnectionCursor,
@@ -8,7 +7,7 @@ import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
 import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
 import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
-import { ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { ConnectionQuery, CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
 import {
   getResolveTree,
   getTreeRequest,
