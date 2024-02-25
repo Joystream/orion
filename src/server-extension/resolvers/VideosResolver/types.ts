@@ -100,6 +100,13 @@ export class DumbPublicFeedArgs {
   @Field(() => VideoWhereInput, { nullable: true })
   where?: Record<string, unknown>
 
+  @Field(() => [String], {
+    nullable: true,
+    description:
+      'The list of video ids to skip/exclude from the public feed videos. Maybe because they are already shown to the user.',
+  })
+  skipVideoIds!: string[]
+
   @Field(() => Int, {
     nullable: true,
     defaultValue: 100,

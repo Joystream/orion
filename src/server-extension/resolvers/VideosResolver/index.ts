@@ -217,7 +217,15 @@ export class VideosResolver {
 
     let listQuerySql = listQuery.sql
 
-    listQuerySql = extendClause(listQuerySql, 'WHERE', 'include_in_home_feed = true', 'AND')
+    listQuerySql = extendClause(
+      listQuerySql,
+      'WHERE',
+      `"video"."include_in_home_feed" = true AND "video"."id" NOT IN (${args.skipVideoIds
+        .map((id) => `'${id}'`)
+        .join(', ')})`,
+      'AND'
+    )
+
     listQuerySql = extendClause(listQuerySql, 'ORDER BY', 'RANDOM()', '')
     ;(listQuery as { sql: string }).sql = listQuerySql
 
