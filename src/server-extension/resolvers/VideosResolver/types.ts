@@ -1,7 +1,7 @@
-import { ArgsType, Field, ObjectType, Int } from 'type-graphql'
+import { MaxLength } from 'class-validator'
+import { ArgsType, Field, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { Video, VideoOrderByInput, VideoWhereInput } from '../baseTypes'
 import { EntityReportInfo } from '../commonTypes'
-import { MaxLength } from 'class-validator'
 
 @ObjectType()
 export class VideosSearchResult {
@@ -93,4 +93,48 @@ export class ExcludeVideoArgs {
 export class ExcludeVideoInfo extends EntityReportInfo {
   @Field(() => String, { nullable: false })
   videoId!: string
+}
+
+@ArgsType()
+export class DumbPublicFeedArgs {
+  @Field(() => VideoWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => [String], {
+    nullable: true,
+    description:
+      'The list of video ids to skip/exclude from the public feed videos. Maybe because they are already shown to the user.',
+  })
+  skipVideoIds!: string[]
+
+  @Field(() => Int, {
+    nullable: true,
+    defaultValue: 100,
+    description: 'The number of videos to return',
+  })
+  limit?: number
+}
+
+export enum PublicFeedOperationType {
+  SET = 'set',
+  UNSET = 'unset',
+}
+registerEnumType(PublicFeedOperationType, { name: 'PublicFeedOperationType' })
+
+@ArgsType()
+export class SetOrUnsetPublicFeedArgs {
+  @Field(() => [String], { nullable: false })
+  videoIds!: string[]
+
+  @Field(() => PublicFeedOperationType, {
+    nullable: false,
+    description: 'Type of operation to perform',
+  })
+  operation: PublicFeedOperationType
+}
+
+@ObjectType()
+export class SetOrUnsetPublicFeedResult {
+  @Field(() => Int)
+  numberOfEntitiesAffected!: number
 }
