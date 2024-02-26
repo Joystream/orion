@@ -47,6 +47,7 @@ import {
   DumbPublicFeedArgs,
   ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
+  PublicFeedOperationType,
   ReportVideoArgs,
   SetOrUnsetPublicFeedArgs,
   SetOrUnsetPublicFeedResult,
@@ -245,7 +246,7 @@ export class VideosResolver {
       const result = await em
         .createQueryBuilder()
         .update<Video>(Video)
-        .set({ includeInHomeFeed: operation === 'set' })
+        .set({ includeInHomeFeed: operation === PublicFeedOperationType.SET })
         .where({ id: In(videoIds) })
         .execute()
 
