@@ -1,3 +1,19 @@
+# 3.6.0
+
+## Schema changes
+- Added `includeInHomeFeed` field to `Video` entity indicating if the video should be included in the home feed/page.
+
+## Mutations
+### Additions
+- `setOrUnsetPublicFeedVideos`: mutation to set or unset the `includeInHomeFeed` field of a video by the Operator. 
+
+### Queries
+#### Additions
+- `dumbPublicFeedVideos`: resolver to retrieve random `N` videos from list of all homepage videos.
+
+## DB Migrations
+- Added partial index on `Video` entity to include only videos that are included in the home feed (in `db/migrations/2200000000000-Indexes.js`)
+
 # 3.5.0
 
 ## Schema changes
