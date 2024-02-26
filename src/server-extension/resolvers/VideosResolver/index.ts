@@ -48,8 +48,8 @@ import {
   ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   ReportVideoArgs,
-  SetPublicFeedArgs,
-  SetPublicFeedResult,
+  SetOrUnsetPublicFeedArgs,
+  SetOrUnsetPublicFeedResult,
   VideoReportInfo,
 } from './types'
 
@@ -234,16 +234,18 @@ export class VideosResolver {
     return result as VideoReturnType[]
   }
 
-  @Mutation(() => SetPublicFeedResult)
+  @Mutation(() => SetOrUnsetPublicFeedResult)
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_PUBLIC_FEED_VIDEOS))
-  async setPublicFeedVideos(@Args() { videoIds }: SetPublicFeedArgs): Promise<SetPublicFeedResult> {
+  async setOrUnsetPublicFeedVideos(
+    @Args() { videoIds, operation }: SetOrUnsetPublicFeedArgs
+  ): Promise<SetOrUnsetPublicFeedResult> {
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
       const result = await em
         .createQueryBuilder()
         .update<Video>(Video)
-        .set({ includeInHomeFeed: true })
+        .set({ includeInHomeFeed: operation === 'set' })
         .where({ id: In(videoIds) })
         .execute()
 

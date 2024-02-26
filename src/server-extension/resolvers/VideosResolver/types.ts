@@ -1,5 +1,5 @@
 import { MaxLength } from 'class-validator'
-import { ArgsType, Field, Int, ObjectType } from 'type-graphql'
+import { ArgsType, Field, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { Video, VideoOrderByInput, VideoWhereInput } from '../baseTypes'
 import { EntityReportInfo } from '../commonTypes'
 
@@ -115,14 +115,26 @@ export class DumbPublicFeedArgs {
   limit?: number
 }
 
+export enum PublicFeedOperationType {
+  SET = 'set',
+  UNSET = 'unset',
+}
+registerEnumType(PublicFeedOperationType, { name: 'PublicFeedOperationType' })
+
 @ArgsType()
-export class SetPublicFeedArgs {
+export class SetOrUnsetPublicFeedArgs {
   @Field(() => [String], { nullable: false })
   videoIds!: string[]
+
+  @Field(() => PublicFeedOperationType, {
+    nullable: false,
+    description: 'Type of operation to perform',
+  })
+  operation: PublicFeedOperationType
 }
 
 @ObjectType()
-export class SetPublicFeedResult {
+export class SetOrUnsetPublicFeedResult {
   @Field(() => Int)
   numberOfEntitiesAffected!: number
 }
