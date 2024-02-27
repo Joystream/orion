@@ -71,7 +71,7 @@ export const configVariables = {
   [ConfigVariable.NotificationAssetRoot]: stringType,
 } as const
 
-type TypeOf<C extends ConfigVariable> = ReturnType<(typeof configVariables)[C]['deserialize']>
+type TypeOf<C extends ConfigVariable> = ReturnType<typeof configVariables[C]['deserialize']>
 
 class Config {
   async get<C extends ConfigVariable>(name: C, em: EntityManager): Promise<TypeOf<C>> {

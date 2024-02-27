@@ -124,9 +124,6 @@ type Video @entity @schema(name: "admin") {
   "Video ID coming from YPP"
   ytVideoId: String
 
-  "token for which this video is trailer"
-  trailerVideoForToken: [TrailerVideo!]! @derivedFrom(field: "video")
-
   "Video relevance score based on the views, reactions, comments and update date"
   videoRelevance: Float! @index
 

@@ -36,26 +36,3 @@ jobs:
           node-version: ${{matrix.node-version}}
       - name: Build docker image
         run: make build-docker
-
-  migrations:
-    name: Run migrations
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-      - name: Prepare workspace
-        run: make prepare
-      - name: create joystream_default network
-        run: docker network create joystream_default
-      - name: Start db
-        run: docker-compose up -d orion_db
-      - name: Wait for db
-        run: |
-          while ! docker-compose exec -T orion_db pg_isready -U postgres -p 23798; do
-            sleep 1
-          done
-      - name: Run migrations
-        run: make migrate
