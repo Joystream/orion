@@ -1,0 +1,150 @@
+{
+  "data": {
+    "EncryptionArtifacts": {
+      "type": "insert",
+      "values": [
+        {
+          "id": "309a13d4bd2a6d50538ab87ef221f13628615128b0bc8af7f088224313fa1964",
+          "accountId": "00000001",
+          "cipherIv": "1fca3a82918fc0be34e5bae5819782d7",
+          "encryptedSeed": "60bfcf81b07161dbc8a102f540f7e152"
+        },
+        {
+          "id": "1cd0bddc2cfd51717519c1a90d148b9d0beb5b72ecde215a16fa2b1bbe1aded6",
+          "accountId": "00000002",
+          "cipherIv": "c949312ec43a7745b5f4cc4ceb01ea88",
+          "encryptedSeed": "5212b53451b6374fafdfff66bb31ad28"
+        }
+      ]
+    },
+    "Session": {
+      "type": "insert",
+      "values": [
+        {
+          "id": "9YY5NSqEbKNbhcucVyCeGBfz52DngOpo4EWaE1ggwEY=",
+          "browser": "undefined undefined",
+          "os": "undefined undefined",
+          "device": "undefined undefined",
+          "deviceType": null,
+          "userId": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+          "accountId": null,
+          "ip": "::ffff:172.24.0.1",
+          "startedAt": "2023-08-08T06:10:55.727Z",
+          "expiry": "2023-08-08T07:11:07.279Z"
+        },
+        {
+          "id": "yFm58Sw9llj/aUi82jrsDFU8e8sBEMoyOnBgVqDdVAk=",
+          "browser": "undefined undefined",
+          "os": "undefined undefined",
+          "device": "undefined undefined",
+          "deviceType": null,
+          "userId": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+          "accountId": "00000001",
+          "ip": "::ffff:172.24.0.1",
+          "startedAt": "2023-08-08T06:11:07.321Z",
+          "expiry": "2023-08-08T07:11:07.321Z"
+        },
+        {
+          "id": "RP78TobqDiiFFG51BoSyyXD+fcxvWc9imSDHEJgT/vk=",
+          "browser": "undefined undefined",
+          "os": "undefined undefined",
+          "device": "undefined undefined",
+          "deviceType": null,
+          "userId": "9cu6G4OFs/FY3Sv9zG5I+2+cw5cu6bogDPAmmBJEu34=",
+          "accountId": null,
+          "ip": "::ffff:172.24.0.1",
+          "startedAt": "2023-08-08T06:11:09.084Z",
+          "expiry": "2023-08-08T07:11:20.425Z"
+        },
+        {
+          "id": "P/RrVuhLVzb/dTOKt5u5RCt6sFN3Im4+w/zj1yM4BNw=",
+          "browser": "undefined undefined",
+          "os": "undefined undefined",
+          "device": "undefined undefined",
+          "deviceType": null,
+          "userId": "9cu6G4OFs/FY3Sv9zG5I+2+cw5cu6bogDPAmmBJEu34=",
+          "accountId": "00000002",
+          "ip": "::ffff:172.24.0.1",
+          "startedAt": "2023-08-08T06:11:20.451Z",
+          "expiry": "2023-08-08T07:11:20.451Z"
+        }
+      ]
+    },
+    "User": {
+      "type": "insert",
+      "values": [
+        {
+          "id": "this-is-not-so-secret-change-it",
+          "isRoot": true
+        },
+        {
+          "id": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+          "isRoot": false
+        },
+        {
+          "id": "9cu6G4OFs/FY3Sv9zG5I+2+cw5cu6bogDPAmmBJEu34=",
+          "isRoot": false
+        }
+      ]
+    },
+    "Account": {
+      "type": "insert",
+      "values": [
+        {
+          "id": "00000001",
+          "userId": "WljIqMTSA6tcULbcYp4vMtm/WJwv8rttl+05ykQgv7s=",
+          "email": "16_Alice.test@example.com",
+          "isEmailConfirmed": false,
+          "isBlocked": false,
+          "registeredAt": "2023-08-08T06:11:07.300Z",
+          "membershipId": "16",
+          "joystreamAccount": "j4W7rVcUCxi2crhhjRq46fNDRbVHTjJrz6bKxZwehEMQxZeSf"
+        },
+        {
+          "id": "00000002",
+          "userId": "9cu6G4OFs/FY3Sv9zG5I+2+cw5cu6bogDPAmmBJEu34=",
+          "email": "17_Bob.test@example.com",
+          "isEmailConfirmed": false,
+          "isBlocked": false,
+          "registeredAt": "2023-08-08T06:11:20.434Z",
+          "membershipId": "17",
+          "joystreamAccount": "j4UYhDYJ4pz2ihhDDzu69v2JTVeGaGmTebmBdWaX2ANVinXyE"
+        }
+      ]
+    },
+    "Channel": {
+      "type": "update",
+      "values": [
+        {
+          "id": "1",
+          "is_excluded": false,
+          "video_views_num": 0,
+          "follows_num": 0
+        }
+      ]
+    },
+    "VideoCategory": {
+      "type": "update",
+      "values": [
+        {
+          "id": "255-2",
+          "is_supported": true
+        },
+        {
+          "id": "261-2",
+          "is_supported": true
+        },
+        {
+          "id": "267-2",
+          "is_supported": true
+        },
+        {
+          "id": "273-2",
+          "is_supported": true
+        }
+      ]
+    }
+  },
+  "blockNumber": 323,
+  "orionVersion": "3.0.2"
+}

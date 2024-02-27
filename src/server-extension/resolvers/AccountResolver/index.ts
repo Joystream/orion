@@ -20,7 +20,8 @@ export class AccountResolver {
     const account = ctx.account
     const em = await this.em()
     assert(account, 'Unexpected context: account is not set')
-    const { id, email, joystreamAccount, membershipId, isEmailConfirmed } = account
+    const { id, email, joystreamAccount, membershipId, isEmailConfirmed, notificationPreferences } =
+      account
     let followedChannels: FollowedChannel[] = []
     if (
       info.fieldNodes[0].selectionSet?.selections.some(
@@ -45,6 +46,7 @@ export class AccountResolver {
       membershipId,
       isEmailConfirmed,
       followedChannels,
+      preferences: notificationPreferences,
     }
   }
 }

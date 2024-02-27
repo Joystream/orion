@@ -121,11 +121,13 @@ export async function signedAction<T extends components['schemas']['ActionExecut
 
 async function insertFakeMember(controllerAccount: string) {
   const em = await globalEm
+  const handle = uniqueId()
   return em.getRepository(Membership).save({
     createdAt: new Date(),
     id: uniqueId(),
     controllerAccount,
     handle: uniqueId(),
+    handleRaw: '0x' + Buffer.from(handle).toString('hex'),
     totalChannelsCreated: 0,
   })
 }
@@ -189,6 +191,10 @@ export async function createAccountAndSignIn(
   seed?: string
 ): Promise<LoggedInAccountInfo> {
   const accountData = await createAccount(email, password, seed)
+  return await signIn(accountData)
+}
+
+export async function signIn(accountData: AccountAccessData): Promise<LoggedInAccountInfo> {
   const keypair = keyring.addFromUri(`//${accountData.seed}`)
   const loginReqData = await signedAction<components['schemas']['LoginRequestData']>(
     {

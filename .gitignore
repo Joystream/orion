@@ -5,17 +5,23 @@
 /**Versions.jsonl
 
 # IDE files
+/.vscode
 /.idea
 src/model/generated
-src/model/generated/index.ts
-src/model/generated/.DS_STORE
+src/types/
+src/auth-server/emails/templates/*.mst
+src/auth-server/emails/templates/preview
 /schema.graphql
 /db/persisted
 /scripts/orion-v1-migration/data
-/db/export.json*
+/db/export
+/db/migrations_dir*
 .DS_STORE
 
 # network tests
 network-tests/graphql/generated
 network-tests/node_modules
 network-tests/lib
+
+# LOGS
+chron_mail_scheduler.log

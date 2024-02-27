@@ -1,9 +1,28 @@
-type User @entity {
+enum OperatorPermission {
+  GRANT_OPERATOR_PERMISSIONS
+  REVOKE_OPERATOR_PERMISSIONS
+  SET_VIDEO_WEIGHTS
+  SET_CHANNEL_WEIGHTS
+  SET_KILL_SWITCH
+  SET_VIDEO_VIEW_PER_USER_TIME_LIMIT
+  SET_VIDEO_HERO
+  SET_CATEGORY_FEATURED_VIDEOS
+  SET_SUPPORTED_CATEGORIES
+  SET_FEATURED_NFTS
+  EXCLUDE_CONTENT
+  RESTORE_CONTENT
+  SET_PUBLIC_FEED_VIDEOS
+}
+
+type User @entity @schema(name: "admin") {
   "Unique identifier (32-byte string, securely random)"
   id: ID!
 
   "Whether the user has root (gateway operator) privileges"
   isRoot: Boolean!
+
+  "List of all the gateway operator permissions that this user has"
+  permissions: [OperatorPermission!]
 
   "The account associated with the user (if any)"
   account: Account @derivedFrom(field: "user")
@@ -49,7 +68,7 @@ type SessionEncryptionArtifacts @entity {
   cipherKey: String!
 }
 
-type Session @entity {
+type Session @entity @schema(name: "admin") {
   "Unique identifier (32-byte string, securely random)"
   id: ID!
 
@@ -82,7 +101,7 @@ type Session @entity {
 }
 
 "A Gateway Account"
-type Account @entity {
+type Account @entity @schema(name: "admin") {
   "Unique identifier (can be sequential)"
   id: ID!
 
@@ -108,13 +127,68 @@ type Account @entity {
 
   "Blockchain (joystream) account associated with the gateway account"
   joystreamAccount: String! @unique
+
+  "runtime notifications"
+  notifications: [Notification!]! @derivedFrom(field: "account")
+
+  "notification preferences for the account"
+  notificationPreferences: AccountNotificationPreferences!
+
+  "ID of the channel which referred the user to the platform"
+  referrerChannelId: String
+}
+
+type AccountNotificationPreferences {
+  # channel notifications: https://www.figma.com/file/zi5siPUXme0Fivq2i40XBd/My-channel?type=design&node-id=1721-82420&mode=design:
+  channelExcludedFromApp: NotificationPreference!
+  videoExcludedFromApp: NotificationPreference!
+  nftFeaturedOnMarketPlace: NotificationPreference!
+  newChannelFollower: NotificationPreference!
+  videoCommentCreated: NotificationPreference!
+  videoLiked: NotificationPreference!
+  videoDisliked: NotificationPreference!
+  yppChannelVerified: NotificationPreference!
+  yppSignupSuccessful: NotificationPreference! #v2
+  yppChannelSuspended: NotificationPreference!
+  nftBought: NotificationPreference!
+  creatorTimedAuctionExpired: NotificationPreference! #v2
+  bidMadeOnNft: NotificationPreference!
+  royaltyReceived: NotificationPreference!
+  channelPaymentReceived: NotificationPreference!
+  channelReceivedFundsFromWg: NotificationPreference!
+  newPayoutUpdatedByCouncil: NotificationPreference! #v2
+  channelFundsWithdrawn: NotificationPreference!
+
+  # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
+  channelCreated: NotificationPreference!
+  replyToComment: NotificationPreference!
+  reactionToComment: NotificationPreference!
+  videoPosted: NotificationPreference!
+  newNftOnAuction: NotificationPreference!
+  newNftOnSale: NotificationPreference!
+  timedAuctionExpired: NotificationPreference! #v2
+  higherBidThanYoursMade: NotificationPreference!
+  auctionWon: NotificationPreference!
+  auctionLost: NotificationPreference!
+  openAuctionBidCanBeWithdrawn: NotificationPreference! #v2
+  fundsFromCouncilReceived: NotificationPreference! #v2
+  fundsToExternalWalletSent: NotificationPreference! #v2
+  fundsFromWgReceived: NotificationPreference! # v2
+}
+
+type NotificationPreference {
+  "Notification is enabled in the app"
+  inAppEnabled: Boolean!
+
+  "Allows to send email for the notification"
+  emailEnabled: Boolean!
 }
 
 enum TokenType {
   EMAIL_CONFIRMATION
 }
 
-type Token @entity {
+type Token @entity @schema(name: "admin") {
   "The token itself (32-byte string, securely random)"
   id: ID!
 

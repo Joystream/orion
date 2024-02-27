@@ -74,7 +74,7 @@ async function tryToProlongSession(id: string, lastActivity: Date): Promise<void
     )
     const maxSessionDurationMs = maxSessionDurationHours * 3_600_000
     const prolongPeriodMs = prolongPeriodMinutes * 60_000
-    const newExpiryMs = Math.min(
+    const newExpiryMs = Math.max(
       startedAt.getTime() + maxSessionDurationMs,
       lastActivity.getTime() + prolongPeriodMs
     )
@@ -172,7 +172,7 @@ export async function getOrCreateSession(
 
   if (existingSession) {
     existingSession.expiry = new Date(
-      Math.min(
+      Math.max(
         existingSession.startedAt.getTime() + sessionMaxDurationHours * 3_600_000,
         sessionExpiry.getTime()
       )
@@ -232,6 +232,8 @@ export function getCorsOrigin(): (RegExp | string)[] | boolean {
 
   const corsOrigin = [
     `https://${rootDomain}`,
+    `http://localhost:3000`,
+    `http://127.0.0.1:3000`,
     new RegExp(`https://.+\\.${rootDomain.replace('.', '\\.')}$`),
   ]
 
