@@ -2,13 +2,7 @@ import { metaToObject } from '@joystream/metadata-protobuf/utils'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { Logger } from '../logger'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
-import {
-  Event,
-  MetaprotocolTransactionResultFailed,
-  NftActivity,
-  NftHistoryEntry,
-  Notification,
-} from '../model'
+import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { EntityManagerOverlay } from '../utils/overlay'
 import { Bytes } from '@polkadot/types/primitive'
@@ -19,8 +13,11 @@ import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
-videoRelevanceManager.init(1000 * 60 * 60)
-
+// eslint-disable-next-line no-void
+void videoRelevanceManager.init({
+  fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
+  scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
+})
 export const JOYSTREAM_SS58_PREFIX = 126
 
 export function bytesToString(b: Uint8Array): string {
@@ -76,17 +73,6 @@ export function genericEventFields(
     indexInBlock,
     timestamp: new Date(block.timestamp),
     inExtrinsic: txHash,
-  }
-}
-
-export function addNotification(
-  overlay: EntityManagerOverlay,
-  memberIds: (string | undefined | null)[],
-  eventId: string
-) {
-  const repository = overlay.getRepository(Notification)
-  for (const memberId of memberIds.filter((m) => m)) {
-    repository.new({ id: repository.getNewEntityId(), memberId, eventId })
   }
 }
 

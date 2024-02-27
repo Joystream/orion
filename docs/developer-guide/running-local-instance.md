@@ -15,7 +15,7 @@ If you need a full local Joystream playground setup which includes:
 - [Storage node](https://github.com/Joystream/joystream/tree/master/storage-node)
 - [Distributor node](https://github.com/Joystream/joystream/tree/master/distributor-node)
 
-You can run it in a following way:
+You can run it in the following way:
 
 ```bash
 # Clone the Orion repository (if not already done)
@@ -50,7 +50,7 @@ yarn start
 
 ### Local Orion endpoints
 
-After executing those steps you will be able to access the the local instance of Orion at:
+After executing those steps you will be able to access the local instance of Orion at:
 - http://localhost:4074/playground ([Auth API](./tutorials/authentication-api.md) playground)
 - http://localhost:4350/graphql (GraphQL API playground)
 

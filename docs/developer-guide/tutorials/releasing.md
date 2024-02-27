@@ -2,14 +2,14 @@
 
 When releasing new version of Orion make sure that:
 1. All pull requests you wish to include in the release are already merged into the `master` branch.
-1. Orion version has been bumped and the `CHANGELOG` file has been updated acording to instructions provided in [_Versioning_](../versioning.md).
+1. Orion version has been bumped and the `CHANGELOG` file has been updated according to instructions provided in [_Versioning_](../versioning.md).
 1. The `CHANGELOG` clearly states all changes included in the release that:
     - could break or in some other way significantly affect the behavior of previous versions of Atlas (ie. are affecting the GraphQL API / Auth API),
     - require additional steps to be taken by the Gateway operators that wish to upgrade to the new version. For example: 
         - introduction of new environment variables or changes to existing environment variables,
         - changes to database schema that would require the operators to execute non-standard migration steps,
         - changes to default docker-compose configuration that would require the Operators make adjustments to their current setup.
-1. All other documentation has been porperly updated to reflect any significant changes introduced in the release. This includes both this documentation (the [Orion Developer Guide](../index.md)) and the [Orion Operator Guide](../../operator-guide/index.md).
+1. All other documentation has been properly updated to reflect any significant changes introduced in the release. This includes both this documentation (the [Orion Developer Guide](../index.md)) and the [Orion Operator Guide](../../operator-guide/index.md).
 1. In case of any changes related to environment variables or docker configuration, make sure a PR to update Orion docker setup in the [Joystream monorepo](https://github.com/Joystream/joystream) has been created and merged as well (example: https://github.com/Joystream/joystream/pull/4730)
 1. In case any changes are affecting [Offchain data](../tutorials/preserving-offchain-state.md) schema in a non-backward-compatible way, make sure a proper export data migration step was added accordingly to _[Introducing breaking changes to Offchain data schema](../tutorials/preserving-offchain-state.md#introducing-breaking-changes-to-offchain-data-schema)_.
 

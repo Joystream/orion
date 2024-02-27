@@ -1,20 +1,17 @@
 # DefaultApi
 
-All URIs are relative to *http://localhost:4074/api/v1*
+All URIs are relative to *http://localhost/api/v1*
 
 | Method | HTTP request | Description |
 |------------- | ------------- | -------------|
 | [**anonymousAuth**](DefaultApi.md#anonymousAuth) | **POST** /anonymous-auth |  |
+| [**changeAccount**](DefaultApi.md#changeAccount) | **POST** /change-account |  |
 | [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
-| [**connectAccount**](DefaultApi.md#connectAccount) | **POST** /connect-account |  |
 | [**createAccount**](DefaultApi.md#createAccount) | **POST** /account |  |
-| [**deleteArtifacts**](DefaultApi.md#deleteArtifacts) | **DELETE** /artifacts |  |
-| [**disconnectAccount**](DefaultApi.md#disconnectAccount) | **POST** /disconnect-account |  |
 | [**getArtifacts**](DefaultApi.md#getArtifacts) | **GET** /artifacts |  |
 | [**getSessionArtifacts**](DefaultApi.md#getSessionArtifacts) | **GET** /session-artifacts |  |
 | [**login**](DefaultApi.md#login) | **POST** /login |  |
 | [**logout**](DefaultApi.md#logout) | **POST** /logout |  |
-| [**postArtifacts**](DefaultApi.md#postArtifacts) | **POST** /artifacts |  |
 | [**postSessionArtifacts**](DefaultApi.md#postSessionArtifacts) | **POST** /session-artifacts |  |
 | [**requestEmailConfirmationToken**](DefaultApi.md#requestEmailConfirmationToken) | **POST** /request-email-confirmation-token |  |
 
@@ -40,6 +37,33 @@ All URIs are relative to *http://localhost:4074/api/v1*
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="changeAccount"></a>
+# **changeAccount**
+> GenericOkResponseData changeAccount(ChangeAccountRequestData)
+
+
+
+    Change the blockchain (Joystream) account associated with the Gateway account. Delete the old account&#39;s encryption artifacts and optionally set new ones.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **ChangeAccountRequestData** | [**ChangeAccountRequestData**](../Models/ChangeAccountRequestData.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 
@@ -73,33 +97,6 @@ No authorization required
 - **Content-Type**: application/json
 - **Accept**: application/json
 
-<a name="connectAccount"></a>
-# **connectAccount**
-> GenericOkResponseData connectAccount(ConnectAccountRequestData)
-
-
-
-    Connect a Joystream account (key) with the Gateway acount by providing a signed proof of ownership.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **ConnectAccountRequestData** | [**ConnectAccountRequestData**](../Models/ConnectAccountRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[cookieAuth](../README.md#cookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
 <a name="createAccount"></a>
 # **createAccount**
 > GenericOkResponseData createAccount(CreateAccountRequestData)
@@ -113,57 +110,6 @@ No authorization required
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **CreateAccountRequestData** | [**CreateAccountRequestData**](../Models/CreateAccountRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[cookieAuth](../README.md#cookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-<a name="deleteArtifacts"></a>
-# **deleteArtifacts**
-> GenericOkResponseData deleteArtifacts()
-
-
-
-    Delete wallet seed encryption artifacts in case they are no longer needed.
-
-### Parameters
-This endpoint does not need any parameter.
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[cookieAuth](../README.md#cookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-<a name="disconnectAccount"></a>
-# **disconnectAccount**
-> GenericOkResponseData disconnectAccount(DisconnectAccountRequestData)
-
-
-
-    Disconnect a Joystream account (key) from the Gateway acount.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **DisconnectAccountRequestData** | [**DisconnectAccountRequestData**](../Models/DisconnectAccountRequestData.md)|  | [optional] |
 
 ### Return type
 
@@ -236,7 +182,7 @@ This endpoint does not need any parameter.
 
 
 
-    Login to user&#39;s account by providing a message signed by one of the user&#39;s connected accounts.
+    Login to user&#39;s account by providing a message signed by the associated blockchain account.
 
 ### Parameters
 
@@ -279,33 +225,6 @@ This endpoint does not need any parameter.
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
-
-<a name="postArtifacts"></a>
-# **postArtifacts**
-> GenericOkResponseData postArtifacts(EncryptionArtifacts)
-
-
-
-    Save wallet seed encryption artifacts associated with the account (if not already saved).
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **EncryptionArtifacts** | [**EncryptionArtifacts**](../Models/EncryptionArtifacts.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-[cookieAuth](../README.md#cookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
 - **Accept**: application/json
 
 <a name="postSessionArtifacts"></a>

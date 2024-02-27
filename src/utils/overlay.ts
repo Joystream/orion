@@ -259,12 +259,16 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return result
   }
 
+  // invalidate cache line
+
   // Creates a new entity of given type and schedules it for insertion.
   new(entityFields: Partial<Flat<E>>): Flat<E> {
     const entity = new this.EntityClass(entityFields)
     // normalize the input (remove UTF-8 null characters)
     this.normalizeInput(entity)
-    Logger.get().debug(`Creating new ${this.entityName}: ${entity.id}`)
+    if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
+      Logger.get().debug(`Creating new ${this.entityName}: ${entity.id}`)
+    }
     // Entities with the same id will override existing ones (!)
     this.cached.set(entity.id, { entity, state: CachedEntityState.ToBeSaved })
     return entity
@@ -301,10 +305,12 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     const logger = Logger.get()
     const toBeSaved = this.getAllToBeSaved()
     if (toBeSaved.length) {
-      logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
-      logger.debug(
-        `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
-      )
+      if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
+        logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
+        logger.debug(
+          `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
+        )
+      }
       await this.repository.save(toBeSaved)
     }
   }
@@ -353,6 +359,11 @@ export class EntityManagerOverlay {
 
   public getEm() {
     return this.em
+  }
+
+  // reason: during migration the overlay would write to the database the old nextId
+  public invalidateRepository(entityName: string) {
+    this.repositories.delete(entityName)
   }
 
   // Create an entity repository overlay or load already cached one

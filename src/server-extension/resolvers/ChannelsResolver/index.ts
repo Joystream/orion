@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { Args, Query, Mutation, Resolver, Info, Ctx, UseMiddleware } from 'type-graphql'
-import { EntityManager, IsNull } from 'typeorm'
+import { EntityManager, In, IsNull } from 'typeorm'
 import {
   ChannelNftCollector,
   ChannelNftCollectorsArgs,
@@ -16,9 +16,32 @@ import {
   ChannelNftCollectorsOrderByInput,
   TopSellingChannelsArgs,
   TopSellingChannelsResult,
+  ExcludeChannelArgs,
+  ExcludeChannelResult,
+  VerifyChannelArgs,
+  VerifyChannelResult,
+  SuspendChannelResult,
+  SuspendChannelArgs,
 } from './types'
 import { GraphQLResolveInfo } from 'graphql'
-import { Channel, ChannelFollow, Report } from '../../../model'
+import {
+  Account,
+  Channel,
+  ChannelFollow,
+  Report,
+  Membership,
+  Exclusion,
+  NewChannelFollower,
+  ChannelExcluded,
+  ChannelVerified,
+  ChannelVerification,
+  ChannelSuspension,
+  ChannelSuspended,
+  YppVerified,
+  YppSuspended,
+  ChannelRecipient,
+  MemberRecipient,
+} from '../../../model'
 import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
 import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
@@ -27,7 +50,11 @@ import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import { model } from '../model'
 import { Context } from '../../check'
 import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly, UserOnly } from '../middleware'
+import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
+import { addNotification } from '../../../utils/notification'
+import { assertNotNull } from '@subsquid/substrate-processor'
+import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
+import pLimit from 'p-limit'
 
 @Resolver()
 export class ChannelsResolver {
@@ -73,7 +100,6 @@ export class ChannelsResolver {
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
@@ -153,7 +179,6 @@ export class ChannelsResolver {
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
-    console.log('Result', result)
 
     return result
   }
@@ -179,6 +204,7 @@ export class ChannelsResolver {
       const existingFollow = await em.findOne(ChannelFollow, {
         where: { channelId, userId: user.id },
       })
+
       // If so - just return the result
       if (existingFollow) {
         return {
@@ -196,6 +222,28 @@ export class ChannelsResolver {
         userId: user.id,
         timestamp: new Date(),
       })
+
+      const ownerAccount = channel.ownerMemberId
+        ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })
+        : null
+      if (ownerAccount) {
+        if (!ctx.account) {
+          // account not null because of the UseMiddleware(AccountOnly) decorator
+          throw new Error('Account not specified')
+        }
+        const followerMembership = await em
+          .getRepository(Membership)
+          .findOneByOrFail({ id: ctx.account.membershipId })
+        await addNotification(
+          em,
+          ownerAccount,
+          new ChannelRecipient({ channel: channel.id }),
+          new NewChannelFollower({
+            followerId: assertNotNull(followerMembership.id),
+            followerHandle: assertNotNull(followerMembership.handle),
+          })
+        )
+      }
 
       await em.save([channel, newFollow])
 
@@ -291,4 +339,197 @@ export class ChannelsResolver {
       }
     })
   }
+
+  @Mutation(() => [SuspendChannelResult])
+  @UseMiddleware(OperatorOnly())
+  async suspendChannels(
+    @Args() { channelIds }: SuspendChannelArgs
+  ): Promise<SuspendChannelResult[]> {
+    const em = await this.em()
+
+    return withHiddenEntities(em, async () => {
+      const channels = await em.find(Channel, {
+        where: { id: In(channelIds) },
+      })
+
+      const suspendChannel = async (channel: Channel) => {
+        // If channel already suspended - return its data
+        if (channel.yppStatus.isTypeOf === 'YppSuspended') {
+          const existingSuspension = await em.getRepository(ChannelSuspension).findOneOrFail({
+            where: { id: channel.yppStatus.suspension },
+          })
+          return {
+            id: existingSuspension.id,
+            channelId: channel.id,
+            createdAt: existingSuspension.timestamp,
+          }
+        }
+        // otherwise create a new suspension
+        const newSuspension = new ChannelSuspension({
+          id: uniqueId(),
+          channelId: channel.id,
+          timestamp: new Date(),
+        })
+        channel.yppStatus = new YppSuspended({ suspension: newSuspension.id })
+        await em.save([newSuspension, channel])
+
+        // in case account exist deposit notification
+        const channelOwnerMemberId = channel.ownerMemberId
+        if (channelOwnerMemberId) {
+          const account = await em.findOne(Account, {
+            where: { membershipId: channelOwnerMemberId },
+          })
+          await addNotification(
+            em,
+            account,
+            new ChannelRecipient({ channel: channel.id }),
+            new ChannelSuspended({})
+          )
+        }
+
+        return {
+          id: newSuspension.id,
+          channelId: channel.id,
+          createdAt: newSuspension.timestamp,
+        }
+      }
+
+      const limit = pLimit(5) // Limit to 5 concurrent promises
+      const existingChannels = channels.filter((channel) => channel)
+      return await Promise.all(
+        existingChannels.map((channel) => limit(async () => await suspendChannel(channel)))
+      )
+    })
+  }
+
+  @Mutation(() => VerifyChannelResult)
+  @UseMiddleware(OperatorOnly())
+  async verifyChannel(@Args() { channelIds }: VerifyChannelArgs): Promise<VerifyChannelResult[]> {
+    const em = await this.em()
+    return await verifyChannelService(em, channelIds)
+  }
+
+  @Mutation(() => ExcludeChannelResult)
+  @UseMiddleware(OperatorOnly())
+  async excludeChannel(
+    @Args() { channelId, rationale }: ExcludeChannelArgs
+  ): Promise<ExcludeChannelResult> {
+    const em = await this.em()
+    return await excludeChannelService(em, channelId, rationale)
+  }
+}
+
+export const excludeChannelService = async (
+  em: EntityManager,
+  channelId: string,
+  rationale: string
+): Promise<ExcludeChannelResult> => {
+  return withHiddenEntities(em, async () => {
+    const channel = await em.findOne(Channel, {
+      where: { id: channelId },
+    })
+
+    if (!channel) {
+      throw new Error(`Channel by id ${channelId} not found!`)
+    }
+    const existingExclusion = await em.findOne(Exclusion, {
+      where: { channelId: channel.id, videoId: IsNull() },
+    })
+    // If exclusion already exists - return its data with { created: false }
+    if (existingExclusion) {
+      return {
+        id: existingExclusion.id,
+        channelId: channel.id,
+        created: false,
+        createdAt: existingExclusion.timestamp,
+        rationale: existingExclusion.rationale,
+      }
+    }
+    // If exclusion doesn't exist, create a new one
+    const newExclusion = new Exclusion({
+      id: uniqueId(8),
+      channelId: channel.id,
+      rationale,
+      timestamp: new Date(),
+    })
+    channel.isExcluded = true
+    await em.save([newExclusion, channel])
+
+    // in case account exist deposit notification
+    const channelOwnerMemberId = channel.ownerMemberId
+    if (channelOwnerMemberId) {
+      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      await addNotification(
+        em,
+        account,
+        new MemberRecipient({ membership: channelOwnerMemberId }),
+        new ChannelExcluded({ channelTitle: channel.title ?? FALLBACK_CHANNEL_TITLE })
+      )
+    }
+
+    return {
+      id: newExclusion.id,
+      channelId: channel.id,
+      videoId: null,
+      created: true,
+      createdAt: newExclusion.timestamp,
+      rationale,
+    }
+  })
+}
+
+export const verifyChannelService = async (em: EntityManager, channelIds: string[]) => {
+  return withHiddenEntities(em, async () => {
+    const channels = await em.getRepository(Channel).find({
+      where: { id: In(channelIds) },
+    })
+
+    const verifyChannel = async (channel: Channel) => {
+      // If channel already verified - return its data
+      if (channel.yppStatus.isTypeOf === 'YppVerified') {
+        const existingVerification = await em.getRepository(ChannelVerification).findOneOrFail({
+          where: { channelId: channel.id },
+        })
+        return {
+          id: existingVerification.id,
+          channelId: channel.id,
+          createdAt: existingVerification.timestamp,
+        }
+      }
+      // othewise create new verification regardless whether the channel was previously verified
+      const newVerification = new ChannelVerification({
+        id: uniqueId(),
+        channelId: channel.id,
+        timestamp: new Date(),
+      })
+      channel.yppStatus = new YppVerified({ verification: newVerification.id })
+      await em.save([newVerification, channel])
+
+      // in case account exist deposit notification
+      const channelOwnerMemberId = channel.ownerMemberId
+      if (channelOwnerMemberId) {
+        const account = await em.findOne(Account, {
+          where: { membershipId: channelOwnerMemberId },
+        })
+        await addNotification(
+          em,
+          account,
+          new ChannelRecipient({ channel: channel.id }),
+          new ChannelVerified({})
+        )
+      }
+
+      return {
+        id: newVerification.id,
+        channelId: channel.id,
+        createdAt: newVerification.timestamp,
+      }
+    }
+
+    const limit = pLimit(5) // Limit to 5 concurrent promises
+    const existingChannels = channels.filter((channel) => channel)
+    return await Promise.all(
+      existingChannels.map((channel) => limit(async () => await verifyChannel(channel)))
+    )
+  })
 }

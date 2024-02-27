@@ -1,7 +1,149 @@
-# 3.1.0
-### Additions
-- Implements mappings for `Content.VideoAssetsDeletedByModerator` and `Content.ChannelAssetsDeletedByModerator` runtime events
+# 3.6.0
 
+## Schema changes
+- Added `includeInHomeFeed` field to `Video` entity indicating if the video should be included in the home feed/page.
+
+## Mutations
+### Additions
+- `setOrUnsetPublicFeedVideos`: mutation to set or unset the `includeInHomeFeed` field of a video by the Operator. 
+
+### Queries
+#### Additions
+- `dumbPublicFeedVideos`: resolver to retrieve random `N` videos from list of all homepage videos.
+
+## DB Migrations
+- Added partial index on `Video` entity to include only videos that are included in the home feed (in `db/migrations/2200000000000-Indexes.js`)
+
+# 3.5.0
+
+## Schema changes
+- Added `isShort` field to `Video` entity indicating whether a video is a short format, vertical video or not.
+
+## Misc
+- Disable both in App and email notifications for `videoPosted` notifiations type by default.
+- Remove unused `@joystream/metadata-protobuf` patch from assets/patches directory.
+
+# 3.4.0
+
+## Schema changes
+- Added `@schema(name: "admin")` directive to hide entities (from public GRAPHQL API) in Graphql schema definitions.
+
+## Misc
+- Patch `@subsquid/typeorm-config` & `@subsquid/typeorm-migration` packages to change `squid-typeorm-migration apply` command to apply a single migrations file too using `--filename` option instead of applying the whole `db/migrations` directory.
+- Patch `@subsquid/openreader` and `@subsquid/typeorm-codegen` dependencies to include the db schema `name` too in the generated typeorm/postgres migrations, and an optional `schema` directive to specify the schema of any GRAPHQL entity.
+
+## DB Migrations
+- Update `generate-migrations` makefile command. Now the existing `*-Data.js` will not be overwritten, instead a new `*-Data.js` migration file (containing only changes compared to the previous DB state) will be added whenever there are GRAPHQL schema changes. The `*-Views.js` migration file will also be updated whenever the GRAPHQL schema changes.
+- Create `generateViewsMigration.js` script to create new `*-Views.js` migration file.
+- Separate the view definitions(in `db/viewDefinitions.js`) from views migration file(`*-Views.js`).
+- Add `*-Admin.js` migration file to create an `admin` schema & user, previously the `admin` schema and user was being created in the `*-Views.js` migration.
+- Regenerate the postgres db migrations.
+
+## Documentation
+- Updated documentation for [upgrading-orion.md](docs/operator-guide/tutorials/upgrading-orion.md)
+- Updated documentation for [entity-visibility.md#managing-entity-visibility](docs/developer-guide/tutorials/entity-visibility.md)
+
+### Bug Fixes:
+- read/write `export.json` file, containing the offchain state, using `big-json` package, instead using Javascript native `JSON.stringify` function which does not work on large JSON objects
+
+# 3.3.0
+
+## Schema
+- `orionLanguage` property has been added.
+
+## Mappings 
+- Language detection is used to populate new property on video update and creation.
+
+# 3.2.1
+
+## Misc
+- Added index on timestamp fields on `Video`, `Event` and `OwnedNft` entities
+- update `docker.yml` github workflow to build and publish docker images.
+- added `generate-migrations` makefile command to generate migrations
+- adds OpenTelemetry tracing integration with `graphql-server` and `auth-server`
+- update nodejs version to `node:18`
+
+### Bug Fixes:
+- Extend session based on activity after initial expiry is over.
+- Fix/notification email title.
+- Improves off-chain import/export script
+
+# 3.2.0
+This release adds notifications to the orion infrastructure...
+## Schema changes
+- Introduced `NotificationEmailDelivery` entity to handle email notifications. It includes fields for tracking the notification, delivery attempts, and a discard flag.
+- Added `EmailDeliveryAttempt` entity to track each delivery attempt. It includes a status and timestamp.
+- Created `DeliveryStatus` union type that can be either `EmailSuccess` or `EmailFailure` (which includes an error status).
+- Introduced `Read` and `Unread` types to track if a notification has been read. Both are part of the `ReadOrUnread` union.
+- Started defining a `Notification` entity. It includes fields for the account, notification type, event, status, in-app visibility, creation timestamp, and recipient.
+- Defined RecipientType as a union of `MemberRecipient` and `ChannelRecipient`.
+- Introduced various notification types as part of the NotificationType union. Each type has specific fields relevant to the notification.
+- Added `ChannelSuspended, NftFeaturedOnMarketPlace, ChannelVerified, ChannelExcluded, VideoExcluded, NewChannelFollower, CommentPostedToVideo, VideoLiked, VideoDisliked, NftPurchased, CreatorReceivesAuctionBid, NftOffered, DirectChannelPaymentByMember, EnglishAuctionSettled, ChannelFundsWithdrawn, ChannelCreated, CommentReply, ReactionToComment, VideoPosted, NewAuction, NewNftOnSale, HigherBidPlaced, AuctionWon, AuctionLost, BidMadeCompletingAuction, NftRoyaltyPaid` types. Each type includes fields relevant to the specific notification.
+- Introduced `AccountNotificationPreferences` type to handle user notification preferences.
+- Added fields for each notification type, each of which is of `NotificationPreference` type.
+- Channel notifications include: `channelExcludedFromApp, videoExcludedFromApp, nftFeaturedOnMarketPlace, newChannelFollower, videoCommentCreated, videoLiked, videoDisliked, yppChannelVerified, yppSignupSuccessful, yppChannelSuspended, nftBought, creatorTimedAuctionExpired, bidMadeOnNft, royaltyReceived, channelPaymentReceived, channelReceivedFundsFromWg, newPayoutUpdatedByCouncil, channelFundsWithdrawn`.
+Member notifications include: `channelCreated, replyToComment, reactionToComment, videoPosted, newNftOnAuction, newNftOnSale, timedAuctionExpired, higherBidThanYoursMade, auctionWon, auctionLost, openAuctionBidCanBeWithdrawn, fundsFromCouncilReceived, fundsToExternalWalletSent, fundsFromWgReceived`.
+- Introduced `ChannelYppStatus` as a union type in the GraphQL schema. This type represents the YouTube Partner Program (YPP) status of a channel.
+The ChannelYppStatus can be one of three types: `YppUnverified, YppVerified, YppSuspended`.
+## Resolvers 
+- Ypp status mutation resolvers have been introduced, intended for the Ypp verification ops team:
+    - Added `verifyChannel` mutation is protected by the `OperatorOnly` middleware, meaning it can only be accessed by operators returning a list of `VerifyChannelResults` (each contaning the `id` of the new suspension, the `channelId` of the suspended channel, and the `createdAt` timestamp of when the suspension was created)
+    - Added `excludeChannel` mutation (protected by the `OperatorOnly` middleware) to the GraphQL schema. This mutation is used to exclude a channel. It takes channelId and rationale as arguments and returns an `ExcludeChannelResult` (contaning the `id` of the new suspension, the `channelId` of the suspended channel, and the `createdAt` timestamp of when the suspension was created)
+    - Added `suspendChannels` mutation (protected by the `OperatorOnly` middleware) to the GraphQL schema. This mutation is used to suspend. It takes `channelIds` as an argument and returns a list of `SuspendChannelResult` (each contaning the `id` of the new suspension, the `channelId` of the suspended channel, and the `createdAt` timestamp of when the suspension was created)
+- Notification-related resolvers (accessible only through the `AccountOnly` middleware) are intened for the use with the front end app:
+    - Added `markNotificationsAsRead` mutation. This mutation marks specified notifications as read. It takes an array of `notificationIds` and returns an object with an array of IDs of notifications that were successfully marked as read.
+    - Added `setAccountNotificationPreferences` mutation. This mutation updates the notification preferences for the current account. It takes an object of `newPreferences` and returns the updated notification preferences.
+    - Both mutations are protected by the `AccountOnly` middleware, meaning they can only be accessed by authenticated accounts.
+    - Added a helper function `maybeUpdateNotificationPreference` to update individual notification preferences if a new value is provided. This function is used in the `setAccountNotificationPreferences` mutation to update each preference.
+- Notification email attepmts and assets
+    - Added `setMaxAttemptsOnMailDelivery` mutation. This mutation sets the maximum number of attempts to deliver an email notification. It takes `newMaxAttempts` as an argument and returns the new maximum attempts. The mutation is protected by the `OperatorOnly` middleware.
+    - Introduced `setNewNotificationCenterPath` mutation. This mutation sets the new notification center path. It takes `newMaxAttempts` as an argument and returns the new maximum attempts. The mutation is protected by the `OperatorOnly` middleware.
+    - Added `setNewAppRootDomain` mutation. This mutation sets the new application root domain. It takes `newRootDomain` as an argument and returns an object indicating whether the new root domain was applied. The mutation is protected by the `OperatorOnly` middleware.
+## Mail Scheduler module
+- mail template generation using mjml (see `./src/auth-server/emails/templates/mjml/notification.html.mst.mjml`)
+- Introduced functions to handle email notifications.
+- Added `getMaxAttempts` function to fetch the maximum number of email delivery attempts from the configuration.
+- Added `mailsToDeliver` function to fetch all email notifications that have not been discarded.
+- Added `deliverEmails` function to process each email notification. It creates the email content, executes the delivery, and records the attempt. If the delivery is successful or the maximum number of attempts has been reached, the notification is discarded.
+- The `deliverEmails` function is called in the `main` function, which logs the result of the email delivery process.
+- The email delivery is meant (for the moment) to be scheduled via chron job (as explained on operator documentation)
+## Misc
+- several unit test have been introduced along with CI checks
+- Improved Home page scoring schedule logic
+- Refactored migration logic in order to migrate global account counter, which will be used also to migrate Notifications counters in future releases
+## Environment
+- Added `EMAIL_NOTIFICATION_DELIVERY_MAX_ATTEMPTS` environment variable to configure the maximum number of attempts to deliver an email notification, before the scheduler stops attending them
+- Introduced `APP_ASSET_STORAGE` environment variable to specify the URL where the application's assets are stored.
+- Added `APP_NAME_ALT` environment variable to set an alternative name for the application.
+- Introduced `NOTIFICATION_ASSET_ROOT` environment variable to specify the URL where the notification icons are stored.
+## Documentation
+- added documentation for setting up the email scheduler having a [Sendgrid](https://sendgrid.com) account
+
+# 3.1.0
+
+### Entities
+- Adds `User.permission` to the `User` entity, this however doesn't require migration logic.
+- Adds `Channel.channelWeights` in order to boost channel relevance. This value can be set via the `setChannelWeights` mutation
+### Resolvers
+- Adds supports for new permissions model for gateway operator users. Now the root user can assign/revoke operator permission/s to users using `grantPermissions` & `revokePermissions` mutations
+- Adds new `setChannelWeights` operator mutation to set weight/bias for any channel/s which will be used to calculate the Atlas homepage video relevance scores
+### Performance
+- Adds `Video.createdAt` as index in order to speed up Atlas home page queries 
+
+# 3.0.4
+
+### Misc
+- sum channels rewards into a new `Channel.cumulativeReward` field
+- start `Channel.cumulativeRewardClaimed` at zero instead of null
+
+# 3.0.3
+### Optimisation:
+- Solves n+1 query issue on the `AssetResolver` `resolvedUrls` field resolver, by reusing `storageBagId` field if available. Resulting in faster query times and inpacting home page loading speed for front end application significantly. This fix involves only the `orion_graphql-server` microservice
+### Misc
+- adds `http://localhost:3000` and `http://127.0.0.1:3000` as authorized CORS origins for local front end testing 
+# 3.0.2
+### Bug Fixes:
+- Store membership handles both as utf-8 string and raw bytes - [#4950](https://github.com/Joystream/joystream/pull/4950)
 # 3.0.1
 ### Misc
 - add migration for the `Account` id field

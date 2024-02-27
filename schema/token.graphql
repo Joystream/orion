@@ -143,6 +143,9 @@ type RevenueShare @entity {
   "ending block"
   endsAt: Int!
 
+  "number of holders that could join the split before it ended"
+  potentialParticipantsNum: Int
+
   "Number of participants (stackers)"
   participantsNum: Int!
 

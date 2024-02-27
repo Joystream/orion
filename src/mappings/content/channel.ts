@@ -1,19 +1,4 @@
-import {
-  Channel,
-  ChannelFollow,
-  Event,
-  Membership,
-  MetaprotocolTransactionResultFailed,
-  MetaprotocolTransactionStatusEventData,
-  StorageDataObject,
-  DataObjectTypeChannelPayoutsPayload,
-  ChannelPayoutsUpdatedEventData,
-  ChannelRewardClaimedEventData,
-  ChannelRewardClaimedAndWithdrawnEventData,
-  ChannelFundsWithdrawnEventData,
-  ChannelAssetsDeletedByModeratorEventData,
-} from '../../model'
-import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -21,22 +6,48 @@ import {
   ChannelOwnerRemarked,
   IChannelMetadata,
 } from '@joystream/metadata-protobuf'
-import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
-import { EventHandlerContext } from '../../utils/events'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
-  processAppActionMetadata,
+  Channel,
+  ChannelAssetsDeletedByModeratorEventData,
+  ChannelCreated,
+  ChannelCreatedEventData,
+  ChannelFollow,
+  ChannelFundsWithdrawn,
+  ChannelFundsWithdrawnEventData,
+  ChannelPayoutsUpdatedEventData,
+  ChannelRecipient,
+  ChannelRewardClaimedAndWithdrawnEventData,
+  ChannelRewardClaimedEventData,
+  DataObjectTypeChannelPayoutsPayload,
+  Event,
+  MemberRecipient,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  MetaprotocolTransactionStatusEventData,
+  StorageDataObject,
+  YppUnverified,
+} from '../../model'
+import { EventHandlerContext } from '../../utils/events'
+import { addNotification } from '../../utils/notification'
+import { Flat } from '../../utils/overlay'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
+import {
   deleteChannel,
   encodeAssets,
-  parseContentActor,
+  getAccountForMember,
+  getChannelOwnerAccount,
   increaseChannelCumulativeRevenue,
+  parseContentActor,
+  processAppActionMetadata,
 } from './utils'
-import { Flat } from '../../utils/overlay'
-import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processChannelCreatedEvent({
   overlay,
   block,
+  extrinsicHash,
+  indexInBlock,
   event,
 }: EventHandlerContext<'Content.ChannelCreated'>) {
   const [
@@ -66,6 +77,8 @@ export async function processChannelCreatedEvent({
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
     cumulativeRewardClaimed: BigInt(0),
+    yppStatus: new YppUnverified(),
+    cumulativeReward: 0n,
   })
 
   const ownerMember = channel.ownerMemberId
@@ -110,6 +123,23 @@ export async function processChannelCreatedEvent({
 
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
+    const event = overlay.getRepository(Event).new({
+      id: `${block.height}-${indexInBlock}`,
+      inBlock: block.height,
+      inExtrinsic: extrinsicHash,
+      indexInBlock,
+      timestamp: new Date(block.timestamp),
+      data: new ChannelCreatedEventData({ channel: channel.id }),
+    })
+
+    const ownerAccount = await getAccountForMember(overlay, ownerMember.id)
+    await addNotification(
+      overlay,
+      ownerAccount,
+      new MemberRecipient({ membership: ownerMember.id }),
+      new ChannelCreated({ channelId: channel.id, channelTitle: channel.title || '??' }),
+      event
+    )
   }
 }
 
@@ -302,7 +332,7 @@ export async function processChannelRewardUpdatedEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
   increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
@@ -328,7 +358,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
     }),
   })
 
-  channel.cumulativeRewardClaimed = (channel.cumulativeRewardClaimed || 0n) + claimedAmount
+  channel.cumulativeRewardClaimed += claimedAmount
   increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
@@ -344,7 +374,7 @@ export async function processChannelFundsWithdrawnEvent({
   // load channel
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
-  overlay.getRepository(Event).new({
+  const entityEvent = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new ChannelFundsWithdrawnEventData({
       amount,
@@ -353,4 +383,14 @@ export async function processChannelFundsWithdrawnEvent({
       actor: parseContentActor(actor),
     }),
   })
+
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    new ChannelFundsWithdrawn({ amount }),
+    entityEvent
+  )
 }

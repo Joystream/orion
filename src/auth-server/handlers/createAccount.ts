@@ -1,10 +1,11 @@
 import express from 'express'
-import { BadRequestError, ConflictError, NotFoundError } from '../errors'
-import { components } from '../generated/api-types'
-import { globalEm } from '../../utils/globalEm'
 import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../model'
 import { AuthContext } from '../../utils/auth'
+import { globalEm } from '../../utils/globalEm'
 import { idStringFromNumber } from '../../utils/misc'
+import { defaultNotificationPreferences } from '../../utils/notification/helpers'
+import { BadRequestError, ConflictError, NotFoundError } from '../errors'
+import { components } from '../generated/api-types'
 import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
@@ -76,6 +77,7 @@ export const createAccount: (
         )
       }
 
+      const notificationPreferences = defaultNotificationPreferences()
       const account = new Account({
         id: idStringFromNumber(nextAccountId),
         email,
@@ -85,6 +87,8 @@ export const createAccount: (
         userId: authContext?.user.id,
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
+        notificationPreferences,
+        referrerChannelId: null,
       })
 
       await em.save([
