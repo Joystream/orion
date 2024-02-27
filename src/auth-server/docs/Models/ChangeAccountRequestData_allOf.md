@@ -1,4 +1,4 @@
-# ConnectAccountRequestData_allOf
+# ChangeAccountRequestData_allOf
 ## Properties
 
 | Name | Type | Description | Notes |
