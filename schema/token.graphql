@@ -29,6 +29,9 @@ type CreatorToken @entity {
   "total supply"
   totalSupply: BigInt!
 
+  "Flag to indicate whether the CRT is featured or not"
+  isFeatured: Boolean!
+
   "sales issued for this token"
   sales: [Sale!] @derivedFrom(field: "token")
 
@@ -51,7 +54,7 @@ type CreatorToken @entity {
   ammCurves: [AmmCurve!] @derivedFrom(field: "token")
 
   "date at which this token was created"
-  createdAt: DateTime!
+  createdAt: DateTime! @index
 
   "channel from which the token is issued uniqueness guaranteed by runtime"
   channel: TokenChannel @derivedFrom(field: "token")
@@ -139,6 +142,9 @@ type RevenueShare @entity {
 
   "ending block"
   endsAt: Int!
+
+  "number of holders that could join the split before it ended"
+  potentialParticipantsNum: Int
 
   "Number of participants (stackers)"
   participantsNum: Int!

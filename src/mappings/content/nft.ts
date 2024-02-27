@@ -1,5 +1,40 @@
+import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
+import {
+  Account,
+  Auction,
+  AuctionBidCanceledEventData,
+  AuctionBidMadeEventData,
+  AuctionCanceledEventData,
+  Bid,
+  BidMadeCompletingAuctionEventData,
+  BuyNowCanceledEventData,
+  BuyNowPriceUpdatedEventData,
+  EnglishAuctionSettledEventData,
+  EnglishAuctionStartedEventData,
+  Event,
+  MemberRecipient,
+  NewAuction,
+  NewNftOnSale,
+  NftBoughtEventData,
+  NftOfferedEventData,
+  NftOwnerChannel,
+  NftOwnerMember,
+  NftPurchased,
+  NftSellOrderMadeEventData,
+  OpenAuctionBidAcceptedEventData,
+  OpenAuctionStartedEventData,
+  OwnedNft,
+  TransactionalStatusAuction,
+  TransactionalStatusBuyNow,
+  TransactionalStatusIdle,
+  TransactionalStatusInitiatedOfferToMember,
+  Video,
+} from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
+import { addNotification } from '../../utils/notification'
+import { EntityManagerOverlay } from '../../utils/overlay'
+import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import {
   addNewBidNotification,
   addRoyaltyPaymentNotification,
@@ -21,41 +56,6 @@ import {
   parseVideoTitle,
   processNft,
 } from './utils'
-import {
-  Auction,
-  AuctionBidCanceledEventData,
-  AuctionBidMadeEventData,
-  AuctionCanceledEventData,
-  Bid,
-  BidMadeCompletingAuctionEventData,
-  BuyNowCanceledEventData,
-  BuyNowPriceUpdatedEventData,
-  EnglishAuctionSettledEventData,
-  EnglishAuctionStartedEventData,
-  Event,
-  NftBoughtEventData,
-  NftOwnerChannel,
-  NftOwnerMember,
-  NftSellOrderMadeEventData,
-  OpenAuctionBidAcceptedEventData,
-  OpenAuctionStartedEventData,
-  OwnedNft,
-  TransactionalStatusAuction,
-  TransactionalStatusBuyNow,
-  TransactionalStatusIdle,
-  TransactionalStatusInitiatedOfferToMember,
-  Video,
-  NewAuction,
-  NewNftOnSale,
-  NftPurchased,
-  NftOfferedEventData,
-  Account,
-  MemberRecipient,
-} from '../../model'
-import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
-import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
-import { addNotification } from '../../utils/notification'
-import { EntityManagerOverlay } from '../../utils/overlay'
 
 export async function processOpenAuctionStartedEvent({
   overlay,

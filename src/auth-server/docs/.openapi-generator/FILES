@@ -4,12 +4,11 @@ Models/ActionExecutionRequestData.md
 Models/AnonymousUserAuthRequestData.md
 Models/AnonymousUserAuthResponseData.md
 Models/AnonymousUserAuthResponseData_allOf.md
+Models/ChangeAccountRequestData.md
+Models/ChangeAccountRequestData_allOf.md
 Models/ConfirmEmailRequestData.md
-Models/ConnectAccountRequestData.md
-Models/ConnectAccountRequestData_allOf.md
 Models/CreateAccountRequestData.md
 Models/CreateAccountRequestData_allOf.md
-Models/DisconnectAccountRequestData.md
 Models/EncryptionArtifacts.md
 Models/GenericErrorResponseData.md
 Models/GenericOkResponseData.md

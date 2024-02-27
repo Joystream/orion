@@ -1,53 +1,58 @@
-import 'reflect-metadata'
-import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
-import { EntityManager, MoreThan } from 'typeorm'
 import {
-  AddVideoViewResult,
-  ExcludeVideoInfo,
-  MostViewedVideosConnectionArgs,
-  ReportVideoArgs,
-  VideoReportInfo,
-} from './types'
-import { VideosConnection } from '../baseTypes'
-import {
-  VideoViewEvent,
-  Video,
-  Report,
-  Exclusion,
-  Account,
-  VideoExcluded,
-  ChannelRecipient,
-} from '../../../model'
-import { ensureArray } from '@subsquid/openreader/lib/util/util'
-import { UserInputError } from 'apollo-server-core'
-import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
-import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
-import {
-  decodeRelayConnectionCursor,
   RelayConnectionRequest,
+  decodeRelayConnectionCursor,
 } from '@subsquid/openreader/lib/ir/connection'
 import { AnyFields } from '@subsquid/openreader/lib/ir/fields'
+import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
+import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
+import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
+import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
+import { ConnectionQuery, CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
 import {
   getResolveTree,
   getTreeRequest,
   hasTreeRequest,
   simplifyResolveTree,
 } from '@subsquid/openreader/lib/util/resolve-tree'
-import { model } from '../model'
+import { ensureArray } from '@subsquid/openreader/lib/util/util'
+import { UserInputError } from 'apollo-server-core'
 import { GraphQLResolveInfo } from 'graphql'
-import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
-import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
-import { ConnectionQuery, CountQuery } from '@subsquid/openreader/lib//sql/query'
-import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
-import { config, ConfigVariable } from '../../../utils/config'
-import { Context } from '../../check'
 import { isObject } from 'lodash'
-import { has } from '../../../utils/misc'
-import { videoRelevanceManager } from '../../../mappings/utils'
-import { uniqueId } from '../../../utils/crypto'
-import { addNotification } from '../../../utils/notification'
+import 'reflect-metadata'
+import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
+import { EntityManager, In, MoreThan } from 'typeorm'
 import { parseVideoTitle } from '../../../mappings/content/utils'
-import { UserOnly, OperatorOnly } from '../middleware'
+import { videoRelevanceManager } from '../../../mappings/utils'
+import {
+  Account,
+  ChannelRecipient,
+  Exclusion,
+  OperatorPermission,
+  Report,
+  Video,
+  VideoExcluded,
+  VideoViewEvent,
+} from '../../../model'
+import { ConfigVariable, config } from '../../../utils/config'
+import { uniqueId } from '../../../utils/crypto'
+import { has } from '../../../utils/misc'
+import { addNotification } from '../../../utils/notification'
+import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
+import { Context } from '../../check'
+import { Video as VideoReturnType, VideosConnection } from '../baseTypes'
+import { OperatorOnly, UserOnly } from '../middleware'
+import { model } from '../model'
+import {
+  AddVideoViewResult,
+  DumbPublicFeedArgs,
+  ExcludeVideoInfo,
+  MostViewedVideosConnectionArgs,
+  PublicFeedOperationType,
+  ReportVideoArgs,
+  SetOrUnsetPublicFeedArgs,
+  SetOrUnsetPublicFeedResult,
+  VideoReportInfo,
+} from './types'
 
 @Resolver()
 export class VideosResolver {
@@ -192,6 +197,63 @@ export class VideosResolver {
     }
 
     return result as VideosConnection
+  }
+
+  @Query(() => [VideoReturnType])
+  async dumbPublicFeedVideos(
+    @Args() args: DumbPublicFeedArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<VideoReturnType[]> {
+    const tree = getResolveTree(info)
+
+    const sqlArgs = parseSqlArguments(model, 'Video', {
+      limit: args.limit,
+      where: args.where,
+    })
+
+    const videoFields = parseAnyTree(model, 'Video', info.schema, tree)
+
+    const listQuery = new ListQuery(model, ctx.openreader.dialect, 'Video', videoFields, sqlArgs)
+
+    let listQuerySql = listQuery.sql
+
+    listQuerySql = extendClause(
+      listQuerySql,
+      'WHERE',
+      `"video"."include_in_home_feed" = true AND "video"."id" NOT IN (${args.skipVideoIds
+        .map((id) => `'${id}'`)
+        .join(', ')})`,
+      'AND'
+    )
+
+    listQuerySql = extendClause(listQuerySql, 'ORDER BY', 'RANDOM()', '')
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return result as VideoReturnType[]
+  }
+
+  @Mutation(() => SetOrUnsetPublicFeedResult)
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_PUBLIC_FEED_VIDEOS))
+  async setOrUnsetPublicFeedVideos(
+    @Args() { videoIds, operation }: SetOrUnsetPublicFeedArgs
+  ): Promise<SetOrUnsetPublicFeedResult> {
+    const em = await this.em()
+
+    return withHiddenEntities(em, async () => {
+      const result = await em
+        .createQueryBuilder()
+        .update<Video>(Video)
+        .set({ includeInHomeFeed: operation === PublicFeedOperationType.SET })
+        .where({ id: In(videoIds) })
+        .execute()
+
+      return {
+        numberOfEntitiesAffected: result.affected || 0,
+      }
+    })
   }
 
   @UseMiddleware(UserOnly)

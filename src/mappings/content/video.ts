@@ -1,3 +1,4 @@
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   AppActionMetadata,
@@ -8,14 +9,15 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  Video,
-  VideoViewEvent,
   Event,
-  VideoCreatedEventData,
+  Video,
   VideoAssetsDeletedByModeratorEventData,
+  VideoCreatedEventData,
   VideoPosted,
+  VideoViewEvent
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
+import { predictLanguage } from '../../utils/language'
 import {
   deserializeMetadata,
   genericEventFields,
@@ -26,14 +28,13 @@ import { processVideoMetadata } from './metadata'
 import {
   deleteVideo,
   encodeAssets,
-  parseContentActor,
   notifyChannelFollowers,
   parseChannelTitle,
+  parseContentActor,
   parseVideoTitle,
   processAppActionMetadata,
-  processNft,
+  processNft
 } from './utils'
-import { generateAppActionCommitment } from '@joystream/js/utils'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -121,6 +122,9 @@ export async function processVideoCreatedEvent({
     }
   }
 
+  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
+  video.orionLanguage = predictLanguage(languageText)
+
   channel.totalVideosCreated += 1
 
   const eventEntity = overlay.getRepository(Event).new({
@@ -185,6 +189,9 @@ export async function processVideoUpdatedEvent({
       newDataObjectIds
     )
   }
+
+  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
+  video.orionLanguage = predictLanguage(languageText)
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

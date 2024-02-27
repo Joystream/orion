@@ -642,6 +642,7 @@ export async function processRevenueSplitIssuedEvent({
     claimed: BigInt(0),
     startingAt: startBlock,
     endsAt,
+    potentialParticipantsNum: token.accountsNum,
   }) as RevenueShare
 
   token.currentRenvenueShareId = id

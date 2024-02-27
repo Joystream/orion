@@ -11,9 +11,11 @@ enum OperatorPermission {
   SET_FEATURED_NFTS
   EXCLUDE_CONTENT
   RESTORE_CONTENT
+  SET_PUBLIC_FEED_VIDEOS
+  SET_FEATURED_CRTS
 }
 
-type User @entity {
+type User @entity @schema(name: "admin") {
   "Unique identifier (32-byte string, securely random)"
   id: ID!
 
@@ -67,7 +69,7 @@ type SessionEncryptionArtifacts @entity {
   cipherKey: String!
 }
 
-type Session @entity {
+type Session @entity @schema(name: "admin") {
   "Unique identifier (32-byte string, securely random)"
   id: ID!
 
@@ -100,7 +102,7 @@ type Session @entity {
 }
 
 "A Gateway Account"
-type Account @entity {
+type Account @entity @schema(name: "admin") {
   "Unique identifier (can be sequential)"
   id: ID!
 
@@ -187,7 +189,7 @@ enum TokenType {
   EMAIL_CONFIRMATION
 }
 
-type Token @entity {
+type Token @entity @schema(name: "admin") {
   "The token itself (32-byte string, securely random)"
   id: ID!
 

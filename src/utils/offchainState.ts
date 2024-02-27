@@ -1,5 +1,6 @@
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import { createParseStream, createStringifyStream } from 'big-json'
 import fs from 'fs'
 import path from 'path'
 import { EntityManager } from 'typeorm'
@@ -172,7 +173,11 @@ export class OffchainState {
     })
 
     this.logger.info(`Saving export data to ${exportFilePath}`)
-    fs.writeFileSync(exportFilePath, JSON.stringify(exportedState))
+    await new Promise((resolve, reject) => {
+      const writeStream = fs.createWriteStream(exportFilePath)
+      const stringifyStream = createStringifyStream({ body: exportedState })
+      stringifyStream.pipe(writeStream).on('error', reject).on('finish', resolve)
+    })
     this.logger.info('Done')
   }
 
@@ -200,7 +205,7 @@ export class OffchainState {
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
       )
     }
-    const exportFile = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const exportFile = await this.readExportJsonFile(exportFilePath)
     const data = this.prepareExportData(exportFile, em)
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
@@ -279,14 +284,31 @@ export class OffchainState {
     this.logger.info('Done')
   }
 
-  public getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): number {
+  public async getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): Promise<number> {
     if (!fs.existsSync(exportFilePath)) {
       this.logger.warn(`Export file ${exportFilePath} does not exist`)
       this._isImported = true
       return -1
     }
-    const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const { blockNumber }: ExportedState = await this.readExportJsonFile()
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
+  }
+
+  public async readExportJsonFile(filePath = DEFAULT_EXPORT_PATH): Promise<ExportedState> {
+    return new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(filePath)
+      const parseStream = createParseStream()
+
+      let exportedState: ExportedState
+
+      parseStream.on('data', (data: ExportedState) => (exportedState = data))
+
+      parseStream.on('end', () => resolve(exportedState))
+
+      parseStream.on('error', (error: Error) => reject(error))
+
+      readStream.pipe(parseStream as any)
+    })
   }
 }

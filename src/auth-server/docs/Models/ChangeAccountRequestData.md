@@ -1,4 +1,4 @@
-# ConnectAccountRequestData
+# ChangeAccountRequestData
 ## Properties
 
 | Name | Type | Description | Notes |

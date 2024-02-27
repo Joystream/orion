@@ -15,9 +15,13 @@ src/auth-server/emails/templates/preview
 /db/persisted
 /scripts/orion-v1-migration/data
 /db/export
+/db/migrations_dir*
 .DS_STORE
 
 # network tests
 network-tests/graphql/generated
 network-tests/node_modules
 network-tests/lib
+
+# LOGS
+chron_mail_scheduler.log

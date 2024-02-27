@@ -1,25 +1,4 @@
-import {
-  Channel,
-  ChannelFollow,
-  Event,
-  Membership,
-  MetaprotocolTransactionResultFailed,
-  MetaprotocolTransactionStatusEventData,
-  StorageDataObject,
-  DataObjectTypeChannelPayoutsPayload,
-  ChannelPayoutsUpdatedEventData,
-  ChannelRewardClaimedEventData,
-  ChannelRewardClaimedAndWithdrawnEventData,
-  ChannelFundsWithdrawnEventData,
-  ChannelCreated,
-  ChannelCreatedEventData,
-  ChannelFundsWithdrawn,
-  YppUnverified,
-  MemberRecipient,
-  ChannelRecipient,
-  ChannelAssetsDeletedByModeratorEventData,
-} from '../../model'
-import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -27,21 +6,42 @@ import {
   ChannelOwnerRemarked,
   IChannelMetadata,
 } from '@joystream/metadata-protobuf'
-import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
-import { EventHandlerContext } from '../../utils/events'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
-  processAppActionMetadata,
+  Channel,
+  ChannelAssetsDeletedByModeratorEventData,
+  ChannelCreated,
+  ChannelCreatedEventData,
+  ChannelFollow,
+  ChannelFundsWithdrawn,
+  ChannelFundsWithdrawnEventData,
+  ChannelPayoutsUpdatedEventData,
+  ChannelRecipient,
+  ChannelRewardClaimedAndWithdrawnEventData,
+  ChannelRewardClaimedEventData,
+  DataObjectTypeChannelPayoutsPayload,
+  Event,
+  MemberRecipient,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  MetaprotocolTransactionStatusEventData,
+  StorageDataObject,
+  YppUnverified,
+} from '../../model'
+import { EventHandlerContext } from '../../utils/events'
+import { addNotification } from '../../utils/notification'
+import { Flat } from '../../utils/overlay'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
+import {
   deleteChannel,
   encodeAssets,
-  parseContentActor,
-  increaseChannelCumulativeRevenue,
-  getChannelOwnerAccount,
   getAccountForMember,
+  getChannelOwnerAccount,
+  increaseChannelCumulativeRevenue,
+  parseContentActor,
+  processAppActionMetadata
 } from './utils'
-import { Flat } from '../../utils/overlay'
-import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification } from '../../utils/notification'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -76,9 +76,9 @@ export async function processChannelCreatedEvent({
     videoViewsNum: 0,
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
-    cumulativeRewardClaimed: 0n,
     cumulativeReward: 0n,
     yppStatus: new YppUnverified(),
+    cumulativeRewardClaimed: BigInt(0),
   })
 
   const ownerMember = channel.ownerMemberId

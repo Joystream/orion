@@ -1,3 +1,59 @@
+# 3.6.0
+
+## Schema changes
+- Added `includeInHomeFeed` field to `Video` entity indicating if the video should be included in the home feed/page.
+
+## Mutations
+### Additions
+- `setOrUnsetPublicFeedVideos`: mutation to set or unset the `includeInHomeFeed` field of a video by the Operator. 
+
+### Queries
+#### Additions
+- `dumbPublicFeedVideos`: resolver to retrieve random `N` videos from list of all homepage videos.
+
+## DB Migrations
+- Added partial index on `Video` entity to include only videos that are included in the home feed (in `db/migrations/2200000000000-Indexes.js`)
+
+# 3.5.0
+
+## Schema changes
+- Added `isShort` field to `Video` entity indicating whether a video is a short format, vertical video or not.
+
+## Misc
+- Disable both in App and email notifications for `videoPosted` notifiations type by default.
+- Remove unused `@joystream/metadata-protobuf` patch from assets/patches directory.
+
+# 3.4.0
+
+## Schema changes
+- Added `@schema(name: "admin")` directive to hide entities (from public GRAPHQL API) in Graphql schema definitions.
+
+## Misc
+- Patch `@subsquid/typeorm-config` & `@subsquid/typeorm-migration` packages to change `squid-typeorm-migration apply` command to apply a single migrations file too using `--filename` option instead of applying the whole `db/migrations` directory.
+- Patch `@subsquid/openreader` and `@subsquid/typeorm-codegen` dependencies to include the db schema `name` too in the generated typeorm/postgres migrations, and an optional `schema` directive to specify the schema of any GRAPHQL entity.
+
+## DB Migrations
+- Update `generate-migrations` makefile command. Now the existing `*-Data.js` will not be overwritten, instead a new `*-Data.js` migration file (containing only changes compared to the previous DB state) will be added whenever there are GRAPHQL schema changes. The `*-Views.js` migration file will also be updated whenever the GRAPHQL schema changes.
+- Create `generateViewsMigration.js` script to create new `*-Views.js` migration file.
+- Separate the view definitions(in `db/viewDefinitions.js`) from views migration file(`*-Views.js`).
+- Add `*-Admin.js` migration file to create an `admin` schema & user, previously the `admin` schema and user was being created in the `*-Views.js` migration.
+- Regenerate the postgres db migrations.
+
+## Documentation
+- Updated documentation for [upgrading-orion.md](docs/operator-guide/tutorials/upgrading-orion.md)
+- Updated documentation for [entity-visibility.md#managing-entity-visibility](docs/developer-guide/tutorials/entity-visibility.md)
+
+### Bug Fixes:
+- read/write `export.json` file, containing the offchain state, using `big-json` package, instead using Javascript native `JSON.stringify` function which does not work on large JSON objects
+
+# 3.3.0
+
+## Schema
+- `orionLanguage` property has been added.
+
+## Mappings 
+- Language detection is used to populate new property on video update and creation.
+
 # 3.2.1
 
 ## Misc

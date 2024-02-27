@@ -1,4 +1,4 @@
-type Event @entity {
+type Event @entity @schema(name: "admin") {
   "{blockNumber}-{indexInBlock}"
   id: ID!
 
@@ -29,7 +29,7 @@ type FutureNotificationOrionEvent @entity {
   event: Event
 }
 
-type NftHistoryEntry @entity {
+type NftHistoryEntry @entity @schema(name: "admin") {
   "Autoincremented"
   id: ID!
 
@@ -40,7 +40,7 @@ type NftHistoryEntry @entity {
   event: Event!
 }
 
-type NftActivity @entity {
+type NftActivity @entity @schema(name: "admin") {
   "Autoincremented"
   id: ID!
 
