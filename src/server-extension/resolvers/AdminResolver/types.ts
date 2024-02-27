@@ -281,6 +281,14 @@ export class SetFeaturedNftsInput {
   featuredNftsIds: string[]
 }
 
+@ArgsType()
+export class SetFeaturedCrtsInput {
+  @Field(() => [String], {
+    description: 'IDs of the CRTs that should be featured by the Gateway',
+  })
+  featuredCrtsIds: string[]
+}
+
 @ObjectType()
 export class SetFeaturedNftsResult {
   @Field(() => Int, {
@@ -288,6 +296,15 @@ export class SetFeaturedNftsResult {
     description: 'The updated number of nft that are now explicitly featured by the Gateway',
   })
   newNumberOfNftsFeatured?: number
+}
+
+@ObjectType()
+export class SetFeaturedCrtsResult {
+  @Field(() => Int, {
+    nullable: true,
+    description: 'The updated number of crts that are now explicitly featured by the Gateway',
+  })
+  newNumberOfCrtsFeatured?: number
 }
 
 @ArgsType()
