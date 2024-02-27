@@ -129,6 +129,12 @@ type Video @entity @schema(name: "admin") {
 
   "Video relevance score based on the views, reactions, comments and update date"
   videoRelevance: Float! @index
+
+  "Whether the video is a short format, vertical video (e.g. Youtube Shorts, TikTok, Instagram Reels)"
+  isShort: Boolean
+
+  "Optional boolean flag to indicate if the video should be included in the home feed/page."
+  includeInHomeFeed: Boolean
 }
 
 type VideoFeaturedInCategory

@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "3.4.0",
+  "version": "3.6.0",
   "engines": {
     "node": ">=16"
   },
@@ -41,11 +41,10 @@
     "@polkadot/types": "8.9.1",
     "@polkadot/util": "9.5.1",
     "@polkadot/util-crypto": "9.5.1",
-    "@joystream/types": "4.0.0",
-    "@joystream/metadata-protobuf": "2.9.0"
+    "@joystream/types": "4.0.0"
   },
   "dependencies": {
-    "@joystream/js": "^1.4.0",
+    "@joystream/js": "^1.8.0",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/auto-instrumentations-node": "0.37.0",

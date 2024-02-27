@@ -1,24 +1,24 @@
+import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { EntityManager } from 'typeorm'
 import {
-  User,
   Account,
-  Membership,
-  Video,
-  Channel,
-  YppUnverified,
-  Notification,
-  NotificationEmailDelivery,
-  OwnedNft,
-  NftOwnerChannel,
-  TransactionalStatusIdle,
   Auction,
   AuctionTypeEnglish,
   Bid,
+  Channel,
+  Membership,
+  NftOwnerChannel,
+  Notification,
+  NotificationEmailDelivery,
+  OwnedNft,
   TransactionalStatusAuction,
+  TransactionalStatusIdle,
+  User,
+  Video,
+  YppUnverified,
 } from '../../model'
-import { defaultNotificationPreferences } from '../../utils/notification'
 import { globalEm } from '../../utils/globalEm'
-import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { defaultNotificationPreferences } from '../../utils/notification'
 
 // TODO: refactor this using the Builder pattern
 export async function populateDbWithSeedData() {
@@ -65,6 +65,7 @@ export async function populateDbWithSeedData() {
       totalVideosCreated: 0,
       cumulativeRewardClaimed: 0n,
       cumulativeReward: 0n,
+      cumulativeRevenue: BigInt(0),
       yppStatus: new YppUnverified(),
     })
     const video = new Video({

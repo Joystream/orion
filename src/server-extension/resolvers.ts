@@ -8,4 +8,3 @@ export { NotificationResolver } from './resolvers/NotificationResolver'
 export { StateResolver } from './resolvers/StateResolver'
 export { VideoCategoriesResolver } from './resolvers/VideoCategoriesResolver'
 export { VideosResolver } from './resolvers/VideosResolver'
-
