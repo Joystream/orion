@@ -12,6 +12,7 @@ enum OperatorPermission {
   EXCLUDE_CONTENT
   RESTORE_CONTENT
   SET_PUBLIC_FEED_VIDEOS
+  SET_FEATURED_CRTS
 }
 
 type User @entity @schema(name: "admin") {

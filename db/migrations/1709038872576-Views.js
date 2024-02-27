@@ -1,4 +1,3 @@
-
 const { getViewDefinitions } = require('../viewDefinitions')
 
 module.exports = class Views1709038872576 {
