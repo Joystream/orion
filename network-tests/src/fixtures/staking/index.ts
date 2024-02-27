@@ -1,1 +1,0 @@
-export { BondingRestrictedFixture } from './BondingRestrictedFixture'

@@ -1,3 +1,4 @@
+import pLimit from 'p-limit'
 import {
   AppAction,
   IAppAction,
@@ -6,63 +7,58 @@ import {
   IVideoMetadata,
 } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { integrateMeta } from '@joystream/metadata-protobuf/utils'
-import { createType } from '@joystream/types'
-import { ed25519Verify } from '@polkadot/util-crypto'
-import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
-import BN from 'bn.js'
-import pLimit from 'p-limit'
-import { EntityManager } from 'typeorm'
 import {
-  Account,
-  App,
-  Auction,
-  AuctionLost,
-  AuctionType,
-  AuctionTypeEnglish,
-  AuctionTypeOpen,
-  AuctionWhitelistedMember,
-  AuctionWon,
-  BannedMember,
-  Bid,
-  Channel,
-  ChannelFollow,
-  ChannelRecipient,
-  Comment,
-  CommentReaction,
-  ContentActorCurator,
-  ContentActor as ContentActorEntity,
-  ContentActorLead,
-  ContentActorMember,
-  CreatorReceivesAuctionBid,
-  DataObjectType,
   DataObjectTypeChannelAvatar,
   DataObjectTypeChannelCoverPhoto,
   DataObjectTypeVideoMedia,
   DataObjectTypeVideoSubtitle,
   DataObjectTypeVideoThumbnail,
-  Event,
-  HigherBidPlaced,
-  License as LicenseEntity,
-  MemberRecipient,
-  Membership,
-  NftIssuedEventData,
-  NftOwner,
+  Auction,
+  AuctionTypeEnglish,
+  AuctionTypeOpen,
+  AuctionWhitelistedMember,
+  Channel,
   NftOwnerChannel,
   NftOwnerMember,
-  NftRoyaltyPaid,
-  NotificationType,
   OwnedNft,
   TransactionalStatusAuction,
   TransactionalStatusBuyNow,
   TransactionalStatusIdle,
   TransactionalStatusInitiatedOfferToMember,
   Video,
-  VideoMediaEncoding,
+  VideoSubtitle,
+  ContentActor as ContentActorEntity,
+  ContentActorMember,
+  ContentActorCurator,
+  ContentActorLead,
+  Event,
+  NftIssuedEventData,
+  DataObjectType,
+  Bid,
+  NftOwner,
+  Comment,
+  CommentReaction,
+  License as LicenseEntity,
   VideoMediaMetadata,
   VideoReaction,
-  VideoSubtitle,
+  VideoMediaEncoding,
+  App,
+  BannedMember,
+  ChannelFollow,
+  Account,
+  HigherBidPlaced,
+  Membership,
+  NftRoyaltyPaid,
+  MemberRecipient,
+  NotificationType,
+  ChannelRecipient,
+  CreatorReceivesAuctionBid,
+  AuctionWon,
+  AuctionLost,
+  AuctionType,
 } from '../../model'
+import { criticalError } from '../../utils/misc'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import {
   ContentActor,
   EnglishAuctionParamsRecord,
@@ -71,10 +67,14 @@ import {
   OpenAuctionParamsRecord,
   StorageAssetsRecord,
 } from '../../types/v1000'
-import { criticalError } from '../../utils/misc'
-import { addNotification } from '../../utils/notification'
-import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
+import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
+import { ed25519Verify } from '@polkadot/util-crypto'
+import { integrateMeta } from '@joystream/metadata-protobuf/utils'
+import { createType } from '@joystream/types'
+import { EntityManager } from 'typeorm'
+import BN from 'bn.js'
+import { addNotification } from '../../utils/notification'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -863,26 +863,6 @@ export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
   const scaledRoyalty = BigInt(Math.round(royaltyPct * 1e7)) // Scale to 10^7 and convert to bigint
   const royaltyPrice = (scaledRoyalty * price) / BigInt(1e9) // Divide by 10^9 to account for scaling
   return royaltyPrice
-}
-
-export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
-  overlay: EntityManagerOverlay,
-  nft: Flat<OwnedNft>
-) {
-  const video = await overlay.getRepository(Video).getByIdOrFail(nft.videoId)
-  const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
-  if (nft.owner.isTypeOf === 'NftOwnerChannel') {
-    increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
-  } else {
-    if (nft.creatorRoyalty) {
-      const royaltyAmount = computeRoyalty(nft.creatorRoyalty, assertNotNull(nft.lastSalePrice))
-      increaseChannelCumulativeRevenue(channel, royaltyAmount)
-    }
-  }
-}
-
-export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount: bigint): void {
-  channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
 }
 
 export function parseChannelTitle(channel: Flat<Channel>): string {

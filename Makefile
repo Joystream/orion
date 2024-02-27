@@ -3,7 +3,6 @@ process: migrate
 
 install:
 	@rm -rf node_modules # clean up node_modules to avoid issues with patch-package
-	@rm -rf network-tests/node_modules # clean up node_modules to avoid issues with patch-package
 	@npm install
 
 build:
@@ -49,8 +48,6 @@ codegen:
 	@npm run generate:schema || true
 	@npx squid-typeorm-codegen
 
-network-tests:
-	@npm run generate:network-tests || true
 
 typegen:
 	@npx squid-substrate-typegen typegen.json

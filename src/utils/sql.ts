@@ -12,7 +12,7 @@ export const selectQueryClauses = [
   'OFFSET',
 ] as const
 
-export type SelectQueryClause = (typeof selectQueryClauses)[number]
+export type SelectQueryClause = typeof selectQueryClauses[number]
 
 export function getStartIndexOfOutermost(
   selectQuery: string,
