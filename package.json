@@ -8,6 +8,7 @@
     "generate:schema": "./scripts/generate-schema-file.sh",
     "generate:types:auth-api": "npx openapi-typescript ./src/auth-server/openapi.yml -o ./src/auth-server/generated/api-types.ts -c ./prettierrc.js",
     "generate:docs:auth-api": "rm -rf ./src/auth-server/docs/* && npx openapi-generator-cli generate -i ./src/auth-server/openapi.yml -g markdown -o ./src/auth-server/docs",
+    "generate:network-tests": "npm run codegen --workspace=network-tests",
     "generate:emails": "./scripts/generate-emails.js -i ./src/auth-server/emails/templates/mjml/*.mjml -o ./src/auth-server/emails/templates -p ./src/auth-server/emails/templates/preview",
     "watch:generate:emails": "node --watch ./scripts/generate-emails.js --watch -i ./src/auth-server/emails/templates/mjml/*.mjml -o ./src/auth-server/emails/templates -p ./src/auth-server/emails/templates/preview",
     "build": "npm run generate:schema; npm run generate:emails; rm -rf lib && tsc && ./scripts/copyfiles.sh",
@@ -25,6 +26,8 @@
     "tests:compareState": "npx ts-node ./src/tests/compareState.ts",
     "tests:benchmark": "npx ts-node ./src/tests/benchmarks/index.ts",
     "tests:auth-api": "./src/auth-server/tests/run.sh",
+    "tests:mappings": "npm run run-all --workspace=network-tests",
+    "tests:resolvers:token-service": "ts-mocha ./src/server-extension/resolvers/CreatorToken/services.test.ts",
     "tests:mail-scheduler": "./src/mail-scheduler/tests/run-tests.sh",
     "tests:migrations": "./src/tests/migrations/run.sh",
     "tests:notifications": "./src/tests/integration/run.sh",
@@ -38,7 +41,7 @@
     "@polkadot/types": "8.9.1",
     "@polkadot/util": "9.5.1",
     "@polkadot/util-crypto": "9.5.1",
-    "@joystream/types": "0.20.5"
+    "@joystream/types": "4.0.0"
   },
   "dependencies": {
     "@joystream/js": "^1.8.0",
@@ -54,10 +57,10 @@
     "@polkadot/util-crypto": "9.5.1",
     "@sendgrid/mail": "^7.7.0",
     "@subsquid/archive-registry": "^2.1.0",
-    "@subsquid/graphql-server": "^3.3.2",
+    "@subsquid/graphql-server": "3.3.2",
     "@subsquid/ss58": "^0.1.3",
     "@subsquid/substrate-processor": "^2.2.0",
-    "@subsquid/typeorm-migration": "^0.1.4",
+    "@subsquid/typeorm-migration": "0.1.4",
     "@subsquid/typeorm-store": "^0.2.0",
     "@types/lodash": "^4.14.189",
     "@types/node-schedule": "^2.1.0",
@@ -100,10 +103,10 @@
     "@joystream/cli": "^1.2.0",
     "@subsquid/substrate-metadata-explorer": "^1.0.9",
     "@subsquid/substrate-typegen": "^2.1.0",
-    "@subsquid/typeorm-codegen": "^0.3.1",
+    "@subsquid/typeorm-codegen": "0.3.1",
     "@types/async-lock": "^1.1.3",
+    "@types/chai": "^4.3.11",
     "@types/big-json": "^3.2.4",
-    "@types/chai": "^4.3.5",
     "@types/cookie-parser": "^1.4.3",
     "@types/express-rate-limit": "^6.0.0",
     "@types/mocha": "^10.0.1",
@@ -114,7 +117,7 @@
     "@types/url-join": "^4",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.43.0",
-    "chai": "^4.3.7",
+    "chai": "^4.3.10",
     "eslint": "^8.35.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
@@ -134,5 +137,8 @@
     "supertest": "^6.3.3",
     "ts-mocha": "^10.0.0",
     "typescript": "^4.8.2"
-  }
+  },
+  "workspaces": [
+    "network-tests"
+  ]
 }

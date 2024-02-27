@@ -1,3 +1,4 @@
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   AppActionMetadata,
@@ -8,26 +9,32 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  Video,
-  VideoViewEvent,
   Event,
+  Video,
+  VideoAssetsDeletedByModeratorEventData,
   VideoCreatedEventData,
   VideoPosted,
+  VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import { predictLanguage } from '../../utils/language'
+import {
+  deserializeMetadata,
+  genericEventFields,
+  u8aToBytes,
+  videoRelevanceManager,
+} from '../utils'
 import { processVideoMetadata } from './metadata'
 import {
   deleteVideo,
   encodeAssets,
   notifyChannelFollowers,
   parseChannelTitle,
+  parseContentActor,
   parseVideoTitle,
   processAppActionMetadata,
   processNft,
 } from './utils'
-import { generateAppActionCommitment } from '@joystream/js/utils'
-import { predictLanguage } from '../../utils/language'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -207,6 +214,28 @@ export async function processVideoDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
   await deleteVideo(overlay, contentId)
+}
+
+export async function processVideoAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, contentId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.VideoAssetsDeletedByModerator'>): Promise<void> {
+  const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new VideoAssetsDeletedByModeratorEventData({
+      video: video.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processVideoVisibilitySetByModeratorEvent({

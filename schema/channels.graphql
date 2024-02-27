@@ -59,8 +59,17 @@ type Channel @entity @schema(name: "admin") {
   "Number of videos ever created in this channel"
   totalVideosCreated: Int!
 
+  "% of channel balance that the creator devotes to revenue shares"
+  revenueShareRatioPercent: Int
+
   "Cumulative rewards claimed by this channel"
   cumulativeRewardClaimed: BigInt!
+
+  "Token issued by channel if any"
+  creatorToken: TokenChannel @derivedFrom(field: "channel")
+
+  "Cumulative total revenue coming from nft sales + member payments + council payouts"
+  cumulativeRevenue: BigInt!
 
   "Cumulative rewards paid to this channel"
   cumulativeReward: BigInt!

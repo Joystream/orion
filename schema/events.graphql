@@ -67,6 +67,8 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | MemberBannedFromChannelEventData
+  | ChannelAssetsDeletedByModeratorEventData
+  | VideoAssetsDeletedByModeratorEventData
   | VideoReactionEventData
 
 # Needed when adding a new runtime notification
@@ -412,4 +414,34 @@ type MemberBannedFromChannelEventData {
 
   "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
   action: Boolean!
+}
+
+# Emitted when channel asset/s are deleted by the moderator
+type ChannelAssetsDeletedByModeratorEventData {
+  "Channel whose assets were deleted"
+  channel: Channel!
+
+  "IDs of channel assets being deleted by moderator"
+  assetIds: [BigInt!]
+
+  "Actor who deleted the channel assets."
+  deletedBy: ContentActor!
+
+  "why the channel assets were deleted"
+  rationale: String!
+}
+
+# Emitted when video asset/s are deleted by the moderator
+type VideoAssetsDeletedByModeratorEventData {
+  "Video whose assets were deleted"
+  video: Video!
+
+  "IDs of video assets being deleted by moderator"
+  assetIds: [BigInt!]
+
+  "Actor who deleted the video assets."
+  deletedBy: ContentActor!
+
+  "why the video assets were deleted"
+  rationale: String!
 }

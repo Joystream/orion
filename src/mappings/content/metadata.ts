@@ -74,6 +74,7 @@ import {
   EntityAssetsMap,
   MetaNumberProps,
   getChannelOwnerAccount,
+  increaseChannelCumulativeRevenue,
 } from './utils'
 
 export async function processChannelMetadata(
@@ -656,6 +657,7 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
+  increaseChannelCumulativeRevenue(channel, amount)
   const ownerAccount = await getChannelOwnerAccount(overlay, channel)
   await addNotification(
     overlay,

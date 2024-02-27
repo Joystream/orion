@@ -1,5 +1,40 @@
+import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
+import {
+  Account,
+  Auction,
+  AuctionBidCanceledEventData,
+  AuctionBidMadeEventData,
+  AuctionCanceledEventData,
+  Bid,
+  BidMadeCompletingAuctionEventData,
+  BuyNowCanceledEventData,
+  BuyNowPriceUpdatedEventData,
+  EnglishAuctionSettledEventData,
+  EnglishAuctionStartedEventData,
+  Event,
+  MemberRecipient,
+  NewAuction,
+  NewNftOnSale,
+  NftBoughtEventData,
+  NftOfferedEventData,
+  NftOwnerChannel,
+  NftOwnerMember,
+  NftPurchased,
+  NftSellOrderMadeEventData,
+  OpenAuctionBidAcceptedEventData,
+  OpenAuctionStartedEventData,
+  OwnedNft,
+  TransactionalStatusAuction,
+  TransactionalStatusBuyNow,
+  TransactionalStatusIdle,
+  TransactionalStatusInitiatedOfferToMember,
+  Video,
+} from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
+import { addNotification } from '../../utils/notification'
+import { EntityManagerOverlay } from '../../utils/overlay'
+import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import {
   addNewBidNotification,
   addRoyaltyPaymentNotification,
@@ -12,6 +47,7 @@ import {
   getChannelTitleById,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
+  maybeIncreaseChannelCumulativeRevenueAfterNft,
   maybeNotifyNftCreator,
   memberHandleById,
   notifyBiddersOnAuctionCompletion,
@@ -20,41 +56,6 @@ import {
   parseVideoTitle,
   processNft,
 } from './utils'
-import {
-  Auction,
-  AuctionBidCanceledEventData,
-  AuctionBidMadeEventData,
-  AuctionCanceledEventData,
-  Bid,
-  BidMadeCompletingAuctionEventData,
-  BuyNowCanceledEventData,
-  BuyNowPriceUpdatedEventData,
-  EnglishAuctionSettledEventData,
-  EnglishAuctionStartedEventData,
-  Event,
-  NftBoughtEventData,
-  NftOwnerChannel,
-  NftOwnerMember,
-  NftSellOrderMadeEventData,
-  OpenAuctionBidAcceptedEventData,
-  OpenAuctionStartedEventData,
-  OwnedNft,
-  TransactionalStatusAuction,
-  TransactionalStatusBuyNow,
-  TransactionalStatusIdle,
-  TransactionalStatusInitiatedOfferToMember,
-  Video,
-  NewAuction,
-  NewNftOnSale,
-  NftPurchased,
-  NftOfferedEventData,
-  Account,
-  MemberRecipient,
-} from '../../model'
-import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
-import { SubstrateBlock, assertNotNull } from '@subsquid/substrate-processor'
-import { addNotification } from '../../utils/notification'
-import { EntityManagerOverlay } from '../../utils/overlay'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
@@ -292,6 +293,7 @@ export async function processEnglishAuctionSettledEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -353,6 +355,7 @@ export async function processBidMadeCompletingAuctionEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -408,6 +411,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -479,6 +483,7 @@ export async function processOfferAcceptedEvent({
     // set last sale
     nft.lastSalePrice = price
     nft.lastSaleDate = new Date(block.timestamp)
+    await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
   }
 
   // update NFT's transactional status
@@ -580,6 +585,7 @@ export async function processNftBoughtEvent({
   // set last sale
   nft.lastSalePrice = price
   nft.lastSaleDate = new Date(block.timestamp)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
 
   // update NFT's transactional status
   nft.transactionalStatus = new TransactionalStatusIdle()

@@ -1,0 +1,57 @@
+{
+  "accounts": {
+    "j4TR4Nn3FgiUcSGsToxGzftGX4cSDYntpw6eUK7LRtvxvU21m": 0,
+    "j4WApqUqmxr6AWUCgysrZgQ6tTtTdQBeeXWkpfyDSPacJMH4P": 1,
+    "j4TnG8GSYwT26S5WgfisfWfod1pWmht7iNeKv3uQtApUxrM5c": 2,
+    "j4UkzaqsydfDbBmmmYaN9hrLTa3azeqJAQCwfE3LcjcFg1SfN": 3,
+    "j4V5oDnYmwctSaYj4GM6y3amwqz6yBVnXUk3CQsV3Pfnino2x": 4,
+    "j4SVtNkq6to8WqXuHGszdB8Q6HNSYpVmxsYGzKxfgD7BE3yQW": 5,
+    "j4UxNLdUCvGhRngFK5DARvq8Zvvt48iXz2J98vFfu7jbjZtgN": 6,
+    "j4RbjvmE9QeGxx1HYgiMCLywnbtPGXMBAuJ9eQFBrJaAfB4jA": 7,
+    "j4VpUEKBwn9qefh9hzMVtpmtU96bugtJHvbGqBooekKDyvFAh": 8,
+    "j4VUteBmES2kdm4XjTGsVD9qgfiMHdvUnTnE2kfG3qe1n99gZ": 9,
+    "j4U64Lu3vyP7eVY9GFkVbUP7ez3G9fBvift5oKkEWvLkwtmHy": 10,
+    "j4UiZQ8G7inVGHyuUygocEQyFrmfjx8GUDnGgpSiGU84F7LMb": 11,
+    "j4RqJWfjVsGnku5ivYHiodbb2KrXshRNCPAus95w3Cw29BDee": 12,
+    "j4ThDe5f9q7jpfhXZ4NyPo7gbhpK4ya42j96PdWG3RDvCkqFt": 13,
+    "j4RjWRLR4SMz8avUvGFpJKr5nwArB9BZR7jmCPYpSFYWsmzWq": 14,
+    "j4W8LbLToVWNMFbjHoHJuKv8MLpMUDNs35eeDLwGXVozGwL89": 15,
+    "j4RNsHrNcVgFS6gCDNN4mWwhzH5V7Q51oWwgnCz4pa7RgKw7P": 16,
+    "j4V8aYvikDX5ntFoQNKnRVgn4bHQpZQyX7Jjr4yuBgBjSwaa9": 17,
+    "j4RZtV76H1dM6Mt8WocFDvVN1ikjy9w9F3dJ2rK7xmqrxpPse": 18,
+    "j4Tx3jiNbmJicDVM7q5GL3bsi1QvZ1dAX9ms6yVzqeKF33ECJ": 19,
+    "j4Uj5tnZx4gFF6uDNEp8LM5jR19Jneq5oAWvENoBHKC8HnC8k": 20,
+    "j4Tq1xb7x6E3cYxBgXMHVeog4bv4S58Cbw4XyzCDAzzCK9JPA": 21,
+    "j4RULfKM1S66EfsNStiWkkGM5iGgDidUs3o8L3zoU1WnwDJeE": 22,
+    "j4V3wPjGHNZLfxgPHWpJy6Xo8n2GxsQQwupLR5MKFpfC3aaap": 23,
+    "j4Tromj4p3AXVp79TKDr4gP9Bu6k8asCZwXrY4D4eG7NCiZwx": 24,
+    "j4TWd8gh29UVUzmSMqZRkqAMAq5GZGir6QTdfLMBXrSR1HLHU": 25,
+    "j4S1H23ULmzFSSWbHe6XHaSkiizw7wS1q2GFMDhb7CjuGDSLV": 26,
+    "j4SghRZfvwnaSwfREAnTGbdhpuqRir1oPue8zW1hArR33NToJ": 27,
+    "j4X5Ze8NeAXiTHyN2nJhNUu8g2orhLivZh2d3S8uGQxfWyB7r": 28,
+    "j4UsLGNtMSuLmpZ9vAuLut1ueooGcfrWR5WwxeqqmjEfa98tH": 29,
+    "j4WB4Dac7mfdDQdx4Gs5nW7VhBfQSwokpeunD122rnv1GxSKN": 30,
+    "j4SKskGjdaQz6h69A6TxUvUpEsnUqe87ZBTbGZBf6ig2PP9HE": 31,
+    "j4W39HLCpNHCfYz6ozh6uUqfhTbEdkJ2u8tbr5Cm8KRDbccea": 32,
+    "j4WfaiKniQ3kXz3WBzP2gfsubftANLKSoh6fcSXMuvoe5f8i8": 33
+  },
+  "keyIds": {
+    "start": 0,
+    "final": 34,
+    "custom": [
+      "Councillor//0",
+      "Councillor//1",
+      "Councillor//2",
+      "Councillor//3",
+      "Councillor//4",
+      "worker//Content//0",
+      "worker//Storage//0",
+      "worker//Storage//1",
+      "//Colossus1"
+    ]
+  },
+  "miniSecret": "",
+  "faucet": {
+    "suri": ""
+  }
+}
