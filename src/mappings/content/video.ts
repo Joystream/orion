@@ -14,7 +14,7 @@ import {
   VideoAssetsDeletedByModeratorEventData,
   VideoCreatedEventData,
   VideoPosted,
-  VideoViewEvent
+  VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { predictLanguage } from '../../utils/language'
@@ -33,7 +33,7 @@ import {
   parseContentActor,
   parseVideoTitle,
   processAppActionMetadata,
-  processNft
+  processNft,
 } from './utils'
 
 export async function processVideoCreatedEvent({

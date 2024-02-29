@@ -40,7 +40,7 @@ import {
   getChannelOwnerAccount,
   increaseChannelCumulativeRevenue,
   parseContentActor,
-  processAppActionMetadata
+  processAppActionMetadata,
 } from './utils'
 
 export async function processChannelCreatedEvent({
@@ -76,9 +76,9 @@ export async function processChannelCreatedEvent({
     videoViewsNum: 0,
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
-    cumulativeReward: 0n,
-    yppStatus: new YppUnverified(),
     cumulativeRewardClaimed: BigInt(0),
+    yppStatus: new YppUnverified(),
+    cumulativeReward: 0n,
   })
 
   const ownerMember = channel.ownerMemberId
