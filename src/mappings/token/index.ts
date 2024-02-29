@@ -90,6 +90,7 @@ export async function processTokenIssuedEvent({
     isInviteOnly: transferPolicy.__kind === 'Permissioned',
     accountsNum: 0, // will be uptdated as account are added
     deissued: false,
+    isFeatured: false,
     numberOfVestedTransferIssued: 0,
     numberOfRevenueShareActivations: 0,
   })
