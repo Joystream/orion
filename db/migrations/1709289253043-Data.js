@@ -1,5 +1,5 @@
-module.exports = class Data1709208986305 {
-    name = 'Data1709208986305'
+module.exports = class Data1709289253043 {
+    name = 'Data1709289253043'
 
     async up(db) {
         await db.query(`CREATE TABLE "amm_curve" ("id" character varying NOT NULL, "token_id" character varying, "burned_by_amm" numeric NOT NULL, "minted_by_amm" numeric NOT NULL, "amm_slope_parameter" numeric NOT NULL, "amm_init_price" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_477b83cf84964aa40f38edf1db1" PRIMARY KEY ("id"))`)
@@ -27,12 +27,12 @@ module.exports = class Data1709208986305 {
         await db.query(`CREATE INDEX "IDX_5c5d611ec29439dc91eeea287b" ON "sale" ("token_id", "created_in") `)
         await db.query(`CREATE TABLE "benefit" ("id" character varying NOT NULL, "token_id" character varying, "emoji_code" text, "title" text NOT NULL, "description" text NOT NULL, "display_order" integer NOT NULL, CONSTRAINT "Benefit_token_displayOrder" UNIQUE ("token_id", "display_order") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "PK_c024dccb30e6f4702adffe884d1" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_77ac3c1669ee14648626b078f9" ON "benefit" ("token_id", "display_order") `)
-        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "is_featured" boolean NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward_permill" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_renvenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, "last_price" numeric, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
+        await db.query(`CREATE TABLE "creator_token" ("id" character varying NOT NULL, "status" character varying(6) NOT NULL, "avatar" jsonb, "total_supply" numeric NOT NULL, "is_featured" boolean NOT NULL, "symbol" text, "is_invite_only" boolean NOT NULL, "annual_creator_reward_permill" integer NOT NULL, "revenue_share_ratio_permill" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL, "description" text, "whitelist_applicant_note" text, "whitelist_applicant_link" text, "accounts_num" integer NOT NULL, "number_of_revenue_share_activations" integer NOT NULL, "deissued" boolean NOT NULL, "current_amm_sale_id" character varying, "current_sale_id" character varying, "current_revenue_share_id" character varying, "number_of_vested_transfer_issued" integer NOT NULL, "last_price" numeric, CONSTRAINT "PK_abbc66d13ff7d3828e4c830d325" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_790a6fc1f7aad3711c0672bb6b" ON "creator_token" ("symbol") `)
         await db.query(`CREATE INDEX "IDX_64480ef90bda6c11650c3f4279" ON "creator_token" ("created_at") `)
         await db.query(`CREATE INDEX "IDX_aabe40376c0eb47772b52780b1" ON "creator_token" ("current_amm_sale_id") `)
         await db.query(`CREATE INDEX "IDX_5eca884f8728ff8f0c6a389c24" ON "creator_token" ("current_sale_id") `)
-        await db.query(`CREATE INDEX "IDX_e30b9944186aeb1e86707e1705" ON "creator_token" ("current_renvenue_share_id") `)
+        await db.query(`CREATE INDEX "IDX_df8c309ef364e49b9d2f17dc77" ON "creator_token" ("current_revenue_share_id") `)
         await db.query(`CREATE TABLE "trailer_video" ("id" character varying NOT NULL, "video_id" character varying, "token_id" character varying NOT NULL, CONSTRAINT "TrailerVideo_token" UNIQUE ("token_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "TrailerVideo_token_video" UNIQUE ("token_id", "video_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_0151a0342b10afcd1933f10656" UNIQUE ("token_id"), CONSTRAINT "PK_06ed751f0ca8164994ff327cacc" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_c73677538ef22a243568edac74" ON "trailer_video" ("video_id") `)
         await db.query(`CREATE INDEX "IDX_0151a0342b10afcd1933f10656" ON "trailer_video" ("token_id") `)
@@ -66,7 +66,7 @@ module.exports = class Data1709208986305 {
         await db.query(`ALTER TABLE "benefit" ADD CONSTRAINT "FK_b484e2182fc7a1910e84a5ae7ad" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "creator_token" ADD CONSTRAINT "FK_aabe40376c0eb47772b52780b19" FOREIGN KEY ("current_amm_sale_id") REFERENCES "amm_curve"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "creator_token" ADD CONSTRAINT "FK_5eca884f8728ff8f0c6a389c24b" FOREIGN KEY ("current_sale_id") REFERENCES "sale"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "creator_token" ADD CONSTRAINT "FK_e30b9944186aeb1e86707e17056" FOREIGN KEY ("current_renvenue_share_id") REFERENCES "revenue_share"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
+        await db.query(`ALTER TABLE "creator_token" ADD CONSTRAINT "FK_df8c309ef364e49b9d2f17dc778" FOREIGN KEY ("current_revenue_share_id") REFERENCES "revenue_share"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_c73677538ef22a243568edac74b" FOREIGN KEY ("video_id") REFERENCES "admin"."video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_0151a0342b10afcd1933f106564" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "future_notification_orion_event" ADD CONSTRAINT "FK_9f7f80afbee45690f0ebda52281" FOREIGN KEY ("event_id") REFERENCES "admin"."event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -107,7 +107,7 @@ module.exports = class Data1709208986305 {
         await db.query(`DROP INDEX "public"."IDX_64480ef90bda6c11650c3f4279"`)
         await db.query(`DROP INDEX "public"."IDX_aabe40376c0eb47772b52780b1"`)
         await db.query(`DROP INDEX "public"."IDX_5eca884f8728ff8f0c6a389c24"`)
-        await db.query(`DROP INDEX "public"."IDX_e30b9944186aeb1e86707e1705"`)
+        await db.query(`DROP INDEX "public"."IDX_df8c309ef364e49b9d2f17dc77"`)
         await db.query(`DROP TABLE "trailer_video"`)
         await db.query(`DROP INDEX "public"."IDX_c73677538ef22a243568edac74"`)
         await db.query(`DROP INDEX "public"."IDX_0151a0342b10afcd1933f10656"`)
@@ -141,7 +141,7 @@ module.exports = class Data1709208986305 {
         await db.query(`ALTER TABLE "benefit" DROP CONSTRAINT "FK_b484e2182fc7a1910e84a5ae7ad"`)
         await db.query(`ALTER TABLE "creator_token" DROP CONSTRAINT "FK_aabe40376c0eb47772b52780b19"`)
         await db.query(`ALTER TABLE "creator_token" DROP CONSTRAINT "FK_5eca884f8728ff8f0c6a389c24b"`)
-        await db.query(`ALTER TABLE "creator_token" DROP CONSTRAINT "FK_e30b9944186aeb1e86707e17056"`)
+        await db.query(`ALTER TABLE "creator_token" DROP CONSTRAINT "FK_df8c309ef364e49b9d2f17dc778"`)
         await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_c73677538ef22a243568edac74b"`)
         await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_0151a0342b10afcd1933f106564"`)
         await db.query(`ALTER TABLE "future_notification_orion_event" DROP CONSTRAINT "FK_9f7f80afbee45690f0ebda52281"`)

@@ -1,42 +1,53 @@
-import { EventHandlerContext } from '../../utils/events'
 import {
-  TokenAccount,
-  TokenStatus,
-  VestingSchedule,
-  TokenChannel,
+  CreatorTokenIssuerRemarked,
+  SaleMetadata,
+  TokenMetadata,
+} from '@joystream/metadata-protobuf'
+import { isSet } from '@joystream/metadata-protobuf/utils'
+import {
   AmmCurve,
-  Sale,
-  SaleTransaction,
-  RevenueShare,
   AmmTransaction,
   AmmTransactionType,
-  VestedSale,
-  RevenueShareParticipation,
-  InitialIssuanceVestingSource,
-  SaleVestingSource,
+  Channel,
+  ChannelRecipient,
   CreatorToken,
   CreatorTokenIssued,
-  CreatorTokenMarketStarted,
-  Channel,
-  Event,
-  CreatorTokenSaleStarted,
-  CreatorTokenMarketMint,
-  Membership,
-  CreatorTokenMarketBurn,
-  CreatorTokenSaleMint,
   CreatorTokenIssuedEventData,
-  CreatorTokenMarketStartedEventData,
-  CreatorTokenSaleStartedEventData,
-  CreatorTokenMarketMintEventData,
+  CreatorTokenMarketBurn,
   CreatorTokenMarketBurnEventData,
-  CreatorTokenSaleMintEventData,
-  CreatorTokenRevenueShareStarted,
-  CreatorTokenRevenueSharePlanned,
-  FutureNotificationOrionEvent,
+  CreatorTokenMarketMint,
+  CreatorTokenMarketMintEventData,
+  CreatorTokenMarketStarted,
+  CreatorTokenMarketStartedEventData,
   CreatorTokenRevenueShareEnded,
-  ChannelRecipient,
+  CreatorTokenRevenueSharePlanned,
+  CreatorTokenRevenueShareStarted,
+  CreatorTokenSaleMint,
+  CreatorTokenSaleMintEventData,
+  CreatorTokenSaleStarted,
+  CreatorTokenSaleStartedEventData,
+  Event,
+  FutureNotificationOrionEvent,
+  InitialIssuanceVestingSource,
+  Membership,
+  RevenueShare,
+  RevenueShareParticipation,
+  Sale,
+  SaleTransaction,
+  SaleVestingSource,
+  TokenAccount,
+  TokenChannel,
+  TokenStatus,
+  VestedSale,
+  VestingSchedule,
 } from '../../model'
+import { getCurrentBlockHeight } from '../../notifications-scheduler/utils'
+import { EventHandlerContext } from '../../utils/events'
+import { addNotification } from '../../utils/notification'
+import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
+import { deserializeMetadata, genericEventFields } from '../utils'
 import {
+  VestingScheduleData,
   addVestingScheduleToAccount,
   burnFromVesting,
   createAccount,
@@ -46,18 +57,7 @@ import {
   parseCreatorTokenSymbol,
   processTokenMetadata,
   processValidatedTransfers,
-  VestingScheduleData,
 } from './utils'
-import { deserializeMetadata } from '../utils'
-import {
-  SaleMetadata,
-  CreatorTokenIssuerRemarked,
-  TokenMetadata,
-} from '@joystream/metadata-protobuf'
-import { isSet } from '@joystream/metadata-protobuf/utils'
-import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
-import { getCurrentBlockHeight } from '../../notifications-scheduler/utils'
-import { addNotification } from '../../utils/notification'
 
 export async function processTokenIssuedEvent({
   overlay,
@@ -134,34 +134,28 @@ export async function processCreatorTokenIssuedEvent({
     asV1000: [, channelId, tokenId],
   },
 }: EventHandlerContext<'Content.CreatorTokenIssued'>) {
-  await overlay.getRepository(TokenChannel).new({
+  overlay.getRepository(TokenChannel).new({
     id: overlay.getRepository(TokenChannel).getNewEntityId(),
     channelId: channelId.toString(),
     tokenId: tokenId.toString(),
   })
 
-  const token = await overlay.getRepository(CreatorToken).getById(tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(channelId.toString())
+  const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenIssuedEventData({ token: tokenId.toString() }),
   })
 
   // CreatorTokenIssued event is dispatch after TokenIssued
-  if (token && channel) {
-    const notificationData = new CreatorTokenIssued({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: channelId.toString(),
-      channelTitle: parseChannelTitle(channel),
-    })
+  const notificationData = new CreatorTokenIssued({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    channelId: channelId.toString(),
+    channelTitle: parseChannelTitle(channel),
+  })
 
-    await notifyChannelFollowers(overlay, channelId.toString(), notificationData, eventEntity)
-  }
+  await notifyChannelFollowers(overlay, channelId.toString(), notificationData, eventEntity)
 }
 
 export async function processTokenAmountTransferredEvent({
@@ -224,7 +218,7 @@ export async function processAmmActivatedEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
 
   token.status = TokenStatus.MARKET
   const id = overlay.getRepository(AmmCurve).getNewEntityId()
@@ -241,24 +235,18 @@ export async function processAmmActivatedEvent({
   token.currentAmmSaleId = id
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenMarketStartedEventData({ token: tokenId.toString(), ammCurve: amm.id }),
   })
 
-  if (channel) {
-    const notificationData = new CreatorTokenMarketStarted({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: tokenChannel.channelId,
-      channelTitle: parseChannelTitle(channel),
-    })
+  const notificationData = new CreatorTokenMarketStarted({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    channelId: tokenChannel.channelId,
+    channelTitle: parseChannelTitle(channel),
+  })
 
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
-    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
-  }
+  await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
+  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 }
 
 export async function processTokenSaleInitializedEvent({
@@ -274,7 +262,7 @@ export async function processTokenSaleInitializedEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
 
   const sourceAccount = await getTokenAccountByMemberByTokenOrFail(
     overlay,
@@ -322,11 +310,7 @@ export async function processTokenSaleInitializedEvent({
   token.lastPrice = sale.pricePerUnit
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenSaleStartedEventData({ token: tokenId.toString(), sale: sale.id }),
   })
 
@@ -339,16 +323,14 @@ export async function processTokenSaleInitializedEvent({
     }
   }
 
-  if (channel) {
-    const notificationData = new CreatorTokenSaleStarted({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      channelId: tokenChannel.channelId,
-      channelTitle: parseChannelTitle(channel),
-    })
+  const notificationData = new CreatorTokenSaleStarted({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    channelId: tokenChannel.channelId,
+    channelTitle: parseChannelTitle(channel),
+  })
 
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
-    await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
-  }
+  await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
+  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 }
 
 export async function processPatronageRateDecreasedToEvent({
@@ -390,7 +372,7 @@ export async function processTokensBoughtOnAmmEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
 
   token.totalSupply += crtMinted
 
@@ -418,36 +400,30 @@ export async function processTokensBoughtOnAmmEvent({
   token.lastPrice = tx.pricePerUnit
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenMarketMintEventData({
       token: tokenId.toString(),
       ammMintTransaction: tx.id,
     }),
   })
 
-  if (channel) {
-    const minter = await overlay.getRepository(Membership).getById(memberId.toString())
-    const notificationData = new CreatorTokenMarketMint({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      mintedTokenAmount: crtMinted,
-      minterHandle: minter?.handle ?? 'Someone',
-      paiedJoyAmount: joysDeposited,
-      minterId: minter?.id,
-    })
+  const minter = await overlay.getRepository(Membership).getById(memberId.toString())
+  const notificationData = new CreatorTokenMarketMint({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    mintedTokenAmount: crtMinted,
+    minterHandle: minter?.handle ?? 'Someone',
+    paiedJoyAmount: joysDeposited,
+    minterId: minter?.id,
+  })
 
-    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
-    await addNotification(
-      overlay,
-      channelOwnerAccount,
-      new ChannelRecipient({ channel: channel.id }),
-      notificationData,
-      eventEntity
-    )
-  }
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    notificationData,
+    eventEntity
+  )
 }
 
 export async function processTokensSoldOnAmmEvent({
@@ -463,7 +439,7 @@ export async function processTokensSoldOnAmmEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
   token.totalSupply -= crtBurned
   const activeAmm = await overlay.getRepository(AmmCurve).getByIdOrFail(token.currentAmmSaleId!)
   const ammId = activeAmm.id
@@ -488,36 +464,30 @@ export async function processTokensSoldOnAmmEvent({
   token.lastPrice = tx.pricePerUnit
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenMarketBurnEventData({
       token: tokenId.toString(),
       ammBurnTransaction: tx.id,
     }),
   })
 
-  if (channel) {
-    const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
-    const notificationData = new CreatorTokenMarketBurn({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      burnedTokenAmount: crtBurned,
-      burnerHandle: burnerMember?.handle ?? 'Someone',
-      receivedJoyAmount: joysRecovered,
-      burnerId: burnerMember?.id,
-    })
+  const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
+  const notificationData = new CreatorTokenMarketBurn({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    burnedTokenAmount: crtBurned,
+    burnerHandle: burnerMember?.handle ?? 'Someone',
+    receivedJoyAmount: joysRecovered,
+    burnerId: burnerMember?.id,
+  })
 
-    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
-    await addNotification(
-      overlay,
-      channelOwnerAccount,
-      new ChannelRecipient({ channel: channel.id }),
-      notificationData,
-      eventEntity
-    )
-  }
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    notificationData,
+    eventEntity
+  )
 }
 
 export async function processTokensPurchasedOnSaleEvent({
@@ -532,7 +502,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
   let buyerAccount = await getTokenAccountByMemberByToken(overlay, memberId, tokenId)
   if (buyerAccount === undefined) {
     const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
@@ -556,11 +526,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const vestingForSale = await overlay.getRepository(VestedSale).getOneByRelation('saleId', sale.id)
 
   const eventEntity = overlay.getRepository(Event).new({
-    id: `${block.height}-${indexInBlock}`,
-    inBlock: block.height,
-    inExtrinsic: extrinsicHash,
-    indexInBlock,
-    timestamp: new Date(block.timestamp),
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenSaleMintEventData({
       token: tokenId.toString(),
       saleTransaction: tx.id,
@@ -578,25 +544,23 @@ export async function processTokensPurchasedOnSaleEvent({
     )
   }
 
-  if (channel) {
-    const minterMember = await overlay.getRepository(Membership).getById(memberId.toString())
-    const notificationData = new CreatorTokenSaleMint({
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      mintedTokenAmount: amountPurchased,
-      minterHandle: minterMember?.handle ?? 'Someone',
-      paiedJoyAmount: sale.pricePerUnit * amountPurchased,
-      minterId: minterMember?.id,
-    })
+  const minterMember = await overlay.getRepository(Membership).getById(memberId.toString())
+  const notificationData = new CreatorTokenSaleMint({
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    mintedTokenAmount: amountPurchased,
+    minterHandle: minterMember?.handle ?? 'Someone',
+    paiedJoyAmount: sale.pricePerUnit * amountPurchased,
+    minterId: minterMember?.id,
+  })
 
-    const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
-    await addNotification(
-      overlay,
-      channelOwnerAccount,
-      new ChannelRecipient({ channel: channel.id }),
-      notificationData,
-      eventEntity
-    )
-  }
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    notificationData,
+    eventEntity
+  )
 }
 
 export async function processUpcomingTokenSaleUpdatedEvent({
@@ -627,7 +591,7 @@ export async function processRevenueSplitIssuedEvent({
   const tokenChannel = await overlay
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
-  const channel = await overlay.getRepository(Channel).getById(tokenChannel.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
   const { lastProcessedBlock } = await getCurrentBlockHeight(overlay.getEm())
   const token = (await overlay
     .getRepository(CreatorToken)
@@ -646,49 +610,48 @@ export async function processRevenueSplitIssuedEvent({
     potentialParticipantsNum: token.accountsNum,
   }) as RevenueShare
 
-  token.currentRenvenueShareId = id
+  token.currentRevenueShareId = id
 
-  if (channel) {
-    const revenueShareStartedNotification = new CreatorTokenRevenueShareStarted({
+  const revenueShareStartedNotification = new CreatorTokenRevenueShareStarted({
+    revenueShareId: revenueShare.id,
+    tokenId: tokenId.toString(),
+    channelTitle: parseChannelTitle(channel),
+    channelId: channel.id,
+    tokenSymbol: parseCreatorTokenSymbol(token),
+  })
+  // revenue share is planned for future block
+  if (lastProcessedBlock < startBlock && lastProcessedBlock > 0) {
+    const plannedNotificationData = new CreatorTokenRevenueSharePlanned({
       revenueShareId: revenueShare.id,
-      tokenId: tokenId.toString(),
+      channelTitle: parseChannelTitle(channel),
+      channelId: channel.id,
+      plannedAt: startBlock,
+      tokenSymbol: parseCreatorTokenSymbol(token),
+    })
+    overlay.getRepository(FutureNotificationOrionEvent).new({
+      id: `${revenueShare.id}-${block.height}-rSStart`,
+      executionBlock: startBlock,
+      notificationType: revenueShareStartedNotification,
+    })
+
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), plannedNotificationData)
+
+    // revenue share starts at creation
+  } else if (lastProcessedBlock > 0) {
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueShareStartedNotification)
+  }
+
+  overlay.getRepository(FutureNotificationOrionEvent).new({
+    id: `${revenueShare.id}-${block.height}-rSEnd`,
+    executionBlock: endsAt,
+    notificationType: new CreatorTokenRevenueShareEnded({
+      revenueShareId: revenueShare.id,
       channelTitle: parseChannelTitle(channel),
       channelId: channel.id,
       tokenSymbol: parseCreatorTokenSymbol(token),
-    })
-    // revenue share is planned for future block
-    if (lastProcessedBlock < startBlock && lastProcessedBlock > 0) {
-      const plannedNotificationData = new CreatorTokenRevenueSharePlanned({
-        revenueShareId: revenueShare.id,
-        channelTitle: parseChannelTitle(channel),
-        channelId: channel.id,
-        plannedAt: startBlock,
-        tokenSymbol: parseCreatorTokenSymbol(token),
-      })
-      await overlay.getRepository(FutureNotificationOrionEvent).new({
-        id: `${revenueShare.id}-${block.height}-rSStart`,
-        executionBlock: startBlock,
-        notificationType: revenueShareStartedNotification,
-      })
-
-      await notifyTokenHolders(overlay.getEm(), tokenId.toString(), plannedNotificationData)
-
-      // revenue share starts at creation
-    } else if (lastProcessedBlock > 0) {
-      await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueShareStartedNotification)
-    }
-
-    await overlay.getRepository(FutureNotificationOrionEvent).new({
-      id: `${revenueShare.id}-${block.height}-rSEnd`,
-      executionBlock: endsAt,
-      notificationType: new CreatorTokenRevenueShareEnded({
-        revenueShareId: revenueShare.id,
-        channelTitle: parseChannelTitle(channel),
-        tokenSymbol: parseCreatorTokenSymbol(token),
-        tokenId: tokenId.toString(),
-      }),
-    })
-  }
+      tokenId: tokenId.toString(),
+    }),
+  })
 }
 
 export async function processMemberJoinedWhitelistEvent({
@@ -770,11 +733,11 @@ export async function processRevenueSplitLeftEvent({
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   account.stakedAmount -= unstakedAmount
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
-  if (token.currentRenvenueShareId) {
+  if (token.currentRevenueShareId) {
     // TODO: refactor this as should be true all the times, might be a good idea to panic
     const revenueShare = await overlay
       .getRepository(RevenueShare)
-      .getByIdOrFail(token.currentRenvenueShareId!)
+      .getByIdOrFail(token.currentRevenueShareId)
     revenueShare.participantsNum -= 1
     const qRevenueShareParticipation = (
       await overlay
@@ -796,9 +759,9 @@ export async function processRevenueSplitFinalizedEvent({
   const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
   const revenueShare = await overlay
     .getRepository(RevenueShare)
-    .getByIdOrFail(token.currentRenvenueShareId!)
+    .getByIdOrFail(token.currentRevenueShareId!)
   revenueShare.finalized = true
-  token.currentRenvenueShareId = null
+  token.currentRevenueShareId = null
 }
 
 export async function processUserParticipatedInSplitEvent({
@@ -813,7 +776,7 @@ export async function processUserParticipatedInSplitEvent({
 
   const revenueShare = await overlay
     .getRepository(RevenueShare)
-    .getByIdOrFail(token.currentRenvenueShareId!)
+    .getByIdOrFail(token.currentRevenueShareId!)
   revenueShare.claimed += joyDividend
   revenueShare.participantsNum += 1
 

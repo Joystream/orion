@@ -481,7 +481,7 @@ type CreatorTokenMarketMintEventData {
   "Token for which transaction happened"
   token: CreatorToken
 
-  "Details of the transaction that happend"
+  "Details of the transaction that happened"
   ammMintTransaction: AmmTransaction
 }
 
@@ -489,7 +489,7 @@ type CreatorTokenMarketBurnEventData {
   "Token for which transaction happened"
   token: CreatorToken
 
-  "Details of the transaction that happend"
+  "Details of the transaction that happened"
   ammBurnTransaction: AmmTransaction
 }
 
@@ -505,7 +505,7 @@ type CreatorTokenSaleMintEventData {
   "Token for which transaction happened"
   token: CreatorToken
 
-  "Details of the transaction that happend"
+  "Details of the transaction that happened"
   saleTransaction: SaleTransaction
 }
 
