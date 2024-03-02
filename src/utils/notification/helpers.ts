@@ -116,6 +116,24 @@ export function preferencesForNotification(
       return preferences.auctionWon
     case 'AuctionLost':
       return preferences.auctionLost
+    case 'CreatorTokenIssued':
+      return preferences.crtIssued
+    case 'CreatorTokenMarketStarted':
+      return preferences.crtMarketStarted
+    case 'CreatorTokenMarketMint':
+      return preferences.crtMarketMint
+    case 'CreatorTokenMarketBurn':
+      return preferences.crtMarketBurn
+    case 'CreatorTokenSaleStarted':
+      return preferences.crtSaleStarted
+    case 'CreatorTokenSaleMint':
+      return preferences.crtSaleMint
+    case 'CreatorTokenRevenueShareStarted':
+      return preferences.crtRevenueShareStarted
+    case 'CreatorTokenRevenueSharePlanned':
+      return preferences.crtRevenueSharePlanned
+    case 'CreatorTokenRevenueShareEnded':
+      return preferences.crtRevenueShareEnded
     default: // all the remaining notifications (v2 scope) are not enabled by default
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
