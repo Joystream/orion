@@ -143,7 +143,8 @@ async function addOffChainNotification(
   em: EntityManager,
   account: Flat<Account>,
   recipient: RecipientType,
-  notificationType: NotificationType
+  notificationType: NotificationType,
+  dispatchBlock?: number
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
@@ -152,7 +153,9 @@ async function addOffChainNotification(
     OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
     account.id,
     recipient,
-    notificationType
+    notificationType,
+    undefined,
+    dispatchBlock
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -171,7 +174,8 @@ async function addRuntimeNotification(
   account: Flat<Account>,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event: Event
+  event: Event,
+  dispatchBlock?: number
 ) {
   const em = overlay.getEm()
   // get notification Id from orion_db in any case
@@ -191,7 +195,8 @@ async function addRuntimeNotification(
     account.id,
     recipient,
     notificationType,
-    event
+    event,
+    dispatchBlock
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -235,7 +240,8 @@ const createNotification = (
   accountId: string,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event
+  event?: Event,
+  dispatchBlock?: number
 ) => {
   return new Notification({
     id,
@@ -245,6 +251,7 @@ const createNotification = (
     status: new Unread(),
     eventId: event?.id,
     createdAt: event?.timestamp ?? new Date(),
+    dispatchBlock,
   })
 }
 
@@ -253,7 +260,8 @@ export const addNotification = async (
   account: Flat<Account> | null,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event
+  event?: Event,
+  dispatchBlock?: number
 ) => {
   if (!account) {
     // if account is not in orion_db skip.
@@ -267,10 +275,17 @@ export const addNotification = async (
       account,
       recipient,
       notificationType,
-      event
+      event,
+      dispatchBlock
     )
   } else {
-    await addOffChainNotification(store as EntityManager, account, recipient, notificationType)
+    await addOffChainNotification(
+      store as EntityManager,
+      account,
+      recipient,
+      notificationType,
+      dispatchBlock
+    )
   }
 }
 

@@ -1,5 +1,8 @@
-import { criticalError } from '../../utils/misc'
-import { Flat, EntityManagerOverlay } from '../../utils/overlay'
+import { ITokenMetadata } from '@joystream/metadata-protobuf'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { isSet } from '@joystream/metadata-protobuf/utils'
+import pLimit from 'p-limit'
+import { EntityManager } from 'typeorm'
 import {
   Account,
   Benefit,
@@ -17,13 +20,10 @@ import {
   Video,
 } from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
-import { isSet } from '@joystream/metadata-protobuf/utils'
 import { uniqueId } from '../../utils/crypto'
-import { ITokenMetadata } from '@joystream/metadata-protobuf'
-import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
-import pLimit from 'p-limit'
-import { EntityManager } from 'typeorm'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 
 export const FALLBACK_TOKEN_SYMBOL = '??'
 
@@ -344,16 +344,25 @@ export async function notifyTokenHolders(
   em: EntityManager,
   tokenId: string,
   notificationType: NotificationType,
-  event?: Event
+  event?: Event,
+  dispatchBlock?: number
 ) {
   const holdersAccounts = await getHolderAccountsForToken(em, tokenId)
-  for (const holdersAccount of holdersAccounts) {
-    await addNotification(
-      em,
-      holdersAccount,
-      new MemberRecipient({ membership: holdersAccount.membershipId }),
-      notificationType,
-      event
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+
+  await Promise.all(
+    holdersAccounts.map((holdersAccount) =>
+      limit(() =>
+        addNotification(
+          em,
+          holdersAccount,
+          new MemberRecipient({ membership: holdersAccount.membershipId }),
+          notificationType,
+          event,
+          dispatchBlock
+        )
+      )
     )
-  }
+  )
 }

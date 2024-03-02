@@ -22,12 +22,12 @@ import {
   CreatorTokenRevenueShareEnded,
   CreatorTokenRevenueSharePlanned,
   CreatorTokenRevenueShareStarted,
+  CreatorTokenRevenueSplitIssuedEventData,
   CreatorTokenSaleMint,
   CreatorTokenSaleMintEventData,
   CreatorTokenSaleStarted,
   CreatorTokenSaleStartedEventData,
   Event,
-  FutureNotificationOrionEvent,
   InitialIssuanceVestingSource,
   Membership,
   RevenueShare,
@@ -41,8 +41,9 @@ import {
   VestedSale,
   VestingSchedule,
 } from '../../model'
-import { getCurrentBlockHeight } from '../../notifications-scheduler/utils'
+import { getCurrentBlockHeight } from '../../utils/blockHeight'
 import { EventHandlerContext } from '../../utils/events'
+import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
 import { deserializeMetadata, genericEventFields } from '../utils'
@@ -582,6 +583,8 @@ export async function processUpcomingTokenSaleUpdatedEvent({
 export async function processRevenueSplitIssuedEvent({
   overlay,
   block,
+  extrinsicHash,
+  indexInBlock,
   event: {
     asV1000: [tokenId, startBlock, duration, joyAllocation],
   },
@@ -592,10 +595,17 @@ export async function processRevenueSplitIssuedEvent({
     .getRepository(TokenChannel)
     .getOneByRelationOrFail('tokenId', tokenId.toString())
   const channel = await overlay.getRepository(Channel).getByIdOrFail(tokenChannel.channelId)
-  const { lastProcessedBlock } = await getCurrentBlockHeight(overlay.getEm())
   const token = (await overlay
     .getRepository(CreatorToken)
     .getByIdOrFail(tokenId.toString())) as CreatorToken
+
+  const { lastProcessedBlock } = await getCurrentBlockHeight(overlay.getEm())
+  if (lastProcessedBlock < 0) {
+    // If within the mappings context we are not able to get the correct block height
+    // (i.e. height is -ve when this event is emitted), it means something is wrong
+    // with the processor state and we should panic we should panic
+    criticalError('Failed to get current block height from "squid_processor"."status" table')
+  }
 
   const revenueShare = overlay.getRepository(RevenueShare).new({
     id,
@@ -612,6 +622,16 @@ export async function processRevenueSplitIssuedEvent({
 
   token.currentRevenueShareId = id
 
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new CreatorTokenRevenueSplitIssuedEventData({
+      token: tokenId.toString(),
+      revenueShare: id,
+    }),
+  })
+
+  // Schedule/Dispatch Notifications
+
   const revenueShareStartedNotification = new CreatorTokenRevenueShareStarted({
     revenueShareId: revenueShare.id,
     tokenId: tokenId.toString(),
@@ -619,39 +639,41 @@ export async function processRevenueSplitIssuedEvent({
     channelId: channel.id,
     tokenSymbol: parseCreatorTokenSymbol(token),
   })
-  // revenue share is planned for future block
-  if (lastProcessedBlock < startBlock && lastProcessedBlock > 0) {
-    const plannedNotificationData = new CreatorTokenRevenueSharePlanned({
+  await notifyTokenHolders(
+    overlay.getEm(),
+    tokenId.toString(),
+    revenueShareStartedNotification,
+    undefined,
+    startBlock // schedule for start block
+  )
+
+  // if revenue share is planned for future block then also schedule a notification with immediate delivery
+  if (lastProcessedBlock < startBlock) {
+    const revenueSharePlannedNotification = new CreatorTokenRevenueSharePlanned({
       revenueShareId: revenueShare.id,
       channelTitle: parseChannelTitle(channel),
       channelId: channel.id,
       plannedAt: startBlock,
       tokenSymbol: parseCreatorTokenSymbol(token),
     })
-    overlay.getRepository(FutureNotificationOrionEvent).new({
-      id: `${revenueShare.id}-${block.height}-rSStart`,
-      executionBlock: startBlock,
-      notificationType: revenueShareStartedNotification,
-    })
 
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), plannedNotificationData)
-
-    // revenue share starts at creation
-  } else if (lastProcessedBlock > 0) {
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueShareStartedNotification)
+    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueSharePlannedNotification)
   }
 
-  overlay.getRepository(FutureNotificationOrionEvent).new({
-    id: `${revenueShare.id}-${block.height}-rSEnd`,
-    executionBlock: endsAt,
-    notificationType: new CreatorTokenRevenueShareEnded({
-      revenueShareId: revenueShare.id,
-      channelTitle: parseChannelTitle(channel),
-      channelId: channel.id,
-      tokenSymbol: parseCreatorTokenSymbol(token),
-      tokenId: tokenId.toString(),
-    }),
+  const revenueSharedEndedNotification = new CreatorTokenRevenueShareEnded({
+    revenueShareId: revenueShare.id,
+    channelTitle: parseChannelTitle(channel),
+    channelId: channel.id,
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: tokenId.toString(),
   })
+  await notifyTokenHolders(
+    overlay.getEm(),
+    tokenId.toString(),
+    revenueSharedEndedNotification,
+    undefined,
+    endsAt // schedule for end block
+  )
 }
 
 export async function processMemberJoinedWhitelistEvent({

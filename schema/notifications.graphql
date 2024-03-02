@@ -72,6 +72,9 @@ type Notification @entity {
   "timestamp"
   createdAt: DateTime!
 
+  "block after which notification should be dispatched (if null, then it should be dispatched immediately)"
+  dispatchBlock: Int
+
   "recipient"
   recipient: RecipientType!
 }

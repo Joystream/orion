@@ -1,5 +1,5 @@
-module.exports = class Data1709289253043 {
-    name = 'Data1709289253043'
+module.exports = class Data1709385679520 {
+    name = 'Data1709385679520'
 
     async up(db) {
         await db.query(`CREATE TABLE "amm_curve" ("id" character varying NOT NULL, "token_id" character varying, "burned_by_amm" numeric NOT NULL, "minted_by_amm" numeric NOT NULL, "amm_slope_parameter" numeric NOT NULL, "amm_init_price" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_477b83cf84964aa40f38edf1db1" PRIMARY KEY ("id"))`)
@@ -49,6 +49,7 @@ module.exports = class Data1709289253043 {
         await db.query(`CREATE INDEX "IDX_b2135c373c44a37e4e6842ead5" ON "vested_sale" ("sale_id", "vesting_id") `)
         await db.query(`ALTER TABLE "admin"."channel" ADD "revenue_share_ratio_percent" integer`)
         await db.query(`ALTER TABLE "admin"."channel" ADD "cumulative_revenue" numeric NOT NULL`)
+        await db.query(`ALTER TABLE "notification" ADD "dispatch_block" integer`)
         await db.query(`ALTER TABLE "amm_curve" ADD CONSTRAINT "FK_97bee00638822978784362d19fc" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "amm_transaction" ADD CONSTRAINT "FK_135d9555d7ea3e45dd78d8aedec" FOREIGN KEY ("amm_id") REFERENCES "amm_curve"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "amm_transaction" ADD CONSTRAINT "FK_51f006dbc040d62dc479adbee78" FOREIGN KEY ("account_id") REFERENCES "token_account"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -124,6 +125,7 @@ module.exports = class Data1709289253043 {
         await db.query(`DROP INDEX "public"."IDX_b2135c373c44a37e4e6842ead5"`)
         await db.query(`ALTER TABLE "admin"."channel" DROP COLUMN "revenue_share_ratio_percent"`)
         await db.query(`ALTER TABLE "admin"."channel" DROP COLUMN "cumulative_revenue"`)
+        await db.query(`ALTER TABLE "notification" DROP COLUMN "dispatch_block"`)
         await db.query(`ALTER TABLE "amm_curve" DROP CONSTRAINT "FK_97bee00638822978784362d19fc"`)
         await db.query(`ALTER TABLE "amm_transaction" DROP CONSTRAINT "FK_135d9555d7ea3e45dd78d8aedec"`)
         await db.query(`ALTER TABLE "amm_transaction" DROP CONSTRAINT "FK_51f006dbc040d62dc479adbee78"`)
