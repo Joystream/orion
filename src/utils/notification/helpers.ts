@@ -113,9 +113,9 @@ export function preferencesForNotification(
     case 'HigherBidPlaced':
       return preferences.higherBidThanYoursMade
     case 'AuctionWon':
-      return preferences.auctionLost
-    case 'AuctionLost':
       return preferences.auctionWon
+    case 'AuctionLost':
+      return preferences.auctionLost
     default: // all the remaining notifications (v2 scope) are not enabled by default
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
