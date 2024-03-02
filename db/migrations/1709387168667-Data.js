@@ -1,5 +1,5 @@
-module.exports = class Data1709385679520 {
-    name = 'Data1709385679520'
+module.exports = class Data1709387168667 {
+    name = 'Data1709387168667'
 
     async up(db) {
         await db.query(`CREATE TABLE "amm_curve" ("id" character varying NOT NULL, "token_id" character varying, "burned_by_amm" numeric NOT NULL, "minted_by_amm" numeric NOT NULL, "amm_slope_parameter" numeric NOT NULL, "amm_init_price" numeric NOT NULL, "finalized" boolean NOT NULL, CONSTRAINT "PK_477b83cf84964aa40f38edf1db1" PRIMARY KEY ("id"))`)
@@ -37,8 +37,6 @@ module.exports = class Data1709385679520 {
         await db.query(`CREATE INDEX "IDX_c73677538ef22a243568edac74" ON "trailer_video" ("video_id") `)
         await db.query(`CREATE INDEX "IDX_0151a0342b10afcd1933f10656" ON "trailer_video" ("token_id") `)
         await db.query(`CREATE INDEX "IDX_7eb550061f81d70d7c14b9368a" ON "trailer_video" ("token_id", "video_id") `)
-        await db.query(`CREATE TABLE "future_notification_orion_event" ("id" character varying NOT NULL, "notification_type" jsonb NOT NULL, "execution_block" integer NOT NULL, "event_id" character varying, CONSTRAINT "PK_93f4d7b85e4867c47ada2828f80" PRIMARY KEY ("id"))`)
-        await db.query(`CREATE INDEX "IDX_9f7f80afbee45690f0ebda5228" ON "future_notification_orion_event" ("event_id") `)
         await db.query(`CREATE TABLE "token_channel" ("id" character varying NOT NULL, "token_id" character varying NOT NULL, "channel_id" character varying NOT NULL, CONSTRAINT "TokenChannel_channel" UNIQUE ("channel_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "TokenChannel_token" UNIQUE ("token_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "TokenChannel_token_channel" UNIQUE ("token_id", "channel_id") DEFERRABLE INITIALLY DEFERRED, CONSTRAINT "REL_7105aa65a2d333bb2f66db129e" UNIQUE ("token_id"), CONSTRAINT "REL_b065bc433d65b0a6874073ea54" UNIQUE ("channel_id"), CONSTRAINT "PK_e5cd0127f70ee171db28af0293c" PRIMARY KEY ("id"))`)
         await db.query(`CREATE INDEX "IDX_7105aa65a2d333bb2f66db129e" ON "token_channel" ("token_id") `)
         await db.query(`CREATE INDEX "IDX_b065bc433d65b0a6874073ea54" ON "token_channel" ("channel_id") `)
@@ -70,7 +68,6 @@ module.exports = class Data1709385679520 {
         await db.query(`ALTER TABLE "creator_token" ADD CONSTRAINT "FK_df8c309ef364e49b9d2f17dc778" FOREIGN KEY ("current_revenue_share_id") REFERENCES "revenue_share"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_c73677538ef22a243568edac74b" FOREIGN KEY ("video_id") REFERENCES "admin"."video"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "trailer_video" ADD CONSTRAINT "FK_0151a0342b10afcd1933f106564" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
-        await db.query(`ALTER TABLE "future_notification_orion_event" ADD CONSTRAINT "FK_9f7f80afbee45690f0ebda52281" FOREIGN KEY ("event_id") REFERENCES "admin"."event"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "token_channel" ADD CONSTRAINT "FK_7105aa65a2d333bb2f66db129e9" FOREIGN KEY ("token_id") REFERENCES "creator_token"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "token_channel" ADD CONSTRAINT "FK_b065bc433d65b0a6874073ea540" FOREIGN KEY ("channel_id") REFERENCES "admin"."channel"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
         await db.query(`ALTER TABLE "vested_sale" ADD CONSTRAINT "FK_4b0d0d4f6a5ce72247ffe223240" FOREIGN KEY ("sale_id") REFERENCES "sale"("id") ON DELETE NO ACTION ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED`)
@@ -113,8 +110,6 @@ module.exports = class Data1709385679520 {
         await db.query(`DROP INDEX "public"."IDX_c73677538ef22a243568edac74"`)
         await db.query(`DROP INDEX "public"."IDX_0151a0342b10afcd1933f10656"`)
         await db.query(`DROP INDEX "public"."IDX_7eb550061f81d70d7c14b9368a"`)
-        await db.query(`DROP TABLE "future_notification_orion_event"`)
-        await db.query(`DROP INDEX "public"."IDX_9f7f80afbee45690f0ebda5228"`)
         await db.query(`DROP TABLE "token_channel"`)
         await db.query(`DROP INDEX "public"."IDX_7105aa65a2d333bb2f66db129e"`)
         await db.query(`DROP INDEX "public"."IDX_b065bc433d65b0a6874073ea54"`)
@@ -146,7 +141,6 @@ module.exports = class Data1709385679520 {
         await db.query(`ALTER TABLE "creator_token" DROP CONSTRAINT "FK_df8c309ef364e49b9d2f17dc778"`)
         await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_c73677538ef22a243568edac74b"`)
         await db.query(`ALTER TABLE "trailer_video" DROP CONSTRAINT "FK_0151a0342b10afcd1933f106564"`)
-        await db.query(`ALTER TABLE "future_notification_orion_event" DROP CONSTRAINT "FK_9f7f80afbee45690f0ebda52281"`)
         await db.query(`ALTER TABLE "token_channel" DROP CONSTRAINT "FK_7105aa65a2d333bb2f66db129e9"`)
         await db.query(`ALTER TABLE "token_channel" DROP CONSTRAINT "FK_b065bc433d65b0a6874073ea540"`)
         await db.query(`ALTER TABLE "vested_sale" DROP CONSTRAINT "FK_4b0d0d4f6a5ce72247ffe223240"`)

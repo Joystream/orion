@@ -18,17 +18,6 @@ type Event @entity @schema(name: "admin") {
   data: EventData!
 }
 
-type FutureNotificationOrionEvent @entity {
-  "notification type that will be created"
-  notificationType: NotificationType!
-
-  "block after which notification should be created"
-  executionBlock: Int!
-
-  "related event for on chain notifications"
-  event: Event
-}
-
 type NftHistoryEntry @entity @schema(name: "admin") {
   "Autoincremented"
   id: ID!
