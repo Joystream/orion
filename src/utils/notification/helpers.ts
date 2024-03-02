@@ -62,6 +62,15 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     fundsFromCouncilReceived: notificationPrefAllTrue(),
     fundsToExternalWalletSent: notificationPrefAllTrue(),
     fundsFromWgReceived: notificationPrefAllTrue(),
+    crtIssued: notificationPrefAllTrue(),
+    crtMarketStarted: notificationPrefAllTrue(),
+    crtMarketMint: notificationPrefAllTrue(),
+    crtMarketBurn: notificationPrefAllTrue(),
+    crtSaleStarted: notificationPrefAllTrue(),
+    crtSaleMint: notificationPrefAllTrue(),
+    crtRevenueShareStarted: notificationPrefAllTrue(),
+    crtRevenueSharePlanned: notificationPrefAllTrue(),
+    crtRevenueShareEnded: notificationPrefAllTrue(),
   })
 }
 
