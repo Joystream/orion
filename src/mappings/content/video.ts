@@ -1,3 +1,4 @@
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   AppActionMetadata,
@@ -8,13 +9,14 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  Video,
-  VideoViewEvent,
   Event,
+  Video,
   VideoCreatedEventData,
   VideoPosted,
+  VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
+import { predictVideoLanguage } from '../../utils/language'
 import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
 import { processVideoMetadata } from './metadata'
 import {
@@ -26,8 +28,6 @@ import {
   processAppActionMetadata,
   processNft,
 } from './utils'
-import { generateAppActionCommitment } from '@joystream/js/utils'
-import { predictLanguage } from '../../utils/language'
 
 export async function processVideoCreatedEvent({
   overlay,
@@ -115,8 +115,10 @@ export async function processVideoCreatedEvent({
     }
   }
 
-  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText)
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
 
   channel.totalVideosCreated += 1
 
@@ -183,8 +185,10 @@ export async function processVideoUpdatedEvent({
     )
   }
 
-  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText)
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)

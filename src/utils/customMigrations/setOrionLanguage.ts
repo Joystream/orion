@@ -2,7 +2,7 @@ import { createLogger } from '@subsquid/logger'
 import { IsNull } from 'typeorm'
 import { Video } from '../../model'
 import { globalEm } from '../globalEm'
-import { predictLanguage } from '../language'
+import { predictVideoLanguage } from '../language'
 
 const logger = createLogger('setOrionLanguage')
 
@@ -25,8 +25,10 @@ async function setOrionLanguage() {
       hasMore = false
     } else {
       const updates = videos.map((video) => {
-        const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-        video.orionLanguage = predictLanguage(languageText)
+        video.orionLanguage = predictVideoLanguage({
+          title: video.title ?? '',
+          description: video.description ?? '',
+        })
         return video
       })
 
