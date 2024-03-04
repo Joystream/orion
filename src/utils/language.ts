@@ -14,9 +14,8 @@ function cleanString(input: string): string {
 export function predictLanguage(text: string): { lang: string; accuracy: number } | undefined {
   const cleanedText = cleanString(text)
 
-  // console.log(`Cleaned text: ${cleanedText}`)
   // Get the most accurate language prediction
-  return detectAll(cleanedText).length ? detectAll(cleanedText)[0] : undefined
+  return detectAll(cleanedText)?.[0]
 }
 
 export function predictVideoLanguage({
