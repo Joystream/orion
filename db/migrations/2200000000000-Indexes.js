@@ -49,6 +49,12 @@ module.exports = class Indexes2200000000000 {
     await db.query(
       `CREATE INDEX video_include_in_home_feed_idx ON admin.video (include_in_home_feed) WHERE include_in_home_feed = true;`
     )
+    await db.query(
+      `CREATE INDEX idx_video_is_short_false ON admin.video (is_short) WHERE is_short = FALSE;`
+    )
+    await db.query(
+      `CREATE INDEX idx_video_is_short_derived_false ON admin.video (is_short_derived) WHERE is_short_derived = FALSE;`
+    )
   }
 
   async down(db) {
