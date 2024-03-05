@@ -177,7 +177,7 @@ export async function processVideoMetadata(
     isSet(meta.mediaPixelHeight) &&
     meta.mediaPixelHeight > meta.mediaPixelWidth &&
     meta.duration &&
-    meta.duration < 60
+    meta.duration <= 60
   ) {
     video.isShortDerived = true
   }
