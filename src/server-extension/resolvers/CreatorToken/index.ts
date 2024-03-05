@@ -1,5 +1,7 @@
-import { Resolver, Query, Args } from 'type-graphql'
+import { Args, Query, Resolver } from 'type-graphql'
 import { EntityManager } from 'typeorm'
+import { CreatorToken, RevenueShare, TokenAccount } from '../../../model'
+import { computeTransferrableAmount } from './services'
 import {
   GetAccountTransferrableBalanceArgs,
   GetAccountTransferrableBalanceResult,
@@ -8,8 +10,6 @@ import {
   GetShareDividendsResult,
   GetShareDividensArgs,
 } from './types'
-import { CreatorToken, RevenueShare, TokenAccount } from '../../../model'
-import { computeTransferrableAmount } from './services'
 
 @Resolver()
 export class TokenResolver {
@@ -24,7 +24,7 @@ export class TokenResolver {
     if (!token) {
       throw new Error('Token not found')
     }
-    const { currentRenvenueShareId: revenueShareId, totalSupply } = token
+    const { currentRevenueShareId: revenueShareId, totalSupply } = token
     if (!revenueShareId) {
       throw new Error('No Revenue share ongoing for this token')
     }

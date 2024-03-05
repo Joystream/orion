@@ -1,9 +1,16 @@
-import { criticalError } from '../../utils/misc'
-import { Flat, EntityManagerOverlay } from '../../utils/overlay'
+import { ITokenMetadata } from '@joystream/metadata-protobuf'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { isSet } from '@joystream/metadata-protobuf/utils'
+import pLimit from 'p-limit'
+import { EntityManager } from 'typeorm'
 import {
+  Account,
   Benefit,
   CreatorToken,
+  Event,
   IssuerTransferVestingSource,
+  MemberRecipient,
+  NotificationType,
   TokenAccount,
   TokenAvatarUri,
   TrailerVideo,
@@ -13,10 +20,16 @@ import {
   Video,
 } from '../../model'
 import { Validated, ValidatedPayment, VestingScheduleParams } from '../../types/v1000'
-import { isSet } from '@joystream/metadata-protobuf/utils'
 import { uniqueId } from '../../utils/crypto'
-import { ITokenMetadata } from '@joystream/metadata-protobuf'
-import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
+import { criticalError } from '../../utils/misc'
+import { addNotification } from '../../utils/notification'
+import { EntityManagerOverlay, Flat } from '../../utils/overlay'
+
+export const FALLBACK_TOKEN_SYMBOL = '??'
+
+export function parseCreatorTokenSymbol(token: Flat<CreatorToken>): string {
+  return token.symbol || FALLBACK_TOKEN_SYMBOL
+}
 
 export async function removeVesting(overlay: EntityManagerOverlay, vestedAccountId: string) {
   // remove information that a particular vesting schedule is pending on an account
@@ -115,7 +128,7 @@ export async function addVestingScheduleToAccount(
       accountId: account.id,
       vestingId,
       totalVestingAmount: amount,
-      vestingSource: vestingSource,
+      vestingSource,
       acquiredAt: currentBlock,
     })
   }
@@ -305,4 +318,51 @@ export async function processTokenMetadata(
       trailerVideoRepository.remove(oldTrailer)
     }
   }
+}
+
+export async function getHolderAccountsForToken(
+  em: EntityManager,
+  tokenId: string
+): Promise<Account[]> {
+  const holders = await em.getRepository(TokenAccount).findBy({ tokenId })
+
+  const holdersMemberIds = holders
+    .filter((follower) => follower?.memberId)
+    .map((follower) => follower.memberId as string)
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+  const holdersAccounts: (Account | null)[] = await Promise.all(
+    holdersMemberIds.map((membershipId) =>
+      limit(async () => await em.getRepository(Account).findOneBy({ membershipId }))
+    )
+  )
+
+  return holdersAccounts.filter((account) => account) as Account[]
+}
+
+export async function notifyTokenHolders(
+  em: EntityManager,
+  tokenId: string,
+  notificationType: NotificationType,
+  event?: Event,
+  dispatchBlock?: number
+) {
+  const holdersAccounts = await getHolderAccountsForToken(em, tokenId)
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+
+  await Promise.all(
+    holdersAccounts.map((holdersAccount) =>
+      limit(() =>
+        addNotification(
+          em,
+          holdersAccount,
+          new MemberRecipient({ membership: holdersAccount.membershipId }),
+          notificationType,
+          event,
+          dispatchBlock
+        )
+      )
+    )
+  )
 }

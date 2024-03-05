@@ -113,7 +113,7 @@ import {
   processUpcomingTokenSaleUpdatedEvent,
   processUserParticipatedInSplitEvent,
 } from './mappings/token'
-import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import { commentCountersManager, migrateCounters, videoRelevanceManager } from './mappings/utils'
 import { Event } from './types/support'
 import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
 import { assertAssignable } from './utils/misc'
@@ -138,7 +138,8 @@ const maxCachedEntities = parseInt(process.env.MAX_CACHED_ENTITIES || '1000')
 const processor = new SubstrateBatchProcessor()
   .setDataSource({ archive: archiveUrl })
   .addEvent('Content.VideoCreated', defaultEventOptions)
-
+// By adding other events separately, we sacrifice some type safety,
+// but otherwise the compilation of this file takes forever.
 processor.addEvent('Content.VideoUpdated', defaultEventOptions)
 processor.addEvent('Content.VideoDeleted', defaultEventOptions)
 processor.addEvent('Content.VideoDeletedByModerator', defaultEventOptions)
@@ -168,6 +169,10 @@ processor.addEvent('Content.NftBought', defaultEventOptions)
 processor.addEvent('Content.BuyNowCanceled', defaultEventOptions)
 processor.addEvent('Content.BuyNowPriceUpdated', defaultEventOptions)
 processor.addEvent('Content.NftSlingedBackToTheOriginalArtist', defaultEventOptions)
+processor.addEvent('Content.ChannelPayoutsUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelRewardUpdated', defaultEventOptions)
+processor.addEvent('Content.ChannelFundsWithdrawn', defaultEventOptions)
+processor.addEvent('Content.ChannelRewardClaimedAndWithdrawn', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketCreated', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketInvitationAccepted', defaultEventOptions)
 processor.addEvent('Storage.StorageBucketsUpdatedForBag', defaultEventOptions)
@@ -410,6 +415,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      await migrateCounters.migrateCounters(overlay)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }
