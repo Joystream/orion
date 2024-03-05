@@ -1,7 +1,8 @@
+
 const { getViewDefinitions } = require('../viewDefinitions')
 
-module.exports = class Views1708791754135 {
-  name = 'Views1708791754135'
+module.exports = class Views1709622091505 {
+  name = 'Views1709622091505'
 
   async up(db) {
     const viewDefinitions = getViewDefinitions(db);
