@@ -169,6 +169,18 @@ export async function processVideoMetadata(
   if (isSet(meta.enableComments)) {
     video.isCommentSectionEnabled = meta.enableComments
   }
+
+  // Prepare video `isShortDerived` flag
+  if (
+    !isSet(meta.isShort) &&
+    isSet(meta.mediaPixelWidth) &&
+    isSet(meta.mediaPixelHeight) &&
+    meta.mediaPixelHeight > meta.mediaPixelWidth &&
+    meta.duration &&
+    meta.duration <= 60
+  ) {
+    video.isShortDerived = true
+  }
 }
 
 function extractVideoSize(assets: Flat<StorageDataObject>[]): bigint | undefined {
