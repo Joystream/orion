@@ -1,5 +1,6 @@
-import { EntityManager } from 'typeorm'
+import { EntityManager, IsNull, LessThanOrEqual } from 'typeorm'
 import { EmailDeliveryAttempt, EmailFailure, NotificationEmailDelivery } from '../model'
+import { getCurrentBlockHeight } from '../utils/blockHeight'
 import { ConfigVariable, config } from '../utils/config'
 import { uniqueId } from '../utils/crypto'
 import { globalEm } from '../utils/globalEm'
@@ -11,9 +12,14 @@ export async function getMaxAttempts(em: EntityManager): Promise<number> {
 }
 
 export async function mailsToDeliver(em: EntityManager): Promise<NotificationEmailDelivery[]> {
+  const { lastProcessedBlock } = await getCurrentBlockHeight(em)
   const result = await em.getRepository(NotificationEmailDelivery).find({
     where: {
       discard: false,
+      notification: [
+        { dispatchBlock: IsNull() },
+        { dispatchBlock: LessThanOrEqual(lastProcessedBlock) },
+      ],
     },
     relations: {
       notification: { account: true },

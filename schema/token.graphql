@@ -93,7 +93,7 @@ type CreatorToken @entity {
   currentSale: Sale
 
   "current revenue share if ongoing"
-  currentRenvenueShare: RevenueShare
+  currentRevenueShare: RevenueShare
 
   "number of vested transfer completed"
   numberOfVestedTransferIssued: Int!

@@ -10,9 +10,11 @@ import { createType } from '@joystream/types'
 import { u8aToHex } from '@polkadot/util'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
+import { NextEntityIdManager } from '../utils/NextEntityIdManager'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
+export const migrateCounters = new NextEntityIdManager()
 // eslint-disable-next-line no-void
 void videoRelevanceManager.init({
   fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs

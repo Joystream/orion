@@ -33,7 +33,7 @@ docker-compose up -d orion_processor
 # until docker logs orion_processor | grep "Saving database updates..." >/dev/null; do
 #     sleep 1
 # done
-sleep 10
+sleep 20
 
 cleanup() {
     rm -rf ./db/export

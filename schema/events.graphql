@@ -70,6 +70,13 @@ union EventData =
   | ChannelAssetsDeletedByModeratorEventData
   | VideoAssetsDeletedByModeratorEventData
   | VideoReactionEventData
+  | CreatorTokenIssuedEventData
+  | CreatorTokenMarketStartedEventData
+  | CreatorTokenMarketMintEventData
+  | CreatorTokenMarketBurnEventData
+  | CreatorTokenSaleStartedEventData
+  | CreatorTokenSaleMintEventData
+  | CreatorTokenRevenueSplitIssuedEventData
 
 # Needed when adding a new runtime notification
 type CommentReactionEventData {
@@ -444,4 +451,57 @@ type VideoAssetsDeletedByModeratorEventData {
 
   "why the video assets were deleted"
   rationale: String!
+}
+
+type CreatorTokenIssuedEventData {
+  "Token that was issued"
+  token: CreatorToken
+}
+
+type CreatorTokenMarketStartedEventData {
+  "Token for which market was created"
+  token: CreatorToken
+
+  "Details of the created market"
+  ammCurve: AmmCurve
+}
+
+type CreatorTokenMarketMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  ammMintTransaction: AmmTransaction
+}
+
+type CreatorTokenMarketBurnEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  ammBurnTransaction: AmmTransaction
+}
+
+type CreatorTokenSaleStartedEventData {
+  "Token for which sale was created"
+  token: CreatorToken
+
+  "Details of the created sale"
+  sale: Sale
+}
+
+type CreatorTokenSaleMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  saleTransaction: SaleTransaction
+}
+
+type CreatorTokenRevenueSplitIssuedEventData {
+  "Token for which split was issued"
+  token: CreatorToken
+
+  "Details of the revenue split"
+  revenueShare: RevenueShare
 }

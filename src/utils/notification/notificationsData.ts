@@ -276,5 +276,106 @@ export const getNotificationData = async (
         subject: 'Funds withdrawn',
       }
     }
+    // CRT
+    case 'CreatorTokenIssued': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} issued a creator token for their channel called $${tokenSymbol}.`,
+        subject: 'New CRT issued',
+      }
+    }
+    case 'CreatorTokenMarketStarted': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started a market for $${tokenSymbol} token.`,
+        subject: 'New CRT market',
+      }
+    }
+    case 'CreatorTokenSaleStarted': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started a sale for $${tokenSymbol} token.`,
+        subject: 'New CRT sale',
+      }
+    }
+    case 'CreatorTokenMarketMint': {
+      const { mintedTokenAmount, paiedJoyAmount, minterHandle, tokenSymbol, minterId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', minterId),
+        text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
+          paiedJoyAmount
+        )}`,
+        subject: 'New market buy transaction',
+      }
+    }
+    case 'CreatorTokenMarketBurn': {
+      const { burnedTokenAmount, receivedJoyAmount, burnerHandle, tokenSymbol, burnerId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', burnerId),
+        text: `${burnerHandle} sold ${burnedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
+          receivedJoyAmount
+        )}`,
+        subject: 'New market sell transaction',
+      }
+    }
+
+    case 'CreatorTokenSaleMint': {
+      const { mintedTokenAmount, paiedJoyAmount, minterHandle, tokenSymbol, minterId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', minterId),
+        text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token sale for ${formatJOY(
+          paiedJoyAmount
+        )}`,
+        subject: 'New token sale buy transaction',
+      }
+    }
+    case 'CreatorTokenRevenueSharePlanned': {
+      const { tokenSymbol, channelTitle, plannedAt, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} planned revenue share for $${tokenSymbol} token starting at block ${plannedAt}`,
+        subject: 'New revenue share planned',
+      }
+    }
+    case 'CreatorTokenRevenueShareStarted': {
+      const { tokenSymbol, channelTitle, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started revenue share for $${tokenSymbol} token. Go and claim your share now!`,
+        subject: 'Revenue share started',
+      }
+    }
+    case 'CreatorTokenRevenueShareEnded': {
+      const { tokenSymbol, channelTitle, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
+        subject: 'Revenue share ended',
+      }
+    }
   }
 }
