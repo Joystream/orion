@@ -24,7 +24,7 @@ export class VideoRelevanceManager {
   }: VideoRelevanceManagerLoops): Promise<void> {
     const em = await globalEm
 
-    this.updateScheduledLoop(em, scheduledUpdateLoopTime)
+    this.updateLoop(em, scheduledUpdateLoopTime)
       .then(() => {
         /* Do nothing */
       })
@@ -33,7 +33,7 @@ export class VideoRelevanceManager {
         process.exit(-1)
       })
 
-    this.updateFullUpdateLoop(em, fullUpdateLoopTime)
+    this.updateLoop(em, fullUpdateLoopTime)
       .then(() => {
         /* Do nothing */
       })
@@ -103,23 +103,27 @@ export class VideoRelevanceManager {
         INNER JOIN videos_with_weight as videoCte on videoCte.channelId = channel.id
         GROUP BY channel.id)
         
+        ranked_videos AS (
+          SELECT
+              videoCte.videoId,
+              topChannelVideo.maxChannelRelevance,
+              ROW_NUMBER() OVER (PARTITION BY videoCte.channelId ORDER BY videoCte.videoRelevance DESC, videoCte.videoId) as rank
+          FROM videos_with_weight as videoCte
+          LEFT JOIN top_channel_score as topChannelVideo ON videoCte.channelId = topChannelVideo.channelId
+        )
+      
         UPDATE video
-        SET video_relevance = COALESCE(topChannelVideo.maxChannelRelevance, 1) 
-        FROM videos_with_weight as videoCte
-        LEFT JOIN top_channel_score as topChannelVideo on topChannelVideo.channelId = videoCte.channelId and topChannelVideo.maxChannelRelevance = videoCte.videoRelevance
-        WHERE video.id = videoCte.videoId;
-        `)
+        SET video_relevance = CASE
+                                WHEN ranked_videos.rank = 1 THEN ranked_videos.maxChannelRelevance
+                                ELSE 1
+                            END
+        FROM ranked_videos
+        WHERE video.id = ranked_videos.videoId;
+      `)
     this.channelsToUpdate.clear()
   }
 
-  private async updateScheduledLoop(em: EntityManager, intervalMs: number): Promise<void> {
-    while (true) {
-      await this.updateVideoRelevanceValue(em)
-      await new Promise((resolve) => setTimeout(resolve, intervalMs))
-    }
-  }
-
-  private async updateFullUpdateLoop(em: EntityManager, intervalMs: number): Promise<void> {
+  private async updateLoop(em: EntityManager, intervalMs: number): Promise<void> {
     while (true) {
       await this.updateVideoRelevanceValue(em)
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
