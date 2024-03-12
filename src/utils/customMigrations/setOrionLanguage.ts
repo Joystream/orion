@@ -1,52 +1,56 @@
-import { createLogger } from '@subsquid/logger'
-import { IsNull } from 'typeorm'
-import { Video } from '../../model'
+import { EntityManager } from 'typeorm'
 import { globalEm } from '../globalEm'
 import { predictVideoLanguage } from '../language'
 
-const logger = createLogger('setOrionLanguage')
+async function detectVideoLanguage() {
+  const em: EntityManager = await globalEm
+  const videos: any[] = await em.query(`
+    SELECT id, title, description
+    FROM admin.video
+  `)
 
-async function setOrionLanguage() {
-  const em = await globalEm
+  // Temporary storage for batch update data
+  const updates: any[] = []
 
-  const batchSize = 10000
-  let offset = 0
-  let hasMore = true
-
-  while (hasMore) {
-    const videos = await em.find(Video, {
-      where: { orionLanguage: IsNull() },
-      order: { id: 'ASC' },
-      take: batchSize,
-      skip: offset,
+  for (const [i, video] of videos.entries()) {
+    const orionLanguage = predictVideoLanguage({
+      title: video.title,
+      description: video.description,
     })
 
-    if (videos.length === 0) {
-      hasMore = false
-    } else {
-      const updates = videos.map((video) => {
-        video.orionLanguage = predictVideoLanguage({
-          title: video.title ?? '',
-          description: video.description ?? '',
-        })
-        return video
-      })
-
-      // Save all updates in a single transaction
-      await em.transaction(async (transactionalEntityManager) => {
-        await transactionalEntityManager.save(updates)
-      })
-
-      logger.info(`Updated ${updates.length} videos.`)
-
-      offset += videos.length // Prepare the offset for the next batch
-    }
+    // Instead of updating immediately, push the update data into the array
+    updates.push({ orionLanguage, id: video.id })
+    console.log(i)
   }
+
+  // Define batch size
+  const batchSize = 1000 // Adjust the batch size based on your database and network performance
+
+  for (let i = 0; i < updates.length; i += batchSize) {
+    const batch = updates.slice(i, i + batchSize)
+
+    // Prepare the query and parameters for batch update
+    const query = `
+      UPDATE admin.video AS v SET
+        orion_language = c.orion_language
+      FROM (VALUES ${batch
+        .map((_, idx) => `($${idx * 2 + 1}, $${idx * 2 + 2})`)
+        .join(',')}) AS c(orion_language, id)
+      WHERE c.id = v.id;
+    `
+
+    const queryParams = batch.flatMap((update) => [update.orionLanguage, update.id])
+
+    // Execute batch update
+    await em.query(query, queryParams)
+  }
+
+  console.log(`Updated languages for ${videos.length} videos`)
 }
 
-setOrionLanguage()
-  .then(() => logger.info('Update process completed.'))
+detectVideoLanguage()
+  .then(() => console.log('Update process completed.'))
   .catch(() => {
-    logger.error('process failed')
+    console.error('process failed')
     process.exit(1)
   })
