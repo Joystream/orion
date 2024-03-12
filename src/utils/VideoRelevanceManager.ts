@@ -78,7 +78,7 @@ export class VideoRelevanceManager {
             video.id as videoId,
             channel.id as channelId,
             (ROUND((
-            (extract(epoch from now()) - ${wtEpoch})
+            (extract(epoch FROM date_trunc('day', now() at time zone 'UTC')) - ${wtEpoch})
             / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} 
             + (views_num * ${viewsWeight}) 
             + (comments_count * ${commentsWeight}) 
