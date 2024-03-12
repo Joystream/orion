@@ -246,7 +246,7 @@ export async function processAmmActivatedEvent({
     channelTitle: parseChannelTitle(channel),
   })
 
-  await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
+  await notifyTokenHolders(overlay, tokenId.toString(), notificationData, eventEntity)
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 }
 
@@ -330,7 +330,7 @@ export async function processTokenSaleInitializedEvent({
     channelTitle: parseChannelTitle(channel),
   })
 
-  await notifyTokenHolders(overlay.getEm(), tokenId.toString(), notificationData, eventEntity)
+  await notifyTokenHolders(overlay, tokenId.toString(), notificationData, eventEntity)
   await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
 }
 
@@ -640,7 +640,7 @@ export async function processRevenueSplitIssuedEvent({
     tokenSymbol: parseCreatorTokenSymbol(token),
   })
   await notifyTokenHolders(
-    overlay.getEm(),
+    overlay,
     tokenId.toString(),
     revenueShareStartedNotification,
     undefined,
@@ -657,7 +657,7 @@ export async function processRevenueSplitIssuedEvent({
       tokenSymbol: parseCreatorTokenSymbol(token),
     })
 
-    await notifyTokenHolders(overlay.getEm(), tokenId.toString(), revenueSharePlannedNotification)
+    await notifyTokenHolders(overlay, tokenId.toString(), revenueSharePlannedNotification)
   }
 
   const revenueSharedEndedNotification = new CreatorTokenRevenueShareEnded({
@@ -668,7 +668,7 @@ export async function processRevenueSplitIssuedEvent({
     tokenId: tokenId.toString(),
   })
   await notifyTokenHolders(
-    overlay.getEm(),
+    overlay,
     tokenId.toString(),
     revenueSharedEndedNotification,
     undefined,

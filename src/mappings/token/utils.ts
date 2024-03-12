@@ -2,7 +2,6 @@ import { ITokenMetadata } from '@joystream/metadata-protobuf'
 import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { isSet } from '@joystream/metadata-protobuf/utils'
 import pLimit from 'p-limit'
-import { EntityManager } from 'typeorm'
 import {
   Account,
   Benefit,
@@ -321,9 +320,10 @@ export async function processTokenMetadata(
 }
 
 export async function getHolderAccountsForToken(
-  em: EntityManager,
+  overlay: EntityManagerOverlay,
   tokenId: string
 ): Promise<Account[]> {
+  const em = overlay.getEm()
   const holders = await em.getRepository(TokenAccount).findBy({ tokenId })
 
   const holdersMemberIds = holders
@@ -341,7 +341,7 @@ export async function getHolderAccountsForToken(
 }
 
 export async function notifyTokenHolders(
-  em: EntityManager,
+  em: EntityManagerOverlay,
   tokenId: string,
   notificationType: NotificationType,
   event?: Event,
