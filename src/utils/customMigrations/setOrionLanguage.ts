@@ -49,3 +49,8 @@ async function detectVideoLanguage() {
 }
 
 detectVideoLanguage()
+  .then(() => console.log('Update process completed.'))
+  .catch(() => {
+    console.error('process failed')
+    process.exit(1)
+  })
