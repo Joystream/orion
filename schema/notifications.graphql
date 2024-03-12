@@ -457,6 +457,9 @@ type CreatorTokenMarketStarted @variant {
 }
 
 type CreatorTokenMarketMint @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
   "handle of member that minted tokens"
   minterHandle: String!
 
@@ -474,6 +477,9 @@ type CreatorTokenMarketMint @variant {
 }
 
 type CreatorTokenMarketBurn @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
   "handle of member that burned tokens"
   burnerHandle: String!
 
@@ -491,6 +497,9 @@ type CreatorTokenMarketBurn @variant {
 }
 
 type CreatorTokenSaleMint @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
   "handle of member that minted tokens"
   minterHandle: String!
 
