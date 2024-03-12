@@ -74,51 +74,67 @@ export class VideoRelevanceManager {
 
     await em.query(`
         WITH videos_with_weight AS (
-        SELECT 
-        video.id as videoId,
-        channel.id as channelId,
-        (ROUND((
-        (extract(epoch from now()) - ${wtEpoch})
-        / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} 
-        + (views_num * ${viewsWeight}) 
-        + (comments_count * ${commentsWeight}) 
-        + (reactions_count * ${reactionsWeight})) 
-        * COALESCE(channel.channel_weight, ${channelWeight}),2)) as videoRelevance
-        FROM video
-        INNER JOIN channel  ON video.channel_id = channel.id
-        ${
-          forceUpdateAll
-            ? ''
-            : `WHERE video.channel_id in (${[...this.channelsToUpdate.values()]
-                .map((id) => `'${id}'`)
-                .join(', ')})`
-        }
-        ORDER BY video.id),
-        
+          SELECT 
+            video.id as videoId,
+            channel.id as channelId,
+            (ROUND((
+            (extract(epoch from now()) - ${wtEpoch})
+            / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} 
+            + (views_num * ${viewsWeight}) 
+            + (comments_count * ${commentsWeight}) 
+            + (reactions_count * ${reactionsWeight})) 
+            * COALESCE(channel.channel_weight, ${channelWeight}), 2)) as videoRelevance
+          FROM 
+            video
+            INNER JOIN channel  ON video.channel_id = channel.id
+          ${
+            forceUpdateAll
+              ? ''
+              : `WHERE video.channel_id in (${[...this.channelsToUpdate.values()]
+                  .map((id) => `'${id}'`)
+                  .join(', ')})`
+          }
+          ORDER BY 
+            video.id
+        ),
+    
         top_channel_score as (
-        SELECT 
-        channel.id as channelId,
-        MAX(videoCte.videoRelevance) as maxChannelRelevance
-        FROM channel
-        INNER JOIN videos_with_weight as videoCte on videoCte.channelId = channel.id
-        GROUP BY channel.id)
-        
+          SELECT
+            channel.id as channelId,
+            MAX(videos_with_weight.videoRelevance) as maxChannelRelevance
+          FROM
+            channel
+            INNER JOIN videos_with_weight on videos_with_weight.channelId = channel.id
+          GROUP BY
+            channel.id
+        ),
+
         ranked_videos AS (
           SELECT
-              videoCte.videoId,
-              topChannelVideo.maxChannelRelevance,
-              ROW_NUMBER() OVER (PARTITION BY videoCte.channelId ORDER BY videoCte.videoRelevance DESC, videoCte.videoId) as rank
-          FROM videos_with_weight as videoCte
-          LEFT JOIN top_channel_score as topChannelVideo ON videoCte.channelId = topChannelVideo.channelId
+            videos_with_weight.videoId,
+            topChannelVideo.maxChannelRelevance,
+            ROW_NUMBER() OVER (
+              PARTITION BY videos_with_weight.channelId
+              ORDER BY
+                videos_with_weight.videoRelevance DESC,
+                videos_with_weight.videoId
+            ) as rank
+          FROM
+            videos_with_weight
+            LEFT JOIN top_channel_score as topChannelVideo ON videos_with_weight.channelId = topChannelVideo.channelId
         )
-      
-        UPDATE video
-        SET video_relevance = CASE
-                                WHEN ranked_videos.rank = 1 THEN ranked_videos.maxChannelRelevance
-                                ELSE 1
-                            END
-        FROM ranked_videos
-        WHERE video.id = ranked_videos.videoId;
+
+        UPDATE
+          video
+        SET
+          video_relevance = CASE
+            WHEN ranked_videos.rank = 1 THEN ranked_videos.maxChannelRelevance
+            ELSE 1
+          END
+        FROM
+          ranked_videos
+        WHERE
+          video.id = ranked_videos.videoId;
       `)
     this.channelsToUpdate.clear()
   }
