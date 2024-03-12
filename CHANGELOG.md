@@ -1,3 +1,17 @@
+# 3.7.0
+
+## Schema changes
+- Added `isShortDerived` field to `Video` entity indicating whether a video is a short format, vertical video or not. This field is computed in the mappings based on the video dimensions and duration when `isShort` is not set in the metadata.
+
+## Misc
+
+- update `setOrionLanguage` Custom migration script.
+
+## Bug Fixes:
+- Added fix to improve the accuracy of `Video.orionLanguage` field by reworking the `predictVideoLanguage` function in `src/utils/language.ts`
+- Use UTC midnight epoch instead of current epoch to calculate video relevance score in `VideoRelevanceManager`
+
+
 # 3.6.0
 
 ## Schema changes
