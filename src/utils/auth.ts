@@ -1,17 +1,17 @@
+import { createLogger } from '@subsquid/logger'
 import { Request, Response } from 'express'
 import { EntityManager, FindOptionsWhere, IsNull, MoreThan } from 'typeorm'
 import { Account, Session } from '../model'
 import {
   CachedSessionData,
-  sessionCache,
-  SESSION_CACHE_MINIMUM_TTL,
   SESSION_CACHE_EXPIRY_TTL_MARGIN,
+  SESSION_CACHE_MINIMUM_TTL,
+  sessionCache,
 } from './cache'
-import { config, ConfigVariable } from './config'
-import { getUserAgentData } from './http'
-import { createLogger } from '@subsquid/logger'
-import { globalEm } from './globalEm'
+import { ConfigVariable, config } from './config'
 import { uniqueId } from './crypto'
+import { globalEm } from './globalEm'
+import { getUserAgentData } from './http'
 
 const authLogger = createLogger('authentication')
 

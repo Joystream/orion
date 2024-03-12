@@ -410,6 +410,7 @@ export async function processTokensBoughtOnAmmEvent({
 
   const minter = await overlay.getRepository(Membership).getById(memberId.toString())
   const notificationData = new CreatorTokenMarketMint({
+    channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
     mintedTokenAmount: crtMinted,
     minterHandle: minter?.handle ?? 'Someone',
@@ -474,6 +475,7 @@ export async function processTokensSoldOnAmmEvent({
 
   const burnerMember = await overlay.getRepository(Membership).getById(memberId.toString())
   const notificationData = new CreatorTokenMarketBurn({
+    channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
     burnedTokenAmount: crtBurned,
     burnerHandle: burnerMember?.handle ?? 'Someone',
@@ -547,6 +549,7 @@ export async function processTokensPurchasedOnSaleEvent({
 
   const minterMember = await overlay.getRepository(Membership).getById(memberId.toString())
   const notificationData = new CreatorTokenSaleMint({
+    channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
     mintedTokenAmount: amountPurchased,
     minterHandle: minterMember?.handle ?? 'Someone',
