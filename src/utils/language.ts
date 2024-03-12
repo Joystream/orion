@@ -1,19 +1,36 @@
-import { detect } from 'tinyld'
+import { detectAll } from 'tinyld'
 
 function cleanString(input: string): string {
-  // Remove symbols, numbers, and emojis
-  // The regex [\p{P}\p{S}\p{N}\p{M}] matches all kinds of punctuation, symbols, numbers, and mark characters (including emojis)
-  // \p{P} matches any kind of punctuation character
-  // \p{S} matches any kind of math symbol, currency sign, or modifier symbol
-  // \p{N} matches any kind of numeric character in any script
-  // \p{M} matches characters that are combined with other characters, often used for emojis and diacritics
-  // The 'u' flag enables Unicode support, allowing the regex to match Unicode characters and properties
-  const cleanedString = input.replace(/[\p{P}\p{S}\p{N}\p{M}]/gu, '')
-  return cleanedString.toLowerCase()
+  // First, remove URLs. This pattern targets a broad range of URLs.
+  let cleanedString = input.replace(/(https?:\/\/[^\s]+)|(www\.[^\s]+)/gu, '')
+
+  // Remove hashtags. This regex looks for the '#' symbol followed by one or more word characters.
+  cleanedString = cleanedString.replace(/#\w+/gu, '')
+
+  return cleanedString
 }
 
-// Example usage
-export const predictLanguage = (text: string): string | undefined => {
+function predictLanguage(text: string): { lang: string; accuracy: number } | undefined {
   const cleanedText = cleanString(text)
-  return detect(cleanedText) || undefined
+
+  // Get the most accurate language prediction
+  return detectAll(cleanedText)?.[0]
+}
+
+export function predictVideoLanguage({ title, description }: any): string | undefined {
+  let detectedLang: string | undefined
+
+  const titleLang = predictLanguage(title ?? '')
+
+  detectedLang = titleLang?.lang
+
+  if ((titleLang?.accuracy || 0) < 0.5) {
+    const titleAndDescriptionLang = predictLanguage(`${title} ${description}`)
+    if ((titleAndDescriptionLang?.accuracy || 0) > (titleLang?.accuracy || 0)) {
+      // then
+      detectedLang = titleAndDescriptionLang?.lang
+    }
+  }
+
+  return detectedLang
 }
