@@ -17,7 +17,7 @@ import {
   VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { predictLanguage } from '../../utils/language'
+import { predictVideoLanguage } from '../../utils/language'
 import {
   deserializeMetadata,
   genericEventFields,
@@ -122,8 +122,10 @@ export async function processVideoCreatedEvent({
     }
   }
 
-  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText)
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
 
   channel.totalVideosCreated += 1
 
@@ -190,8 +192,10 @@ export async function processVideoUpdatedEvent({
     )
   }
 
-  const languageText = [video.title ?? '', video.description ?? ''].join(' ')
-  video.orionLanguage = predictLanguage(languageText)
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
