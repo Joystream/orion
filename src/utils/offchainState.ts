@@ -5,8 +5,15 @@ import fs from 'fs'
 import path from 'path'
 import { EntityManager } from 'typeorm'
 import * as model from '../model'
+import {
+  AccountNotificationPreferences,
+  fromJsonDeliveryStatus,
+  fromJsonNotificationType,
+  fromJsonReadOrUnread,
+  fromJsonRecipientType,
+} from '../model'
 import { uniqueId } from './crypto'
-import { defaultNotificationPreferences } from './notification/helpers'
+import { defaultNotificationPreferences, notificationPrefAllTrue } from './notification/helpers'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -112,11 +119,51 @@ function migrateExportDataToV320(data: ExportedData): ExportedData {
   return data
 }
 
+export function setCrtNotificationPreferences(
+  notificationPreferencesObj: any
+): AccountNotificationPreferences {
+  notificationPreferencesObj.crtIssued = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketBurn = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueSharePlanned = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareEnded = notificationPrefAllTrue()
+  const notificationPreferences = new AccountNotificationPreferences(
+    undefined,
+    notificationPreferencesObj
+  )
+  return notificationPreferences
+}
+
+function migrateExportDataToV400(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    // account will find himself with all CRT notification pref. enabled by default
+    account.notificationPreferences = setCrtNotificationPreferences(
+      account.notificationPreferences as AccountNotificationPreferences
+    )
+  })
+
+  data.Notification?.values.forEach((notification) => {
+    notification.notificationType = fromJsonNotificationType(notification.notificationType)
+    notification.status = fromJsonReadOrUnread(notification.status)
+    notification.recipient = fromJsonRecipientType(notification.recipient)
+  })
+
+  data.EmailDeliveryAttempt?.values.forEach((emailDeliveryAttempt) => {
+    emailDeliveryAttempt.status = fromJsonDeliveryStatus(emailDeliveryAttempt.status)
+  })
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
+    '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
