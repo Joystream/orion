@@ -113,7 +113,7 @@ import {
   processUpcomingTokenSaleUpdatedEvent,
   processUserParticipatedInSplitEvent,
 } from './mappings/token'
-import { commentCountersManager, migrateCounters, videoRelevanceManager } from './mappings/utils'
+import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
 import { Event } from './types/support'
 import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
 import { assertAssignable } from './utils/misc'
@@ -415,7 +415,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
-      await migrateCounters.migrateCounters(overlay)
       ctx.log.info(`Offchain state successfully imported!`)
     }
   }
