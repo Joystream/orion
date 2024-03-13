@@ -361,11 +361,6 @@ export class EntityManagerOverlay {
     return this.em
   }
 
-  // reason: during migration the overlay would write to the database the old nextId
-  public invalidateRepository(entityName: string) {
-    this.repositories.delete(entityName)
-  }
-
   // Create an entity repository overlay or load already cached one
   public getRepository<E extends AnyEntity>(entityClass: Constructor<E>): RepositoryOverlay<E> {
     const loadedRepository = this.repositories.get(entityClass.name)

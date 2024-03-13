@@ -19,7 +19,7 @@ import { EntityManagerOverlay } from '../overlay'
 export const RUNTIME_NOTIFICATION_ID_TAG = 'RuntimeNotification'
 export const OFFCHAIN_NOTIFICATION_ID_TAG = 'OffchainNotification'
 
-function notificationPrefAllTrue(): NotificationPreference {
+export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
 }
 
