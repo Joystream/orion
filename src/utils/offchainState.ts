@@ -299,7 +299,6 @@ export class OffchainState {
                 })
                 .join(', ')}
             ) AS "data"
-            ORDER BY "id"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
             fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
           )
