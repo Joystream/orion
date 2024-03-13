@@ -315,7 +315,23 @@ export class OffchainState {
               values.length
             } entities left)...`
           )
-          await em.getRepository(entityName).insert(batch)
+
+          // UPSERT operation specifically for NextEntityId
+          if (entityName === 'NextEntityId') {
+            for (const entity of batch) {
+              await em.query(
+                `
+                INSERT INTO "next_entity_id" ("entity_name", "next_id")
+                VALUES ($1, $2)
+                ON CONFLICT (entity_name)
+                DO UPDATE SET next_id = EXCLUDED.next_id;
+              `,
+                [entity.entityName, entity.nextId]
+              )
+            }
+          } else {
+            await em.getRepository(entityName).insert(batch)
+          }
         }
       }
       this.logger.info(
