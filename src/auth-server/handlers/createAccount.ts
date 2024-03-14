@@ -1,12 +1,12 @@
 import express from 'express'
-import { BadRequestError, ConflictError, NotFoundError } from '../errors'
-import { components } from '../generated/api-types'
-import { globalEm } from '../../utils/globalEm'
 import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../model'
 import { AuthContext } from '../../utils/auth'
+import { globalEm } from '../../utils/globalEm'
 import { idStringFromNumber } from '../../utils/misc'
-import { verifyActionExecutionRequest } from '../utils'
 import { defaultNotificationPreferences } from '../../utils/notification/helpers'
+import { BadRequestError, ConflictError, NotFoundError } from '../errors'
+import { components } from '../generated/api-types'
+import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -22,7 +22,7 @@ export const createAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      payload: { email, memberId, joystreamAccountId, referrerChannelId },
+      payload: { email, memberId, joystreamAccountId },
     } = req.body
     const { authContext } = res.locals
     const em = await globalEm
@@ -88,7 +88,7 @@ export const createAccount: (
         joystreamAccount: joystreamAccountId,
         membershipId: memberId.toString(),
         notificationPreferences,
-        referrerChannelId: referrerChannelId || null,
+        referrerChannelId: null,
       })
 
       await em.save([

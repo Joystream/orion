@@ -86,6 +86,10 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return this.nextId
   }
 
+  setNextEntityId(nextId: number) {
+    this.nextId = nextId
+  }
+
   // Prevents inserting strings that contain null character into the postgresql table
   // (as this would cause an error)
   private normalizeString(s: string) {
@@ -359,11 +363,6 @@ export class EntityManagerOverlay {
 
   public getEm() {
     return this.em
-  }
-
-  // reason: during migration the overlay would write to the database the old nextId
-  public invalidateRepository(entityName: string) {
-    this.repositories.delete(entityName)
   }
 
   // Create an entity repository overlay or load already cached one

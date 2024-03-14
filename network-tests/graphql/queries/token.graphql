@@ -1,0 +1,332 @@
+fragment MemberFields on Membership {
+  id
+  handle
+  createdAt
+  controllerAccount
+}
+
+fragment TokenFields on CreatorToken {
+  id
+  lastPrice
+  createdAt
+  deissued
+  isInviteOnly
+  status
+  symbol
+  totalSupply
+  sales {
+    id
+    endsAt
+  }
+  currentSale {
+    id
+  }
+  accounts {
+    id
+    member {
+      id
+    }
+  }
+  accountsNum
+  avatar {
+    ... on TokenAvatarObject {
+      __typename
+      avatarObject {
+        id
+      }
+    }
+    ... on TokenAvatarUri {
+      __typename
+    }
+  }
+  trailerVideo {
+    id
+    video {
+      id
+    }
+    token {
+      id
+    }
+  }
+  benefits {
+    emojiCode
+    title
+    description
+    displayOrder
+  }
+  annualCreatorRewardPermill
+  revenueShareRatioPermill
+  revenueShares {
+    id
+  }
+  currentRenvenueShare {
+    id
+  }
+  description
+  ammCurves {
+    id
+  }
+}
+
+fragment RevenueShareParticipationFields on RevenueShareParticipation {
+  id
+  revenueShare {
+    id
+  }
+  createdIn
+  earnings
+  stakedAmount
+  recovered
+  account {
+    id
+    member {
+      id
+    }
+  }
+}
+
+fragment TokenAccountFields on TokenAccount {
+  id
+  member {
+    id
+  }
+  token {
+    id
+  }
+  stakedAmount
+  totalAmount
+  deleted
+  vestingSchedules {
+    ...VestedAccountFields
+  }
+  revenueShareParticipation {
+    ...RevenueShareParticipationFields
+  }
+}
+
+fragment RevenueShareFields on RevenueShare {
+  id
+  startingAt
+  finalized
+  endsAt
+  createdIn
+  claimed
+  allocation
+  participantsNum
+  token {
+    id
+  }
+  stakers {
+    account {
+      id
+    }
+  }
+}
+
+fragment VestingScheduleFields on VestingSchedule {
+  id
+  endsAt
+  cliffRatioPermill
+  cliffDurationBlocks
+  cliffBlock
+  accounts {
+    account {
+      member {
+        id
+      }
+    }
+  }
+  vestedSale {
+    sale {
+      id
+    }
+  }
+}
+
+fragment SaleFields on Sale {
+  id
+  endsAt
+  createdIn
+  finalized
+  id
+  maxAmountPerMember
+  pricePerUnit
+  startBlock
+  termsAndConditions
+  tokenSaleAllocation
+  tokensSold
+  vestedSale {
+    vesting {
+      id
+    }
+  }
+  fundsSourceAccount {
+    id
+  }
+  transactions {
+    createdIn
+    id
+    quantity
+    account {
+      id
+    }
+  }
+}
+
+fragment VestedAccountFields on VestedAccount {
+  id
+  totalVestingAmount
+  acquiredAt
+  vesting {
+    id
+    cliffRatioPermill
+    vestingDurationBlocks
+    cliffDurationBlocks
+    endsAt
+    cliffBlock
+  }
+  account {
+    id
+  }
+}
+
+fragment AmmCurvFields on AmmCurve {
+  mintedByAmm
+  id
+  finalized
+  burnedByAmm
+  ammSlopeParameter
+  ammInitPrice
+  transactions {
+    ...AmmTransactionFields
+  }
+}
+
+fragment ChannelFields on Channel {
+  id
+  rewardAccount
+  revenueShareRatioPercent
+  language
+  isPublic
+  isExcluded
+  isCensored
+  followsNum
+  description
+  createdAt
+  channelStateBloatBond
+  videoViewsNum
+  totalVideosCreated
+  title
+  videos {
+    id
+  }
+  ownerMember {
+    id
+  }
+  createdInBlock
+  creatorToken {
+    id
+  }
+}
+
+fragment AmmTransactionFields on AmmTransaction {
+  id
+  createdIn
+  pricePaid
+  pricePerUnit
+  quantity
+  transactionType
+  account {
+    id
+  }
+}
+
+subscription getTokenById($id: String!) {
+  creatorTokenById(id: $id) {
+    ...TokenFields
+  }
+}
+
+subscription getTokenAccountById($id: String!) {
+  tokenAccountById(id: $id) {
+    ...TokenAccountFields
+  }
+}
+
+subscription getRevenueShareById($id: String!) {
+  revenueShareById(id: $id) {
+    ...RevenueShareFields
+  }
+}
+
+subscription getRevenueShareParticipationById($id: String!) {
+  revenueShareParticipationById(id: $id) {
+    ...RevenueShareParticipationFields
+  }
+}
+
+subscription getVestingScheduleById($id: String!) {
+  vestingScheduleById(id: $id) {
+    ...VestingScheduleFields
+  }
+}
+
+subscription getSaleById($id: String!) {
+  saleById(id: $id) {
+    ...SaleFields
+  }
+}
+
+subscription getVestedAccountById($id: String!) {
+  vestedAccountById(id: $id) {
+    ...VestedAccountFields
+  }
+}
+
+subscription getAmmById($id: String!) {
+  ammCurveById(id: $id) {
+    ...AmmCurvFields
+  }
+}
+
+subscription getChannelById($id: String!) {
+  channelById(id: $id) {
+    ...ChannelFields
+  }
+}
+
+subscription getAmmTransactionById($id: String!) {
+  ammTransactionById(id: $id) {
+    ...AmmTransactionFields
+  }
+}
+
+subscription getMemberById($id: String!) {
+  membershipById(id: $id) {
+    ...MemberFields
+  }
+}
+
+query getShareDividend($tokenId: String!, $stakingAmount: Int!) {
+  getShareDividend(stakingAmount: $stakingAmount, tokenId: $tokenId) {
+    dividendJoyAmount
+  }
+}
+query getCumulativeHistoricalShareAllocationForToken($tokenId: String!) {
+  getCumulativeHistoricalShareAllocation(tokenId: $tokenId) {
+    cumulativeHistoricalAllocation
+  }
+}
+query getAccountTransferrableBalance(
+  $tokenId: String!
+  $memberId: String!
+  $currentBlockHeight: Int!
+) {
+  getAccountTransferrableBalance(
+    currentBlockHeight: $currentBlockHeight
+    memberId: $memberId
+    tokenId: $tokenId
+  ) {
+    transferrableCrtAmount
+  }
+}

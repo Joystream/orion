@@ -1,25 +1,25 @@
+import { Flat } from 'lodash'
 import { EntityManager } from 'typeorm'
 import {
   Account,
   AccountNotificationPreferences,
-  NextEntityId,
-  NotificationPreference,
-  Notification,
   Event,
-  Unread,
+  NextEntityId,
+  Notification,
   NotificationEmailDelivery,
-  RecipientType,
+  NotificationPreference,
   NotificationType,
+  RecipientType,
+  Unread,
 } from '../../model'
-import { getNextIdForEntity } from '../nextEntityId'
-import { Flat } from 'lodash'
-import { EntityManagerOverlay } from '../overlay'
 import { uniqueId } from '../crypto'
+import { getNextIdForEntity } from '../nextEntityId'
+import { EntityManagerOverlay } from '../overlay'
 
 export const RUNTIME_NOTIFICATION_ID_TAG = 'RuntimeNotification'
 export const OFFCHAIN_NOTIFICATION_ID_TAG = 'OffchainNotification'
 
-function notificationPrefAllTrue(): NotificationPreference {
+export function notificationPrefAllTrue(): NotificationPreference {
   return new NotificationPreference({ inAppEnabled: true, emailEnabled: true })
 }
 
@@ -62,6 +62,15 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     fundsFromCouncilReceived: notificationPrefAllTrue(),
     fundsToExternalWalletSent: notificationPrefAllTrue(),
     fundsFromWgReceived: notificationPrefAllTrue(),
+    crtIssued: notificationPrefAllTrue(),
+    crtMarketStarted: notificationPrefAllTrue(),
+    crtMarketMint: notificationPrefAllTrue(),
+    crtMarketBurn: notificationPrefAllTrue(),
+    crtSaleStarted: notificationPrefAllTrue(),
+    crtSaleMint: notificationPrefAllTrue(),
+    crtRevenueShareStarted: notificationPrefAllTrue(),
+    crtRevenueSharePlanned: notificationPrefAllTrue(),
+    crtRevenueShareEnded: notificationPrefAllTrue(),
   })
 }
 
@@ -113,9 +122,27 @@ export function preferencesForNotification(
     case 'HigherBidPlaced':
       return preferences.higherBidThanYoursMade
     case 'AuctionWon':
-      return preferences.auctionLost
-    case 'AuctionLost':
       return preferences.auctionWon
+    case 'AuctionLost':
+      return preferences.auctionLost
+    case 'CreatorTokenIssued':
+      return preferences.crtIssued
+    case 'CreatorTokenMarketStarted':
+      return preferences.crtMarketStarted
+    case 'CreatorTokenMarketMint':
+      return preferences.crtMarketMint
+    case 'CreatorTokenMarketBurn':
+      return preferences.crtMarketBurn
+    case 'CreatorTokenSaleStarted':
+      return preferences.crtSaleStarted
+    case 'CreatorTokenSaleMint':
+      return preferences.crtSaleMint
+    case 'CreatorTokenRevenueShareStarted':
+      return preferences.crtRevenueShareStarted
+    case 'CreatorTokenRevenueSharePlanned':
+      return preferences.crtRevenueSharePlanned
+    case 'CreatorTokenRevenueShareEnded':
+      return preferences.crtRevenueShareEnded
     default: // all the remaining notifications (v2 scope) are not enabled by default
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
@@ -125,7 +152,8 @@ async function addOffChainNotification(
   em: EntityManager,
   account: Flat<Account>,
   recipient: RecipientType,
-  notificationType: NotificationType
+  notificationType: NotificationType,
+  dispatchBlock?: number
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
@@ -134,7 +162,9 @@ async function addOffChainNotification(
     OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
     account.id,
     recipient,
-    notificationType
+    notificationType,
+    undefined,
+    dispatchBlock
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -153,7 +183,8 @@ async function addRuntimeNotification(
   account: Flat<Account>,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event: Event
+  event: Event,
+  dispatchBlock?: number
 ) {
   const em = overlay.getEm()
   // get notification Id from orion_db in any case
@@ -173,7 +204,8 @@ async function addRuntimeNotification(
     account.id,
     recipient,
     notificationType,
-    event
+    event,
+    dispatchBlock
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -217,7 +249,8 @@ const createNotification = (
   accountId: string,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event
+  event?: Event,
+  dispatchBlock?: number
 ) => {
   return new Notification({
     id,
@@ -227,6 +260,7 @@ const createNotification = (
     status: new Unread(),
     eventId: event?.id,
     createdAt: event?.timestamp ?? new Date(),
+    dispatchBlock,
   })
 }
 
@@ -235,7 +269,8 @@ export const addNotification = async (
   account: Flat<Account> | null,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event
+  event?: Event,
+  dispatchBlock?: number
 ) => {
   if (!account) {
     // if account is not in orion_db skip.
@@ -249,10 +284,17 @@ export const addNotification = async (
       account,
       recipient,
       notificationType,
-      event
+      event,
+      dispatchBlock
     )
   } else {
-    await addOffChainNotification(store as EntityManager, account, recipient, notificationType)
+    await addOffChainNotification(
+      store as EntityManager,
+      account,
+      recipient,
+      notificationType,
+      dispatchBlock
+    )
   }
 }
 

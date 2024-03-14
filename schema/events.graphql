@@ -67,7 +67,16 @@ union EventData =
   | ChannelPayoutsUpdatedEventData
   | ChannelPaymentMadeEventData
   | MemberBannedFromChannelEventData
+  | ChannelAssetsDeletedByModeratorEventData
+  | VideoAssetsDeletedByModeratorEventData
   | VideoReactionEventData
+  | CreatorTokenIssuedEventData
+  | CreatorTokenMarketStartedEventData
+  | CreatorTokenMarketMintEventData
+  | CreatorTokenMarketBurnEventData
+  | CreatorTokenSaleStartedEventData
+  | CreatorTokenSaleMintEventData
+  | CreatorTokenRevenueSplitIssuedEventData
 
 # Needed when adding a new runtime notification
 type CommentReactionEventData {
@@ -412,4 +421,87 @@ type MemberBannedFromChannelEventData {
 
   "The action performed. TRUE if the member is being banned, FALSE if the member is being unbanned"
   action: Boolean!
+}
+
+# Emitted when channel asset/s are deleted by the moderator
+type ChannelAssetsDeletedByModeratorEventData {
+  "Channel whose assets were deleted"
+  channel: Channel!
+
+  "IDs of channel assets being deleted by moderator"
+  assetIds: [BigInt!]
+
+  "Actor who deleted the channel assets."
+  deletedBy: ContentActor!
+
+  "why the channel assets were deleted"
+  rationale: String!
+}
+
+# Emitted when video asset/s are deleted by the moderator
+type VideoAssetsDeletedByModeratorEventData {
+  "Video whose assets were deleted"
+  video: Video!
+
+  "IDs of video assets being deleted by moderator"
+  assetIds: [BigInt!]
+
+  "Actor who deleted the video assets."
+  deletedBy: ContentActor!
+
+  "why the video assets were deleted"
+  rationale: String!
+}
+
+type CreatorTokenIssuedEventData {
+  "Token that was issued"
+  token: CreatorToken
+}
+
+type CreatorTokenMarketStartedEventData {
+  "Token for which market was created"
+  token: CreatorToken
+
+  "Details of the created market"
+  ammCurve: AmmCurve
+}
+
+type CreatorTokenMarketMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  ammMintTransaction: AmmTransaction
+}
+
+type CreatorTokenMarketBurnEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  ammBurnTransaction: AmmTransaction
+}
+
+type CreatorTokenSaleStartedEventData {
+  "Token for which sale was created"
+  token: CreatorToken
+
+  "Details of the created sale"
+  sale: Sale
+}
+
+type CreatorTokenSaleMintEventData {
+  "Token for which transaction happened"
+  token: CreatorToken
+
+  "Details of the transaction that happened"
+  saleTransaction: SaleTransaction
+}
+
+type CreatorTokenRevenueSplitIssuedEventData {
+  "Token for which split was issued"
+  token: CreatorToken
+
+  "Details of the revenue split"
+  revenueShare: RevenueShare
 }

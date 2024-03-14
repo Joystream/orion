@@ -5,8 +5,16 @@ import fs from 'fs'
 import path from 'path'
 import { EntityManager } from 'typeorm'
 import * as model from '../model'
+import {
+  AccountNotificationPreferences,
+  fromJsonDeliveryStatus,
+  fromJsonNotificationType,
+  fromJsonReadOrUnread,
+  fromJsonRecipientType,
+} from '../model'
 import { uniqueId } from './crypto'
-import { defaultNotificationPreferences } from './notification/helpers'
+import { defaultNotificationPreferences, notificationPrefAllTrue } from './notification/helpers'
+import { EntityManagerOverlay } from './overlay'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -112,11 +120,51 @@ function migrateExportDataToV320(data: ExportedData): ExportedData {
   return data
 }
 
+export function setCrtNotificationPreferences(
+  notificationPreferencesObj: any
+): AccountNotificationPreferences {
+  notificationPreferencesObj.crtIssued = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketBurn = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueSharePlanned = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareEnded = notificationPrefAllTrue()
+  const notificationPreferences = new AccountNotificationPreferences(
+    undefined,
+    notificationPreferencesObj
+  )
+  return notificationPreferences
+}
+
+function migrateExportDataToV400(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    // account will find himself with all CRT notification pref. enabled by default
+    account.notificationPreferences = setCrtNotificationPreferences(
+      account.notificationPreferences as AccountNotificationPreferences
+    )
+  })
+
+  data.Notification?.values.forEach((notification) => {
+    notification.notificationType = fromJsonNotificationType(notification.notificationType)
+    notification.status = fromJsonReadOrUnread(notification.status)
+    notification.recipient = fromJsonRecipientType(notification.recipient)
+  })
+
+  data.EmailDeliveryAttempt?.values.forEach((emailDeliveryAttempt) => {
+    emailDeliveryAttempt.status = fromJsonDeliveryStatus(emailDeliveryAttempt.status)
+  })
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
+    '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
@@ -199,7 +247,32 @@ export class OffchainState {
     return data
   }
 
-  public async import(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
+  private async importNextEntityIdCounters(
+    overlay: EntityManagerOverlay,
+    entityName: string,
+    data: Record<string, unknown>[]
+  ) {
+    const em = overlay.getEm()
+    assert(entityName === 'NextEntityId')
+    for (const record of data) {
+      if (em.connection.hasMetadata(record.entityName as string)) {
+        // reason: during migration the overlay would write to the database the
+        // old nextId, to avoid that directly set the 'nextId' in the Overlay
+        overlay
+          .getRepository(model[record.entityName as keyof typeof model] as any)
+          .setNextEntityId(record.nextId as number)
+      } else {
+        await em.getRepository(entityName).upsert(record, ['entityName'])
+      }
+    }
+  }
+
+  public async import(
+    overlay: EntityManagerOverlay,
+    exportFilePath = DEFAULT_EXPORT_PATH
+  ): Promise<void> {
+    const em = overlay.getEm()
+
     if (!fs.existsSync(exportFilePath)) {
       throw new Error(
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
@@ -252,7 +325,6 @@ export class OffchainState {
                 })
                 .join(', ')}
             ) AS "data"
-            ORDER BY "id"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
             fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
           )
@@ -269,7 +341,13 @@ export class OffchainState {
               values.length
             } entities left)...`
           )
-          await em.getRepository(entityName).insert(batch)
+
+          // UPSERT operation specifically for NextEntityId
+          if (entityName === 'NextEntityId') {
+            await this.importNextEntityIdCounters(overlay, entityName, batch)
+          } else {
+            await em.getRepository(entityName).insert(batch)
+          }
         }
       }
       this.logger.info(

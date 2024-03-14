@@ -12,6 +12,7 @@ enum OperatorPermission {
   EXCLUDE_CONTENT
   RESTORE_CONTENT
   SET_PUBLIC_FEED_VIDEOS
+  SET_FEATURED_CRTS
 }
 
 type User @entity @schema(name: "admin") {
@@ -174,6 +175,15 @@ type AccountNotificationPreferences {
   fundsFromCouncilReceived: NotificationPreference! #v2
   fundsToExternalWalletSent: NotificationPreference! #v2
   fundsFromWgReceived: NotificationPreference! # v2
+  crtIssued: NotificationPreference!
+  crtMarketStarted: NotificationPreference!
+  crtMarketMint: NotificationPreference!
+  crtMarketBurn: NotificationPreference!
+  crtSaleStarted: NotificationPreference!
+  crtSaleMint: NotificationPreference!
+  crtRevenueShareStarted: NotificationPreference!
+  crtRevenueSharePlanned: NotificationPreference!
+  crtRevenueShareEnded: NotificationPreference!
 }
 
 type NotificationPreference {

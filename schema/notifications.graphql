@@ -72,6 +72,9 @@ type Notification @entity {
   "timestamp"
   createdAt: DateTime!
 
+  "block after which notification should be dispatched (if null, then it should be dispatched immediately)"
+  dispatchBlock: Int
+
   "recipient"
   recipient: RecipientType!
 }
@@ -112,6 +115,16 @@ union NotificationType =
   | HigherBidPlaced # higher bid than yours made
   | AuctionWon # auction won
   | AuctionLost # auction lost
+  | CreatorTokenIssued
+  | CreatorTokenMarketStarted
+  | CreatorTokenSaleStarted
+  | CreatorTokenMarketMint
+  | CreatorTokenMarketBurn
+  | CreatorTokenSaleMint
+  | CreatorTokenRevenueShareStarted
+  | CreatorTokenRevenueSharePlanned
+  | CreatorTokenRevenueShareEnded
+
 type ChannelSuspended @variant {
   phantom: Int
 }
@@ -408,4 +421,148 @@ type NftRoyaltyPaid @variant {
 
   "bid amount"
   amount: BigInt!
+}
+
+type CreatorTokenIssued @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenSaleStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenMarketStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "channel Id used for link"
+  channelId: String!
+}
+
+type CreatorTokenMarketMint @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
+  "handle of member that minted tokens"
+  minterHandle: String!
+
+  "id of member that minted tokens"
+  minterId: String!
+
+  "amount of tokens that user minted"
+  mintedTokenAmount: BigInt!
+
+  "amount of joy that user used for minting"
+  paiedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+}
+
+type CreatorTokenMarketBurn @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
+  "handle of member that burned tokens"
+  burnerHandle: String!
+
+  "id of member that burned tokens"
+  burnerId: String!
+
+  "amount of tokens that user burned"
+  burnedTokenAmount: BigInt!
+
+  "amount of joy that user received for burning"
+  receivedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+}
+
+type CreatorTokenSaleMint @variant {
+  "channel title for notification avatar"
+  channelId: String!
+
+  "handle of member that minted tokens"
+  minterHandle: String!
+
+  "id of member that minted tokens"
+  minterId: String!
+
+  "amount of tokens that user minted"
+  mintedTokenAmount: BigInt!
+
+  "amount of joy that user used for minting"
+  paiedJoyAmount: BigInt!
+
+  "symbol of the token"
+  tokenSymbol: String!
+}
+
+type CreatorTokenRevenueShareStarted @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+
+  "id of token"
+  tokenId: String!
+}
+
+type CreatorTokenRevenueSharePlanned @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "block on which split is planned to start"
+  plannedAt: Int!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+}
+
+type CreatorTokenRevenueShareEnded @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+
+  "id of token"
+  tokenId: String!
 }

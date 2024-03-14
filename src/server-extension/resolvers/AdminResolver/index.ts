@@ -17,6 +17,7 @@ import {
   Account,
   Channel,
   ChannelRecipient,
+  CreatorToken,
   NftFeaturedOnMarketPlace,
   OperatorPermission,
   OwnedNft,
@@ -50,6 +51,8 @@ import {
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
   SetChannelsWeightsArgs,
+  SetFeaturedCrtsInput,
+  SetFeaturedCrtsResult,
   SetFeaturedNftsInput,
   SetFeaturedNftsResult,
   SetKillSwitchInput,
@@ -398,6 +401,36 @@ export class AdminResolver {
   ): Promise<SetFeaturedNftsResult> {
     const em = await this.em()
     return await setFeaturedNftsInner(em, featuredNftsIds)
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_FEATURED_CRTS))
+  @Mutation(() => SetFeaturedCrtsResult)
+  async setFeaturedCrts(
+    @Args() { featuredCrtsIds }: SetFeaturedCrtsInput
+  ): Promise<SetFeaturedCrtsResult> {
+    const em = await this.em()
+    let newNumberOfCrtsFeatured = 0
+
+    await em
+      .createQueryBuilder()
+      .update<CreatorToken>(CreatorToken)
+      .set({ isFeatured: false })
+      .where({ isFeatured: true })
+      .execute()
+
+    if (featuredCrtsIds.length) {
+      const result = await em
+        .createQueryBuilder()
+        .update<CreatorToken>(CreatorToken)
+        .set({ isFeatured: true })
+        .where({ id: In(featuredCrtsIds) })
+        .execute()
+      newNumberOfCrtsFeatured = result.affected || 0
+    }
+
+    return {
+      newNumberOfCrtsFeatured,
+    }
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.EXCLUDE_CONTENT))

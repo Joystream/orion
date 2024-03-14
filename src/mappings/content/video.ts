@@ -11,19 +11,26 @@ import {
   Channel,
   Event,
   Video,
+  VideoAssetsDeletedByModeratorEventData,
   VideoCreatedEventData,
   VideoPosted,
   VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { predictVideoLanguage } from '../../utils/language'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import {
+  deserializeMetadata,
+  genericEventFields,
+  u8aToBytes,
+  videoRelevanceManager,
+} from '../utils'
 import { processVideoMetadata } from './metadata'
 import {
   deleteVideo,
   encodeAssets,
   notifyChannelFollowers,
   parseChannelTitle,
+  parseContentActor,
   parseVideoTitle,
   processAppActionMetadata,
   processNft,
@@ -211,6 +218,28 @@ export async function processVideoDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
   await deleteVideo(overlay, contentId)
+}
+
+export async function processVideoAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, contentId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.VideoAssetsDeletedByModerator'>): Promise<void> {
+  const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new VideoAssetsDeletedByModeratorEventData({
+      video: video.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processVideoVisibilitySetByModeratorEvent({
