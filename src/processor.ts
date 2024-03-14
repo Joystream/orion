@@ -411,7 +411,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       // there is no need to recalc video relevance before orion is synced
       await overlay.updateDatabase()
       const em = overlay.getEm()
-      await offchainState.import(em)
+      await offchainState.import(overlay)
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)
