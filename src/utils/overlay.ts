@@ -86,6 +86,10 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     return this.nextId
   }
 
+  setNextEntityId(nextId: number) {
+    this.nextId = nextId
+  }
+
   // Prevents inserting strings that contain null character into the postgresql table
   // (as this would cause an error)
   private normalizeString(s: string) {

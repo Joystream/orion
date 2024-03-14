@@ -14,6 +14,7 @@ import {
 } from '../model'
 import { uniqueId } from './crypto'
 import { defaultNotificationPreferences, notificationPrefAllTrue } from './notification/helpers'
+import { EntityManagerOverlay } from './overlay'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
@@ -246,7 +247,32 @@ export class OffchainState {
     return data
   }
 
-  public async import(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
+  private async importNextEntityIdCounters(
+    overlay: EntityManagerOverlay,
+    entityName: string,
+    data: Record<string, unknown>[]
+  ) {
+    const em = overlay.getEm()
+    assert(entityName === 'NextEntityId')
+    for (const record of data) {
+      if (em.connection.hasMetadata(record.entityName as string)) {
+        // reason: during migration the overlay would write to the database the
+        // old nextId, to avoid that directly set the 'nextId' in the Overlay
+        overlay
+          .getRepository(model[record.entityName as keyof typeof model] as any)
+          .setNextEntityId(record.nextId as number)
+      } else {
+        await em.getRepository(entityName).upsert(record, ['entityName'])
+      }
+    }
+  }
+
+  public async import(
+    overlay: EntityManagerOverlay,
+    exportFilePath = DEFAULT_EXPORT_PATH
+  ): Promise<void> {
+    const em = overlay.getEm()
+
     if (!fs.existsSync(exportFilePath)) {
       throw new Error(
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
@@ -318,17 +344,7 @@ export class OffchainState {
 
           // UPSERT operation specifically for NextEntityId
           if (entityName === 'NextEntityId') {
-            for (const entity of batch) {
-              await em.query(
-                `
-                INSERT INTO "next_entity_id" ("entity_name", "next_id")
-                VALUES ($1, $2)
-                ON CONFLICT (entity_name)
-                DO UPDATE SET next_id = EXCLUDED.next_id;
-              `,
-                [entity.entityName, entity.nextId]
-              )
-            }
+            await this.importNextEntityIdCounters(overlay, entityName, batch)
           } else {
             await em.getRepository(entityName).insert(batch)
           }
