@@ -466,10 +466,12 @@ export async function createBid(
     auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
   ) {
     newBid.previousTopBidId = previousTopBidId
-    return { bid: newBid, auction, previousTopBid, auctionBids }
   }
 
-  return { bid: newBid, auction, auctionBids }
+  // Although there is no notion of a "previousTopBid" in the OpenAuction type
+  // as all active bids are considered valid, but we still return it whether the
+  // auction type is "Open" or "English" for notification purposes.
+  return { bid: newBid, auction, previousTopBid, auctionBids }
 }
 
 export async function getChannelOwnerMemberByVideoId(

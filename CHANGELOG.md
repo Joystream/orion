@@ -1,5 +1,11 @@
 # 4.0.0
 
+## Misc
+
+- Enable both in App and email notifications for `previousTopBidder` in NFT Open Auction.
+
+# 4.0.0
+
 This is Creator Tokens (CRT) release. It introduces the CRT mappings, custom resolvers and mutations.
 
 # 3.7.0
