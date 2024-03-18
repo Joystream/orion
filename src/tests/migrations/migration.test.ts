@@ -1,17 +1,15 @@
-import { EntityManager } from 'typeorm'
-import { globalEm } from '../../utils/globalEm'
-import { Account, Channel, NextEntityId, NotificationPreference } from '../../model'
 import { expect } from 'chai'
+import { EntityManager } from 'typeorm'
+import { getAccountForMemberOrFail } from '../../mappings/utils'
+import { Account, Channel, NextEntityId, NotificationPreference } from '../../model'
+import { globalEm } from '../../utils/globalEm'
 
 const arePrefsAllTrue = (account: Account) =>
   Object.values(account.notificationPreferences).every((v: NotificationPreference) => {
     return v.inAppEnabled && v.emailEnabled
   })
 const queryAccount = async (membershipId: string, em: EntityManager) => {
-  return await em.getRepository(Account).findOneOrFail({
-    where: { membershipId },
-    relations: { notifications: true },
-  })
+  return await getAccountForMemberOrFail(em, membershipId)
 }
 
 describe('Migration from 3.0.2 to 3.2.0', () => {
@@ -35,10 +33,6 @@ describe('Migration from 3.0.2 to 3.2.0', () => {
     it('notification accounts should be empty', () => {
       expect(aliceAccount.notifications).to.have.lengthOf(0)
       expect(bobAccount.notifications).to.have.lengthOf(0)
-    })
-    it('referrer channel id should be null', () => {
-      expect(aliceAccount.referrerChannelId).to.be.null
-      expect(bobAccount.referrerChannelId).to.be.null
     })
   })
   describe('Channels are migrated properly', () => {

@@ -1,8 +1,7 @@
 import { expect } from 'chai'
+import { EntityManager } from 'typeorm'
 import { Account, Auction, AuctionTypeEnglish, Channel, OwnedNft } from '../../model'
 import { globalEm } from '../../utils/globalEm'
-import { EntityManager } from 'typeorm'
-import _ from 'lodash'
 import { clearDb, populateDbWithSeedData } from './testUtils'
 
 describe('Database seed data tests', () => {
@@ -19,9 +18,9 @@ describe('Database seed data tests', () => {
     it('check that seed membership data exists', async () => {
       const result = await em
         .getRepository(Account)
-        .findOne({ where: { id: '1' }, relations: { membership: true } })
+        .findOne({ where: { id: '1' }, relations: { joystreamAccount: { memberships: true } } })
       expect(result).to.not.be.null
-      expect(result?.membership.id).to.equal('1')
+      expect(result?.joystreamAccount.memberships[0].id).to.equal('1')
     })
 
     describe('check that seed content entities exists', () => {

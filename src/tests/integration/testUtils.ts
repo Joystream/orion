@@ -5,6 +5,7 @@ import {
   Auction,
   AuctionTypeEnglish,
   Bid,
+  BlockchainAccount,
   Channel,
   Membership,
   NftOwnerChannel,
@@ -24,30 +25,35 @@ import { defaultNotificationPreferences } from '../../utils/notification'
 export async function populateDbWithSeedData() {
   const em = await globalEm
   for (let i = 0; i < 10; i++) {
+    const controllerAccountId = `controller-account-${i}`
+    const blockchainAccount = new BlockchainAccount({
+      id: controllerAccountId,
+    })
+    await em.save(blockchainAccount)
     const member = new Membership({
       createdAt: new Date(),
       id: i.toString(),
-      controllerAccount: `controller-account-${i}`,
+      controllerAccountId,
       handle: `handle-${i}`,
       handleRaw: '0x' + Buffer.from(`handle-${i}`).toString('hex'),
       totalChannelsCreated: 0,
     })
+    await em.save(member)
     const user = new User({
       id: `user-${i}`,
       isRoot: false,
     })
+    await em.save(user)
     const account = new Account({
       id: i.toString(),
       email: `test-email-${i}@example.com`,
-      isEmailConfirmed: false,
       registeredAt: new Date(),
       isBlocked: false,
       userId: user.id,
-      joystreamAccount: `test-joystream-account-${i}`,
-      membershipId: member.id,
+      joystreamAccountId: controllerAccountId,
       notificationPreferences: defaultNotificationPreferences(),
     })
-    await em.save([user, member, account])
+    await em.save(account)
   }
   for (let i = 0; i < 10; i++) {
     const channel = new Channel({

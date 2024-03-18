@@ -1,12 +1,15 @@
-import './config'
-import request from 'supertest'
-import { app } from '../index'
-import { globalEm } from '../../utils/globalEm'
-import assert from 'assert'
-import { ConfigVariable, config } from '../../utils/config'
-import { u8aToHex } from '@polkadot/util'
 import { KeyringPair } from '@polkadot/keyring/types'
+import { u8aToHex } from '@polkadot/util'
+import { cryptoWaitReady } from '@polkadot/util-crypto'
+import assert from 'assert'
+import request from 'supertest'
 import { EntityManager } from 'typeorm'
+import { Account, EncryptionArtifacts as EncryptionArtifactsEntity } from '../../model'
+import { SESSION_COOKIE_NAME } from '../../utils/auth'
+import { ConfigVariable, config } from '../../utils/config'
+import { globalEm } from '../../utils/globalEm'
+import { components } from '../generated/api-types'
+import { app } from '../index'
 import {
   EncryptionArtifacts,
   LoggedInAccountInfo,
@@ -16,10 +19,7 @@ import {
   keyring,
   prepareEncryptionArtifacts,
 } from './common'
-import { cryptoWaitReady } from '@polkadot/util-crypto'
-import { components } from '../generated/api-types'
-import { SESSION_COOKIE_NAME } from '../../utils/auth'
-import { Account, EncryptionArtifacts as EncryptionArtifactsEntity } from '../../model'
+import './config'
 
 type ChangeAccountArgs = {
   accountId: string
@@ -94,7 +94,7 @@ describe('changeAccount', () => {
       accountId,
     })
     assert(
-      account?.joystreamAccount === joystreamAccountId,
+      account?.joystreamAccountId === joystreamAccountId,
       'Blockchain account unexpectedly changed'
     )
     assert(encryptionArtifacts, 'Encryption artifacts unexpectedly deleted')
@@ -226,7 +226,7 @@ describe('changeAccount', () => {
       .getRepository(EncryptionArtifactsEntity)
       .findOneBy({ accountId })
     assert(
-      account?.joystreamAccount === joystreamAccountId,
+      account?.joystreamAccountId === joystreamAccountId,
       'Blockchain account unexpectedly changed'
     )
     assert(encryptionArtifacts, 'New encryption artifacts not saved')
@@ -253,7 +253,7 @@ describe('changeAccount', () => {
     const encryptionArtifacts = await em
       .getRepository(EncryptionArtifactsEntity)
       .findOneBy({ accountId })
-    assert(account?.joystreamAccount === alice.address, 'Blockchain account not changed')
+    assert(account?.joystreamAccountId === alice.address, 'Blockchain account not changed')
     assert(encryptionArtifacts, 'Encryption artifacts not saved')
     assert(
       (await decryptSeed(email, password, encryptionArtifacts)) === newSeed,
@@ -275,7 +275,7 @@ describe('changeAccount', () => {
     const encryptionArtifacts = await em
       .getRepository(EncryptionArtifactsEntity)
       .findOneBy({ accountId })
-    assert(account?.joystreamAccount === bob.address, 'Blockchain account not changed')
+    assert(account?.joystreamAccountId === bob.address, 'Blockchain account not changed')
     assert(!encryptionArtifacts, 'Encryption artifacts not deleted')
   })
 

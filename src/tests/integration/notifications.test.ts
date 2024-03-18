@@ -1,14 +1,15 @@
-import { EntityManager } from 'typeorm'
-import { IMemberRemarked, ReactVideo, MemberRemarked } from '@joystream/metadata-protobuf'
+import { IMemberRemarked, MemberRemarked, ReactVideo } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass } from '@joystream/metadata-protobuf/types'
-import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
-import { globalEm } from '../../utils/globalEm'
+import { Store } from '@subsquid/typeorm-store'
+import { expect } from 'chai'
+import { config as dontenvConfig } from 'dotenv'
+import Long from 'long'
+import path from 'path'
+import { EntityManager } from 'typeorm'
+import { auctionBidMadeInner } from '../../mappings/content/nft'
+import { processMemberRemarkedEvent } from '../../mappings/membership'
+import { backwardCompatibleMetaID, getAccountForMember } from '../../mappings/utils'
 import {
-  excludeChannelService,
-  verifyChannelService,
-} from '../../server-extension/resolvers/ChannelsResolver'
-import {
-  Account,
   Channel,
   ChannelExcluded,
   ChannelRecipient,
@@ -26,21 +27,19 @@ import {
   Video,
   VideoLiked,
 } from '../../model'
-import { expect } from 'chai'
+import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
+import {
+  excludeChannelService,
+  verifyChannelService,
+} from '../../server-extension/resolvers/ChannelsResolver'
+import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
+import { globalEm } from '../../utils/globalEm'
 import {
   OFFCHAIN_NOTIFICATION_ID_TAG,
   RUNTIME_NOTIFICATION_ID_TAG,
 } from '../../utils/notification/helpers'
-import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
-import { auctionBidMadeInner } from '../../mappings/content/nft'
 import { EntityManagerOverlay } from '../../utils/overlay'
-import { Store } from '@subsquid/typeorm-store'
-import { processMemberRemarkedEvent } from '../../mappings/membership'
-import Long from 'long'
-import { backwardCompatibleMetaID } from '../../mappings/utils'
-import { config as dontenvConfig } from 'dotenv'
-import path from 'path'
-import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
+import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
 
 dontenvConfig({
   path: path.resolve(__dirname, './.env'),
@@ -84,9 +83,7 @@ describe('notifications tests', () => {
       })
       const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(channel).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelVerified')
@@ -132,9 +129,7 @@ describe('notifications tests', () => {
       })
       const channel = await em.getRepository(Channel).findOneBy({ id: channelId })
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(channel).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelExcluded')
@@ -191,9 +186,7 @@ describe('notifications tests', () => {
       expect(video).not.to.be.null
       expect(video!.channel).not.to.be.null
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: video!.channel.ownerMemberId! })
+      const account = await getAccountForMember(em, video!.channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('VideoExcluded')
       expect(notification!.status.isTypeOf).to.equal('Unread')
@@ -240,9 +233,7 @@ describe('notifications tests', () => {
       const nft = await em
         .getRepository(OwnedNft)
         .findOneOrFail({ where: { id: nftId }, relations: { video: { channel: true } } })
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: nft!.video!.channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, nft!.video!.channel!.ownerMemberId!)
       const nextNotificationIdPost = await getNextNotificationId(em, false)
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('NftFeaturedOnMarketPlace')
@@ -300,9 +291,7 @@ describe('notifications tests', () => {
       notification = (await overlay
         .getRepository(Notification)
         .getById(notificationId)) as Notification | null
-      const account = (await overlay
-        .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', outbiddedMember)) as Account
+      const account = await getAccountForMember(em, outbiddedMember)
 
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('HigherBidPlaced')
@@ -328,9 +317,7 @@ describe('notifications tests', () => {
       notification = (await overlay
         .getRepository(Notification)
         .getByIdOrFail(notificationId)) as Notification
-      const account = await overlay
-        .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', channel!.ownerMemberId!)
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
 
       // complete the missing checks as above
       expect(notification).not.to.be.null
