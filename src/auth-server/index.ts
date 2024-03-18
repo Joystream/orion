@@ -1,16 +1,16 @@
-import express from 'express'
+import { createLogger } from '@subsquid/logger'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import express from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { HttpError } from 'express-openapi-validator/dist/framework/types'
-import path from 'path'
-import { AuthApiError } from './errors'
-import { createLogger } from '@subsquid/logger'
-import { authenticate, getCorsOrigin } from '../utils/auth'
-import cookieParser from 'cookie-parser'
-import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimits'
-import swaggerUi, { JsonObject } from 'swagger-ui-express'
-import YAML from 'js-yaml'
 import fs from 'fs'
+import YAML from 'js-yaml'
+import path from 'path'
+import swaggerUi, { JsonObject } from 'swagger-ui-express'
+import { authenticate, getCorsOrigin } from '../utils/auth'
+import { AuthApiError } from './errors'
+import { applyRateLimits, globalRateLimit, rateLimitsPerRoute } from './rateLimits'
 
 export const logger = createLogger('auth-api')
 
@@ -22,7 +22,7 @@ function authHandler(type: 'header' | 'cookie') {
     if (req.res) {
       req.res.locals.authContext = authContext
     }
-    return true
+    return !!authContext
   }
 }
 
