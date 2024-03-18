@@ -6,7 +6,6 @@ All URIs are relative to *http://localhost/api/v1*
 |------------- | ------------- | -------------|
 | [**anonymousAuth**](DefaultApi.md#anonymousAuth) | **POST** /anonymous-auth |  |
 | [**changeAccount**](DefaultApi.md#changeAccount) | **POST** /change-account |  |
-| [**confirmEmail**](DefaultApi.md#confirmEmail) | **POST** /confirm-email |  |
 | [**createAccount**](DefaultApi.md#createAccount) | **POST** /account |  |
 | [**getArtifacts**](DefaultApi.md#getArtifacts) | **GET** /artifacts |  |
 | [**getSessionArtifacts**](DefaultApi.md#getSessionArtifacts) | **GET** /session-artifacts |  |
@@ -64,33 +63,6 @@ No authorization required
 ### Authorization
 
 [cookieAuth](../README.md#cookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
-- **Accept**: application/json
-
-<a name="confirmEmail"></a>
-# **confirmEmail**
-> GenericOkResponseData confirmEmail(ConfirmEmailRequestData)
-
-
-
-    Confirm account&#39;s e-mail address provided during registration.
-
-### Parameters
-
-|Name | Type | Description  | Notes |
-|------------- | ------------- | ------------- | -------------|
-| **ConfirmEmailRequestData** | [**ConfirmEmailRequestData**](../Models/ConfirmEmailRequestData.md)|  | [optional] |
-
-### Return type
-
-[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
-
-### Authorization
-
-No authorization required
 
 ### HTTP request headers
 
@@ -260,7 +232,7 @@ This endpoint does not need any parameter.
 
 
 
-    Request a token to be sent to account&#39;s e-mail address, which will allow confirming the ownership of the e-mail by the user.
+    Request a token to be sent to e-mail address (as the first step of signup process), which will allow confirming the ownership of the e-mail by the user.
 
 ### Parameters
 
