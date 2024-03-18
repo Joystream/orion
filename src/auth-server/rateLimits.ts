@@ -1,6 +1,6 @@
+import { Express } from 'express'
 import rateLimit, { Options as RateLimitOptions, RateLimitRequestHandler } from 'express-rate-limit'
 import { paths } from './generated/api-types'
-import { Express } from 'express'
 
 const defaultRateLimitOptions: Partial<RateLimitOptions> = {
   standardHeaders: true,
@@ -64,12 +64,6 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
     },
   },
   '/request-email-confirmation-token': {
-    post: {
-      windowMinutes: 5,
-      limit: 10,
-    },
-  },
-  '/confirm-email': {
     post: {
       windowMinutes: 5,
       limit: 10,
