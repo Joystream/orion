@@ -22,9 +22,8 @@ import 'reflect-metadata'
 import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, MoreThan } from 'typeorm'
 import { parseVideoTitle } from '../../../mappings/content/utils'
-import { videoRelevanceManager } from '../../../mappings/utils'
+import { getAccountForMember, videoRelevanceManager } from '../../../mappings/utils'
 import {
-  Account,
   ChannelRecipient,
   Exclusion,
   OperatorPermission,
@@ -424,7 +423,7 @@ export const excludeVideoService = async (
     // in case account exist deposit notification
     const channelOwnerMemberId = video.channel.ownerMemberId
     if (channelOwnerMemberId) {
-      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      const account = await getAccountForMember(em, channelOwnerMemberId)
       await addNotification(
         em,
         account,

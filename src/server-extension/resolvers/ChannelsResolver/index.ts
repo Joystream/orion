@@ -1,60 +1,60 @@
+import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
+import { ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
+import { assertNotNull } from '@subsquid/substrate-processor'
+import { GraphQLResolveInfo } from 'graphql'
+import pLimit from 'p-limit'
 import 'reflect-metadata'
-import { Args, Query, Mutation, Resolver, Info, Ctx, UseMiddleware } from 'type-graphql'
+import { Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, IsNull } from 'typeorm'
+import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
+import { getAccountForMember } from '../../../mappings/utils'
 import {
+  Channel,
+  ChannelExcluded,
+  ChannelFollow,
+  ChannelRecipient,
+  ChannelSuspended,
+  ChannelSuspension,
+  ChannelVerification,
+  ChannelVerified,
+  Exclusion,
+  MemberRecipient,
+  Membership,
+  NewChannelFollower,
+  Report,
+  YppSuspended,
+  YppVerified,
+} from '../../../model'
+import { uniqueId } from '../../../utils/crypto'
+import { addNotification } from '../../../utils/notification'
+import { extendClause, withHiddenEntities } from '../../../utils/sql'
+import { Context } from '../../check'
+import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
+import { model } from '../model'
+import {
+  ChannelFollowResult,
   ChannelNftCollector,
   ChannelNftCollectorsArgs,
+  ChannelNftCollectorsOrderByInput,
+  ChannelReportInfo,
+  ChannelUnfollowResult,
+  ExcludeChannelArgs,
+  ExcludeChannelResult,
   ExtendedChannel,
   ExtendedChannelsArgs,
   FollowChannelArgs,
-  UnfollowChannelArgs,
   MostRecentChannelsArgs,
-  ChannelReportInfo,
   ReportChannelArgs,
-  ChannelFollowResult,
-  ChannelUnfollowResult,
-  ChannelNftCollectorsOrderByInput,
+  SuspendChannelArgs,
+  SuspendChannelResult,
   TopSellingChannelsArgs,
   TopSellingChannelsResult,
-  ExcludeChannelArgs,
-  ExcludeChannelResult,
+  UnfollowChannelArgs,
   VerifyChannelArgs,
   VerifyChannelResult,
-  SuspendChannelResult,
-  SuspendChannelArgs,
 } from './types'
-import { GraphQLResolveInfo } from 'graphql'
-import {
-  Account,
-  Channel,
-  ChannelFollow,
-  Report,
-  Membership,
-  Exclusion,
-  NewChannelFollower,
-  ChannelExcluded,
-  ChannelVerified,
-  ChannelVerification,
-  ChannelSuspension,
-  ChannelSuspended,
-  YppVerified,
-  YppSuspended,
-  ChannelRecipient,
-  MemberRecipient,
-} from '../../../model'
-import { extendClause, withHiddenEntities } from '../../../utils/sql'
 import { buildExtendedChannelsQuery, buildTopSellingChannelsQuery } from './utils'
-import { parseAnyTree } from '@subsquid/openreader/lib/opencrud/tree'
-import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
-import { ListQuery } from '@subsquid/openreader/lib/sql/query'
-import { model } from '../model'
-import { Context } from '../../check'
-import { uniqueId } from '../../../utils/crypto'
-import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
-import { addNotification } from '../../../utils/notification'
-import { assertNotNull } from '@subsquid/substrate-processor'
-import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
-import pLimit from 'p-limit'
 
 @Resolver()
 export class ChannelsResolver {
@@ -224,7 +224,7 @@ export class ChannelsResolver {
       })
 
       const ownerAccount = channel.ownerMemberId
-        ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })
+        ? await getAccountForMember(em, channel.ownerMemberId)
         : null
       if (ownerAccount) {
         if (!ctx.account) {
@@ -233,7 +233,7 @@ export class ChannelsResolver {
         }
         const followerMembership = await em
           .getRepository(Membership)
-          .findOneByOrFail({ id: ctx.account.membershipId })
+          .findOneByOrFail({ controllerAccountId: ctx.account.joystreamAccountId })
         await addNotification(
           em,
           ownerAccount,
@@ -376,9 +376,7 @@ export class ChannelsResolver {
         // in case account exist deposit notification
         const channelOwnerMemberId = channel.ownerMemberId
         if (channelOwnerMemberId) {
-          const account = await em.findOne(Account, {
-            where: { membershipId: channelOwnerMemberId },
-          })
+          const account = await getAccountForMember(em, channelOwnerMemberId)
           await addNotification(
             em,
             account,
@@ -458,7 +456,7 @@ export const excludeChannelService = async (
     // in case account exist deposit notification
     const channelOwnerMemberId = channel.ownerMemberId
     if (channelOwnerMemberId) {
-      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
+      const account = await getAccountForMember(em, channelOwnerMemberId)
       await addNotification(
         em,
         account,
@@ -508,9 +506,7 @@ export const verifyChannelService = async (em: EntityManager, channelIds: string
       // in case account exist deposit notification
       const channelOwnerMemberId = channel.ownerMemberId
       if (channelOwnerMemberId) {
-        const account = await em.findOne(Account, {
-          where: { membershipId: channelOwnerMemberId },
-        })
+        const account = await getAccountForMember(em, channelOwnerMemberId)
         await addNotification(
           em,
           account,
