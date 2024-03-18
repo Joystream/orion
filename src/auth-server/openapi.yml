@@ -140,28 +140,15 @@ paths:
           $ref: '#/components/responses/GenericTooManyRequestsResponse'
         default:
           $ref: '#/components/responses/GenericInternalServerErrorResponse'
-  /confirm-email:
-    post:
-      operationId: confirmEmail
-      x-eov-operation-handler: confirmEmail
-      description: Confirm account's e-mail address provided during registration.
-      requestBody:
-        $ref: '#/components/requestBodies/ConfirmEmailRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenericOkResponse'
-        '400':
-          $ref: '#/components/responses/ConfirmEmailBadRequestResponse'
-        '429':
-          $ref: '#/components/responses/GenericTooManyRequestsResponse'
-        default:
-          $ref: '#/components/responses/GenericInternalServerErrorResponse'
   /request-email-confirmation-token:
     post:
       operationId: requestEmailConfirmationToken
       x-eov-operation-handler: requestEmailConfirmationToken
-      description: Request a token to be sent to account's e-mail address,
+      description:
+        Request a token to be sent to e-mail address (as the first step of signup process),
         which will allow confirming the ownership of the e-mail by the user.
+      security:
+        - cookieAuth: []
       requestBody:
         $ref: '#/components/requestBodies/RequestTokenRequestBody'
       responses:
@@ -169,8 +156,6 @@ paths:
           $ref: '#/components/responses/GenericOkResponse'
         '400':
           $ref: '#/components/responses/RequestTokenBadRequestResponse'
-        '404':
-          $ref: '#/components/responses/RequestEmailConfirmationAccountNotFoundResponse'
         '429':
           $ref: '#/components/responses/RequestTokenTooManyRequestsResponse'
         default:
@@ -240,11 +225,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CreateAccountRequestData'
-    ConfirmEmailRequestBody:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ConfirmEmailRequestData'
     RequestTokenRequestBody:
       content:
         application/json:
@@ -309,12 +289,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/GenericOkResponseData'
-    ConfirmEmailBadRequestResponse:
-      description: Missing token or provided token is invalid / already used.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
     GenericUnauthorizedResponse:
       description: Access token (session id) is missing or invalid.
       content:
@@ -335,12 +309,6 @@ components:
             $ref: '#/components/schemas/GenericErrorResponseData'
     GenericTooManyRequestsResponse:
       description: Too many requests sent within a given timeframe.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenericErrorResponseData'
-    RequestEmailConfirmationAccountNotFoundResponse:
-      description: Provided e-mail address is not associated with any account.
       content:
         application/json:
           schema:
@@ -461,18 +429,17 @@ components:
                 - type: object
                   required:
                     - email
-                    - memberId
                   properties:
                     action:
                       type: string
                       enum:
                         - createAccount
-                    memberId:
-                      type: string
                     email:
                       type: string
                       pattern: ^\S+@\S+\.\S+$
                       maxLength: 255
+                    emailConfirmationToken:
+                      type: string
                     encryptionArtifacts:
                       $ref: '#/components/schemas/EncryptionArtifacts'
     ChangeAccountRequestData:
@@ -495,14 +462,6 @@ components:
                       type: string
                     newArtifacts:
                       $ref: '#/components/schemas/EncryptionArtifacts'
-    ConfirmEmailRequestData:
-      type: object
-      required:
-        - token
-      properties:
-        token:
-          type: string
-          description: Confirmation token recieved by the user via an e-mail.
     RequestTokenRequestData:
       type: object
       required:
