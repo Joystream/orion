@@ -112,31 +112,20 @@ type Account @entity @schema(name: "admin") {
   "Gateway account's e-mail address"
   email: String! @unique
 
-  """
-  Indicates whether the gateway account's e-mail has been confirmed or not.
-  """
-  isEmailConfirmed: Boolean!
-
   "Indicates whether the access to the gateway account is blocked"
   isBlocked: Boolean!
 
   "Time when the gateway account was registered"
   registeredAt: DateTime!
 
-  "On-chain membership associated with the gateway account"
-  membership: Membership! @unique
-
   "Blockchain (joystream) account associated with the gateway account"
-  joystreamAccount: String! @unique
+  joystreamAccount: BlockchainAccount! @unique
 
   "runtime notifications"
   notifications: [Notification!]! @derivedFrom(field: "account")
 
   "notification preferences for the account"
   notificationPreferences: AccountNotificationPreferences!
-
-  "ID of the channel which referred the user to the platform"
-  referrerChannelId: String
 }
 
 type AccountNotificationPreferences {
@@ -213,4 +202,27 @@ type Token @entity @schema(name: "admin") {
 
   "The account the token was issued for"
   issuedFor: Account!
+}
+
+type EmailConfirmationToken @entity @schema(name: "admin") {
+  "The token itself (32-byte string, securely random)"
+  id: ID!
+
+  "When was the token issued"
+  issuedAt: DateTime!
+
+  "When does the token expire or when has it expired"
+  expiry: DateTime!
+
+  # "The User the token was issued for"
+  # issuedFor: User!
+
+  "The email the token was issued for"
+  email: String!
+
+  # "Indicates whether the token has been confirmed or not"
+  # isConfirmed: Boolean!
+
+  # "Time when the token was confirmed"
+  # confirmedAt: DateTime
 }

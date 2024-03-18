@@ -8,6 +8,14 @@ type AvatarUri @variant {
   avatarUri: String!
 }
 
+type BlockchainAccount @entity {
+  "The blockchain account id/address"
+  id: ID!
+
+  "Membership associated with the blockchain account (controllerAccount)"
+  memberships: [Membership!] @derivedFrom(field: "controllerAccount")
+}
+
 union Avatar = AvatarObject | AvatarUri
 
 type MemberMetadata @entity {
@@ -41,7 +49,7 @@ type Membership @entity {
   metadata: MemberMetadata @derivedFrom(field: "member")
 
   "Member's controller account id"
-  controllerAccount: String!
+  controllerAccount: BlockchainAccount!
 
   "Auctions in which is this user whitelisted to participate"
   whitelistedInAuctions: [AuctionWhitelistedMember!] @derivedFrom(field: "member")
