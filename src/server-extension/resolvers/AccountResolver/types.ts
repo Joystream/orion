@@ -1,4 +1,6 @@
-import { Field, ObjectType } from 'type-graphql'
+import { IsUrl } from 'class-validator'
+import { ArgsType, Field, ObjectType } from 'type-graphql'
+import { BlockchainAccount } from '../../../model'
 import { AccountNotificationPreferencesOutput } from '../NotificationResolver/types'
 
 @ObjectType()
@@ -19,17 +21,49 @@ export class AccountData {
   email!: string
 
   @Field(() => String, { nullable: false })
-  joystreamAccount!: string
-
-  @Field(() => Boolean, { nullable: false })
-  isEmailConfirmed!: boolean
-
-  @Field(() => String, { nullable: false })
-  membershipId: string
+  joystreamAccount!: BlockchainAccount
 
   @Field(() => [FollowedChannel], { nullable: false })
   followedChannels: FollowedChannel[]
 
   @Field(() => AccountNotificationPreferencesOutput, { nullable: true })
   preferences?: AccountNotificationPreferencesOutput
+}
+
+@ArgsType()
+export class CreateAccountMembershipArgs {
+  @Field(() => String, { nullable: false, description: 'Membership Handle' })
+  handle: string
+
+  @Field(() => String, { description: 'Membership avatar URL' })
+  @IsUrl({ require_tld: false })
+  avatar: string
+
+  @Field(() => String, { description: '`about` information to associate with new Membership' })
+  about: string
+
+  @Field(() => String, { description: 'Membership name' })
+  name: string
+}
+
+@ObjectType()
+export class CreateAccountMembershipResult {
+  @Field(() => String, { nullable: false })
+  accountId!: string
+
+  @Field(() => Number, { nullable: false })
+  memberId: number
+}
+
+export type FaucetRegisterMembershipParams = {
+  address: string
+  handle: string
+  avatar: string
+  about: string
+  name: string
+}
+
+export type FaucetRegisterMembershipResponse = {
+  memberId: number
+  block: number
 }
