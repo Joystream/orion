@@ -74,6 +74,7 @@ import {
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
+import { getMemberControllerAccount } from '../membership/utils'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -466,10 +467,12 @@ export async function createBid(
     auction.auctionType.isTypeOf === 'AuctionTypeEnglish'
   ) {
     newBid.previousTopBidId = previousTopBidId
-    return { bid: newBid, auction, previousTopBid, auctionBids }
   }
 
-  return { bid: newBid, auction, auctionBids }
+  // Although there is no notion of a "previous top bid" in the OpenAuction type
+  // as all active bids are considered valid, but we still return it whether the
+  // auction type is "Open" or "English" for notification purposes.
+  return { bid: newBid, auction, previousTopBid, auctionBids }
 }
 
 export async function getChannelOwnerMemberByVideoId(
@@ -654,7 +657,13 @@ export async function getFollowersAccountsForChannel(
   const limit = pLimit(10) // Limit to 10 concurrent promises
   const followersAccounts: (Account | null)[] = await Promise.all(
     followersUserIds.map((userId) =>
-      limit(async () => await overlay.getEm().getRepository(Account).findOneBy({ userId }))
+      limit(
+        async () =>
+          await overlay
+            .getEm()
+            .getRepository(Account)
+            .findOne({ where: { userId }, relations: { joystreamAccount: { memberships: true } } })
+      )
     )
   )
 
@@ -676,10 +685,11 @@ export async function getAccountForMember(
   if (!memberId) {
     return null
   }
+
   // accounts are created by orion_auth_api and updated by orion_graphql-server
   const memberAccount = await overlay
     .getRepository(Account)
-    .getOneByRelation('membershipId', memberId)
+    .getOneByRelation('joystreamAccountId', await getMemberControllerAccount(overlay, memberId))
   return (memberAccount as Account) ?? null
 }
 
@@ -754,7 +764,7 @@ export async function notifyChannelFollowers(
     await addNotification(
       overlay,
       followerAccount,
-      new MemberRecipient({ membership: followerAccount.membershipId }),
+      new MemberRecipient({ membership: followerAccount.joystreamAccount.memberships[0].id }), // TODO: handle multiple memberships (i.e. follower account address owns multiple memberships). Also, consider a scenario where a follower account has no memberships.
       notificationType,
       event
     )
