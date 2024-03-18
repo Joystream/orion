@@ -1,14 +1,14 @@
 import express from 'express'
-import { AuthContext } from '../../utils/auth'
+import { Session } from '../../model'
 import { globalEm } from '../../utils/globalEm'
-import { components } from '../generated/api-types'
 import { BadRequestError } from '../errors'
+import { components } from '../generated/api-types'
 
 type ReqParams = Record<string, string>
 type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 
 export const logout: (
   req: express.Request<ReqParams, ResBody>,

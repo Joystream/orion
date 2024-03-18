@@ -1,15 +1,15 @@
 import express from 'express'
-import { NotFoundError, UnauthorizedError } from '../errors'
+import { Session, SessionEncryptionArtifacts } from '../../model'
 import { globalEm } from '../../utils/globalEm'
-import { SessionEncryptionArtifacts } from '../../model'
+import { NotFoundError, UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
-import { AuthContext } from '../../utils/auth'
 
+// TODO: ensure that encryption artifacts for expired sessions are removed
 type ReqParams = Record<string, unknown>
 type ResBody =
   | components['schemas']['SessionEncryptionArtifacts']
   | components['schemas']['GenericErrorResponseData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 
 export const getSessionArtifacts: (
   req: express.Request<ReqParams, ResBody>,
@@ -19,7 +19,7 @@ export const getSessionArtifacts: (
   try {
     const em = await globalEm
     const { authContext: session } = res.locals
-    if (!session?.account) {
+    if (!session.account) {
       throw new UnauthorizedError('Cannot get session artifacts for anonymous session')
     }
     const artifacts = await em
