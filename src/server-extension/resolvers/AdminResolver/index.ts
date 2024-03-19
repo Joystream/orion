@@ -515,6 +515,9 @@ export class AdminResolver {
 export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: string[]) => {
   let newNumberOfNftsFeatured = 0
 
+  const currentFeaturedNft = await em.find(OwnedNft, { where: { isFeatured: true } })
+  const currentFeaturedNftIds = currentFeaturedNft.map((nft) => nft.id)
+
   await em
     .createQueryBuilder()
     .update<OwnedNft>(OwnedNft)
@@ -537,7 +540,9 @@ export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: s
         where: { id: featuredNftId },
         relations: { video: { channel: true } },
       })
-      if (featuredNft?.video?.channel) {
+      const alreadyFeatured = currentFeaturedNftIds.includes(featuredNftId)
+      // this will avoid duplicated notifications if the nft was reselected as featured
+      if (!alreadyFeatured && featuredNft?.video?.channel) {
         const notificationData = {
           videoId: featuredNft.video.id,
           videoTitle: parseVideoTitle(featuredNft.video),
