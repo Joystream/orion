@@ -625,7 +625,7 @@ export async function processRevenueSplitIssuedEvent({
 
   token.currentRevenueShareId = id
 
-  overlay.getRepository(Event).new({
+  const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
     data: new CreatorTokenRevenueSplitIssuedEventData({
       token: tokenId.toString(),
@@ -646,7 +646,7 @@ export async function processRevenueSplitIssuedEvent({
     overlay,
     tokenId.toString(),
     revenueShareStartedNotification,
-    undefined,
+    event,
     startBlock // schedule for start block
   )
 
@@ -660,7 +660,7 @@ export async function processRevenueSplitIssuedEvent({
       tokenSymbol: parseCreatorTokenSymbol(token),
     })
 
-    await notifyTokenHolders(overlay, tokenId.toString(), revenueSharePlannedNotification)
+    await notifyTokenHolders(overlay, tokenId.toString(), revenueSharePlannedNotification, event)
   }
 
   const revenueSharedEndedNotification = new CreatorTokenRevenueShareEnded({
@@ -674,7 +674,7 @@ export async function processRevenueSplitIssuedEvent({
     overlay,
     tokenId.toString(),
     revenueSharedEndedNotification,
-    undefined,
+    event,
     endsAt // schedule for end block
   )
 }
