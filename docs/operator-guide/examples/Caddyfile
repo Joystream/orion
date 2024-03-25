@@ -13,5 +13,6 @@ archive.{$GATEWAY_ROOT_DOMAIN} {
 # # Optional: uncomment to serve atlas statically on the server
 # {$GATEWAY_ROOT_DOMAIN} {
 #     root * /srv/atlas
+#     try_files {path} /index.html
 #     file_server
 # }
