@@ -17,10 +17,25 @@ services:
       - orion_db_data:/var/lib/postgresql/data
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
 
+  interactions_db:
+    image: mongo:latest
+    container_name: interactions_db
+    hostname: interactions_db
+    restart: unless-stopped
+    shm_size: 1g
+    command: ['mongod', '--port', '${INTERACTIONS_DB_PORT}']
+    ports:
+      - '${INTERACTIONS_DB_PORT}:${INTERACTIONS_DB_PORT}'
+    volumes:
+      - interactions_db_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: squid
+      MONGO_INITDB_ROOT_PASSWORD: squid
+
   orion_processor:
     container_name: orion_processor
     hostname: orion_processor
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -40,7 +55,7 @@ services:
   orion_graphql-server:
     container_name: orion_graphql-server
     hostname: orion_graphql-server
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -61,7 +76,7 @@ services:
   orion_auth-api:
     container_name: orion_auth-api
     hostname: orion_auth-api
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -82,7 +97,7 @@ services:
   orion_interations-api:
     container_name: orion_interations-api
     hostname: orion_interations-api
-    image: node:14
+    image: node:18
     restart: unless-stopped
     env_file:
       - .env
@@ -102,6 +117,7 @@ services:
 
 volumes:
   orion_db_data:
+  interactions_db_data:
 
 networks:
   default:
