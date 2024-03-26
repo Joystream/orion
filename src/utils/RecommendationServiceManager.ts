@@ -46,7 +46,7 @@ export class RecommendationServiceManager {
       !process.env.RECOMMENDATION_SERVICE_DATABASE
     ) {
       recommendationServiceLogger.error(
-        'RecommendationServiceManager initalized without required variables'
+        'RecommendationServiceManager initialized without required variables'
       )
       return
     }
@@ -212,7 +212,7 @@ export class RecommendationServiceManager {
   }
 
   enableSync() {
-    this._enabled = true
+    this._enabled = !!this.client
   }
 
   private async sendBatchRequest(requests: ClientRequests.Request[]) {
@@ -348,11 +348,16 @@ export class RecommendationServiceManager {
   }
 
   initBatchLoop() {
+    if (!this.client) {
+      // Avoid initialization if client is not available
+      return
+    }
     if (this._loopInitialized) {
       throw new Error('update loop was initialized more than once')
     }
+    recommendationServiceLogger.info('Initializing interactions update loop...')
     this._loopInitialized = true
-    this._batchUpdateLoop(30 * 1_000) // 5mins
+    this._batchUpdateLoop(30 * 1_000) // 5 mins
       .then(() => {
         /* Do nothing */
       })

@@ -39,17 +39,24 @@ typegen:
 prepare: install codegen build setup-recommendations
 
 up-squid:
-	@docker network create joystream_default || true
-	@docker-compose up -d
+	@set -a; \
+	source .env; \
+	set +a; \
+	docker network create joystream_default || true; \
+	if [ -z "$$RECOMMENDATION_SERVICE_PRIVATE_KEY" ] && [ -z "$$RECOMMENDATION_SERVICE_DATABASE"]; then \
+		docker-compose up -d; \
+	else \
+		docker-compose --profile interactions up -d; \
+	fi \
 
 up-archive:
-	@docker network create joystream_default || true
+	@docker network create joystream_default || truee
 	@docker-compose -f archive/docker-compose.yml up -d
 
 up: up-archive up-squid
 
 down-squid:
-	@docker-compose down -v
+	@docker-compose down -v --remove-orphans
 
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v

@@ -12,9 +12,11 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express'
 import YAML from 'js-yaml'
 import fs from 'fs'
 import { recommendationServiceManager } from '../utils/RecommendationServiceManager'
+import { initInteractionsDb } from './interactionsEm'
 
 recommendationServiceManager.enableSync()
 recommendationServiceManager.initBatchLoop()
+initInteractionsDb().then(() => undefined)
 
 export const logger = createLogger('interactions-api')
 

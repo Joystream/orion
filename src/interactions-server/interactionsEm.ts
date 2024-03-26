@@ -3,7 +3,7 @@ import { createLogger } from '@subsquid/logger'
 
 const interactionsEmLogger = createLogger('interactionsEm')
 
-async function initInteractionsDb() {
+export async function initInteractionsDb() {
   let instance: typeof mongoose | null = null
   try {
     interactionsEmLogger.info(`Initializing interactions database connection...`)
@@ -22,9 +22,6 @@ async function initInteractionsDb() {
   }
   return instance
 }
-
-// eslint-disable-next-line no-void
-void initInteractionsDb()
 
 const PurchaseModel = mongoose.model(
   'Purchase',

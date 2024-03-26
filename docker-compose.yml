@@ -21,6 +21,7 @@ services:
     image: mongo:latest
     container_name: interactions_db
     hostname: interactions_db
+    profiles: ['interactions']
     restart: unless-stopped
     shm_size: 1g
     command: ['mongod', '--port', '${INTERACTIONS_DB_PORT}']
@@ -94,9 +95,10 @@ services:
     ports:
       - '${AUTH_API_PORT}:${AUTH_API_PORT}'
 
-  orion_interations-api:
-    container_name: orion_interations-api
-    hostname: orion_interations-api
+  orion_interactions-api:
+    container_name: orion_interactions-api
+    hostname: orion_interactions-api
+    profiles: ['interactions']
     image: node:18
     restart: unless-stopped
     env_file:
