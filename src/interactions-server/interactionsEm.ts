@@ -26,16 +26,43 @@ async function initInteractionsDb() {
 // eslint-disable-next-line no-void
 void initInteractionsDb()
 
-const InteractionsModel = mongoose.model(
-  'Interaction',
-  new mongoose.Schema(
-    {
-      type: String,
-      itemId: String,
-      timestamp: Date,
-    },
-    { strict: false }
-  )
+const PurchaseModel = mongoose.model(
+  'Purchase',
+  new mongoose.Schema({
+    itemId: String,
+    timestamp: Date,
+    userId: String,
+  })
 )
 
-export { InteractionsModel }
+const RatingModel = mongoose.model(
+  'Rating',
+  new mongoose.Schema({
+    itemId: String,
+    timestamp: Date,
+    rating: Number,
+    userId: String,
+  })
+)
+
+const DetailViewModel = mongoose.model(
+  'DetailView',
+  new mongoose.Schema({
+    itemId: String,
+    timestamp: Date,
+    duration: Number,
+    userId: String,
+  })
+)
+
+const VideoPortionModel = mongoose.model(
+  'VideoPortion',
+  new mongoose.Schema({
+    itemId: String,
+    timestamp: Date,
+    portion: Number,
+    userId: String,
+  })
+)
+
+export { PurchaseModel, RatingModel, DetailViewModel, VideoPortionModel }

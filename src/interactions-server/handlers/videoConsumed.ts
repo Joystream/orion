@@ -4,6 +4,7 @@ import { components } from '../generated/api-types'
 import { AuthContext } from '../../utils/auth'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 import { singlePurchaseLimiter } from '../interactionsLimiter'
+import { PurchaseModel, RatingModel } from '../interactionsEm'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -19,7 +20,7 @@ export const videoConsumed: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const { authContext: session } = res.locals
-    const { itemId, recommId } = req.body
+    const { itemId } = req.body
     if (!session || !session.userId || session.expiry.getTime() < Date.now()) {
       throw new UnauthorizedError('Session unavailable or expired')
     }
@@ -34,7 +35,14 @@ export const videoConsumed: (
       throw new TooManyRequestsError('Too many requests')
     }
 
-    recommendationServiceManager.scheduleItemConsumed(`${itemId}-video`, session.userId, recommId)
+    const row = new PurchaseModel({
+      itemId: `${itemId}-video`,
+      timestamp: new Date(),
+      userId: recommendationServiceManager.mapUserId(session.userId),
+    })
+    await row.save()
+
+    // recommendationServiceManager.scheduleItemConsumed(`${itemId}-video`, session.userId, recommId)
 
     res.status(200).json({ success: true })
   } catch (e) {

@@ -4,6 +4,7 @@ import { components } from '../generated/api-types'
 import { AuthContext } from '../../utils/auth'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 import { singleClickLimiter } from '../interactionsLimiter'
+import { DetailViewModel } from '../interactionsEm'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -35,12 +36,20 @@ export const videoClicked: (
       throw new TooManyRequestsError('Too many requests')
     }
 
-    recommendationServiceManager.scheduleClickEvent(
-      `${itemId}-video`,
-      session.userId,
+    const row = new DetailViewModel({
+      itemId: `${itemId}-video`,
+      timestamp: new Date(),
+      userId: recommendationServiceManager.mapUserId(session.userId),
       duration,
-      recommId
-    )
+    })
+    await row.save()
+
+    // recommendationServiceManager.scheduleClickEvent(
+    //   `${itemId}-video`,
+    //   session.userId,
+    //   duration,
+    //   recommId
+    // )
 
     res.status(200).json({ success: true })
   } catch (e) {

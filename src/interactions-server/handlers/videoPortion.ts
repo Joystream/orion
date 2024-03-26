@@ -3,6 +3,7 @@ import { BadRequestError, UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
 import { AuthContext } from '../../utils/auth'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
+import { PurchaseModel, VideoPortionModel } from '../interactionsEm'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -28,12 +29,20 @@ export const videoPortion: (
       throw new BadRequestError('Request missing parameters')
     }
 
-    recommendationServiceManager.scheduleViewPortion(
-      `${itemId}-video`,
-      session.userId,
+    const row = new VideoPortionModel({
+      itemId: `${itemId}-video`,
+      timestamp: new Date(),
+      userId: recommendationServiceManager.mapUserId(session.userId),
       portion,
-      recommId
-    )
+    })
+    await row.save()
+
+    // recommendationServiceManager.scheduleViewPortion(
+    //   `${itemId}-video`,
+    //   session.userId,
+    //   portion,
+    //   recommId
+    // )
 
     res.status(200).json({ success: true })
   } catch (e) {

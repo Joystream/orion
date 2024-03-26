@@ -1,9 +1,13 @@
 import express from 'express'
 import { BadRequestError, TooManyRequestsError, UnauthorizedError } from '../errors'
 import { singleClickLimiter } from '../interactionsLimiter'
-import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
+import {
+  RecommendationServiceManager,
+  recommendationServiceManager,
+} from '../../utils/RecommendationServiceManager'
 import { components } from '../generated/api-types'
 import { AuthContext } from '../../utils/auth'
+import { DetailViewModel } from '../interactionsEm'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -19,7 +23,7 @@ export const channelClicked = async (
 ) => {
   try {
     const { authContext: session } = res.locals
-    const { itemId, duration, recommId } = req.body
+    const { itemId, duration } = req.body
 
     if (!session || !session.userId || session.expiry.getTime() < Date.now()) {
       throw new UnauthorizedError('Session unavailable or expired')
@@ -35,12 +39,20 @@ export const channelClicked = async (
       throw new TooManyRequestsError('Too many requests')
     }
 
-    recommendationServiceManager.scheduleClickEvent(
-      `${itemId}-channel`,
-      session.userId,
+    const row = new DetailViewModel({
+      itemId: `${itemId}-channel`,
+      timestamp: new Date(),
+      userId: recommendationServiceManager.mapUserId(session.userId),
       duration,
-      recommId
-    )
+    })
+    await row.save()
+
+    // recommendationServiceManager.scheduleClickEvent(
+    //   `${itemId}-channel`,
+    //   session.userId,
+    //   duration,
+    //   recommId
+    // )
 
     res.status(200).json({ success: true })
   } catch (e) {

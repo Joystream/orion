@@ -35,8 +35,8 @@ async function main() {
     !process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY ||
     !process.env.RECOMMENDATION_SERVICE_DATABASE
   ) {
-    console.error('RecommendationServiceManager initalized without required variables')
-    throw new Error()
+    console.error('Missing required variables for setting up Recombee. Skipping...')
+    process.exit(1)
   }
 
   const client = new ApiClient(
