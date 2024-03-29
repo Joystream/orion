@@ -768,7 +768,7 @@ export async function processRevenueSplitLeftEvent({
       await overlay
         .getRepository(RevenueShareParticipation)
         .getManyByRelation('accountId', account.id)
-    ).find((participation) => participation.revenueShareId === revenueShare.id)
+    ).find((participation) => participation.recovered === false)
     if (qRevenueShareParticipation) {
       qRevenueShareParticipation.recovered = true
     }
