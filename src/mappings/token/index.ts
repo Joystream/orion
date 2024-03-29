@@ -757,21 +757,21 @@ export async function processRevenueSplitLeftEvent({
 }: EventHandlerContext<'ProjectToken.RevenueSplitLeft'>) {
   const account = await getTokenAccountByMemberByTokenOrFail(overlay, memberId, tokenId)
   account.stakedAmount -= unstakedAmount
-  const token = await overlay.getRepository(CreatorToken).getByIdOrFail(tokenId.toString())
-  if (token.currentRevenueShareId) {
-    // TODO: refactor this as should be true all the times, might be a good idea to panic
+
+  const revenueShareParticipation = (
+    await overlay
+      .getRepository(RevenueShareParticipation)
+      .getManyByRelation('accountId', account.id)
+  ).find((participation) => participation.recovered === false)
+
+  if (revenueShareParticipation) {
+    revenueShareParticipation.recovered = true
+
     const revenueShare = await overlay
       .getRepository(RevenueShare)
-      .getByIdOrFail(token.currentRevenueShareId)
+      .getByIdOrFail(revenueShareParticipation.revenueShareId || '')
+
     revenueShare.participantsNum -= 1
-    const qRevenueShareParticipation = (
-      await overlay
-        .getRepository(RevenueShareParticipation)
-        .getManyByRelation('accountId', account.id)
-    ).find((participation) => participation.recovered === false)
-    if (qRevenueShareParticipation) {
-      qRevenueShareParticipation.recovered = true
-    }
   }
 }
 
