@@ -57,7 +57,7 @@ export class TokenResolver {
       cumulativeAllocationAmount += share.allocation
     }
     return {
-      cumulativeHistoricalAllocation: Number(cumulativeAllocationAmount),
+      cumulativeHistoricalAllocation: cumulativeAllocationAmount.toString(),
     }
   }
 
