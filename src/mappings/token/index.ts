@@ -766,12 +766,6 @@ export async function processRevenueSplitLeftEvent({
 
   if (revenueShareParticipation) {
     revenueShareParticipation.recovered = true
-
-    const revenueShare = await overlay
-      .getRepository(RevenueShare)
-      .getByIdOrFail(revenueShareParticipation.revenueShareId || '')
-
-    revenueShare.participantsNum -= 1
   }
 }
 
