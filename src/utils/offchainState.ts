@@ -2,8 +2,9 @@ import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
 import { createParseStream, createStringifyStream } from 'big-json'
 import fs from 'fs'
+import { snakeCase } from 'lodash'
 import path from 'path'
-import { EntityManager } from 'typeorm'
+import { EntityManager, ValueTransformer } from 'typeorm'
 import * as model from '../model'
 import {
   AccountNotificationPreferences,
@@ -35,7 +36,7 @@ type ClassConstructors<T> = {
 type ExportedStateMap = {
   [K in keyof ClassConstructors<typeof model>]?:
     | true
-    | (keyof SnakeCaseKeys<InstanceType<ClassConstructors<typeof model>[K]>>)[]
+    | (keyof InstanceType<ClassConstructors<typeof model>[K]>)[]
 }
 
 const exportedStateMap: ExportedStateMap = {
@@ -59,17 +60,17 @@ const exportedStateMap: ExportedStateMap = {
   EmailDeliveryAttempt: true,
   Token: true,
   NextEntityId: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
-  Video: ['is_excluded', 'views_num'],
-  Comment: ['is_excluded'],
-  OwnedNft: ['is_featured'],
-  VideoCategory: ['is_supported'],
+  Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
+  Video: ['isExcluded', 'viewsNum'],
+  Comment: ['isExcluded'],
+  OwnedNft: ['isFeatured'],
+  VideoCategory: ['isSupported'],
 }
 
 type ExportedData = {
   [K in keyof typeof exportedStateMap]?: {
     type: 'insert' | 'update'
-    values: Record<string, unknown>[]
+    values: InstanceType<ClassConstructors<typeof model>[K]>[]
   }
 }
 
@@ -88,20 +89,20 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
     id: `${V2_MIGRATION_USER_PREFIX}${uniqueId()}`,
     isRoot: false,
   }
-  data.User = { type: 'insert', values: [migrationUser] }
+  data.User = { type: 'insert', values: [migrationUser as model.User] }
   const replaceIpWithUserId = (v: Record<string, unknown>) => {
     delete v.ip
     v.userId = migrationUser.id
   }
-  data.VideoViewEvent?.values.forEach(replaceIpWithUserId)
-  data.Report?.values.forEach(replaceIpWithUserId)
-  data.NftFeaturingRequest?.values.forEach(replaceIpWithUserId)
+  data.VideoViewEvent?.values.forEach(replaceIpWithUserId as any)
+  data.Report?.values.forEach(replaceIpWithUserId as any)
+  data.NftFeaturingRequest?.values.forEach(replaceIpWithUserId as any)
 
   // We don't migrate channel follows from v2, because in v3
   // an account is required in order to follow a channel
   delete data.ChannelFollow
   data.Channel?.values.forEach((v) => {
-    v.follows_num = 0
+    v.followsNum = 0
   })
 
   return data
@@ -111,8 +112,6 @@ function migrateExportDataToV320(data: ExportedData): ExportedData {
   data.Account?.values.forEach((account) => {
     // account will find himself with all notification pref. enabled by default
     account.notificationPreferences = defaultNotificationPreferences()
-    // referrer channel id is set to null
-    account.referrerChannelId = null
   })
 
   // all channels will start as unverified because they are re-synched from mappings
@@ -197,7 +196,10 @@ export class OffchainState {
                 ? await em
                     .getRepository(entityName)
                     .createQueryBuilder()
-                    .select(['id', ...(fields as unknown as string)])
+                    .select([
+                      'id',
+                      ...fields.map((field) => `${snakeCase(String(field))} AS "${String(field)}"`),
+                    ])
                     .getRawMany()
                 : await em.getRepository(entityName).find({})
               if (!values.length) {
@@ -234,8 +236,36 @@ export class OffchainState {
     return parseInt(major) * (1000 * 1000) + parseInt(minor) * 1000 + parseInt(patch)
   }
 
+  private transformJsonbProperties(data: ExportedData, em: EntityManager): ExportedData {
+    // construct proper JSONB objects from raw data
+    return Object.fromEntries(
+      Object.entries(data).map(([entityName, { type, values }]) => {
+        const metadata = em.connection.getMetadata(entityName)
+        const jsonbColumns = metadata.columns.filter((c) => c.type === 'jsonb')
+
+        values = (values as any[]).map((value) => {
+          jsonbColumns.forEach((column) => {
+            const propertyName = column.propertyName
+            const transformer = column.transformer as ValueTransformer | undefined
+            if (value[propertyName] && transformer) {
+              const rawValue = value[propertyName]
+              const transformedValue = transformer.from(rawValue)
+              value[propertyName] = transformedValue
+            }
+          })
+          return value
+        })
+
+        return [entityName, { type, values }]
+      })
+    )
+  }
+
   public prepareExportData(exportState: ExportedState, em: EntityManager): ExportedData {
     let { data } = exportState
+
+    data = this.transformJsonbProperties(data, em)
+
     Object.entries(this.migrations)
       .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)) // sort in increasing order
       .forEach(([version, fn]) => {
@@ -250,7 +280,7 @@ export class OffchainState {
   private async importNextEntityIdCounters(
     overlay: EntityManagerOverlay,
     entityName: string,
-    data: Record<string, unknown>[]
+    data: model.NextEntityId[]
   ) {
     const em = overlay.getEm()
     assert(entityName === 'NextEntityId')
@@ -297,7 +327,7 @@ export class OffchainState {
         const fieldTypes = Object.fromEntries(
           fieldNames.map((fieldName) => {
             const metaType = meta.columns.find(
-              (c) => c.databaseNameWithoutPrefixes === fieldName
+              (c) => c.databaseNameWithoutPrefixes === snakeCase(fieldName)
             )?.type
             return [fieldName, metaType === String ? 'text' : metaType]
           })
@@ -314,7 +344,7 @@ export class OffchainState {
             `UPDATE "${meta.tableName}"
             SET ${fieldNames
               .filter((f) => f !== 'id')
-              .map((f) => `"${f}" = "data"."${f}"`)
+              .map((f) => `"${snakeCase(f)}" = "data"."${f}"`)
               .join(', ')}
             FROM (
               SELECT
@@ -326,7 +356,7 @@ export class OffchainState {
                 .join(', ')}
             ) AS "data"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
-            fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
+            fieldNames.map((fieldName) => batch.map((v) => v[fieldName as keyof typeof v]))
           )
         }
       } else {
@@ -344,7 +374,11 @@ export class OffchainState {
 
           // UPSERT operation specifically for NextEntityId
           if (entityName === 'NextEntityId') {
-            await this.importNextEntityIdCounters(overlay, entityName, batch)
+            await this.importNextEntityIdCounters(
+              overlay,
+              entityName,
+              batch as model.NextEntityId[]
+            )
           } else {
             await em.getRepository(entityName).insert(batch)
           }

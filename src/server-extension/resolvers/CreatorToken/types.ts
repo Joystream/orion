@@ -23,8 +23,8 @@ export class GetCumulativeHistoricalShareAllocationArgs {
 
 @ObjectType()
 export class GetCumulativeHistoricalShareAllocationResult {
-  @Field(() => Int, { nullable: false })
-  cumulativeHistoricalAllocation!: number
+  @Field(() => String, { nullable: false })
+  cumulativeHistoricalAllocation!: string
 }
 
 @ArgsType()
