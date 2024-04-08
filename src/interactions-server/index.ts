@@ -14,11 +14,11 @@ import fs from 'fs'
 import { recommendationServiceManager } from '../utils/RecommendationServiceManager'
 import { initInteractionsDb } from './interactionsEm'
 
+export const logger = createLogger('interactions-api')
+
 recommendationServiceManager.enableSync()
 recommendationServiceManager.initBatchLoop()
-initInteractionsDb().then(() => undefined)
-
-export const logger = createLogger('interactions-api')
+initInteractionsDb()
 
 export const app = express()
 
