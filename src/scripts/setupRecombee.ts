@@ -36,7 +36,7 @@ async function main() {
     !process.env.RECOMMENDATION_SERVICE_DATABASE
   ) {
     console.error('Missing required variables for setting up Recombee. Skipping...')
-    process.exit(1)
+    return
   }
 
   const client = new ApiClient(
