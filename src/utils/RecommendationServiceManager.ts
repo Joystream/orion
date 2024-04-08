@@ -8,7 +8,8 @@ import {
 import { createLogger } from '@subsquid/logger'
 import { randomUUID } from 'crypto'
 import { stringToHex } from '@polkadot/util'
-import { predictLanguage } from './language'
+
+export type RecommendationItemId = `${string}-${'video' | 'channel'}`
 
 export type RSVideo = {
   comments_count: number
@@ -68,13 +69,12 @@ export class RecommendationServiceManager {
       return
     }
 
-    const languageText = (video.title ?? '') + (video.description ?? '')
     const actionObject: RSVideo = {
       category_id: video.categoryId ?? undefined,
       channel_id: video.channelId ?? undefined,
       comments_count: video.commentsCount,
       duration: video.duration,
-      language: predictLanguage(languageText) ?? video.language,
+      language: video.orionLanguage ?? video.language,
       reactions_count: video.reactionsCount,
       timestamp: new Date(video.createdAt),
       title: video.title,
@@ -116,7 +116,7 @@ export class RecommendationServiceManager {
 
   // this interaction has big model value and should we used for
   // reliable interactions like video viewed in 90% or nft of given video bought
-  scheduleItemConsumed(itemId: string, userId: string, recommId?: string) {
+  scheduleItemConsumed(itemId: RecommendationItemId, userId: string, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -130,7 +130,12 @@ export class RecommendationServiceManager {
   }
 
   // this interaction should be dispatched when user clicks a video to see it
-  scheduleClickEvent(itemId: string, userId: string, duration?: number, recommId?: string) {
+  scheduleClickEvent(
+    itemId: RecommendationItemId,
+    userId: string,
+    duration?: number,
+    recommId?: string
+  ) {
     if (!this._enabled) {
       return
     }
@@ -146,7 +151,12 @@ export class RecommendationServiceManager {
 
   // this interaction is for user engagement level
   // in Orion it would state how long user has watched the video
-  scheduleViewPortion(itemId: string, userId: string, portion: number, recommId?: string) {
+  scheduleViewPortion(
+    itemId: RecommendationItemId,
+    userId: string,
+    portion: number,
+    recommId?: string
+  ) {
     if (!this._enabled) {
       return
     }
@@ -164,7 +174,7 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
-  scheduleItemBookmark(itemId: string, userId: string, recommId?: string) {
+  scheduleItemBookmark(itemId: RecommendationItemId, userId: string, recommId?: string) {
     if (!this._enabled) {
       return
     }
@@ -177,7 +187,7 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
-  deleteItemBookmark(itemId: string, userId: string) {
+  deleteItemBookmark(itemId: RecommendationItemId, userId: string) {
     if (!this._enabled) {
       return
     }
@@ -186,7 +196,12 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
-  scheduleItemRating(itemId: string, userId: string, rating: number, recommId?: string) {
+  scheduleItemRating(
+    itemId: RecommendationItemId,
+    userId: string,
+    rating: number,
+    recommId?: string
+  ) {
     if (!this._enabled) {
       return
     }
@@ -202,7 +217,7 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
-  deleteItemRating(itemId: string, userId: string) {
+  deleteItemRating(itemId: RecommendationItemId, userId: string) {
     if (!this._enabled) {
       return
     }
@@ -286,7 +301,7 @@ export class RecommendationServiceManager {
     return this.mapRecommendationResponse(res)
   }
 
-  async recommendItemsToItem(itemId: string, userId?: string, opts?: CommonOptions) {
+  async recommendItemsToItem(itemId: RecommendationItemId, userId?: string, opts?: CommonOptions) {
     const request = new ClientRequests.RecommendItemsToItem(
       itemId,
       userId ? this.mapUserId(userId) : randomUUID(),
@@ -308,7 +323,7 @@ export class RecommendationServiceManager {
     return this.mapRecommendationResponse(res)
   }
 
-  async recommendNextVideo(itemId: string, userId?: string, opts?: CommonOptions) {
+  async recommendNextVideo(itemId: RecommendationItemId, userId?: string, opts?: CommonOptions) {
     const request = new ClientRequests.RecommendItemsToItem(
       itemId,
       userId ? this.mapUserId(userId) : randomUUID(),

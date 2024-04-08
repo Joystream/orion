@@ -1,21 +1,6 @@
-import {
-  RelayConnectionRequest,
-  decodeRelayConnectionCursor,
-} from '@subsquid/openreader/lib/ir/connection'
-import { AnyFields } from '@subsquid/openreader/lib/ir/fields'
-import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
-import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
-import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
-import { ConnectionQuery, CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
-import {
-  getResolveTree,
-  getTreeRequest,
-  hasTreeRequest,
-  simplifyResolveTree,
-} from '@subsquid/openreader/lib/util/resolve-tree'
-import { ensureArray } from '@subsquid/openreader/lib/util/util'
-import { UserInputError } from 'apollo-server-core'
+import { CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { GraphQLResolveInfo } from 'graphql'
 import { isObject } from 'lodash'
 import 'reflect-metadata'
@@ -39,22 +24,26 @@ import { has } from '../../../utils/misc'
 import { addNotification } from '../../../utils/notification'
 import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { Context } from '../../check'
-import {RecommendedVideosQuery, Video as VideoReturnType, VideosConnection} from '../baseTypes'
+import { RecommendedVideosQuery, Video as VideoReturnType, VideosConnection } from '../baseTypes'
 import { OperatorOnly, UserOnly } from '../middleware'
 import { model } from '../model'
 import {
-    AddVideoViewResult,
-    DumbPublicFeedArgs,
-    ExcludeVideoInfo, HomepageVideoQueryArgs,
-    MostViewedVideosConnectionArgs, NextVideoQueryArgs,
-    PublicFeedOperationType,
-    ReportVideoArgs,
-    SetOrUnsetPublicFeedArgs,
-    SetOrUnsetPublicFeedResult, SimiliarVideosQueryArgs,
-    VideoReportInfo,
+  AddVideoViewResult,
+  DumbPublicFeedArgs,
+  ExcludeVideoInfo,
+  HomepageVideoQueryArgs,
+  MostViewedVideosConnectionArgs,
+  NextVideoQueryArgs,
+  PublicFeedOperationType,
+  ReportVideoArgs,
+  SetOrUnsetPublicFeedArgs,
+  SetOrUnsetPublicFeedResult,
+  SimiliarVideosQueryArgs,
+  VideoReportInfo,
 } from './types'
-import {buildRecommendationsVideoQuery, convertVideoWhereIntoReQlQuery} from "./utils";
-import {recommendationServiceManager} from "../../../utils/RecommendationServiceManager";
+import { buildRecommendationsVideoQuery, convertVideoWhereIntoReQlQuery } from './utils'
+import { recommendationServiceManager } from '../../../utils/RecommendationServiceManager'
+import { createConnectionQueryFromParams } from '../../../utils/subsquid'
 
 @Resolver()
 export class VideosResolver {
@@ -118,7 +107,7 @@ export class VideosResolver {
   }
 
   @Query(() => RecommendedVideosQuery)
-  async similiarVideos(
+  async similarVideos(
     @Args()
     args: SimiliarVideosQueryArgs,
     @Info() info: GraphQLResolveInfo,

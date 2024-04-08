@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
-  title: Orion authentication API
-  description: Orion API for handling authentication, account creation and related activites
+  title: Orion interactions API
+  description: Orion API for handling user interactions such as clicking, watching videos
   contact:
     email: info@joystream.org
   license:
