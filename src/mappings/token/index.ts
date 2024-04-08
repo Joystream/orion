@@ -152,6 +152,7 @@ export async function processCreatorTokenIssuedEvent({
   // CreatorTokenIssued event is dispatch after TokenIssued
   const notificationData = new CreatorTokenIssued({
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     channelId: channelId.toString(),
     channelTitle: parseChannelTitle(channel),
   })
@@ -242,6 +243,7 @@ export async function processAmmActivatedEvent({
 
   const notificationData = new CreatorTokenMarketStarted({
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     channelId: tokenChannel.channelId,
     channelTitle: parseChannelTitle(channel),
   })
@@ -326,6 +328,7 @@ export async function processTokenSaleInitializedEvent({
 
   const notificationData = new CreatorTokenSaleStarted({
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     channelId: tokenChannel.channelId,
     channelTitle: parseChannelTitle(channel),
   })
@@ -412,6 +415,7 @@ export async function processTokensBoughtOnAmmEvent({
   const notificationData = new CreatorTokenMarketMint({
     channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     mintedTokenAmount: crtMinted,
     minterHandle: minter?.handle ?? 'Someone',
     paiedJoyAmount: joysDeposited,
@@ -477,6 +481,7 @@ export async function processTokensSoldOnAmmEvent({
   const notificationData = new CreatorTokenMarketBurn({
     channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     burnedTokenAmount: crtBurned,
     burnerHandle: burnerMember?.handle ?? 'Someone',
     receivedJoyAmount: joysRecovered,
@@ -551,6 +556,7 @@ export async function processTokensPurchasedOnSaleEvent({
   const notificationData = new CreatorTokenSaleMint({
     channelId: tokenChannel.channelId,
     tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: token.id,
     mintedTokenAmount: amountPurchased,
     minterHandle: minterMember?.handle ?? 'Someone',
     paiedJoyAmount: sale.pricePerUnit * amountPurchased,
@@ -658,6 +664,7 @@ export async function processRevenueSplitIssuedEvent({
       channelId: channel.id,
       plannedAt: startBlock,
       tokenSymbol: parseCreatorTokenSymbol(token),
+      tokenId: token.id,
     })
 
     await notifyTokenHolders(overlay, tokenId.toString(), revenueSharePlannedNotification, event)
