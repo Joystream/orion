@@ -1,15 +1,15 @@
-import { metaToObject } from '@joystream/metadata-protobuf/utils'
 import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { Logger } from '../logger'
-import { SubstrateBlock } from '@subsquid/substrate-processor'
-import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
-import { encodeAddress } from '@polkadot/util-crypto'
-import { EntityManagerOverlay } from '../utils/overlay'
-import { Bytes } from '@polkadot/types/primitive'
+import { metaToObject } from '@joystream/metadata-protobuf/utils'
 import { createType } from '@joystream/types'
+import { Bytes } from '@polkadot/types/primitive'
 import { u8aToHex } from '@polkadot/util'
+import { encodeAddress } from '@polkadot/util-crypto'
+import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { Logger } from '../logger'
+import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
+import { EntityManagerOverlay } from '../utils/overlay'
 
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()

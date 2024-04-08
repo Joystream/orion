@@ -1,17 +1,17 @@
+import { createLogger } from '@subsquid/logger'
 import { Request, Response } from 'express'
 import { EntityManager, FindOptionsWhere, IsNull, MoreThan } from 'typeorm'
 import { Account, Session } from '../model'
 import {
   CachedSessionData,
-  sessionCache,
-  SESSION_CACHE_MINIMUM_TTL,
   SESSION_CACHE_EXPIRY_TTL_MARGIN,
+  SESSION_CACHE_MINIMUM_TTL,
+  sessionCache,
 } from './cache'
-import { config, ConfigVariable } from './config'
-import { getUserAgentData } from './http'
-import { createLogger } from '@subsquid/logger'
-import { globalEm } from './globalEm'
+import { ConfigVariable, config } from './config'
 import { uniqueId } from './crypto'
+import { globalEm } from './globalEm'
+import { getUserAgentData } from './http'
 
 const authLogger = createLogger('authentication')
 
@@ -74,7 +74,7 @@ async function tryToProlongSession(id: string, lastActivity: Date): Promise<void
     )
     const maxSessionDurationMs = maxSessionDurationHours * 3_600_000
     const prolongPeriodMs = prolongPeriodMinutes * 60_000
-    const newExpiryMs = Math.min(
+    const newExpiryMs = Math.max(
       startedAt.getTime() + maxSessionDurationMs,
       lastActivity.getTime() + prolongPeriodMs
     )
@@ -172,7 +172,7 @@ export async function getOrCreateSession(
 
   if (existingSession) {
     existingSession.expiry = new Date(
-      Math.min(
+      Math.max(
         existingSession.startedAt.getTime() + sessionMaxDurationHours * 3_600_000,
         sessionExpiry.getTime()
       )

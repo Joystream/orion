@@ -1,24 +1,4 @@
-import {
-  Channel,
-  ChannelFollow,
-  Event,
-  Membership,
-  MetaprotocolTransactionResultFailed,
-  MetaprotocolTransactionStatusEventData,
-  StorageDataObject,
-  DataObjectTypeChannelPayoutsPayload,
-  ChannelPayoutsUpdatedEventData,
-  ChannelRewardClaimedEventData,
-  ChannelRewardClaimedAndWithdrawnEventData,
-  ChannelFundsWithdrawnEventData,
-  ChannelCreated,
-  ChannelCreatedEventData,
-  ChannelFundsWithdrawn,
-  YppUnverified,
-  MemberRecipient,
-  ChannelRecipient,
-} from '../../model'
-import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   ChannelMetadata,
@@ -26,20 +6,42 @@ import {
   ChannelOwnerRemarked,
   IChannelMetadata,
 } from '@joystream/metadata-protobuf'
-import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
-import { EventHandlerContext } from '../../utils/events'
+import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import {
-  processAppActionMetadata,
+  Channel,
+  ChannelAssetsDeletedByModeratorEventData,
+  ChannelCreated,
+  ChannelCreatedEventData,
+  ChannelFollow,
+  ChannelFundsWithdrawn,
+  ChannelFundsWithdrawnEventData,
+  ChannelPayoutsUpdatedEventData,
+  ChannelRecipient,
+  ChannelRewardClaimedAndWithdrawnEventData,
+  ChannelRewardClaimedEventData,
+  DataObjectTypeChannelPayoutsPayload,
+  Event,
+  MemberRecipient,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  MetaprotocolTransactionStatusEventData,
+  StorageDataObject,
+  YppUnverified,
+} from '../../model'
+import { EventHandlerContext } from '../../utils/events'
+import { addNotification } from '../../utils/notification'
+import { Flat } from '../../utils/overlay'
+import { deserializeMetadata, genericEventFields, toAddress, u8aToBytes } from '../utils'
+import { processChannelMetadata, processModeratorRemark, processOwnerRemark } from './metadata'
+import {
   deleteChannel,
   encodeAssets,
-  parseContentActor,
-  getChannelOwnerAccount,
   getAccountForMember,
+  getChannelOwnerAccount,
+  increaseChannelCumulativeRevenue,
+  parseContentActor,
+  processAppActionMetadata,
 } from './utils'
-import { Flat } from '../../utils/overlay'
-import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
-import { generateAppActionCommitment } from '@joystream/js/utils'
-import { addNotification } from '../../utils/notification'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 export async function processChannelCreatedEvent({
@@ -54,12 +56,13 @@ export async function processChannelCreatedEvent({
     { owner, dataObjects, channelStateBloatBond },
     channelCreationParameters,
     rewardAccount,
-  ] = event.asV1000
+  ] = event.isV1000 ? event.asV1000 : event.asV2002
 
   const followsNum = await overlay
     .getEm()
     .getRepository(ChannelFollow)
     .countBy({ channelId: channelId.toString() })
+
   // create entity
   const channel = overlay.getRepository(Channel).new({
     id: channelId.toString(),
@@ -73,8 +76,9 @@ export async function processChannelCreatedEvent({
     followsNum,
     videoViewsNum: 0,
     totalVideosCreated: 0,
+    cumulativeRevenue: BigInt(0),
+    cumulativeRewardClaimed: BigInt(0),
     yppStatus: new YppUnverified(),
-    cumulativeRewardClaimed: 0n,
     cumulativeReward: 0n,
   })
 
@@ -143,10 +147,11 @@ export async function processChannelCreatedEvent({
 export async function processChannelUpdatedEvent({
   overlay,
   block,
-  event: {
-    asV1000: [, channelId, channelUpdateParameters, newDataObjects],
-  },
+  event,
 }: EventHandlerContext<'Content.ChannelUpdated'>) {
+  const [, channelId, channelUpdateParameters, newDataObjects] = event.isV2002
+    ? event.asV2002
+    : event.asV1000
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
 
   //  update metadata if it was changed
@@ -162,6 +167,7 @@ export async function processChannelUpdatedEvent({
     } else {
       channelMetadataUpdate = deserializeMetadata(ChannelMetadata, channelUpdateParameters.newMeta)
     }
+
     await processChannelMetadata(
       overlay,
       block,
@@ -190,6 +196,28 @@ export async function processChannelDeletedByModeratorEvent({
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
   recommendationServiceManager.scheduleChannelDeletion(channelId.toString())
+}
+
+export async function processChannelAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, channelId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.ChannelAssetsDeletedByModerator'>): Promise<void> {
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new ChannelAssetsDeletedByModeratorEventData({
+      channel: channel.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processChannelVisibilitySetByModeratorEvent({
@@ -308,6 +336,7 @@ export async function processChannelRewardUpdatedEvent({
   })
 
   channel.cumulativeRewardClaimed += claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelRewardClaimedAndWithdrawnEvent({
@@ -333,6 +362,7 @@ export async function processChannelRewardClaimedAndWithdrawnEvent({
   })
 
   channel.cumulativeRewardClaimed += claimedAmount
+  increaseChannelCumulativeRevenue(channel, claimedAmount)
 }
 
 export async function processChannelFundsWithdrawnEvent({

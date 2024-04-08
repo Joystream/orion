@@ -1,0 +1,32 @@
+overwrite: true
+
+schema:
+  - 'http://localhost:4350/graphql'
+
+documents:
+  - './graphql/queries/*.graphql'
+
+config:
+  scalars:
+    Date: Date
+    BigInt: string
+  preResolveTypes: true # avoid using Pick
+  skipTypename: true # skip __typename field in typings unless it's part of the query
+
+generates:
+  ./graphql/generated/schema.ts:
+    plugins:
+      - typescript
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
+  ./graphql/generated/operations.ts:
+    preset: import-types
+    presetConfig:
+      typesPath: ./schema
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
+    plugins:
+      - typescript-operations
+      - typescript-document-nodes

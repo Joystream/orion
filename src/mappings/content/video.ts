@@ -1,3 +1,4 @@
+import { generateAppActionCommitment } from '@joystream/js/utils'
 import {
   AppAction,
   AppActionMetadata,
@@ -8,25 +9,32 @@ import { DecodedMetadataObject } from '@joystream/metadata-protobuf/types'
 import { integrateMeta } from '@joystream/metadata-protobuf/utils'
 import {
   Channel,
-  Video,
-  VideoViewEvent,
   Event,
+  Video,
+  VideoAssetsDeletedByModeratorEventData,
   VideoCreatedEventData,
   VideoPosted,
+  VideoViewEvent,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { deserializeMetadata, u8aToBytes, videoRelevanceManager } from '../utils'
+import { predictVideoLanguage } from '../../utils/language'
+import {
+  deserializeMetadata,
+  genericEventFields,
+  u8aToBytes,
+  videoRelevanceManager,
+} from '../utils'
 import { processVideoMetadata } from './metadata'
 import {
   deleteVideo,
   encodeAssets,
   notifyChannelFollowers,
   parseChannelTitle,
+  parseContentActor,
   parseVideoTitle,
   processAppActionMetadata,
   processNft,
 } from './utils'
-import { generateAppActionCommitment } from '@joystream/js/utils'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 export async function processVideoCreatedEvent({
@@ -115,6 +123,11 @@ export async function processVideoCreatedEvent({
     }
   }
 
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
+
   channel.totalVideosCreated += 1
 
   const eventEntity = overlay.getRepository(Event).new({
@@ -184,6 +197,11 @@ export async function processVideoUpdatedEvent({
     )
   }
 
+  video.orionLanguage = predictVideoLanguage({
+    title: video.title ?? '',
+    description: video.description ?? '',
+  })
+
   if (channel && video) {
     recommendationServiceManager.scheduleVideoUpsert(video as Video, channel as Channel)
   }
@@ -211,6 +229,28 @@ export async function processVideoDeletedByModeratorEvent({
 }: EventHandlerContext<'Content.VideoDeletedByModerator'>): Promise<void> {
   recommendationServiceManager.scheduleVideoDeletion(contentId.toString())
   await deleteVideo(overlay, contentId)
+}
+
+export async function processVideoAssetsDeletedByModeratorEvent({
+  block,
+  indexInBlock,
+  extrinsicHash,
+  overlay,
+  event: {
+    asV1000: [deletedBy, contentId, assetIds, rationale],
+  },
+}: EventHandlerContext<'Content.VideoAssetsDeletedByModerator'>): Promise<void> {
+  const video = await overlay.getRepository(Video).getByIdOrFail(contentId.toString())
+
+  overlay.getRepository(Event).new({
+    ...genericEventFields(overlay, block, indexInBlock, extrinsicHash),
+    data: new VideoAssetsDeletedByModeratorEventData({
+      video: video.id,
+      assetIds,
+      deletedBy: parseContentActor(deletedBy),
+      rationale: rationale.toString(),
+    }),
+  })
 }
 
 export async function processVideoVisibilitySetByModeratorEvent({

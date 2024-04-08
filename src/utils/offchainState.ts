@@ -1,15 +1,45 @@
 import { createLogger } from '@subsquid/logger'
 import assert from 'assert'
+import { createParseStream, createStringifyStream } from 'big-json'
 import fs from 'fs'
+import { snakeCase } from 'lodash'
 import path from 'path'
-import { EntityManager } from 'typeorm'
+import { EntityManager, ValueTransformer } from 'typeorm'
+import * as model from '../model'
+import {
+  AccountNotificationPreferences,
+  fromJsonDeliveryStatus,
+  fromJsonNotificationType,
+  fromJsonReadOrUnread,
+  fromJsonRecipientType,
+} from '../model'
 import { uniqueId } from './crypto'
-import { defaultNotificationPreferences } from './notification/helpers'
-import { NextEntityId } from '../model'
+import { defaultNotificationPreferences, notificationPrefAllTrue } from './notification/helpers'
+import { EntityManagerOverlay } from './overlay'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
-const exportedStateMap = {
+type CamelToSnakeCase<S> = S extends `${infer T}${infer U}`
+  ? T extends Capitalize<T>
+    ? `_${Lowercase<T>}${CamelToSnakeCase<U>}`
+    : `${T}${CamelToSnakeCase<U>}`
+  : S
+
+type SnakeCaseKeys<T> = {
+  [K in keyof T as CamelToSnakeCase<K>]: T[K]
+}
+
+type ClassConstructors<T> = {
+  [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
+}
+
+type ExportedStateMap = {
+  [K in keyof ClassConstructors<typeof model>]?:
+    | true
+    | (keyof InstanceType<ClassConstructors<typeof model>[K]>)[]
+}
+
+const exportedStateMap: ExportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
@@ -27,19 +57,20 @@ const exportedStateMap = {
   Account: true,
   Notification: true,
   NotificationEmailDelivery: true,
-  NotificationEmailDeliveryAttempt: true,
+  EmailDeliveryAttempt: true,
   Token: true,
-  Channel: ['is_excluded', 'video_views_num', 'follows_num', 'ypp_status', 'channel_weight'],
-  Video: ['is_excluded', 'views_num'],
-  Comment: ['is_excluded'],
-  OwnedNft: ['is_featured'],
-  VideoCategory: ['is_supported'],
+  NextEntityId: true,
+  Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
+  Video: ['isExcluded', 'viewsNum'],
+  Comment: ['isExcluded'],
+  OwnedNft: ['isFeatured'],
+  VideoCategory: ['isSupported'],
 }
 
 type ExportedData = {
   [K in keyof typeof exportedStateMap]?: {
     type: 'insert' | 'update'
-    values: Record<string, unknown>[]
+    values: InstanceType<ClassConstructors<typeof model>[K]>[]
   }
 }
 
@@ -58,20 +89,20 @@ function migrateExportDataToV300(data: ExportedData): ExportedData {
     id: `${V2_MIGRATION_USER_PREFIX}${uniqueId()}`,
     isRoot: false,
   }
-  data.User = { type: 'insert', values: [migrationUser] }
+  data.User = { type: 'insert', values: [migrationUser as model.User] }
   const replaceIpWithUserId = (v: Record<string, unknown>) => {
     delete v.ip
     v.userId = migrationUser.id
   }
-  data.VideoViewEvent?.values.forEach(replaceIpWithUserId)
-  data.Report?.values.forEach(replaceIpWithUserId)
-  data.NftFeaturingRequest?.values.forEach(replaceIpWithUserId)
+  data.VideoViewEvent?.values.forEach(replaceIpWithUserId as any)
+  data.Report?.values.forEach(replaceIpWithUserId as any)
+  data.NftFeaturingRequest?.values.forEach(replaceIpWithUserId as any)
 
   // We don't migrate channel follows from v2, because in v3
   // an account is required in order to follow a channel
   delete data.ChannelFollow
   data.Channel?.values.forEach((v) => {
-    v.follows_num = 0
+    v.followsNum = 0
   })
 
   return data
@@ -81,8 +112,6 @@ function migrateExportDataToV320(data: ExportedData): ExportedData {
   data.Account?.values.forEach((account) => {
     // account will find himself with all notification pref. enabled by default
     account.notificationPreferences = defaultNotificationPreferences()
-    // referrer channel id is set to null
-    account.referrerChannelId = null
   })
 
   // all channels will start as unverified because they are re-synched from mappings
@@ -90,21 +119,51 @@ function migrateExportDataToV320(data: ExportedData): ExportedData {
   return data
 }
 
+export function setCrtNotificationPreferences(
+  notificationPreferencesObj: any
+): AccountNotificationPreferences {
+  notificationPreferencesObj.crtIssued = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtMarketBurn = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtSaleMint = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareStarted = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueSharePlanned = notificationPrefAllTrue()
+  notificationPreferencesObj.crtRevenueShareEnded = notificationPrefAllTrue()
+  const notificationPreferences = new AccountNotificationPreferences(
+    undefined,
+    notificationPreferencesObj
+  )
+  return notificationPreferences
+}
+
+function migrateExportDataToV400(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    // account will find himself with all CRT notification pref. enabled by default
+    account.notificationPreferences = setCrtNotificationPreferences(
+      account.notificationPreferences as AccountNotificationPreferences
+    )
+  })
+
+  data.Notification?.values.forEach((notification) => {
+    notification.notificationType = fromJsonNotificationType(notification.notificationType)
+    notification.status = fromJsonReadOrUnread(notification.status)
+    notification.recipient = fromJsonRecipientType(notification.recipient)
+  })
+
+  data.EmailDeliveryAttempt?.values.forEach((emailDeliveryAttempt) => {
+    emailDeliveryAttempt.status = fromJsonDeliveryStatus(emailDeliveryAttempt.status)
+  })
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
-  private globalCountersMigration = {
-    // destination version : [global counters names]
-    '3.0.1': ['Account'],
-    '3.0.2': ['Account'],
-    '3.0.3': ['Account'],
-    '3.0.4': ['Account'],
-    '3.1.0': ['Account'],
-    '3.2.0': ['Account'],
-  }
-
   private migrations: Migrations = {
+    '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
   }
@@ -137,7 +196,10 @@ export class OffchainState {
                 ? await em
                     .getRepository(entityName)
                     .createQueryBuilder()
-                    .select(['id', ...fields])
+                    .select([
+                      'id',
+                      ...fields.map((field) => `${snakeCase(String(field))} AS "${String(field)}"`),
+                    ])
                     .getRawMany()
                 : await em.getRepository(entityName).find({})
               if (!values.length) {
@@ -161,7 +223,11 @@ export class OffchainState {
     })
 
     this.logger.info(`Saving export data to ${exportFilePath}`)
-    fs.writeFileSync(exportFilePath, JSON.stringify(exportedState))
+    await new Promise((resolve, reject) => {
+      const writeStream = fs.createWriteStream(exportFilePath)
+      const stringifyStream = createStringifyStream({ body: exportedState })
+      stringifyStream.pipe(writeStream).on('error', reject).on('finish', resolve)
+    })
     this.logger.info('Done')
   }
 
@@ -170,8 +236,36 @@ export class OffchainState {
     return parseInt(major) * (1000 * 1000) + parseInt(minor) * 1000 + parseInt(patch)
   }
 
+  private transformJsonbProperties(data: ExportedData, em: EntityManager): ExportedData {
+    // construct proper JSONB objects from raw data
+    return Object.fromEntries(
+      Object.entries(data).map(([entityName, { type, values }]) => {
+        const metadata = em.connection.getMetadata(entityName)
+        const jsonbColumns = metadata.columns.filter((c) => c.type === 'jsonb')
+
+        values = (values as any[]).map((value) => {
+          jsonbColumns.forEach((column) => {
+            const propertyName = column.propertyName
+            const transformer = column.transformer as ValueTransformer | undefined
+            if (value[propertyName] && transformer) {
+              const rawValue = value[propertyName]
+              const transformedValue = transformer.from(rawValue)
+              value[propertyName] = transformedValue
+            }
+          })
+          return value
+        })
+
+        return [entityName, { type, values }]
+      })
+    )
+  }
+
   public prepareExportData(exportState: ExportedState, em: EntityManager): ExportedData {
     let { data } = exportState
+
+    data = this.transformJsonbProperties(data, em)
+
     Object.entries(this.migrations)
       .sort(([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)) // sort in increasing order
       .forEach(([version, fn]) => {
@@ -183,13 +277,38 @@ export class OffchainState {
     return data
   }
 
-  public async import(em: EntityManager, exportFilePath = DEFAULT_EXPORT_PATH): Promise<void> {
+  private async importNextEntityIdCounters(
+    overlay: EntityManagerOverlay,
+    entityName: string,
+    data: model.NextEntityId[]
+  ) {
+    const em = overlay.getEm()
+    assert(entityName === 'NextEntityId')
+    for (const record of data) {
+      if (em.connection.hasMetadata(record.entityName as string)) {
+        // reason: during migration the overlay would write to the database the
+        // old nextId, to avoid that directly set the 'nextId' in the Overlay
+        overlay
+          .getRepository(model[record.entityName as keyof typeof model] as any)
+          .setNextEntityId(record.nextId as number)
+      } else {
+        await em.getRepository(entityName).upsert(record, ['entityName'])
+      }
+    }
+  }
+
+  public async import(
+    overlay: EntityManagerOverlay,
+    exportFilePath = DEFAULT_EXPORT_PATH
+  ): Promise<void> {
+    const em = overlay.getEm()
+
     if (!fs.existsSync(exportFilePath)) {
       throw new Error(
         `Cannot perform offchain data import! Export file ${exportFilePath} does not exist!`
       )
     }
-    const exportFile = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const exportFile = await this.readExportJsonFile(exportFilePath)
     const data = this.prepareExportData(exportFile, em)
     this.logger.info('Importing offchain state')
     for (const [entityName, { type, values }] of Object.entries(data)) {
@@ -208,7 +327,7 @@ export class OffchainState {
         const fieldTypes = Object.fromEntries(
           fieldNames.map((fieldName) => {
             const metaType = meta.columns.find(
-              (c) => c.databaseNameWithoutPrefixes === fieldName
+              (c) => c.databaseNameWithoutPrefixes === snakeCase(fieldName)
             )?.type
             return [fieldName, metaType === String ? 'text' : metaType]
           })
@@ -225,7 +344,7 @@ export class OffchainState {
             `UPDATE "${meta.tableName}"
             SET ${fieldNames
               .filter((f) => f !== 'id')
-              .map((f) => `"${f}" = "data"."${f}"`)
+              .map((f) => `"${snakeCase(f)}" = "data"."${f}"`)
               .join(', ')}
             FROM (
               SELECT
@@ -237,7 +356,7 @@ export class OffchainState {
                 .join(', ')}
             ) AS "data"
             WHERE "${meta.tableName}"."id" = "data"."id"`,
-            fieldNames.map((fieldName) => batch.map((v) => v[fieldName]))
+            fieldNames.map((fieldName) => batch.map((v) => v[fieldName as keyof typeof v]))
           )
         }
       } else {
@@ -252,17 +371,23 @@ export class OffchainState {
               values.length
             } entities left)...`
           )
-          await em.getRepository(entityName).insert(batch)
+
+          // UPSERT operation specifically for NextEntityId
+          if (entityName === 'NextEntityId') {
+            await this.importNextEntityIdCounters(
+              overlay,
+              entityName,
+              batch as model.NextEntityId[]
+            )
+          } else {
+            await em.getRepository(entityName).insert(batch)
+          }
         }
       }
       this.logger.info(
         `Done ${type === 'update' ? 'updating' : 'inserting'} ${entityName} entities`
       )
     }
-
-    // migrate counter values
-    const { exportedVersion } = exportFile
-    await this.migrateCounters(exportedVersion, em)
 
     const renamedExportFilePath = `${exportFilePath}.imported`
     this.logger.info(`Renaming export file to ${renamedExportFilePath})...`)
@@ -271,34 +396,31 @@ export class OffchainState {
     this.logger.info('Done')
   }
 
-  public getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): number {
+  public async getExportBlockNumber(exportFilePath = DEFAULT_EXPORT_PATH): Promise<number> {
     if (!fs.existsSync(exportFilePath)) {
       this.logger.warn(`Export file ${exportFilePath} does not exist`)
       this._isImported = true
       return -1
     }
-    const { blockNumber }: ExportedState = JSON.parse(fs.readFileSync(exportFilePath, 'utf-8'))
+    const { blockNumber }: ExportedState = await this.readExportJsonFile()
     this.logger.info(`Last export block number established: ${blockNumber}`)
     return blockNumber
   }
 
-  private async migrateCounters(exportedVersion: string, em: EntityManager): Promise<void> {
-    const migrationData = Object.entries(this.globalCountersMigration).sort(
-      ([a], [b]) => this.versionToNumber(a) - this.versionToNumber(b)
-    ) // sort in increasing order
+  public async readExportJsonFile(filePath = DEFAULT_EXPORT_PATH): Promise<ExportedState> {
+    return new Promise((resolve, reject) => {
+      const readStream = fs.createReadStream(filePath)
+      const parseStream = createParseStream()
 
-    for (const [version, counters] of migrationData) {
-      if (this.versionToNumber(exportedVersion) < this.versionToNumber(version)) {
-        this.logger.info(`Migrating global counters to version ${version}`)
-        for (const entityName of counters) {
-          // build query that gets the entityName with the highest id
-          const rowNumber = await em.query(`SELECT COUNT(*) FROM ${entityName}`)
-          const latestId = parseInt(rowNumber[0].count)
+      let exportedState: ExportedState
 
-          this.logger.info(`Setting next id for ${entityName} to ${latestId + 1}`)
-          await em.save(new NextEntityId({ entityName, nextId: latestId + 1 }))
-        }
-      }
-    }
+      parseStream.on('data', (data: ExportedState) => (exportedState = data))
+
+      parseStream.on('end', () => resolve(exportedState))
+
+      parseStream.on('error', (error: Error) => reject(error))
+
+      readStream.pipe(parseStream as any)
+    })
   }
 }

@@ -1,8 +1,9 @@
+import { EntityManager, IsNull, LessThanOrEqual } from 'typeorm'
+import { EmailDeliveryAttempt, EmailFailure, NotificationEmailDelivery } from '../model'
+import { getCurrentBlockHeight } from '../utils/blockHeight'
 import { ConfigVariable, config } from '../utils/config'
-import { EmailDeliveryAttempt, NotificationEmailDelivery } from '../model'
-import { EntityManager } from 'typeorm'
-import { globalEm } from '../utils/globalEm'
 import { uniqueId } from '../utils/crypto'
+import { globalEm } from '../utils/globalEm'
 import { createMailContent, executeMailDelivery } from './utils'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
@@ -11,9 +12,14 @@ export async function getMaxAttempts(em: EntityManager): Promise<number> {
 }
 
 export async function mailsToDeliver(em: EntityManager): Promise<NotificationEmailDelivery[]> {
+  const { lastProcessedBlock } = await getCurrentBlockHeight(em)
   const result = await em.getRepository(NotificationEmailDelivery).find({
     where: {
       discard: false,
+      notification: [
+        { dispatchBlock: IsNull() },
+        { dispatchBlock: LessThanOrEqual(lastProcessedBlock) },
+      ],
     },
     relations: {
       notification: { account: true },
@@ -30,12 +36,21 @@ export async function deliverEmails() {
   const appName = await config.get(ConfigVariable.AppName, em)
   for (const notificationDelivery of newEmailDeliveries) {
     const toAccount = notificationDelivery.notification.account
-    let content = ''
+    let content
+    let subject
     if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
-      content = await createMailContent(em, appName, notificationDelivery.notification)
+      const result = await createMailContent(em, appName, notificationDelivery.notification)
+      content = result?.content
+      subject = result?.subject
     }
     const attempts = notificationDelivery.attempts
-    const status = await executeMailDelivery(appName, em, toAccount, content)
+    const status =
+      content && subject
+        ? await executeMailDelivery(appName, em, toAccount, subject, content)
+        : new EmailFailure({
+            errorStatus: 'Failure in Creating mail content',
+          })
+
     const newAttempt = new EmailDeliveryAttempt({
       id: uniqueId(),
       timestamp: new Date(),
@@ -62,7 +77,9 @@ export async function main() {
 main()
   .then(() => {
     console.log('Email delivery finished')
+    process.exit(0)
   })
   .catch((err) => {
     console.error('Email delivery failed', err)
+    process.exit(1)
   })

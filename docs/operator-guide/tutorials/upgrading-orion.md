@@ -22,15 +22,15 @@ Always make sure the versions of Orion and Atlas you're planing to upgrade to ar
 
 1. **Backup the databse** before the upgrade. You can do that by executing the following command on the production server:
     ```bash
-    docker exec orion-db pg_dumpall -U postgres > "orion-production-$(date '+%Y-%m-%d').bak"
+    docker exec orion_db pg_dumpall -U postgres -p 23798 > "orion-production-$(date '+%Y-%m-%d').bak"
     ```
-    Make sure the backup file was succesfully created in the current directory.
+    Make sure the backup file was successfully created in the current directory.
 1. Stop the processor and create [Offchain data export](../../developer-guide/tutorials/preserving-offchain-state.md) file:
     ```bash
-    docker-compose stop orion-processor
-    docker-compose run --rm orion-processor npm run offchain-state:export
+    docker-compose stop orion_processor
+    docker-compose run --rm orion_processor npm run offchain-state:export
     ```
-    Make sure the export file was created succesfully under `./db/export/export.json`
+    Make sure the export file was created successfully under `./db/export/export.json`
 1. Download the latest Orion docker image:
     ```bash
     docker tag joystream/orion:latest joystream/orion:previous
@@ -46,9 +46,9 @@ Always make sure the versions of Orion and Atlas you're planing to upgrade to ar
     ```
 1. Wait for the Orion processor to catch up with the Joystream blockchain before disabling the _kill switch_. You can follow the processor logs using:
     ```bash
-    docker logs -f --tail 10 orion-processor
+    docker logs -f --tail 10 orion_processor
     ```
-    You can also check the logs of other docker services, ie. `orion-graphql-api`, `orion-auth-api` and `orion-db` to make sure they are running as expected.
+    You can also check the logs of other docker services, ie. `orion_graphql-api`, `orion_auth-api` and `orion_db` to make sure they are running as expected.
 1. After the processor is synced, you can run some test queries on `https://query.mygateway.com/graphql` (first you'll need to authenticate, for example through `https://auth.mygateway.com/playground`) to make sure the new version is working as expected.
 1. Once you're confident that the release was successful, disable the _kill switch_ by executing `setKillSwitch(isKilled: false)` operator mutation using Orion's GraphQL API.
 
@@ -63,12 +63,12 @@ In case something goes wrong during the upgrade, you can restore the database fr
     # Switch back to the previous version of joystream/orion docker image
     docker tag joystream/orion:previous joystream/orion:latest
     # Start the orion-db service
-    docker-compose up -d orion-db
+    docker-compose up -d orion_db
     # Copy the backup file to the orion-db container
     # Replace the YYYY-mm-dd with the date of the backup you wish to restore
-    docker cp "orion-production-YYYY-mm-dd.bak" orion-db:/tmp/orion-production.bak
+    docker cp "orion-production-YYYY-mm-dd.bak" orion_db:/tmp/orion-production.bak
     # Restore the database
-    docker exec orion-db psql -f /tmp/orion-production.bak -U postgres postgres
+    docker exec orion_db psql -f /tmp/orion-production.bak -U postgres -p 23798 postgres
     # Bring up the Orion services
     docker-compose up -d
 ```

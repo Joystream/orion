@@ -1,0 +1,21 @@
+services:
+  joystream-node:
+    image: joystream/node:$JOYSTREAM_NODE_TAG
+    hostname: joystream-node
+    restart: unless-stopped
+    container_name: joystream-node
+    volumes:
+      - chain-data:/data
+    command: --dev --alice --validator --pruning=archive --unsafe-ws-external --unsafe-rpc-external --rpc-methods Safe --rpc-cors=all --log runtime --base-path /data
+    ports:
+      - 9944:9944
+      - 9933:9933
+
+volumes:
+  chain-data:
+    driver: local
+
+networks:
+  default:
+    external:
+      name: joystream_default

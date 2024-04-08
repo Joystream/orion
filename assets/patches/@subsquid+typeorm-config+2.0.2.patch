@@ -1,0 +1,33 @@
+diff --git a/node_modules/@subsquid/typeorm-config/lib/config.js b/node_modules/@subsquid/typeorm-config/lib/config.js
+index 046611f..28fd4e2 100644
+--- a/node_modules/@subsquid/typeorm-config/lib/config.js
++++ b/node_modules/@subsquid/typeorm-config/lib/config.js
+@@ -28,22 +28,22 @@ const path = __importStar(require("path"));
+ const process = __importStar(require("process"));
+ const connectionOptions_1 = require("./connectionOptions");
+ const namingStrategy_1 = require("./namingStrategy");
+-exports.MIGRATIONS_DIR = 'db/migrations';
++exports.MIGRATIONS_DIR = "db/migrations";
+ function createOrmConfig(options) {
+     let dir = path.resolve(options?.projectDir || process.cwd());
+-    let model = resolveModel(path.join(dir, 'lib/model'));
++    let model = resolveModel(path.join(dir, "lib/model"));
+     let migrationsDir = path.join(dir, exports.MIGRATIONS_DIR);
+     return {
+-        type: 'postgres',
++        type: "postgres",
+         namingStrategy: new namingStrategy_1.SnakeNamingStrategy(),
+         entities: [model],
+-        migrations: [migrationsDir + '/*.js'],
+-        ...(0, connectionOptions_1.createConnectionOptions)()
++        migrations: [migrationsDir + `/${options?.file || "*.js"}`],
++        ...(0, connectionOptions_1.createConnectionOptions)(),
+     };
+ }
+ exports.createOrmConfig = createOrmConfig;
+ function resolveModel(model) {
+-    model = path.resolve(model || 'lib/model');
++    model = path.resolve(model || "lib/model");
+     try {
+         return require.resolve(model);
+     }

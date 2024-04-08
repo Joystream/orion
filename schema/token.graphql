@@ -1,0 +1,423 @@
+enum TokenStatus {
+  SALE
+  MARKET
+  IDLE
+}
+
+type TokenAvatarObject @variant {
+  "The avatar data object"
+  avatarObject: StorageDataObject!
+}
+
+type TokenAvatarUri @variant {
+  "The avatar URL"
+  avatarUri: String!
+}
+
+union TokenAvatar = TokenAvatarObject | TokenAvatarUri
+
+type CreatorToken @entity {
+  "runtime token identifier"
+  id: ID!
+
+  "status sale / market / idle"
+  status: TokenStatus!
+
+  "avatar object (profile picture)"
+  avatar: TokenAvatar
+
+  "total supply"
+  totalSupply: BigInt!
+
+  "Flag to indicate whether the CRT is featured or not"
+  isFeatured: Boolean!
+
+  "sales issued for this token"
+  sales: [Sale!] @derivedFrom(field: "token")
+
+  "symbol for the token uniqueness guaranteed by runtime"
+  symbol: String @index
+
+  "access status invite only vs anyone"
+  isInviteOnly: Boolean!
+
+  "creator annual revenue (minted)"
+  annualCreatorRewardPermill: Int!
+
+  "revenue share ratio between creator and holder"
+  revenueShareRatioPermill: Int!
+
+  "revenue shares issued for this token"
+  revenueShares: [RevenueShare!] @derivedFrom(field: "token")
+
+  "amm curves issued for this token"
+  ammCurves: [AmmCurve!] @derivedFrom(field: "token")
+
+  "date at which this token was created"
+  createdAt: DateTime! @index
+
+  "channel from which the token is issued uniqueness guaranteed by runtime"
+  channel: TokenChannel @derivedFrom(field: "token")
+
+  "video for the token presentation page"
+  trailerVideo: [TrailerVideo!]! @derivedFrom(field: "token")
+
+  "about information displayed under the presentation video"
+  description: String
+
+  "list of benefits for the token"
+  benefits: [Benefit!] @derivedFrom(field: "token")
+
+  "note from creator to member interested in joining the whitelist"
+  whitelistApplicantNote: String
+
+  "link for creator to member interested in joining the whitelist"
+  whitelistApplicantLink: String
+
+  "holders having some amount of this token"
+  accounts: [TokenAccount!] @derivedFrom(field: "token")
+
+  "number of accounts to avoid aggregate COUNT"
+  accountsNum: Int!
+
+  "number of revenue shares issued"
+  numberOfRevenueShareActivations: Int!
+
+  "whether it has been deissued or not"
+  deissued: Boolean!
+
+  "current amm sale if ongoing"
+  currentAmmSale: AmmCurve
+
+  "current sale if ongoing"
+  currentSale: Sale
+
+  "current revenue share if ongoing"
+  currentRevenueShare: RevenueShare
+
+  "number of vested transfer completed"
+  numberOfVestedTransferIssued: Int!
+
+  "last unit price available"
+  lastPrice: BigInt
+}
+
+type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
+  "counter"
+  id: ID!
+
+  "video reference"
+  video: Video!
+
+  "token reference, unique as one token cannot have multiple trailers"
+  token: CreatorToken! @unique
+}
+
+type TokenChannel @entity @index(fields: ["token", "channel"], unique: true) {
+  "counter"
+  id: ID!
+
+  "token reference"
+  token: CreatorToken! @unique
+
+  "channel reference"
+  channel: Channel! @unique
+}
+
+type RevenueShare @entity {
+  "counter"
+  id: ID!
+
+  "token which this revenue share is for"
+  token: CreatorToken!
+
+  "list of participating members"
+  stakers: [RevenueShareParticipation!] @derivedFrom(field: "revenueShare")
+
+  "block at which the revenue share was issued"
+  createdIn: Int!
+
+  "starting block"
+  startingAt: Int!
+
+  "ending block"
+  endsAt: Int!
+
+  "number of holders that could join the split before it ended"
+  potentialParticipantsNum: Int
+
+  "Number of participants (stackers)"
+  participantsNum: Int!
+
+  "total number of HAPI allocated"
+  allocation: BigInt!
+
+  "amounts claimed so far in order to avoid SUM aggregations"
+  claimed: BigInt!
+
+  "finalized"
+  finalized: Boolean!
+}
+
+type Benefit @entity @index(fields: ["token", "displayOrder"], unique: true) {
+  "counter"
+  id: ID!
+
+  "token the benefit is for"
+  token: CreatorToken!
+
+  "emoji for the benefit"
+  emojiCode: String
+
+  "title for the benefit"
+  title: String!
+
+  "description for the benefit"
+  description: String!
+
+  "order in which the benefits is displayed"
+  displayOrder: Int!
+}
+
+type Sale @entity @index(fields: ["token", "createdIn"], unique: true) {
+  "counter"
+  id: ID!
+
+  "token for which the sale is issued"
+  token: CreatorToken!
+
+  "constant price in HAPI for each token"
+  pricePerUnit: BigInt!
+
+  "total amount of token on sale"
+  tokenSaleAllocation: BigInt!
+
+  "amount of tokens that has been sold"
+  tokensSold: BigInt!
+
+  "creation block"
+  createdIn: Int!
+
+  "sale start block"
+  startBlock: Int!
+
+  "ending block"
+  endsAt: Int!
+
+  "terms and conditions text"
+  termsAndConditions: String!
+
+  "max amount that member can purchase"
+  maxAmountPerMember: BigInt
+
+  "transactions references"
+  transactions: [SaleTransaction!] @derivedFrom(field: "sale")
+
+  "finalized"
+  finalized: Boolean!
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "sale")
+
+  "sale funds source"
+  fundsSourceAccount: TokenAccount!
+}
+
+type VestedSale @entity @index(fields: ["sale", "vesting"], unique: true) {
+  "counter"
+  id: ID!
+
+  "Sale reference"
+  sale: Sale! @unique
+
+  "vesting schedule reference"
+  vesting: VestingSchedule! @unique
+}
+
+type SaleTransaction @entity @index(fields: ["sale", "account"]) {
+  "counter"
+  id: ID!
+
+  "amount of token bought"
+  quantity: BigInt!
+
+  "sale"
+  sale: Sale!
+
+  "buyer account"
+  account: TokenAccount!
+
+  "block"
+  createdIn: Int!
+}
+
+type AmmCurve @entity {
+  "counter"
+  id: ID!
+
+  "token this Amm is for"
+  token: CreatorToken!
+
+  "quantity bought on the market by the amm"
+  burnedByAmm: BigInt!
+
+  "quantity sold to the market"
+  mintedByAmm: BigInt!
+
+  "the amm slope parameter a in the formula a * x + b"
+  ammSlopeParameter: BigInt!
+
+  "the amm intercept parameter b in the formula a * x + b"
+  ammInitPrice: BigInt!
+
+  "transaction for this amm"
+  transactions: [AmmTransaction!] @derivedFrom(field: "amm")
+
+  "finalized (i.e. closed)"
+  finalized: Boolean!
+}
+
+type AmmTransaction @entity @index(fields: ["account", "amm"]) {
+  "counter"
+  id: ID!
+
+  "amount of token bought/sold"
+  quantity: BigInt!
+
+  "total HAPI paid/received for the quantity"
+  pricePaid: BigInt!
+
+  "Reference to the Amm Sale"
+  amm: AmmCurve!
+
+  "buyer account"
+  account: TokenAccount!
+
+  "price per unit in HAPI"
+  pricePerUnit: BigInt!
+
+  "was it bought/sold"
+  transactionType: AmmTransactionType!
+
+  "block"
+  createdIn: Int!
+}
+
+enum AmmTransactionType {
+  BUY
+  SELL
+}
+
+type TokenAccount @entity @index(fields: ["token", "member"]) {
+  "counter"
+  id: ID!
+
+  "member id ref"
+  member: Membership!
+
+  "token for which the account is created"
+  token: CreatorToken!
+
+  "staked amount, to avoid walking to split participations"
+  stakedAmount: BigInt!
+
+  "total token amount (not necessarely liqud) for the account"
+  totalAmount: BigInt!
+
+  "sale transactions for this account"
+  saleTransactions: [SaleTransaction!] @derivedFrom(field: "account")
+
+  "amm transactions for this account"
+  ammTransactions: [AmmTransaction!] @derivedFrom(field: "account")
+
+  "information about token account's participation in revenue shares"
+  revenueShareParticipation: [RevenueShareParticipation!] @derivedFrom(field: "account")
+
+  "vesting schedule info, it can be empty if no vesting schedules are pending"
+  vestingSchedules: [VestedAccount!]! @derivedFrom(field: "account")
+
+  "has been deleted or not"
+  deleted: Boolean!
+}
+
+type VestedAccount @entity {
+  "counter"
+  id: ID!
+
+  "vesting schedule reference"
+  vesting: VestingSchedule!
+
+  "account reference"
+  account: TokenAccount!
+
+  "total amount the schedule is vested"
+  totalVestingAmount: BigInt!
+
+  "vesting source"
+  vestingSource: VestingSource!
+
+  "acquired at block"
+  acquiredAt: Int!
+}
+
+type SaleVestingSource @variant {
+  sale: Sale!
+}
+type IssuerTransferVestingSource @variant {
+  phantom: Int
+}
+type InitialIssuanceVestingSource @variant {
+  phantom: Int
+}
+
+union VestingSource = InitialIssuanceVestingSource | IssuerTransferVestingSource | SaleVestingSource
+
+type VestingSchedule @entity {
+  "counter"
+  id: ID!
+
+  "Permill of amount vested immediately after cliff period"
+  cliffRatioPermill: Int!
+
+  "vesting duration in blocks"
+  vestingDurationBlocks: Int!
+
+  "cliff duration in blocks"
+  cliffDurationBlocks: Int!
+
+  "vesting ending block"
+  endsAt: Int!
+
+  "cliff block"
+  cliffBlock: Int!
+
+  "accounts reference"
+  accounts: [VestedAccount!] @derivedFrom(field: "vesting")
+
+  "vesting schedule for sale"
+  vestedSale: VestedSale @derivedFrom(field: "vesting")
+}
+
+# TODO: add a field to signal that holder had left the revenue share
+type RevenueShareParticipation @entity @index(fields: ["account", "revenueShare"], unique: true) {
+  "counter"
+  id: ID!
+
+  "participating Account"
+  account: TokenAccount!
+
+  "revenue share the account is participating in"
+  revenueShare: RevenueShare!
+
+  "staked amount"
+  stakedAmount: BigInt!
+
+  "eearned joy amounts"
+  earnings: BigInt!
+
+  "block"
+  createdIn: Int!
+
+  "whether the account unstaked funds, recoving the participation"
+  recovered: Boolean!
+}

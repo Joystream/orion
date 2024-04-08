@@ -10,6 +10,7 @@ export type NotificationData = {
   link: string
   avatar: string
   text: string
+  subject: string
 }
 
 export const getNotificationData = async (
@@ -32,6 +33,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'channel-page', [channelId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `New channel created: “${channelTitle}“`,
+        subject: 'New channel',
       }
     }
 
@@ -43,6 +45,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} replied to your comment under the video: “${videoTitle}”`,
+        subject: `New comment`,
       }
     }
     case 'ReactionToComment': {
@@ -52,6 +55,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} reacted to your comment on the video: “${videoTitle}”`,
+        subject: `New reaction`,
       }
     }
 
@@ -63,6 +67,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'video-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} posted a new video: “${videoTitle}”`,
+        subject: `New video`,
       }
     }
     case 'NewNftOnSale': {
@@ -72,6 +77,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} started the sale of NFT: “${videoTitle}”`,
+        subject: `New NFT sale`,
       }
     }
     case 'NewAuction': {
@@ -81,6 +87,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `${channelTitle} started an auction for NFT: “${videoTitle}”`,
+        subject: 'New NFT auction',
       }
     }
 
@@ -92,6 +99,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', newBidderId),
         text: `${newBidderHandle} placed a higher bid in the timed auction for NFT: “${videoTitle}”`,
+        subject: 'You got outbid',
       }
     }
     case 'AuctionWon': {
@@ -102,6 +110,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
         text: `You won ${auctionText} auction for NFT: “${videoTitle}”`,
+        subject: 'Action won',
       }
     }
     case 'AuctionLost': {
@@ -112,6 +121,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
         text: `You lost ${auctionText} auction for NFT: “${videoTitle}”. Withdraw your bid`,
+        subject: 'Auction lost',
       }
     }
 
@@ -127,6 +137,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'term-of-sevice-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your channel “${channelTitle}” is excluded from App`,
+        subject: 'Channel excluded',
       }
     }
     case 'VideoExcluded': {
@@ -136,6 +147,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'term-of-sevice-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your video is excluded from App: “${videoTitle}”`,
+        subject: 'Video excluded',
       }
     }
     case 'NftFeaturedOnMarketPlace': {
@@ -145,6 +157,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'marketplace-page'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your NFT was featured in the marketplace featured section: “${videoTitle}”`,
+        subject: 'NFT featured',
       }
     }
 
@@ -156,6 +169,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'member-page', [followerId]),
         avatar: await getNotificationAvatar(em, 'membershipId', followerId),
         text: `${followerHandle} followed your channel`,
+        subject: 'New follower',
       }
     }
     case 'CommentPostedToVideo': {
@@ -165,6 +179,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} left a comment on your video: “${videoTitle}”`,
+        subject: 'New comment',
       }
     }
     case 'VideoLiked': {
@@ -174,6 +189,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'video-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} liked your video: “${videoTitle}”`,
+        subject: 'New video like',
       }
     }
     case 'VideoDisliked': {
@@ -183,6 +199,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'video-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `${memberHandle} disliked your video: “${videoTitle}”`,
+        subject: 'New video dislike',
       }
     }
 
@@ -193,6 +210,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'ypp-dashboard'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your channel got verified in our Youtube Partnership Program`,
+        subject: 'Channel verified',
       }
     }
     case 'ChannelSuspended': {
@@ -201,6 +219,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'ypp-dashboard'),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `Your channel got suspended in our Youtube Partnership Program`,
+        subject: 'Channel suspended',
       }
     }
 
@@ -212,6 +231,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', buyerId),
         text: `${buyerHandle} purchased for ${formatJOY(price)} your NFT: “${videoTitle}”`,
+        subject: 'New NFT purchase',
       }
     }
     case 'NftRoyaltyPaid': {
@@ -221,6 +241,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'channelId', recipientId),
         text: `You received ${formatJOY(amount)} royalties from your NFT: “${videoTitle}”`,
+        subject: 'New NFT royalty',
       }
     }
     case 'CreatorReceivesAuctionBid': {
@@ -230,6 +251,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'nft-page', [videoId]),
         avatar: await getNotificationAvatar(em, 'membershipId', bidderId),
         text: `${bidderHandle} placed a bid of ${formatJOY(amount)} for your NFT: “${videoTitle}”`,
+        subject: 'New NFT bid',
       }
     }
 
@@ -241,6 +263,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'member-page', [payerId]),
         avatar: await getNotificationAvatar(em, 'membershipId', payerId),
         text: `${payerHandle} transferred ${formatJOY(amount)} to your channel`,
+        subject: 'New payment',
       }
     }
     case 'ChannelFundsWithdrawn': {
@@ -250,6 +273,108 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'payments-page'),
         avatar: await getNotificationAvatar(em, 'membershipId', recipientId),
         text: `${formatJOY(amount)} were withdrawn from your channel account`,
+        subject: 'Funds withdrawn',
+      }
+    }
+    // CRT
+    case 'CreatorTokenIssued': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} issued a creator token for their channel called $${tokenSymbol}.`,
+        subject: 'New CRT issued',
+      }
+    }
+    case 'CreatorTokenMarketStarted': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started a market for $${tokenSymbol} token.`,
+        subject: 'New CRT market',
+      }
+    }
+    case 'CreatorTokenSaleStarted': {
+      const { channelId, channelTitle, tokenSymbol } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'channel-page', [channelId]),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started a sale for $${tokenSymbol} token.`,
+        subject: 'New CRT sale',
+      }
+    }
+    case 'CreatorTokenMarketMint': {
+      const { mintedTokenAmount, paiedJoyAmount, minterHandle, tokenSymbol, minterId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', minterId),
+        text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
+          paiedJoyAmount
+        )}`,
+        subject: 'New market buy transaction',
+      }
+    }
+    case 'CreatorTokenMarketBurn': {
+      const { burnedTokenAmount, receivedJoyAmount, burnerHandle, tokenSymbol, burnerId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', burnerId),
+        text: `${burnerHandle} sold ${burnedTokenAmount} $${tokenSymbol} on token market for ${formatJOY(
+          receivedJoyAmount
+        )}`,
+        subject: 'New market sell transaction',
+      }
+    }
+
+    case 'CreatorTokenSaleMint': {
+      const { mintedTokenAmount, paiedJoyAmount, minterHandle, tokenSymbol, minterId } =
+        notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'crt-page'),
+        avatar: await getNotificationAvatar(em, 'membershipId', minterId),
+        text: `${minterHandle} minted ${mintedTokenAmount} $${tokenSymbol} on token sale for ${formatJOY(
+          paiedJoyAmount
+        )}`,
+        subject: 'New token sale buy transaction',
+      }
+    }
+    case 'CreatorTokenRevenueSharePlanned': {
+      const { tokenSymbol, channelTitle, plannedAt, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} planned revenue share for $${tokenSymbol} token starting at block ${plannedAt}`,
+        subject: 'New revenue share planned',
+      }
+    }
+    case 'CreatorTokenRevenueShareStarted': {
+      const { tokenSymbol, channelTitle, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} started revenue share for $${tokenSymbol} token. Go and claim your share now!`,
+        subject: 'Revenue share started',
+      }
+    }
+    case 'CreatorTokenRevenueShareEnded': {
+      const { tokenSymbol, channelTitle, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
+        subject: 'Revenue share ended',
       }
     }
   }

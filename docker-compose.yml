@@ -10,7 +10,8 @@ services:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: squid
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+      - '[::1]:${DB_PORT}:${DB_PORT}'
     command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
     shm_size: 1g
     volumes:
@@ -63,6 +64,7 @@ services:
       - docker.env
     environment:
       - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
     depends_on:
       - orion_db
     volumes:
@@ -84,6 +86,7 @@ services:
       - docker.env
     environment:
       - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
     depends_on:
       - orion_db
     volumes:

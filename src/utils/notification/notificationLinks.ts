@@ -12,6 +12,8 @@ type LinkType =
   | 'member-page'
   | 'ypp-dashboard'
   | 'payments-page'
+  | 'crt-page'
+  | 'portfolio'
 
 export const getNotificationLink = async (
   em: EntityManager,
@@ -39,6 +41,12 @@ export const getNotificationLink = async (
 
     case 'payments-page':
       return await getLink(em, 'payments')
+
+    case 'crt-page':
+      return await getLink(em, 'studio/crtDashboard')
+
+    case 'portfolio':
+      return await getLink(em, 'portfolio')
 
     case 'ypp-dashboard':
       return await getLink(em, 'ypp/dashboard')

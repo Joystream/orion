@@ -1,4 +1,4 @@
-FROM node:16-alpine AS node
+FROM node:18-alpine AS node
 
 FROM node AS node-with-gyp
 RUN apk add g++ make python3
@@ -10,10 +10,13 @@ ADD package-lock.json .
 ADD assets assets
 RUN npm ci
 ADD tsconfig.json .
+ADD typegen.json .
+ADD joystream.jsonl .
 ADD src src
 ADD schema schema
 ADD scripts scripts
 RUN npx squid-typeorm-codegen
+RUN npx squid-substrate-typegen typegen.json
 RUN npm run build
 
 FROM node-with-gyp AS deps
@@ -45,4 +48,4 @@ CMD ["npm", "run", "processor-start"]
 
 
 FROM squid AS query-node
-CMD ["npm", "run", "query-node-start"]
+CMD ["npm", "run", "graphql-server-start"]

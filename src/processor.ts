@@ -5,92 +5,120 @@ import {
   SubstrateBlock,
 } from '@subsquid/substrate-processor'
 import { Store, TypeormDatabase } from '@subsquid/typeorm-store'
+import { EntityManager } from 'typeorm'
 import { Logger } from './logger'
 import {
-  processStorageBucketCreatedEvent,
-  processStorageBucketInvitationAcceptedEvent,
-  processStorageBucketsUpdatedForBagEvent,
-  processStorageOperatorMetadataSetEvent,
-  processStorageBucketVoucherLimitsSetEvent,
+  processChannelAgentRemarkedEvent,
+  processChannelAssetsDeletedByModeratorEvent,
+  processChannelCreatedEvent,
+  processChannelDeletedByModeratorEvent,
+  processChannelDeletedEvent,
+  processChannelFundsWithdrawnEvent,
+  processChannelOwnerRemarkedEvent,
+  processChannelPayoutsUpdatedEvent,
+  processChannelRewardClaimedAndWithdrawnEvent,
+  processChannelRewardUpdatedEvent,
+  processChannelUpdatedEvent,
+  processChannelVisibilitySetByModeratorEvent,
+} from './mappings/content/channel'
+import {
+  processAuctionBidCanceledEvent,
+  processAuctionBidMadeEvent,
+  processAuctionCanceledEvent,
+  processBidMadeCompletingAuctionEvent,
+  processBuyNowCanceledEvent,
+  processBuyNowPriceUpdatedEvent,
+  processEnglishAuctionSettledEvent,
+  processEnglishAuctionStartedEvent,
+  processNftBoughtEvent,
+  processNftIssuedEvent,
+  processNftSellOrderMadeEvent,
+  processNftSlingedBackToTheOriginalArtistEvent,
+  processOfferAcceptedEvent,
+  processOfferCanceledEvent,
+  processOfferStartedEvent,
+  processOpenAuctionBidAcceptedEvent,
+  processOpenAuctionStartedEvent,
+} from './mappings/content/nft'
+import {
+  processVideoAssetsDeletedByModeratorEvent,
+  processVideoCreatedEvent,
+  processVideoDeletedByModeratorEvent,
+  processVideoDeletedEvent,
+  processVideoUpdatedEvent,
+  processVideoVisibilitySetByModeratorEvent,
+} from './mappings/content/video'
+import {
+  processMemberAccountsUpdatedEvent,
+  processMemberProfileUpdatedEvent,
+  processMemberRemarkedEvent,
+  processNewMember,
+} from './mappings/membership'
+import {
+  processDataObjectsDeletedEvent,
+  processDataObjectsMovedEvent,
+  processDataObjectsUpdatedEvent,
+  processDataObjectsUploadedEvent,
+  processDistributionBucketCreatedEvent,
+  processDistributionBucketDeletedEvent,
+  processDistributionBucketFamilyCreatedEvent,
+  processDistributionBucketFamilyDeletedEvent,
+  processDistributionBucketFamilyMetadataSetEvent,
+  processDistributionBucketInvitationAcceptedEvent,
+  processDistributionBucketInvitationCancelledEvent,
+  processDistributionBucketMetadataSetEvent,
+  processDistributionBucketModeUpdatedEvent,
+  processDistributionBucketOperatorInvitedEvent,
+  processDistributionBucketOperatorRemovedEvent,
+  processDistributionBucketStatusUpdatedEvent,
+  processDistributionBucketsUpdatedForBagEvent,
+  processDynamicBagCreatedEvent,
+  processDynamicBagDeletedEvent,
   processPendingDataObjectsAcceptedEvent,
+  processStorageBucketCreatedEvent,
+  processStorageBucketDeletedEvent,
+  processStorageBucketInvitationAcceptedEvent,
   processStorageBucketInvitationCancelledEvent,
   processStorageBucketOperatorInvitedEvent,
   processStorageBucketOperatorRemovedEvent,
   processStorageBucketStatusUpdatedEvent,
-  processStorageBucketDeletedEvent,
+  processStorageBucketVoucherLimitsSetEvent,
+  processStorageBucketsUpdatedForBagEvent,
+  processStorageOperatorMetadataSetEvent,
   processVoucherChangedEvent,
-  processDynamicBagCreatedEvent,
-  processDynamicBagDeletedEvent,
-  processDataObjectsUploadedEvent,
-  processDataObjectsUpdatedEvent,
-  processDataObjectsMovedEvent,
-  processDataObjectsDeletedEvent,
-  processDistributionBucketCreatedEvent,
-  processDistributionBucketStatusUpdatedEvent,
-  processDistributionBucketDeletedEvent,
-  processDistributionBucketsUpdatedForBagEvent,
-  processDistributionBucketModeUpdatedEvent,
-  processDistributionBucketOperatorInvitedEvent,
-  processDistributionBucketInvitationCancelledEvent,
-  processDistributionBucketInvitationAcceptedEvent,
-  processDistributionBucketMetadataSetEvent,
-  processDistributionBucketOperatorRemovedEvent,
-  processDistributionBucketFamilyCreatedEvent,
-  processDistributionBucketFamilyMetadataSetEvent,
-  processDistributionBucketFamilyDeletedEvent,
 } from './mappings/storage'
 import {
-  processChannelCreatedEvent,
-  processChannelUpdatedEvent,
-  processChannelDeletedEvent,
-  processChannelDeletedByModeratorEvent,
-  processChannelVisibilitySetByModeratorEvent,
-  processChannelOwnerRemarkedEvent,
-  processChannelAgentRemarkedEvent,
-  processChannelPayoutsUpdatedEvent,
-  processChannelRewardUpdatedEvent,
-  processChannelFundsWithdrawnEvent,
-  processChannelRewardClaimedAndWithdrawnEvent,
-} from './mappings/content/channel'
-import {
-  processVideoCreatedEvent,
-  processVideoUpdatedEvent,
-  processVideoDeletedEvent,
-  processVideoDeletedByModeratorEvent,
-  processVideoVisibilitySetByModeratorEvent,
-} from './mappings/content/video'
-import {
-  processOpenAuctionStartedEvent,
-  processEnglishAuctionStartedEvent,
-  processNftIssuedEvent,
-  processAuctionBidMadeEvent,
-  processAuctionBidCanceledEvent,
-  processAuctionCanceledEvent,
-  processEnglishAuctionSettledEvent,
-  processBidMadeCompletingAuctionEvent,
-  processOpenAuctionBidAcceptedEvent,
-  processOfferStartedEvent,
-  processOfferAcceptedEvent,
-  processOfferCanceledEvent,
-  processNftSellOrderMadeEvent,
-  processNftBoughtEvent,
-  processBuyNowCanceledEvent,
-  processBuyNowPriceUpdatedEvent,
-  processNftSlingedBackToTheOriginalArtistEvent,
-} from './mappings/content/nft'
-import {
-  processMemberAccountsUpdatedEvent,
-  processMemberProfileUpdatedEvent,
-  processNewMember,
-  processMemberRemarkedEvent,
-} from './mappings/membership'
-import { Event } from './types/support'
-import { assertAssignable } from './utils/misc'
-import { EntityManagerOverlay } from './utils/overlay'
-import { EventNames, EventHandler, eventConstructors, EventInstance } from './utils/events'
+  processAccountDustedByEvent,
+  processAmmActivatedEvent,
+  processAmmDeactivatedEvent,
+  processCreatorTokenIssuedEvent,
+  processCreatorTokenIssuerRemarkedEvent,
+  processMemberJoinedWhitelistEvent,
+  processPatronageCreditClaimedEvent,
+  processPatronageRateDecreasedToEvent,
+  processRevenueSplitFinalizedEvent,
+  processRevenueSplitIssuedEvent,
+  processRevenueSplitLeftEvent,
+  processTokenAmountTransferredByIssuerEvent,
+  processTokenAmountTransferredEvent,
+  processTokenDeissuedEvent,
+  processTokenIssuedEvent,
+  processTokenSaleFinalizedEvent,
+  processTokenSaleInitializedEvent,
+  processTokensBoughtOnAmmEvent,
+  processTokensBurnedEvent,
+  processTokensPurchasedOnSaleEvent,
+  processTokensSoldOnAmmEvent,
+  processTransferPolicyChangedToPermissionlessEvent,
+  processUpcomingTokenSaleUpdatedEvent,
+  processUserParticipatedInSplitEvent,
+} from './mappings/token'
 import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
-import { EntityManager } from 'typeorm'
+import { Event } from './types/support'
+import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
+import { assertAssignable } from './utils/misc'
 import { OffchainState } from './utils/offchainState'
+import { EntityManagerOverlay } from './utils/overlay'
 import { recommendationServiceManager } from './utils/RecommendationServiceManager'
 
 const defaultEventOptions = {
@@ -124,6 +152,7 @@ processor.addEvent('Content.ChannelDeletedByModerator', defaultEventOptions)
 processor.addEvent('Content.ChannelVisibilitySetByModerator', defaultEventOptions)
 processor.addEvent('Content.ChannelOwnerRemarked', defaultEventOptions)
 processor.addEvent('Content.ChannelAgentRemarked', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssued', defaultEventOptions)
 processor.addEvent('Content.OpenAuctionStarted', defaultEventOptions)
 processor.addEvent('Content.EnglishAuctionStarted', defaultEventOptions)
 processor.addEvent('Content.NftIssued', defaultEventOptions)
@@ -183,6 +212,29 @@ processor.addEvent('Members.MemberInvited', defaultEventOptions)
 processor.addEvent('Members.MemberAccountsUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberProfileUpdated', defaultEventOptions)
 processor.addEvent('Members.MemberRemarked', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferred', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenAmountTransferredByIssuer', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageRateDecreasedTo', defaultEventOptions)
+processor.addEvent('ProjectToken.PatronageCreditClaimed', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenDeissued', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmActivated', defaultEventOptions)
+processor.addEvent('ProjectToken.AmmDeactivated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBoughtOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.AccountDustedBy', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensSoldOnAmm', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleInitialized', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensPurchasedOnSale', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitIssued', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitLeft', defaultEventOptions)
+processor.addEvent('ProjectToken.MemberJoinedWhitelist', defaultEventOptions)
+processor.addEvent('ProjectToken.UpcomingTokenSaleUpdated', defaultEventOptions)
+processor.addEvent('ProjectToken.TokensBurned', defaultEventOptions)
+processor.addEvent('ProjectToken.TokenSaleFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.RevenueSplitFinalized', defaultEventOptions)
+processor.addEvent('ProjectToken.UserParticipatedInSplit', defaultEventOptions)
+processor.addEvent('ProjectToken.TransferPolicyChangedToPermissionless', defaultEventOptions)
+processor.addEvent('Content.CreatorTokenIssuerRemarked', defaultEventOptions)
 
 type Item = BatchProcessorItem<typeof processor>
 type Ctx = BatchContext<Store, Item>
@@ -194,14 +246,18 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Content.VideoUpdated': processVideoUpdatedEvent,
   'Content.VideoDeleted': processVideoDeletedEvent,
   'Content.VideoDeletedByModerator': processVideoDeletedByModeratorEvent,
+  'Content.VideoAssetsDeletedByModerator': processVideoAssetsDeletedByModeratorEvent,
   'Content.VideoVisibilitySetByModerator': processVideoVisibilitySetByModeratorEvent,
   'Content.ChannelCreated': processChannelCreatedEvent,
   'Content.ChannelUpdated': processChannelUpdatedEvent,
   'Content.ChannelDeleted': processChannelDeletedEvent,
   'Content.ChannelDeletedByModerator': processChannelDeletedByModeratorEvent,
+  'Content.ChannelAssetsDeletedByModerator': processChannelAssetsDeletedByModeratorEvent,
   'Content.ChannelVisibilitySetByModerator': processChannelVisibilitySetByModeratorEvent,
   'Content.ChannelOwnerRemarked': processChannelOwnerRemarkedEvent,
   'Content.ChannelAgentRemarked': processChannelAgentRemarkedEvent,
+  'Content.CreatorTokenIssued': processCreatorTokenIssuedEvent,
+  'Content.CreatorTokenIssuerRemarked': processCreatorTokenIssuerRemarkedEvent,
   'Content.OpenAuctionStarted': processOpenAuctionStartedEvent,
   'Content.EnglishAuctionStarted': processEnglishAuctionStartedEvent,
   'Content.NftIssued': processNftIssuedEvent,
@@ -262,10 +318,30 @@ const eventHandlers: { [E in EventNames]: EventHandler<E> } = {
   'Members.MemberAccountsUpdated': processMemberAccountsUpdatedEvent,
   'Members.MemberProfileUpdated': processMemberProfileUpdatedEvent,
   'Members.MemberRemarked': processMemberRemarkedEvent,
+  'ProjectToken.TokenIssued': processTokenIssuedEvent,
+  'ProjectToken.TokenDeissued': processTokenDeissuedEvent,
+  'ProjectToken.AccountDustedBy': processAccountDustedByEvent,
+  'ProjectToken.AmmActivated': processAmmActivatedEvent,
+  'ProjectToken.AmmDeactivated': processAmmDeactivatedEvent,
+  'ProjectToken.TokensBoughtOnAmm': processTokensBoughtOnAmmEvent,
+  'ProjectToken.TokensSoldOnAmm': processTokensSoldOnAmmEvent,
+  'ProjectToken.PatronageRateDecreasedTo': processPatronageRateDecreasedToEvent,
+  'ProjectToken.PatronageCreditClaimed': processPatronageCreditClaimedEvent,
+  'ProjectToken.TokenSaleInitialized': processTokenSaleInitializedEvent,
+  'ProjectToken.TokensPurchasedOnSale': processTokensPurchasedOnSaleEvent,
+  'ProjectToken.TokenAmountTransferred': processTokenAmountTransferredEvent,
+  'ProjectToken.TokenAmountTransferredByIssuer': processTokenAmountTransferredByIssuerEvent,
+  'ProjectToken.TokensBurned': processTokensBurnedEvent,
+  'ProjectToken.TokenSaleFinalized': processTokenSaleFinalizedEvent,
+  'ProjectToken.RevenueSplitIssued': processRevenueSplitIssuedEvent,
+  'ProjectToken.MemberJoinedWhitelist': processMemberJoinedWhitelistEvent,
+  'ProjectToken.UpcomingTokenSaleUpdated': processUpcomingTokenSaleUpdatedEvent,
+  'ProjectToken.RevenueSplitLeft': processRevenueSplitLeftEvent,
+  'ProjectToken.RevenueSplitFinalized': processRevenueSplitFinalizedEvent,
+  'ProjectToken.UserParticipatedInSplit': processUserParticipatedInSplitEvent,
+  'ProjectToken.TransferPolicyChangedToPermissionless':
+    processTransferPolicyChangedToPermissionlessEvent,
 }
-
-const offchainState = new OffchainState()
-const exportBlockNumber = offchainState.getExportBlockNumber()
 
 async function processEvent<EventName extends EventNames>(
   ctx: Ctx,
@@ -287,8 +363,16 @@ async function afterDbUpdate(em: EntityManager) {
   await commentCountersManager.updateParentRepliesCounters(em)
 }
 
+const offchainState = new OffchainState()
+let exportBlockNumber: number
+
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
+
+  // Get the export block number from the offchain state
+  if (!exportBlockNumber) {
+    exportBlockNumber = await offchainState.getExportBlockNumber()
+  }
 
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
 
@@ -338,7 +422,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       // there is no need to recalc video relevance before orion is synced
       await overlay.updateDatabase()
       const em = overlay.getEm()
-      await offchainState.import(em)
+      await offchainState.import(overlay)
       await commentCountersManager.updateVideoCommentsCounters(em, true)
       await commentCountersManager.updateParentRepliesCounters(em, true)
       await videoRelevanceManager.updateVideoRelevanceValue(em, true)

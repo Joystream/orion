@@ -1,4 +1,4 @@
-type VideoViewEvent @entity {
+type VideoViewEvent @entity @schema(name: "admin") {
   "Unique identifier of the video view event"
   id: ID!
 
@@ -15,7 +15,7 @@ type VideoViewEvent @entity {
   videoViewPercentage: Int!
 }
 
-type Report @entity {
+type Report @entity @schema(name: "admin") {
   "Unique identifier of the report"
   id: ID!
 
@@ -35,7 +35,7 @@ type Report @entity {
   rationale: String!
 }
 
-type NftFeaturingRequest @entity {
+type NftFeaturingRequest @entity @schema(name: "admin") {
   "Unique identifier of the request"
   id: ID!
 
@@ -52,7 +52,7 @@ type NftFeaturingRequest @entity {
   rationale: String!
 }
 
-type ChannelFollow @entity {
+type ChannelFollow @entity @schema(name: "admin") {
   "Unique identifier of the follow"
   id: ID!
 
@@ -66,7 +66,7 @@ type ChannelFollow @entity {
   timestamp: DateTime!
 }
 
-type GatewayConfig @entity {
+type GatewayConfig @entity @schema(name: "admin") {
   "Unique name of the configuration variable"
   id: ID!
 
@@ -77,7 +77,7 @@ type GatewayConfig @entity {
   updatedAt: DateTime!
 }
 
-type Exclusion @entity {
+type Exclusion @entity @schema(name: "admin") {
   "Unique identifier of the exclusion"
   id: ID!
 
