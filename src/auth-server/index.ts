@@ -15,7 +15,7 @@ import { recommendationServiceManager } from '../utils/RecommendationServiceMana
 
 export const logger = createLogger('auth-api')
 
-recommendationServiceManager.enableSync()
+recommendationServiceManager.enableExport()
 recommendationServiceManager.initBatchLoop()
 export const app = express()
 

@@ -411,7 +411,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       !recommendationServiceManager.isEnabled &&
       (process.env.FORCE_RECOMMENDATION_DATA_SYNC || block.header.height >= exportBlockNumber)
     ) {
-      recommendationServiceManager.enableSync()
+      recommendationServiceManager.enableExport()
       recommendationServiceManager.initBatchLoop()
       ctx.log.info(`Recommendations service enabled!`)
     }

@@ -33,7 +33,8 @@ async function main() {
 
   if (
     !process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY ||
-    !process.env.RECOMMENDATION_SERVICE_DATABASE
+    !process.env.RECOMMENDATION_SERVICE_DATABASE ||
+    !process.env.RECOMMENDATION_SERVICE_DATABASE_REGION
   ) {
     console.error('Missing required variables for setting up Recombee. Skipping...')
     return
@@ -43,7 +44,7 @@ async function main() {
     process.env.RECOMMENDATION_SERVICE_DATABASE,
     process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY,
     {
-      region: 'eu-west',
+      region: process.env.RECOMMENDATION_SERVICE_DATABASE_REGION,
     }
   )
   // setup item properties
@@ -62,11 +63,11 @@ async function main() {
   const failedRequests = res.filter((req) => req.code === 400)
 
   if (failedRequests.length) {
-    console.error('Some of the requests failed! Recommbee is not ready to be used.', failedRequests)
+    console.error('Some of the requests failed! Recombee is not ready to be used.', failedRequests)
     throw new Error()
   }
   console.log(
-    'Recombee setup is completed! Rember to add following scenarios to the admin UI: watch-next, similar-videos, homepage'
+    'Recombee setup is completed! Remember to add following scenarios to the admin UI: watch-next, similar-videos, homepage'
   )
 }
 

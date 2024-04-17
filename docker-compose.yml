@@ -19,7 +19,7 @@ services:
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
 
   interactions_db:
-    image: mongo:latest
+    image: mongo:7.0.0
     container_name: interactions_db
     hostname: interactions_db
     profiles: ['interactions']

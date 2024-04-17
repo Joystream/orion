@@ -122,6 +122,8 @@ export async function processChannelCreatedEvent({
     }
   }
 
+  recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
+
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
     const event = overlay.getRepository(Event).new({
@@ -176,6 +178,8 @@ export async function processChannelUpdatedEvent({
       newDataObjects
     )
   }
+
+  recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
 }
 
 export async function processChannelDeletedEvent({

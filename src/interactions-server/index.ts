@@ -16,7 +16,7 @@ import { initInteractionsDb } from './interactionsEm'
 
 export const logger = createLogger('interactions-api')
 
-recommendationServiceManager.enableSync()
+recommendationServiceManager.enableExport()
 recommendationServiceManager.initBatchLoop()
 initInteractionsDb()
 

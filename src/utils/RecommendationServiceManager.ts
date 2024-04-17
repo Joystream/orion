@@ -22,6 +22,13 @@ export type RSVideo = {
   channel_description?: string
 } & Required<Pick<Video, 'duration' | 'language' | 'title'>>
 
+export type RSChannel = {
+  follows_num: number
+  timestamp: Date
+  video_views_num: number
+  entry_app_id?: string
+} & Required<Pick<Channel, 'title' | 'description' | 'language'>>
+
 type RSUser = Pick<User, 'id'>
 
 type CommonOptions = {
@@ -44,7 +51,8 @@ export class RecommendationServiceManager {
   constructor() {
     if (
       !process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY ||
-      !process.env.RECOMMENDATION_SERVICE_DATABASE
+      !process.env.RECOMMENDATION_SERVICE_DATABASE ||
+      !process.env.RECOMMENDATION_SERVICE_DATABASE_REGION
     ) {
       recommendationServiceLogger.error(
         'RecommendationServiceManager initialized without required variables'
@@ -55,7 +63,7 @@ export class RecommendationServiceManager {
       process.env.RECOMMENDATION_SERVICE_DATABASE,
       process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY,
       {
-        region: 'eu-west',
+        region: process.env.RECOMMENDATION_SERVICE_DATABASE_REGION,
       }
     )
     recommendationServiceLogger.info(
@@ -92,6 +100,28 @@ export class RecommendationServiceManager {
   scheduleVideoDeletion(videoId: string) {
     const actionObject = new ClientRequests.DeleteItem(`${videoId}-video`)
     this._queue.push(actionObject)
+  }
+
+  scheduleChannelUpsert(channel: Channel) {
+    // for dev env sync only up to 20k channels
+    if (!this._enabled || (isDevEnv && Number(channel.id) > 20_000)) {
+      return
+    }
+
+    const actionObject: RSChannel = {
+      title: channel.title,
+      description: channel.description,
+      follows_num: channel.followsNum,
+      entry_app_id: channel.entryAppId ?? undefined,
+      timestamp: new Date(channel.createdAt),
+      video_views_num: channel.videoViewsNum,
+      language: channel.language,
+    }
+
+    const request = new ClientRequests.SetItemValues(`${channel.id}-channel`, actionObject, {
+      cascadeCreate: true,
+    })
+    this._queue.push(request)
   }
 
   scheduleChannelDeletion(channelId: string) {
@@ -226,7 +256,7 @@ export class RecommendationServiceManager {
     this._queue.push(actionObject)
   }
 
-  enableSync() {
+  enableExport() {
     this._enabled = !!this.client
   }
 
