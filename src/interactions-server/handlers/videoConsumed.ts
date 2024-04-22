@@ -4,7 +4,7 @@ import { components } from '../generated/api-types'
 import { AuthContext } from '../../utils/auth'
 import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 import { singlePurchaseLimiter } from '../interactionsLimiter'
-import { PurchaseModel, RatingModel } from '../interactionsEm'
+import { PurchaseModel } from '../interactionsEm'
 
 type ReqParams = Record<string, string>
 type ResBody =

@@ -48,6 +48,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - processor_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -68,6 +69,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - graphql_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -90,6 +92,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - auth_api_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -112,6 +115,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - interactions_api_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -123,6 +127,10 @@ services:
 volumes:
   orion_db_data:
   interactions_db_data:
+  interactions_api_queue:
+  auth_api_queue:
+  graphql_queue:
+  processor_queue:
 
 networks:
   default:

@@ -8,6 +8,8 @@ import {
 import { createLogger } from '@subsquid/logger'
 import { randomUUID } from 'crypto'
 import { stringToHex } from '@polkadot/util'
+import { PersistentQueue } from './persistingQueue'
+import path from 'path'
 
 export type RecommendationItemId = `${string}-${'video' | 'channel'}`
 
@@ -41,14 +43,14 @@ const recommendationServiceLogger = createLogger('recommendationsService')
 const isDevEnv = process.env.ORION_ENV === 'development'
 
 export class RecommendationServiceManager {
-  private _queue: ClientRequests.Request[] = []
+  private _queue: PersistentQueue<ClientRequests.Request>
   private client: ApiClient | null = null
 
   // if orion is launched in dev mode, always sync videos
   private _enabled = false
   private _loopInitialized = false
 
-  constructor() {
+  constructor(queueFilePath: string) {
     if (
       !process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY ||
       !process.env.RECOMMENDATION_SERVICE_DATABASE ||
@@ -59,6 +61,7 @@ export class RecommendationServiceManager {
       )
       return
     }
+    this._queue = new PersistentQueue<ClientRequests.Request>(queueFilePath)
     this.client = new ApiClient(
       process.env.RECOMMENDATION_SERVICE_DATABASE,
       process.env.RECOMMENDATION_SERVICE_PRIVATE_KEY,
@@ -94,12 +97,15 @@ export class RecommendationServiceManager {
     const request = new ClientRequests.SetItemValues(`${video.id}-video`, actionObject, {
       cascadeCreate: true,
     })
-    this._queue.push(request)
+    this._queue.addToQueue(request).catch(() => undefined)
   }
 
   scheduleVideoDeletion(videoId: string) {
+    if (!this._enabled) {
+      return
+    }
     const actionObject = new ClientRequests.DeleteItem(`${videoId}-video`)
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   scheduleChannelUpsert(channel: Channel) {
@@ -121,12 +127,16 @@ export class RecommendationServiceManager {
     const request = new ClientRequests.SetItemValues(`${channel.id}-channel`, actionObject, {
       cascadeCreate: true,
     })
-    this._queue.push(request)
+    this._queue.addToQueue(request).catch(() => undefined)
   }
 
   scheduleChannelDeletion(channelId: string) {
+    if (!this._enabled) {
+      return
+    }
+
     const actionObject = new ClientRequests.DeleteItem(`${channelId}-channel`)
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   scheduleUserUpsert(user: RSUser) {
@@ -141,7 +151,7 @@ export class RecommendationServiceManager {
         cascadeCreate: true,
       }
     )
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   // this interaction has big model value and should we used for
@@ -156,7 +166,7 @@ export class RecommendationServiceManager {
       cascadeCreate: true,
       recommId,
     })
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   // this interaction should be dispatched when user clicks a video to see it
@@ -176,7 +186,7 @@ export class RecommendationServiceManager {
       recommId,
       duration,
     })
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   // this interaction is for user engagement level
@@ -201,7 +211,7 @@ export class RecommendationServiceManager {
         recommId,
       }
     )
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   scheduleItemBookmark(itemId: RecommendationItemId, userId: string, recommId?: string) {
@@ -214,7 +224,7 @@ export class RecommendationServiceManager {
       cascadeCreate: !isDevEnv,
       recommId,
     })
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   deleteItemBookmark(itemId: RecommendationItemId, userId: string) {
@@ -223,7 +233,7 @@ export class RecommendationServiceManager {
     }
 
     const actionObject = new ClientRequests.DeleteBookmark(this.mapUserId(userId), itemId)
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   scheduleItemRating(
@@ -244,7 +254,7 @@ export class RecommendationServiceManager {
       cascadeCreate: !isDevEnv,
       recommId,
     })
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   deleteItemRating(itemId: RecommendationItemId, userId: string) {
@@ -253,7 +263,7 @@ export class RecommendationServiceManager {
     }
 
     const actionObject = new ClientRequests.DeleteRating(userId, itemId)
-    this._queue.push(actionObject)
+    this._queue.addToQueue(actionObject).catch(() => undefined)
   }
 
   enableExport() {
@@ -298,6 +308,10 @@ export class RecommendationServiceManager {
   }
 
   async recommendItemsToUser(userId?: string, opts?: CommonOptions) {
+    if (!this._enabled) {
+      return
+    }
+
     recommendationServiceLogger.info(
       `Getting items recommendations to ${userId || 'empty user'}(${this.mapUserId(userId ?? '')})`
     )
@@ -322,6 +336,10 @@ export class RecommendationServiceManager {
   }
 
   async recommendNextItems(recommId: string, opts?: CommonOptions) {
+    if (!this._enabled) {
+      return
+    }
+
     const request = new ClientRequests.RecommendNextItems(recommId, opts?.limit ?? 10)
     const res = await this.client?.send(request)
     if (!res) {
@@ -332,6 +350,10 @@ export class RecommendationServiceManager {
   }
 
   async recommendItemsToItem(itemId: RecommendationItemId, userId?: string, opts?: CommonOptions) {
+    if (!this._enabled) {
+      return
+    }
+
     const request = new ClientRequests.RecommendItemsToItem(
       itemId,
       userId ? this.mapUserId(userId) : randomUUID(),
@@ -354,6 +376,10 @@ export class RecommendationServiceManager {
   }
 
   async recommendNextVideo(itemId: RecommendationItemId, userId?: string, opts?: CommonOptions) {
+    if (!this._enabled) {
+      return
+    }
+
     const request = new ClientRequests.RecommendItemsToItem(
       itemId,
       userId ? this.mapUserId(userId) : randomUUID(),
@@ -414,14 +440,20 @@ export class RecommendationServiceManager {
 
   private async _batchUpdateLoop(intervalMs: number): Promise<void> {
     while (true) {
-      if (this._queue.length) {
-        const batchArray = [...this._queue]
-        this._queue.length = 0
-        await this.sendBatchRequest(batchArray)
+      const queue = this._queue.getQueue()
+      if (queue.length) {
+        await this._queue.lockQueue(async () => {
+          await this.sendBatchRequest(queue)
+        })
+        await this._queue.flushQueue()
       }
       await new Promise((resolve) => setTimeout(resolve, intervalMs))
     }
   }
 }
 
-export const recommendationServiceManager = new RecommendationServiceManager()
+const dirPath = path.resolve('../app/persistedQueue')
+
+export const recommendationServiceManager = new RecommendationServiceManager(
+  `${dirPath}/interactions`
+)
