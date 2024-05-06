@@ -188,6 +188,42 @@ export class NotificationResolver {
         newPreferences.fundsFromWgReceived,
         account.notificationPreferences.fundsFromWgReceived
       )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtIssued,
+        account.notificationPreferences.crtIssued
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtMarketStarted,
+        account.notificationPreferences.crtMarketStarted
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtMarketMint,
+        account.notificationPreferences.crtMarketMint
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtMarketBurn,
+        account.notificationPreferences.crtMarketBurn
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtSaleStarted,
+        account.notificationPreferences.crtSaleStarted
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtSaleMint,
+        account.notificationPreferences.crtSaleMint
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtRevenueShareStarted,
+        account.notificationPreferences.crtRevenueShareStarted
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtRevenueSharePlanned,
+        account.notificationPreferences.crtRevenueSharePlanned
+      )
+      maybeUpdateNotificationPreference(
+        newPreferences.crtRevenueShareEnded,
+        account.notificationPreferences.crtRevenueShareEnded
+      )
       await em.save(account)
 
       return toOutputGQL(account.notificationPreferences)
