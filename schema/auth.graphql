@@ -41,7 +41,7 @@ type User @entity @schema(name: "admin") {
   nftFeaturingRequests: [NftFeaturingRequest!]! @derivedFrom(field: "user")
 }
 
-type EncryptionArtifacts @entity {
+type EncryptionArtifacts @entity @schema(name: "admin") {
   "ID / lookupKey"
   id: ID!
 
@@ -55,7 +55,7 @@ type EncryptionArtifacts @entity {
   encryptedSeed: String!
 }
 
-type SessionEncryptionArtifacts @entity {
+type SessionEncryptionArtifacts @entity @schema(name: "admin") {
   "Unique identifier"
   id: ID!
 
