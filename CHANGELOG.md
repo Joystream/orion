@@ -1,3 +1,17 @@
+# 4.0.2
+
+## Bug Fixes:
+- Fixed: unstake tokens atfer revenue share has been finalized.
+- Fixed: transform raw json objects to `jsonb` properties while importing the offchain state.
+- Fixed: `bigint` to `number` conversion in `getCumulativeHistoricalShareAllocation` custom resolver.
+- Fixed duplicate notifications being received by users for featured NFTs.
+
+# 4.0.1
+
+## Misc
+
+- Enable both in App and email notifications for `previousTopBidder` in NFT Open Auction.
+
 # 4.0.0
 
 This is Creator Tokens (CRT) release. It introduces the CRT mappings, custom resolvers and mutations.

@@ -430,6 +430,9 @@ type CreatorTokenIssued @variant {
   "symbol of the token"
   tokenSymbol: String!
 
+  "id of the token"
+  tokenId: String!
+
   "channel Id used for link"
   channelId: String!
 }
@@ -441,6 +444,9 @@ type CreatorTokenSaleStarted @variant {
   "symbol of the token"
   tokenSymbol: String!
 
+  "id of the token"
+  tokenId: String!
+
   "channel Id used for link"
   channelId: String!
 }
@@ -451,6 +457,9 @@ type CreatorTokenMarketStarted @variant {
 
   "symbol of the token"
   tokenSymbol: String!
+
+  "id of the token"
+  tokenId: String!
 
   "channel Id used for link"
   channelId: String!
@@ -474,6 +483,9 @@ type CreatorTokenMarketMint @variant {
 
   "symbol of the token"
   tokenSymbol: String!
+
+  "id of the token"
+  tokenId: String!
 }
 
 type CreatorTokenMarketBurn @variant {
@@ -494,6 +506,9 @@ type CreatorTokenMarketBurn @variant {
 
   "symbol of the token"
   tokenSymbol: String!
+
+  "id of the token"
+  tokenId: String!
 }
 
 type CreatorTokenSaleMint @variant {
@@ -514,6 +529,9 @@ type CreatorTokenSaleMint @variant {
 
   "symbol of the token"
   tokenSymbol: String!
+
+  "id of the token"
+  tokenId: String!
 }
 
 type CreatorTokenRevenueShareStarted @variant {
@@ -542,6 +560,9 @@ type CreatorTokenRevenueSharePlanned @variant {
 
   "symbol of the token"
   tokenSymbol: String!
+
+  "id of the token"
+  tokenId: String!
 
   "block on which split is planned to start"
   plannedAt: Int!
