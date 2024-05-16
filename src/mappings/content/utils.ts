@@ -761,13 +761,16 @@ export async function notifyChannelFollowers(
 ) {
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
   for (const followerAccount of followersAccounts) {
-    await addNotification(
-      overlay,
-      followerAccount,
-      new MemberRecipient({ membership: followerAccount.joystreamAccount.memberships[0].id }), // TODO: handle multiple memberships (i.e. follower account address owns multiple memberships). Also, consider a scenario where a follower account has no memberships.
-      notificationType,
-      event
-    )
+    // TODO: handling multiple memberships (i.e. follower account address owns multiple memberships). Also, consider a scenario where a follower account has no memberships.
+    for (const membership of followerAccount.joystreamAccount.memberships) {
+      await addNotification(
+        overlay,
+        followerAccount,
+        new MemberRecipient({ membership: membership.id }),
+        notificationType,
+        event
+      )
+    }
   }
 }
 
