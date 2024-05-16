@@ -14,6 +14,7 @@ import { components } from '../generated/api-types'
 import { app } from '../index'
 import { SimpleRateLimit, resetAllLimits } from '../rateLimits'
 import './config'
+import { findActiveToken } from './requestEmailConfirmationToken'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
@@ -151,12 +152,18 @@ export async function createAccount(
   // const membership = await insertFakeMember(keypair.address)
 
   const anonSessionId = await anonymousAuth()
+  await requestEmailConfirmationToken(email, anonSessionId, 200)
+
+  const token = await findActiveToken(em, email)
+  assert(token, 'Token not found')
+
   const createAccountReqData = await signedAction<
     components['schemas']['CreateAccountRequestData']
   >(
     {
       action: 'createAccount',
       email,
+      emailConfirmationToken: token.id,
       encryptionArtifacts: await prepareEncryptionArtifacts(seed, email, password),
     },
     keypair
@@ -196,11 +203,13 @@ export async function confirmEmail(token: string, expectedStatus: number): Promi
 
 export async function requestEmailConfirmationToken(
   email: string,
+  sessionId: string,
   expectedStatus: number
 ): Promise<void> {
   await request(app)
     .post('/api/v1/request-email-confirmation-token')
     .set('Content-Type', 'application/json')
+    .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
     .send({ email })
     .expect(expectedStatus)
 }

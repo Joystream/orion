@@ -42,7 +42,6 @@ if (process.env.OPENAPI_PLAYGROUND === 'true' || process.env.OPENAPI_PLAYGROUND 
     fs.readFileSync(path.join(__dirname, 'openapi.yml')).toString()
   ) as JsonObject
   logger.info('Running playground at /playground')
-  console.log('Spec', spec)
   app.use('/playground', swaggerUi.serve, swaggerUi.setup(spec))
 }
 app.use(
