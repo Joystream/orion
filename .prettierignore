@@ -10,3 +10,5 @@ db/migrations/*-Views.js
 schema.graphql
 /scripts/orion-v1-migration/data
 /db/export
+src/auth-server/generated
+src/auth-server/emails/templates/preview

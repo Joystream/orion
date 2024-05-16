@@ -65,7 +65,11 @@ export const requestEmailConfirmationToken: (
       // Send email with verification token if Gateway account does not exist.
       // Otherwise, send email to asking user to login/change password. but
       // the API response should be the same to avoid email enumeration attack.
-      account ? await sendLoginOrChangePasswordEmail(email, em) : await sendWelcomeEmail(email, em)
+      if (account) {
+        await sendLoginOrChangePasswordEmail(email, em)
+      } else {
+        await sendWelcomeEmail(email, em)
+      }
     })
 
     res.status(200).json({ success: true })
