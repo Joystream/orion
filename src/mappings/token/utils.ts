@@ -23,7 +23,7 @@ import { uniqueId } from '../../utils/crypto'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { getAccountForMember } from '../utils'
+import { getAccountForMember } from '../content/utils'
 
 export const FALLBACK_TOKEN_SYMBOL = '??'
 
@@ -338,7 +338,7 @@ export async function getHolderAccountsForToken(
   const holdersAccounts = await Promise.all(
     holdersMemberIds.map((membershipId) =>
       limit(async () => {
-        const account = await getAccountForMember(em, membershipId)
+        const account = await getAccountForMember(overlay, membershipId)
         return [membershipId, account] as [string, Account | null]
       })
     )

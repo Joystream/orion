@@ -56,8 +56,15 @@ export async function processMemberAccountsUpdatedEvent({
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
+    // Create blockchain account entity if it doesn't exist
+    const controllerAccountId = toAddress(newControllerAccount)
+    const blockchainAccount =
+      (await overlay.getRepository(BlockchainAccount).getById(controllerAccountId)) ||
+      overlay.getRepository(BlockchainAccount).new({
+        id: controllerAccountId,
+      })
     const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
-    member.controllerAccountId = toAddress(newControllerAccount)
+    member.controllerAccountId = blockchainAccount.id
   }
 }
 

@@ -74,7 +74,6 @@ import {
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { getMemberControllerAccount } from '../membership/utils'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -691,6 +690,21 @@ export async function getAccountForMember(
     .getRepository(Account)
     .getOneByRelation('joystreamAccountId', await getMemberControllerAccount(overlay, memberId))
   return (memberAccount as Account) ?? null
+}
+
+async function getMemberControllerAccount(
+  overlay: EntityManagerOverlay,
+  memberId: string
+): Promise<string> {
+  const membership = await overlay.getRepository(Membership).getByIdOrFail(memberId)
+
+  if (!membership.controllerAccountId) {
+    // This should never happen, but only added for type safety as
+    // the foreign entity references are always set nullable by the
+    // subsquid codegen even if in the graphql schema they are not.
+    criticalError(`Membership ${membership.id} controller account not found.`)
+  }
+  return membership.controllerAccountId
 }
 
 export async function getAccountsForBidders(

@@ -34,12 +34,7 @@ import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay } from '../../utils/overlay'
-import {
-  addNftActivity,
-  addNftHistoryEntry,
-  genericEventFields,
-  getAccountForMember,
-} from '../utils'
+import { addNftActivity, addNftHistoryEntry, genericEventFields } from '../utils'
 import {
   addNewBidNotification,
   addRoyaltyPaymentNotification,
@@ -49,6 +44,7 @@ import {
   createBid,
   findTopBid,
   finishAuction,
+  getAccountForMember,
   getChannelTitleById,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
@@ -622,10 +618,7 @@ export async function processNftBoughtEvent({
   await maybeNotifyNftCreator(overlay, previousNftOwner, notificationData, event)
   if (previousNftOwner.isTypeOf === 'NftOwnerMember') {
     // case when previous owner is a member
-    const previousNftOwnerAccount = await getAccountForMember(
-      overlay.getEm(),
-      previousNftOwner.member
-    )
+    const previousNftOwnerAccount = await getAccountForMember(overlay, previousNftOwner.member)
     await addNotification(
       overlay,
       previousNftOwnerAccount ? (previousNftOwnerAccount as Account) : null,
