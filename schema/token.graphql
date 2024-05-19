@@ -60,7 +60,7 @@ type CreatorToken @entity {
   channel: TokenChannel @derivedFrom(field: "token")
 
   "video for the token presentation page"
-  trailerVideo: [TrailerVideo!]! @derivedFrom(field: "token")
+  trailerVideo: TrailerVideo @derivedFrom(field: "token")
 
   "about information displayed under the presentation video"
   description: String
