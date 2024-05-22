@@ -91,7 +91,7 @@ export class StateResolver {
           COALESCE(event.data->>'amount', '0')::bigint
         ) AS "total_rewards_volume",
         SUM(
-          COALESCE(amm_buy.pricePaid, '0')::bigint
+          COALESCE(amm_buy.price_paid, '0')::bigint
         ) AS "total_crt_volume",
         SUM(
           COALESCE(event.data->>'price', '0')::bigint + COALESCE(winning_bid.amount, 0)
