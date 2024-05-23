@@ -1,4 +1,4 @@
-import { Resolver, Root, Subscription } from 'type-graphql'
+import { Resolver, Root, Subscription, Query, ObjectType, Field } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
 import { ProcessorState } from './types'
 import _, { isObject } from 'lodash'
@@ -73,4 +73,63 @@ export class StateResolver {
   processorState(@Root() state: ProcessorState): ProcessorState {
     return state
   }
+
+  @Query(() => EarningStatsOutput)
+  async totalJoystreamEarnings(): Promise<EarningStatsOutput> {
+    const em = await this.tx()
+    const result = (
+      await em.query<
+        {
+          total_rewards_volume: string
+          total_crt_volume: string
+          total_nft_volume: string
+        }[]
+      >(
+        `
+      SELECT
+          SUM(
+          COALESCE(event.data->>'amount', '0')::bigint
+        ) AS "total_rewards_volume",
+        SUM(
+          COALESCE(amm_buy.price_paid, '0')::bigint
+        ) AS "total_crt_volume",
+        SUM(
+          COALESCE(event.data->>'price', '0')::bigint + COALESCE(winning_bid.amount, 0)
+        ) AS "total_nft_volume"
+      FROM
+          "event"
+      LEFT JOIN amm_transaction AS amm_buy ON "data"->>'ammMintTransaction' = amm_buy.id
+      LEFT JOIN bid AS winning_bid ON "data"->>'winningBid' = winning_bid.id
+      WHERE
+          "event"."data"->>'isTypeOf' IN (
+              'ChannelPaymentMadeEventData',
+              'CreatorTokenMarketMintEventData',
+              'NftBoughtEventData',
+              'EnglishAuctionSettledEventData',
+              'BidMadeCompletingAuctionEventData',
+              'OpenAuctionBidAcceptedEventData'
+          )
+
+      `
+      )
+    )[0]
+
+    return {
+      crtSaleVolume: result.total_crt_volume ?? 0,
+      nftSaleVolume: result.total_nft_volume ?? 0,
+      totalRewardsPaid: result.total_rewards_volume ?? 0,
+    }
+  }
+}
+
+@ObjectType()
+export class EarningStatsOutput {
+  @Field({ nullable: false })
+  crtSaleVolume: string
+
+  @Field({ nullable: false })
+  totalRewardsPaid: string
+
+  @Field({ nullable: false })
+  nftSaleVolume: string
 }
