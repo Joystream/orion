@@ -19,7 +19,7 @@ export const schedulePriceUpdate = async (): Promise<void> => {
   while (true) {
     await updateJoystreamPrice()
     log.info(`Price refetched: ${JOYSTREAM_USD_PRICE}`)
-    await new Promise((resolve) => setTimeout(resolve, 1_000 * 60 * 30)) // 30mins
+    await new Promise((resolve) => setTimeout(resolve, 1_000 * 60 * 5)) // 5mins
   }
 }
 

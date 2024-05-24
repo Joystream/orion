@@ -401,7 +401,7 @@ export const getNotificationData = async (
         link: await getNotificationLink(em, 'portfolio'),
         avatar: await getNotificationAvatar(em, 'channelId', channelId),
         text: `🔓 ${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
-        subject: 'Revenue share ended',
+        subject: `🔓 ${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
       }
     }
   }
