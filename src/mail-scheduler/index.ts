@@ -5,6 +5,7 @@ import { ConfigVariable, config } from '../utils/config'
 import { uniqueId } from '../utils/crypto'
 import { globalEm } from '../utils/globalEm'
 import { createMailContent, executeMailDelivery } from './utils'
+import { updateJoystreamPrice } from '../utils/joystreamPrice'
 
 export async function getMaxAttempts(em: EntityManager): Promise<number> {
   const maxAttempts = await config.get(ConfigVariable.EmailNotificationDeliveryMaxAttempts, em)
@@ -31,6 +32,7 @@ export async function mailsToDeliver(em: EntityManager): Promise<NotificationEma
 
 export async function deliverEmails() {
   const em = await globalEm
+  await updateJoystreamPrice()
   const newEmailDeliveries = await mailsToDeliver(em)
   const maxAttempts = await getMaxAttempts(em)
   const appName = await config.get(ConfigVariable.AppName, em)

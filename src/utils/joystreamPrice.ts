@@ -10,9 +10,14 @@ const MAX_SAFE_NUMBER_BN = new BN(Number.MAX_SAFE_INTEGER)
 const log = createLogger('price')
 
 export const updateJoystreamPrice = async () => {
-  const data = await fetch('https://status.joystream.org/price')
-  const json = await data.json()
-  JOYSTREAM_USD_PRICE = +json.price ?? 0
+  // we don't care if the request fails, app should continue to work w/o joy price
+  const data = await fetch('https://status.joystream.org/price').catch(() =>
+    log.error('Fetching JOYSTREAM price failed')
+  )
+  if (data) {
+    const json = await data.json()
+    JOYSTREAM_USD_PRICE = +json.price ?? 0
+  }
 }
 
 export const schedulePriceUpdate = async (): Promise<void> => {

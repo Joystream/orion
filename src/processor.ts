@@ -382,7 +382,7 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
     await updateJoystreamPrice()
     schedulePriceUpdate()
       .then(() => undefined)
-      .catch(() => ctx.log.error('Fetching JOYSTREAM price failed'))
+      .catch(() => undefined)
   }
 
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
