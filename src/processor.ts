@@ -119,11 +119,6 @@ import { EventHandler, EventInstance, EventNames, eventConstructors } from './ut
 import { assertAssignable } from './utils/misc'
 import { OffchainState } from './utils/offchainState'
 import { EntityManagerOverlay } from './utils/overlay'
-import {
-  JOYSTREAM_USD_PRICE,
-  schedulePriceUpdate,
-  updateJoystreamPrice,
-} from './utils/joystreamPrice'
 
 const defaultEventOptions = {
   data: {
@@ -376,13 +371,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   // Get the export block number from the offchain state
   if (!exportBlockNumber) {
     exportBlockNumber = await offchainState.getExportBlockNumber()
-  }
-
-  if (JOYSTREAM_USD_PRICE === null) {
-    await updateJoystreamPrice()
-    schedulePriceUpdate()
-      .then(() => undefined)
-      .catch(() => undefined)
   }
 
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
