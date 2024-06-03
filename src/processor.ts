@@ -119,6 +119,7 @@ import { EventHandler, EventInstance, EventNames, eventConstructors } from './ut
 import { assertAssignable } from './utils/misc'
 import { OffchainState } from './utils/offchainState'
 import { EntityManagerOverlay } from './utils/overlay'
+import { recommendationServiceManager } from './utils/RecommendationServiceManager'
 
 const defaultEventOptions = {
   data: {
@@ -403,6 +404,16 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       block.header.height >= exportBlockNumber
     ) {
       videoRelevanceManager.turnOnVideoRelevanceManager()
+      ctx.log.info(`Video relevance service enabled!`)
+    }
+
+    if (
+      !recommendationServiceManager.isEnabled &&
+      (process.env.FORCE_RECOMMENDATION_DATA_SYNC || block.header.height >= exportBlockNumber)
+    ) {
+      recommendationServiceManager.enableExport()
+      recommendationServiceManager.initBatchLoop()
+      ctx.log.info(`Recommendations service enabled!`)
     }
 
     // Importing exported offchain state

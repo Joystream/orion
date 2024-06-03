@@ -18,6 +18,22 @@ services:
       - orion_db_data:/var/lib/postgresql/data
       - ./db/postgres.conf:/etc/postgresql/postgresql.conf
 
+  interactions_db:
+    image: mongo:7.0.0
+    container_name: interactions_db
+    hostname: interactions_db
+    profiles: ['interactions']
+    restart: unless-stopped
+    shm_size: 1g
+    command: ['mongod', '--port', '${INTERACTIONS_DB_PORT}']
+    ports:
+      - '${INTERACTIONS_DB_PORT}:${INTERACTIONS_DB_PORT}'
+    volumes:
+      - interactions_db_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: squid
+      MONGO_INITDB_ROOT_PASSWORD: squid
+
   orion_processor:
     container_name: orion_processor
     hostname: orion_processor
@@ -32,6 +48,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - processor_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -52,6 +69,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - graphql_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -74,6 +92,7 @@ services:
     depends_on:
       - orion_db
     volumes:
+      - auth_api_queue:/app/persistedQueue
       - type: bind
         source: .
         target: /orion
@@ -82,8 +101,36 @@ services:
     ports:
       - '${AUTH_API_PORT}:${AUTH_API_PORT}'
 
+  orion_interactions-api:
+    container_name: orion_interactions-api
+    hostname: orion_interactions-api
+    profiles: ['interactions']
+    image: node:18
+    restart: unless-stopped
+    env_file:
+      - .env
+      - docker.env
+    environment:
+      - SQD_TRACE=interactions
+    depends_on:
+      - orion_db
+    volumes:
+      - interactions_api_queue:/app/persistedQueue
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'serve-interactions-api']
+    ports:
+      - '${INTERACTIONS_API_PORT}:${INTERACTIONS_API_PORT}'
+
 volumes:
   orion_db_data:
+  interactions_db_data:
+  interactions_api_queue:
+  auth_api_queue:
+  graphql_queue:
+  processor_queue:
 
 networks:
   default:

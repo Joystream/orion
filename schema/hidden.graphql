@@ -10,6 +10,9 @@ type VideoViewEvent @entity @schema(name: "admin") {
 
   "Video view event timestamp"
   timestamp: DateTime!
+
+  "Percentage of video viewed"
+  videoViewPercentage: Int!
 }
 
 type Report @entity @schema(name: "admin") {

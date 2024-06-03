@@ -1,4 +1,4 @@
-import { MaxLength } from 'class-validator'
+import { MaxLength, Max } from 'class-validator'
 import { ArgsType, Field, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { Video, VideoOrderByInput, VideoWhereInput } from '../baseTypes'
 import { EntityReportInfo } from '../commonTypes'
@@ -36,6 +36,45 @@ export class VideosConnectionArgs {
   orderBy!: VideoOrderByInput[]
 
   @Field(() => VideoWhereInput, { nullable: true, simple: true })
+  where?: Record<string, unknown>
+}
+
+@ArgsType()
+export class CommonVideoQueryArgs {
+  @Field(() => VideoWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => [VideoOrderByInput], { nullable: true })
+  orderBy?: VideoOrderByInput[]
+
+  @Field(() => Int, { nullable: true })
+  limit?: number
+}
+
+@ArgsType()
+export class HomepageVideoQueryArgs extends CommonVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  recommId?: string
+}
+
+@ArgsType()
+export class SimiliarVideosQueryArgs extends CommonVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  videoId: string
+
+  @Field(() => String, { nullable: true })
+  recommId?: string
+}
+
+@ArgsType()
+export class NextVideoQueryArgs {
+  @Field(() => String, { nullable: true })
+  videoId: string
+
+  @Field(() => String, { nullable: true })
+  recommId?: string
+
+  @Field(() => VideoWhereInput, { nullable: true })
   where?: Record<string, unknown>
 }
 

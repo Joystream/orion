@@ -22,6 +22,7 @@ To learn how to run your own instance of Atlas, please refer to the [Atlas opera
 - Production deployment:
     - [Deploying Orion to production](./tutorials/deploying-orion.md)
     - [Upgrading Orion](./tutorials/upgrading-orion.md)
+- [Recommendations in Orion](./tutorials/recommendations.md)
 
 
 ## Orion architecture

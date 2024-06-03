@@ -55,6 +55,7 @@ import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 import { FALLBACK_CHANNEL_TITLE } from '../../../mappings/content/utils'
 import pLimit from 'p-limit'
+import { recommendationServiceManager } from '../../../utils/RecommendationServiceManager'
 
 @Resolver()
 export class ChannelsResolver {
@@ -223,6 +224,8 @@ export class ChannelsResolver {
         timestamp: new Date(),
       })
 
+      recommendationServiceManager.scheduleItemBookmark(`${channel.id}-channel`, user.id)
+
       const ownerAccount = channel.ownerMemberId
         ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })
         : null
@@ -283,6 +286,7 @@ export class ChannelsResolver {
       }
       // Otherwise remove the follow
       channel.followsNum -= 1
+      recommendationServiceManager.deleteItemBookmark(`${channel.id}-channel`, user.id)
 
       await Promise.all([em.remove(follow), em.save(channel)])
 

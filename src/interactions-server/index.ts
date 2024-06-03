@@ -3,7 +3,7 @@ import cors from 'cors'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { HttpError } from 'express-openapi-validator/dist/framework/types'
 import path from 'path'
-import { AuthApiError } from './errors'
+import { InteractionsApiError } from './errors'
 import { createLogger } from '@subsquid/logger'
 import { authenticate, getCorsOrigin } from '../utils/auth'
 import cookieParser from 'cookie-parser'
@@ -12,16 +12,20 @@ import swaggerUi, { JsonObject } from 'swagger-ui-express'
 import YAML from 'js-yaml'
 import fs from 'fs'
 import { recommendationServiceManager } from '../utils/RecommendationServiceManager'
+import { initInteractionsDb } from './interactionsEm'
 
-export const logger = createLogger('auth-api')
+export const logger = createLogger('interactions-api')
 
 recommendationServiceManager.enableExport()
 recommendationServiceManager.initBatchLoop()
+initInteractionsDb()
+
 export const app = express()
 
 function authHandler(type: 'header' | 'cookie') {
   return async (req: express.Request) => {
     const authContext = await authenticate(req, type)
+
     if (req.res) {
       req.res.locals.authContext = authContext
     }
@@ -29,7 +33,6 @@ function authHandler(type: 'header' | 'cookie') {
   }
 }
 
-logger.info('Starting auth server')
 app.set('trust proxy', process.env.TRUST_PROXY || false)
 app.use(cookieParser(process.env.COOKIE_SECRET))
 app.use(express.json())
@@ -69,10 +72,12 @@ app.use((err: unknown, req: express.Request, res: express.Response, next: expres
   }
   logger.error(String(err))
   const message =
-    err instanceof HttpError || err instanceof AuthApiError ? err.message : 'Internal server error'
-  const status = err instanceof HttpError || err instanceof AuthApiError ? err.status : 500
+    err instanceof HttpError || err instanceof InteractionsApiError
+      ? err.message
+      : 'Internal server error'
+  const status = err instanceof HttpError || err instanceof InteractionsApiError ? err.status : 500
   res.status(status).json({ message })
 })
 
-const port = parseInt(process.env.AUTH_API_PORT || '4704')
+const port = parseInt(process.env.INTERACTIONS_API_PORT || '4706')
 app.listen(port, () => logger.info(`Listening on port ${port}`))

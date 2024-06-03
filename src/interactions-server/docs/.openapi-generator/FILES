@@ -1,0 +1,8 @@
+Apis/DefaultApi.md
+Models/GenericErrorResponseData.md
+Models/GenericOkResponseData.md
+Models/ItemClickInteractionRequestData.md
+Models/ItemConsumedInteractionRequestData.md
+Models/ItemPortionInteractionRequestData.md
+Models/ItemRateInteractionRequestData.md
+README.md

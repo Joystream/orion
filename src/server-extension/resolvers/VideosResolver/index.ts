@@ -1,21 +1,6 @@
-import {
-  RelayConnectionRequest,
-  decodeRelayConnectionCursor,
-} from '@subsquid/openreader/lib/ir/connection'
-import { AnyFields } from '@subsquid/openreader/lib/ir/fields'
-import { getConnectionSize } from '@subsquid/openreader/lib/limit.size'
-import { parseOrderBy } from '@subsquid/openreader/lib/opencrud/orderBy'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
-import { parseWhere } from '@subsquid/openreader/lib/opencrud/where'
-import { ConnectionQuery, CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
-import {
-  getResolveTree,
-  getTreeRequest,
-  hasTreeRequest,
-  simplifyResolveTree,
-} from '@subsquid/openreader/lib/util/resolve-tree'
-import { ensureArray } from '@subsquid/openreader/lib/util/util'
-import { UserInputError } from 'apollo-server-core'
+import { CountQuery, ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { GraphQLResolveInfo } from 'graphql'
 import { isObject } from 'lodash'
 import 'reflect-metadata'
@@ -39,25 +24,198 @@ import { has } from '../../../utils/misc'
 import { addNotification } from '../../../utils/notification'
 import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { Context } from '../../check'
-import { Video as VideoReturnType, VideosConnection } from '../baseTypes'
+import { RecommendedVideosQuery, Video as VideoReturnType, VideosConnection } from '../baseTypes'
 import { OperatorOnly, UserOnly } from '../middleware'
 import { model } from '../model'
 import {
   AddVideoViewResult,
   DumbPublicFeedArgs,
   ExcludeVideoInfo,
+  HomepageVideoQueryArgs,
   MostViewedVideosConnectionArgs,
+  NextVideoQueryArgs,
   PublicFeedOperationType,
   ReportVideoArgs,
   SetOrUnsetPublicFeedArgs,
   SetOrUnsetPublicFeedResult,
+  SimiliarVideosQueryArgs,
   VideoReportInfo,
 } from './types'
+import { buildRecommendationsVideoQuery, convertVideoWhereIntoReQlQuery } from './utils'
+import { recommendationServiceManager } from '../../../utils/RecommendationServiceManager'
+import { createConnectionQueryFromParams } from '../../../utils/subsquid'
 
 @Resolver()
 export class VideosResolver {
   // Set by depenency injection
   constructor(private em: () => Promise<EntityManager>) {}
+
+  @Query(() => RecommendedVideosQuery)
+  async homepageVideos(
+    @Args()
+    args: HomepageVideoQueryArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<RecommendedVideosQuery> {
+    const { recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
+
+    let recommendationsResponse
+    const getUserRecommendationsPromise = recommendationServiceManager.recommendItemsToUser(
+      ctx.userId ?? undefined,
+      {
+        limit: queryArgs.limit,
+        filterQuery: reQLQuery,
+      }
+    )
+    if (argsRecommId) {
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          argsRecommId,
+          {
+            limit: queryArgs.limit,
+            filterQuery: reQLQuery,
+          }
+        )
+      } catch (e) {
+        // if recommId have expired, req will throw an error
+        recommendationsResponse = await getUserRecommendationsPromise
+      }
+    } else {
+      recommendationsResponse = await getUserRecommendationsPromise
+    }
+
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
+    }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return {
+      video: result as Video[],
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
+    }
+  }
+
+  @Query(() => RecommendedVideosQuery)
+  async similarVideos(
+    @Args()
+    args: SimiliarVideosQueryArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<RecommendedVideosQuery> {
+    const { videoId, recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
+
+    let recommendationsResponse
+    const getItemRecommendationsPromise = recommendationServiceManager.recommendItemsToItem(
+      `${videoId}-video`,
+      ctx.userId ?? undefined,
+      {
+        limit: queryArgs.limit,
+        filterQuery: reQLQuery,
+      }
+    )
+    if (argsRecommId) {
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          argsRecommId,
+          {
+            limit: queryArgs.limit,
+            filterQuery: reQLQuery,
+          }
+        )
+      } catch (e) {
+        recommendationsResponse = await getItemRecommendationsPromise
+      }
+    } else {
+      recommendationsResponse = await getItemRecommendationsPromise
+    }
+
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
+    }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return {
+      video: result as Video[],
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
+    }
+  }
+
+  @Query(() => RecommendedVideosQuery)
+  async nextVideo(
+    @Args()
+    args: NextVideoQueryArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<RecommendedVideosQuery> {
+    const { videoId, recommId: argsRecommId, ...queryArgs } = args
+    const listQuery = buildRecommendationsVideoQuery(queryArgs, info, ctx)
+    const reQLQuery = args.where ? convertVideoWhereIntoReQlQuery(args.where) : undefined
+
+    let recommendationsResponse
+    const getItemRecommendationsPromise = recommendationServiceManager.recommendNextVideo(
+      `${videoId}-video`,
+      ctx.userId ?? undefined,
+      {
+        filterQuery: reQLQuery,
+      }
+    )
+
+    if (argsRecommId) {
+      try {
+        recommendationsResponse = await recommendationServiceManager.recommendNextItems(
+          argsRecommId,
+          {
+            filterQuery: reQLQuery,
+          }
+        )
+      } catch (e) {
+        recommendationsResponse = await getItemRecommendationsPromise
+      }
+    } else {
+      recommendationsResponse = await getItemRecommendationsPromise
+    }
+
+    if (recommendationsResponse && recommendationsResponse.recomms.length) {
+      const { recomms } = recommendationsResponse
+      const ids = recomms.map((recomm) => recomm.id)
+      ;(listQuery as { sql: string }).sql = extendClause(
+        listQuery.sql,
+        'WHERE',
+        `"video"."id" IN (${ids.map((id) => `'${id}'`).join(', ')})`,
+        'AND'
+      )
+    }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return {
+      video: result as Video[],
+      recommId: recommendationsResponse?.recommId ?? '',
+      numberNextRecommsCalls: recommendationsResponse?.numberNextRecommsCalls ?? 0,
+    }
+  }
 
   @Query(() => VideosConnection)
   async mostViewedVideosConnection(
@@ -67,56 +225,17 @@ export class VideosResolver {
     @Ctx() ctx: Context
   ): Promise<VideosConnection> {
     const typeName = 'Video'
-    const outputType = 'VideosConnection'
-    const edgeType = 'VideoEdge'
-
-    if (args.limit > 1000) {
-      throw new Error('The limit cannot exceed 1000')
-    }
-
-    // Validation based on '@subsquid/openreader/src/opencrud/schema.ts'
-    const orderByArg = ensureArray(args.orderBy)
-    if (orderByArg.length === 0) {
-      throw new UserInputError('orderBy argument is required for connection')
-    }
-
-    const req: RelayConnectionRequest<AnyFields> = {
-      orderBy: parseOrderBy(model, typeName, orderByArg as unknown[] as string[]),
-      where: parseWhere(args.where),
-    }
-
-    if (args.first !== null && args.first !== undefined) {
-      if (args.first < 0) {
-        throw new UserInputError("'first' argument of connection can't be less than 0")
-      } else {
-        req.first = args.first
-      }
-    }
-
-    if (args.after !== null && args.after !== undefined) {
-      if (decodeRelayConnectionCursor(args.after) == null) {
-        throw new UserInputError(`invalid cursor value: ${args.after}`)
-      } else {
-        req.after = args.after
-      }
-    }
-
-    const tree = getResolveTree(info, outputType)
-
-    req.totalCount = hasTreeRequest(tree.fields, 'totalCount')
-    req.pageInfo = hasTreeRequest(tree.fields, 'pageInfo')
-
-    const edgesTree = getTreeRequest(tree.fields, 'edges')
-    if (edgesTree) {
-      const edgeFields = simplifyResolveTree(info.schema, edgesTree, edgeType).fields
-      req.edgeCursor = hasTreeRequest(edgeFields, 'cursor')
-      const nodeTree = getTreeRequest(edgeFields, 'node')
-      if (nodeTree) {
-        req.edgeNode = parseAnyTree(model, typeName, info.schema, nodeTree)
-      }
-    }
-
-    ctx.openreader.responseSizeLimit?.check(() => getConnectionSize(model, typeName, req) + 1)
+    const { connectionQuery, req } = createConnectionQueryFromParams({
+      ctx,
+      info,
+      args: {
+        ...args,
+        first: args.limit,
+      },
+      edgeType: 'VideoEdge',
+      outputType: 'VideosConnection',
+      typeName,
+    })
 
     const idsQuery = new CountQuery(model, ctx.openreader.dialect, typeName, req.where)
     let idsQuerySql = idsQuery.sql
@@ -146,8 +265,6 @@ export class VideosResolver {
     if (ids.length === 0) {
       ids = ['-1']
     }
-
-    const connectionQuery = new ConnectionQuery(model, ctx.openreader.dialect, typeName, req)
 
     let connectionQuerySql: string
 

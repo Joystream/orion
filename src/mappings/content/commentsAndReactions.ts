@@ -16,6 +16,7 @@ import { AnyMetadataClass, DecodedMetadataObject } from '@joystream/metadata-pro
 import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
+  Account,
   BannedMember,
   ChannelRecipient,
   Comment,
@@ -29,6 +30,7 @@ import {
   CommentTextUpdatedEventData,
   Event,
   MemberRecipient,
+  Membership,
   MetaprotocolTransactionResult,
   MetaprotocolTransactionResultCommentCreated,
   MetaprotocolTransactionResultCommentDeleted,
@@ -60,6 +62,7 @@ import {
   parseVideoTitle,
 } from './utils'
 import { addNotification } from '../../utils/notification'
+import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -207,6 +210,11 @@ async function processVideoReaction(
       createdAt: new Date(block.timestamp),
     })
 
+  const userMembership = await overlay.getRepository(Membership).getById(memberId)
+  const account = await overlay
+    .getRepository(Account)
+    .getOneBy({ joystreamAccount: userMembership?.controllerAccount })
+
   if (existingReaction) {
     const previousReactionTypeCounter = getOrCreateVideoReactionsCountByType(
       video,
@@ -219,6 +227,11 @@ async function processVideoReaction(
       --previousReactionTypeCounter.count
       // remove reaction
       videoReactionRepository.remove(existingReaction)
+
+      if (account) {
+        recommendationServiceManager.deleteItemRating(`${video.id}-video`, account.userId)
+      }
+
       return
     }
     // otherwise...
@@ -228,6 +241,14 @@ async function processVideoReaction(
     --previousReactionTypeCounter.count
     // update the existing reaction's type
     videoReaction.reaction = reactionType
+
+    if (account) {
+      recommendationServiceManager.scheduleItemRating(
+        `${video.id}-video`,
+        account.userId,
+        reactionType === 'LIKE' ? 1 : -1
+      )
+    }
   } else {
     ++video.reactionsCount
     ++newReactionTypeCounter.count
@@ -238,6 +259,13 @@ async function processVideoReaction(
         videoReaction: videoReaction.id,
       }),
     })
+    if (account) {
+      recommendationServiceManager.scheduleItemRating(
+        `${video.id}-video`,
+        account.userId,
+        reactionType === 'LIKE' ? 1 : -1
+      )
+    }
     if (video.channelId) {
       const channelOwnerMemberId = await getChannelOwnerMemberByChannelId(overlay, video.channelId)
       if (channelOwnerMemberId) {

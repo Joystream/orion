@@ -5,6 +5,7 @@ import { globalEm } from '../../utils/globalEm'
 import { components } from '../generated/api-types'
 import { UnauthorizedError } from '../errors'
 import { getOrCreateSession, setSessionCookie } from '../../utils/auth'
+import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -32,6 +33,11 @@ export const anonymousAuth: (
               isRoot: false,
             })
           )
+
+      if (user && !userId) {
+        recommendationServiceManager.scheduleUserUpsert({ id: user.id })
+      }
+
       if (!user) {
         throw new UnauthorizedError('User not found by provided userId')
       }

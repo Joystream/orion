@@ -58,6 +58,21 @@ registerEnumType(VideoOrderByInput, { name: 'VideoOrderByInput' })
 export class VideosConnection {
   @Field(() => Int, { nullable: false }) totalCount!: number
 }
+
+@ObjectType()
+export class RecommendedVideosQuery {
+  @Field(() => Int, { nullable: true }) numberNextRecommsCalls?: number
+  @Field(() => String, { nullable: false }) recommId!: string
+  @Field(() => [Video]) video: Video[]
+}
+
+@ObjectType()
+export class RecommendedChannelsQuery {
+  @Field(() => Int, { nullable: true }) numberNextRecommsCalls?: number
+  @Field(() => String, { nullable: false }) recommId!: string
+  @Field(() => [Channel]) video: Channel[]
+}
+
 export const OwnedNftWhereInput = new GraphQLScalarType({
   name: 'OwnedNftWhereInput',
 })

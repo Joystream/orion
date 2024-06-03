@@ -18,13 +18,16 @@ serve:
 serve-auth-api:
 	@npm run auth-server-start
 
+serve-interactions-api:
+	@npm run interactions-server-start
+
 migrate:
 	@npx squid-typeorm-migration apply
 
 dbgen:
 	@npx squid-typeorm-migration generate
 
-generate-migrations: 
+generate-migrations:
 	@docker run -d --name temp_migrations_db \
 		-e POSTGRES_DB=squid \
 		-e POSTGRES_HOST_AUTH_METHOD=trust \
@@ -49,27 +52,37 @@ codegen:
 	@npm run generate:schema || true
 	@npx squid-typeorm-codegen
 
+setup-recommendations:
+	@npm run recommendations:setup
+
 network-tests:
 	@npm run generate:network-tests || true
 
 typegen:
 	@npx squid-substrate-typegen typegen.json
 
-prepare: install typegen codegen build
+prepare: install typegen codegen build setup-recommendations
 
 up-squid:
-	@docker network create joystream_default || true
-	@docker-compose up -d
+	@set -a; \
+	source .env; \
+	set +a; \
+	docker network create joystream_default || true; \
+	if [ -z "$$RECOMMENDATION_SERVICE_PRIVATE_KEY" ] && [ -z "$$RECOMMENDATION_SERVICE_DATABASE"]; then \
+		docker-compose up -d; \
+	else \
+		docker-compose --profile interactions up -d; \
+	fi \
 
 up-archive:
-	@docker network create joystream_default || true
+	@docker network create joystream_default || truee
 	@docker-compose -f archive/docker-compose.yml up -d
 
 up: up-archive up-squid
 
 down-squid:
-	@docker-compose down -v
-	
+	@docker-compose down -v --remove-orphans
+
 down-archive:
 	@docker-compose -f archive/docker-compose.yml down -v
 

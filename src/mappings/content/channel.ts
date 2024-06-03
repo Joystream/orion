@@ -42,6 +42,7 @@ import {
   parseContentActor,
   processAppActionMetadata,
 } from './utils'
+import { recommendationServiceManager } from '../../utils/RecommendationServiceManager'
 
 export async function processChannelCreatedEvent({
   overlay,
@@ -121,6 +122,8 @@ export async function processChannelCreatedEvent({
     }
   }
 
+  recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
+
   if (ownerMember) {
     ownerMember.totalChannelsCreated += 1
     const event = overlay.getRepository(Event).new({
@@ -175,6 +178,8 @@ export async function processChannelUpdatedEvent({
       newDataObjects
     )
   }
+
+  recommendationServiceManager.scheduleChannelUpsert(channel as Channel)
 }
 
 export async function processChannelDeletedEvent({
@@ -184,6 +189,7 @@ export async function processChannelDeletedEvent({
   },
 }: EventHandlerContext<'Content.ChannelDeleted'>): Promise<void> {
   await deleteChannel(overlay, channelId)
+  recommendationServiceManager.scheduleChannelDeletion(channelId.toString())
 }
 
 export async function processChannelDeletedByModeratorEvent({
@@ -193,6 +199,7 @@ export async function processChannelDeletedByModeratorEvent({
   },
 }: EventHandlerContext<'Content.ChannelDeletedByModerator'>): Promise<void> {
   await deleteChannel(overlay, channelId)
+  recommendationServiceManager.scheduleChannelDeletion(channelId.toString())
 }
 
 export async function processChannelAssetsDeletedByModeratorEvent({
