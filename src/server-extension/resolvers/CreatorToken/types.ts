@@ -1,4 +1,5 @@
-import { ArgsType, Field, Int, ObjectType } from 'type-graphql'
+import { ArgsType, Field, Float, Int, ObjectType } from 'type-graphql'
+import { GraphQLScalarType } from 'graphql'
 
 @ArgsType()
 export class GetShareDividensArgs {
@@ -43,4 +44,31 @@ export class GetAccountTransferrableBalanceArgs {
 export class GetAccountTransferrableBalanceResult {
   @Field(() => Int, { nullable: false })
   transferrableCrtAmount!: number
+}
+
+@ObjectType()
+export class CreatorToken {
+  @Field(() => String, { nullable: false }) id!: string
+}
+
+@ObjectType()
+export class MarketplaceTokensReturnType {
+  @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
+  @Field(() => Float, { nullable: false }) pricePercentageChange!: number
+}
+
+export const TokenWhereInput = new GraphQLScalarType({
+  name: 'CreatorTokenWhereInput',
+})
+
+@ArgsType()
+export class MarketplaceTokensArgs {
+  @Field(() => TokenWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => Int, {
+    nullable: false,
+    description: 'The number of days in period',
+  })
+  periodDays: number
 }
