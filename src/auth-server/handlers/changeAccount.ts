@@ -54,8 +54,6 @@ export const changeAccount: (
         { joystreamAccountId: payload.joystreamAccountId }
       )
 
-      console.log('after update')
-
       // Remove the old encryption artifacts
       await em.delete(EncryptionArtifacts, { accountId: account.id })
 

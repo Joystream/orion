@@ -1,6 +1,5 @@
 import { IsUrl } from 'class-validator'
 import { ArgsType, Field, ObjectType } from 'type-graphql'
-import { BlockchainAccount } from '../../../model'
 import { AccountNotificationPreferencesOutput } from '../NotificationResolver/types'
 
 @ObjectType()
@@ -21,7 +20,7 @@ export class AccountData {
   email!: string
 
   @Field(() => String, { nullable: false })
-  joystreamAccount!: BlockchainAccount
+  joystreamAccountId!: string
 
   @Field(() => [FollowedChannel], { nullable: false })
   followedChannels: FollowedChannel[]

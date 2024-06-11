@@ -31,7 +31,7 @@ export class AccountResolver {
     const account = ctx.account
     const em = await this.em()
     assert(account, 'Unexpected context: account is not set')
-    const { id, email, joystreamAccount, notificationPreferences } = account
+    const { id, email, joystreamAccountId, notificationPreferences } = account
     let followedChannels: FollowedChannel[] = []
     if (
       info.fieldNodes[0].selectionSet?.selections.some(
@@ -44,7 +44,7 @@ export class AccountResolver {
     return {
       id,
       email,
-      joystreamAccount,
+      joystreamAccountId,
       followedChannels,
       preferences: notificationPreferences,
     }
@@ -123,7 +123,9 @@ export class AccountResolver {
         throw new Error(
           `Failed to create membership through faucet for account address: ${
             params.address
-          }, error: ${error.response?.data?.error || error.cause || error.code}`
+          }, error: ${
+            error.response?.data?.error || error.cause || error.code
+          }, faucet address: ${url}`
         )
       }
       throw error
