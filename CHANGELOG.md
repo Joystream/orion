@@ -1,3 +1,10 @@
+# 4.0.3
+
+## Misc
+
+- Update Email notification subjects and tests [#333](https://github.com/Joystream/orion/pull/333)
+- Update Node.js version to 18.x in all github actions.
+
 # 4.0.2
 
 ## Bug Fixes:
