@@ -20,7 +20,7 @@ export const requestEmailConfirmationToken: (
   next: express.NextFunction
 ) => Promise<void> = async (req, res, next) => {
   try {
-    const { email } = req.body
+    const { email, signupType } = req.body
     const { authContext } = res.locals
 
     if (authContext.account) {
@@ -58,9 +58,10 @@ export const requestEmailConfirmationToken: (
       }
 
       // Deactivate all currently active email confirmation tokens for this email
+      const currentTimestamp = new Date()
       await em
         .getRepository(EmailConfirmationToken)
-        .update({ email, expiry: MoreThan(new Date()) }, { expiry: new Date() })
+        .update({ email, expiry: MoreThan(currentTimestamp) }, { expiry: currentTimestamp })
 
       // Send email with verification token if Gateway account does not exist.
       // Otherwise, send email to asking user to login/change password. but
@@ -68,7 +69,7 @@ export const requestEmailConfirmationToken: (
       if (account) {
         await sendLoginOrChangePasswordEmail(email, em)
       } else {
-        await sendWelcomeEmail(email, em)
+        await sendWelcomeEmail(email, signupType, em)
       }
     })
 

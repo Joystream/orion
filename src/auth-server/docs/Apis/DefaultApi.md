@@ -246,7 +246,7 @@ This endpoint does not need any parameter.
 
 ### Authorization
 
-No authorization required
+[cookieAuth](../README.md#cookieAuth)
 
 ### HTTP request headers
 

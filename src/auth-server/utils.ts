@@ -9,7 +9,6 @@ import { EntityManager } from 'typeorm'
 import { EmailConfirmationToken } from '../model'
 import { ConfigVariable, config } from '../utils/config'
 import { uniqueId } from '../utils/crypto'
-import { formatDate } from '../utils/date'
 import { sgSendMail } from '../utils/mail'
 import { registerEmailContent } from './emails'
 import { BadRequestError } from './errors'
@@ -73,15 +72,21 @@ async function issueEmailConfirmationToken(
   return em.save(token)
 }
 
-export async function sendWelcomeEmail(email: string, em: EntityManager): Promise<void> {
+export async function sendWelcomeEmail(
+  email: string,
+  signupType: string,
+  em: EntityManager
+): Promise<void> {
   const emailConfirmationToken = await issueEmailConfirmationToken(email, em)
   const appName = await config.get(ConfigVariable.AppName, em)
   const confirmEmailRoute = await config.get(ConfigVariable.EmailConfirmationRoute, em)
-  const emailConfirmationLink = confirmEmailRoute.replace('{token}', emailConfirmationToken.id)
+  const emailConfirmationLink = confirmEmailRoute
+    .replace('{token}', emailConfirmationToken.id)
+    .replace('{expiry}', emailConfirmationToken.expiry.toISOString())
+    .replace('{signupType}', signupType)
 
   const emailContent = registerEmailContent({
     link: emailConfirmationLink,
-    linkExpiryDate: formatDate(emailConfirmationToken.expiry),
     appName,
   })
   await sgSendMail({

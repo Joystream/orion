@@ -90,6 +90,11 @@ export interface components {
     RequestTokenRequestData: {
       /** @description User's e-mail address. */
       email: string;
+      /**
+       * @description Signup type.
+       * @enum {string}
+       */
+      signupType: "internal" | "external" | "ypp";
     };
     GenericErrorResponseData: {
       message?: string;

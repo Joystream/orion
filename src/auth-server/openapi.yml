@@ -466,10 +466,18 @@ components:
       type: object
       required:
         - email
+        - signupType
       properties:
         email:
           type: string
           description: User's e-mail address.
+        signupType:
+          type: string
+          enum:
+            - internal
+            - external
+            - ypp
+          description: Signup type.
     GenericErrorResponseData:
       type: object
       properties:
