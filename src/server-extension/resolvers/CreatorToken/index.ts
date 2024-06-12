@@ -15,6 +15,8 @@ import {
   MarketplaceTokensArgs,
   CreatorToken as TokenReturnType,
   MarketplaceTokensReturnType,
+  TopSellingTokensReturnType,
+  TopSellingTokensArgs,
 } from './types'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
@@ -54,8 +56,81 @@ export class TokenResolver {
     }
   }
 
+  @Query(() => [TopSellingTokensReturnType])
+  async topSellingToken(
+    @Args() args: TopSellingTokensArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ) {
+    const tree = getResolveTree(info)
+    const sqlArgs = parseSqlArguments(model, 'CreatorToken', {
+      where: args.where,
+    })
+
+    const tokenSubTree = tree.fieldsByTypeName.TopSellingTokensReturnType.creatorToken
+    const tokenFields = parseAnyTree(model, 'CreatorToken', info.schema, tokenSubTree)
+
+    const topTokensCtes = `
+WITH  tokens_volumes AS (
+   SELECT ac.token_id,
+        SUM(tr.price_paid) as ammVolume
+   FROM amm_transaction tr
+   JOIN amm_curve ac ON ac.id = tr.amm_id
+   GROUP BY token_id
+),
+ranked_tokens AS (
+    SELECT token_id, ammVolume,
+           ROW_NUMBER() OVER (ORDER BY ammVolume DESC) AS growth_rank
+    FROM tokens_volumes
+)
+`
+
+    const listQuery = new ListQuery(
+      model,
+      ctx.openreader.dialect,
+      'CreatorToken',
+      tokenFields,
+      sqlArgs
+    )
+
+    let listQuerySql = listQuery.sql
+
+    listQuerySql = extendClause(listQuerySql, 'SELECT', 'rT.ammVolume')
+
+    listQuerySql = extendClause(
+      listQuerySql,
+      'FROM',
+      'LEFT JOIN ranked_tokens rT ON rT.token_id = creator_token.id',
+      ''
+    )
+
+    listQuerySql = extendClause(listQuerySql, 'WHERE', 'rT.growth_rank <= 10', 'AND')
+    listQuerySql = extendClause(listQuerySql, 'ORDER BY', 'rT.growth_rank', '')
+
+    listQuerySql = `${topTokensCtes} ${listQuerySql}`
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    const oldListQMap = listQuery.map.bind(listQuery)
+    listQuery.map = (rows: unknown[][]) => {
+      const ammVolumes: unknown[] = []
+
+      for (const row of rows) {
+        ammVolumes.push(row.pop())
+      }
+      const channelsMapped = oldListQMap(rows)
+      return channelsMapped.map((creatorToken, i) => ({
+        creatorToken,
+        ammVolume: ammVolumes[i] ?? 0,
+      }))
+    }
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return result as TokenReturnType[]
+  }
+
   @Query(() => [MarketplaceTokensReturnType])
-  async getMarketplaceTokens(
+  async hotAndColdTokens(
     @Args() args: MarketplaceTokensArgs,
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context

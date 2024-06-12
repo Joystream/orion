@@ -57,6 +57,12 @@ export class MarketplaceTokensReturnType {
   @Field(() => Float, { nullable: false }) pricePercentageChange!: number
 }
 
+@ObjectType()
+export class TopSellingTokensReturnType {
+  @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
+  @Field(() => String, { nullable: false }) ammVolume!: string
+}
+
 export const TokenWhereInput = new GraphQLScalarType({
   name: 'CreatorTokenWhereInput',
 })
@@ -71,4 +77,10 @@ export class MarketplaceTokensArgs {
     description: 'The number of days in period',
   })
   periodDays: number
+}
+
+@ArgsType()
+export class TopSellingTokensArgs {
+  @Field(() => TokenWhereInput, { nullable: true })
+  where?: Record<string, unknown>
 }
