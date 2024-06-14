@@ -21,6 +21,7 @@ module.exports = class Views1709641962433 {
       }
     }
 
+    const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
     const ammVolumeCte = `
 WITH  trading_volumes AS (
    SELECT ac.token_id,
@@ -54,7 +55,7 @@ ldt_oldest_transactions AS (
     ) oldest ON ldt.token_id = oldest.token_id AND ldt.created_in = oldest.oldest_created_in
 )   
 `
-      const currentAmmVolumeWithoutCurrentWeek = `
+    const currentAmmVolumeWithoutCurrentWeek = `
     SELECT 
         amm_id,
         SUM(CASE

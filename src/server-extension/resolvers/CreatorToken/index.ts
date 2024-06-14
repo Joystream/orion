@@ -16,7 +16,6 @@ import {
   CreatorToken as TokenReturnType,
   MarketplaceTokensReturnType,
   TopSellingTokensReturnType,
-  TopSellingTokensArgs,
 } from './types'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
