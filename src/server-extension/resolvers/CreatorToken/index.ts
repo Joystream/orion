@@ -58,10 +58,16 @@ export class TokenResolver {
 
   @Query(() => [TopSellingTokensReturnType])
   async topSellingToken(
-    @Args() args: TopSellingTokensArgs,
+    @Args() args: MarketplaceTokensArgs,
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
   ) {
+    const em = await this.em()
+    const { lastProcessedBlock } = await getCurrentBlockHeight(em)
+
+    if (lastProcessedBlock < 0) {
+      throw new Error('Failed to retrieve processor block height')
+    }
     const tree = getResolveTree(info)
     const sqlArgs = parseSqlArguments(model, 'CreatorToken', {
       where: args.where,
@@ -76,6 +82,7 @@ WITH  tokens_volumes AS (
         SUM(tr.price_paid) as ammVolume
    FROM amm_transaction tr
    JOIN amm_curve ac ON ac.id = tr.amm_id
+   WHERE tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
    GROUP BY token_id
 ),
 ranked_tokens AS (
