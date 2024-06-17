@@ -1,15 +1,15 @@
 module.exports = class Data1718451331982 {
-    name = 'Data1718451331982'
+  name = 'Data1718451331982'
 
-    async up(db) {
-      await db.query(`
+  async up(db) {
+    await db.query(`
         CREATE SCHEMA squid_processor;
 `)
-      await db.query(`CREATE TABLE IF NOT EXISTS squid_processor.status (
+    await db.query(`CREATE TABLE IF NOT EXISTS squid_processor.status (
     id SERIAL PRIMARY KEY,
     height INT
 );`)
-         const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
+    const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
     const ammVolumeCte = `
 WITH  trading_volumes AS (
    SELECT ac.token_id,
@@ -85,14 +85,15 @@ JOIN (
 ) as liq_until ON liq_until.amm_id = ac.id
 LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
 `
-      const marketplaceTokenMaterializedViewName = 'marketplace_tokens'
-      await db.query(`
+    const marketplaceTokenMaterializedViewName = 'marketplace_tokens'
+    await db.query(`
 CREATE MATERIALIZED VIEW ${marketplaceTokenMaterializedViewName}  as (
 ${marketplaceTokensViewQuery}
 ) WITH DATA;
-`)    }
+`)
+  }
 
-    async down(db) {
-       await db.query(`DROP MATERIALIZED VIEW IF EXISTS ${marketplaceTokenMaterializedViewName};`)
-    }
+  async down(db) {
+    await db.query(`DROP MATERIALIZED VIEW IF EXISTS ${marketplaceTokenMaterializedViewName};`)
+  }
 }

@@ -16,6 +16,8 @@ import {
   CreatorToken as TokenReturnType,
   MarketplaceTokensReturnType,
   TopSellingTokensReturnType,
+  MarketplaceTableTokensArgs,
+  MarketplaceToken,
 } from './types'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
@@ -264,6 +266,41 @@ top_tokens AS (
     const result = await ctx.openreader.executeQuery(listQuery)
 
     return result as TokenReturnType[]
+  }
+
+  @Query(() => [MarketplaceToken])
+  async getMarketplaceTokens(
+    @Args() args: MarketplaceTableTokensArgs,
+    @Info() info: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<MarketplaceToken[]> {
+    const tree = getResolveTree(info)
+
+    const sqlArgs = parseSqlArguments(model, 'MarketplaceToken', {
+      limit: args.limit,
+      where: args.where,
+      orderBy: args.orderBy,
+    })
+
+    const videoFields = parseAnyTree(model, 'MarketplaceToken', info.schema, tree)
+
+    const listQuery = new ListQuery(
+      model,
+      ctx.openreader.dialect,
+      'MarketplaceToken',
+      videoFields,
+      sqlArgs
+    )
+
+    let listQuerySql = listQuery.sql
+
+    console.log('test', listQuerySql)
+    listQuerySql = listQuerySql.replace(/marketplace_token/g, 'marketplace_tokens')
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return result as MarketplaceToken[]
   }
 
   @Query(() => GetCumulativeHistoricalShareAllocationResult)

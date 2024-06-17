@@ -79,6 +79,38 @@ export class MarketplaceTokensArgs {
   periodDays: number
 }
 
+export const MarketplaceTokenWhereInput = new GraphQLScalarType({
+  name: 'MarketplaceTokenWhereInput',
+})
+
+export const MarketplaceTokenOrderByInput = new GraphQLScalarType({
+  name: 'id_ASC',
+})
+
+@ObjectType()
+export class MarketplaceToken {
+  @Field(() => String, { nullable: false }) id!: string
+}
+
+@ArgsType()
+export class MarketplaceTableTokensArgs {
+  @Field(() => MarketplaceTokenWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+
+  @Field(() => Int, {
+    nullable: true,
+    defaultValue: 100,
+    description: 'The number of videos to return',
+  })
+  limit?: number
+
+  @Field(() => [MarketplaceTokenOrderByInput], {
+    nullable: true,
+    description: 'Order of input',
+  })
+  orderBy?: unknown[]
+}
+
 @ArgsType()
 export class TopSellingTokensArgs {
   @Field(() => TokenWhereInput, { nullable: true })
