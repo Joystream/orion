@@ -55,6 +55,8 @@ export class CreatorToken {
 export class MarketplaceTokensReturnType {
   @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
   @Field(() => Float, { nullable: false }) pricePercentageChange!: number
+  @Field(() => String, { nullable: false, description: 'Type of the result: hot | cold' })
+  resultType!: 'hot' | 'cold'
 }
 
 @ObjectType()
@@ -92,6 +94,17 @@ export class MarketplaceToken {
   @Field(() => String, { nullable: false }) id!: string
 }
 
+@ObjectType()
+export class MarketplaceTokenCount {
+  @Field(() => Int, { nullable: false }) count: number
+}
+
+@ArgsType()
+export class MarketplaceTokensCountArgs {
+  @Field(() => MarketplaceTokenWhereInput, { nullable: true })
+  where?: Record<string, unknown>
+}
+
 @ArgsType()
 export class MarketplaceTableTokensArgs {
   @Field(() => MarketplaceTokenWhereInput, { nullable: true })
@@ -99,10 +112,15 @@ export class MarketplaceTableTokensArgs {
 
   @Field(() => Int, {
     nullable: true,
-    defaultValue: 100,
+    defaultValue: 10,
     description: 'The number of videos to return',
   })
   limit?: number
+
+  @Field(() => Int, {
+    nullable: true,
+  })
+  offset?: number
 
   @Field(() => [MarketplaceTokenOrderByInput], {
     nullable: true,

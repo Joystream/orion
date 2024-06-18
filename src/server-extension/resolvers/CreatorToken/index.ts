@@ -18,6 +18,8 @@ import {
   TopSellingTokensReturnType,
   MarketplaceTableTokensArgs,
   MarketplaceToken,
+  MarketplaceTokenCount,
+  MarketplaceTokensCountArgs,
 } from './types'
 import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
@@ -229,7 +231,9 @@ top_tokens AS (
     listQuerySql = extendClause(
       listQuerySql,
       'SELECT',
-      'tT.percentage_change as pricePercentageChange'
+      `tT.percentage_change as pricePercentageChange,
+(CASE WHEN tT.growth_rank <= 10 THEN 'hot' ELSE 'cold' END) AS result_type
+      `
     )
 
     listQuerySql = extendClause(
@@ -242,30 +246,82 @@ top_tokens AS (
     listQuerySql = extendClause(
       listQuerySql,
       'WHERE',
-      'tT.growth_rank <= 10 OR tT.shrink_rank <= 10',
+      '(tT.growth_rank <= 10 OR tT.shrink_rank <= 10) AND tT.percentage_change > 0',
       'AND'
     )
 
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
+    console.log('sql,', listQuerySql)
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
       const pricePercentageChanges: unknown[] = []
+      const resultTypes: unknown[] = []
 
       for (const row of rows) {
+        resultTypes.push(row.pop())
         pricePercentageChanges.push(row.pop())
       }
       const channelsMapped = oldListQMap(rows)
       return channelsMapped.map((creatorToken, i) => ({
         creatorToken,
         pricePercentageChange: pricePercentageChanges[i] ?? 0,
+        resultType: resultTypes[i],
       }))
     }
 
     const result = await ctx.openreader.executeQuery(listQuery)
 
     return result as TokenReturnType[]
+  }
+
+  @Query(() => MarketplaceTokenCount)
+  async getMarketplaceTokensCount(
+    @Args() args: MarketplaceTokensCountArgs,
+    @Info() _: GraphQLResolveInfo,
+    @Ctx() ctx: Context
+  ): Promise<MarketplaceTokenCount> {
+    const sqlArgs = parseSqlArguments(model, 'MarketplaceToken', {
+      where: args.where,
+    })
+
+    const idField = [
+      {
+        'field': 'id',
+        'aliases': ['id'],
+        'kind': 'scalar',
+        'type': { 'kind': 'scalar', 'name': 'ID' },
+        'prop': {
+          'type': { 'kind': 'scalar', 'name': 'ID' },
+          'nullable': false,
+          'description': 'runtime token identifier',
+        },
+        'index': 0,
+      },
+    ]
+
+    // TODO: this could be replaced with CountQuery
+    const listQuery = new ListQuery(
+      model,
+      ctx.openreader.dialect,
+      'MarketplaceToken',
+      idField as any,
+      sqlArgs
+    )
+
+    let listQuerySql = listQuery.sql
+
+    listQuerySql = `SELECT COUNT(*) ${listQuerySql.slice(listQuerySql.indexOf('FROM'))}`
+    listQuerySql = listQuerySql.replace(/marketplace_token/g, 'marketplace_tokens')
+    ;(listQuery as { sql: string }).sql = listQuerySql
+
+    const result = await ctx.openreader.executeQuery(listQuery)
+
+    return {
+      // since ID is index 0 variable
+      count: result[0].id,
+    }
   }
 
   @Query(() => [MarketplaceToken])
@@ -280,10 +336,11 @@ top_tokens AS (
       limit: args.limit,
       where: args.where,
       orderBy: args.orderBy,
+      offset: args.offset,
     })
 
     const videoFields = parseAnyTree(model, 'MarketplaceToken', info.schema, tree)
-
+    console.log('xd', JSON.stringify(videoFields), sqlArgs)
     const listQuery = new ListQuery(
       model,
       ctx.openreader.dialect,

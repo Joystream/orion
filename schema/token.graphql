@@ -107,8 +107,8 @@ type MarketplaceToken @entity {
   marketCap: BigInt
   cumulativeRevenue: BigInt
   ammVolume: BigInt
-  lastDayPriceChange: Int
-  weeklyLiqChange: Int
+  lastDayPriceChange: BigDecimal
+  weeklyLiqChange: BigDecimal
 
   "runtime token identifier"
   id: ID!
@@ -140,8 +140,8 @@ type MarketplaceToken @entity {
   "date at which this token was created"
   createdAt: DateTime! @index
 
-  # "channel from which the token is issued uniqueness guaranteed by runtime"
-  # channelO: TokenChannel @derivedFrom(field: "token")
+  "channel from which the token is issued uniqueness guaranteed by runtime"
+  channelId: String
 
   "about information displayed under the presentation video"
   description: String

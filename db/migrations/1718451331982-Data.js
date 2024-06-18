@@ -68,9 +68,10 @@ SELECT
     (ac.minted_by_amm - ac.burned_by_amm) as liquidity,
     (ct.last_price * ct.total_supply) as market_cap,
     c.cumulative_revenue,
+    c.id as channel_id,
     tv.amm_volume,
     CASE 
-            WHEN ldt_o.oldest_price_paid = 0 THEN 0
+            WHEN ldt_o.oldest_price_paid = 0 OR ldt_o.oldest_price_paid IS NULL  THEN 0
             ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
     END AS last_day_price_change,
     ((ac.minted_by_amm - ac.burned_by_amm - (liq_until.buy_until - liq_until.sell_until)) * 100 / (liq_until.buy_until - liq_until.sell_until)) as weekly_liq_change,
