@@ -1,4 +1,9 @@
 import { detectAll } from 'tinyld'
+import DetectLanguage from 'detectlanguage'
+
+const languageDetectionApiKey = process.env.DETECTLANGUAGE_API_KEY
+
+const languageDetectionInstace = new DetectLanguage(languageDetectionApiKey ?? '')
 
 function cleanString(input: string): string {
   // First, remove URLs. This pattern targets a broad range of URLs.
@@ -15,6 +20,11 @@ function predictLanguage(text: string): { lang: string; accuracy: number } | und
 
   // Get the most accurate language prediction
   return detectAll(cleanedText)?.[0]
+}
+
+export async function predictLanguageForArray(texts: string[]) {
+  const result = await languageDetectionInstace.detect(texts)
+  return result.map((row) => row[0].language)
 }
 
 export function predictVideoLanguage({ title, description }: any): string | undefined {
