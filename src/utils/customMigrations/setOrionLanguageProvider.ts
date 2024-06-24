@@ -5,28 +5,15 @@ import { predictLanguageForArray } from '../language'
 
 const batchSize = 5_000 // Adjust the batch size based on your database and network performance
 
+type VideoUpdateType = {
+  id: string
+  title: string
+  description: string
+}
+
 export const VIDEO_ORION_LANGUAGE_CURSOR_NAME = 'video_orion_language'
 
-export async function detectVideoLanguageWithProvider() {
-  const em: EntityManager = await globalEm
-  const cursorEntity: { value: string }[] = await em.query(
-    `SELECT value FROM orion_offchain_cursor WHERE cursor_name='${VIDEO_ORION_LANGUAGE_CURSOR_NAME}'`
-  )
-  const cursor = +(cursorEntity[0]?.value ?? 0)
-
-  const videos: { id: string; title: string; description: string }[] = await em.query(`
-    SELECT id, title, description
-    FROM admin.video
-    ORDER BY id::INTEGER ASC
-    OFFSET ${cursor}
-    LIMIT ${batchSize}
-  `)
-
-  if (!videos.length) {
-    console.log('No more videos!')
-    return
-  }
-
+export async function updateVideoLanguages(em: EntityManager, videos: VideoUpdateType[]) {
   const mappedVideos = videos.map((video) => `${video.title} ${video.description}`)
 
   const predictionForVideos = await predictLanguageForArray(mappedVideos)
@@ -49,6 +36,28 @@ export async function detectVideoLanguageWithProvider() {
 
   // Execute batch update
   await em.query(query, queryParams)
+}
+
+export async function detectVideoLanguageWithProvider() {
+  const em: EntityManager = await globalEm
+  const cursorEntity: { value: string }[] = await em.query(
+    `SELECT value FROM orion_offchain_cursor WHERE cursor_name='${VIDEO_ORION_LANGUAGE_CURSOR_NAME}'`
+  )
+  const cursor = +(cursorEntity[0]?.value ?? 0)
+
+  const videos: VideoUpdateType[] = await em.query(`
+    SELECT id, title, description
+    FROM admin.video
+    ORDER BY id::INTEGER ASC
+    OFFSET ${cursor}
+    LIMIT ${batchSize}
+  `)
+
+  if (!videos.length) {
+    console.log('No more videos!')
+    return
+  }
+  await updateVideoLanguages(em, videos)
   const newCursor = new OrionOffchainCursor({
     cursorName: VIDEO_ORION_LANGUAGE_CURSOR_NAME,
     value: cursor + Math.min(batchSize, videos.length),

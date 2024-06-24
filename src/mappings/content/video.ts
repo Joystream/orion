@@ -16,11 +16,14 @@ import {
   VideoPosted,
   VideoViewEvent,
 } from '../../model'
+import { VIDEO_ORION_LANGUAGE_CURSOR_NAME } from '../../utils/customMigrations/setOrionLanguageProvider'
 import { EventHandlerContext } from '../../utils/events'
 import { predictVideoLanguage } from '../../utils/language'
+import { OrionVideoLanguageManager } from '../../utils/OrionVideoLanguageManager'
 import {
   deserializeMetadata,
   genericEventFields,
+  orionVideoLanguageManager,
   u8aToBytes,
   videoRelevanceManager,
 } from '../utils'
@@ -122,10 +125,12 @@ export async function processVideoCreatedEvent({
     }
   }
 
-  video.orionLanguage = predictVideoLanguage({
-    title: video.title ?? '',
-    description: video.description ?? '',
-  })
+  video.orionLanguage = VIDEO_ORION_LANGUAGE_CURSOR_NAME
+    ? null
+    : predictVideoLanguage({
+        title: video.title ?? '',
+        description: video.description ?? '',
+      })
 
   channel.totalVideosCreated += 1
 
@@ -192,10 +197,14 @@ export async function processVideoUpdatedEvent({
     )
   }
 
-  video.orionLanguage = predictVideoLanguage({
-    title: video.title ?? '',
-    description: video.description ?? '',
-  })
+  if (VIDEO_ORION_LANGUAGE_CURSOR_NAME) {
+    orionVideoLanguageManager.scheduleVideoForDetection(video.id)
+  } else {
+    video.orionLanguage = predictVideoLanguage({
+      title: video.title ?? '',
+      description: video.description ?? '',
+    })
+  }
 
   if (autoIssueNft) {
     await processNft(overlay, block, indexInBlock, extrinsicHash, video, contentActor, autoIssueNft)
