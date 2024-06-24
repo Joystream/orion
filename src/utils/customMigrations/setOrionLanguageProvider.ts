@@ -3,13 +3,11 @@ import { OrionOffchainCursor } from '../../model'
 import { globalEm } from '../globalEm'
 import { predictLanguageForArray } from '../language'
 
-const batchSize = 5 // Adjust the batch size based on your database and network performance
+const batchSize = 5_000 // Adjust the batch size based on your database and network performance
 
-let rowAffected = 0
+export const VIDEO_ORION_LANGUAGE_CURSOR_NAME = 'video_orion_language'
 
-const VIDEO_ORION_LANGUAGE_CURSOR_NAME = 'video_orion_language'
-
-async function detectVideoLanguageWithProvider() {
+export async function detectVideoLanguageWithProvider() {
   const em: EntityManager = await globalEm
   const cursorEntity: { value: string }[] = await em.query(
     `SELECT value FROM orion_offchain_cursor WHERE cursor_name='${VIDEO_ORION_LANGUAGE_CURSOR_NAME}'`
@@ -60,14 +58,5 @@ async function detectVideoLanguageWithProvider() {
     `Updated languages for videos in range ${cursor}-${cursor + Math.min(batchSize, videos.length)}`
   )
 
-  rowAffected += videos.length
-
   await detectVideoLanguageWithProvider()
 }
-
-detectVideoLanguageWithProvider()
-  .then(() => console.log(`Update process completed. Rows affected ${rowAffected}`))
-  .catch((e) => {
-    console.error('process failed', e)
-    process.exit(1)
-  })
