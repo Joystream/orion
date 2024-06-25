@@ -251,7 +251,6 @@ top_tokens AS (
     )
 
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
-    console.log('sql,', listQuerySql)
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const oldListQMap = listQuery.map.bind(listQuery)
@@ -340,7 +339,6 @@ top_tokens AS (
     })
 
     const videoFields = parseAnyTree(model, 'MarketplaceToken', info.schema, tree)
-    console.log('xd', JSON.stringify(videoFields), sqlArgs)
     const listQuery = new ListQuery(
       model,
       ctx.openreader.dialect,
@@ -351,7 +349,6 @@ top_tokens AS (
 
     let listQuerySql = listQuery.sql
 
-    console.log('test', listQuerySql)
     listQuerySql = listQuerySql.replace(/marketplace_token/g, 'marketplace_tokens')
     ;(listQuery as { sql: string }).sql = listQuerySql
 

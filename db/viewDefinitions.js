@@ -2,6 +2,8 @@ const noCategoryVideosSupportedByDefault =
   process.env.SUPPORT_NO_CATEGORY_VIDEOS === 'true' ||
   process.env.SUPPORT_NO_CATEGORY_VIDEOS === '1'
 
+const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
+
 // Add public 'VIEW' definitions for hidden entities created by
 // applying `@schema(name: "admin") directive to the Graphql entities
 function getViewDefinitions(db) {
@@ -87,6 +89,77 @@ function getViewDefinitions(db) {
     email_delivery_attempt: ['FALSE'],
     // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
     // notification: ['FALSE'],
+    marketplace_tokens: `
+WITH  trading_volumes AS (
+   SELECT ac.token_id,
+        SUM(tr.price_paid) as amm_volume
+   FROM amm_transaction tr
+   JOIN amm_curve ac ON ac.id = tr.amm_id
+   GROUP BY token_id
+),
+
+last_day_transactions AS (
+    SELECT
+        tr.amm_id,
+        ac.token_id,
+        ROUND(tr.price_paid / tr.quantity) AS price_paid,
+        tr.created_in
+    FROM amm_transaction tr
+    JOIN amm_curve ac ON tr.amm_id = ac.id
+    WHERE tr.created_in >= (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY} 
+),
+
+ldt_oldest_transactions AS (
+    SELECT
+        ldt.token_id,
+        ldt.price_paid AS oldest_price_paid
+    FROM last_day_transactions ldt
+    JOIN (
+        SELECT token_id, MIN(created_in) AS oldest_created_in
+        FROM last_day_transactions
+        GROUP BY token_id
+    ) oldest ON ldt.token_id = oldest.token_id AND ldt.created_in = oldest.oldest_created_in
+) 
+
+SELECT
+    (ac.minted_by_amm - ac.burned_by_amm) as liquidity,
+    (ct.last_price * ct.total_supply) as market_cap,
+    c.cumulative_revenue,
+    c.id as channel_id,
+    tv.amm_volume,
+    CASE 
+            WHEN ldt_o.oldest_price_paid = 0 OR ldt_o.oldest_price_paid IS NULL  THEN 0
+            ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
+    END AS last_day_price_change,
+    ((ac.minted_by_amm - ac.burned_by_amm - (liq_until.buy_until - liq_until.sell_until)) * 100 / (liq_until.buy_until - liq_until.sell_until)) as weekly_liq_change,
+    ct.*
+FROM creator_token ct
+LEFT JOIN token_channel tc ON tc.token_id = ct.id
+LEFT JOIN channel c ON c.id = tc.channel_id
+LEFT JOIN ldt_oldest_transactions ldt_o ON ldt_o.token_id = ct.id
+LEFT JOIN amm_curve ac ON ac.id = ct.current_amm_sale_id
+JOIN (
+
+    SELECT 
+        amm_id,
+        SUM(CASE
+                WHEN transaction_type = 'BUY' THEN quantity
+                ELSE 0
+            END
+        ) AS buy_until,
+        SUM(CASE
+                WHEN transaction_type = 'SELL' THEN quantity
+                ELSE 0
+            END
+        ) AS sell_until
+    FROM amm_transaction
+    WHERE created_in <= (SELECT height FROM squid_processor.status) - ${7 * BLOCKS_PER_DAY} 
+    GROUP BY amm_id
+
+) as liq_until ON liq_until.amm_id = ac.id
+LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
+
+`,
   }
 }
 
