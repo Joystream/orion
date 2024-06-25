@@ -246,7 +246,7 @@ top_tokens AS (
     listQuerySql = extendClause(
       listQuerySql,
       'WHERE',
-      '(tT.growth_rank <= 10 OR tT.shrink_rank <= 10) AND tT.percentage_change > 0',
+      '(tT.growth_rank <= 10 OR tT.shrink_rank <= 10) AND tT.percentage_change != 0',
       'AND'
     )
 
