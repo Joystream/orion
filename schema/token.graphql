@@ -107,8 +107,8 @@ type MarketplaceToken @entity {
   marketCap: BigInt
   cumulativeRevenue: BigInt
   ammVolume: BigInt
-  lastDayPriceChange: BigDecimal
-  weeklyLiqChange: BigDecimal
+  priceChange: BigDecimal
+  liquidityChange: BigDecimal
 
   "runtime token identifier"
   id: ID!

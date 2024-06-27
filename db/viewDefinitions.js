@@ -98,7 +98,7 @@ WITH  trading_volumes AS (
    GROUP BY token_id
 ),
 
-last_day_transactions AS (
+last_month_transactions AS (
     SELECT
         tr.amm_id,
         ac.token_id,
@@ -106,17 +106,17 @@ last_day_transactions AS (
         tr.created_in
     FROM amm_transaction tr
     JOIN amm_curve ac ON tr.amm_id = ac.id
-    WHERE tr.created_in >= (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY} 
+    WHERE tr.created_in >= (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30} 
 ),
 
 ldt_oldest_transactions AS (
     SELECT
         ldt.token_id,
         ldt.price_paid AS oldest_price_paid
-    FROM last_day_transactions ldt
+    FROM last_month_transactions ldt
     JOIN (
         SELECT token_id, MIN(created_in) AS oldest_created_in
-        FROM last_day_transactions
+        FROM last_month_transactions
         GROUP BY token_id
     ) oldest ON ldt.token_id = oldest.token_id AND ldt.created_in = oldest.oldest_created_in
 ) 
@@ -130,8 +130,8 @@ SELECT
     CASE 
             WHEN ldt_o.oldest_price_paid = 0 OR ldt_o.oldest_price_paid IS NULL  THEN 0
             ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
-    END AS last_day_price_change,
-    ((ac.minted_by_amm - ac.burned_by_amm - (liq_until.buy_until - liq_until.sell_until)) * 100 / GREATEST(liq_until.buy_until - liq_until.sell_until, 1)) as weekly_liq_change,
+    END AS price_change,
+    ((ac.minted_by_amm - ac.burned_by_amm - (liq_until.buy_until - liq_until.sell_until)) * 100 / GREATEST(liq_until.buy_until - liq_until.sell_until, 1)) as liquidity_change,
     ct.*
 FROM creator_token ct
 LEFT JOIN token_channel tc ON tc.token_id = ct.id
@@ -153,7 +153,7 @@ JOIN (
             END
         ) AS sell_until
     FROM amm_transaction
-    WHERE created_in <= (SELECT height FROM squid_processor.status) - ${7 * BLOCKS_PER_DAY} 
+    WHERE created_in <= (SELECT height FROM squid_processor.status) - ${30 * BLOCKS_PER_DAY} 
     GROUP BY amm_id
 
 ) as liq_until ON liq_until.amm_id = ac.id
