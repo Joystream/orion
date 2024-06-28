@@ -163,7 +163,7 @@ LEFT JOIN
                    FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}) as tr
      GROUP BY token_id) as liq_until ON liq_until.token_id = ct.id
 
-LEFT JOIN trading_volumes tv ON tv.token_id = ct.id;
+LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
 
 `,
   }

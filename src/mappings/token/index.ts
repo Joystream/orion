@@ -233,7 +233,8 @@ export async function processAmmActivatedEvent({
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
-  token.lastPrice = amm.ammInitPrice
+  token.lastPrice =
+    (amm.ammSlopeParameter * BigInt(token.totalSupply)) / BigInt(2) + amm.ammInitPrice
   token.currentAmmSaleId = id
 
   const eventEntity = overlay.getRepository(Event).new({
