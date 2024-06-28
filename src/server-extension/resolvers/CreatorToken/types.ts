@@ -55,8 +55,6 @@ export class CreatorToken {
 export class MarketplaceTokensReturnType {
   @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
   @Field(() => Float, { nullable: false }) pricePercentageChange!: number
-  @Field(() => String, { nullable: false, description: 'Type of the result: hot | cold' })
-  resultType!: 'hot' | 'cold'
 }
 
 @ObjectType()
@@ -79,6 +77,12 @@ export class MarketplaceTokensArgs {
     description: 'The number of days in period',
   })
   periodDays: number
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Whether the result should be order by price change descending',
+  })
+  orderByPriceDesc: boolean | null
 }
 
 export const MarketplaceTokenWhereInput = new GraphQLScalarType({

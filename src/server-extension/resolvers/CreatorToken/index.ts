@@ -87,11 +87,6 @@ WITH  tokens_volumes AS (
    JOIN amm_curve ac ON ac.id = tr.amm_id
    WHERE tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
    GROUP BY token_id
-),
-ranked_tokens AS (
-    SELECT token_id, ammVolume,
-           ROW_NUMBER() OVER (ORDER BY ammVolume DESC) AS growth_rank
-    FROM tokens_volumes
 )
 `
 
@@ -105,17 +100,23 @@ ranked_tokens AS (
 
     let listQuerySql = listQuery.sql
 
-    listQuerySql = extendClause(listQuerySql, 'SELECT', 'rT.ammVolume')
+    listQuerySql = extendClause(listQuerySql, 'SELECT', 'COALESCE(tV.ammVolume, 0)')
 
     listQuerySql = extendClause(
       listQuerySql,
       'FROM',
-      'LEFT JOIN ranked_tokens rT ON rT.token_id = creator_token.id',
+      'LEFT JOIN tokens_volumes tV ON tV.token_id = creator_token.id',
       ''
     )
 
-    listQuerySql = extendClause(listQuerySql, 'WHERE', 'rT.growth_rank <= 10', 'AND')
-    listQuerySql = extendClause(listQuerySql, 'ORDER BY', 'rT.growth_rank', '')
+    if (typeof args.orderByPriceDesc === 'boolean') {
+      listQuerySql = extendClause(
+        listQuerySql,
+        'ORDER BY',
+        `COALESCE(tV.ammVolume, 0) ${args.orderByPriceDesc ? 'DESC' : 'ASC'}`,
+        ''
+      )
+    }
 
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
     ;(listQuery as { sql: string }).sql = listQuerySql
@@ -140,7 +141,7 @@ ranked_tokens AS (
   }
 
   @Query(() => [MarketplaceTokensReturnType])
-  async hotAndColdTokens(
+  async tokensWithPriceChange(
     @Args() args: MarketplaceTokensArgs,
     @Info() info: GraphQLResolveInfo,
     @Ctx() ctx: Context
@@ -161,60 +162,32 @@ ranked_tokens AS (
     const tokenFields = parseAnyTree(model, 'CreatorToken', info.schema, tokenSubTree)
 
     const topTokensCtes = `
-WITH recent_transactions AS (
-    SELECT
-        tr.amm_id,
-        ac.token_id,
-        ROUND(tr.price_paid / tr.quantity) AS price_paid,
-        tr.created_in
-    FROM amm_transaction tr
-    JOIN amm_curve ac ON tr.amm_id = ac.id
-    WHERE tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
-),
-oldest_transactions AS (
-    SELECT
-        tr.token_id,
-        tr.price_paid AS oldest_price_paid
-    FROM recent_transactions tr
-    JOIN (
-        SELECT token_id, MIN(created_in) AS oldest_created_in
-        FROM recent_transactions
-        GROUP BY token_id
-    ) oldest ON tr.token_id = oldest.token_id AND tr.created_in = oldest.oldest_created_in
-),
-newest_transactions AS (
-    SELECT
-        tr.token_id,
-        tr.price_paid AS newest_price_paid
-    FROM recent_transactions tr
-    JOIN (
-        SELECT token_id, MAX(created_in) AS newest_created_in
-        FROM recent_transactions
-        GROUP BY token_id
-    ) newest ON tr.token_id = newest.token_id AND tr.created_in = newest.newest_created_in
+WITH oldest_transactions AS (
+    SELECT DISTINCT ON (ac.token_id) tr.amm_id,
+                        ac.token_id,
+                        tr.price_per_unit as oldest_price_paid,
+                        tr.created_in
+     FROM amm_transaction tr
+     JOIN amm_curve ac ON tr.amm_id = ac.id
+     WHERE tr.created_in <
+             (SELECT height
+              FROM squid_processor.status) - ${
+                lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY
+              }
+     ORDER BY ac.token_id,
+              tr.created_in DESC
 ),
 price_changes AS (
     SELECT 
         ot.token_id,
         ot.oldest_price_paid,
-        nt.newest_price_paid,
+        ct.last_price,
         CASE 
             WHEN ot.oldest_price_paid = 0 THEN 0
-            ELSE ((nt.newest_price_paid - ot.oldest_price_paid) * 100.0 / ot.oldest_price_paid)
+            ELSE ((ct.last_price - ot.oldest_price_paid) * 100.0 / ot.oldest_price_paid)
         END AS percentage_change
     FROM oldest_transactions ot
-    JOIN newest_transactions nt ON ot.token_id = nt.token_id
-),
-ranked_tokens AS (
-    SELECT token_id, percentage_change, newest_price_paid, oldest_price_paid,
-           ROW_NUMBER() OVER (ORDER BY percentage_change DESC) AS growth_rank,
-           ROW_NUMBER() OVER (ORDER BY percentage_change ASC) AS shrink_rank
-    FROM price_changes
-),
-top_tokens AS (
-    SELECT *
-    FROM ranked_tokens
-    WHERE growth_rank <= 10 OR shrink_rank <= 10
+    JOIN creator_token as ct ON ot.token_id = ct.id
 )
 `
 
@@ -231,24 +204,24 @@ top_tokens AS (
     listQuerySql = extendClause(
       listQuerySql,
       'SELECT',
-      `tT.percentage_change as pricePercentageChange,
-(CASE WHEN tT.growth_rank <= 10 THEN 'hot' ELSE 'cold' END) AS result_type
-      `
+      `COALESCE(pc.percentage_change, 0) as pricePercentageChange`
     )
 
     listQuerySql = extendClause(
       listQuerySql,
       'FROM',
-      'LEFT JOIN top_tokens tT ON creator_token.id = tT.token_id',
+      'LEFT JOIN price_changes pc ON creator_token.id = pc.token_id',
       ''
     )
 
-    listQuerySql = extendClause(
-      listQuerySql,
-      'WHERE',
-      '(tT.growth_rank <= 10 OR tT.shrink_rank <= 10) AND tT.percentage_change != 0',
-      'AND'
-    )
+    if (typeof args.orderByPriceDesc === 'boolean') {
+      listQuerySql = extendClause(
+        listQuerySql,
+        'ORDER BY',
+        `COALESCE(pc.percentage_change, 0) ${args.orderByPriceDesc ? 'DESC' : 'ASC'}`,
+        ''
+      )
+    }
 
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
     ;(listQuery as { sql: string }).sql = listQuerySql
@@ -256,17 +229,14 @@ top_tokens AS (
     const oldListQMap = listQuery.map.bind(listQuery)
     listQuery.map = (rows: unknown[][]) => {
       const pricePercentageChanges: unknown[] = []
-      const resultTypes: unknown[] = []
 
       for (const row of rows) {
-        resultTypes.push(row.pop())
         pricePercentageChanges.push(row.pop())
       }
       const channelsMapped = oldListQMap(rows)
       return channelsMapped.map((creatorToken, i) => ({
         creatorToken,
         pricePercentageChange: pricePercentageChanges[i] ?? 0,
-        resultType: resultTypes[i],
       }))
     }
 
