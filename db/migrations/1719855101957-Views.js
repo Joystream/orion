@@ -1,8 +1,8 @@
 
 const { getViewDefinitions } = require('../viewDefinitions')
 
-module.exports = class Views1709641962433 {
-  name = 'Views1709641962433'
+module.exports = class Views1719855101957 {
+  name = 'Views1719855101957'
 
   async up(db) {
     // these two queries will be invoked and the cleaned up by the squid itself
@@ -30,8 +30,6 @@ module.exports = class Views1709641962433 {
         `);
       }
     }
-
- 
   }  
 
   async down(db) {
@@ -39,6 +37,5 @@ module.exports = class Views1709641962433 {
     for (const viewName of Object.keys(viewDefinitions)) {
       await db.query(`DROP VIEW "${viewName}"`)
     }
-
   }
 }
