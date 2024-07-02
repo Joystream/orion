@@ -11,6 +11,26 @@ info:
 servers:
   - url: '/api/v1/'
 paths:
+  /register-user-interaction:
+    post:
+      security:
+        - cookieAuth: []
+      operationId: registerUserInteraction
+      x-eov-operation-handler: registerUserInteraction
+      description: Register a user interaction with Atlas part.
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterUserInteractionRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/GenericOkResponse'
+        '400':
+          $ref: '#/components/responses/GenericBadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedAnonymousUserResponse'
+        '429':
+          $ref: '#/components/responses/GenericTooManyRequestsResponse'
+        default:
+          $ref: '#/components/responses/GenericInternalServerErrorResponse'
   /anonymous-auth:
     post:
       operationId: anonymousAuth
@@ -225,6 +245,11 @@ components:
       in: cookie
       name: session_id
   requestBodies:
+    RegisterUserInteractionRequestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterUserInteractionRequestData'
     AnonymousUserAuthRequestBody:
       content:
         application/json:
@@ -415,6 +440,16 @@ components:
           type: string
         payload:
           $ref: '#/components/schemas/ActionExecutionPayload'
+    RegisterUserInteractionRequestData:
+      type: object
+      required:
+        - entityId
+        - type
+      properties:
+        entityId:
+          type: string
+        type:
+          type: string
     AnonymousUserAuthRequestData:
       type: object
       properties:
