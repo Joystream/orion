@@ -1,4 +1,3 @@
-import { detectAll } from 'tinyld'
 import DetectLanguage from 'detectlanguage'
 
 const languageDetectionApiKey = process.env.DETECTLANGUAGE_API_KEY
@@ -15,32 +14,8 @@ function cleanString(input: string): string {
   return cleanedString
 }
 
-function predictLanguage(text: string): { lang: string; accuracy: number } | undefined {
-  const cleanedText = cleanString(text)
-
-  // Get the most accurate language prediction
-  return detectAll(cleanedText)?.[0]
-}
-
-export async function predictLanguageForArray(texts: string[]) {
-  const result = await languageDetectionInstace.detect(texts)
+export async function predictLanguageWithProvider(texts: string[]) {
+  const cleanedTexts = texts.map(cleanString)
+  const result = await languageDetectionInstace.detect(cleanedTexts)
   return result.map((row) => row[0].language)
-}
-
-export function predictVideoLanguage({ title, description }: any): string | undefined {
-  let detectedLang: string | undefined
-
-  const titleLang = predictLanguage(title ?? '')
-
-  detectedLang = titleLang?.lang
-
-  if ((titleLang?.accuracy || 0) < 0.5) {
-    const titleAndDescriptionLang = predictLanguage(`${title} ${description}`)
-    if ((titleAndDescriptionLang?.accuracy || 0) > (titleLang?.accuracy || 0)) {
-      // then
-      detectedLang = titleAndDescriptionLang?.lang
-    }
-  }
-
-  return detectedLang
 }

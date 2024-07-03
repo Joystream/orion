@@ -52,7 +52,9 @@ export class OrionVideoLanguageManager {
   private async updateLoop(intervalMs: number): Promise<void> {
     const em = await globalEm
     while (true) {
-      await this.updateScheduledVideoLanguage(em)
+      await this.updateScheduledVideoLanguage(em).catch((e) => {
+        console.log(`Updating scheduled videos Orion language with provider failed`, e)
+      })
       await this.updateOrionVideoLanguage().catch((e) => {
         console.log(`Updating Orion language with provider failed`, e)
       })
