@@ -1,6 +1,11 @@
-import { Resolver, Root, Subscription, Query, ObjectType, Field } from 'type-graphql'
+import { Resolver, Root, Subscription, Query, ObjectType, Field, Args } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
-import { ProcessorState } from './types'
+import {
+  EarningStatsOutput,
+  ProcessorState,
+  TopInteractedEntity,
+  TopInteractedEntityArgs,
+} from './types'
 import _, { isObject } from 'lodash'
 import { globalEm } from '../../../utils/globalEm'
 import { has } from '../../../utils/misc'
@@ -74,6 +79,28 @@ export class StateResolver {
     return state
   }
 
+  @Query(() => [TopInteractedEntity])
+  async getTopInteractedEnities(
+    @Args() args: TopInteractedEntityArgs
+  ): Promise<TopInteractedEntity[]> {
+    const em = await this.tx()
+
+    const result: { entity_id: string; entrycount: number }[] = await em.query(`
+SELECT entity_id, SUM(count) as entryCount
+    FROM admin.user_interaction_count
+    WHERE type = '${args.type}'
+    AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
+    GROUP BY entity_id
+    ORDER BY entryCount DESC
+    LIMIT 10;
+`)
+
+    return result.map((res) => ({
+      interactionCount: res.entrycount,
+      entityId: res.entity_id,
+    }))
+  }
+
   @Query(() => EarningStatsOutput)
   async totalJoystreamEarnings(): Promise<EarningStatsOutput> {
     const em = await this.tx()
@@ -120,16 +147,4 @@ export class StateResolver {
       totalRewardsPaid: result.total_rewards_volume ?? 0,
     }
   }
-}
-
-@ObjectType()
-export class EarningStatsOutput {
-  @Field({ nullable: false })
-  crtSaleVolume: string
-
-  @Field({ nullable: false })
-  totalRewardsPaid: string
-
-  @Field({ nullable: false })
-  nftSaleVolume: string
 }
