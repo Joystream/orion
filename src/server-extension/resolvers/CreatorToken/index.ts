@@ -118,6 +118,10 @@ WITH  tokens_volumes AS (
       )
     }
 
+    const limit = args.limit ?? 10
+
+    listQuerySql = extendClause(listQuerySql, 'LIMIT', String(limit), '')
+
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
     ;(listQuery as { sql: string }).sql = listQuerySql
 
@@ -222,6 +226,10 @@ price_changes AS (
         ''
       )
     }
+
+    const limit = args.limit ?? 10
+
+    listQuerySql = extendClause(listQuerySql, 'LIMIT', String(limit), '')
 
     listQuerySql = `${topTokensCtes} ${listQuerySql}`
     ;(listQuery as { sql: string }).sql = listQuerySql

@@ -78,6 +78,11 @@ export class MarketplaceTokensArgs {
   })
   periodDays: number
 
+  @Field(() => Int, {
+    nullable: true,
+  })
+  limit?: number
+
   @Field(() => Boolean, {
     nullable: true,
     description: 'Whether the result should be order by price change descending',
