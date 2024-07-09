@@ -166,33 +166,42 @@ WITH  tokens_volumes AS (
     const tokenFields = parseAnyTree(model, 'CreatorToken', info.schema, tokenSubTree)
 
     const topTokensCtes = `
-WITH oldest_transactions AS (
-    SELECT DISTINCT ON (ac.token_id) tr.amm_id,
+WITH oldest_transactions_before AS
+    (SELECT DISTINCT ON (ac.token_id) tr.amm_id,
                         ac.token_id,
                         tr.price_per_unit as oldest_price_paid,
                         tr.created_in
      FROM amm_transaction tr
      JOIN amm_curve ac ON tr.amm_id = ac.id
-     WHERE tr.created_in <
-             (SELECT height
-              FROM squid_processor.status) - ${
-                lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY
-              }
+     WHERE tr.created_in < ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
      ORDER BY ac.token_id,
-              tr.created_in DESC
-),
-price_changes AS (
-    SELECT 
-        ot.token_id,
-        ot.oldest_price_paid,
-        ct.last_price,
-        CASE 
-            WHEN ot.oldest_price_paid = 0 THEN 0
-            ELSE ((ct.last_price - ot.oldest_price_paid) * 100.0 / ot.oldest_price_paid)
-        END AS percentage_change
-    FROM oldest_transactions ot
-    JOIN creator_token as ct ON ot.token_id = ct.id
-)
+              tr.created_in DESC),
+
+              oldest_transactions_after AS
+    (SELECT DISTINCT ON (ac.token_id) tr.amm_id,
+                        ac.token_id,
+                        tr.price_per_unit as oldest_price_paid,
+                        tr.created_in
+     FROM amm_transaction tr
+     JOIN amm_curve ac ON tr.amm_id = ac.id
+     WHERE tr.created_in > ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}     
+     ORDER BY ac.token_id,
+              tr.created_in ASC),
+
+
+     price_changes AS
+    (SELECT ct.id,
+            ot.oldest_price_paid,
+            ct.symbol,
+            ct.last_price,
+CASE
+    WHEN ot.oldest_price_paid = 0 AND ota.oldest_price_paid = 0 THEN 0
+    WHEN ot.oldest_price_paid = 0 THEN ((ct.last_price - ota.oldest_price_paid) * 100.0 / ota.oldest_price_paid)
+    ELSE ((ct.last_price - ot.oldest_price_paid) * 100.0 / ot.oldest_price_paid)
+END AS percentage_change
+     FROM creator_token ct
+     LEFT JOIN oldest_transactions_before as ot ON ot.token_id = ct.id
+     LEFT JOIN oldest_transactions_after as ota ON ota.token_id = ct.id)
 `
 
     const listQuery = new ListQuery(
@@ -214,7 +223,7 @@ price_changes AS (
     listQuerySql = extendClause(
       listQuerySql,
       'FROM',
-      'LEFT JOIN price_changes pc ON creator_token.id = pc.token_id',
+      'LEFT JOIN price_changes pc ON creator_token.id = pc.id',
       ''
     )
 
