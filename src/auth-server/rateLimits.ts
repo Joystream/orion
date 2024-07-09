@@ -32,7 +32,7 @@ export const rateLimitsPerRoute: RateLimitsPerRoute = {
   '/register-user-interaction': {
     post: {
       windowMinutes: 5,
-      limit: 1,
+      limit: 30,
     },
   },
   '/anonymous-auth': {

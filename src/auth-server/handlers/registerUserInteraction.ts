@@ -2,8 +2,15 @@ import express from 'express'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { components } from '../generated/api-types'
-import { UnauthorizedError } from '../errors'
+import { TooManyRequestsError, UnauthorizedError } from '../errors'
 import { UserInteractionCount } from '../../model'
+
+import { InMemoryRateLimiter } from 'rolling-rate-limiter'
+
+export const interactionLimiter = new InMemoryRateLimiter({
+  interval: 1000 * 60 * 5, // 5 minutes
+  maxInInterval: 1,
+})
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -24,6 +31,12 @@ export const registerUserInteraction: (
     console.log(session)
     if (!session) {
       throw new UnauthorizedError('Cannot register interactions for empty session')
+    }
+
+    const isBlocked = await interactionLimiter.limit(`${type}-${entityId}-${session.userId}`)
+
+    if (isBlocked) {
+      throw new TooManyRequestsError('Too many requests for single entity')
     }
 
     const em = await globalEm
