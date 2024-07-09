@@ -97,18 +97,34 @@ WITH trading_volumes AS
      JOIN amm_curve ac ON ac.id = tr.amm_id
      GROUP BY token_id),
 
-base_price_transaction AS
-    (SELECT DISTINCT ON (ac.token_id) tr.amm_id,
-                        ac.token_id,
-                        tr.price_per_unit as oldest_price_paid,
-                        tr.created_in
-     FROM amm_transaction tr
-     JOIN amm_curve ac ON tr.amm_id = ac.id
-     WHERE tr.created_in <
-             (SELECT height
-              FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}
-     ORDER BY ac.token_id,
-              tr.created_in DESC)
+base_price_transaction AS (
+    WITH oldest_transactions AS (
+        SELECT DISTINCT ON (ac.token_id) 
+            tr.amm_id,
+            ac.token_id,
+            tr.price_per_unit AS oldest_price_paid,
+            tr.created_in
+        FROM amm_transaction tr
+        JOIN amm_curve ac ON tr.amm_id = ac.id
+        WHERE tr.created_in < (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}
+        ORDER BY ac.token_id, tr.created_in DESC
+    ),
+    fallback_transactions AS (
+        SELECT DISTINCT ON (ac.token_id) 
+            tr.amm_id,
+            ac.token_id,
+            tr.price_per_unit AS oldest_price_paid,
+            tr.created_in
+        FROM amm_transaction tr
+        JOIN amm_curve ac ON tr.amm_id = ac.id
+        WHERE tr.created_in > (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}
+        ORDER BY ac.token_id, tr.created_in ASC
+    )
+    SELECT * FROM oldest_transactions
+    UNION ALL
+    SELECT * FROM fallback_transactions
+    WHERE NOT EXISTS (SELECT 1 FROM oldest_transactions)
+)
 
 SELECT 
       COALESCE(ac.total_liq, 0) as liquidity,
