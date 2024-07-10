@@ -10,9 +10,15 @@ import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntr
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 import { EntityManagerOverlay } from '../utils/overlay'
+import { OrionVideoLanguageManager } from '../utils/OrionVideoLanguageManager'
 
+export const orionVideoLanguageManager = new OrionVideoLanguageManager()
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
+// eslint-disable-next-line no-void
+void orionVideoLanguageManager.init(
+  1000 * 60 * 5 // 5 mins
+)
 // eslint-disable-next-line no-void
 void videoRelevanceManager.init({
   fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs

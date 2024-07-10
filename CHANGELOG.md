@@ -1,3 +1,8 @@
+# 4.0.4
+
+## Bug Fixes:
+- Fixed: improve the accuracy of `Video.orionLanguage` field by reworking the `predictVideoLanguage` function in `src/utils/language.ts`
+
 # 4.0.3
 
 ## Misc
