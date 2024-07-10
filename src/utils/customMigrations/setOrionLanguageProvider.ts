@@ -41,7 +41,7 @@ export async function updateVideoLanguages(em: EntityManager, videos: VideoUpdat
 export async function detectVideoLanguageWithProvider() {
   const em: EntityManager = await globalEm
   let cursorEntity: { value: number }[] = await em.query(
-    `SELECT value FROM orion_offchain_cursor WHERE cursor_name='${VIDEO_ORION_LANGUAGE_CURSOR_NAME}'`
+    `SELECT value FROM admin.orion_offchain_cursor WHERE cursor_name='${VIDEO_ORION_LANGUAGE_CURSOR_NAME}'`
   )
   while (true) {
     const cursor = +(cursorEntity[0]?.value ?? 0)

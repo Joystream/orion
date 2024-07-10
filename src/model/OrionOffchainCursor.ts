@@ -1,6 +1,6 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm'
+import { Column, Entity, PrimaryColumn } from 'typeorm'
 
-@Entity()
+@Entity({ schema: 'admin' })
 export class OrionOffchainCursor {
   constructor(props?: Partial<OrionOffchainCursor>) {
     Object.assign(this, props)
