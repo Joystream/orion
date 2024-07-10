@@ -17,5 +17,5 @@ function cleanString(input: string): string {
 export async function predictLanguageWithProvider(texts: string[]) {
   const cleanedTexts = texts.map(cleanString)
   const result = await languageDetectionInstace.detect(cleanedTexts)
-  return result.map((row) => row[0].language)
+  return result.map((row) => row[0]?.language)
 }
