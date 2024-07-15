@@ -1,5 +1,10 @@
 import { ArgsType, Field, Float, Int, ObjectType } from 'type-graphql'
-import { GraphQLScalarType } from 'graphql'
+import {
+  CreatorToken,
+  MarketplaceTokenOrderByInput,
+  MarketplaceTokenWhereInput,
+  TokenWhereInput,
+} from '../baseTypes'
 
 @ArgsType()
 export class GetShareDividensArgs {
@@ -47,11 +52,6 @@ export class GetAccountTransferrableBalanceResult {
 }
 
 @ObjectType()
-export class CreatorToken {
-  @Field(() => String, { nullable: false }) id!: string
-}
-
-@ObjectType()
 export class MarketplaceTokensReturnType {
   @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
   @Field(() => Float, { nullable: false }) pricePercentageChange!: number
@@ -62,10 +62,6 @@ export class TopSellingTokensReturnType {
   @Field(() => CreatorToken, { nullable: false }) creatorToken!: CreatorToken
   @Field(() => String, { nullable: false }) ammVolume!: string
 }
-
-export const TokenWhereInput = new GraphQLScalarType({
-  name: 'CreatorTokenWhereInput',
-})
 
 @ArgsType()
 export class MarketplaceTokensArgs {
@@ -88,19 +84,6 @@ export class MarketplaceTokensArgs {
     description: 'Whether the result should be order by price change descending',
   })
   orderByPriceDesc: boolean | null
-}
-
-export const MarketplaceTokenWhereInput = new GraphQLScalarType({
-  name: 'MarketplaceTokenWhereInput',
-})
-
-export const MarketplaceTokenOrderByInput = new GraphQLScalarType({
-  name: 'id_ASC',
-})
-
-@ObjectType()
-export class MarketplaceToken {
-  @Field(() => String, { nullable: false }) id!: string
 }
 
 @ObjectType()

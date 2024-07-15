@@ -13,11 +13,9 @@ import {
   GetShareDividendsResult,
   GetShareDividensArgs,
   MarketplaceTokensArgs,
-  CreatorToken as TokenReturnType,
   MarketplaceTokensReturnType,
   TopSellingTokensReturnType,
   MarketplaceTableTokensArgs,
-  MarketplaceToken,
   MarketplaceTokenCount,
   MarketplaceTokensCountArgs,
 } from './types'
@@ -26,6 +24,7 @@ import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencr
 import { extendClause } from '../../../utils/sql'
 import { Context } from '../../check'
 import { getCurrentBlockHeight } from '../../../utils/blockHeight'
+import { MarketplaceToken, CreatorToken as TokenReturnType } from '../baseTypes'
 
 export const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
 
@@ -80,13 +79,18 @@ export class TokenResolver {
     const tokenFields = parseAnyTree(model, 'CreatorToken', info.schema, tokenSubTree)
 
     const topTokensCtes = `
-WITH  tokens_volumes AS (
-   SELECT ac.token_id,
+WITH tokens_volumes AS (
+   SELECT 
+        ac.token_id,
         SUM(tr.price_paid) as ammVolume
-   FROM amm_transaction tr
-   JOIN amm_curve ac ON ac.id = tr.amm_id
-   WHERE tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
-   GROUP BY token_id
+   FROM 
+        amm_transaction tr
+   JOIN
+        amm_curve ac ON ac.id = tr.amm_id
+   WHERE
+        tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
+   GROUP BY
+        token_id
 )
 `
 
@@ -141,7 +145,7 @@ WITH  tokens_volumes AS (
 
     const result = await ctx.openreader.executeQuery(listQuery)
 
-    return result as TokenReturnType[]
+    return result as TopSellingTokensReturnType[]
   }
 
   @Query(() => [MarketplaceTokensReturnType])
@@ -325,12 +329,12 @@ END AS percentage_change
       offset: args.offset,
     })
 
-    const videoFields = parseAnyTree(model, 'MarketplaceToken', info.schema, tree)
+    const marketplaceTokensFields = parseAnyTree(model, 'MarketplaceToken', info.schema, tree)
     const listQuery = new ListQuery(
       model,
       ctx.openreader.dialect,
       'MarketplaceToken',
-      videoFields,
+      marketplaceTokensFields,
       sqlArgs
     )
 

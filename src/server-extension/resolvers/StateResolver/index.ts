@@ -80,20 +80,28 @@ export class StateResolver {
   }
 
   @Query(() => [TopInteractedEntity])
-  async getTopInteractedEnities(
+  async getTopInteractedEntities(
     @Args() args: TopInteractedEntityArgs
   ): Promise<TopInteractedEntity[]> {
     const em = await this.tx()
 
-    const result: { entity_id: string; entrycount: number }[] = await em.query(`
-SELECT entity_id, SUM(count) as entryCount
-    FROM admin.user_interaction_count
-    WHERE type = '${args.type}'
-    AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
-    GROUP BY entity_id
-    ORDER BY entryCount DESC
-    LIMIT 10;
-`)
+    const result: { entity_id: string; entrycount: number }[] = await em.query(
+      `
+SELECT 
+  entity_id,
+  SUM(count) as entryCount
+FROM
+  admin.user_interaction_count
+WHERE
+  type = $1 AND day_timestamp >= NOW() - INTERVAL '$2 DAYS'
+GROUP BY
+  entity_id
+ORDER BY
+  entryCount DESC
+LIMIT 10;
+`,
+      [args.type, args.period]
+    )
 
     return result.map((res) => ({
       interactionCount: res.entrycount,

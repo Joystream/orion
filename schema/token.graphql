@@ -102,7 +102,7 @@ type CreatorToken @entity {
   lastPrice: BigInt
 }
 
-type MarketplaceToken @entity {
+type MarketplaceToken @entity @schema(name: "admin") {
   liquidity: Int
   marketCap: BigInt
   cumulativeRevenue: BigInt

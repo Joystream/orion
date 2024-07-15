@@ -7,7 +7,7 @@ import { UserInteractionCount } from '../../model'
 
 import { InMemoryRateLimiter } from 'rolling-rate-limiter'
 
-export const interactionLimiter = new InMemoryRateLimiter({
+const interactionLimiter = new InMemoryRateLimiter({
   interval: 1000 * 60 * 5, // 5 minutes
   maxInInterval: 1,
 })
@@ -28,7 +28,6 @@ export const registerUserInteraction: (
     const { authContext: session } = res.locals
     const { type, entityId } = req.body
 
-    console.log(session)
     if (!session) {
       throw new UnauthorizedError('Cannot register interactions for empty session')
     }
@@ -58,7 +57,7 @@ export const registerUserInteraction: (
       if (!dailyInteractionRow) {
         await em.getRepository(UserInteractionCount).save({
           id: `${Date.now()}-${entityId}-${type}`,
-          dayTimestamp: new Date(),
+          dayTimestamp: new Date(date.setHours(0, 0, 0, 0)),
           count: 1,
           type,
           entityId,

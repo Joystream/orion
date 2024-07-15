@@ -1,14 +1,14 @@
 
 const { getViewDefinitions } = require('../viewDefinitions')
 
-module.exports = class Views1719855101957 {
-  name = 'Views1719855101957'
+module.exports = class Views1721051247895 {
+  name = 'Views1721051247895'
 
   async up(db) {
-    // these two queries will be invoked and the cleaned up by the squid itself
+        // these two queries will be invoked and the cleaned up by the squid itself
     // we only do this to be able to reference processor height in mappings 
     await db.query(`
-        CREATE SCHEMA squid_processor;
+        CREATE SCHEMA IF NOT EXISTS squid_processor;
 `)
     await db.query(`CREATE TABLE IF NOT EXISTS squid_processor.status (
     id SERIAL PRIMARY KEY,
