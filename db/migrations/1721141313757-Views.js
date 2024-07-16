@@ -1,8 +1,8 @@
 
 const { getViewDefinitions } = require('../viewDefinitions')
 
-module.exports = class Views1721138354291 {
-  name = 'Views1721138354291'
+module.exports = class Views1721141313757 {
+  name = 'Views1721141313757'
 
   async up(db) {
     // these two queries will be invoked and the cleaned up by the squid itself
