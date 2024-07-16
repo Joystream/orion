@@ -19,6 +19,7 @@ serve-auth-api:
 	@npm run auth-server-start
 
 migrate:
+	@ls db/migrations
 	@npx squid-typeorm-migration apply
 
 dbgen:
