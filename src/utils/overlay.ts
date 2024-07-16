@@ -345,16 +345,16 @@ export class EntityManagerOverlay {
   constructor(
     private em: EntityManager,
     private nextEntityIds: NextEntityId[],
-    private afterDbUpdte: (em: EntityManager) => Promise<void>
+    private afterDbUpdate: (em: EntityManager) => Promise<void>
   ) {}
 
-  public static async create(store: Store, afterDbUpdte: (em: EntityManager) => Promise<void>) {
+  public static async create(store: Store, afterDbUpdate: (em: EntityManager) => Promise<void>) {
     // FIXME: This is a little hacky, but we really need to access the underlying EntityManager
     const em = await (store as unknown as { em: () => Promise<EntityManager> }).em()
     // Add "admin" schema to search path in order to be able to access "hidden" entities
     await em.query('SET search_path TO admin,public')
     const nextEntityIds = await em.find(NextEntityId, {})
-    return new EntityManagerOverlay(em, nextEntityIds, afterDbUpdte)
+    return new EntityManagerOverlay(em, nextEntityIds, afterDbUpdate)
   }
 
   public totalCacheSize() {
@@ -400,6 +400,6 @@ export class EntityManagerOverlay {
         })
     )
     await this.em.save(nextIds)
-    await this.afterDbUpdte(this.em)
+    await this.afterDbUpdate(this.em)
   }
 }
