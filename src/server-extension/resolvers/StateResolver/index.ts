@@ -93,14 +93,14 @@ SELECT
 FROM
   admin.user_interaction_count
 WHERE
-  type = $1 AND day_timestamp >= NOW() - INTERVAL '$2 DAYS'
+  type = $1 AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
 GROUP BY
   entity_id
 ORDER BY
   entryCount DESC
 LIMIT 10;
 `,
-      [args.type, args.period]
+      [args.type]
     )
 
     return result.map((res) => ({
