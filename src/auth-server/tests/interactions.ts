@@ -17,7 +17,7 @@ async function userInteraction({
   entityId: string
   expectedStatus: number
 }) {
-  const payload: components['schemas']['RegisterUserInteractionRequestData']['payload'] = {
+  const payload: components['schemas']['RegisterUserInteractionRequestData'] = {
     type,
     entityId,
   }
