@@ -327,8 +327,8 @@ export async function getHolderAccountsForToken(
   const holders = await em.getRepository(TokenAccount).findBy({ tokenId })
 
   const holdersMemberIds = holders
-    .filter((follower) => follower?.memberId)
-    .map((follower) => follower.memberId as string)
+    .filter((holder) => holder?.memberId)
+    .map((holder) => holder.memberId as string)
 
   const limit = pLimit(10) // Limit to 10 concurrent promises
   const holdersAccounts: (Account | null)[] = await Promise.all(
@@ -347,17 +347,17 @@ export async function notifyTokenHolders(
   event?: Event,
   dispatchBlock?: number
 ) {
-  const holdersAccounts = await getHolderAccountsForToken(em, tokenId)
+  const holderAccounts = await getHolderAccountsForToken(em, tokenId)
 
   const limit = pLimit(10) // Limit to 10 concurrent promises
 
   await Promise.all(
-    holdersAccounts.map((holdersAccount) =>
+    holderAccounts.map((holderAccount) =>
       limit(() =>
         addNotification(
           em,
-          holdersAccount,
-          new MemberRecipient({ membership: holdersAccount.membershipId }),
+          holderAccount,
+          new MemberRecipient({ membership: holderAccount.membershipId }),
           notificationType,
           event,
           dispatchBlock

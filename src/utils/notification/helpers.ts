@@ -159,7 +159,7 @@ async function addOffChainNotification(
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
 
   const notification = createNotification(
-    OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
+    `${OFFCHAIN_NOTIFICATION_ID_TAG}-${nextNotificationId}`,
     account.id,
     recipient,
     notificationType,
@@ -186,21 +186,22 @@ async function addRuntimeNotification(
   event: Event,
   dispatchBlock?: number
 ) {
-  const em = overlay.getEm()
   // get notification Id from orion_db in any case
-  const nextNotificationId = await getNextIdForEntity(em, RUNTIME_NOTIFICATION_ID_TAG)
+  const nextNotificationId = await getNextIdForEntity(overlay, RUNTIME_NOTIFICATION_ID_TAG)
+
+  const runtimeNotificationId = `${RUNTIME_NOTIFICATION_ID_TAG}-${nextNotificationId}`
 
   // check that on-notification is not already present in orion_db in case the processor has been restarted (but not orion_db)
   const existingNotification = await overlay
     .getRepository(Notification)
-    .getById(nextNotificationId.toString())
+    .getById(runtimeNotificationId)
 
   if (existingNotification) {
     return
   }
 
   const notification = createNotification(
-    RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
+    runtimeNotificationId,
     account.id,
     recipient,
     notificationType,
@@ -215,8 +216,6 @@ async function addRuntimeNotification(
   if (pref.emailEnabled) {
     await createEmailNotification(overlay, notification)
   }
-
-  await saveNextNotificationId(em, nextNotificationId + 1, RUNTIME_NOTIFICATION_ID_TAG)
 
   return notification.id
 }
