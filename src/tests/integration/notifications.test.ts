@@ -1,12 +1,14 @@
-import { EntityManager } from 'typeorm'
-import { IMemberRemarked, ReactVideo, MemberRemarked } from '@joystream/metadata-protobuf'
+import { IMemberRemarked, MemberRemarked, ReactVideo } from '@joystream/metadata-protobuf'
 import { AnyMetadataClass } from '@joystream/metadata-protobuf/types'
-import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
-import { globalEm } from '../../utils/globalEm'
-import {
-  excludeChannelService,
-  verifyChannelService,
-} from '../../server-extension/resolvers/ChannelsResolver'
+import { Store } from '@subsquid/typeorm-store'
+import { expect } from 'chai'
+import { config as dontenvConfig } from 'dotenv'
+import Long from 'long'
+import path from 'path'
+import { EntityManager } from 'typeorm'
+import { auctionBidMadeInner } from '../../mappings/content/nft'
+import { processMemberRemarkedEvent } from '../../mappings/membership'
+import { backwardCompatibleMetaID } from '../../mappings/utils'
 import {
   Account,
   Channel,
@@ -26,21 +28,19 @@ import {
   Video,
   VideoLiked,
 } from '../../model'
-import { expect } from 'chai'
+import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
+import {
+  excludeChannelService,
+  verifyChannelService,
+} from '../../server-extension/resolvers/ChannelsResolver'
+import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
+import { globalEm } from '../../utils/globalEm'
 import {
   OFFCHAIN_NOTIFICATION_ID_TAG,
   RUNTIME_NOTIFICATION_ID_TAG,
 } from '../../utils/notification/helpers'
-import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
-import { auctionBidMadeInner } from '../../mappings/content/nft'
-import { EntityManagerOverlay } from '../../utils/overlay'
-import { Store } from '@subsquid/typeorm-store'
-import { processMemberRemarkedEvent } from '../../mappings/membership'
-import Long from 'long'
-import { backwardCompatibleMetaID } from '../../mappings/utils'
-import { config as dontenvConfig } from 'dotenv'
-import path from 'path'
-import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
+import { AnyEntity, Constructor, EntityManagerOverlay } from '../../utils/overlay'
+import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
 
 dontenvConfig({
   path: path.resolve(__dirname, './.env'),
@@ -50,9 +50,19 @@ const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Uint8Array 
   return Buffer.from(metaClass.encode(obj).finish())
 }
 
-const getNextNotificationId = async (em: EntityManager, onchain: boolean) => {
+const getNextNotificationId = async (
+  store: EntityManager | EntityManagerOverlay,
+  onchain: boolean
+) => {
   const tag = onchain ? RUNTIME_NOTIFICATION_ID_TAG : OFFCHAIN_NOTIFICATION_ID_TAG
-  const row = await em.getRepository(NextEntityId).findOneBy({ entityName: tag })
+  if (store instanceof EntityManagerOverlay) {
+    const row = await store
+      .getRepository(NextEntityId as Constructor<NextEntityId & AnyEntity>)
+      .getOneBy({ entityName: tag })
+    const id = parseInt(row?.nextId.toString() || '1')
+    return id
+  }
+  const row = await store.getRepository(NextEntityId).findOneBy({ entityName: tag })
   const id = parseInt(row?.nextId.toString() || '1')
   return id
 }
@@ -69,6 +79,7 @@ describe('notifications tests', () => {
   let em: EntityManager
   before(async () => {
     em = await globalEm
+    overlay = await createOverlay()
     await populateDbWithSeedData()
   })
   describe('👉 YPP Verify channel', () => {
@@ -281,10 +292,9 @@ describe('notifications tests', () => {
 
     before(async () => {
       const bidAmount = BigInt(100000)
-      nextNotificationIdPre = await getNextNotificationId(em, true)
+      nextNotificationIdPre = await getNextNotificationId(overlay, true)
       notificationId = RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
       nft = await em.getRepository(OwnedNft).findOneByOrFail({ videoId })
-      overlay = await createOverlay()
 
       await auctionBidMadeInner(
         overlay,
@@ -368,8 +378,7 @@ describe('notifications tests', () => {
       asV2001: ['3', metadataToBytes(MemberRemarked, metadataMessage), undefined],
     } as any
     before(async () => {
-      overlay = await createOverlay()
-      nextNotificationIdPre = await getNextNotificationId(em, true)
+      nextNotificationIdPre = await getNextNotificationId(overlay, true)
       notificationId = RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre.toString()
     })
     it('should process video liked and deposit notification', async () => {
@@ -381,7 +390,7 @@ describe('notifications tests', () => {
         event,
       })
 
-      const nextNotificationId = await getNextNotificationId(em, true)
+      const nextNotificationId = await getNextNotificationId(overlay, true)
       notification = (await overlay
         .getRepository(Notification)
         .getByIdOrFail(notificationId)) as Notification
@@ -422,8 +431,7 @@ describe('notifications tests', () => {
       asV2001: ['2', metadataToBytes(MemberRemarked, metadataMessage), undefined], // avoid comment author == creator
     } as any
     before(async () => {
-      overlay = await createOverlay()
-      nextNotificationIdPre = await getNextNotificationId(em, true)
+      nextNotificationIdPre = await getNextNotificationId(overlay, true)
       notificationId = RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre.toString()
     })
     it('should process comment to video and deposit notification', async () => {
@@ -435,7 +443,7 @@ describe('notifications tests', () => {
         event,
       })
 
-      const nextNotificationId = await getNextNotificationId(em, true)
+      const nextNotificationId = await getNextNotificationId(overlay, true)
       notification = (await overlay
         .getRepository(Notification)
         .getByIdOrFail(notificationId)) as Notification | null
@@ -485,7 +493,7 @@ describe('notifications tests', () => {
       } as any
 
       before(async () => {
-        nextNotificationIdPre = await getNextNotificationId(em, true)
+        nextNotificationIdPre = await getNextNotificationId(overlay, true)
         notificationId = RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre.toString()
 
         await processMemberRemarkedEvent({
@@ -500,7 +508,7 @@ describe('notifications tests', () => {
       describe('should process reply to comment and deposit notification', () => {
         let nextNotificationId: number
         before(async () => {
-          nextNotificationId = await getNextNotificationId(em, true)
+          nextNotificationId = await getNextNotificationId(overlay, true)
           notification = (await overlay
             .getRepository(Notification)
             .getByIdOrFail(notificationId)) as Notification | null
