@@ -13,7 +13,6 @@ import {
   Unread,
 } from '../../model'
 import { uniqueId } from '../crypto'
-import { criticalError } from '../misc'
 import { getNextIdForEntity } from '../nextEntityId'
 import { EntityManagerOverlay } from '../overlay'
 
@@ -157,7 +156,7 @@ async function addOffChainNotification(
   dispatchBlock?: number
 ) {
   // get notification Id from orion_db in any case
-  const nextNotificationId = (await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)) || '1'
+  const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
 
   const notification = createNotification(
     `${OFFCHAIN_NOTIFICATION_ID_TAG}-${nextNotificationId}`,
@@ -176,7 +175,7 @@ async function addOffChainNotification(
     await createEmailNotification(em, notification)
   }
 
-  await saveNextNotificationId(em, parseInt(nextNotificationId) + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
+  await saveNextNotificationId(em, nextNotificationId + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
 }
 
 async function addRuntimeNotification(
@@ -189,10 +188,6 @@ async function addRuntimeNotification(
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(overlay, RUNTIME_NOTIFICATION_ID_TAG)
-
-  if (!nextNotificationId) {
-    criticalError(`NextEntityId counter for "RuntimeNotification" tag not found`)
-  }
 
   const runtimeNotificationId = `${RUNTIME_NOTIFICATION_ID_TAG}-${nextNotificationId}`
 

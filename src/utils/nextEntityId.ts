@@ -6,18 +6,22 @@ import { AnyEntity, Constructor, EntityManagerOverlay } from './overlay'
 export async function getNextIdForEntity(
   store: EntityManager | EntityManagerOverlay,
   entityName: string
-): Promise<string | undefined> {
+): Promise<number> {
   // Get next entity id from overlay (this will mostly be used in the mappings context)
   if (store instanceof EntityManagerOverlay) {
     const row = await store
       .getRepository(NextEntityId as Constructor<NextEntityId & AnyEntity>)
       .getOneBy({ entityName: entityName })
 
-    const id = row?.nextId.toString()
+    const id = parseInt(row?.nextId.toString() || '1')
 
     // Update the id to be the next one in the overlay
     if (row) {
       row.nextId++
+    } else {
+      store
+        .getRepository(NextEntityId as Constructor<NextEntityId & AnyEntity>)
+        .new({ entityName, nextId: id + 1 })
     }
 
     return id
@@ -35,6 +39,6 @@ export async function getNextIdForEntity(
       lock: { mode: 'pessimistic_write' },
     })
   }
-  const id = row?.nextId.toString()
+  const id = parseInt(row?.nextId.toString() || '1')
   return id
 }
