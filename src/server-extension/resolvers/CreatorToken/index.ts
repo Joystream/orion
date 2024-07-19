@@ -337,7 +337,7 @@ END AS percentage_change
       sqlArgs
     )
 
-    let listQuerySql = listQuery.sql
+    const listQuerySql = listQuery.sql
 
     ;(listQuery as { sql: string }).sql = listQuerySql
 
