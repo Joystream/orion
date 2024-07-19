@@ -1,14 +1,14 @@
-import { Resolver, Root, Subscription, Query, ObjectType, Field, Args } from 'type-graphql'
+import _, { isObject } from 'lodash'
+import { Args, Query, Resolver, Root, Subscription } from 'type-graphql'
 import type { EntityManager } from 'typeorm'
+import { globalEm } from '../../../utils/globalEm'
+import { has } from '../../../utils/misc'
 import {
   EarningStatsOutput,
   ProcessorState,
   TopInteractedEntity,
   TopInteractedEntityArgs,
 } from './types'
-import _, { isObject } from 'lodash'
-import { globalEm } from '../../../utils/globalEm'
-import { has } from '../../../utils/misc'
 
 class ProcessorStateRetriever {
   public state: ProcessorState
@@ -87,19 +87,19 @@ export class StateResolver {
 
     const result: { entity_id: string; entrycount: number }[] = await em.query(
       `
-SELECT 
-  entity_id,
-  SUM(count) as entryCount
-FROM
-  admin.user_interaction_count
-WHERE
-  type = $1 AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
-GROUP BY
-  entity_id
-ORDER BY
-  entryCount DESC
-LIMIT 10;
-`,
+      SELECT 
+        entity_id,
+        SUM(count) as entryCount
+      FROM
+        admin.user_interaction_count
+      WHERE
+        type = $1 AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
+      GROUP BY
+        entity_id
+      ORDER BY
+        entryCount DESC
+      LIMIT 10;
+      `,
       [args.type]
     )
 

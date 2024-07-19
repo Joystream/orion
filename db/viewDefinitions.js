@@ -90,98 +90,101 @@ function getViewDefinitions(db) {
     // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
     // notification: ['FALSE'],
     marketplace_tokens: `
-WITH trading_volumes AS
-    (SELECT ac.token_id,
-            SUM(tr.price_paid) as amm_volume
-     FROM amm_transaction tr
-     JOIN amm_curve ac ON ac.id = tr.amm_id
-     GROUP BY token_id),
-
-base_price_transaction AS (
-    WITH oldest_transactions AS (
-        SELECT DISTINCT ON (ac.token_id) 
-            tr.amm_id,
-            ac.token_id,
-            tr.price_per_unit AS oldest_price_paid,
-            tr.created_in
-        FROM amm_transaction tr
-        JOIN amm_curve ac ON tr.amm_id = ac.id
-        WHERE tr.created_in < (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}
-        ORDER BY ac.token_id, tr.created_in DESC
-    ),
-    fallback_transactions AS (
-        SELECT DISTINCT ON (ac.token_id) 
-            tr.amm_id,
-            ac.token_id,
-            tr.price_per_unit AS oldest_price_paid,
-            tr.created_in
-        FROM amm_transaction tr
-        JOIN amm_curve ac ON tr.amm_id = ac.id
-        WHERE tr.created_in > (SELECT height FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}
-        ORDER BY ac.token_id, tr.created_in ASC
-    )
-    SELECT * FROM oldest_transactions
-    UNION ALL
-    SELECT * FROM fallback_transactions
-    WHERE NOT EXISTS (SELECT 1 FROM oldest_transactions)
-)
-
-SELECT 
-      COALESCE(ac.total_liq, 0) as liquidity,
-      COALESCE((ct.last_price * ct.total_supply), 0) as market_cap,
-      c.cumulative_revenue,
-      c.id as channel_id,
-      COALESCE(tv.amm_volume, 0) as amm_volume,
-      CASE
-           WHEN ldt_o.oldest_price_paid = 0
-                OR ldt_o.oldest_price_paid IS NULL THEN 0
-           ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
-       END AS price_change,
-       CASE
-           WHEN liq_until.quantity IS NULL THEN 0
-           ELSE ((ac.total_liq - liq_until.quantity) * 100 / GREATEST(liq_until.quantity, 1))
-       END as liquidity_change,
-       ct.*
-FROM creator_token ct
-LEFT JOIN token_channel tc ON tc.token_id = ct.id
-LEFT JOIN channel c ON c.id = tc.channel_id
-LEFT JOIN base_price_transaction ldt_o ON ldt_o.token_id = ct.id
-LEFT JOIN
-
-    (SELECT token_id,
-            SUM(CASE
-                    WHEN transaction_type = 'BUY' THEN quantity
-                    ELSE quantity * -1
-                END) AS total_liq
-     FROM
-         (SELECT ac.token_id,
-                 tr.transaction_type,
-                 tr.quantity
+      WITH trading_volumes AS
+          (SELECT ac.token_id,
+                  SUM(tr.price_paid) as amm_volume
           FROM amm_transaction tr
-          JOIN amm_curve ac ON tr.amm_id = ac.id) as tr
-     GROUP BY token_id) as ac ON ac.token_id = ct.id
+          JOIN amm_curve ac ON ac.id = tr.amm_id
+          GROUP BY token_id),
 
-LEFT JOIN
+      base_price_transaction AS (
+          WITH oldest_transactions AS (
+              SELECT DISTINCT ON (ac.token_id) 
+                  tr.amm_id,
+                  ac.token_id,
+                  tr.price_per_unit AS oldest_price_paid,
+                  tr.created_in
+              FROM amm_transaction tr
+              JOIN amm_curve ac ON tr.amm_id = ac.id
+              WHERE tr.created_in < (SELECT height FROM squid_processor.status) - ${
+                BLOCKS_PER_DAY * 30
+              }
+              ORDER BY ac.token_id, tr.created_in DESC
+          ),
+          fallback_transactions AS (
+              SELECT DISTINCT ON (ac.token_id) 
+                  tr.amm_id,
+                  ac.token_id,
+                  tr.price_per_unit AS oldest_price_paid,
+                  tr.created_in
+              FROM amm_transaction tr
+              JOIN amm_curve ac ON tr.amm_id = ac.id
+              WHERE tr.created_in > (SELECT height FROM squid_processor.status) - ${
+                BLOCKS_PER_DAY * 30
+              }
+              ORDER BY ac.token_id, tr.created_in ASC
+          )
+          SELECT * FROM oldest_transactions
+          UNION ALL
+          SELECT * FROM fallback_transactions
+          WHERE NOT EXISTS (SELECT 1 FROM oldest_transactions)
+      )
 
-    (SELECT token_id,
-            SUM(CASE
-                    WHEN transaction_type = 'BUY' THEN quantity
-                    ELSE quantity * -1
-                END) AS quantity
-     FROM
-         (SELECT ac.token_id,
-                 tr.transaction_type,
-                 tr.quantity
-          FROM amm_transaction tr
-          JOIN amm_curve ac ON tr.amm_id = ac.id
-          WHERE tr.created_in <
-                  (SELECT height
-                   FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}) as tr
-     GROUP BY token_id) as liq_until ON liq_until.token_id = ct.id
+      SELECT 
+            COALESCE(ac.total_liq, 0) as liquidity,
+            COALESCE((ct.last_price * ct.total_supply), 0) as market_cap,
+            c.cumulative_revenue,
+            c.id as channel_id,
+            COALESCE(tv.amm_volume, 0) as amm_volume,
+            CASE
+                WHEN ldt_o.oldest_price_paid = 0
+                      OR ldt_o.oldest_price_paid IS NULL THEN 0
+                ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
+            END AS price_change,
+            CASE
+                WHEN liq_until.quantity IS NULL THEN 0
+                ELSE ((ac.total_liq - liq_until.quantity) * 100 / GREATEST(liq_until.quantity, 1))
+            END as liquidity_change,
+            ct.*
+      FROM creator_token ct
+      LEFT JOIN token_channel tc ON tc.token_id = ct.id
+      LEFT JOIN channel c ON c.id = tc.channel_id
+      LEFT JOIN base_price_transaction ldt_o ON ldt_o.token_id = ct.id
+      LEFT JOIN
 
-LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
+          (SELECT token_id,
+                  SUM(CASE
+                          WHEN transaction_type = 'BUY' THEN quantity
+                          ELSE quantity * -1
+                      END) AS total_liq
+          FROM
+              (SELECT ac.token_id,
+                      tr.transaction_type,
+                      tr.quantity
+                FROM amm_transaction tr
+                JOIN amm_curve ac ON tr.amm_id = ac.id) as tr
+          GROUP BY token_id) as ac ON ac.token_id = ct.id
 
-`,
+      LEFT JOIN
+
+          (SELECT token_id,
+                  SUM(CASE
+                          WHEN transaction_type = 'BUY' THEN quantity
+                          ELSE quantity * -1
+                      END) AS quantity
+          FROM
+              (SELECT ac.token_id,
+                      tr.transaction_type,
+                      tr.quantity
+                FROM amm_transaction tr
+                JOIN amm_curve ac ON tr.amm_id = ac.id
+                WHERE tr.created_in <
+                        (SELECT height
+                        FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}) as tr
+          GROUP BY token_id) as liq_until ON liq_until.token_id = ct.id
+
+      LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
+      `,
   }
 }
 
