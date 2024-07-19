@@ -89,7 +89,7 @@ function getViewDefinitions(db) {
     email_delivery_attempt: ['FALSE'],
     // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
     // notification: ['FALSE'],
-    marketplace_tokens: `
+    marketplace_token: `
       WITH trading_volumes AS
           (SELECT ac.token_id,
                   SUM(tr.price_paid) as amm_volume

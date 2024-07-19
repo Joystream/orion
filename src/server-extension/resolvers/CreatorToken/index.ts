@@ -1,10 +1,16 @@
+import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
+import { ListQuery } from '@subsquid/openreader/lib/sql/query'
+import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
+import { GraphQLResolveInfo } from 'graphql'
 import { Args, Ctx, Info, Query, Resolver } from 'type-graphql'
 import { EntityManager } from 'typeorm'
 import { CreatorToken, RevenueShare, TokenAccount } from '../../../model'
+import { getCurrentBlockHeight } from '../../../utils/blockHeight'
+import { extendClause } from '../../../utils/sql'
+import { Context } from '../../check'
+import { MarketplaceToken, CreatorToken as TokenReturnType } from '../baseTypes'
 import { model } from '../model'
-import { GraphQLResolveInfo } from 'graphql'
 import { computeTransferrableAmount } from './services'
-import { ListQuery } from '@subsquid/openreader/lib/sql/query'
 import {
   GetAccountTransferrableBalanceArgs,
   GetAccountTransferrableBalanceResult,
@@ -12,19 +18,13 @@ import {
   GetCumulativeHistoricalShareAllocationResult,
   GetShareDividendsResult,
   GetShareDividensArgs,
-  MarketplaceTokensArgs,
-  MarketplaceTokensReturnType,
-  TopSellingTokensReturnType,
   MarketplaceTableTokensArgs,
   MarketplaceTokenCount,
+  MarketplaceTokensArgs,
   MarketplaceTokensCountArgs,
+  MarketplaceTokensReturnType,
+  TopSellingTokensReturnType,
 } from './types'
-import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
-import { parseAnyTree, parseSqlArguments } from '@subsquid/openreader/lib/opencrud/tree'
-import { extendClause } from '../../../utils/sql'
-import { Context } from '../../check'
-import { getCurrentBlockHeight } from '../../../utils/blockHeight'
-import { MarketplaceToken, CreatorToken as TokenReturnType } from '../baseTypes'
 
 export const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
 
@@ -303,7 +303,6 @@ END AS percentage_change
     let listQuerySql = listQuery.sql
 
     listQuerySql = `SELECT COUNT(*) ${listQuerySql.slice(listQuerySql.indexOf('FROM'))}`
-    listQuerySql = listQuerySql.replace(/marketplace_token/g, 'marketplace_tokens')
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
@@ -340,7 +339,6 @@ END AS percentage_change
 
     let listQuerySql = listQuery.sql
 
-    listQuerySql = listQuerySql.replace(/marketplace_token/g, 'marketplace_tokens')
     ;(listQuery as { sql: string }).sql = listQuerySql
 
     const result = await ctx.openreader.executeQuery(listQuery)
