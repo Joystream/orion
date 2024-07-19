@@ -285,7 +285,7 @@ export const addNotification = async (
       recipient,
       notificationType,
       event,
-      dispatchBlock ?? event.inBlock
+      dispatchBlock || event.inBlock
     )
   } else {
     const { lastProcessedBlock } = await getCurrentBlockHeight(store as EntityManager)
