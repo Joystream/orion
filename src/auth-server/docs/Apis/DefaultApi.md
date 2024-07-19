@@ -13,6 +13,7 @@ All URIs are relative to *http://localhost/api/v1*
 | [**login**](DefaultApi.md#login) | **POST** /login |  |
 | [**logout**](DefaultApi.md#logout) | **POST** /logout |  |
 | [**postSessionArtifacts**](DefaultApi.md#postSessionArtifacts) | **POST** /session-artifacts |  |
+| [**registerUserInteraction**](DefaultApi.md#registerUserInteraction) | **POST** /register-user-interaction |  |
 | [**requestEmailConfirmationToken**](DefaultApi.md#requestEmailConfirmationToken) | **POST** /request-email-confirmation-token |  |
 
 
@@ -240,6 +241,33 @@ This endpoint does not need any parameter.
 |Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
 | **SessionEncryptionArtifacts** | [**SessionEncryptionArtifacts**](../Models/SessionEncryptionArtifacts.md)|  | [optional] |
+
+### Return type
+
+[**GenericOkResponseData**](../Models/GenericOkResponseData.md)
+
+### Authorization
+
+[cookieAuth](../README.md#cookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+<a name="registerUserInteraction"></a>
+# **registerUserInteraction**
+> GenericOkResponseData registerUserInteraction(RegisterUserInteractionRequestData)
+
+
+
+    Register a user interaction with Atlas part.
+
+### Parameters
+
+|Name | Type | Description  | Notes |
+|------------- | ------------- | ------------- | -------------|
+| **RegisterUserInteractionRequestData** | [**RegisterUserInteractionRequestData**](../Models/RegisterUserInteractionRequestData.md)|  | [optional] |
 
 ### Return type
 

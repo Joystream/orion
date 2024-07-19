@@ -15,6 +15,7 @@ Models/GenericOkResponseData.md
 Models/LoginRequestData.md
 Models/LoginRequestData_allOf.md
 Models/LoginResponseData.md
+Models/RegisterUserInteractionRequestData.md
 Models/RequestTokenRequestData.md
 Models/SessionEncryptionArtifacts.md
 README.md

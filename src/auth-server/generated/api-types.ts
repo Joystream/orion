@@ -4,6 +4,10 @@
  */
 
 export interface paths {
+  '/register-user-interaction': {
+    /** @description Register a user interaction with Atlas part. */
+    post: operations['registerUserInteraction']
+  }
   '/anonymous-auth': {
     /** @description Authenticate as an anonymous user, either using an existing user identifier or creating a new one. */
     post: operations['anonymousAuth']
@@ -57,6 +61,10 @@ export interface components {
     ActionExecutionRequestData: {
       signature: string
       payload: components['schemas']['ActionExecutionPayload']
+    }
+    RegisterUserInteractionRequestData: {
+      entityId: string
+      type: string
     }
     AnonymousUserAuthRequestData: {
       userId?: string
@@ -245,6 +253,11 @@ export interface components {
   }
   parameters: never
   requestBodies: {
+    RegisterUserInteractionRequestBody?: {
+      content: {
+        'application/json': components['schemas']['RegisterUserInteractionRequestData']
+      }
+    }
     AnonymousUserAuthRequestBody?: {
       content: {
         'application/json': components['schemas']['AnonymousUserAuthRequestData']
@@ -290,6 +303,17 @@ export type $defs = Record<string, never>
 export type external = Record<string, never>
 
 export interface operations {
+  /** @description Register a user interaction with Atlas part. */
+  registerUserInteraction: {
+    requestBody: components['requestBodies']['RegisterUserInteractionRequestBody']
+    responses: {
+      200: components['responses']['GenericOkResponse']
+      400: components['responses']['GenericBadRequestResponse']
+      401: components['responses']['UnauthorizedAnonymousUserResponse']
+      429: components['responses']['GenericTooManyRequestsResponse']
+      default: components['responses']['GenericInternalServerErrorResponse']
+    }
+  }
   /** @description Authenticate as an anonymous user, either using an existing user identifier or creating a new one. */
   anonymousAuth: {
     requestBody: components['requestBodies']['AnonymousUserAuthRequestBody']

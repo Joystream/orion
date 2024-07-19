@@ -102,6 +102,81 @@ type CreatorToken @entity {
   lastPrice: BigInt
 }
 
+type MarketplaceToken @entity @schema(name: "admin") {
+  liquidity: Int
+  marketCap: BigInt
+  cumulativeRevenue: BigInt
+  ammVolume: BigInt
+  priceChange: BigDecimal
+  liquidityChange: BigDecimal
+
+  "runtime token identifier"
+  id: ID!
+
+  "status sale / market / idle"
+  status: TokenStatus!
+
+  "avatar object (profile picture)"
+  avatar: TokenAvatar
+
+  "total supply"
+  totalSupply: BigInt!
+
+  "Flag to indicate whether the CRT is featured or not"
+  isFeatured: Boolean!
+
+  "symbol for the token uniqueness guaranteed by runtime"
+  symbol: String @index
+
+  "access status invite only vs anyone"
+  isInviteOnly: Boolean!
+
+  "creator annual revenue (minted)"
+  annualCreatorRewardPermill: Int!
+
+  "revenue share ratio between creator and holder"
+  revenueShareRatioPermill: Int!
+
+  "date at which this token was created"
+  createdAt: DateTime! @index
+
+  "channel from which the token is issued uniqueness guaranteed by runtime"
+  channelId: String
+
+  "about information displayed under the presentation video"
+  description: String
+
+  "note from creator to member interested in joining the whitelist"
+  whitelistApplicantNote: String
+
+  "link for creator to member interested in joining the whitelist"
+  whitelistApplicantLink: String
+
+  "number of accounts to avoid aggregate COUNT"
+  accountsNum: Int!
+
+  "number of revenue shares issued"
+  numberOfRevenueShareActivations: Int!
+
+  "whether it has been deissued or not"
+  deissued: Boolean!
+
+  "current amm sale if ongoing"
+  currentAmmSaleId: String
+
+  "current sale if ongoing"
+  currentSaleId: String
+
+  "current revenue share if ongoing"
+  currentRevenueShareId: String
+
+  "number of vested transfer completed"
+  numberOfVestedTransferIssued: Int!
+
+  "last unit price available"
+  lastPrice: BigInt
+}
+
 type TrailerVideo @entity @index(fields: ["token", "video"], unique: true) {
   "counter"
   id: ID!

@@ -61,3 +61,25 @@ export class VideosConnection {
 export const OwnedNftWhereInput = new GraphQLScalarType({
   name: 'OwnedNftWhereInput',
 })
+
+@ObjectType()
+export class CreatorToken {
+  @Field(() => String, { nullable: false }) id!: string
+}
+
+export const TokenWhereInput = new GraphQLScalarType({
+  name: 'CreatorTokenWhereInput',
+})
+
+export const MarketplaceTokenWhereInput = new GraphQLScalarType({
+  name: 'MarketplaceTokenWhereInput',
+})
+
+export const MarketplaceTokenOrderByInput = new GraphQLScalarType({
+  name: 'id_ASC',
+})
+
+@ObjectType()
+export class MarketplaceToken {
+  @Field(() => String, { nullable: false }) id!: string
+}

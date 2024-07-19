@@ -29,6 +29,12 @@ export const globalRateLimit: SimpleRateLimit = {
 
 // Route-specific rate limits
 export const rateLimitsPerRoute: RateLimitsPerRoute = {
+  '/register-user-interaction': {
+    post: {
+      windowMinutes: 5,
+      limit: 30,
+    },
+  },
   '/anonymous-auth': {
     post: {
       windowMinutes: 5,
