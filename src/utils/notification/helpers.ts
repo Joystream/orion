@@ -12,6 +12,7 @@ import {
   RecipientType,
   Unread,
 } from '../../model'
+import { getCurrentBlockHeight } from '../blockHeight'
 import { uniqueId } from '../crypto'
 import { getNextIdForEntity } from '../nextEntityId'
 import { EntityManagerOverlay } from '../overlay'
@@ -153,7 +154,7 @@ async function addOffChainNotification(
   account: Flat<Account>,
   recipient: RecipientType,
   notificationType: NotificationType,
-  dispatchBlock?: number
+  dispatchBlock: number
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
@@ -163,8 +164,8 @@ async function addOffChainNotification(
     account.id,
     recipient,
     notificationType,
-    undefined,
-    dispatchBlock
+    dispatchBlock,
+    undefined
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -184,7 +185,7 @@ async function addRuntimeNotification(
   recipient: RecipientType,
   notificationType: NotificationType,
   event: Event,
-  dispatchBlock?: number
+  dispatchBlock: number
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(overlay, RUNTIME_NOTIFICATION_ID_TAG)
@@ -205,8 +206,8 @@ async function addRuntimeNotification(
     account.id,
     recipient,
     notificationType,
-    event,
-    dispatchBlock
+    dispatchBlock,
+    event
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -248,8 +249,8 @@ const createNotification = (
   accountId: string,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event,
-  dispatchBlock?: number
+  dispatchBlock: number,
+  event?: Event
 ) => {
   return new Notification({
     id,
@@ -284,15 +285,16 @@ export const addNotification = async (
       recipient,
       notificationType,
       event,
-      dispatchBlock
+      dispatchBlock || event.inBlock
     )
   } else {
+    const { lastProcessedBlock } = await getCurrentBlockHeight(store as EntityManager)
     await addOffChainNotification(
       store as EntityManager,
       account,
       recipient,
       notificationType,
-      dispatchBlock
+      dispatchBlock ?? lastProcessedBlock
     )
   }
 }
