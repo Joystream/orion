@@ -61,8 +61,9 @@ const exportedStateMap: ExportedStateMap = {
   Token: true,
   NextEntityId: true,
   BlockchainAccount: true, // this is a special case, because it's being created both in the mappings and the create/change account resolvers.
+  OrionOffchainCursor: true,
   Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
-  Video: ['isExcluded', 'viewsNum'],
+  Video: ['isExcluded', 'viewsNum', 'orionLanguage'],
   Comment: ['isExcluded'],
   OwnedNft: ['isFeatured'],
   VideoCategory: ['isSupported'],

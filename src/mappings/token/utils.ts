@@ -23,7 +23,7 @@ import { uniqueId } from '../../utils/crypto'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { getAccountForMember } from '../content/utils'
+import { getAccountForMember, getFollowersAccountsForChannel } from '../content/utils'
 
 export const FALLBACK_TOKEN_SYMBOL = '??'
 
@@ -332,7 +332,7 @@ export async function getHolderAccountsForToken(
 
   const holdersMemberIds = holders
     .filter((holder) => holder?.memberId)
-    .map((follower) => follower.memberId as string)
+    .map((holder) => holder.memberId as string)
 
   const limit = pLimit(10) // Limit to 10 concurrent promises
   const holdersAccounts = await Promise.all(
@@ -354,17 +354,54 @@ export async function notifyTokenHolders(
   event?: Event,
   dispatchBlock?: number
 ) {
-  const holdersAccounts = await getHolderAccountsForToken(em, tokenId)
+  const holderAccounts = await getHolderAccountsForToken(em, tokenId)
 
   const limit = pLimit(10) // Limit to 10 concurrent promises
 
   await Promise.all(
-    holdersAccounts.map(([holderMemberId, account]) =>
+    holderAccounts.map(([holderMemberId, holderAccount]) =>
       limit(() =>
         addNotification(
           em,
-          account,
+          holderAccount,
           new MemberRecipient({ membership: holderMemberId }),
+          notificationType,
+          event,
+          dispatchBlock
+        )
+      )
+    )
+  )
+}
+
+export async function notifyChannelFollowersAndTokenHolders(
+  overlay: EntityManagerOverlay,
+  channelId: string,
+  tokenId: string,
+  notificationType: NotificationType,
+  event?: Event,
+  dispatchBlock?: number
+) {
+  const [followersAccounts, holderAccounts] = await Promise.all([
+    getFollowersAccountsForChannel(overlay, channelId),
+    getHolderAccountsForToken(overlay, tokenId),
+  ])
+
+  // Combine followers and holders, removing duplicates
+  const allAccounts = [...followersAccounts, ...holderAccounts]
+  const accounts = Array.from(new Set(allAccounts.map((a) => a.id)))
+    .map((id) => allAccounts.find((account) => account.id === id))
+    .filter((account): account is Account => account !== undefined)
+
+  const limit = pLimit(10) // Limit to 10 concurrent promises
+
+  await Promise.all(
+    accounts.map((account) =>
+      limit(() =>
+        addNotification(
+          overlay,
+          account,
+          new MemberRecipient({ membership: account.membershipId }),
           notificationType,
           event,
           dispatchBlock

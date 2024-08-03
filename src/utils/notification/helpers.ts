@@ -12,6 +12,7 @@ import {
   RecipientType,
   Unread,
 } from '../../model'
+import { getCurrentBlockHeight } from '../blockHeight'
 import { uniqueId } from '../crypto'
 import { getNextIdForEntity } from '../nextEntityId'
 import { EntityManagerOverlay } from '../overlay'
@@ -153,18 +154,18 @@ async function addOffChainNotification(
   account: Flat<Account>,
   recipient: RecipientType,
   notificationType: NotificationType,
-  dispatchBlock?: number
+  dispatchBlock: number
 ) {
   // get notification Id from orion_db in any case
   const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
 
   const notification = createNotification(
-    OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
+    `${OFFCHAIN_NOTIFICATION_ID_TAG}-${nextNotificationId}`,
     account.id,
     recipient,
     notificationType,
-    undefined,
-    dispatchBlock
+    dispatchBlock,
+    undefined
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -184,28 +185,29 @@ async function addRuntimeNotification(
   recipient: RecipientType,
   notificationType: NotificationType,
   event: Event,
-  dispatchBlock?: number
+  dispatchBlock: number
 ) {
-  const em = overlay.getEm()
   // get notification Id from orion_db in any case
-  const nextNotificationId = await getNextIdForEntity(em, RUNTIME_NOTIFICATION_ID_TAG)
+  const nextNotificationId = await getNextIdForEntity(overlay, RUNTIME_NOTIFICATION_ID_TAG)
+
+  const runtimeNotificationId = `${RUNTIME_NOTIFICATION_ID_TAG}-${nextNotificationId}`
 
   // check that on-notification is not already present in orion_db in case the processor has been restarted (but not orion_db)
   const existingNotification = await overlay
     .getRepository(Notification)
-    .getById(nextNotificationId.toString())
+    .getById(runtimeNotificationId)
 
   if (existingNotification) {
     return
   }
 
   const notification = createNotification(
-    RUNTIME_NOTIFICATION_ID_TAG + '-' + nextNotificationId.toString(),
+    runtimeNotificationId,
     account.id,
     recipient,
     notificationType,
-    event,
-    dispatchBlock
+    dispatchBlock,
+    event
   )
 
   const pref = preferencesForNotification(account.notificationPreferences, notificationType)
@@ -215,8 +217,6 @@ async function addRuntimeNotification(
   if (pref.emailEnabled) {
     await createEmailNotification(overlay, notification)
   }
-
-  await saveNextNotificationId(em, nextNotificationId + 1, RUNTIME_NOTIFICATION_ID_TAG)
 
   return notification.id
 }
@@ -249,8 +249,8 @@ const createNotification = (
   accountId: string,
   recipient: RecipientType,
   notificationType: NotificationType,
-  event?: Event,
-  dispatchBlock?: number
+  dispatchBlock: number,
+  event?: Event
 ) => {
   return new Notification({
     id,
@@ -285,15 +285,16 @@ export const addNotification = async (
       recipient,
       notificationType,
       event,
-      dispatchBlock
+      dispatchBlock || event.inBlock
     )
   } else {
+    const { lastProcessedBlock } = await getCurrentBlockHeight(store as EntityManager)
     await addOffChainNotification(
       store as EntityManager,
       account,
       recipient,
       notificationType,
-      dispatchBlock
+      dispatchBlock ?? lastProcessedBlock
     )
   }
 }

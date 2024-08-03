@@ -15,6 +15,7 @@ All URIs are relative to *http://localhost/api/v1*
 *DefaultApi* | [**login**](Apis/DefaultApi.md#login) | **POST** /login | Login to user's account by providing a message signed by the associated blockchain account. |
 *DefaultApi* | [**logout**](Apis/DefaultApi.md#logout) | **POST** /logout | Terminate the current session. |
 *DefaultApi* | [**postSessionArtifacts**](Apis/DefaultApi.md#postsessionartifacts) | **POST** /session-artifacts | Save wallet seed encryption artifacts for the current session on the server. |
+*DefaultApi* | [**registerUserInteraction**](Apis/DefaultApi.md#registeruserinteraction) | **POST** /register-user-interaction | Register a user interaction with Atlas part. |
 *DefaultApi* | [**requestEmailConfirmationToken**](Apis/DefaultApi.md#requestemailconfirmationtoken) | **POST** /request-email-confirmation-token | Request a token to be sent to e-mail address (as the first step of signup process), which will allow confirming the ownership of the e-mail by the user. |
 
 
@@ -36,6 +37,7 @@ All URIs are relative to *http://localhost/api/v1*
  - [LoginRequestData](./Models/LoginRequestData.md)
  - [LoginRequestData_allOf](./Models/LoginRequestData_allOf.md)
  - [LoginResponseData](./Models/LoginResponseData.md)
+ - [RegisterUserInteractionRequestData](./Models/RegisterUserInteractionRequestData.md)
  - [RequestTokenRequestData](./Models/RequestTokenRequestData.md)
  - [SessionEncryptionArtifacts](./Models/SessionEncryptionArtifacts.md)
 

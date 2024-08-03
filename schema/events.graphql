@@ -505,3 +505,20 @@ type CreatorTokenRevenueSplitIssuedEventData {
   "Details of the revenue split"
   revenueShare: RevenueShare
 }
+
+type UserInteractionCount @entity @schema(name: "admin") {
+  "Autoincremented ID"
+  id: ID!
+
+  "Type of the user interaction eg. 'tokenMarketplaceEntry'"
+  type: String
+
+  "ID of the entity that the event is related to for 'tokenMarketplaceEntry' it would be token ID"
+  entityId: String
+
+  "Timestamp of the day that is used to count the interactions"
+  dayTimestamp: DateTime! @index
+
+  "Count of the interactions"
+  count: Int!
+}

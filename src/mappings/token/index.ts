@@ -54,6 +54,7 @@ import {
   createAccount,
   getTokenAccountByMemberByToken,
   getTokenAccountByMemberByTokenOrFail,
+  notifyChannelFollowersAndTokenHolders,
   notifyTokenHolders,
   parseCreatorTokenSymbol,
   processTokenMetadata,
@@ -233,7 +234,7 @@ export async function processAmmActivatedEvent({
     ammInitPrice: BigInt(intercept),
     finalized: false,
   })
-  token.lastPrice = amm.ammInitPrice
+  token.lastPrice = (amm.ammSlopeParameter * token.totalSupply) / BigInt(2) + amm.ammInitPrice
   token.currentAmmSaleId = id
 
   const eventEntity = overlay.getRepository(Event).new({
@@ -248,8 +249,13 @@ export async function processAmmActivatedEvent({
     channelTitle: parseChannelTitle(channel),
   })
 
-  await notifyTokenHolders(overlay, tokenId.toString(), notificationData, eventEntity)
-  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+  await notifyChannelFollowersAndTokenHolders(
+    overlay,
+    channel.id,
+    tokenId.toString(),
+    notificationData,
+    eventEntity
+  )
 }
 
 export async function processTokenSaleInitializedEvent({
@@ -333,8 +339,13 @@ export async function processTokenSaleInitializedEvent({
     channelTitle: parseChannelTitle(channel),
   })
 
-  await notifyTokenHolders(overlay, tokenId.toString(), notificationData, eventEntity)
-  await notifyChannelFollowers(overlay, channel.id, notificationData, eventEntity)
+  await notifyChannelFollowersAndTokenHolders(
+    overlay,
+    channel.id,
+    tokenId.toString(),
+    notificationData,
+    eventEntity
+  )
 }
 
 export async function processPatronageRateDecreasedToEvent({

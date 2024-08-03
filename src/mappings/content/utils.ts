@@ -646,27 +646,30 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
 export async function getFollowersAccountsForChannel(
   overlay: EntityManagerOverlay,
   channelId: string
-): Promise<Account[]> {
+): Promise<[string, Account][]> {
   const followers = await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
 
   const followersUserIds = followers
     .filter((follower) => follower?.userId)
     .map((follower) => follower.userId as string)
 
+  const getFollowerAccount = (userId: string) =>
+    overlay
+      .getEm()
+      .getRepository(Account)
+      .findOne({ where: { userId }, relations: { joystreamAccount: { memberships: true } } })
+
   const limit = pLimit(10) // Limit to 10 concurrent promises
-  const followersAccounts: (Account | null)[] = await Promise.all(
+  const followersAccounts = await Promise.all(
     followersUserIds.map((userId) =>
-      limit(
-        async () =>
-          await overlay
-            .getEm()
-            .getRepository(Account)
-            .findOne({ where: { userId }, relations: { joystreamAccount: { memberships: true } } })
-      )
+      limit(async () => {
+        const account = await getFollowerAccount(userId)
+        return [account?.joystreamAccount.memberships[0].id, account] as [string, Account | null]
+      })
     )
   )
 
-  return followersAccounts.filter((account) => account) as Account[]
+  return followersAccounts.filter(([_, account]) => account !== null) as [string, Account][]
 }
 
 export async function getChannelOwnerAccount(

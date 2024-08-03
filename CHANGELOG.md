@@ -1,3 +1,19 @@
+# 4.0.6
+
+## Bug Fixes:
+- Fixed: Set `Notification.dispatchBlock` field for all type of notifications (both future and immediate), to allow querying notifications by block number at which they should be delivered - [#344](https://github.com/Joystream/orion/pull/344)
+
+# 4.0.5
+
+## Bug Fixes:
+- Fixed: avoiding IDs override/conflict while creating concurrent runtime notifications by reading/updating the `nextEntityId` from the `overlay` instead of DB - [#342](https://github.com/Joystream/orion/pull/342)
+- Fixed: removed possibility of creating duplicate CRT notifications in `processAmmActivatedEvent` and `processTokenSaleInitializedEvent` mappings if the account being notified is both channel follower as well as token holder - [#343](https://github.com/Joystream/orion/pull/343)
+
+# 4.0.4
+
+## Bug Fixes:
+- Fixed: improve the accuracy of `Video.orionLanguage` field by reworking the `predictVideoLanguage` function in `src/utils/language.ts`
+
 # 4.0.3
 
 ## Misc

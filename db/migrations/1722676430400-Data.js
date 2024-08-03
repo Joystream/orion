@@ -1,5 +1,5 @@
-module.exports = class Data1710699134312 {
-    name = 'Data1710699134312'
+module.exports = class Data1722676430400 {
+    name = 'Data1722676430400'
 
     async up(db) {
         await db.query(`ALTER TABLE "admin"."account" DROP CONSTRAINT "FK_601b93655bcbe73cb58d8c80cd3"`)
