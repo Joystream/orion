@@ -14,7 +14,7 @@ On the Atlas side, you can check the list of releases [here](https://github.com/
 
 Always make sure the versions of Orion and Atlas you're planing to upgrade to are compatible with each other.
 
-## Typical upgrade process
+## Typical upgrade process (For Breaking Changes)
 
 1. Turn on the _kill switch_ ([maintenance mode](./maintenance-mode.md)). This will prevent the users from interactig with the Gateway during the upgrade, as this could have undesired consequences (for example, due to processor not being fully synced). To do that you should execute `setKillSwitch(isKilled: true)` operator mutation using Orion's GraphQL API (you need to be authenticated as Operator first).
 
@@ -71,4 +71,14 @@ In case something goes wrong during the upgrade, you can restore the database fr
     docker exec orion_db psql -f /tmp/orion-production.bak -U postgres -p 23798 postgres
     # Bring up the Orion services
     docker-compose up -d
+```
+
+
+## Upgrade Process (For Non-breaking Changes)
+
+The non breaking changes include examples such as adding nullable field to the entity or making the change to the mappings that does not require processor re-syncing. In this case, you just new to restart the services to deploy new changes:
+
+```bash
+# Restart the Orion services to apply latest code changes
+docker restart orion_processor orion_graphql-server orion_auth-api
 ```
