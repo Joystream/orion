@@ -30,3 +30,33 @@ export function idStringFromNumber(idNum: number) {
   // Add leading zeros to simplify sorting
   return _.repeat('0', 8 - idStr.length) + idStr
 }
+
+export async function pWaitFor(
+  conditionFunction: () => Promise<boolean>,
+  checkInterval = 100,
+  timeout = 5000, // Default timeout of 5000 milliseconds
+  errorMessage = 'Condition timed out'
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let elapsedTime = 0
+
+    const interval = setInterval(() => {
+      conditionFunction()
+        .then((isConditionMet) => {
+          if (isConditionMet) {
+            clearInterval(interval)
+            resolve()
+          } else if (elapsedTime > timeout) {
+            clearInterval(interval)
+            reject(new Error(errorMessage))
+          } else {
+            elapsedTime += checkInterval // Update the elapsed time
+          }
+        })
+        .catch((error) => {
+          clearInterval(interval)
+          reject(error)
+        })
+    }, checkInterval)
+  })
+}

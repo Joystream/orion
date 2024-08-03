@@ -1,14 +1,15 @@
+import { MemberRemarked, MembershipMetadata } from '@joystream/metadata-protobuf'
 import { u8aToHex } from '@polkadot/util'
 import {
+  BlockchainAccount,
   Event,
   Membership,
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionStatusEventData,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
-import { MemberRemarked, MembershipMetadata } from '@joystream/metadata-protobuf'
 import { bytesToString, deserializeMetadata, genericEventFields, toAddress } from '../utils'
-import { processMembershipMetadata, processMemberRemark } from './metadata'
+import { processMemberRemark, processMembershipMetadata } from './metadata'
 
 export async function processNewMember({
   overlay,
@@ -24,10 +25,19 @@ export async function processNewMember({
   const { controllerAccount, handle: handleBytes, metadata: metadataBytes } = params
   const metadata = deserializeMetadata(MembershipMetadata, metadataBytes)
 
+  const controllerAccountId = toAddress(controllerAccount)
+
+  // Create blockchain account entity if it doesn't exist
+  const blockchainAccount =
+    (await overlay.getRepository(BlockchainAccount).getById(controllerAccountId)) ||
+    overlay.getRepository(BlockchainAccount).new({
+      id: controllerAccountId,
+    })
+
   const member = overlay.getRepository(Membership).new({
     createdAt: new Date(block.timestamp),
     id: memberId.toString(),
-    controllerAccount: toAddress(controllerAccount),
+    controllerAccountId: blockchainAccount.id,
     totalChannelsCreated: 0,
   })
   if (handleBytes) {
@@ -46,8 +56,15 @@ export async function processMemberAccountsUpdatedEvent({
   },
 }: EventHandlerContext<'Members.MemberAccountsUpdated'>) {
   if (newControllerAccount) {
+    // Create blockchain account entity if it doesn't exist
+    const controllerAccountId = toAddress(newControllerAccount)
+    const blockchainAccount =
+      (await overlay.getRepository(BlockchainAccount).getById(controllerAccountId)) ||
+      overlay.getRepository(BlockchainAccount).new({
+        id: controllerAccountId,
+      })
     const member = await overlay.getRepository(Membership).getByIdOrFail(memberId.toString())
-    member.controllerAccount = toAddress(newControllerAccount)
+    member.controllerAccountId = blockchainAccount.id
   }
 }
 

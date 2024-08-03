@@ -1,17 +1,16 @@
 import express from 'express'
-import { AuthContext } from '../../utils/auth'
-import { globalEm } from '../../utils/globalEm'
-import { components } from '../generated/api-types'
-import { SessionEncryptionArtifacts } from '../../model'
+import { Session, SessionEncryptionArtifacts } from '../../model'
 import { uniqueId } from '../../utils/crypto'
+import { globalEm } from '../../utils/globalEm'
 import { ConflictError, UnauthorizedError } from '../errors'
+import { components } from '../generated/api-types'
 
 type ReqParams = Record<string, string>
 type ReqBody = components['schemas']['SessionEncryptionArtifacts']
 type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 
 export const postSessionArtifacts: (
   req: express.Request<ReqParams, ResBody, ReqBody>,

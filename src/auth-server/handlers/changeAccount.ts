@@ -1,9 +1,8 @@
 import express from 'express'
-import { components } from '../generated/api-types'
-import { UnauthorizedError, BadRequestError, ConflictError } from '../errors'
-import { AuthContext } from '../../utils/auth'
+import { Account, BlockchainAccount, EncryptionArtifacts, Session } from '../../model'
 import { globalEm } from '../../utils/globalEm'
-import { Account, EncryptionArtifacts } from '../../model'
+import { BadRequestError, ConflictError, UnauthorizedError } from '../errors'
+import { components } from '../generated/api-types'
 import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
@@ -11,7 +10,7 @@ type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['ChangeAccountRequestData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 
 export const changeAccount: (
   req: express.Request<ReqParams, ResBody, ReqBody>,
@@ -19,14 +18,10 @@ export const changeAccount: (
   next: express.NextFunction
 ) => Promise<void> = async (req, res, next) => {
   try {
-    const {
-      body: { payload },
-    } = req
-    const {
-      locals: { authContext },
-    } = res
+    const { payload } = req.body
+    const { authContext } = res.locals
 
-    if (!authContext?.account) {
+    if (!authContext.account) {
       throw new UnauthorizedError()
     }
 
@@ -41,7 +36,7 @@ export const changeAccount: (
 
     await em.transaction(async (em) => {
       const existingGatewayAccount = await em.findOne(Account, {
-        where: { joystreamAccount: payload.joystreamAccountId },
+        where: { joystreamAccountId: payload.joystreamAccountId },
       })
 
       if (existingGatewayAccount && existingGatewayAccount.id !== account.id) {
@@ -50,15 +45,21 @@ export const changeAccount: (
         )
       }
 
-      // Update the assigned blockchain account
-      await em.update(Account, { id: account.id }, { joystreamAccount: payload.joystreamAccountId })
+      // Create the given blockchain account if it doesn't exist
+      await em.upsert(BlockchainAccount, { id: payload.joystreamAccountId }, ['id'])
+
+      await em.update(
+        Account,
+        { id: account.id },
+        { joystreamAccountId: payload.joystreamAccountId }
+      )
 
       // Remove the old encryption artifacts
       await em.delete(EncryptionArtifacts, { accountId: account.id })
 
       // Optionally save new encryption artifacts
       if (payload.newArtifacts) {
-        // We don't check if artifacts already exist by this id, becasue that opens up
+        // We don't check if artifacts already exist by this id, because that opens up
         // a brute-force attack vector. Instead, in this case the existing artifacts will
         // be overwritten.
         await em.save(EncryptionArtifacts, {

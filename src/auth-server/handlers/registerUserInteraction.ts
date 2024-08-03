@@ -1,11 +1,9 @@
 import express from 'express'
-import { AuthContext } from '../../utils/auth'
-import { globalEm } from '../../utils/globalEm'
-import { components } from '../generated/api-types'
-import { TooManyRequestsError, UnauthorizedError } from '../errors'
-import { UserInteractionCount } from '../../model'
-
 import { InMemoryRateLimiter } from 'rolling-rate-limiter'
+import { Session, UserInteractionCount } from '../../model'
+import { globalEm } from '../../utils/globalEm'
+import { TooManyRequestsError, UnauthorizedError } from '../errors'
+import { components } from '../generated/api-types'
 
 const interactionLimiter = new InMemoryRateLimiter({
   interval: 1000 * 60 * 5, // 5 minutes
@@ -16,7 +14,7 @@ type ReqParams = Record<string, string>
 type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 type ReqBody = components['schemas']['RegisterUserInteractionRequestData']
 
 export const registerUserInteraction: (

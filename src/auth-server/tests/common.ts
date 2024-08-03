@@ -1,19 +1,20 @@
-import './config'
-import request from 'supertest'
-import { app } from '../index'
-import { globalEm } from '../../utils/globalEm'
-import { Account, Membership } from '../../model'
-import assert from 'assert'
-import { components } from '../generated/api-types'
+import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
 import { Keyring } from '@polkadot/keyring'
 import { KeyringPair } from '@polkadot/keyring/types'
-import { ConfigVariable, config } from '../../utils/config'
 import { u8aToHex } from '@polkadot/util'
-import { JOYSTREAM_ADDRESS_PREFIX } from '@joystream/types'
-import { uniqueId } from '../../utils/crypto'
+import assert from 'assert'
 import { ScryptOptions, createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto'
+import request from 'supertest'
+import { Account, Membership } from '../../model'
 import { SESSION_COOKIE_NAME } from '../../utils/auth'
+import { ConfigVariable, config } from '../../utils/config'
+import { uniqueId } from '../../utils/crypto'
+import { globalEm } from '../../utils/globalEm'
+import { components } from '../generated/api-types'
+import { app } from '../index'
 import { SimpleRateLimit, resetAllLimits } from '../rateLimits'
+import './config'
+import { findActiveToken } from './requestEmailConfirmationToken'
 
 export const keyring = new Keyring({ type: 'sr25519', ss58Format: JOYSTREAM_ADDRESS_PREFIX })
 
@@ -125,11 +126,18 @@ async function insertFakeMember(controllerAccount: string) {
   return em.getRepository(Membership).save({
     createdAt: new Date(),
     id: uniqueId(),
-    controllerAccount,
+    controllerAccountId: controllerAccount,
     handle: uniqueId(),
     handleRaw: '0x' + Buffer.from(handle).toString('hex'),
     totalChannelsCreated: 0,
   })
+}
+
+async function getAccountByEmail(email: string) {
+  const em = await globalEm
+  return em
+    .getRepository(Account)
+    .findOne({ where: { email }, relations: { joystreamAccount: { memberships: true } } })
 }
 
 export async function createAccount(
@@ -141,16 +149,21 @@ export async function createAccount(
   const keypair = keyring.addFromUri(`//${seed}`)
   const em = await globalEm
 
-  const membership = await insertFakeMember(keypair.address)
+  // const membership = await insertFakeMember(keypair.address)
 
   const anonSessionId = await anonymousAuth()
+  await requestEmailConfirmationToken(email, anonSessionId, 200)
+
+  const token = await findActiveToken(em, email)
+  assert(token, 'Token not found')
+
   const createAccountReqData = await signedAction<
     components['schemas']['CreateAccountRequestData']
   >(
     {
       action: 'createAccount',
       email,
-      memberId: membership.id,
+      emailConfirmationToken: token.id,
       encryptionArtifacts: await prepareEncryptionArtifacts(seed, email, password),
     },
     keypair
@@ -161,8 +174,22 @@ export async function createAccount(
     .set('Cookie', `${SESSION_COOKIE_NAME}=${anonSessionId}`)
     .send(createAccountReqData)
     .expect(200)
-  const account = await em.getRepository(Account).findOneBy({ email })
+  const account = await getAccountByEmail(email)
   assert(account, 'Account not found')
+  assert.equal(account.joystreamAccount?.memberships.length, 0)
+
+  // Associate the account with a membership
+  const membership = await insertFakeMember(keypair.address)
+
+  const updatedAccount = await getAccountByEmail(email)
+
+  assert(updatedAccount, 'Account not found')
+  assert.equal(updatedAccount.joystreamAccount.memberships.length, 1)
+  assert.equal(
+    updatedAccount.joystreamAccount.memberships[0].controllerAccountId,
+    membership.controllerAccountId
+  )
+
   return { accountId: account.id, joystreamAccountId: keypair.address, email, password, seed }
 }
 
@@ -176,11 +203,13 @@ export async function confirmEmail(token: string, expectedStatus: number): Promi
 
 export async function requestEmailConfirmationToken(
   email: string,
+  sessionId: string,
   expectedStatus: number
 ): Promise<void> {
   await request(app)
     .post('/api/v1/request-email-confirmation-token')
     .set('Content-Type', 'application/json')
+    .set('Cookie', `${SESSION_COOKIE_NAME}=${sessionId}`)
     .send({ email })
     .expect(expectedStatus)
 }

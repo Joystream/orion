@@ -646,21 +646,30 @@ export function encodeAssets(assets: StorageAssetsRecord | undefined): Uint8Arra
 export async function getFollowersAccountsForChannel(
   overlay: EntityManagerOverlay,
   channelId: string
-): Promise<Account[]> {
+): Promise<[string, Account][]> {
   const followers = await overlay.getEm().getRepository(ChannelFollow).findBy({ channelId })
 
   const followersUserIds = followers
     .filter((follower) => follower?.userId)
     .map((follower) => follower.userId as string)
 
+  const getFollowerAccount = (userId: string) =>
+    overlay
+      .getEm()
+      .getRepository(Account)
+      .findOne({ where: { userId }, relations: { joystreamAccount: { memberships: true } } })
+
   const limit = pLimit(10) // Limit to 10 concurrent promises
-  const followersAccounts: (Account | null)[] = await Promise.all(
+  const followersAccounts = await Promise.all(
     followersUserIds.map((userId) =>
-      limit(async () => await overlay.getEm().getRepository(Account).findOneBy({ userId }))
+      limit(async () => {
+        const account = await getFollowerAccount(userId)
+        return [account?.joystreamAccount.memberships[0].id, account] as [string, Account | null]
+      })
     )
   )
 
-  return followersAccounts.filter((account) => account) as Account[]
+  return followersAccounts.filter(([_, account]) => account !== null) as [string, Account][]
 }
 
 export async function getChannelOwnerAccount(
@@ -678,11 +687,27 @@ export async function getAccountForMember(
   if (!memberId) {
     return null
   }
+
   // accounts are created by orion_auth_api and updated by orion_graphql-server
   const memberAccount = await overlay
     .getRepository(Account)
-    .getOneByRelation('membershipId', memberId)
+    .getOneByRelation('joystreamAccountId', await getMemberControllerAccount(overlay, memberId))
   return (memberAccount as Account) ?? null
+}
+
+async function getMemberControllerAccount(
+  overlay: EntityManagerOverlay,
+  memberId: string
+): Promise<string> {
+  const membership = await overlay.getRepository(Membership).getByIdOrFail(memberId)
+
+  if (!membership.controllerAccountId) {
+    // This should never happen, but only added for type safety as
+    // the foreign entity references are always set nullable by the
+    // subsquid codegen even if in the graphql schema they are not.
+    criticalError(`Membership ${membership.id} controller account not found.`)
+  }
+  return membership.controllerAccountId
 }
 
 export async function getAccountsForBidders(
@@ -753,13 +778,16 @@ export async function notifyChannelFollowers(
 ) {
   const followersAccounts = await getFollowersAccountsForChannel(overlay, channelId)
   for (const followerAccount of followersAccounts) {
-    await addNotification(
-      overlay,
-      followerAccount,
-      new MemberRecipient({ membership: followerAccount.membershipId }),
-      notificationType,
-      event
-    )
+    // TODO: handling multiple memberships (i.e. follower account address owns multiple memberships). Also, consider a scenario where a follower account has no memberships.
+    for (const membership of followerAccount.joystreamAccount.memberships) {
+      await addNotification(
+        overlay,
+        followerAccount,
+        new MemberRecipient({ membership: membership.id }),
+        notificationType,
+        event
+      )
+    }
   }
 }
 

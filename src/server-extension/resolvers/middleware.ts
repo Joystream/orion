@@ -7,7 +7,7 @@ export const OperatorOnly = (
 ): MiddlewareFn<Context> => {
   return async ({ context }, next) => {
     // Ensure the user exists in the context
-    if (!context?.user) {
+    if (!context.user) {
       throw new Error('Unauthorized: User required')
     }
 

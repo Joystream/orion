@@ -1,5 +1,5 @@
-import { compile } from 'handlebars'
 import fs from 'fs'
+import { compile } from 'handlebars'
 import path from 'path'
 import { NotificationData } from '../../utils/notification/notificationsData'
 
@@ -14,7 +14,6 @@ function getEmailTemplateData<T>(templatePath: string): (data: T) => string {
 // type aliases for template data
 type RegisterEmailTemplateData = {
   link: string
-  linkExpiryDate: string
   appName: string
 }
 

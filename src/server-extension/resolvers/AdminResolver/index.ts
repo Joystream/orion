@@ -12,9 +12,8 @@ import 'reflect-metadata'
 import { Args, Ctx, Info, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, Not, UpdateResult } from 'typeorm'
 import { parseVideoTitle } from '../../../mappings/content/utils'
-import { videoRelevanceManager } from '../../../mappings/utils'
+import { getAccountForMember, videoRelevanceManager } from '../../../mappings/utils'
 import {
-  Account,
   Channel,
   ChannelRecipient,
   CreatorToken,
@@ -548,9 +547,7 @@ export const setFeaturedNftsInner = async (em: EntityManager, featuredNftsIds: s
           videoTitle: parseVideoTitle(featuredNft.video),
         }
         const channelOwnerAccount = featuredNft.video.channel.ownerMemberId
-          ? await em
-              .getRepository(Account)
-              .findOneBy({ membershipId: featuredNft.video.channel.ownerMemberId })
+          ? await getAccountForMember(em, featuredNft.video.channel.ownerMemberId)
           : null
         await addNotification(
           em,

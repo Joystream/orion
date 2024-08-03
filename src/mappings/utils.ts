@@ -5,8 +5,16 @@ import { Bytes } from '@polkadot/types/primitive'
 import { u8aToHex } from '@polkadot/util'
 import { encodeAddress } from '@polkadot/util-crypto'
 import { SubstrateBlock } from '@subsquid/substrate-processor'
+import { EntityManager } from 'typeorm'
 import { Logger } from '../logger'
-import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
+import {
+  Account,
+  Event,
+  Membership,
+  MetaprotocolTransactionResultFailed,
+  NftActivity,
+  NftHistoryEntry,
+} from '../model'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
 import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 import { EntityManagerOverlay } from '../utils/overlay'
@@ -104,6 +112,33 @@ export function addNftActivity(
       eventId,
     })
   }
+}
+
+export async function getAccountForMemberOrFail(
+  em: EntityManager,
+  memberOrMemberId: string | Membership
+) {
+  const account = await getAccountForMember(em, memberOrMemberId)
+
+  if (!account) {
+    throw new Error(`Account not found for member ${memberOrMemberId}`)
+  }
+  return account
+}
+
+export async function getAccountForMember(
+  em: EntityManager,
+  memberOrMemberId: string | Membership
+): Promise<Account | null> {
+  const member =
+    memberOrMemberId instanceof Membership
+      ? memberOrMemberId
+      : await em.getRepository(Membership).findOneByOrFail({ id: memberOrMemberId })
+
+  return em.getRepository(Account).findOne({
+    where: { joystreamAccountId: member.controllerAccountId! },
+    relations: { joystreamAccount: { memberships: true } },
+  })
 }
 
 export function toAddress(addressBytes: Uint8Array) {

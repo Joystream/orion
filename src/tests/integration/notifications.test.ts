@@ -8,9 +8,8 @@ import path from 'path'
 import { EntityManager } from 'typeorm'
 import { auctionBidMadeInner } from '../../mappings/content/nft'
 import { processMemberRemarkedEvent } from '../../mappings/membership'
-import { backwardCompatibleMetaID } from '../../mappings/utils'
+import { backwardCompatibleMetaID, getAccountForMember } from '../../mappings/utils'
 import {
-  Account,
   Channel,
   ChannelExcluded,
   ChannelRecipient,
@@ -95,9 +94,7 @@ describe('notifications tests', () => {
       })
       const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(channel).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelVerified')
@@ -143,9 +140,7 @@ describe('notifications tests', () => {
       })
       const channel = await em.getRepository(Channel).findOneBy({ id: channelId })
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(channel).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('ChannelExcluded')
@@ -202,9 +197,7 @@ describe('notifications tests', () => {
       expect(video).not.to.be.null
       expect(video!.channel).not.to.be.null
       const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: video!.channel.ownerMemberId! })
+      const account = await getAccountForMember(em, video!.channel!.ownerMemberId!)
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('VideoExcluded')
       expect(notification!.status.isTypeOf).to.equal('Unread')
@@ -251,9 +244,7 @@ describe('notifications tests', () => {
       const nft = await em
         .getRepository(OwnedNft)
         .findOneOrFail({ where: { id: nftId }, relations: { video: { channel: true } } })
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: nft!.video!.channel!.ownerMemberId! })
+      const account = await getAccountForMember(em, nft!.video!.channel!.ownerMemberId!)
       const nextNotificationIdPost = await getNextNotificationId(em, false)
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('NftFeaturedOnMarketPlace')
@@ -310,9 +301,7 @@ describe('notifications tests', () => {
       notification = (await overlay
         .getRepository(Notification)
         .getById(notificationId)) as Notification | null
-      const account = (await overlay
-        .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', outbiddedMember)) as Account
+      const account = await getAccountForMember(em, outbiddedMember)
 
       expect(notification).not.to.be.null
       expect(notification!.notificationType.isTypeOf).to.equal('HigherBidPlaced')
@@ -338,9 +327,7 @@ describe('notifications tests', () => {
       notification = (await overlay
         .getRepository(Notification)
         .getByIdOrFail(notificationId)) as Notification
-      const account = await overlay
-        .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', channel!.ownerMemberId!)
+      const account = await getAccountForMember(em, channel!.ownerMemberId!)
 
       // complete the missing checks as above
       expect(notification).not.to.be.null

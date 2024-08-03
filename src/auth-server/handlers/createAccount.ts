@@ -1,6 +1,13 @@
 import express from 'express'
-import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../model'
-import { AuthContext } from '../../utils/auth'
+import { MoreThan } from 'typeorm'
+import {
+  Account,
+  BlockchainAccount,
+  EmailConfirmationToken,
+  EncryptionArtifacts,
+  NextEntityId,
+  Session,
+} from '../../model'
 import { globalEm } from '../../utils/globalEm'
 import { idStringFromNumber } from '../../utils/misc'
 import { defaultNotificationPreferences } from '../../utils/notification/helpers'
@@ -13,7 +20,7 @@ type ResBody =
   | components['schemas']['GenericOkResponseData']
   | components['schemas']['GenericErrorResponseData']
 type ReqBody = components['schemas']['CreateAccountRequestData']
-type ResLocals = { authContext: AuthContext }
+type ResLocals = { authContext: Session }
 
 export const createAccount: (
   req: express.Request<ReqParams, ResBody, ReqBody>,
@@ -22,13 +29,21 @@ export const createAccount: (
 ) => Promise<void> = async (req, res, next) => {
   try {
     const {
-      payload: { email, memberId, joystreamAccountId },
+      payload: { email, emailConfirmationToken, joystreamAccountId },
     } = req.body
     const { authContext } = res.locals
     const em = await globalEm
 
-    if (authContext?.account) {
+    if (authContext.account) {
       throw new BadRequestError('Already logged in to an account.')
+    }
+
+    const token = await em.getRepository(EmailConfirmationToken).findOne({
+      where: { id: emailConfirmationToken, email, expiry: MoreThan(new Date()) },
+    })
+
+    if (!token) {
+      throw new NotFoundError('Token not found. Possibly expired or already used.')
     }
 
     await verifyActionExecutionRequest(em, req.body)
@@ -45,55 +60,43 @@ export const createAccount: (
         )?.nextId.toString() || '1'
       )
 
-      const existingByEmail = await em.getRepository(Account).findOneBy({ email })
-      if (existingByEmail) {
-        throw new ConflictError('Account with the provided e-mail address already exists.')
-      }
+      // TODO: Don't reveal whether an account with the given email exists, to prevent email enumeration attacks
+      // ! Not needed, as the token is already checked for existence, and is not expired
+      // const existingByEmail = await em.getRepository(Account).findOneBy({ email })
+      // if (existingByEmail) {
+      //   throw new ConflictError('Account with the provided e-mail address already exists.')
+      // }
 
-      const existingByMemberId = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: memberId })
-      if (existingByMemberId) {
-        throw new ConflictError('Account with the provided member id already exists.')
-      }
+      // Create the given blockchain account if it doesn't exist
+      await em.upsert(BlockchainAccount, { id: joystreamAccountId }, ['id'])
 
       const existingByJoystreamAccountId = await em
         .getRepository(Account)
-        .findOneBy({ joystreamAccount: joystreamAccountId })
+        .findOneBy({ joystreamAccountId })
       if (existingByJoystreamAccountId) {
         throw new ConflictError(
           'Account with the provided joystream account address already exists.'
         )
       }
 
-      const membership = await em.getRepository(Membership).findOneBy({ id: memberId })
-      if (!membership) {
-        throw new NotFoundError(`Membership not found by id: ${memberId}`)
-      }
-
-      if (membership.controllerAccount !== joystreamAccountId) {
-        throw new BadRequestError(
-          `Provided joystream account address doesn't match the controller account of the provided membership.`
-        )
-      }
-
-      const notificationPreferences = defaultNotificationPreferences()
+      // Create the account
       const account = new Account({
         id: idStringFromNumber(nextAccountId),
         email,
-        isEmailConfirmed: false,
         registeredAt: new Date(),
         isBlocked: false,
-        userId: authContext?.user.id,
-        joystreamAccount: joystreamAccountId,
-        membershipId: memberId.toString(),
-        notificationPreferences,
-        referrerChannelId: null,
+        userId: authContext.user.id,
+        joystreamAccountId: joystreamAccountId,
+        notificationPreferences: defaultNotificationPreferences(),
       })
+
+      // Mark the token as used
+      token.expiry = new Date()
 
       await em.save([
         account,
         new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }),
+        token,
       ])
 
       if (req.body.payload.encryptionArtifacts) {

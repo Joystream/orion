@@ -60,6 +60,7 @@ const exportedStateMap: ExportedStateMap = {
   EmailDeliveryAttempt: true,
   Token: true,
   NextEntityId: true,
+  BlockchainAccount: true, // this is a special case, because it's being created both in the mappings and the create/change account resolvers.
   OrionOffchainCursor: true,
   Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
   Video: ['isExcluded', 'viewsNum', 'orionLanguage'],
@@ -142,9 +143,7 @@ export function setCrtNotificationPreferences(
 function migrateExportDataToV400(data: ExportedData): ExportedData {
   data.Account?.values.forEach((account) => {
     // account will find himself with all CRT notification pref. enabled by default
-    account.notificationPreferences = setCrtNotificationPreferences(
-      account.notificationPreferences as AccountNotificationPreferences
-    )
+    account.notificationPreferences = setCrtNotificationPreferences(account.notificationPreferences)
   })
 
   data.Notification?.values.forEach((notification) => {
@@ -159,11 +158,26 @@ function migrateExportDataToV400(data: ExportedData): ExportedData {
   return data
 }
 
+// TODO: How to upgrade to v5.0.0?
+// 1. Backup old db
+// 2. Export state using old code build (i.e. `npm run offchain-state:export`)
+// 3. Create copy of export.json file
+// 4. Build new code (v5.0.0)
+// 5. import state (i.e. `npm run offchain-state:import`)
+function migrateExportDataToV500(data: ExportedData): ExportedData {
+  data.Account?.values.forEach((account) => {
+    account.joystreamAccountId = (account as any).joystreamAccount
+  })
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
+    '5.0.0': migrateExportDataToV500,
     '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,

@@ -23,7 +23,7 @@ import { uniqueId } from '../../utils/crypto'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { getFollowersAccountsForChannel } from '../content/utils'
+import { getAccountForMember, getFollowersAccountsForChannel } from '../content/utils'
 
 export const FALLBACK_TOKEN_SYMBOL = '??'
 
@@ -320,10 +320,13 @@ export async function processTokenMetadata(
   }
 }
 
+/**
+ * @returns [holderMemberId, Account][]
+ */
 export async function getHolderAccountsForToken(
   overlay: EntityManagerOverlay,
   tokenId: string
-): Promise<Account[]> {
+): Promise<[string, Account][]> {
   const em = overlay.getEm()
   const holders = await em.getRepository(TokenAccount).findBy({ tokenId })
 
@@ -332,13 +335,16 @@ export async function getHolderAccountsForToken(
     .map((holder) => holder.memberId as string)
 
   const limit = pLimit(10) // Limit to 10 concurrent promises
-  const holdersAccounts: (Account | null)[] = await Promise.all(
+  const holdersAccounts = await Promise.all(
     holdersMemberIds.map((membershipId) =>
-      limit(async () => await em.getRepository(Account).findOneBy({ membershipId }))
+      limit(async () => {
+        const account = await getAccountForMember(overlay, membershipId)
+        return [membershipId, account] as [string, Account | null]
+      })
     )
   )
 
-  return holdersAccounts.filter((account) => account) as Account[]
+  return holdersAccounts.filter(([_, account]) => account !== null) as [string, Account][]
 }
 
 export async function notifyTokenHolders(
@@ -353,12 +359,12 @@ export async function notifyTokenHolders(
   const limit = pLimit(10) // Limit to 10 concurrent promises
 
   await Promise.all(
-    holderAccounts.map((holderAccount) =>
+    holderAccounts.map(([holderMemberId, holderAccount]) =>
       limit(() =>
         addNotification(
           em,
           holderAccount,
-          new MemberRecipient({ membership: holderAccount.membershipId }),
+          new MemberRecipient({ membership: holderMemberId }),
           notificationType,
           event,
           dispatchBlock

@@ -1,9 +1,9 @@
 import express from 'express'
 import { Account } from '../../model'
+import { getOrCreateSession, setSessionCookie } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
 import { UnauthorizedError } from '../errors'
 import { components } from '../generated/api-types'
-import { getOrCreateSession, setSessionCookie } from '../../utils/auth'
 import { verifyActionExecutionRequest } from '../utils'
 
 type ReqParams = Record<string, string>
@@ -26,9 +26,7 @@ export const login: (
     await verifyActionExecutionRequest(em, req.body)
 
     const [sessionData, account] = await em.transaction(async (em) => {
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ joystreamAccount: joystreamAccountId })
+      const account = await em.getRepository(Account).findOneBy({ joystreamAccountId })
       if (!account) {
         throw new UnauthorizedError('Invalid credentials')
       }

@@ -44,6 +44,7 @@ import {
   createBid,
   findTopBid,
   finishAuction,
+  getAccountForMember,
   getChannelTitleById,
   getCurrentAuctionFromVideo,
   getNftOwnerMemberId,
@@ -617,9 +618,7 @@ export async function processNftBoughtEvent({
   await maybeNotifyNftCreator(overlay, previousNftOwner, notificationData, event)
   if (previousNftOwner.isTypeOf === 'NftOwnerMember') {
     // case when previous owner is a member
-    const previousNftOwnerAccount = await overlay
-      .getRepository(Account)
-      .getOneByRelation('membershipId', previousNftOwner.member)
+    const previousNftOwnerAccount = await getAccountForMember(overlay, previousNftOwner.member)
     await addNotification(
       overlay,
       previousNftOwnerAccount ? (previousNftOwnerAccount as Account) : null,

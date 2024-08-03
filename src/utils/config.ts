@@ -24,6 +24,8 @@ export enum ConfigVariable {
   AppAssetStorage = 'APP_ASSET_STORAGE',
   AppNameAlt = 'APP_NAME_ALT',
   NotificationAssetRoot = 'NOTIFICATION_ASSET_ROOT',
+  FaucetUrl = 'FAUCET_URL',
+  FaucetCaptchaBypassKey = 'FAUCET_CAPTCHA_BYPASS_KEY',
 }
 
 const boolType = {
@@ -69,6 +71,8 @@ export const configVariables = {
   [ConfigVariable.AppAssetStorage]: stringType,
   [ConfigVariable.AppNameAlt]: stringType,
   [ConfigVariable.NotificationAssetRoot]: stringType,
+  [ConfigVariable.FaucetUrl]: stringType,
+  [ConfigVariable.FaucetCaptchaBypassKey]: stringType,
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<(typeof configVariables)[C]['deserialize']>

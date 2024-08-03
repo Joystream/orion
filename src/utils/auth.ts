@@ -105,15 +105,13 @@ sessionCache.on('expired', (sessionId: string, cachedData: CachedSessionData) =>
   })
 })
 
-export type AuthContext = Session | null
-
-export async function getSessionIdFromHeader(req: Request): Promise<string | undefined> {
+export function getSessionIdFromHeader(req: Request): string | undefined {
   authLogger.trace(`Authorization header: ${JSON.stringify(req.headers.authorization, null, 2)}`)
   const [, sessionId] = req.headers.authorization?.match(/^Bearer ([A-Za-z0-9+/=]+)$/) || []
   return sessionId
 }
 
-export async function getSessionIdFromCookie(req: Request): Promise<string | undefined> {
+export function getSessionIdFromCookie(req: Request): string | undefined {
   authLogger.trace(`Cookies: ${JSON.stringify(req.cookies, null, 2)}`)
   return req.cookies ? req.cookies[SESSION_COOKIE_NAME] : undefined
 }
@@ -121,10 +119,10 @@ export async function getSessionIdFromCookie(req: Request): Promise<string | und
 export async function authenticate(
   req: Request,
   authType: 'cookie' | 'header'
-): Promise<AuthContext> {
+): Promise<Session | null> {
   const em = await globalEm
   const sessionId =
-    authType === 'cookie' ? await getSessionIdFromCookie(req) : await getSessionIdFromHeader(req)
+    authType === 'cookie' ? getSessionIdFromCookie(req) : getSessionIdFromHeader(req)
 
   if (sessionId) {
     authLogger.trace(`Authenticating... SessionId: ${sessionId}`)
