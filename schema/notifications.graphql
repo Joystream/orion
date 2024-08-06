@@ -124,6 +124,7 @@ union NotificationType =
   | CreatorTokenRevenueShareStarted
   | CreatorTokenRevenueSharePlanned
   | CreatorTokenRevenueShareEnded
+  | CreatorTokenRevenueShareEndedReminder
 
 type ChannelSuspended @variant {
   phantom: Int
@@ -572,6 +573,23 @@ type CreatorTokenRevenueSharePlanned @variant {
 }
 
 type CreatorTokenRevenueShareEnded @variant {
+  "channel title for notification text"
+  channelTitle: String!
+
+  "channel title for notification avatar"
+  channelId: String!
+
+  "symbol of the token"
+  tokenSymbol: String!
+
+  "id of created revenue share to verify its' viability in future"
+  revenueShareId: String!
+
+  "id of token"
+  tokenId: String!
+}
+
+type CreatorTokenRevenueShareEndedReminder @variant {
   "channel title for notification text"
   channelTitle: String!
 

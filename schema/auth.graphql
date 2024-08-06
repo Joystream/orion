@@ -184,6 +184,7 @@ type AccountNotificationPreferences {
   crtRevenueShareStarted: NotificationPreference!
   crtRevenueSharePlanned: NotificationPreference!
   crtRevenueShareEnded: NotificationPreference!
+  crtRevenueShareEndedReminder: NotificationPreference!
 }
 
 type NotificationPreference {
