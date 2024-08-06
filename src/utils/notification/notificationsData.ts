@@ -404,5 +404,15 @@ export const getNotificationData = async (
         subject: `🔓 ${channelTitle} ended revenue share for $${tokenSymbol} token. Unlock your locked tokens!`,
       }
     }
+    case 'CreatorTokenRevenueShareEndedReminder': {
+      const { tokenSymbol, channelId } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'payout'),
+        link: await getNotificationLink(em, 'portfolio'),
+        avatar: await getNotificationAvatar(em, 'channelId', channelId),
+        text: `🔓 Your $${tokenSymbol} revenue share is waiting to be closed. Unlock locked tokens and open your market!`,
+        subject: `🔓 Your $${tokenSymbol} revenue share is waiting to be closed. Unlock locked tokens and open your market!`,
+      }
+    }
   }
 }
