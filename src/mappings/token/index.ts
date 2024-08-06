@@ -47,7 +47,7 @@ import { getCurrentBlockHeight } from '../../utils/blockHeight'
 import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
-import { removeFutureNotification, removeNotification } from '../../utils/notification/helpers'
+import { removeFutureNotification } from '../../utils/notification/helpers'
 import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
 import { deserializeMetadata, genericEventFields } from '../utils'
 import {
