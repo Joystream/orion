@@ -1,5 +1,5 @@
 import { Flat } from 'lodash'
-import { EntityManager } from 'typeorm'
+import { EntityManager, FindOptionsWhere } from 'typeorm'
 import {
   Account,
   AccountNotificationPreferences,
@@ -72,6 +72,7 @@ export function defaultNotificationPreferences(): AccountNotificationPreferences
     crtRevenueShareStarted: notificationPrefAllTrue(),
     crtRevenueSharePlanned: notificationPrefAllTrue(),
     crtRevenueShareEnded: notificationPrefAllTrue(),
+    crtRevenueShareEndedReminder: notificationPrefAllTrue(),
   })
 }
 
@@ -144,6 +145,9 @@ export function preferencesForNotification(
       return preferences.crtRevenueSharePlanned
     case 'CreatorTokenRevenueShareEnded':
       return preferences.crtRevenueShareEnded
+    case 'CreatorTokenRevenueShareEndedReminder':
+      return preferences.crtRevenueShareEnded
+
     default: // all the remaining notifications (v2 scope) are not enabled by default
       return new NotificationPreference({ inAppEnabled: false, emailEnabled: false })
   }
@@ -297,6 +301,45 @@ export const addNotification = async (
       dispatchBlock ?? lastProcessedBlock
     )
   }
+}
+
+export async function removeFutureNotification(
+  em: EntityManager,
+  notificationType: Notification['notificationType']['isTypeOf'],
+  currentBlockHeight: number,
+  filters: Record<string, string | number>
+) {
+  const result: { id: string }[] = await em.query(
+    `
+    SELECT
+        id 
+    FROM 
+        public.notification 
+    WHERE
+        notification_type ->> 'isTypeOf'=$1
+      AND
+        dispatch_block > $2
+        ${Object.keys(filters).map((key, idx) => {
+          return `
+      AND
+        notification_type ->> '${key}'=$${idx + 3}
+        `
+        })}
+         `,
+    [notificationType, currentBlockHeight, ...Object.values(filters)]
+  )
+  const notificationToRemove = result[0]
+
+  if (!notificationToRemove) {
+    return
+  }
+
+  await em.getRepository(Notification).delete({
+    id: notificationToRemove.id,
+  })
+  await em.getRepository(NotificationEmailDelivery).delete({
+    notificationId: notificationToRemove.id,
+  })
 }
 
 async function saveNextNotificationId(

@@ -20,6 +20,7 @@ import {
   CreatorTokenMarketStarted,
   CreatorTokenMarketStartedEventData,
   CreatorTokenRevenueShareEnded,
+  CreatorTokenRevenueShareEndedReminder,
   CreatorTokenRevenueSharePlanned,
   CreatorTokenRevenueShareStarted,
   CreatorTokenRevenueSplitIssuedEventData,
@@ -41,10 +42,12 @@ import {
   VestedSale,
   VestingSchedule,
 } from '../../model'
+import { BLOCKS_PER_DAY } from '../../server-extension/resolvers/CreatorToken'
 import { getCurrentBlockHeight } from '../../utils/blockHeight'
 import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
+import { removeFutureNotification, removeNotification } from '../../utils/notification/helpers'
 import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
 import { deserializeMetadata, genericEventFields } from '../utils'
 import {
@@ -695,6 +698,26 @@ export async function processRevenueSplitIssuedEvent({
     event,
     endsAt // schedule for end block
   )
+
+  // This event should have dispatch block of ending block plus about 3 days
+  // If user closes the share before its execution, this notification will be removing during share closing mapping
+  const revenueSharedEndedReminderNotification = new CreatorTokenRevenueShareEndedReminder({
+    revenueShareId: revenueShare.id,
+    channelTitle: parseChannelTitle(channel),
+    channelId: channel.id,
+    tokenSymbol: parseCreatorTokenSymbol(token),
+    tokenId: tokenId.toString(),
+  })
+
+  const channelOwnerAccount = await getChannelOwnerAccount(overlay, channel)
+  await addNotification(
+    overlay,
+    channelOwnerAccount,
+    new ChannelRecipient({ channel: channel.id }),
+    revenueSharedEndedReminderNotification,
+    undefined,
+    endsAt + BLOCKS_PER_DAY * 3 // schedule for end block
+  )
 }
 
 export async function processMemberJoinedWhitelistEvent({
@@ -799,6 +822,10 @@ export async function processRevenueSplitFinalizedEvent({
     .getByIdOrFail(token.currentRevenueShareId!)
   revenueShare.finalized = true
   token.currentRevenueShareId = null
+
+  await removeFutureNotification(overlay.getEm(), 'CreatorTokenRevenueShareEndedReminder', 1, {
+    tokenId: token.id,
+  })
 }
 
 export async function processUserParticipatedInSplitEvent({
