@@ -59,19 +59,19 @@ prepare: install typegen codegen build
 
 up-squid:
 	@docker network create joystream_default || true
-	@docker-compose up -d
+	@docker compose up -d
 
 up-archive:
 	@docker network create joystream_default || true
-	@docker-compose -f archive/docker-compose.yml up -d
+	@docker compose -f archive/docker-compose.yml up -d
 
 up: up-archive up-squid
 
 down-squid:
-	@docker-compose down -v
+	@docker compose down -v
 	
 down-archive:
-	@docker-compose -f archive/docker-compose.yml down -v
+	@docker compose -f archive/docker-compose.yml down -v
 
 down: down-squid down-archive
 

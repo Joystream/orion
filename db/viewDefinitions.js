@@ -1,3 +1,5 @@
+const { withPriceChange } = require('../lib/server-extension/resolvers/CreatorToken/utils')
+
 const noCategoryVideosSupportedByDefault =
   process.env.SUPPORT_NO_CATEGORY_VIDEOS === 'true' ||
   process.env.SUPPORT_NO_CATEGORY_VIDEOS === '1'
@@ -90,101 +92,57 @@ function getViewDefinitions(db) {
     // TODO (notifications v2): make this part of the admin schema with appropriate resolver for queries
     // notification: ['FALSE'],
     marketplace_token: `
-      WITH trading_volumes AS
-          (SELECT ac.token_id,
-                  SUM(tr.price_paid) as amm_volume
-          FROM amm_transaction tr
-          JOIN amm_curve ac ON ac.id = tr.amm_id
-          GROUP BY token_id),
-
-      base_price_transaction AS (
-          WITH oldest_transactions AS (
-              SELECT DISTINCT ON (ac.token_id) 
-                  tr.amm_id,
-                  ac.token_id,
-                  tr.price_per_unit AS oldest_price_paid,
-                  tr.created_in
-              FROM amm_transaction tr
-              JOIN amm_curve ac ON tr.amm_id = ac.id
-              WHERE tr.created_in < (SELECT height FROM squid_processor.status) - ${
-                BLOCKS_PER_DAY * 30
-              }
-              ORDER BY ac.token_id, tr.created_in DESC
-          ),
-          fallback_transactions AS (
-              SELECT DISTINCT ON (ac.token_id) 
-                  tr.amm_id,
-                  ac.token_id,
-                  tr.price_per_unit AS oldest_price_paid,
-                  tr.created_in
-              FROM amm_transaction tr
-              JOIN amm_curve ac ON tr.amm_id = ac.id
-              WHERE tr.created_in > (SELECT height FROM squid_processor.status) - ${
-                BLOCKS_PER_DAY * 30
-              }
-              ORDER BY ac.token_id, tr.created_in ASC
-          )
-          SELECT * FROM oldest_transactions
-          UNION ALL
-          SELECT * FROM fallback_transactions
-          WHERE NOT EXISTS (SELECT 1 FROM oldest_transactions)
-      )
-
-      SELECT 
-            COALESCE(ac.total_liq, 0) as liquidity,
-            COALESCE((ct.last_price * ct.total_supply), 0) as market_cap,
-            c.cumulative_revenue,
-            c.id as channel_id,
-            COALESCE(tv.amm_volume, 0) as amm_volume,
-            CASE
-                WHEN ldt_o.oldest_price_paid = 0
-                      OR ldt_o.oldest_price_paid IS NULL THEN 0
-                ELSE ((ct.last_price - ldt_o.oldest_price_paid) * 100.0 / ldt_o.oldest_price_paid)
-            END AS price_change,
-            CASE
-                WHEN liq_until.quantity IS NULL THEN 0
-                ELSE ((ac.total_liq - liq_until.quantity) * 100 / GREATEST(liq_until.quantity, 1))
-            END as liquidity_change,
-            ct.*
-      FROM creator_token ct
-      LEFT JOIN token_channel tc ON tc.token_id = ct.id
-      LEFT JOIN channel c ON c.id = tc.channel_id
-      LEFT JOIN base_price_transaction ldt_o ON ldt_o.token_id = ct.id
-      LEFT JOIN
-
-          (SELECT token_id,
-                  SUM(CASE
-                          WHEN transaction_type = 'BUY' THEN quantity
-                          ELSE quantity * -1
-                      END) AS total_liq
-          FROM
-              (SELECT ac.token_id,
-                      tr.transaction_type,
-                      tr.quantity
-                FROM amm_transaction tr
-                JOIN amm_curve ac ON tr.amm_id = ac.id) as tr
-          GROUP BY token_id) as ac ON ac.token_id = ct.id
-
-      LEFT JOIN
-
-          (SELECT token_id,
-                  SUM(CASE
-                          WHEN transaction_type = 'BUY' THEN quantity
-                          ELSE quantity * -1
-                      END) AS quantity
-          FROM
-              (SELECT ac.token_id,
-                      tr.transaction_type,
-                      tr.quantity
-                FROM amm_transaction tr
-                JOIN amm_curve ac ON tr.amm_id = ac.id
-                WHERE tr.created_in <
-                        (SELECT height
-                        FROM squid_processor.status) - ${BLOCKS_PER_DAY * 30}) as tr
-          GROUP BY token_id) as liq_until ON liq_until.token_id = ct.id
-
-      LEFT JOIN trading_volumes tv ON tv.token_id = ct.id
-      `,
+    WITH
+      last_block AS (
+        SELECT height FROM squid_processor.status
+      ),
+      tokens_with_stats AS (
+        SELECT
+          ac.token_id,
+          SUM(CASE
+            WHEN (
+              transaction_type = 'BUY'
+              AND tr.created_in < last_block.height - ${BLOCKS_PER_DAY * 30}
+            ) THEN quantity
+            WHEN (
+              transaction_type = 'SELL'
+              AND tr.created_in < last_block.height - ${BLOCKS_PER_DAY * 30}
+            ) THEN quantity * -1
+            ELSE 0
+          END) AS total_liquidity_30d_ago,
+          SUM (CASE
+            WHEN transaction_type = 'BUY' THEN quantity
+            ELSE quantity * -1
+          END) AS total_liquidity,
+          SUM(tr.price_paid) as amm_volume
+        FROM amm_transaction tr
+        JOIN amm_curve ac ON ac.id = tr.amm_id
+        JOIN creator_token ct ON ct.current_amm_sale_id = ac.id
+        JOIN last_block ON 1=1
+        GROUP BY token_id
+      ),
+      ${withPriceChange({ periodDays: 30, currentBlock: 'last_block' })}
+    SELECT 
+      COALESCE(tws.total_liquidity, 0) as liquidity,
+      (ct.last_price * ct.total_supply) as market_cap,
+      c.cumulative_revenue,
+      c.id as channel_id,
+      COALESCE(tws.amm_volume, 0) as amm_volume,
+      COALESCE(twpc.percentage_change, 0) price_change,
+      CASE
+        WHEN (tws.total_liquidity_30d_ago IS NULL OR tws.total_liquidity_30d_ago = 0) THEN 0
+        ELSE (
+          (tws.total_liquidity - tws.total_liquidity_30d_ago)
+          * 100
+          / tws.total_liquidity_30d_ago
+        )
+      END as liquidity_change,
+      ct.*
+    FROM creator_token ct
+    LEFT JOIN token_channel tc ON tc.token_id = ct.id
+    LEFT JOIN channel c ON c.id = tc.channel_id
+    LEFT JOIN tokens_with_price_change twpc ON twpc.token_id = ct.id
+    LEFT JOIN tokens_with_stats tws ON tws.token_id = ct.id`,
   }
 }
 

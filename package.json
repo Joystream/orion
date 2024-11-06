@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "4.0.6",
+  "version": "4.1.0",
   "engines": {
     "node": ">=16"
   },
@@ -142,5 +142,8 @@
   },
   "workspaces": [
     "network-tests"
-  ]
+  ],
+  "volta": {
+    "node": "16.20.2"
+  }
 }
