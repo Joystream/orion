@@ -16,10 +16,10 @@ jobs:
       - name: Prepare workspace
         run: make prepare
       - name: Start db
-        run: docker-compose up -d orion_db
+        run: docker compose up -d orion_db
       - name: Wait for db
         run: |
-          while ! docker-compose exec -T orion_db pg_isready -U postgres -p 23798; do
+          while ! docker compose exec -T orion_db pg_isready -U postgres -p 23798; do
             sleep 1
           done
       - name: Run migrations
