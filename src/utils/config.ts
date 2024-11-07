@@ -5,6 +5,7 @@ import { withHiddenEntities } from './sql'
 export enum ConfigVariable {
   SupportNoCategoryVideo = 'SUPPORT_NO_CATEGORY_VIDEOS',
   SupportNewCategories = 'SUPPORT_NEW_CATEGORIES',
+  CrtMarketCapMinVolumeJoy = 'CRT_MARKET_CAP_MIN_VOLUME_JOY',
   KillSwitch = 'KILL_SWITCH_ON',
   VideoViewPerUserTimeLimit = 'VIDEO_VIEW_PER_USER_TIME_LIMIT',
   VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
@@ -49,6 +50,7 @@ const jsonType = <T>() => ({
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
+  [ConfigVariable.CrtMarketCapMinVolumeJoy]: intType,
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerUserTimeLimit]: intType,
   [ConfigVariable.VideoRelevanceViewsTick]: intType,

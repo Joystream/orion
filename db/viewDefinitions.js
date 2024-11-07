@@ -124,7 +124,13 @@ function getViewDefinitions(db) {
       ${withPriceChange({ periodDays: 30, currentBlock: 'last_block' })}
     SELECT 
       COALESCE(tws.total_liquidity, 0) as liquidity,
-      (ct.last_price * ct.total_supply) as market_cap,
+      CASE
+        WHEN tws.amm_volume >= COALESCE(
+          market_cap_min_volume_cfg.value::int8,
+          ${parseInt(process.env.CRT_MARKET_CAP_MIN_VOLUME_JOY)}
+        ) THEN (ct.last_price * ct.total_supply)
+        ELSE 0
+      END as market_cap,
       c.cumulative_revenue,
       c.id as channel_id,
       COALESCE(tws.amm_volume, 0) as amm_volume,
@@ -142,7 +148,8 @@ function getViewDefinitions(db) {
     LEFT JOIN token_channel tc ON tc.token_id = ct.id
     LEFT JOIN channel c ON c.id = tc.channel_id
     LEFT JOIN tokens_with_price_change twpc ON twpc.token_id = ct.id
-    LEFT JOIN tokens_with_stats tws ON tws.token_id = ct.id`,
+    LEFT JOIN tokens_with_stats tws ON tws.token_id = ct.id
+    LEFT JOIN "admin"."gateway_config" market_cap_min_volume_cfg ON market_cap_min_volume_cfg.id = 'CRT_MARKET_CAP_MIN_VOLUME_JOY'`,
   }
 }
 
