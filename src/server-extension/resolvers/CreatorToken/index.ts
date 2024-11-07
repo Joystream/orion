@@ -25,6 +25,7 @@ import {
   MarketplaceTokensReturnType,
   TopSellingTokensReturnType,
 } from './types'
+import { withPriceChange } from './utils'
 
 export const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
 
@@ -80,17 +81,19 @@ export class TokenResolver {
 
     const topTokensCtes = `
 WITH tokens_volumes AS (
-   SELECT 
-        ac.token_id,
-        SUM(tr.price_paid) as ammVolume
-   FROM 
-        amm_transaction tr
-   JOIN
-        amm_curve ac ON ac.id = tr.amm_id
-   WHERE
-        tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
-   GROUP BY
-        token_id
+  SELECT 
+      ac.token_id,
+      SUM(tr.price_paid) as ammVolume
+  FROM 
+      amm_transaction tr
+  JOIN
+      amm_curve ac ON ac.id = tr.amm_id
+  JOIN
+      creator_token cr ON cr.current_amm_sale_id = ac.id
+  WHERE
+      tr.created_in >= ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
+  GROUP BY
+      token_id
 )
 `
 
@@ -169,44 +172,11 @@ WITH tokens_volumes AS (
     const tokenSubTree = tree.fieldsByTypeName.MarketplaceTokensReturnType.creatorToken
     const tokenFields = parseAnyTree(model, 'CreatorToken', info.schema, tokenSubTree)
 
-    const topTokensCtes = `
-WITH oldest_transactions_before AS
-    (SELECT DISTINCT ON (ac.token_id) tr.amm_id,
-                        ac.token_id,
-                        tr.price_per_unit as oldest_price_paid,
-                        tr.created_in
-     FROM amm_transaction tr
-     JOIN amm_curve ac ON tr.amm_id = ac.id
-     WHERE tr.created_in < ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}
-     ORDER BY ac.token_id,
-              tr.created_in DESC),
-
-              oldest_transactions_after AS
-    (SELECT DISTINCT ON (ac.token_id) tr.amm_id,
-                        ac.token_id,
-                        tr.price_per_unit as oldest_price_paid,
-                        tr.created_in
-     FROM amm_transaction tr
-     JOIN amm_curve ac ON tr.amm_id = ac.id
-     WHERE tr.created_in > ${lastProcessedBlock - args.periodDays * BLOCKS_PER_DAY}     
-     ORDER BY ac.token_id,
-              tr.created_in ASC),
-
-
-     price_changes AS
-    (SELECT ct.id,
-            ot.oldest_price_paid,
-            ct.symbol,
-            ct.last_price,
-CASE
-    WHEN ot.oldest_price_paid = 0 AND ota.oldest_price_paid = 0 THEN 0
-    WHEN ot.oldest_price_paid = 0 THEN ((ct.last_price - ota.oldest_price_paid) * 100.0 / ota.oldest_price_paid)
-    ELSE ((ct.last_price - ot.oldest_price_paid) * 100.0 / ot.oldest_price_paid)
-END AS percentage_change
-     FROM creator_token ct
-     LEFT JOIN oldest_transactions_before as ot ON ot.token_id = ct.id
-     LEFT JOIN oldest_transactions_after as ota ON ota.token_id = ct.id)
-`
+    const topTokensCtes = `WITH ${withPriceChange({
+      currentBlock: lastProcessedBlock,
+      periodDays: args.periodDays,
+      minVolume: args.minVolume,
+    })}`
 
     const listQuery = new ListQuery(
       model,
@@ -221,13 +191,13 @@ END AS percentage_change
     listQuerySql = extendClause(
       listQuerySql,
       'SELECT',
-      `COALESCE(pc.percentage_change, 0) as pricePercentageChange`
+      `COALESCE(twpc.percentage_change, 0) as pricePercentageChange`
     )
 
     listQuerySql = extendClause(
       listQuerySql,
       'FROM',
-      'LEFT JOIN price_changes pc ON creator_token.id = pc.id',
+      'JOIN tokens_with_price_change twpc ON creator_token.id = twpc.token_id',
       ''
     )
 
@@ -235,7 +205,7 @@ END AS percentage_change
       listQuerySql = extendClause(
         listQuerySql,
         'ORDER BY',
-        `COALESCE(pc.percentage_change, 0) ${args.orderByPriceDesc ? 'DESC' : 'ASC'}`,
+        `COALESCE(twpc.percentage_change, 0) ${args.orderByPriceDesc ? 'DESC' : 'ASC'}`,
         ''
       )
     }

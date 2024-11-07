@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   orion_db:
     container_name: orion_db
@@ -9,6 +7,8 @@ services:
     environment:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: squid
+    networks:
+      - joystream_default
     ports:
       - '127.0.0.1:${DB_PORT}:${DB_PORT}'
       - '[::1]:${DB_PORT}:${DB_PORT}'
@@ -23,6 +23,8 @@ services:
     hostname: orion_processor
     image: node:18
     restart: unless-stopped
+    networks:
+      - joystream_default
     env_file:
       - .env
       - docker.env
@@ -43,6 +45,8 @@ services:
     hostname: orion_graphql-server
     image: node:18
     restart: unless-stopped
+    networks:
+      - joystream_default
     env_file:
       - .env
       - docker.env
@@ -65,6 +69,8 @@ services:
     hostname: orion_auth-api
     image: node:18
     restart: unless-stopped
+    networks:
+      - joystream_default
     env_file:
       - .env
       - docker.env
@@ -86,6 +92,5 @@ volumes:
   orion_db_data:
 
 networks:
-  default:
-    external:
-      name: joystream_default
+  joystream_default:
+    external: true

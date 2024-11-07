@@ -5,6 +5,7 @@ import {
   MarketplaceTokenWhereInput,
   TokenWhereInput,
 } from '../baseTypes'
+import { BigInteger } from '@subsquid/graphql-server'
 
 @ArgsType()
 export class GetShareDividensArgs {
@@ -73,6 +74,12 @@ export class MarketplaceTokensArgs {
     description: 'The number of days in period',
   })
   periodDays: number
+
+  @Field(() => BigInteger, {
+    nullable: true,
+    description: 'Minimum required transaction volume in the period',
+  })
+  minVolume: string | null
 
   @Field(() => Int, {
     nullable: true,

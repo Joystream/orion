@@ -1,3 +1,13 @@
+# 4.1.0
+
+## Misc
+- `tokensWithPriceChange`, `marketplaceTokens` and `topSellingToken` queries now only take the currently active AMM sale into account when calculating values such as volume / liquidity / price change.
+- added `minVolume` argument to `tokensWithPriceChange` query to allow filtering out tokens w/ negligible volume
+- updated docker setup to support the latest docker version
+
+## Bug Fixes:
+- `tokensWithPriceChange` and `marketplaceTokens` queries returned incorrect price changes when no transactions were made in the given period. Now at least one transaction in the provided period is required to calculate price change.
+
 # 4.0.6
 
 ## Bug Fixes:
