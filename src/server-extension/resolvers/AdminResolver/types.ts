@@ -81,6 +81,18 @@ export class ChannelWeight {
 }
 
 @ArgsType()
+export class SetCrtMarketCapMinVolume {
+  @Field(() => Int, { nullable: false })
+  minVolumeJoy!: number
+}
+
+@ObjectType()
+export class CrtMarketCapMinVolume {
+  @Field(() => Int, { nullable: false })
+  minVolumeJoy!: number
+}
+
+@ArgsType()
 export class SetKillSwitchInput {
   @Field(() => Boolean, { nullable: false })
   isKilled!: boolean

@@ -37,6 +37,7 @@ import {
   AppActionSignatureInput,
   AppRootDomain,
   ChannelWeight,
+  CrtMarketCapMinVolume,
   ExcludableContentType,
   ExcludeContentArgs,
   ExcludeContentResult,
@@ -51,6 +52,7 @@ import {
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
   SetChannelsWeightsArgs,
+  SetCrtMarketCapMinVolume,
   SetFeaturedCrtsInput,
   SetFeaturedCrtsResult,
   SetFeaturedNftsInput,
@@ -232,6 +234,14 @@ export class AdminResolver {
     return results
   }
 
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CRT_MARKETCAP_MIN_VOLUME))
+  @Mutation(() => CrtMarketCapMinVolume)
+  async setCrtMarketCapMinVolume(@Args() args: SetCrtMarketCapMinVolume) {
+    const em = await this.em()
+    await config.set(ConfigVariable.CrtMarketCapMinVolumeJoy, args.minVolumeJoy, em)
+    return { minVolumeJoy: await config.get(ConfigVariable.CrtMarketCapMinVolumeJoy, em) }
+  }
+
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_KILL_SWITCH))
   @Mutation(() => KillSwitch)
   async setKillSwitch(@Args() args: SetKillSwitchInput): Promise<KillSwitch> {
@@ -353,7 +363,7 @@ export class AdminResolver {
     }
   }
 
-  @UseMiddleware(OperatorOnly(OperatorPermission.SET_SUPPORTED_CATEGORIES))
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CRT_MARKETCAP_MIN_VOLUME))
   @Mutation(() => SetSupportedCategoriesResult)
   async setSupportedCategories(
     @Args()

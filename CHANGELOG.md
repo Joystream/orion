@@ -1,7 +1,14 @@
 # 4.1.0
 
-## Misc
+## Affected components:
+- Migrations (`marketplace_tokens` view)
+- GraphQL server (`tokensWithPriceChange` and `topSellingToken` queries, `setCrtMarketCapMinVolume` mutation)
+- Config: `CRT_MARKET_CAP_MIN_VOLUME_JOY`
+- Docker compose
+
+## Changes
 - `tokensWithPriceChange`, `marketplaceTokens` and `topSellingToken` queries now only take the currently active AMM sale into account when calculating values such as volume / liquidity / price change.
+- `marketplaceTokens` query now takes into account a configurable `CRT_MARKET_CAP_MIN_VOLUME_JOY` value which allows specifying a volume threshold below which tokens are considered to have no market cap. 
 - added `minVolume` argument to `tokensWithPriceChange` query to allow filtering out tokens w/ negligible volume
 - updated docker setup to support the latest docker version
 

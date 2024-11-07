@@ -13,6 +13,7 @@ enum OperatorPermission {
   RESTORE_CONTENT
   SET_PUBLIC_FEED_VIDEOS
   SET_FEATURED_CRTS
+  SET_CRT_MARKETCAP_MIN_VOLUME
 }
 
 type User @entity @schema(name: "admin") {
