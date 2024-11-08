@@ -1,8 +1,8 @@
-import { Flat } from 'lodash'
 import { EntityManager } from 'typeorm'
 import {
   Account,
   AccountNotificationPreferences,
+  Channel,
   Event,
   NextEntityId,
   Notification,
@@ -11,11 +11,12 @@ import {
   NotificationType,
   RecipientType,
   Unread,
+  Video,
 } from '../../model'
 import { getCurrentBlockHeight } from '../blockHeight'
 import { uniqueId } from '../crypto'
 import { getNextIdForEntity } from '../nextEntityId'
-import { EntityManagerOverlay } from '../overlay'
+import { EntityManagerOverlay, Flat } from '../overlay'
 
 export const RUNTIME_NOTIFICATION_ID_TAG = 'RuntimeNotification'
 export const OFFCHAIN_NOTIFICATION_ID_TAG = 'OffchainNotification'
@@ -339,3 +340,14 @@ const chunkFromEnd = (str: string, interval: number): string[] =>
   )
 const roundDecPart = (decPart: string, fractionDigits: number): string =>
   Number(`.${decPart}`).toFixed(fractionDigits).slice(1)
+
+export function parseChannelTitle(channel: Flat<Channel>): string {
+  return channel.title || FALLBACK_CHANNEL_TITLE
+}
+
+export function parseVideoTitle(video: Flat<Video>): string {
+  return video.title || FALLBACK_VIDEO_TITLE
+}
+
+export const FALLBACK_CHANNEL_TITLE = '??'
+export const FALLBACK_VIDEO_TITLE = '??'

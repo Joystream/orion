@@ -53,13 +53,9 @@ import {
   commentCountersManager,
   videoRelevanceManager,
 } from '../utils'
-import {
-  getAccountForMember,
-  getChannelOwnerMemberByChannelId,
-  memberHandleById,
-  parseVideoTitle,
-} from './utils'
+import { getAccountForMember, getChannelOwnerMemberByChannelId, memberHandleById } from './utils'
 import { addNotification } from '../../utils/notification'
+import { parseVideoTitle } from '../../utils/notification/helpers'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {

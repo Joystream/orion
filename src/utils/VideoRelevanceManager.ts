@@ -2,8 +2,7 @@ import { EntityManager } from 'typeorm'
 import { config, ConfigVariable } from './config'
 import { globalEm } from './globalEm'
 
-// constant used to parse seconds from creation
-export const NEWNESS_SECONDS_DIVIDER = 60 * 60 * 24
+export const SECONDS_PER_DAY = 60 * 60 * 24
 
 type VideoRelevanceManagerLoops = {
   fullUpdateLoopTime: number
@@ -67,23 +66,40 @@ export class VideoRelevanceManager {
       defaultChannelWeight,
     ] = await config.get(ConfigVariable.RelevanceWeights, em)
     const channelWeight = defaultChannelWeight ?? 1
-    const wtEpoch = `((
-          extract(epoch from video.created_at)*${joystreamTimestampWeight} +
-          COALESCE(extract(epoch from video.published_before_joystream), extract(epoch from video.created_at))*${ytTimestampWeight}
-        ) / ${joystreamTimestampWeight} + ${ytTimestampWeight})`
+    const weightedEpoch = `
+    (
+      (
+        extract(epoch from video.created_at) * ${joystreamTimestampWeight} +
+        CASE
+          WHEN (
+            video.published_before_joystream IS NOT NULL
+            AND video.published_before_joystream < now()
+          ) THEN extract(epoch from video.published_before_joystream)
+          ELSE extract(epoch from video.created_at)
+        END * ${ytTimestampWeight}
+      ) / ${joystreamTimestampWeight + ytTimestampWeight}
+    )`
+    const weightedMeanVideoAgeDays = `
+    (
+      (extract(epoch FROM now()) - ${weightedEpoch})
+      / ${SECONDS_PER_DAY}
+    )`
 
     await em.query(`
         WITH videos_with_weight AS (
           SELECT 
             video.id as videoId,
             channel.id as channelId,
-            (ROUND((
-            (extract(epoch FROM date_trunc('day', now() at time zone 'UTC')) - ${wtEpoch})
-            / ${NEWNESS_SECONDS_DIVIDER} * ${newnessWeight * -1} 
-            + (views_num * ${viewsWeight}) 
-            + (comments_count * ${commentsWeight}) 
-            + (reactions_count * ${reactionsWeight})) 
-            * COALESCE(channel.channel_weight, ${channelWeight}), 2)) as videoRelevance
+            ROUND(
+              (
+                365 * ${newnessWeight}
+                - LEAST(${weightedMeanVideoAgeDays}, 365) * ${newnessWeight}
+                + (views_num * ${viewsWeight}) 
+                + (comments_count * ${commentsWeight}) 
+                + (reactions_count * ${reactionsWeight})
+              ) * COALESCE(channel.channel_weight, ${channelWeight}),
+              2
+            ) as videoRelevance
           FROM 
             video
             INNER JOIN channel  ON video.channel_id = channel.id
@@ -129,7 +145,7 @@ export class VideoRelevanceManager {
         SET
           video_relevance = CASE
             WHEN ranked_videos.rank = 1 THEN ranked_videos.maxChannelRelevance
-            ELSE 1
+            ELSE 0
           END
         FROM
           ranked_videos

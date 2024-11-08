@@ -1,3 +1,19 @@
+# 4.1.1
+
+## Affected components:
+- Processor (non-breaking changes)
+- GraphQL server (non-breaking changes)
+
+## Bug Fixes:
+- Fixed video relevance calculation algorithm by:
+    - Ignoring `publishedBeforeJoystream` date if it's in the future,
+    - Fixing a bug with Joystream/YT creation weight formula,
+    - Introduced an age limit of 365 days to prevent negative relevance score 
+- Fixed ineffective `videoRelevanceManager` calls in GraphQL server due to `videoRelevanceManager` not being turned on.
+- Fixed a bug causing both GraphQL server and Processor services to run video relevance and language update loops (which only processor should be running)
+- Fixed imports in GraphQl server and Processor by moving shared utilities to root `utils` directory to prevent mix-ups.
+
+
 # 4.1.0
 
 ## Affected components:

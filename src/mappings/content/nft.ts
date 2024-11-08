@@ -53,9 +53,9 @@ import {
   notifyBiddersOnAuctionCompletion,
   notifyChannelFollowers,
   parseContentActor,
-  parseVideoTitle,
   processNft,
 } from './utils'
+import { parseVideoTitle } from '../../utils/notification/helpers'
 
 export async function processOpenAuctionStartedEvent({
   overlay,
