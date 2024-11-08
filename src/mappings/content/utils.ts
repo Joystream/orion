@@ -75,6 +75,7 @@ import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
 import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
+import { parseChannelTitle, parseVideoTitle } from '../../utils/notification/helpers'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AsDecoded<MetaClass> = MetaClass extends { create: (props?: infer I) => any }
@@ -887,14 +888,6 @@ export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount:
   channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
 }
 
-export function parseChannelTitle(channel: Flat<Channel>): string {
-  return channel.title || FALLBACK_CHANNEL_TITLE
-}
-
-export function parseVideoTitle(video: Flat<Video>): string {
-  return video.title || FALLBACK_VIDEO_TITLE
-}
-
 export async function memberHandleById(
   overlay: EntityManagerOverlay,
   memberId: string
@@ -908,6 +901,3 @@ export async function getChannelTitleById(overlay: EntityManagerOverlay, channel
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
   return parseChannelTitle(channel)
 }
-
-export const FALLBACK_CHANNEL_TITLE = '??'
-export const FALLBACK_VIDEO_TITLE = '??'

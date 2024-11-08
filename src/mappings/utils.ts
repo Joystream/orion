@@ -15,15 +15,6 @@ import { OrionVideoLanguageManager } from '../utils/OrionVideoLanguageManager'
 export const orionVideoLanguageManager = new OrionVideoLanguageManager()
 export const commentCountersManager = new CommentCountersManager()
 export const videoRelevanceManager = new VideoRelevanceManager()
-// eslint-disable-next-line no-void
-void orionVideoLanguageManager.init(
-  1000 * 60 * 5 // 5 mins
-)
-// eslint-disable-next-line no-void
-void videoRelevanceManager.init({
-  fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
-  scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
-})
 export const JOYSTREAM_SS58_PREFIX = 126
 
 export function bytesToString(b: Uint8Array): string {

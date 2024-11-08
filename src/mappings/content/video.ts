@@ -29,12 +29,11 @@ import {
   deleteVideo,
   encodeAssets,
   notifyChannelFollowers,
-  parseChannelTitle,
   parseContentActor,
-  parseVideoTitle,
   processAppActionMetadata,
   processNft,
 } from './utils'
+import { parseChannelTitle, parseVideoTitle } from '../../utils/notification/helpers'
 
 export async function processVideoCreatedEvent({
   overlay,

@@ -21,8 +21,6 @@ import { isObject } from 'lodash'
 import 'reflect-metadata'
 import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, MoreThan } from 'typeorm'
-import { parseVideoTitle } from '../../../mappings/content/utils'
-import { videoRelevanceManager } from '../../../mappings/utils'
 import {
   Account,
   ChannelRecipient,
@@ -53,6 +51,8 @@ import {
   SetOrUnsetPublicFeedResult,
   VideoReportInfo,
 } from './types'
+import { videoRelevanceManager } from '../../utils'
+import { parseVideoTitle } from '../../../utils/notification/helpers'
 
 @Resolver()
 export class VideosResolver {

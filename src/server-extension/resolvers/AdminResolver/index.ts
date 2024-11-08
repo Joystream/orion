@@ -11,8 +11,6 @@ import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
 import { Args, Ctx, Info, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, Not, UpdateResult } from 'typeorm'
-import { parseVideoTitle } from '../../../mappings/content/utils'
-import { videoRelevanceManager } from '../../../mappings/utils'
 import {
   Account,
   Channel,
@@ -76,6 +74,8 @@ import {
   VideoWeights,
 } from './types'
 import { processCommentsCensorshipStatusUpdate } from './utils'
+import { recalculateAllVideosRelevance } from '../../utils'
+import { parseVideoTitle } from '../../../utils/notification/helpers'
 
 @Resolver()
 export class AdminResolver {
@@ -161,7 +161,7 @@ export class AdminResolver {
       ],
       em
     )
-    await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+    await recalculateAllVideosRelevance(em)
     return { isApplied: true }
   }
 
@@ -222,7 +222,7 @@ export class AdminResolver {
         }
       )
 
-      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      await recalculateAllVideosRelevance(em)
 
       // Push the result into the results array
       results.push({

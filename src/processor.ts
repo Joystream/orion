@@ -113,7 +113,11 @@ import {
   processUpcomingTokenSaleUpdatedEvent,
   processUserParticipatedInSplitEvent,
 } from './mappings/token'
-import { commentCountersManager, videoRelevanceManager } from './mappings/utils'
+import {
+  commentCountersManager,
+  videoRelevanceManager,
+  orionVideoLanguageManager,
+} from './mappings/utils'
 import { Event } from './types/support'
 import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
 import { assertAssignable } from './utils/misc'
@@ -363,6 +367,25 @@ async function afterDbUpdate(em: EntityManager) {
 }
 
 const offchainState = new OffchainState()
+
+// Initialize update intervals
+orionVideoLanguageManager
+  .init(
+    1000 * 60 * 5 // 5 mins
+  )
+  .catch((e) => {
+    throw new Error(`Failed to initialize Orion video language manager: ${e.toString()}`)
+  })
+
+videoRelevanceManager
+  .init({
+    fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
+    scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
+  })
+  .catch((e) => {
+    throw new Error(`Failed to initialize Orion video relevance manager: ${e.toString()}`)
+  })
+
 let exportBlockNumber: number
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {

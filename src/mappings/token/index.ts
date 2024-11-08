@@ -45,7 +45,7 @@ import { getCurrentBlockHeight } from '../../utils/blockHeight'
 import { EventHandlerContext } from '../../utils/events'
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
-import { getChannelOwnerAccount, notifyChannelFollowers, parseChannelTitle } from '../content/utils'
+import { getChannelOwnerAccount, notifyChannelFollowers } from '../content/utils'
 import { deserializeMetadata, genericEventFields } from '../utils'
 import {
   VestingScheduleData,
@@ -60,6 +60,7 @@ import {
   processTokenMetadata,
   processValidatedTransfers,
 } from './utils'
+import { parseChannelTitle } from '../../utils/notification/helpers'
 
 export async function processTokenIssuedEvent({
   overlay,
