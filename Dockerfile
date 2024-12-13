@@ -37,6 +37,8 @@ ADD db db
 ADD assets assets
 ADD schema schema
 ADD scripts scripts
+ADD entrypoints entrypoints
+ADD opentelemetry opentelemetry
 # TODO: use shorter PROMETHEUS_PORT
 ENV PROCESSOR_PROMETHEUS_PORT 3000
 EXPOSE 3000

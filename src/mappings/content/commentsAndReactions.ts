@@ -17,6 +17,7 @@ import { isSet } from '@joystream/metadata-protobuf/utils'
 import { assertNotNull, SubstrateBlock } from '@subsquid/substrate-processor'
 import {
   BannedMember,
+  Channel,
   ChannelRecipient,
   Comment,
   CommentCreatedEventData,
@@ -27,6 +28,7 @@ import {
   CommentReply,
   CommentStatus,
   CommentTextUpdatedEventData,
+  CommentTipTier,
   Event,
   MemberRecipient,
   MetaprotocolTransactionResult,
@@ -56,6 +58,7 @@ import {
 import { getAccountForMember, getChannelOwnerMemberByChannelId, memberHandleById } from './utils'
 import { addNotification } from '../../utils/notification'
 import { parseVideoTitle } from '../../utils/notification/helpers'
+import { HAPI_TO_JOY_RATE } from '../../utils/joystreamPrice'
 
 function parseVideoReaction(reaction: ReactVideo.Reaction): VideoReactionOptions {
   const protobufReactionToGraphqlReaction = {
@@ -418,13 +421,43 @@ export async function processReactCommentMessage(
   return new MetaprotocolTransactionResultOK()
 }
 
+async function commentTipTierParams(
+  overlay: EntityManagerOverlay,
+  tipAmountHapi: bigint
+): Promise<Partial<Comment>> {
+  const tipTiers = await config.get(ConfigVariable.CommentTipTiers, overlay.getEm())
+  if (tipAmountHapi >= BigInt(tipTiers.DIAMOND) * BigInt(HAPI_TO_JOY_RATE)) {
+    return {
+      tipTier: CommentTipTier.DIAMOND,
+      sortPriority: 1000,
+    }
+  }
+  if (tipAmountHapi >= BigInt(tipTiers.GOLD) * BigInt(HAPI_TO_JOY_RATE)) {
+    return {
+      tipTier: CommentTipTier.GOLD,
+      sortPriority: 100,
+    }
+  }
+  if (tipAmountHapi >= BigInt(tipTiers.SILVER) * BigInt(HAPI_TO_JOY_RATE)) {
+    return {
+      tipTier: CommentTipTier.SILVER,
+      sortPriority: 10,
+    }
+  }
+  return {
+    tipTier: null,
+    sortPriority: 0,
+  }
+}
+
 export async function processCreateCommentMessage(
   overlay: EntityManagerOverlay,
   block: SubstrateBlock,
   indexInBlock: number,
   txHash: string | undefined,
   memberId: string,
-  message: DecodedMetadataObject<ICreateComment>
+  message: DecodedMetadataObject<ICreateComment>,
+  payment?: [string, bigint]
 ): Promise<MetaprotocolTransactionResult> {
   const { videoId, parentCommentId, body } = message
 
@@ -437,6 +470,7 @@ export async function processCreateCommentMessage(
   }
 
   const channelId = assertNotNull(video.channelId)
+  const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId)
   const bannedMembers = await overlay
     .getRepository(BannedMember)
     .getManyByRelation('channelId', channelId)
@@ -473,6 +507,15 @@ export async function processCreateCommentMessage(
     )
   }
 
+  let tipAmount = BigInt(0)
+  if (payment) {
+    const [tipDestination, tip] = payment
+    if (tipDestination === channel.rewardAccount) {
+      tipAmount = tip
+    }
+  }
+  const tipTierParams = await commentTipTierParams(overlay, tipAmount)
+
   // add new comment
   const comment = overlay.getRepository(Comment).new({
     // TODO: Re-think backward compatibility
@@ -488,6 +531,8 @@ export async function processCreateCommentMessage(
     reactionsAndRepliesCount: 0,
     isEdited: false,
     isExcluded: false,
+    tipAmount,
+    ...tipTierParams,
   })
 
   // schedule comment counters update

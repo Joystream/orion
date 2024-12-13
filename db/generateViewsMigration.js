@@ -25,6 +25,9 @@ module.exports = class ${className} {
     for (const [tableName, viewConditions] of Object.entries(viewDefinitions)) {
       if (Array.isArray(viewConditions)) {
         await db.query(\`
+          DROP VIEW IF EXISTS "\${tableName}" CASCADE
+        \`)
+        await db.query(\`
           CREATE OR REPLACE VIEW "\${tableName}" AS
             SELECT *
             FROM "admin"."\${tableName}" AS "this"
