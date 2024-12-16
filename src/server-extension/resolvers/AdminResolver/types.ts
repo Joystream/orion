@@ -27,6 +27,30 @@ export class SetVideoWeightsInput {
 }
 
 @ArgsType()
+export class SetTipTierAmountsInput {
+  @Field(() => Int, { nullable: true })
+  SILVER?: number
+
+  @Field(() => Int, { nullable: true })
+  GOLD?: number
+
+  @Field(() => Int, { nullable: true })
+  DIAMOND?: number
+}
+
+@ObjectType()
+export class CommentTipTiers {
+  @Field(() => Int, { nullable: false })
+  SILVER!: number
+
+  @Field(() => Int, { nullable: false })
+  GOLD!: number
+
+  @Field(() => Int, { nullable: false })
+  DIAMOND!: number
+}
+
+@ArgsType()
 export class SetMaxAttemptsOnMailDeliveryInput {
   @Field(() => Int, { nullable: false })
   newMaxAttempts!: number

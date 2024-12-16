@@ -31,6 +31,12 @@ type CommentReactionsCountByReactionId {
   count: Int!
 }
 
+enum CommentTipTier {
+  SILVER
+  GOLD
+  DIAMOND
+}
+
 type Comment @entity @schema(name: "admin") {
   "METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}"
   id: ID!
@@ -73,4 +79,13 @@ type Comment @entity @schema(name: "admin") {
 
   "Whether a comment has been excluded/hidden (by the gateway operator)"
   isExcluded: Boolean!
+
+  "Tier received for adding a tip to the comment (if any)"
+  tipTier: CommentTipTier
+
+  "Tip included when adding the comment (in HAPI)"
+  tipAmount: BigInt!
+
+  "Base sort priority of the comment (can be increased by a tip)"
+  sortPriority: Int!
 }

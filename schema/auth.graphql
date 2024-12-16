@@ -14,6 +14,7 @@ enum OperatorPermission {
   SET_PUBLIC_FEED_VIDEOS
   SET_FEATURED_CRTS
   SET_CRT_MARKETCAP_MIN_VOLUME
+  SET_TIP_TIERS
 }
 
 type User @entity @schema(name: "admin") {

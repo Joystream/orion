@@ -95,7 +95,8 @@ export async function processMemberRemark(
       indexInBlock,
       txHash,
       memberId,
-      decodedMessage.createComment
+      decodedMessage.createComment,
+      payment
     )
   }
 

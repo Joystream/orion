@@ -34,6 +34,7 @@ import { model } from '../model'
 import {
   AppActionSignatureInput,
   AppRootDomain,
+  CommentTipTiers,
   ChannelWeight,
   CrtMarketCapMinVolume,
   ExcludableContentType,
@@ -66,6 +67,7 @@ import {
   SetRootDomainInput,
   SetSupportedCategoriesInput,
   SetSupportedCategoriesResult,
+  SetTipTierAmountsInput,
   SetVideoHeroInput,
   SetVideoHeroResult,
   SetVideoViewPerUserTimeLimitInput,
@@ -163,6 +165,22 @@ export class AdminResolver {
     )
     await recalculateAllVideosRelevance(em)
     return { isApplied: true }
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_TIP_TIERS))
+  @Mutation(() => CommentTipTiers)
+  async setTipTierAmounts(@Args() args: SetTipTierAmountsInput): Promise<CommentTipTiers> {
+    const em = await this.em()
+    const tipTiers = await config.get(ConfigVariable.CommentTipTiers, em)
+    const newTipTiers = { ...tipTiers, ...args }
+    await config.set(ConfigVariable.CommentTipTiers, newTipTiers, em)
+    return newTipTiers
+  }
+
+  @Query(() => CommentTipTiers)
+  async tipTiers(): Promise<CommentTipTiers> {
+    const em = await this.em()
+    return config.get(ConfigVariable.CommentTipTiers, em)
   }
 
   @UseMiddleware(OperatorOnly())

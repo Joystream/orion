@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm'
-import { GatewayConfig } from '../model'
+import { CommentTipTier, GatewayConfig } from '../model'
 import { withHiddenEntities } from './sql'
 
 export enum ConfigVariable {
@@ -25,6 +25,7 @@ export enum ConfigVariable {
   AppAssetStorage = 'APP_ASSET_STORAGE',
   AppNameAlt = 'APP_NAME_ALT',
   NotificationAssetRoot = 'NOTIFICATION_ASSET_ROOT',
+  CommentTipTiers = 'COMMENT_TIP_TIERS',
 }
 
 const boolType = {
@@ -46,6 +47,8 @@ const jsonType = <T>() => ({
   serialize: (v: T) => JSON.stringify(v),
   deserialize: (v: string) => JSON.parse(v) as T,
 })
+
+export type CommentTipTiers = { [key in CommentTipTier]: number }
 
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
@@ -71,6 +74,7 @@ export const configVariables = {
   [ConfigVariable.AppAssetStorage]: stringType,
   [ConfigVariable.AppNameAlt]: stringType,
   [ConfigVariable.NotificationAssetRoot]: stringType,
+  [ConfigVariable.CommentTipTiers]: jsonType<CommentTipTiers>(),
 } as const
 
 type TypeOf<C extends ConfigVariable> = ReturnType<(typeof configVariables)[C]['deserialize']>

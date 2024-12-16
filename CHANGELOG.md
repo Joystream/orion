@@ -1,3 +1,31 @@
+# 4.2.0
+
+## Affected components:
+- Migrations:
+    - **(A) `1733920148217-Data.js`**
+    - views migration
+- GraphQL schema:
+    - **(M) `Comment`**: added `tipTier`, `tipAmount` and `sortPriority` fields
+    - **(M) `OperatorPermission`**: added `SET_TIP_TIERS` variant
+    - **(A) `CommentTipTier`**: new enum
+- GraphQL server:
+    - **(A) `tipTiers`** (query)
+    - **(A) `setTipTierAmounts`** (mutation)
+- Processor:
+    - **(M) `Members.MemberRemarked`** (event handler)
+- Config:
+    - **(A) `COMMENT_TIP_TIERS`**
+- Dockerfile
+
+## Changes
+- Added support for [Atlas tipping functionality](https://github.com/Joystream/atlas/issues/6291):
+    - added `COMMENT_TIP_TIERS` config variable and corresponding `tipTiers` query and `setTipTierAmounts` mutation which allow configuring the minimum amounts of JOY tokens required to obtain each tier (SILVER / GOLD / DIAMOND) when adding a video comment with a tip.
+    - modified `MemberRemarked` event handler: `processCreateCommentMessage` now takes `payment` parameter and assigns a `tipTier`, `tipAmount` and `sortPriority` to a comment based on the amount of JOY paid to channel reward account.
+    - updated GraphQL schema (`Comment`, `CommentTipTier`) and migrations to support new `Comment` fields.
+
+## Bug Fixes:
+- Dockerfile: added missing `entrypoints` and `opentelemetry` directories.
+
 # 4.1.1
 
 ## Affected components:

@@ -3,9 +3,9 @@ import BN from 'bn.js'
 
 export let JOYSTREAM_USD_PRICE: number | null = null
 
-const HAPI_TO_JOY_RATE = 10 ** 10
-const HAPI_TO_JOY_RATE_BN = new BN(HAPI_TO_JOY_RATE)
-const MAX_SAFE_NUMBER_BN = new BN(Number.MAX_SAFE_INTEGER)
+export const HAPI_TO_JOY_RATE = 10 ** 10
+export const HAPI_TO_JOY_RATE_BN = new BN(HAPI_TO_JOY_RATE)
+export const MAX_SAFE_NUMBER_BN = new BN(Number.MAX_SAFE_INTEGER)
 
 const log = createLogger('price')
 

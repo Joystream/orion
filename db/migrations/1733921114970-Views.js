@@ -1,8 +1,8 @@
 
 const { getViewDefinitions } = require('../viewDefinitions')
 
-module.exports = class Views1730976542053 {
-  name = 'Views1730976542053'
+module.exports = class Views1733921114970 {
+  name = 'Views1733921114970'
 
   async up(db) {
     // these two queries will be invoked and the cleaned up by the squid itself
@@ -15,6 +15,9 @@ module.exports = class Views1730976542053 {
     const viewDefinitions = getViewDefinitions(db);
     for (const [tableName, viewConditions] of Object.entries(viewDefinitions)) {
       if (Array.isArray(viewConditions)) {
+        await db.query(`
+          DROP VIEW IF EXISTS "${tableName}" CASCADE
+        `)
         await db.query(`
           CREATE OR REPLACE VIEW "${tableName}" AS
             SELECT *
