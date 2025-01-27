@@ -44,6 +44,8 @@ services:
     command: [
         '--database-url',
         'postgres://postgres:postgres@orion_archive_db:${DB_PORT}/squid-archive',
+        '--scan-max-value',
+        '1000'
         # "--evm-support" # uncomment for chains with Frontier EVM pallet
         # (e.g. Moonbeam/Moonriver or Astar/Shiden)
       ]
