@@ -293,7 +293,7 @@ export async function processEnglishAuctionSettledEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
-  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft, previousNftOwner)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -355,7 +355,7 @@ export async function processBidMadeCompletingAuctionEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
-  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft, previousNftOwner)
 
   // add new event
   const event = overlay.getRepository(Event).new({
@@ -411,7 +411,7 @@ export async function processOpenAuctionBidAcceptedEvent({
   // set last sale
   nft.lastSalePrice = winningBid.amount
   nft.lastSaleDate = new Date(block.timestamp)
-  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft)
+  await maybeIncreaseChannelCumulativeRevenueAfterNft(overlay, nft, previousNftOwner)
 
   // add new event
   const event = overlay.getRepository(Event).new({
