@@ -7,6 +7,11 @@ services:
     environment:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: squid
+    logging:
+      driver: 'local'
+      options:
+        max-size: '200m'
+        max-file: '10'
     networks:
       - joystream_default
     ports:
