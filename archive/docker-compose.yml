@@ -6,15 +6,20 @@ services:
     restart: unless-stopped
     volumes:
       - orion_archive_db_data:/var/lib/postgresql/data
+      - ./postgres.conf:/etc/postgresql/postgresql.conf
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: squid-archive
+    logging:
+      driver: 'local'
+      options:
+        max-size: '200m'
+        max-file: '10'
     ports:
       - '127.0.0.1:${DB_PORT}:${DB_PORT}'
       - '[::1]:${DB_PORT}:${DB_PORT}'
-    command: ['postgres', '-c', 'log_statement=all', '-p', '${DB_PORT}']
-
+    command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
   ingest:
     container_name: orion_archive_ingest
     depends_on:
