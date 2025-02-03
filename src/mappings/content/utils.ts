@@ -870,11 +870,14 @@ export function computeRoyalty(royaltyPct: number, price: bigint): bigint {
 
 export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
   overlay: EntityManagerOverlay,
-  nft: Flat<OwnedNft>
+  nft: Flat<OwnedNft>,
+  previousNftOwner?: NftOwner
 ) {
   const video = await overlay.getRepository(Video).getByIdOrFail(nft.videoId)
   const channel = await overlay.getRepository(Channel).getByIdOrFail(assertNotNull(video.channelId))
-  if (nft.owner.isTypeOf === 'NftOwnerChannel') {
+  const nftOwnerType = previousNftOwner ? previousNftOwner.isTypeOf : nft.owner.isTypeOf
+
+  if (nftOwnerType === 'NftOwnerChannel') {
     increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
   } else {
     if (nft.creatorRoyalty) {
