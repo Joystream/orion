@@ -61,6 +61,7 @@ const exportedStateMap: ExportedStateMap = {
   Token: true,
   NextEntityId: true,
   OrionOffchainCursor: true,
+  UserInteractionCount: true,
   Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
   Video: ['isExcluded', 'viewsNum', 'orionLanguage'],
   Comment: ['isExcluded'],
