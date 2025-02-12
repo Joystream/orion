@@ -399,6 +399,18 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
 
   for (const block of ctx.blocks) {
+    // Importing exported offchain state
+    if (block.header.height > exportBlockNumber && !offchainState.isImported) {
+      ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+      // there is no need to recalc video relevance before orion is synced
+      await overlay.updateDatabase()
+      const em = overlay.getEm()
+      await offchainState.import(overlay)
+      await commentCountersManager.updateVideoCommentsCounters(em, true)
+      await commentCountersManager.updateParentRepliesCounters(em, true)
+      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
+      ctx.log.info(`Offchain state successfully imported!`)
+    }
     for (const item of block.items) {
       if (item.name !== '*') {
         ctx.log.info(`Processing ${item.name} event in block ${block.header.height}...`)
@@ -426,19 +438,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
       block.header.height >= exportBlockNumber
     ) {
       videoRelevanceManager.turnOnVideoRelevanceManager()
-    }
-
-    // Importing exported offchain state
-    if (block.header.height >= exportBlockNumber && !offchainState.isImported) {
-      ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
-      // there is no need to recalc video relevance before orion is synced
-      await overlay.updateDatabase()
-      const em = overlay.getEm()
-      await offchainState.import(overlay)
-      await commentCountersManager.updateVideoCommentsCounters(em, true)
-      await commentCountersManager.updateParentRepliesCounters(em, true)
-      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
-      ctx.log.info(`Offchain state successfully imported!`)
     }
   }
 
