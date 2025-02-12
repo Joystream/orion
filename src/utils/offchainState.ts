@@ -63,10 +63,11 @@ const exportedStateMap: ExportedStateMap = {
   OrionOffchainCursor: true,
   UserInteractionCount: true,
   Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
-  Video: ['isExcluded', 'viewsNum', 'orionLanguage'],
+  Video: ['isExcluded', 'viewsNum', 'orionLanguage', 'includeInHomeFeed'],
   Comment: ['isExcluded'],
   OwnedNft: ['isFeatured'],
   VideoCategory: ['isSupported'],
+  CreatorToken: ['isFeatured'],
 }
 
 type ExportedData = {
