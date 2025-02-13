@@ -16,6 +16,7 @@
     - `CreatorToken.isFeatured` field
     - `Video.includeInHomeFeed` field
     - `UserInteractionCount` entity
+- Fixed import logic (now runs BEFORE processing any block > `exportBlockNumber`. This prevents state inconsistency in case `exportBlockNumber` block does not have any relevant events and is therefore not processed by Orion)
 - Changed default database logging configuration to be more conservative (https://github.com/Joystream/orion/pull/357)
 - Changed default archive configuration to include `scan-max-value` (https://github.com/Joystream/orion/pull/355)
 
