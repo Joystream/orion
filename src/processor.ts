@@ -399,6 +399,9 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
 
   for (const block of ctx.blocks) {
+    if (block.header.height > exportBlockNumber && !videoRelevanceManager.isVideoRelevanceEnabled) {
+      videoRelevanceManager.turnOnVideoRelevanceManager()
+    }
     // Importing exported offchain state
     if (block.header.height > exportBlockNumber && !offchainState.isImported) {
       ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
@@ -431,13 +434,6 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
           await overlay.updateDatabase()
         }
       }
-    }
-
-    if (
-      !videoRelevanceManager.isVideoRelevanceEnabled &&
-      block.header.height >= exportBlockNumber
-    ) {
-      videoRelevanceManager.turnOnVideoRelevanceManager()
     }
   }
 
