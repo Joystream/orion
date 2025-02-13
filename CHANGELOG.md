@@ -1,3 +1,24 @@
+# 4.3.0
+
+## Affected components:
+- Processor:
+    - **(M) `Content.EnglishAuctionSettled`** (event handler)
+    - **(M) `Content.BidMadeCompletingAuction`** (event handler)
+    - **(M) `Content.OpenAuctionBidAccepted`** (event handler)
+    - State importing
+- Export state script (`npm run offchain-state:export`)
+- Default `docker-compose.yml` and `postgres.conf` configuration
+
+## Changes
+
+- Fixed `Channel.cumulativeRevenue` calculation after NFT is sold on Open/English auction (https://github.com/Joystream/joystream/issues/5180)
+- Added missing data to exported state (https://github.com/Joystream/orion/pull/358):
+    - `CreatorToken.isFeatured` field
+    - `Video.includeInHomeFeed` field
+    - `UserInteractionCount` entity
+- Changed default database logging configuration to be more conservative (https://github.com/Joystream/orion/pull/357)
+- Changed default archive configuration to include `scan-max-value` (https://github.com/Joystream/orion/pull/355)
+
 # 4.2.0
 
 ## Affected components:
