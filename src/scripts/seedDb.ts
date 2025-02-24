@@ -16,7 +16,7 @@ type AnyEntityName = {
 
 export async function seed(em: EntityManager) {
   const inputPath = process.argv[2]
-  if (!inputPath && !inputPath.endsWith('.json')) {
+  if (!inputPath || !inputPath.endsWith('.json')) {
     throw new Error('Provide input path (.json) as first argument!')
   }
   const input: [AnyEntityName, Record<string, unknown>][] = JSON.parse(
