@@ -3,7 +3,7 @@ import _ from 'lodash'
 import path from 'path'
 import assert from 'node:assert'
 import fs from 'fs/promises'
-import { loadModel } from '@subsquid/openreader/lib/tools'
+import { loadModel, resolveGraphqlSchema } from '@subsquid/openreader/lib/tools'
 import {
   Enum,
   EnumPropType,
@@ -17,7 +17,7 @@ import {
 import * as model from '../model'
 import { globalEm } from '../utils/globalEm'
 
-const subsquidModel = loadModel(path.join(__dirname, '../../schema.graphql'))
+const subsquidModel = loadModel(resolveGraphqlSchema(path.join(__dirname, '../..')))
 
 type AnyEntity = { id: string }
 
@@ -162,7 +162,7 @@ const excludedEntities = new Set(['NextEntityId', 'OrionOffchainCursor'])
 
 export async function generateMockData(em: EntityManager) {
   const outputPath = process.argv[2]
-  if (!outputPath && !outputPath.endsWith('.json')) {
+  if (!outputPath || !outputPath.endsWith('.json')) {
     throw new Error('Provide output path (.json) as first argument!')
   }
   //   Get a list of all entities from the metadata
@@ -178,6 +178,7 @@ export async function generateMockData(em: EntityManager) {
     e,
   ])
   await fs.writeFile(outputPath, JSON.stringify(mockedRecords, null, 2))
+  console.log(`Saved mock data in ${outputPath}`)
 }
 
 async function main() {

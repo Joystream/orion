@@ -1,3 +1,12 @@
+# 4.4.1
+## Affected components:
+- Scripts:
+    - **(M)** `scripts/generateMockData.ts`
+    - **(M)** `scripts/seedDb.ts`
+
+- Fixed a bug when running `npm run generate:mock-data` from within docker container (missing `schema.graphql`).
+- Fixed invalid error message when input/output path not provided in `generate:mock-data` / `db:seed` scripts.
+
 # 4.4.0
 
 ## Affected components:
