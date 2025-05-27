@@ -1,3 +1,17 @@
+# 4.5.0
+## Affected components:
+- Auth server:
+    - **(M)** `openapi.yml` spec
+    - **(M)** `anonymousAuth` route
+- GraphQL server:
+    - **(M)** `src/server-extension/check.ts`
+
+## Changes
+- POST `/api/v1/anonymous-auth` now returns `sessionId` in response body, enabling header authentication.
+- Auth server's `openapi.yml` definition of `AnonymousUserAuthOkResponse` was adjusted.
+- Auth server's `openapi.yml` definition of `/logout` route was adjusted to enable header (`bearer`) auth.
+- GraphQL server request check method was adjusted to enable header (`bearer`) auth.
+
 # 4.4.1
 ## Affected components:
 - Scripts:

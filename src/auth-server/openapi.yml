@@ -225,6 +225,7 @@ paths:
       description: Terminate the current session.
       security:
         - cookieAuth: []
+        - bearerAuth: []
       responses:
         '200':
           $ref: '#/components/responses/GenericOkResponse'
