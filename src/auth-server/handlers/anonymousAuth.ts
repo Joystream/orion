@@ -50,6 +50,7 @@ export const anonymousAuth: (
     res.status(200).json({
       success: true,
       userId: user.id,
+      sessionId: sessionData.session.id,
     })
   } catch (e) {
     next(e)

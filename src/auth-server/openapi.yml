@@ -461,8 +461,11 @@ components:
         - type: object
           required:
             - userId
+            - sessionId
           properties:
             userId:
+              type: string
+            sessionId:
               type: string
     LoginRequestData:
       allOf:
