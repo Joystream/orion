@@ -15,6 +15,10 @@ enum OperatorPermission {
   SET_FEATURED_CRTS
   SET_CRT_MARKETCAP_MIN_VOLUME
   SET_TIP_TIERS
+  SET_CHANNEL_YPP_STATUS
+  SET_APP_CONFIGS
+  VIEW_CURATOR_SCHEMA
+  VIEW_ADMIN_SCHEMA
 }
 
 type User @entity @schema(name: "admin") {

@@ -12,12 +12,10 @@ import { backwardCompatibleMetaID } from '../../mappings/utils'
 import {
   Account,
   Channel,
-  ChannelExcluded,
   ChannelRecipient,
-  ChannelVerification,
+  ChannelTier,
   CommentPostedToVideo,
   CommentReply,
-  Exclusion,
   MemberRecipient,
   NextEntityId,
   NftFeaturedOnMarketPlace,
@@ -25,15 +23,9 @@ import {
   Notification,
   NotificationEmailDelivery,
   OwnedNft,
-  Video,
   VideoLiked,
 } from '../../model'
 import { setFeaturedNftsInner } from '../../server-extension/resolvers/AdminResolver'
-import {
-  excludeChannelService,
-  verifyChannelService,
-} from '../../server-extension/resolvers/ChannelsResolver'
-import { excludeVideoService } from '../../server-extension/resolvers/VideosResolver'
 import { globalEm } from '../../utils/globalEm'
 import {
   OFFCHAIN_NOTIFICATION_ID_TAG,
@@ -41,6 +33,7 @@ import {
 } from '../../utils/notification/helpers'
 import { AnyEntity, Constructor, EntityManagerOverlay } from '../../utils/overlay'
 import { defaultTestBlock, populateDbWithSeedData } from './testUtils'
+import assert from 'assert'
 
 dontenvConfig({
   path: path.resolve(__dirname, './.env'),
@@ -82,160 +75,7 @@ describe('notifications tests', () => {
     overlay = await createOverlay()
     await populateDbWithSeedData()
   })
-  describe('👉 YPP Verify channel', () => {
-    let notificationId: string
-    it('verify channel should deposit notification', async () => {
-      const channelId = '1'
-      const nextNotificationIdPre = await getNextNotificationId(em, false)
-      notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
-      await verifyChannelService(em, [channelId])
-
-      notification = await em.getRepository(Notification).findOneBy({
-        id: notificationId,
-      })
-      const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
-      const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
-      expect(notification).not.to.be.null
-      expect(channel).not.to.be.null
-      expect(notification!.notificationType.isTypeOf).to.equal('ChannelVerified')
-      expect(notification!.status.isTypeOf).to.equal('Unread')
-      expect(notification!.inApp).to.be.true
-      expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
-      expect((notification!.recipient as ChannelRecipient).channel).to.equal(channel.id)
-      expect(nextNotificationIdPost.toString()).to.equal((nextNotificationIdPre + 1).toString())
-      expect(notification?.accountId).to.equal(account?.id)
-    })
-    it('notification email entity should be correctly deposited', async () => {
-      const notificationEmailDelivery = await em
-        .getRepository(NotificationEmailDelivery)
-        .findOneBy({ notificationId })
-      expect(notificationEmailDelivery).not.to.be.null
-      expect(notificationEmailDelivery!.discard).to.be.false
-      expect(notificationEmailDelivery!.attempts).to.be.undefined
-    })
-    it('verify channel should mark channel as excluded with entity inserted', async () => {
-      const channelId = '2'
-
-      await verifyChannelService(em, [channelId])
-
-      const channel = await em.getRepository(Channel).findOneByOrFail({ id: channelId })
-      const channelVerification = await em
-        .getRepository(ChannelVerification)
-        .findOneBy({ channelId })
-      expect(channelVerification).not.to.be.null
-      expect(channel!.yppStatus.isTypeOf).to.be.equal('YppVerified')
-    })
-  })
-  describe('👉 Exclude channel', () => {
-    let notificationId: string
-    it('exclude channel should deposit notification', async () => {
-      const channelId = '1'
-      const rationale = 'test-rationale'
-      const nextNotificationIdPre = await getNextNotificationId(em, false)
-      notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
-      await excludeChannelService(em, channelId, rationale)
-
-      notification = await em.getRepository(Notification).findOneBy({
-        id: notificationId,
-      })
-      const channel = await em.getRepository(Channel).findOneBy({ id: channelId })
-      const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: channel!.ownerMemberId! })
-      expect(notification).not.to.be.null
-      expect(channel).not.to.be.null
-      expect(notification!.notificationType.isTypeOf).to.equal('ChannelExcluded')
-      expect(notification!.status.isTypeOf).to.equal('Unread')
-      expect((notification!.notificationType as ChannelExcluded).channelTitle).to.equal(
-        `test-channel-${channelId}`
-      )
-      expect(notification!.inApp).to.be.true
-      expect(notification!.recipient.isTypeOf).to.equal('MemberRecipient')
-      expect((notification!.recipient as MemberRecipient).membership).to.equal(
-        channel?.ownerMemberId
-      )
-      expect(nextNotificationIdPost.toString()).to.equal((nextNotificationIdPre + 1).toString())
-      expect(notification?.accountId).to.equal(account?.id)
-    })
-    it('notification email entity should be correctly deposited', async () => {
-      const notificationEmailDelivery = await em
-        .getRepository(NotificationEmailDelivery)
-        .findOneBy({ notificationId })
-      expect(notificationEmailDelivery).not.to.be.null
-      expect(notificationEmailDelivery!.discard).to.be.false
-      expect(notificationEmailDelivery!.attempts).to.be.undefined
-    })
-    it('exclude channel should mark channel as excluded with entity inserted', async () => {
-      const channelId = '2'
-      const rationale = 'test-rationale'
-
-      await excludeChannelService(em, channelId, rationale)
-
-      const channel = await em.getRepository(Channel).findOneBy({ id: channelId })
-      const exclusion = await em.getRepository(Exclusion).findOneBy({ channelId })
-      expect(exclusion).not.to.be.null
-      expect(exclusion!.rationale).to.equal(rationale)
-      expect(channel).not.to.be.null
-      expect(channel!.isExcluded).to.be.true
-    })
-  })
-  describe('👉 Exclude video', () => {
-    let notificationId: string
-    it('exclude video should deposit notification', async () => {
-      const videoId = '1'
-      const rationale = 'test-rationale'
-      const nextNotificationIdPre = await getNextNotificationId(em, false)
-      const notificationId = OFFCHAIN_NOTIFICATION_ID_TAG + '-' + nextNotificationIdPre
-
-      await excludeVideoService(em, videoId, rationale)
-
-      notification = await em.getRepository(Notification).findOneBy({
-        id: notificationId,
-      })
-      const video = await em
-        .getRepository(Video)
-        .findOne({ where: { id: videoId }, relations: { channel: true } })
-      expect(video).not.to.be.null
-      expect(video!.channel).not.to.be.null
-      const nextNotificationIdPost = await getNextNotificationId(em, false)
-      const account = await em
-        .getRepository(Account)
-        .findOneBy({ membershipId: video!.channel.ownerMemberId! })
-      expect(notification).not.to.be.null
-      expect(notification!.notificationType.isTypeOf).to.equal('VideoExcluded')
-      expect(notification!.status.isTypeOf).to.equal('Unread')
-      expect(notification!.inApp).to.be.true
-      expect(notification!.recipient.isTypeOf).to.equal('ChannelRecipient')
-      expect((notification!.recipient as ChannelRecipient).channel).to.equal(video!.channel!.id)
-      expect(nextNotificationIdPost.toString()).to.equal((nextNotificationIdPre + 1).toString())
-      expect(notification?.accountId).to.equal(account?.id)
-    })
-    it('notification email entity should be correctly deposited', async () => {
-      const notificationEmailDelivery = await em
-        .getRepository(NotificationEmailDelivery)
-        .findOneBy({ notificationId })
-      expect(notificationEmailDelivery).not.to.be.null
-      expect(notificationEmailDelivery!.discard).to.be.false
-      expect(notificationEmailDelivery!.attempts).to.be.undefined
-    })
-    it('exclude video should work with exclusion entity added', async () => {
-      const videoId = '2'
-      const rationale = 'test-rationale'
-
-      await excludeVideoService(em, videoId, rationale)
-
-      const video = await em.getRepository(Video).findOneBy({ id: videoId })
-      const exclusion = await em.getRepository(Exclusion).findOneBy({ videoId })
-      expect(exclusion).not.to.be.null
-      expect(exclusion!.rationale).to.equal(rationale)
-      expect(video).not.to.be.null
-      expect(video!.isExcluded).to.be.true
-    })
-  })
+  // TODO: Set YPP status
   describe('👉 Set nft as featured', () => {
     let notificationId: string
     it('feature nfts should deposit notification and set nft as featured', async () => {

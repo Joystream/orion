@@ -84,7 +84,7 @@ export class AdminResolver {
   // Set by dependency injection
   constructor(private em: () => Promise<EntityManager>) {}
 
-  @UseMiddleware(OperatorOnly())
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_APP_CONFIGS))
   @Mutation(() => SetNewAppAssetStorageResult)
   async setAppAssetStorage(
     @Args() args: SetNewAppAssetStorageInput
@@ -94,7 +94,7 @@ export class AdminResolver {
     return { newAppAssetStorage: args.newAppAssetStorage }
   }
 
-  @UseMiddleware(OperatorOnly())
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_APP_CONFIGS))
   @Mutation(() => SetNewAppNameAltResult)
   async setAppNameAlt(@Args() args: SetNewAppNameAltInput): Promise<SetNewAppNameAltResult> {
     const em = await this.em()
@@ -102,7 +102,7 @@ export class AdminResolver {
     return { newAppNameAlt: args.newAppNameAlt }
   }
 
-  @UseMiddleware(OperatorOnly())
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_APP_CONFIGS))
   @Mutation(() => SetNewNotificationAssetRootResult)
   async setNewNotificationAssetRoot(
     @Args() args: SetNewNotificationAssetRootInput
@@ -183,7 +183,7 @@ export class AdminResolver {
     return config.get(ConfigVariable.CommentTipTiers, em)
   }
 
-  @UseMiddleware(OperatorOnly())
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_APP_CONFIGS))
   @Mutation(() => Int)
   async setMaxAttemptsOnMailDelivery(
     @Args() args: SetMaxAttemptsOnMailDeliveryInput
@@ -196,20 +196,7 @@ export class AdminResolver {
     return { maxAttempts: args.newMaxAttempts }
   }
 
-  @UseMiddleware(OperatorOnly())
-  @Mutation(() => Int)
-  async setNewNotificationCenterPath(
-    @Args() args: SetMaxAttemptsOnMailDeliveryInput
-  ): Promise<MaxAttemptsOnMailDelivery> {
-    const em = await this.em()
-    if (args.newMaxAttempts < 1) {
-      throw new Error('Max attempts cannot be less than 1')
-    }
-    await config.set(ConfigVariable.EmailNotificationDeliveryMaxAttempts, args.newMaxAttempts, em)
-    return { maxAttempts: args.newMaxAttempts }
-  }
-
-  @UseMiddleware(OperatorOnly())
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_APP_CONFIGS))
   @Mutation(() => AppRootDomain)
   async setNewAppRootDomain(@Args() args: SetRootDomainInput): Promise<AppRootDomain> {
     const em = await this.em()
@@ -467,6 +454,7 @@ export class AdminResolver {
     @Args()
     { ids, type }: ExcludeContentArgs
   ): Promise<ExcludeContentResult> {
+    // TODO: Consider adding rationale and notification
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {
@@ -493,6 +481,7 @@ export class AdminResolver {
     @Args()
     { ids, type }: RestoreContentArgs
   ): Promise<ExcludeContentResult> {
+    // TODO: Consider adding rationale and notification
     const em = await this.em()
 
     return withHiddenEntities(em, async () => {

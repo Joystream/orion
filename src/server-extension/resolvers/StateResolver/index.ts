@@ -91,7 +91,7 @@ export class StateResolver {
         entity_id,
         SUM(count) as entryCount
       FROM
-        admin.user_interaction_count
+        curator.user_interaction_count
       WHERE
         type = $1 AND day_timestamp >= NOW() - INTERVAL '${args.period} DAYS'
       GROUP BY

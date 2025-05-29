@@ -3,6 +3,7 @@ import { TypeormOpenreaderContext } from '@subsquid/graphql-server/lib/typeorm'
 import { Context as OpenreaderContext } from '@subsquid/openreader/lib/context'
 import { UnauthorizedError } from 'type-graphql'
 import { AuthContext, authenticate } from '../utils/auth'
+import { OperatorPermission } from '../model'
 
 export type Context = OpenreaderContext & AuthContext
 
@@ -44,10 +45,16 @@ export const requestCheck: RequestCheckFunction = async (ctx) => {
     throw new UnauthorizedError()
   }
 
-  // Set search_path accordingly if it's an operator request
-  if (authContext?.user.isRoot) {
+  // Set search_path accordingly to user's permissions
+  if (authContext?.user) {
     const em = await (context.openreader as unknown as TypeormOpenreaderContext).getEntityManager()
-    await em.query('SET LOCAL search_path TO admin,public')
+    const { user } = authContext
+    const permissions = user.permissions || []
+    if (user.isRoot || permissions.includes(OperatorPermission.VIEW_ADMIN_SCHEMA)) {
+      await em.query('SET LOCAL search_path TO admin,curator,public')
+    } else if (permissions.includes(OperatorPermission.VIEW_CURATOR_SCHEMA)) {
+      await em.query('SET LOCAL search_path TO curator,public')
+    }
   }
 
   return true

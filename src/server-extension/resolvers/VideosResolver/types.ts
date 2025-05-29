@@ -80,22 +80,6 @@ export class ReportVideoArgs {
 }
 
 @ArgsType()
-export class ExcludeVideoArgs {
-  @Field(() => String, { nullable: false })
-  videoId!: string
-
-  @Field(() => String, { nullable: false })
-  @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
-  rationale!: string
-}
-
-@ObjectType()
-export class ExcludeVideoInfo extends EntityReportInfo {
-  @Field(() => String, { nullable: false })
-  videoId!: string
-}
-
-@ArgsType()
 export class DumbPublicFeedArgs {
   @Field(() => VideoWhereInput, { nullable: true })
   where?: Record<string, unknown>

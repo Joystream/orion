@@ -26,7 +26,6 @@ import {
   MetaprotocolTransactionResultFailed,
   MetaprotocolTransactionStatusEventData,
   StorageDataObject,
-  YppUnverified,
 } from '../../model'
 import { EventHandlerContext } from '../../utils/events'
 import { addNotification } from '../../utils/notification'
@@ -77,7 +76,8 @@ export async function processChannelCreatedEvent({
     totalVideosCreated: 0,
     cumulativeRevenue: BigInt(0),
     cumulativeRewardClaimed: BigInt(0),
-    yppStatus: new YppUnverified(),
+    isYtSyncEnabled: false,
+    yppStatus: null,
     cumulativeReward: 0n,
   })
 

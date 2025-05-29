@@ -37,7 +37,7 @@ export class OrionVideoLanguageManager {
 
     const videos = await em.query(`
     SELECT id, title, description
-    FROM admin.video
+    FROM curator.video
     WHERE id in (${[...this.videoToDetect.values()].map((id) => `'${id}'`).join(',')})
     `)
 
