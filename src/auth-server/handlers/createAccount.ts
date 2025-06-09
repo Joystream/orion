@@ -82,6 +82,8 @@ export const createAccount: (
         referrerChannelId: null,
       })
 
+      await em.save(account)
+
       if (req.body.payload.encryptionArtifacts) {
         const { cipherIv, encryptedSeed, id: lookupKey } = req.body.payload.encryptionArtifacts
         // We don't check if artifacts already exist by this id, becasue that opens up
