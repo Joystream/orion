@@ -11,7 +11,9 @@ module.exports = class Admin1000000000000 {
     )
     await db.query(`GRANT pg_read_all_data TO "${process.env.DB_ADMIN_USER}"`)
     await db.query(`GRANT pg_write_all_data TO "${process.env.DB_ADMIN_USER}"`)
-    await db.query(`ALTER USER "${process.env.DB_ADMIN_USER}" SET search_path TO admin,curator,public`)
+    await db.query(
+      `ALTER USER "${process.env.DB_ADMIN_USER}" SET search_path TO admin,curator,public`
+    )
   }
 
   async down(db) {
