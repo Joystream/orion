@@ -19,16 +19,6 @@ import { EntityManagerOverlay } from './overlay'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
 
-type CamelToSnakeCase<S> = S extends `${infer T}${infer U}`
-  ? T extends Capitalize<T>
-    ? `_${Lowercase<T>}${CamelToSnakeCase<U>}`
-    : `${T}${CamelToSnakeCase<U>}`
-  : S
-
-type SnakeCaseKeys<T> = {
-  [K in keyof T as CamelToSnakeCase<K>]: T[K]
-}
-
 type ClassConstructors<T> = {
   [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
 }
@@ -56,7 +46,6 @@ const exportedStateMap: ExportedStateMap = {
   NotificationEmailDelivery: true,
   EmailDeliveryAttempt: true,
   Token: true,
-  NextEntityId: true,
   OrionOffchainCursor: true,
   UserInteractionCount: true,
   Channel: [
@@ -284,26 +273,6 @@ export class OffchainState {
     return data
   }
 
-  private async importNextEntityIdCounters(
-    overlay: EntityManagerOverlay,
-    entityName: string,
-    data: model.NextEntityId[]
-  ) {
-    const em = overlay.getEm()
-    assert(entityName === 'NextEntityId')
-    for (const record of data) {
-      if (em.connection.hasMetadata(record.entityName as string)) {
-        // reason: during migration the overlay would write to the database the
-        // old nextId, to avoid that directly set the 'nextId' in the Overlay
-        overlay
-          .getRepository(model[record.entityName as keyof typeof model] as any)
-          .setNextEntityId(record.nextId as number)
-      } else {
-        await em.getRepository(entityName).upsert(record, ['entityName'])
-      }
-    }
-  }
-
   public async import(
     overlay: EntityManagerOverlay,
     exportFilePath = DEFAULT_EXPORT_PATH
@@ -379,16 +348,7 @@ export class OffchainState {
             } entities left)...`
           )
 
-          // UPSERT operation specifically for NextEntityId
-          if (entityName === 'NextEntityId') {
-            await this.importNextEntityIdCounters(
-              overlay,
-              entityName,
-              batch as model.NextEntityId[]
-            )
-          } else {
-            await em.getRepository(entityName).insert(batch)
-          }
+          await em.getRepository(entityName).insert(batch)
         }
       }
       this.logger.info(

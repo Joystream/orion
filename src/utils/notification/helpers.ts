@@ -4,7 +4,6 @@ import {
   AccountNotificationPreferences,
   Channel,
   Event,
-  NextEntityId,
   Notification,
   NotificationEmailDelivery,
   NotificationPreference,
@@ -15,7 +14,6 @@ import {
 } from '../../model'
 import { getCurrentBlockHeight } from '../blockHeight'
 import { uniqueId } from '../crypto'
-import { getNextIdForEntity } from '../nextEntityId'
 import { EntityManagerOverlay, Flat } from '../overlay'
 
 export const RUNTIME_NOTIFICATION_ID_TAG = 'RuntimeNotification'
@@ -157,11 +155,8 @@ async function addOffChainNotification(
   notificationType: NotificationType,
   dispatchBlock: number
 ) {
-  // get notification Id from orion_db in any case
-  const nextNotificationId = await getNextIdForEntity(em, OFFCHAIN_NOTIFICATION_ID_TAG)
-
   const notification = createNotification(
-    `${OFFCHAIN_NOTIFICATION_ID_TAG}-${nextNotificationId}`,
+    `${OFFCHAIN_NOTIFICATION_ID_TAG}-${uniqueId()}`,
     account.id,
     recipient,
     notificationType,
@@ -176,8 +171,6 @@ async function addOffChainNotification(
   if (pref.emailEnabled) {
     await createEmailNotification(em, notification)
   }
-
-  await saveNextNotificationId(em, nextNotificationId + 1, OFFCHAIN_NOTIFICATION_ID_TAG)
 }
 
 async function addRuntimeNotification(
@@ -188,10 +181,7 @@ async function addRuntimeNotification(
   event: Event,
   dispatchBlock: number
 ) {
-  // get notification Id from orion_db in any case
-  const nextNotificationId = await getNextIdForEntity(overlay, RUNTIME_NOTIFICATION_ID_TAG)
-
-  const runtimeNotificationId = `${RUNTIME_NOTIFICATION_ID_TAG}-${nextNotificationId}`
+  const runtimeNotificationId = `${RUNTIME_NOTIFICATION_ID_TAG}-${uniqueId()}`
 
   // check that on-notification is not already present in orion_db in case the processor has been restarted (but not orion_db)
   const existingNotification = await overlay
@@ -298,18 +288,6 @@ export const addNotification = async (
       dispatchBlock ?? lastProcessedBlock
     )
   }
-}
-
-async function saveNextNotificationId(
-  em: EntityManager,
-  nextNotificationId: number,
-  entityName: string
-) {
-  const nextEntityId = new NextEntityId({
-    entityName,
-    nextId: nextNotificationId,
-  })
-  await em.save(nextEntityId)
 }
 
 const JOY_DECIMAL = 10

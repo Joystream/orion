@@ -1,12 +1,12 @@
 import express from 'express'
-import { Account, EncryptionArtifacts, Membership, NextEntityId } from '../../model'
+import { Account, EncryptionArtifacts, Membership } from '../../model'
 import { AuthContext } from '../../utils/auth'
 import { globalEm } from '../../utils/globalEm'
-import { idStringFromNumber } from '../../utils/misc'
 import { defaultNotificationPreferences } from '../../utils/notification/helpers'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors'
 import { components } from '../generated/api-types'
 import { verifyActionExecutionRequest } from '../utils'
+import { uniqueId } from '../../utils/crypto'
 
 type ReqParams = Record<string, string>
 type ResBody =
@@ -34,16 +34,7 @@ export const createAccount: (
     await verifyActionExecutionRequest(em, req.body)
 
     await em.transaction(async (em) => {
-      // Get and lock next account id
-      // FIXME: For some reason this doesn't work as expected without the parseInt!
-      // (returns `nextId` as a string instead of a number)
-      const nextAccountId = parseInt(
-        (
-          await em
-            .getRepository(NextEntityId)
-            .findOne({ where: { entityName: 'Account' }, lock: { mode: 'pessimistic_write' } })
-        )?.nextId.toString() || '1'
-      )
+      const accountId = uniqueId()
 
       const existingByEmail = await em.getRepository(Account).findOneBy({ email })
       if (existingByEmail) {
@@ -79,7 +70,7 @@ export const createAccount: (
 
       const notificationPreferences = defaultNotificationPreferences()
       const account = new Account({
-        id: idStringFromNumber(nextAccountId),
+        id: accountId,
         email,
         isEmailConfirmed: false,
         registeredAt: new Date(),
@@ -90,11 +81,6 @@ export const createAccount: (
         notificationPreferences,
         referrerChannelId: null,
       })
-
-      await em.save([
-        account,
-        new NextEntityId({ entityName: 'Account', nextId: nextAccountId + 1 }),
-      ])
 
       if (req.body.payload.encryptionArtifacts) {
         const { cipherIv, encryptedSeed, id: lookupKey } = req.body.payload.encryptionArtifacts
