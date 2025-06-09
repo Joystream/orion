@@ -33,6 +33,8 @@ services:
     env_file:
       - .env
       - docker.env
+    environment:
+      - TYPEORM_SUBSCRIBERS_DIR=mappings/subscribers
     ports:
       - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
       - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
@@ -44,6 +46,34 @@ services:
         target: /orion
     working_dir: /orion
     command: ['make', 'process']
+
+  orion_relevance-service:
+    container_name: orion_relevance-service
+    image: node:18
+    restart: unless-stopped
+    networks:
+      - joystream_default
+    depends_on:
+      - orion_rabbitmq
+    env_file:
+      - .env
+      - docker.env
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'relevance-service']
+
+  orion_rabbitmq:
+    container_name: orion_rabbitmq
+    hostname: orion_rabbitmq
+    image: rabbitmq:4.1
+    networks:
+      - joystream_default
+    ports:
+      - '127.0.0.1:${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+      - '[::1]:${RABBITMQ_PORT}:${RABBITMQ_PORT}'
 
   orion_graphql-server:
     container_name: orion_graphql-server
@@ -58,6 +88,7 @@ services:
     environment:
       - SQD_TRACE=authentication
       - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
+      - TYPEORM_SUBSCRIBERS_DIR=server-extension/subscribers
     depends_on:
       - orion_db
     volumes:

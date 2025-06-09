@@ -26,7 +26,7 @@ type Video @entity @schema(name: "curator") {
   id: ID!
 
   "Timestamp of the block the video was created at"
-  createdAt: DateTime! @index
+  createdAt: DateTime!
 
   "Reference to videos's channel"
   channel: Channel!
@@ -50,7 +50,7 @@ type Video @entity @schema(name: "curator") {
   language: String
 
   "Video's orion langauge"
-  orionLanguage: String @index
+  orionLanguage: String
 
   "Whether or not Video contains marketing"
   hasMarketing: Boolean
@@ -128,7 +128,7 @@ type Video @entity @schema(name: "curator") {
   trailerVideoForToken: [TrailerVideo!]! @derivedFrom(field: "video")
 
   "Video relevance score based on the views, reactions, comments and update date"
-  videoRelevance: Float! @index
+  videoRelevance: Float!
 
   "Whether the video is a short format, vertical video (e.g. Youtube Shorts, TikTok, Instagram Reels)"
   isShort: Boolean

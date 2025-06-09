@@ -3,7 +3,7 @@ type Channel @entity @schema(name: "curator") {
   id: ID!
 
   "Timestamp of the block the channel was created at"
-  createdAt: DateTime! @index
+  createdAt: DateTime!
 
   "Current member-owner of the channel (if owned by a member)"
   ownerMember: Membership
@@ -30,7 +30,7 @@ type Channel @entity @schema(name: "curator") {
   isExcluded: Boolean!
 
   "The primary langauge of the channel's content"
-  language: String @index
+  language: String
 
   "List of videos that belong to the channel"
   videos: [Video!]! @derivedFrom(field: "channel")

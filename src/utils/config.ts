@@ -10,6 +10,7 @@ export enum ConfigVariable {
   VideoViewPerUserTimeLimit = 'VIDEO_VIEW_PER_USER_TIME_LIMIT',
   VideoRelevanceViewsTick = 'VIDEO_RELEVANCE_VIEWS_TICK',
   RelevanceWeights = 'RELEVANCE_WEIGHTS',
+  RelevanceServiceConfig = 'RELEVANCE_SERVICE_CONFIG',
   AppPrivateKey = 'APP_PRIVATE_KEY',
   AppRootDomain = 'APP_ROOT_DOMAIN',
   SessionExpiryAfterInactivityMinutes = 'SESSION_EXPIRY_AFTER_INACTIVITY_MINUTES',
@@ -26,6 +27,7 @@ export enum ConfigVariable {
   AppNameAlt = 'APP_NAME_ALT',
   NotificationAssetRoot = 'NOTIFICATION_ASSET_ROOT',
   CommentTipTiers = 'COMMENT_TIP_TIERS',
+  ChannelWeightFollowsTick = 'CHANNEL_WEIGHT_FOLLOWS_TICK',
 }
 
 const boolType = {
@@ -50,6 +52,35 @@ const jsonType = <T>() => ({
 
 export type CommentTipTiers = { [key in CommentTipTier]: number }
 
+export type RelevanceWeights = {
+  channel: {
+    crtVolumeWeight: number
+    crtLiquidityWeight: number
+    followersWeight: number
+    revenueWeight: number
+    yppTierWeight: number
+  }
+  video: {
+    ageWeight: number
+    viewsWeight: number
+    commentsWeight: number
+    reactionsWeight: number
+    ageSubWeights: {
+      joystreamAgeWeight: number
+      youtubeAgeWeight: number
+    }
+    // TODO: Tips
+  }
+}
+
+export type RelevanceServiceConfig = {
+  populateBackgroundQueueInterval: number
+  updateLoopInterval: number
+  channelsPerIteration: number
+  videosPerChannel: number
+  ageScoreHalvingDays: number
+}
+
 export const configVariables = {
   [ConfigVariable.SupportNoCategoryVideo]: boolType,
   [ConfigVariable.SupportNewCategories]: boolType,
@@ -57,8 +88,9 @@ export const configVariables = {
   [ConfigVariable.KillSwitch]: boolType,
   [ConfigVariable.VideoViewPerUserTimeLimit]: intType,
   [ConfigVariable.VideoRelevanceViewsTick]: intType,
-  [ConfigVariable.RelevanceWeights]:
-    jsonType<[number, number, number, number, [number, number], number]>(),
+  [ConfigVariable.ChannelWeightFollowsTick]: intType,
+  [ConfigVariable.RelevanceWeights]: jsonType<RelevanceWeights>(),
+  [ConfigVariable.RelevanceServiceConfig]: jsonType<RelevanceServiceConfig>(),
   [ConfigVariable.AppPrivateKey]: stringType,
   [ConfigVariable.SessionMaxDurationHours]: intType,
   [ConfigVariable.SessionExpiryAfterInactivityMinutes]: intType,
@@ -79,17 +111,64 @@ export const configVariables = {
 
 type TypeOf<C extends ConfigVariable> = ReturnType<(typeof configVariables)[C]['deserialize']>
 
+export const configDefaults: { [C in ConfigVariable]?: TypeOf<C> } = {
+  [ConfigVariable.RelevanceWeights]: {
+    channel: {
+      crtVolumeWeight: 0.2,
+      crtLiquidityWeight: 0.2,
+      followersWeight: 0.2,
+      revenueWeight: 0.2,
+      yppTierWeight: 0.2,
+    },
+    video: {
+      ageWeight: 0.6,
+      ageSubWeights: {
+        joystreamAgeWeight: 0.1,
+        youtubeAgeWeight: 0.9,
+      },
+      viewsWeight: 0.1,
+      commentsWeight: 0.15,
+      reactionsWeight: 0.15,
+    },
+  },
+  [ConfigVariable.RelevanceServiceConfig]: {
+    populateBackgroundQueueInterval: 12 * 60 * 60 * 1_000, // 12 hours
+    updateLoopInterval: 6 * 1_000, // 6 seconds
+    channelsPerIteration: 1_000,
+    videosPerChannel: 10,
+    ageScoreHalvingDays: 30,
+  },
+}
+
 class Config {
+  getDefault<C extends ConfigVariable>(name: C) {
+    // Use env value if exists
+    const serializedValue = process.env[name]
+    if (serializedValue === undefined) {
+      // Otherwise fallback to hardcoded value
+      if (configDefaults[name] !== undefined) {
+        return configDefaults[name] as TypeOf<C>
+      }
+      throw new Error(`${name} has no default value`)
+    }
+    return configVariables[name].deserialize(serializedValue) as TypeOf<C>
+  }
+
   async get<C extends ConfigVariable>(name: C, em: EntityManager): Promise<TypeOf<C>> {
-    const serialized = await withHiddenEntities(em, async () => {
-      return (await em.findOneBy(GatewayConfig, { id: name }))?.value ?? process.env[name]
+    const dbValue = await withHiddenEntities(em, async () => {
+      return (await em.findOneBy(GatewayConfig, { id: name }))?.value
     })
 
-    if (serialized === undefined) {
-      throw new Error(`Cannot determine value of config variable ${name}`)
+    // Fallback to default value if not found in DB
+    if (dbValue === undefined) {
+      try {
+        return this.getDefault(name)
+      } catch (e) {
+        throw new Error(`Missing value of config variable: ${name}`)
+      }
     }
 
-    return configVariables[name].deserialize(serialized) as TypeOf<C>
+    return configVariables[name].deserialize(dbValue) as TypeOf<C>
   }
 
   async set<C extends ConfigVariable>(name: C, value: TypeOf<C>, em: EntityManager): Promise<void> {

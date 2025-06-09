@@ -1,14 +1,17 @@
-const { withPriceChange } = require('../lib/server-extension/resolvers/CreatorToken/utils')
+import { EntityManager } from 'typeorm'
+import { withPriceChange } from '../server-extension/resolvers/CreatorToken/utils'
+import { config, ConfigVariable } from '../utils/config'
 
-const noCategoryVideosSupportedByDefault =
-  process.env.SUPPORT_NO_CATEGORY_VIDEOS === 'true' ||
-  process.env.SUPPORT_NO_CATEGORY_VIDEOS === '1'
-
-const BLOCKS_PER_DAY = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
+type ViewDefinitions = {
+  [schemaName: string]: {
+    [tableName: string]: string[] | string
+  }
+}
 
 // Add public 'VIEW' definitions for hidden entities created by
 // applying `@schema(name: "admin")` or `@schema(name: "curator") directive to the Graphql entities
-function getPublicViewDefinitions(db) {
+export function getPublicViewDefinitions(db: EntityManager): ViewDefinitions {
+  const blocksPerDay = 10 * 60 * 24 // 10 blocs per minute, 60 mins * 24 hours
   return {
     curator: {
       channel: [`is_excluded='0'`, `is_censored='0'`],
@@ -23,7 +26,7 @@ function getPublicViewDefinitions(db) {
               "category_id" IS NULL
               AND COALESCE(
                 (SELECT "value" FROM "admin"."gateway_config" WHERE "id"='SUPPORT_NO_CATEGORY_VIDEOS'),
-                ${noCategoryVideosSupportedByDefault ? "'1'" : "'0'"}
+                ${config.getDefault(ConfigVariable.SupportNoCategoryVideo) ? "'1'" : "'0'"}
               )='1'
             )`,
       ],
@@ -82,11 +85,11 @@ function getPublicViewDefinitions(db) {
               SUM(CASE
                 WHEN (
                   transaction_type = 'BUY'
-                  AND tr.created_in < last_block.height - ${BLOCKS_PER_DAY * 30}
+                  AND tr.created_in < last_block.height - ${blocksPerDay * 30}
                 ) THEN quantity
                 WHEN (
                   transaction_type = 'SELL'
-                  AND tr.created_in < last_block.height - ${BLOCKS_PER_DAY * 30}
+                  AND tr.created_in < last_block.height - ${blocksPerDay * 30}
                 ) THEN quantity * -1
                 ELSE 0
               END) AS total_liquidity_30d_ago,
@@ -107,7 +110,7 @@ function getPublicViewDefinitions(db) {
           CASE
             WHEN tws.amm_volume >= COALESCE(
               market_cap_min_volume_cfg.value::int8,
-              ${parseInt(process.env.CRT_MARKET_CAP_MIN_VOLUME_JOY)}
+              ${config.getDefault(ConfigVariable.CrtMarketCapMinVolumeJoy)}
             ) THEN (ct.last_price * ct.total_supply)
             ELSE 0
           END as market_cap,
@@ -149,8 +152,34 @@ function getPublicViewDefinitions(db) {
       token: ['FALSE'],
       gateway_config: ['FALSE'],
       email_delivery_attempt: ['FALSE'],
+    },
+  }
+}
+
+export async function createViews(db: EntityManager) {
+  const defs = getPublicViewDefinitions(db)
+  for (const [schemaName, schemaViews] of Object.entries(defs)) {
+    for (const [tableName, viewConditions] of Object.entries(schemaViews)) {
+      if (Array.isArray(viewConditions)) {
+        await db.query(`DROP VIEW IF EXISTS "${tableName}" CASCADE`)
+        await db.query(`
+            CREATE OR REPLACE VIEW "${tableName}" AS
+              SELECT *
+              FROM "${schemaName}"."${tableName}" AS "this"
+              WHERE ${viewConditions.map((cond) => `(${cond})`).join(' AND ')}
+          `)
+      } else {
+        await db.query(`CREATE OR REPLACE VIEW "${tableName}" AS (${viewConditions})`)
+      }
     }
   }
 }
 
-module.exports = { getPublicViewDefinitions }
+export async function dropViews(db: EntityManager) {
+  const defs = getPublicViewDefinitions(db)
+  for (const schemaViews of Object.values(defs)) {
+    for (const tableName of Object.keys(schemaViews)) {
+      await db.query(`DROP VIEW IF EXISTS "${tableName}" CASCADE`)
+    }
+  }
+}

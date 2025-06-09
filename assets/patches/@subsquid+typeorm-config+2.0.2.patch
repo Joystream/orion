@@ -1,8 +1,8 @@
 diff --git a/node_modules/@subsquid/typeorm-config/lib/config.js b/node_modules/@subsquid/typeorm-config/lib/config.js
-index 046611f..28fd4e2 100644
+index 046611f..04a0ad2 100644
 --- a/node_modules/@subsquid/typeorm-config/lib/config.js
 +++ b/node_modules/@subsquid/typeorm-config/lib/config.js
-@@ -28,22 +28,22 @@ const path = __importStar(require("path"));
+@@ -28,22 +28,26 @@ const path = __importStar(require("path"));
  const process = __importStar(require("process"));
  const connectionOptions_1 = require("./connectionOptions");
  const namingStrategy_1 = require("./namingStrategy");
@@ -13,6 +13,9 @@ index 046611f..28fd4e2 100644
 -    let model = resolveModel(path.join(dir, 'lib/model'));
 +    let model = resolveModel(path.join(dir, "lib/model"));
      let migrationsDir = path.join(dir, exports.MIGRATIONS_DIR);
++    let subscribers = process.env.TYPEORM_SUBSCRIBERS_DIR
++        ? [`${path.join(dir, process.env.TYPEORM_SUBSCRIBERS_DIR)}/*.js`]
++        : undefined
      return {
 -        type: 'postgres',
 +        type: "postgres",
@@ -21,6 +24,7 @@ index 046611f..28fd4e2 100644
 -        migrations: [migrationsDir + '/*.js'],
 -        ...(0, connectionOptions_1.createConnectionOptions)()
 +        migrations: [migrationsDir + `/${options?.file || "*.js"}`],
++        subscribers,
 +        ...(0, connectionOptions_1.createConnectionOptions)(),
      };
  }

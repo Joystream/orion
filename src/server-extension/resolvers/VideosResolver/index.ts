@@ -40,7 +40,7 @@ import {
   SetOrUnsetPublicFeedResult,
   VideoReportInfo,
 } from './types'
-import { videoRelevanceManager } from '../../utils'
+import { relevanceQueuePublisher } from '../../utils'
 
 @Resolver()
 export class VideosResolver {
@@ -297,8 +297,8 @@ export class VideosResolver {
       })
 
       const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
-      if (video.viewsNum % tick === 0) {
-        videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
+      if (video.viewsNum % tick === 0 && video.channelId) {
+        await relevanceQueuePublisher.pushChannel(video.channelId)
       }
       await em.save([video, video.channel, newView])
       return {

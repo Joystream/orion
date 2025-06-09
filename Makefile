@@ -18,6 +18,9 @@ serve:
 serve-auth-api:
 	@npm run auth-server-start
 
+relevance-service:
+	@npm run relevance-service-start
+
 migrate:
 	@npx squid-typeorm-migration apply
 

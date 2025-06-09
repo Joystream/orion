@@ -53,6 +53,8 @@ import { AccountOnly, OperatorOnly, UserOnly } from '../middleware'
 import { addNotification } from '../../../utils/notification'
 import { assertNotNull } from '@subsquid/substrate-processor'
 import pLimit from 'p-limit'
+import { config, ConfigVariable } from '../../../utils/config'
+import { relevanceQueuePublisher } from '../../utils'
 
 @Resolver()
 export class ChannelsResolver {
@@ -220,6 +222,11 @@ export class ChannelsResolver {
         userId: user.id,
         timestamp: new Date(),
       })
+
+      const tick = await config.get(ConfigVariable.ChannelWeightFollowsTick, em)
+      if (channel.followsNum % tick === 0) {
+        await relevanceQueuePublisher.pushChannel(channel.id)
+      }
 
       const ownerAccount = channel.ownerMemberId
         ? await em.getRepository(Account).findOneBy({ membershipId: channel.ownerMemberId })

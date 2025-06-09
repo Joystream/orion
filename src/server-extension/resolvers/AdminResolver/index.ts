@@ -10,10 +10,9 @@ import { getResolveTree } from '@subsquid/openreader/lib/util/resolve-tree'
 import { GraphQLResolveInfo } from 'graphql'
 import 'reflect-metadata'
 import { Args, Ctx, Info, Int, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
-import { EntityManager, In, Not, UpdateResult } from 'typeorm'
+import { EntityManager, In, Not } from 'typeorm'
 import {
   Account,
-  Channel,
   ChannelRecipient,
   CreatorToken,
   NftFeaturedOnMarketPlace,
@@ -35,7 +34,6 @@ import {
   AppActionSignatureInput,
   AppRootDomain,
   CommentTipTiers,
-  ChannelWeight,
   CrtMarketCapMinVolume,
   ExcludableContentType,
   ExcludeContentArgs,
@@ -50,7 +48,6 @@ import {
   RevokeOperatorPermissionsInput,
   SetCategoryFeaturedVideosArgs,
   SetCategoryFeaturedVideosResult,
-  SetChannelsWeightsArgs,
   SetCrtMarketCapMinVolume,
   SetFeaturedCrtsInput,
   SetFeaturedCrtsResult,
@@ -71,13 +68,15 @@ import {
   SetVideoHeroInput,
   SetVideoHeroResult,
   SetVideoViewPerUserTimeLimitInput,
-  SetVideoWeightsInput,
   VideoViewPerUserTimeLimit,
-  VideoWeights,
+  SetRelevanceWeightsArgs,
+  SetRelevanceWeightsResult,
+  SetRelevanceServiceConfigResult,
+  SetRelevanceServiceConfigArgs,
 } from './types'
 import { processCommentsCensorshipStatusUpdate } from './utils'
-import { recalculateAllVideosRelevance } from '../../utils'
 import { parseVideoTitle } from '../../../utils/notification/helpers'
+import { relevanceQueuePublisher } from '../../utils'
 
 @Resolver()
 export class AdminResolver {
@@ -147,24 +146,44 @@ export class AdminResolver {
     return { newPermissions: user.permissions }
   }
 
-  @UseMiddleware(OperatorOnly(OperatorPermission.SET_VIDEO_WEIGHTS))
-  @Mutation(() => VideoWeights)
-  async setVideoWeights(@Args() args: SetVideoWeightsInput): Promise<VideoWeights> {
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_RELEVANCE_WEIGHTS))
+  @Mutation(() => SetRelevanceWeightsResult)
+  async setRelevanceWeights(
+    @Args() args: SetRelevanceWeightsArgs
+  ): Promise<SetRelevanceWeightsResult> {
     const em = await this.em()
+    const currentWeights = await config.get(ConfigVariable.RelevanceWeights, em)
     await config.set(
       ConfigVariable.RelevanceWeights,
-      [
-        args.newnessWeight,
-        args.viewsWeight,
-        args.commentsWeight,
-        args.reactionsWeight,
-        [args.joysteamTimestampSubWeight, args.ytTimestampSubWeight],
-        args.defaultChannelWeight,
-      ],
+      {
+        channel: args.channel ?? currentWeights.channel,
+        video: args.video ?? currentWeights.video,
+      },
       em
     )
-    await recalculateAllVideosRelevance(em)
-    return { isApplied: true }
+    const updatedWeights = await config.get(ConfigVariable.RelevanceWeights, em)
+    await relevanceQueuePublisher.pushRestartRequest()
+    return { updatedWeights }
+  }
+
+  @UseMiddleware(OperatorOnly(OperatorPermission.SET_RELEVANCE_CONFIG))
+  @Mutation(() => SetRelevanceServiceConfigResult)
+  async setRelevanceServiceConfig(
+    @Args() args: SetRelevanceServiceConfigArgs
+  ): Promise<SetRelevanceServiceConfigResult> {
+    const em = await this.em()
+    const currentConfig = await config.get(ConfigVariable.RelevanceServiceConfig, em)
+    await config.set(
+      ConfigVariable.RelevanceServiceConfig,
+      {
+        ...currentConfig,
+        ...args,
+      },
+      em
+    )
+    const updatedConfig = await config.get(ConfigVariable.RelevanceServiceConfig, em)
+    await relevanceQueuePublisher.pushRestartRequest()
+    return { updatedConfig }
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_TIP_TIERS))
@@ -202,41 +221,6 @@ export class AdminResolver {
     const em = await this.em()
     await config.set(ConfigVariable.AppRootDomain, args.newRootDomain, em)
     return { isApplied: true }
-  }
-
-  @UseMiddleware(OperatorOnly(OperatorPermission.SET_CHANNEL_WEIGHTS))
-  @Mutation(() => [ChannelWeight])
-  async setChannelsWeights(@Args() { inputs }: SetChannelsWeightsArgs): Promise<ChannelWeight[]> {
-    const em = await this.em()
-
-    const results: ChannelWeight[] = []
-
-    // Process each SetChannelWeightInput
-    for (const weightInput of inputs) {
-      const { channelId, weight } = weightInput
-
-      // Update the channel weight in the database
-      const updateResult: UpdateResult = await em.transaction(
-        async (transactionalEntityManager) => {
-          return transactionalEntityManager
-            .createQueryBuilder()
-            .update<Channel>(Channel)
-            .set({ channelWeight: weight })
-            .where('id = :id', { id: channelId })
-            .execute()
-        }
-      )
-
-      await recalculateAllVideosRelevance(em)
-
-      // Push the result into the results array
-      results.push({
-        channelId,
-        isApplied: !!updateResult.affected,
-      })
-    }
-
-    return results
   }
 
   @UseMiddleware(OperatorOnly(OperatorPermission.SET_CRT_MARKETCAP_MIN_VOLUME))
