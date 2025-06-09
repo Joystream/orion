@@ -83,7 +83,7 @@ const findNotification = async (em: EntityManager, by: Partial<NotificationType>
 const checkNotificationEmailDelivery = async (notificationId: string) => {
   const notificationEmailDelivery = await (await globalEm)
     .getRepository(NotificationEmailDelivery)
-    .findOneByOrFail({ notificationId })
+    .findOneOrFail({ where: { notificationId }, relations: { attempts: true } })
   expect(notificationEmailDelivery.discard).to.be.false
   expect(notificationEmailDelivery.attempts).to.be.empty
 }
@@ -206,7 +206,7 @@ describe('notifications tests', () => {
   describe('👉 Video Liked', () => {
     let notificationId: string
     const videoId = '1'
-    const block = { timestamp: 123456 } as SubstrateBlock
+    const block = { height: 123, timestamp: 123456 } as SubstrateBlock
     const indexInBlock = 1
     const extrinsicHash = '0x1234567890abcdef'
     const metadataMessage: IMemberRemarked = {
@@ -249,7 +249,7 @@ describe('notifications tests', () => {
   describe('👉 Comment Posted To Video', () => {
     let notificationId: string
     const videoId = '1'
-    const block = { timestamp: 123456 } as SubstrateBlock
+    const block = { height: 123, timestamp: 123456 } as SubstrateBlock
     const indexInBlock = 1
     const extrinsicHash = '0x1234567890abcdef'
     const commentId = backwardCompatibleMetaID(block, indexInBlock)
@@ -296,7 +296,7 @@ describe('notifications tests', () => {
     describe('👉 Reply To Comment', () => {
       let notificationId: string
       const videoId = '1'
-      const block = { timestamp: 123457 } as SubstrateBlock
+      const block = { height: 123, timestamp: 123457 } as SubstrateBlock
       const indexInBlock = 1
       const metadataMessage = {
         createComment: {
