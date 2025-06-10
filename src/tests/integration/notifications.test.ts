@@ -43,6 +43,7 @@ const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Uint8Array 
 const withOverlayTransaction = async (cb: (overlay: EntityManagerOverlay) => Promise<void>) => {
   const em = await globalEm
   const runner = em.connection.createQueryRunner()
+  await runner.connect()
   await runner.startTransaction()
 
   const overlay = await EntityManagerOverlay.create(
@@ -53,7 +54,9 @@ const withOverlayTransaction = async (cb: (overlay: EntityManagerOverlay) => Pro
     }
   )
   await cb(overlay)
+  await overlay.updateDatabase()
   await runner.commitTransaction()
+  await runner.release()
 }
 
 const findNotification = async (em: EntityManager, by: Partial<NotificationType>) => {
@@ -65,7 +68,10 @@ const findNotification = async (em: EntityManager, by: Partial<NotificationType>
         .map(([field, value]) => `n.notification_type->>'${field}' = '${value}'`)
         .join(' AND ')
     )
-    .getOneOrFail()
+    .getOne()
+  if (!notification) {
+    throw new Error(`Could not find notification by: ${JSON.stringify({ notificationType: by })}`)
+  }
   return notification
 }
 
