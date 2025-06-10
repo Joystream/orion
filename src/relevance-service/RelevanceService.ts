@@ -85,10 +85,10 @@ export class RelevanceService {
     )`
   }
 
-  private async getVideosToUpdate(channelId: string): Promise<string[]> {
+  private async getVideosToRate(channelId: string): Promise<string[]> {
     const result = await this.em.query(
       `SELECT id FROM video WHERE channel_id = $1 ORDER BY created_at DESC LIMIT $2`,
-      [channelId, this.config.videosPerChannel]
+      [channelId, this.config.videosPerChannelLimit]
     )
     return result.map((row: { id: string }) => row.id)
   }
@@ -181,19 +181,33 @@ export class RelevanceService {
     return `(1 / POWER(2, ${weightedAgeDays} / ${ageScoreHalvingDays}))`
   }
 
+  private videoRelevanceFormula(alias: string) {
+    const { ageWeight, viewsWeight, commentsWeight, reactionsWeight } = this.weights.video
+    return `(
+      ${alias}.channel_weight * (
+        ${alias}.age_rate * ${ageWeight} +
+        ${alias}.views_num_rate * ${viewsWeight} +
+        ${alias}.comments_count_rate * ${commentsWeight} +
+        ${alias}.reactions_count_rate * ${reactionsWeight}
+      )
+    )`
+  }
+
   private async updateVideoRelevances(channelIds: string[]): Promise<void> {
     if (!this.percentileStats) {
       this.logger.warn('Percentile stats missing, skipping video relevances update')
       return
     }
-    const { percentileStats } = this
-    const { ageWeight, commentsWeight, reactionsWeight, viewsWeight } = this.weights.video
+    const {
+      percentileStats,
+      config: { videosPerChannelSelectTop },
+    } = this
 
-    const videosToUpdate = (
-      await Promise.all(channelIds.map((channelId) => this.getVideosToUpdate(channelId)))
+    const videosToRate = (
+      await Promise.all(channelIds.map((channelId) => this.getVideosToRate(channelId)))
     ).flat()
 
-    this.logger.info(`Updating relevances of ${videosToUpdate.length} videos`)
+    this.logger.info(`Calculating relevances of ${videosToRate.length} videos...`)
     await this.em.transaction(async (em) => {
       // Acquire the row locks first in a predictable order
       await this.em.query(
@@ -205,45 +219,56 @@ export class RelevanceService {
         `UPDATE curator.video SET video_relevance = 0 WHERE video_relevance != 0 AND video.channel_id = ANY($1)`,
         [channelIds]
       )
-      // Update only the relevances of the latest `videosPerChannel` videos for each channel
-      if (videosToUpdate.length > 0) {
+      // Calculate the relevances of the latest `videosPerChannelLimit` videos per channel
+      // and update it for top `videosPerChannelSelectTop` videos per channel
+      if (videosToRate.length > 0) {
         await em.query(
           `
-        WITH videos_with_rates AS (
-          SELECT
-            video.id AS video_id,
-            channel.channel_weight AS channel_weight,
-            ${this.videoAgeRateQuery()} as age_rate,
-            ${this.rateQuery('video.views_num', percentileStats.videoViews)} AS views_num_rate,
-            ${this.rateQuery(
-              'video.comments_count',
-              percentileStats.videoComments
-            )} AS comments_count_rate,
-            ${this.rateQuery(
-              `video.reactions_count`,
-              percentileStats.videoReactions
-            )} AS reactions_count_rate
-          FROM 
-            video
-            INNER JOIN channel ON video.channel_id = channel.id
-          WHERE
-            video.id = ANY($1)
-        )
+        WITH
+          videos_with_ratings AS (
+            SELECT
+              channel_id,
+              channel.channel_weight AS channel_weight,
+              video.id AS video_id,
+              ${this.videoAgeRateQuery()} as age_rate,
+              ${this.rateQuery('video.views_num', percentileStats.videoViews)} AS views_num_rate,
+              ${this.rateQuery(
+                'video.comments_count',
+                percentileStats.videoComments
+              )} AS comments_count_rate,
+              ${this.rateQuery(
+                `video.reactions_count`,
+                percentileStats.videoReactions
+              )} AS reactions_count_rate
+            FROM 
+              video
+              INNER JOIN channel ON video.channel_id = channel.id
+            WHERE
+              video.id = ANY($1)
+          ),
+          rated_videos AS (
+            SELECT
+              vwr.*,
+              ${this.videoRelevanceFormula('vwr')} as video_relevance
+            FROM videos_with_ratings vwr
+          ),
+          ranked_videos AS (
+            SELECT
+              rv.*,
+              rank() OVER (PARTITION BY channel_id ORDER BY video_relevance DESC, age_rate DESC, video_id DESC) AS relevance_rank
+            FROM rated_videos rv
+          )
         UPDATE
           video
         SET
-          video_relevance = vwr.channel_weight * (
-            vwr.age_rate * ${ageWeight} +
-            vwr.views_num_rate * ${viewsWeight} +
-            vwr.comments_count_rate * ${commentsWeight} +
-            vwr.reactions_count_rate * ${reactionsWeight}
-          )
+          video_relevance = rnv.video_relevance
         FROM
-          videos_with_rates vwr
+          ranked_videos rnv
         WHERE
-          video.id = vwr.video_id
+          video.id = rnv.video_id
+          AND rnv.relevance_rank <= ${videosPerChannelSelectTop}
         `,
-          [videosToUpdate]
+          [videosToRate]
         )
       }
     })

@@ -90,7 +90,10 @@ export class SetRelevanceServiceConfigArgs {
   channelsPerIteration?: number
 
   @Field(() => Int, { nullable: true })
-  videosPerChannel?: number
+  videosPerChannelLimit?: number
+
+  @Field(() => Int, { nullable: true })
+  videosPerChannelSelectTop?: number
 
   @Field(() => Int, { nullable: true })
   ageScoreHalvingDays?: number
@@ -108,7 +111,10 @@ export class RelevanceServiceConfig {
   channelsPerIteration!: number
 
   @Field(() => Int, { nullable: false })
-  videosPerChannel!: number
+  videosPerChannelLimit!: number
+
+  @Field(() => Int, { nullable: false })
+  videosPerChannelSelectTop!: number
 
   @Field(() => Int, { nullable: false })
   ageScoreHalvingDays!: number

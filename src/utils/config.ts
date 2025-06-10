@@ -77,7 +77,8 @@ export type RelevanceServiceConfig = {
   populateBackgroundQueueInterval: number
   updateLoopInterval: number
   channelsPerIteration: number
-  videosPerChannel: number
+  videosPerChannelLimit: number
+  videosPerChannelSelectTop: number
   ageScoreHalvingDays: number
 }
 
@@ -133,9 +134,10 @@ export const configDefaults: { [C in ConfigVariable]?: TypeOf<C> } = {
   },
   [ConfigVariable.RelevanceServiceConfig]: {
     populateBackgroundQueueInterval: 12 * 60 * 60 * 1_000, // 12 hours
-    updateLoopInterval: 6 * 1_000, // 6 seconds
-    channelsPerIteration: 1_000,
-    videosPerChannel: 10,
+    updateLoopInterval: 100, // 100 ms
+    channelsPerIteration: 100,
+    videosPerChannelLimit: 10,
+    videosPerChannelSelectTop: 1,
     ageScoreHalvingDays: 30,
   },
 }
