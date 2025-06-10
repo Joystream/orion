@@ -40,31 +40,20 @@ const metadataToBytes = <T>(metaClass: AnyMetadataClass<T>, obj: T): Uint8Array 
   return Buffer.from(metaClass.encode(obj).finish())
 }
 
-const createOverlay = async () => {
+const withOverlayTransaction = async (cb: (overlay: EntityManagerOverlay) => Promise<void>) => {
   const em = await globalEm
-  let commit: () => void = () => null
-  const txPromise = new Promise<void>((resolve) => (commit = resolve))
+  const runner = em.connection.createQueryRunner()
+  await runner.startTransaction()
 
   const overlay = await EntityManagerOverlay.create(
-    new Store(
-      () =>
-        new Promise((resolve) => {
-          em.transaction((em) => {
-            resolve(em)
-            return txPromise
-          }).catch(console.error)
-        })
-    ),
+    new Store(async () => runner.manager),
     // onDbUpdate
     async () => {
       /* Do nothing */
     }
   )
-  const close = async () => {
-    await overlay.updateDatabase()
-    commit()
-  }
-  return { overlay, close }
+  await cb(overlay)
+  await runner.commitTransaction()
 }
 
 const findNotification = async (em: EntityManager, by: Partial<NotificationType>) => {
@@ -143,28 +132,27 @@ describe('notifications tests', () => {
     before(async () => {
       const bidAmount = BigInt(100000)
       nft = await em.getRepository(OwnedNft).findOneByOrFail({ videoId })
-      const { overlay, close } = await createOverlay()
-      await auctionBidMadeInner(
-        overlay,
-        defaultTestBlock(),
-        100,
-        undefined,
-        memberId,
-        videoId,
-        bidAmount
-      )
-      await close()
+      await withOverlayTransaction(async (overlay) => {
+        await auctionBidMadeInner(
+          overlay,
+          defaultTestBlock(),
+          100,
+          undefined,
+          memberId,
+          videoId,
+          bidAmount
+        )
+      })
     })
     it('should deposit notification for member outbidded', async () => {
-      const { overlay, close } = await createOverlay()
       notification = await findNotification(em, {
         isTypeOf: 'HigherBidPlaced',
         videoId,
       })
       notificationId = notification.id
-      const account = (await overlay
+      const account = await em
         .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', outbiddedMember)) as Account
+        .findOneByOrFail({ membershipId: outbiddedMember })
 
       expect(notification.notificationType.isTypeOf).to.equal('HigherBidPlaced')
       expect(notification.status.isTypeOf).to.equal('Unread')
@@ -172,12 +160,10 @@ describe('notifications tests', () => {
       expect(notification.recipient.isTypeOf).to.equal('MemberRecipient')
       expect((notification.recipient as MemberRecipient).membership).to.equal(outbiddedMember)
       expect(notification.accountId).to.equal(account.id)
-      await close()
     })
     it('notification email entity should be correctly deposited', () =>
       checkNotificationEmailDelivery(notificationId))
     it('should deposit notification for creator receiving a new auction bid', async () => {
-      const { overlay, close } = await createOverlay()
       const channel = await em
         .getRepository(Channel)
         .findOneByOrFail({ id: (nft.owner as NftOwnerChannel).channel })
@@ -187,9 +173,9 @@ describe('notifications tests', () => {
       })
       notificationId = notification.id
       assert(channel.ownerMemberId, 'Missing channel ownerMemberId!')
-      const account = await overlay
+      const account = await em
         .getRepository(Account)
-        .getOneByRelationOrFail('membershipId', channel.ownerMemberId)
+        .findOneByOrFail({ membershipId: channel.ownerMemberId })
 
       // complete the missing checks as above
       expect(notification.notificationType.isTypeOf).to.equal('CreatorReceivesAuctionBid')
@@ -198,7 +184,6 @@ describe('notifications tests', () => {
       expect(notification.recipient.isTypeOf).to.equal('ChannelRecipient')
       expect((notification.recipient as ChannelRecipient).channel).to.equal(channel.id)
       expect(notification.accountId).to.equal(account.id)
-      await close()
     })
     it('notification email entity should be correctly deposited', () =>
       checkNotificationEmailDelivery(notificationId))
@@ -220,15 +205,15 @@ describe('notifications tests', () => {
       asV2001: ['3', metadataToBytes(MemberRemarked, metadataMessage), undefined],
     } as unknown as MembersMemberRemarkedEvent
     it('should process video liked and deposit notification', async () => {
-      const { overlay, close } = await createOverlay()
-      await processMemberRemarkedEvent({
-        overlay,
-        block,
-        indexInBlock,
-        extrinsicHash,
-        event,
+      await withOverlayTransaction(async (overlay) => {
+        await processMemberRemarkedEvent({
+          overlay,
+          block,
+          indexInBlock,
+          extrinsicHash,
+          event,
+        })
       })
-      await close()
 
       notification = await findNotification(em, {
         isTypeOf: 'VideoLiked',
@@ -265,15 +250,15 @@ describe('notifications tests', () => {
       asV2001: ['2', metadataToBytes(MemberRemarked, metadataMessage), undefined], // avoid comment author == creator
     } as unknown as MembersMemberRemarkedEvent
     it('should process comment to video and deposit notification', async () => {
-      const { overlay, close } = await createOverlay()
-      await processMemberRemarkedEvent({
-        overlay,
-        block,
-        indexInBlock,
-        extrinsicHash,
-        event,
+      await withOverlayTransaction(async (overlay) => {
+        await processMemberRemarkedEvent({
+          overlay,
+          block,
+          indexInBlock,
+          extrinsicHash,
+          event,
+        })
       })
-      await close()
       notification = await findNotification(em, {
         isTypeOf: 'CommentPostedToVideo',
         videoId,
@@ -311,15 +296,15 @@ describe('notifications tests', () => {
       } as unknown as MembersMemberRemarkedEvent
 
       before(async () => {
-        const { overlay, close } = await createOverlay()
-        await processMemberRemarkedEvent({
-          overlay,
-          block,
-          indexInBlock,
-          extrinsicHash,
-          event,
+        await withOverlayTransaction(async (overlay) => {
+          await processMemberRemarkedEvent({
+            overlay,
+            block,
+            indexInBlock,
+            extrinsicHash,
+            event,
+          })
         })
-        await close()
       })
 
       it('should process reply to comment and deposit notification', async () => {
