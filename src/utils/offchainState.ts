@@ -4,7 +4,7 @@ import { createParseStream, createStringifyStream } from 'big-json'
 import fs from 'fs'
 import { snakeCase } from 'lodash'
 import path from 'path'
-import { EntityManager, ValueTransformer } from 'typeorm'
+import { EntityManager, EntityMetadata, ValueTransformer } from 'typeorm'
 import * as model from '../model'
 import {
   AccountNotificationPreferences,
@@ -48,14 +48,7 @@ const exportedStateMap: ExportedStateMap = {
   Token: true,
   OrionOffchainCursor: true,
   UserInteractionCount: true,
-  Channel: [
-    'isExcluded',
-    'videoViewsNum',
-    'followsNum',
-    'yppStatus',
-    'isYtSyncEnabled',
-    'channelWeight',
-  ],
+  Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'isYtSyncEnabled'],
   Video: ['isExcluded', 'viewsNum', 'orionLanguage', 'includeInHomeFeed'],
   Comment: ['isExcluded'],
   OwnedNft: ['isFeatured'],
@@ -154,11 +147,34 @@ function migrateExportDataToV400(data: ExportedData): ExportedData {
   return data
 }
 
+function migrateExportDataToV500(
+  data: ExportedData & {
+    ChannelVerification?: unknown
+    ChannelSuspension?: unknown
+    Exclusion?: unknown
+    NextEntityId?: unknown
+  }
+): ExportedData {
+  // Skip entities that don't exist / should not be exported to 5.0
+  delete data.ChannelSuspension
+  delete data.Exclusion
+  delete data.ChannelVerification
+  delete data.NextEntityId
+  // Skip Channel's yppStatus and channelWeight
+  data.Channel?.values.forEach((v) => {
+    delete v.yppStatus
+    delete v.channelWeight
+  })
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
+    '5.0.0': migrateExportDataToV500,
     '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
@@ -236,7 +252,14 @@ export class OffchainState {
     // construct proper JSONB objects from raw data
     return Object.fromEntries(
       Object.entries(data).map(([entityName, { type, values }]) => {
-        const metadata = em.connection.getMetadata(entityName)
+        let metadata: EntityMetadata
+        try {
+          metadata = em.connection.getMetadata(entityName)
+        } catch {
+          // If no metadata avilable - skip transformation
+          this.logger.warn(`Metadata not available for entity ${entityName}!`)
+          return [entityName, { type, values }]
+        }
         const jsonbColumns = metadata.columns.filter((c) => c.type === 'jsonb')
 
         values = (values as any[]).map((value) => {
@@ -245,8 +268,12 @@ export class OffchainState {
             const transformer = column.transformer as ValueTransformer | undefined
             if (value[propertyName] && transformer) {
               const rawValue = value[propertyName]
-              const transformedValue = transformer.from(rawValue)
-              value[propertyName] = transformedValue
+              try {
+                const transformedValue = transformer.from(rawValue)
+                value[propertyName] = transformedValue
+              } catch (e) {
+                this.logger.warn(`Couldn't transform ${entityName}.${propertyName} value!`)
+              }
             }
           })
           return value

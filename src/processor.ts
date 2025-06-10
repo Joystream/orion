@@ -393,23 +393,26 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   const em = overlay.getEm()
 
   for (const block of ctx.blocks) {
-    if (block.header.height > exportBlockNumber && !relevanceQueuePublisher.initialized) {
-      await relevanceQueuePublisher.init()
-      ctx.log.info(`Relevance queue publisher initialized`)
-    }
-    // Importing exported offchain state
-    if (block.header.height > exportBlockNumber && !offchainState.isImported) {
-      ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
-      // there is no need to recalc video relevance before orion is synced
-      await overlay.updateDatabase()
-      await offchainState.import(overlay)
-      await commentCountersManager.updateVideoCommentsCounters(em, true)
-      ctx.log.info(`Updated video comment counters`)
-      await commentCountersManager.updateParentRepliesCounters(em, true)
-      ctx.log.info(`Updated video comment reply counters`)
-      await relevanceQueuePublisher.init()
-      ctx.log.info(`Relevance queue publisher initialized`)
-      ctx.log.info(`Offchain state successfully imported!`)
+    if (block.header.height > exportBlockNumber) {
+      if (!offchainState.isImported) {
+        // Importing exported offchain state
+        ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+        // there is no need to recalc video relevance before orion is synced
+        await overlay.updateDatabase()
+        await offchainState.import(overlay)
+        ctx.log.info('Updating video comments counters...')
+        await commentCountersManager.updateVideoCommentsCounters(em, true)
+        ctx.log.info('Video comments counters updated!')
+        ctx.log.info(`Updating video comments reply counters...`)
+        await commentCountersManager.updateParentRepliesCounters(em, true)
+        ctx.log.info(`Video comments reply counters updated!`)
+        ctx.log.info(`Offchain state successfully imported!`)
+      }
+      if (!relevanceQueuePublisher.initialized) {
+        // Initializing relevance queue publisher
+        await relevanceQueuePublisher.init()
+        ctx.log.info(`Relevance queue publisher initialized!`)
+      }
     }
     for (const item of block.items) {
       if (item.name !== '*') {
