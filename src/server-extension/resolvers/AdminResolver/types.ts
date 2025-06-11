@@ -55,11 +55,11 @@ export class VideoRelevanceWeights {
 @ArgsType()
 export class SetRelevanceWeightsArgs {
   @Field(() => ChannelRelevanceWeights, { nullable: true })
-  @SumTo(1)
+  @SumTo(1, { type: '<=' })
   channel?: ChannelRelevanceWeights
 
   @Field(() => VideoRelevanceWeights, { nullable: true })
-  @SumTo(1, { omit: ['ageSubWeights'] })
+  @SumTo(1, { omit: ['ageSubWeights'], type: '==' })
   video?: VideoRelevanceWeights
 }
 

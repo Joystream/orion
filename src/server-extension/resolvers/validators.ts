@@ -8,6 +8,7 @@ import {
 import _ from 'lodash'
 
 type SumToOptions = {
+  type?: '==' | '>' | '>=' | '<' | '<='
   precision?: number
   pick?: string[]
   omit?: string[]
@@ -30,13 +31,24 @@ class SumToConstraint implements ValidatorConstraintInterface {
     const [targetSum, options] = args.constraints as [number, SumToOptions]
     obj = this.prepareValue(obj, options)
     const sum = _.round(_.sum(Object.values(obj)), options.precision ?? 8)
-    return sum === targetSum
+    switch (options.type) {
+      case '>':
+        return sum > targetSum
+      case '>=':
+        return sum >= targetSum
+      case '<':
+        return sum < targetSum
+      case '<=':
+        return sum <= targetSum
+      default:
+        return sum === targetSum
+    }
   }
 
   defaultMessage(args: ValidationArguments) {
     const [targetSum, options] = args.constraints as [number, SumToOptions]
     const props = Object.keys(this.prepareValue(args.value, options))
-    return `Sum of properties: ${props.join(', ')} must equal ${targetSum}`
+    return `Sum of properties: ${props.join(', ')} must be ${options.type || '=='} ${targetSum}`
   }
 }
 
@@ -52,7 +64,7 @@ export function SumTo(
       target: object.constructor,
       propertyName,
       options: validationOptions,
-      constraints: [targetSum, options],
+      constraints: [targetSum, options || {}],
       validator: SumToConstraint,
     })
   }
