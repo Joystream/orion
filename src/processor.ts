@@ -392,6 +392,20 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
   const em = overlay.getEm()
 
+  if (ctx.isHead && offchainState.isImported) {
+    const missingIndexes = await getMissingIndexes(em)
+    if (missingIndexes.length) {
+      ctx.log.info(
+        `Head reached and some indexes are missing (${missingIndexes
+          .map((i) => indexName(i))
+          .join(', ')})! Creating indexes...`
+      )
+      await createIndexes(em, missingIndexes)
+      ctx.log.info(`Indexes created successfully!`)
+    }
+    indexesChecked = true
+  }
+
   for (const block of ctx.blocks) {
     if (block.header.height > exportBlockNumber) {
       if (!offchainState.isImported) {
@@ -439,18 +453,4 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
 
   ctx.log.info(`Saving database updates...`)
   await overlay.updateDatabase()
-
-  if (ctx.isHead && !indexesChecked) {
-    const missingIndexes = await getMissingIndexes(em)
-    if (missingIndexes.length) {
-      ctx.log.info(
-        `Head reached and some indexes are missing (${missingIndexes
-          .map((i) => indexName(i))
-          .join(', ')})! Creating indexes...`
-      )
-      await createIndexes(em, missingIndexes)
-      ctx.log.info(`Indexes created successfully!`)
-    }
-    indexesChecked = true
-  }
 })
