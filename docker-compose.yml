@@ -34,7 +34,7 @@ services:
       - .env
       - docker.env
     environment:
-      - TYPEORM_SUBSCRIBERS_DIR=mappings/subscribers
+      - TYPEORM_SUBSCRIBERS_DIR=lib/mappings/subscribers
     ports:
       - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
       - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
@@ -88,7 +88,7 @@ services:
     environment:
       - SQD_TRACE=authentication
       - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
-      - TYPEORM_SUBSCRIBERS_DIR=server-extension/subscribers
+      - TYPEORM_SUBSCRIBERS_DIR=lib/server-extension/subscribers
     depends_on:
       - orion_db
     volumes:
