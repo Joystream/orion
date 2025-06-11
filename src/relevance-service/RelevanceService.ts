@@ -7,11 +7,14 @@ import { RelevanceServiceConfig, RelevanceWeights } from '../utils/config'
 export const SECONDS_PER_DAY = 60 * 60 * 24
 
 // TODO: Make it configurable
-const PERCENTILE_CUTOFF_TO_RATE = new Map([
-  [0.05, 0],
-  [0.25, 0.2],
-  [0.75, 0.5],
-  [0.95, 0.8],
+const MIN_PERCENTILE_TO_RATE = new Map([
+  [0.25, 0.15], // top 75%
+  [0.5, 0.3], // top 50%
+  [0.75, 0.45], // top 25%
+  [0.9, 0.6], // top 10%
+  [0.95, 0.75], // top 5%
+  [0.975, 0.9], // top 2.5%
+  [0.99, 1], // top 1%
 ])
 
 type PercentileStats = {
@@ -75,12 +78,18 @@ export class RelevanceService {
   }
 
   private rateQuery(column: string, cutoffs: number[]) {
-    const rates = Array.from(PERCENTILE_CUTOFF_TO_RATE.values())
-    const conditions = cutoffs.map((cutoff, i) => `WHEN ${column} <= ${cutoff} THEN ${rates[i]}`)
+    const rates = Array.from(MIN_PERCENTILE_TO_RATE.values())
+    const cutoffsWithRates = cutoffs.map((cutoff, i) => ({
+      cutoff,
+      rate: rates[i],
+    }))
+    const conditions = _.sortBy(cutoffsWithRates, (r) => -r.rate).map(
+      ({ cutoff, rate }) => `WHEN ${column} >= ${cutoff} THEN ${rate}`
+    )
     return `(
       CASE
         ${conditions.join('\n')}
-        ELSE 1
+        ELSE 0
       END
     )`
   }
@@ -326,7 +335,7 @@ export class RelevanceService {
   }
 
   private async updatePercentileStats(): Promise<void> {
-    const fractions = Array.from(PERCENTILE_CUTOFF_TO_RATE.keys())
+    const fractions = Array.from(MIN_PERCENTILE_TO_RATE.keys())
     const [
       crtLiquidityPercentiles,
       crtVolumePercentiles,
