@@ -174,12 +174,25 @@ export const getNotificationData = async (
       }
     }
     case 'CommentPostedToVideo': {
-      const { videoId, videoTitle, memberId, memberHandle } = notificationType
+      const { videoId, videoTitle, memberId, memberHandle, comentId } = notificationType
       return {
         icon: await getNotificationIcon(em, 'follow'),
-        link: await getNotificationLink(em, 'nft-page', [videoId]),
+        link: await getNotificationLink(em, 'video-page', [videoId, comentId]),
         avatar: await getNotificationAvatar(em, 'membershipId', memberId),
         text: `💬 ${memberHandle} left a comment on your video: “${videoTitle}”`,
+        subject: `💬 ${memberHandle} left a comment on your video: “${videoTitle}”`,
+      }
+    }
+    case 'TipCommentPostedToVideo': {
+      const { videoId, videoTitle, memberId, memberHandle, commentId, tipAmount } = notificationType
+      return {
+        icon: await getNotificationIcon(em, 'follow'),
+        link: await getNotificationLink(em, 'video-page', [videoId, commentId]),
+        avatar: await getNotificationAvatar(em, 'membershipId', memberId),
+        text: `💬 You received (${convertHapiToUSD(tipAmount) ?? '-'}$) ${formatJOY(
+          tipAmount
+        )} JOY from ${memberHandle} under your video: “${videoTitle}”`,
+        // You received {tipAmount} JOY tip from {memberHandle} under your video: “{videoTitle}”
         subject: `💬 ${memberHandle} left a comment on your video: “${videoTitle}”`,
       }
     }

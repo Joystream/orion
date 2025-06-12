@@ -161,6 +161,7 @@ type AccountNotificationPreferences {
   channelReceivedFundsFromWg: NotificationPreference!
   newPayoutUpdatedByCouncil: NotificationPreference! #v2
   channelFundsWithdrawn: NotificationPreference!
+  tipVideoCommentCreated: NotificationPreference!
 
   # member notifications: https://www.figma.com/file/yhZpTHdf1sxJx13uRZ71GV/Membership-profile?type=design&node-id=2977-58785&mode=design
   channelCreated: NotificationPreference!
