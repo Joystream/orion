@@ -66,7 +66,8 @@ export async function populateDbWithSeedData() {
       cumulativeRewardClaimed: 0n,
       cumulativeReward: 0n,
       cumulativeRevenue: BigInt(0),
-      yppStatus: new YppUnverified(),
+      yppStatus: new YppUnverified({ timestamp: new Date() }),
+      isYtSyncEnabled: true,
     })
     const video = new Video({
       id: i.toString(),

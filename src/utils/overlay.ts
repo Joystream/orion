@@ -304,17 +304,33 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
       .map(([id]) => id)
   }
 
+  // Acquire all necessary locks before comitting the database updates
+  async acquireLocks(): Promise<void> {
+    const ids = this.getAllToBeSaved()
+      .map((e) => e.id)
+      .concat(this.getAllIdsToBeRemoved())
+    if (ids.length) {
+      // Lock the entities FOR UPDATE (pessimistic_write)
+      await this.repository
+        .createQueryBuilder('e')
+        .select('e.id')
+        .where(`e.id IN (:...ids)`, { ids })
+        .setLock('pessimistic_write')
+        .orderBy(`e.id`, 'ASC')
+        .execute()
+    }
+  }
+
   // Execute all scheduled entity inserts/updates
   async executeScheduledUpdates(): Promise<void> {
     const logger = Logger.get()
     const toBeSaved = this.getAllToBeSaved()
     if (toBeSaved.length) {
-      if (process.env.TESTING !== 'true' && process.env.TESTING !== '1') {
-        logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
-        logger.debug(
-          `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
-        )
-      }
+      // Execute the updates
+      logger.info(`Saving ${toBeSaved.length} ${this.entityName} entities...`)
+      logger.debug(
+        `Ids of ${this.entityName} entities to save: ${toBeSaved.map((e) => e.id).join(', ')}`
+      )
       await this.repository.save(toBeSaved)
     }
   }
@@ -324,6 +340,7 @@ export class RepositoryOverlay<E extends AnyEntity = AnyEntity> {
     const logger = Logger.get()
     const toBeRemoved = this.getAllIdsToBeRemoved().map((id) => new this.EntityClass({ id }))
     if (toBeRemoved.length) {
+      // Execute the removals
       logger.info(`Removing ${toBeRemoved.length} ${this.entityName} entities...`)
       logger.debug(
         `Ids of ${this.entityName} entities to remove: ${toBeRemoved.map((e) => e.id).join(', ')}`
@@ -351,8 +368,8 @@ export class EntityManagerOverlay {
   public static async create(store: Store, afterDbUpdate: (em: EntityManager) => Promise<void>) {
     // FIXME: This is a little hacky, but we really need to access the underlying EntityManager
     const em = await (store as unknown as { em: () => Promise<EntityManager> }).em()
-    // Add "admin" schema to search path in order to be able to access "hidden" entities
-    await em.query('SET search_path TO admin,public')
+    // Add "admin" and "curator" schema to search path in order to be able to access "hidden" entities
+    await em.query('SET search_path TO admin,curator,public')
     const nextEntityIds = await em.find(NextEntityId, {})
     return new EntityManagerOverlay(em, nextEntityIds, afterDbUpdate)
   }
@@ -385,6 +402,13 @@ export class EntityManagerOverlay {
 
   // Update database - "flush" the cached state
   async updateDatabase() {
+    // Acquire all locks first in order to avoid deadlocks
+    await Promise.all(
+      Array.from(this.repositories.values()).map(async (r) => {
+        await r.acquireLocks()
+      })
+    )
+    // Execute the write operations
     await Promise.all(
       Array.from(this.repositories.values()).map(async (r) => {
         await r.executeScheduledUpdates()

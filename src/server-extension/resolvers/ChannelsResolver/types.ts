@@ -178,54 +178,69 @@ export class ChannelsSearchArgs {
   limit?: number
 }
 
-@ArgsType()
-export class SuspendChannelArgs {
-  @Field(() => [String], { nullable: false })
-  channelIds!: string[]
+export enum ChannelYppInputStatus {
+  Suspended,
+  Unverified,
+  Empty,
+  VerifiedBronze,
+  VerifiedSilver,
+  VerifiedGold,
+  VerifiedDiamond,
 }
+registerEnumType(ChannelYppInputStatus, {
+  name: 'ChannelYppInputStatus',
+})
 
-@ArgsType()
-export class VerifyChannelArgs {
-  @Field(() => [String], { nullable: false })
-  channelIds!: string[]
-}
-
-@ObjectType()
-export class SuspendChannelResult {
+@InputType()
+export class SetChannelYppStatusInput {
   @Field(() => String, { nullable: false })
   id!: string
 
-  @Field(() => String, { nullable: false })
-  channelId!: string
-
-  @Field(() => DateTime, { nullable: false })
-  createdAt!: Date
-}
-
-@ObjectType()
-export class VerifyChannelResult {
-  @Field(() => String, { nullable: false })
-  id!: string
-
-  @Field(() => String, { nullable: false })
-  channelId!: string
-
-  @Field(() => DateTime, { nullable: false })
-  createdAt!: Date
+  @Field(() => ChannelYppInputStatus, { nullable: false })
+  status!: ChannelYppInputStatus
 }
 
 @ArgsType()
-export class ExcludeChannelArgs {
-  @Field(() => String, { nullable: false })
-  channelId!: string
+export class SetChannelYppStatusArgs {
+  @Field(() => [SetChannelYppStatusInput], { nullable: false })
+  channels!: SetChannelYppStatusInput[]
 
-  @Field(() => String, { nullable: false })
-  @MaxLength(400, { message: 'Rationale cannot be longer than 400 characters' })
-  rationale!: string
+  @Field(() => Boolean, { nullable: true })
+  skipNotification?: boolean
 }
 
 @ObjectType()
-export class ExcludeChannelResult extends EntityReportInfo {
+export class SetChannelYppStatusResult {
   @Field(() => String, { nullable: false })
-  channelId!: string
+  id!: string
+
+  @Field(() => ChannelYppInputStatus, { nullable: false })
+  previousStatus!: ChannelYppInputStatus
+
+  @Field(() => ChannelYppInputStatus, { nullable: false })
+  newStatus!: ChannelYppInputStatus
+
+  @Field(() => DateTime, { nullable: true })
+  timestamp?: Date
+
+  @Field(() => Boolean, { nullable: false })
+  updated!: boolean
+
+  @Field(() => Boolean, { nullable: false })
+  notificationAdded!: boolean
+}
+
+@ArgsType()
+export class SetChannelYtSyncEnabledArgs {
+  @Field(() => [String], { nullable: false })
+  ids!: string[]
+
+  @Field(() => Boolean, { nullable: false })
+  isYtSyncEnabled!: boolean
+}
+
+@ObjectType()
+export class SetChannelYtSyncEnabledResult {
+  @Field(() => Int, { nullable: false })
+  updatedChannels!: number
 }

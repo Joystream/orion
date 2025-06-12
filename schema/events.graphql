@@ -1,4 +1,4 @@
-type Event @entity @schema(name: "admin") {
+type Event @entity @schema(name: "curator") {
   "{blockNumber}-{indexInBlock}"
   id: ID!
 
@@ -18,7 +18,7 @@ type Event @entity @schema(name: "admin") {
   data: EventData!
 }
 
-type NftHistoryEntry @entity @schema(name: "admin") {
+type NftHistoryEntry @entity @schema(name: "curator") {
   "Autoincremented"
   id: ID!
 
@@ -29,7 +29,7 @@ type NftHistoryEntry @entity @schema(name: "admin") {
   event: Event!
 }
 
-type NftActivity @entity @schema(name: "admin") {
+type NftActivity @entity @schema(name: "curator") {
   "Autoincremented"
   id: ID!
 
@@ -506,7 +506,7 @@ type CreatorTokenRevenueSplitIssuedEventData {
   revenueShare: RevenueShare
 }
 
-type UserInteractionCount @entity @schema(name: "admin") {
+type UserInteractionCount @entity @schema(name: "curator") {
   "Autoincremented ID"
   id: ID!
 

@@ -1,4 +1,4 @@
-type VideoCategory @entity @schema(name: "admin") {
+type VideoCategory @entity @schema(name: "curator") {
   "Runtime identifier"
   id: ID!
 
@@ -21,12 +21,12 @@ type VideoCategory @entity @schema(name: "admin") {
   createdInBlock: Int!
 }
 
-type Video @entity @schema(name: "admin") {
+type Video @entity @schema(name: "curator") {
   "Runtime identifier"
   id: ID!
 
   "Timestamp of the block the video was created at"
-  createdAt: DateTime! @index
+  createdAt: DateTime!
 
   "Reference to videos's channel"
   channel: Channel!
@@ -50,7 +50,7 @@ type Video @entity @schema(name: "admin") {
   language: String
 
   "Video's orion langauge"
-  orionLanguage: String @index
+  orionLanguage: String
 
   "Whether or not Video contains marketing"
   hasMarketing: Boolean
@@ -128,7 +128,7 @@ type Video @entity @schema(name: "admin") {
   trailerVideoForToken: [TrailerVideo!]! @derivedFrom(field: "video")
 
   "Video relevance score based on the views, reactions, comments and update date"
-  videoRelevance: Float! @index
+  videoRelevance: Float!
 
   "Whether the video is a short format, vertical video (e.g. Youtube Shorts, TikTok, Instagram Reels)"
   isShort: Boolean
@@ -142,7 +142,7 @@ type Video @entity @schema(name: "admin") {
 
 type VideoFeaturedInCategory
   @entity
-  @schema(name: "admin")
+  @schema(name: "curator")
   @index(fields: ["category", "video"], unique: true) {
   "{categoryId-videoId}"
   id: ID!
@@ -157,7 +157,7 @@ type VideoFeaturedInCategory
   videoCutUrl: String
 }
 
-type VideoHero @entity @schema(name: "admin") {
+type VideoHero @entity @schema(name: "curator") {
   "Unique ID"
   id: ID!
 
@@ -177,7 +177,7 @@ type VideoHero @entity @schema(name: "admin") {
   activatedAt: DateTime
 }
 
-type VideoMediaMetadata @entity @schema(name: "admin") {
+type VideoMediaMetadata @entity @schema(name: "curator") {
   "Unique identifier"
   id: ID!
 
@@ -198,7 +198,7 @@ type VideoMediaMetadata @entity @schema(name: "admin") {
   createdInBlock: Int!
 }
 
-type VideoMediaEncoding @entity @schema(name: "admin") {
+type VideoMediaEncoding @entity @schema(name: "curator") {
   "Encoding of the video media object"
   codecName: String
 
@@ -209,7 +209,7 @@ type VideoMediaEncoding @entity @schema(name: "admin") {
   mimeMediaType: String
 }
 
-type License @entity @schema(name: "admin") {
+type License @entity @schema(name: "curator") {
   "Unique identifier"
   id: ID!
 
@@ -223,7 +223,7 @@ type License @entity @schema(name: "admin") {
   customText: String
 }
 
-type VideoSubtitle @entity @schema(name: "admin") {
+type VideoSubtitle @entity @schema(name: "curator") {
   "{type}-{language}"
   id: ID!
 
@@ -258,7 +258,7 @@ enum VideoReactionOptions {
   UNLIKE
 }
 
-type VideoReaction @entity @schema(name: "admin") {
+type VideoReaction @entity @schema(name: "curator") {
   "{memberId}-{videoId}"
   id: ID!
 

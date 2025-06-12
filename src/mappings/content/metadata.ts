@@ -669,7 +669,7 @@ export async function processChannelPaymentFromMember(
     }),
   })
 
-  increaseChannelCumulativeRevenue(channel, amount)
+  await increaseChannelCumulativeRevenue(channel, amount)
   const ownerAccount = await getChannelOwnerAccount(overlay, channel)
   await addNotification(
     overlay,

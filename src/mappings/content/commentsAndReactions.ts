@@ -53,7 +53,7 @@ import {
   genericEventFields,
   metaprotocolTransactionFailure,
   commentCountersManager,
-  videoRelevanceManager,
+  relevanceQueuePublisher,
 } from '../utils'
 import { getAccountForMember, getChannelOwnerMemberByChannelId, memberHandleById } from './utils'
 import { addNotification } from '../../utils/notification'
@@ -317,7 +317,7 @@ export async function processReactVideoMessage(
     existingReaction
   )
 
-  videoRelevanceManager.scheduleRecalcForChannel(channelId)
+  await relevanceQueuePublisher.pushChannel(channelId)
 
   return new MetaprotocolTransactionResultOK()
 }
@@ -538,7 +538,7 @@ export async function processCreateCommentMessage(
   // schedule comment counters update
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
+  await relevanceQueuePublisher.pushChannel(video.channelId)
 
   const event = overlay.getRepository(Event).new({
     ...genericEventFields(overlay, block, indexInBlock, txHash),
@@ -702,7 +702,7 @@ export async function processDeleteCommentMessage(
   // schedule comment counters update
   commentCountersManager.scheduleRecalcForComment(comment.parentCommentId)
   commentCountersManager.scheduleRecalcForVideo(comment.videoId)
-  videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
+  await relevanceQueuePublisher.pushChannel(video.channelId)
 
   // update the comment
   comment.text = ''

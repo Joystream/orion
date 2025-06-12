@@ -24,7 +24,7 @@ export async function updateVideoLanguages(em: EntityManager, videos: VideoUpdat
   }))
 
   const query = `
-      UPDATE admin.video AS v SET
+      UPDATE curator.video AS v SET
         orion_language = c.orion_language
       FROM (VALUES ${videosWithDetections
         .map((_, idx) => `($${idx * 2 + 1}, $${idx * 2 + 2})`)
@@ -48,7 +48,7 @@ export async function detectVideoLanguageWithProvider() {
 
     const videos: VideoUpdateType[] = await em.query(`
     SELECT id, title, description
-    FROM admin.video
+    FROM curator.video
     ORDER BY id::INTEGER ASC
     OFFSET ${cursor}
     LIMIT ${batchSize}

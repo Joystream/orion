@@ -71,6 +71,7 @@ export interface components {
     }
     AnonymousUserAuthResponseData: components['schemas']['GenericOkResponseData'] & {
       userId: string
+      sessionId: string
     }
     LoginRequestData: components['schemas']['ActionExecutionRequestData'] & {
       payload?: components['schemas']['ActionExecutionPayload'] & {

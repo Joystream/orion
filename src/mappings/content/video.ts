@@ -21,8 +21,8 @@ import {
   deserializeMetadata,
   genericEventFields,
   orionVideoLanguageManager,
+  relevanceQueuePublisher,
   u8aToBytes,
-  videoRelevanceManager,
 } from '../utils'
 import { processVideoMetadata } from './metadata'
 import {
@@ -65,7 +65,7 @@ export async function processVideoCreatedEvent({
     videoRelevance: 0,
   })
 
-  videoRelevanceManager.scheduleRecalcForChannel(channelId.toString())
+  await relevanceQueuePublisher.pushChannel(channelId.toString())
 
   // fetch related channel and owner
   const channel = await overlay.getRepository(Channel).getByIdOrFail(channelId.toString())

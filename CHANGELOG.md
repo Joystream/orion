@@ -1,3 +1,182 @@
+# 5.0.0
+
+## Changes
+
+### Channel weights and video relevance calculation
+
+- **Automatic channel weights:** The new _Relevance Service_ supports automatic calculation of channel weights based on factors such as channel's _cumulative revenue_, _YPP tier_, _number of followers_, _CRT liquidity_ and _CRT volume_ (the weight of which can be configured).
+- **Improved video relevance formula:** Factors such as number of _views_ / _comments_ / _reactions_ are now represented as `0 - 1` range rates, which simplifies assigning adequate weights.
+- **Fixed video relevance calculation bugs** (such as https://github.com/Joystream/orion/issues/361)
+- **More flexible configuration** (updates interval or number of scored videos per channel can now be configured via the GraphQL API)
+
+### Improved permissions system
+
+- **New view/read permission levels: `VIEW_CURATOR_SCHEMA`, `VIEW_ADMIN_SCHEMA`** . Thanks to the introduction of a new `curator` database schema, the view permissions to access hidden content (hidden / censored channels and videos) can be separated from view permissions to access more sensitive data (Orion account emails, session data, configuration etc.) and other root-level permissions.
+- Changing YPP status of a channel now requires `SET_CHANNEL_YPP_STATUS` permission.
+- Changing other app-scoped configuration settings which don't have a separate permission category now requires `SET_APP_CONFIGS` permission. 
+- Changing the new relevance service weights and configuration requires `SET_RELEVANCE_WEIGHTS` and `SET_RELEVANCE_CONFIG` permissions respectively.
+
+### Support for setting channel YPP tiers and sync status
+
+- `Channel.yppStatus` now includes YPP tier
+- `Channel` now has a new `isYtSyncEnabled` field
+- Those values can be set via the new `setChannelYppStatus` and `setChannelYoutubeSyncEnabled` mutations respectively (given sufficient permissions)
+
+### Fixed _Offchain state_ migrations
+
+- Fixed https://github.com/Joystream/orion/issues/360
+
+### Performance impovements (indexes, faster sync etc.)
+
+- **New indexes:** New PostgreSQL indexes have been added to support faster filtering / ordering of channels and videos in Atlas and [Content admin dashboard](https://github.com/Joystream/gleev/issues/72).
+- **Post-sync index creation:** The creation of some custom PostgreSQL indexes has been delayed to post-sync phase (ie. the time when processor catches up to chain head) to allow faster from-scratch syncing of new Orion instances and faster migrations.
+
+
+## Upgrade instructions
+
+TBD.
+
+## Affected components:
+- **(M)** `assets/patches/@subsquid+typeorm-config+2.0.2.patch` (support for custom TypeORM subscribers)
+- Processor
+    - **(M)** `processor.ts`
+        - support for new `RelevanceService`
+        - support for post-sync index generation (via `model/indexes.ts`)
+        - improved logging
+    - **(A)** `mappings/subscribers/TransactionCommitSubscriber.ts`
+    - **(M)** `mappings/utils.ts` (added `relevanceQueuePublisher` instance)
+    - Event handlers:
+        - **(M)** `Content.ChannelCreated`
+        - **(M)** `Content.VideoCreated`
+        - Events triggering re-calculation of channel / video relevance:
+            - **(M)** `Content.ChannelRewardUpdated`
+            - **(M)** `Content.ChannelRewardClaimedAndWithdrawn`
+            - **(M)** `Content.EnglishAuctionSettled`
+            - **(M)** `Content.BidMadeCompletingAuction`
+            - **(M)** `Content.OpenAuctionBidAccepted`
+            - **(M)** `Content.OfferAccepted`
+            - **(M)** `Content.NftBought`
+            - **(M)** `Members.MemberRemarked`
+                - `ReactVideo` (meta-action)
+                - `CreateComment` (meta-action)
+                - `DeleteComment` (meta-action)
+                - `MakeChannelPayment` (meta-action)
+- Migrations:
+    - **(!) Re-generated all data migrations**
+    - **(!) Custom indexes are no longer part of migrations, moved to `model/indexes.ts`**
+    - **(M)** `db/migrations/1000000000000-Admin.js`
+    - **(D)** `db/migrations/2200000000000-Indexes.js`
+    - **(R)** `db/viewDefinitions.js` => `model/views.ts`
+    - **(M)** `db/generateViewsMigration.js`
+- Schema / Models:
+    - Entities moved from `admin` to `curator` schema 
+        - **(M)** `OwnedNft`
+        - **(M)** `Auction`
+        - **(M)** `Bid`
+        - **(M)** `Channel`
+        - **(M)** `BannedMember`
+        - **(M)** `Event`
+        - **(M)** `NftHistoryEntry`
+        - **(M)** `NftActivity`
+        - **(M)** `UserInteractionCount`
+        - **(M)** `VideoViewEvent`
+        - **(M)** `Report`
+        - **(M)** `NftFeaturingRequest`
+        - **(M)** `ChannelFollow`
+        - **(M)** `StorageDataObject`
+        - **(M)** `MarketplaceToken`
+        - **(M)** `CommentReaction`
+        - **(M)** `Comment`
+        - **(M)** `VideoCategory`
+        - **(M)** `Video`
+        - **(M)** `VideoFeaturedInCategory`
+        - **(M)** `VideoHero`
+        - **(M)** `VideoMediaMetadata`
+        - **(M)** `VideoMediaEncoding`
+        - **(M)** `License`
+        - **(M)** `VideoSubtitle`
+        - **(M)** `VideoReaction`
+    - Entities with removed `@index` decorators (index defs moved to `model/indexes.ts`):
+        - **(M)** `Channel` (`createdAt`, `language`)
+        - **(M)** `Video` (`createdAt`, `orionLanguage`, `videoRelevance`)
+    - Auth server:
+        - **(M)** `auth-server/handlers/createAccount.ts` (dependency on `NextEntityId` removed)
+    - Entities removed:
+        - **(D)** `ChannelVerification`
+        - **(D)** `ChannelSuspension`
+        - **(D)** `Exclusion`
+    - **(M)** `OperatorPermission`
+    - **(M)** `Channel`
+        - added `isYtSyncEnabled`
+        - extended `yppStatus`
+    - **(M)** `ChannelYppStatus`
+    - **(A)** `model/views.ts` (PostgreSQL view creation utils)
+    - **(A)** `model/indexes.ts` (PostgreSQL index creation utils)
+- Auth server:
+    - **(M)** `openapi.yml` spec
+    - **(M)** `anonymousAuth` route
+- GraphQL server:
+    - **(M)** `server-extension/check.ts` (more granular view permissions, `curator` / `admin` schema)
+    - **(M)** `server-extension/utils.ts`
+    - **(A)** `server-extension/subscribers/TransactionCommitSubscriber.ts`
+    - Fixed permissions:
+        - **(M)** `setAppAssetStorage`
+        - **(M)** `setAppNameAlt`
+        - setNewNotificationAssetRoot
+        - setMaxAttemptsOnMailDelivery
+    - **(A)** `setChannelYppStatus`
+    - **(M)** `followChannel`
+    - **(M)** `addVideoView`
+    - **(D)** `suspendChannels` (replaced by `setChannelYppStatus`)
+    - **(D)** `verifyChannel` (replaced by `setChannelYppStatus`)
+    - **(D)** `excludeChannel` (duplicate of `excludeContent`)
+    - **(D)** `excludeVideo` (duplicate of `excludeContent`)
+    - **(D)** `setVideoWeights`
+    - **(D)** `setNewNotificationCenterPath` (duplicate of `setMaxAttemptsOnMailDelivery`)
+    - **(D)** `setChannelsWeights`
+    - **(M)** `processCommentsCensorshipStatusUpdate`
+    - **(A)** `setRelevanceWeights` mutation
+    - **(A)** `setRelevanceServiceConfig` mutation
+- **(A) NEW RELEVANCE SERVICE (`relevance-service`)**
+- **(D)** `utils/VideoRelevanceManager.ts`
+- Config:
+    - **Defaults now can be specified directly in `src/utils/config.ts`** (but can still be overriden by `env` variables and/or db config)
+    - **(A)** `RELEVANCE_SERVICE_CONFIG`
+    - **(A)** `CHANNEL_WEIGHT_FOLLOWS_TICK`
+- Environment:
+    - **(A)** `RABBITMQ_PORT` (required)
+    - **(A)** `RABBITMQ_URL` (required)
+    - **(A)** `CHANNEL_WEIGHT_FOLLOWS_TICK` (required)
+    - **(M)** `VIDEO_RELEVANCE_VIEWS_TICK` (`50` => `10`)
+    - **(D)** `RELEVANCE_WEIGHTS`
+- Utils:
+    - **(M)** `utils/OrionVideoLanguageManager.ts` (`admin` => `curator` schema)
+    - **(M)** `utils/customMigrations/setOrionLanguageProvider.ts` (`admin` => `curator` schema)
+    - **(D)** `utils/nextEntityId.ts`
+    - **(M)** `notification/helpers.ts` (dependency on `NextEntityId` removed)
+    - **(M)** `utils/offchainState.ts`
+    - **(M)** `utils/overlay.ts` (prevent deadlocks)
+- **(M)** `docker-compose.yml`
+    - Added RabbitMQ queue
+    - Added relevance service
+- **(M)** `Makefile`
+    - Turned off `SQD_DEBUG` for mappings in `process`
+    - Added `relevance-service`
+
+# 4.5.0
+## Affected components:
+- Auth server:
+    - **(M)** `openapi.yml` spec
+    - **(M)** `anonymousAuth` route
+- GraphQL server:
+    - **(M)** `src/server-extension/check.ts`
+
+## Changes
+- POST `/api/v1/anonymous-auth` now returns `sessionId` in response body, enabling header authentication.
+- Auth server's `openapi.yml` definition of `AnonymousUserAuthOkResponse` was adjusted.
+- Auth server's `openapi.yml` definition of `/logout` route was adjusted to enable header (`bearer`) auth.
+- GraphQL server request check method was adjusted to enable header (`bearer`) auth.
+
 # 4.4.1
 ## Affected components:
 - Scripts:

@@ -1,11 +1,46 @@
 import { AppAction } from '@joystream/metadata-protobuf'
 import { ArgsType, Field, Float, InputType, Int, ObjectType, registerEnumType } from 'type-graphql'
 import { OperatorPermission } from '../../../model'
+import { SumTo } from '../validators'
 
-@ArgsType()
-export class SetVideoWeightsInput {
+@InputType('ChannelRelevanceWeightsInput')
+@ObjectType('ChannelRelevanceWeights')
+export class ChannelRelevanceWeights {
   @Field(() => Float, { nullable: false })
-  newnessWeight!: number
+  crtVolumeWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  crtLiquidityWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  followersWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  revenueWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  yppTierWeight!: number
+}
+
+@InputType('AgeSubWeightsInput')
+@ObjectType('AgeSubWeights')
+export class AgeSubWeights {
+  @Field(() => Float, { nullable: false })
+  joystreamAgeWeight!: number
+
+  @Field(() => Float, { nullable: false })
+  youtubeAgeWeight!: number
+}
+
+@InputType('VideoRelevanceWeightsInput')
+@ObjectType('VideoRelevanceWeights')
+export class VideoRelevanceWeights {
+  @Field(() => Float, { nullable: false })
+  ageWeight!: number
+
+  @Field(() => AgeSubWeights, { nullable: false })
+  @SumTo(1)
+  ageSubWeights!: AgeSubWeights
 
   @Field(() => Float, { nullable: false })
   viewsWeight!: number
@@ -15,15 +50,80 @@ export class SetVideoWeightsInput {
 
   @Field(() => Float, { nullable: false })
   reactionsWeight!: number
+}
 
-  @Field(() => Float, { nullable: false })
-  joysteamTimestampSubWeight!: number
+@ArgsType()
+export class SetRelevanceWeightsArgs {
+  @Field(() => ChannelRelevanceWeights, { nullable: true })
+  @SumTo(1, { type: '<=' })
+  channel?: ChannelRelevanceWeights
 
-  @Field(() => Float, { nullable: false })
-  ytTimestampSubWeight!: number
+  @Field(() => VideoRelevanceWeights, { nullable: true })
+  @SumTo(1, { omit: ['ageSubWeights'], type: '==' })
+  video?: VideoRelevanceWeights
+}
 
-  @Field(() => Float, { nullable: false })
-  defaultChannelWeight!: number
+@ObjectType()
+export class RelevanceWeights {
+  @Field(() => ChannelRelevanceWeights, { nullable: false })
+  channel!: ChannelRelevanceWeights
+
+  @Field(() => VideoRelevanceWeights, { nullable: false })
+  video!: VideoRelevanceWeights
+}
+
+@ObjectType()
+export class SetRelevanceWeightsResult {
+  @Field(() => RelevanceWeights, { nullable: false })
+  updatedWeights!: RelevanceWeights
+}
+
+@ArgsType()
+export class SetRelevanceServiceConfigArgs {
+  @Field(() => Int, { nullable: true })
+  populateBackgroundQueueInterval?: number
+
+  @Field(() => Int, { nullable: true })
+  updateLoopInterval?: number
+
+  @Field(() => Int, { nullable: true })
+  channelsPerIteration?: number
+
+  @Field(() => Int, { nullable: true })
+  videosPerChannelLimit?: number
+
+  @Field(() => Int, { nullable: true })
+  videosPerChannelSelectTop?: number
+
+  @Field(() => Int, { nullable: true })
+  ageScoreHalvingDays?: number
+}
+
+@ObjectType()
+export class RelevanceServiceConfig {
+  @Field(() => Int, { nullable: false })
+  populateBackgroundQueueInterval!: number
+
+  @Field(() => Int, { nullable: false })
+  updateLoopInterval!: number
+
+  @Field(() => Int, { nullable: false })
+  channelsPerIteration!: number
+
+  @Field(() => Int, { nullable: false })
+  videosPerChannelLimit!: number
+
+  @Field(() => Int, { nullable: false })
+  videosPerChannelSelectTop!: number
+
+  @Field(() => Int, { nullable: false })
+  ageScoreHalvingDays!: number
+}
+
+@ObjectType()
+export class SetRelevanceServiceConfigResult {
+  @Field(() => RelevanceServiceConfig, { nullable: false })
+  updatedConfig!: RelevanceServiceConfig
 }
 
 @ArgsType()
@@ -70,36 +170,6 @@ export class SetRootDomainInput {
 
 @ObjectType()
 export class AppRootDomain {
-  @Field(() => Boolean, { nullable: false })
-  isApplied!: boolean
-}
-
-@ObjectType()
-export class VideoWeights {
-  @Field(() => Boolean, { nullable: false })
-  isApplied!: boolean
-}
-
-@InputType()
-export class ChannelWeightInput {
-  @Field(() => String, { nullable: false })
-  channelId!: string
-
-  @Field(() => Float, { nullable: false })
-  weight!: number
-}
-
-@ArgsType()
-export class SetChannelsWeightsArgs {
-  @Field(() => [ChannelWeightInput], { nullable: false })
-  inputs!: ChannelWeightInput[]
-}
-
-@ObjectType()
-export class ChannelWeight {
-  @Field(() => String, { nullable: false })
-  channelId!: string
-
   @Field(() => Boolean, { nullable: false })
   isApplied!: boolean
 }
