@@ -115,14 +115,15 @@ import {
 } from './mappings/token'
 import {
   commentCountersManager,
-  videoRelevanceManager,
   orionVideoLanguageManager,
+  relevanceQueuePublisher,
 } from './mappings/utils'
 import { Event } from './types/support'
 import { EventHandler, EventInstance, EventNames, eventConstructors } from './utils/events'
 import { assertAssignable } from './utils/misc'
 import { OffchainState } from './utils/offchainState'
 import { EntityManagerOverlay } from './utils/overlay'
+import { createIndexes, getMissingIndexes, indexName } from './model/indexes'
 
 const defaultEventOptions = {
   data: {
@@ -377,16 +378,8 @@ orionVideoLanguageManager
     throw new Error(`Failed to initialize Orion video language manager: ${e.toString()}`)
   })
 
-videoRelevanceManager
-  .init({
-    fullUpdateLoopTime: 1000 * 60 * 60 * 12, // 12 hrs
-    scheduledUpdateLoopTime: 1000 * 60 * 10, // 10 mins
-  })
-  .catch((e) => {
-    throw new Error(`Failed to initialize Orion video relevance manager: ${e.toString()}`)
-  })
-
 let exportBlockNumber: number
+let indexesChecked = false
 
 processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (ctx) => {
   Logger.set(ctx.log)
@@ -397,26 +390,47 @@ processor.run(new TypeormDatabase({ isolationLevel: 'READ COMMITTED' }), async (
   }
 
   const overlay = await EntityManagerOverlay.create(ctx.store, afterDbUpdate)
+  const em = overlay.getEm()
+
+  if (ctx.isHead && offchainState.isImported) {
+    const missingIndexes = await getMissingIndexes(em)
+    if (missingIndexes.length) {
+      ctx.log.info(
+        `Head reached and some indexes are missing (${missingIndexes
+          .map((i) => indexName(i))
+          .join(', ')})! Creating indexes...`
+      )
+      await createIndexes(em, missingIndexes)
+      ctx.log.info(`Indexes created successfully!`)
+    }
+    indexesChecked = true
+  }
 
   for (const block of ctx.blocks) {
-    if (block.header.height > exportBlockNumber && !videoRelevanceManager.isVideoRelevanceEnabled) {
-      videoRelevanceManager.turnOnVideoRelevanceManager()
-    }
-    // Importing exported offchain state
-    if (block.header.height > exportBlockNumber && !offchainState.isImported) {
-      ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
-      // there is no need to recalc video relevance before orion is synced
-      await overlay.updateDatabase()
-      const em = overlay.getEm()
-      await offchainState.import(overlay)
-      await commentCountersManager.updateVideoCommentsCounters(em, true)
-      await commentCountersManager.updateParentRepliesCounters(em, true)
-      await videoRelevanceManager.updateVideoRelevanceValue(em, true)
-      ctx.log.info(`Offchain state successfully imported!`)
+    if (block.header.height > exportBlockNumber) {
+      if (!offchainState.isImported) {
+        // Importing exported offchain state
+        ctx.log.info(`Export block ${exportBlockNumber} reached, importing offchain state...`)
+        // there is no need to recalc video relevance before orion is synced
+        await overlay.updateDatabase()
+        await offchainState.import(overlay)
+        ctx.log.info('Updating video comments counters...')
+        await commentCountersManager.updateVideoCommentsCounters(em, true)
+        ctx.log.info('Video comments counters updated!')
+        ctx.log.info(`Updating video comments reply counters...`)
+        await commentCountersManager.updateParentRepliesCounters(em, true)
+        ctx.log.info(`Video comments reply counters updated!`)
+        ctx.log.info(`Offchain state successfully imported!`)
+      }
+      if (!relevanceQueuePublisher.initialized) {
+        // Initializing relevance queue publisher
+        await relevanceQueuePublisher.init()
+        ctx.log.info(`Relevance queue publisher initialized!`)
+      }
     }
     for (const item of block.items) {
       if (item.name !== '*') {
-        ctx.log.info(`Processing ${item.name} event in block ${block.header.height}...`)
+        ctx.log.debug(`Processing ${item.name} event in block ${block.header.height}...`)
         await processEvent(
           ctx,
           item.name,

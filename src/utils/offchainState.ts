@@ -4,7 +4,7 @@ import { createParseStream, createStringifyStream } from 'big-json'
 import fs from 'fs'
 import { snakeCase } from 'lodash'
 import path from 'path'
-import { EntityManager, ValueTransformer } from 'typeorm'
+import { EntityManager, EntityMetadata, ValueTransformer } from 'typeorm'
 import * as model from '../model'
 import {
   AccountNotificationPreferences,
@@ -18,16 +18,6 @@ import { defaultNotificationPreferences, notificationPrefAllTrue } from './notif
 import { EntityManagerOverlay } from './overlay'
 
 const DEFAULT_EXPORT_PATH = path.resolve(__dirname, '../../db/export/export.json')
-
-type CamelToSnakeCase<S> = S extends `${infer T}${infer U}`
-  ? T extends Capitalize<T>
-    ? `_${Lowercase<T>}${CamelToSnakeCase<U>}`
-    : `${T}${CamelToSnakeCase<U>}`
-  : S
-
-type SnakeCaseKeys<T> = {
-  [K in keyof T as CamelToSnakeCase<K>]: T[K]
-}
 
 type ClassConstructors<T> = {
   [K in keyof T]: T[K] extends new (...args: any[]) => any ? T[K] : never
@@ -43,9 +33,6 @@ const exportedStateMap: ExportedStateMap = {
   VideoViewEvent: true,
   ChannelFollow: true,
   Report: true,
-  Exclusion: true,
-  ChannelVerification: true,
-  ChannelSuspension: true,
   GatewayConfig: true,
   NftFeaturingRequest: true,
   VideoHero: true,
@@ -59,10 +46,9 @@ const exportedStateMap: ExportedStateMap = {
   NotificationEmailDelivery: true,
   EmailDeliveryAttempt: true,
   Token: true,
-  NextEntityId: true,
   OrionOffchainCursor: true,
   UserInteractionCount: true,
-  Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'channelWeight'],
+  Channel: ['isExcluded', 'videoViewsNum', 'followsNum', 'yppStatus', 'isYtSyncEnabled'],
   Video: ['isExcluded', 'viewsNum', 'orionLanguage', 'includeInHomeFeed'],
   Comment: ['isExcluded'],
   OwnedNft: ['isFeatured'],
@@ -161,11 +147,34 @@ function migrateExportDataToV400(data: ExportedData): ExportedData {
   return data
 }
 
+function migrateExportDataToV500(
+  data: ExportedData & {
+    ChannelVerification?: unknown
+    ChannelSuspension?: unknown
+    Exclusion?: unknown
+    NextEntityId?: unknown
+  }
+): ExportedData {
+  // Skip entities that don't exist / should not be exported to 5.0
+  delete data.ChannelSuspension
+  delete data.Exclusion
+  delete data.ChannelVerification
+  delete data.NextEntityId
+  // Skip Channel's yppStatus and channelWeight
+  data.Channel?.values.forEach((v) => {
+    delete v.yppStatus
+    delete v.channelWeight
+  })
+
+  return data
+}
+
 export class OffchainState {
   private logger = createLogger('offchainState')
   private _isImported = false
 
   private migrations: Migrations = {
+    '5.0.0': migrateExportDataToV500,
     '4.0.0': migrateExportDataToV400,
     '3.2.0': migrateExportDataToV320,
     '3.0.0': migrateExportDataToV300,
@@ -243,7 +252,14 @@ export class OffchainState {
     // construct proper JSONB objects from raw data
     return Object.fromEntries(
       Object.entries(data).map(([entityName, { type, values }]) => {
-        const metadata = em.connection.getMetadata(entityName)
+        let metadata: EntityMetadata
+        try {
+          metadata = em.connection.getMetadata(entityName)
+        } catch {
+          // If no metadata avilable - skip transformation
+          this.logger.warn(`Metadata not available for entity ${entityName}!`)
+          return [entityName, { type, values }]
+        }
         const jsonbColumns = metadata.columns.filter((c) => c.type === 'jsonb')
 
         values = (values as any[]).map((value) => {
@@ -252,8 +268,12 @@ export class OffchainState {
             const transformer = column.transformer as ValueTransformer | undefined
             if (value[propertyName] && transformer) {
               const rawValue = value[propertyName]
-              const transformedValue = transformer.from(rawValue)
-              value[propertyName] = transformedValue
+              try {
+                const transformedValue = transformer.from(rawValue)
+                value[propertyName] = transformedValue
+              } catch (e) {
+                this.logger.warn(`Couldn't transform ${entityName}.${propertyName} value!`)
+              }
             }
           })
           return value
@@ -278,26 +298,6 @@ export class OffchainState {
         }
       })
     return data
-  }
-
-  private async importNextEntityIdCounters(
-    overlay: EntityManagerOverlay,
-    entityName: string,
-    data: model.NextEntityId[]
-  ) {
-    const em = overlay.getEm()
-    assert(entityName === 'NextEntityId')
-    for (const record of data) {
-      if (em.connection.hasMetadata(record.entityName as string)) {
-        // reason: during migration the overlay would write to the database the
-        // old nextId, to avoid that directly set the 'nextId' in the Overlay
-        overlay
-          .getRepository(model[record.entityName as keyof typeof model] as any)
-          .setNextEntityId(record.nextId as number)
-      } else {
-        await em.getRepository(entityName).upsert(record, ['entityName'])
-      }
-    }
   }
 
   public async import(
@@ -375,16 +375,7 @@ export class OffchainState {
             } entities left)...`
           )
 
-          // UPSERT operation specifically for NextEntityId
-          if (entityName === 'NextEntityId') {
-            await this.importNextEntityIdCounters(
-              overlay,
-              entityName,
-              batch as model.NextEntityId[]
-            )
-          } else {
-            await em.getRepository(entityName).insert(batch)
-          }
+          await em.getRepository(entityName).insert(batch)
         }
       }
       this.logger.info(

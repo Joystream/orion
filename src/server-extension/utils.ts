@@ -1,12 +1,11 @@
-import { EntityManager } from 'typeorm'
+import { RelevanceQueuePublisher } from '../relevance-service/RelevanceQueue'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
-import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 
 export const commentCountersManager = new CommentCountersManager()
-export const videoRelevanceManager = new VideoRelevanceManager()
-
-videoRelevanceManager.turnOnVideoRelevanceManager()
-
-export async function recalculateAllVideosRelevance(em: EntityManager) {
-  return videoRelevanceManager.updateVideoRelevanceValue(em, true)
-}
+export const relevanceQueuePublisher = new RelevanceQueuePublisher({
+  autoInitialize: true,
+  defaultPushOptions: {
+    deferred: true,
+    skipIfUninitialized: false,
+  },
+})

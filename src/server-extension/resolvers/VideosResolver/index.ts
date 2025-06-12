@@ -21,20 +21,10 @@ import { isObject } from 'lodash'
 import 'reflect-metadata'
 import { Arg, Args, Ctx, Info, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { EntityManager, In, MoreThan } from 'typeorm'
-import {
-  Account,
-  ChannelRecipient,
-  Exclusion,
-  OperatorPermission,
-  Report,
-  Video,
-  VideoExcluded,
-  VideoViewEvent,
-} from '../../../model'
+import { OperatorPermission, Report, Video, VideoViewEvent } from '../../../model'
 import { ConfigVariable, config } from '../../../utils/config'
 import { uniqueId } from '../../../utils/crypto'
 import { has } from '../../../utils/misc'
-import { addNotification } from '../../../utils/notification'
 import { extendClause, overrideClause, withHiddenEntities } from '../../../utils/sql'
 import { Context } from '../../check'
 import { Video as VideoReturnType, VideosConnection } from '../baseTypes'
@@ -43,7 +33,6 @@ import { model } from '../model'
 import {
   AddVideoViewResult,
   DumbPublicFeedArgs,
-  ExcludeVideoInfo,
   MostViewedVideosConnectionArgs,
   PublicFeedOperationType,
   ReportVideoArgs,
@@ -51,8 +40,7 @@ import {
   SetOrUnsetPublicFeedResult,
   VideoReportInfo,
 } from './types'
-import { videoRelevanceManager } from '../../utils'
-import { parseVideoTitle } from '../../../utils/notification/helpers'
+import { relevanceQueuePublisher } from '../../utils'
 
 @Resolver()
 export class VideosResolver {
@@ -309,8 +297,8 @@ export class VideosResolver {
       })
 
       const tick = await config.get(ConfigVariable.VideoRelevanceViewsTick, em)
-      if (video.viewsNum % tick === 0) {
-        videoRelevanceManager.scheduleRecalcForChannel(video.channelId)
+      if (video.viewsNum % tick === 0 && video.channelId) {
+        await relevanceQueuePublisher.pushChannel(video.channelId)
       }
       await em.save([video, video.channel, newView])
       return {
@@ -373,72 +361,4 @@ export class VideosResolver {
       }
     })
   }
-
-  @Mutation(() => ExcludeVideoInfo)
-  @UseMiddleware(OperatorOnly())
-  async excludeVideo(@Args() { videoId, rationale }: ReportVideoArgs): Promise<ExcludeVideoInfo> {
-    return excludeVideoService(await this.em(), videoId, rationale)
-  }
-}
-
-export const excludeVideoService = async (
-  em: EntityManager,
-  videoId: string,
-  rationale: string
-) => {
-  return withHiddenEntities(em, async () => {
-    const video = await em.findOne(Video, {
-      where: { id: videoId },
-      relations: { channel: true },
-    })
-
-    if (!video) {
-      throw new Error(`Video by id ${videoId} not found!`)
-    }
-
-    const existingExclusion = await em.findOne(Exclusion, {
-      where: { channelId: video.channel.id, videoId },
-    })
-    // If exclusion already exists - return its data with { created: false }
-    if (existingExclusion) {
-      return {
-        id: existingExclusion.id,
-        channelId: video.channel.id,
-        videoId,
-        created: false,
-        createdAt: existingExclusion.timestamp,
-        rationale: existingExclusion.rationale,
-      }
-    }
-    // If exclusion doesn't exist, create a new one
-    const newExclusion = new Exclusion({
-      id: uniqueId(8),
-      channelId: video.channel.id,
-      videoId,
-      rationale,
-      timestamp: new Date(),
-    })
-    video.isExcluded = true
-    await em.save([newExclusion, video])
-
-    // in case account exist deposit notification
-    const channelOwnerMemberId = video.channel.ownerMemberId
-    if (channelOwnerMemberId) {
-      const account = await em.findOne(Account, { where: { membershipId: channelOwnerMemberId } })
-      await addNotification(
-        em,
-        account,
-        new ChannelRecipient({ channel: video.channel.id }),
-        new VideoExcluded({ videoTitle: parseVideoTitle(video) })
-      )
-    }
-
-    return {
-      id: newExclusion.id,
-      videoId,
-      created: true,
-      createdAt: newExclusion.timestamp,
-      rationale,
-    }
-  })
 }

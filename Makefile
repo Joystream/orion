@@ -1,5 +1,5 @@
 process: migrate
-	@SQD_DEBUG=sqd:processor:mapping node -r dotenv-expand/config lib/processor.js
+	@node -r dotenv-expand/config lib/processor.js
 
 install:
 	@rm -rf node_modules # clean up node_modules to avoid issues with patch-package
@@ -17,6 +17,9 @@ serve:
 
 serve-auth-api:
 	@npm run auth-server-start
+
+relevance-service:
+	@npm run relevance-service-start
 
 migrate:
 	@npx squid-typeorm-migration apply

@@ -1,9 +1,9 @@
-type Channel @entity @schema(name: "admin") {
+type Channel @entity @schema(name: "curator") {
   "Runtime entity identifier (EntityId)"
   id: ID!
 
   "Timestamp of the block the channel was created at"
-  createdAt: DateTime! @index
+  createdAt: DateTime!
 
   "Current member-owner of the channel (if owned by a member)"
   ownerMember: Membership
@@ -30,7 +30,7 @@ type Channel @entity @schema(name: "admin") {
   isExcluded: Boolean!
 
   "The primary langauge of the channel's content"
-  language: String @index
+  language: String
 
   "List of videos that belong to the channel"
   videos: [Video!]! @derivedFrom(field: "channel")
@@ -77,52 +77,41 @@ type Channel @entity @schema(name: "admin") {
   "Weight/Bias of the channel affecting video relevance in the Homepage"
   channelWeight: Float
 
-  "Channel Ypp Status: either unverified , verified or suspended"
-  yppStatus: ChannelYppStatus!
+  "Channel Ypp Status (if exists): either unverified, verified or suspended"
+  yppStatus: ChannelYppStatus
+
+  "Whether YouTube sync is enabled for this channel"
+  isYtSyncEnabled: Boolean!
+}
+
+enum ChannelTier {
+  BRONZE
+  SILVER
+  GOLD
+  DIAMOND
 }
 
 union ChannelYppStatus = YppUnverified | YppVerified | YppSuspended
 
 type YppUnverified {
-  phantom: Int
+  timestamp: DateTime!
 }
 
 type YppVerified {
-  verification: ChannelVerification!
+  tier: ChannelTier!
+  timestamp: DateTime!
 }
 
 type YppSuspended {
-  suspension: ChannelSuspension!
+  timestamp: DateTime!
 }
 
 type BannedMember
   @entity
-  @schema(name: "admin")
+  @schema(name: "curator")
   @index(fields: ["member", "channel"], unique: true) {
   "{memberId}-{channelId}"
   id: ID!
   member: Membership!
   channel: Channel!
-}
-
-type ChannelVerification @entity @schema(name: "admin") {
-  "unique Id"
-  id: ID!
-
-  "channel verified"
-  channel: Channel!
-
-  "timestamp of verification"
-  timestamp: DateTime!
-}
-
-type ChannelSuspension @entity @schema(name: "admin") {
-  "unique Id"
-  id: ID!
-
-  "channel suspended"
-  channel: Channel!
-
-  "timestamp of suspension"
-  timestamp: DateTime!
 }

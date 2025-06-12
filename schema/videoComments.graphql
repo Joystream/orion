@@ -1,4 +1,4 @@
-type CommentReaction @entity @schema(name: "admin") {
+type CommentReaction @entity @schema(name: "curator") {
   "{memberId}-{commentId}-{reactionId}"
   id: ID!
 
@@ -37,7 +37,7 @@ enum CommentTipTier {
   DIAMOND
 }
 
-type Comment @entity @schema(name: "admin") {
+type Comment @entity @schema(name: "curator") {
   "METAPROTOCOL-{network}-{blockNumber}-{indexInBlock}"
   id: ID!
 

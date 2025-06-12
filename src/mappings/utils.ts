@@ -8,13 +8,19 @@ import { SubstrateBlock } from '@subsquid/substrate-processor'
 import { Logger } from '../logger'
 import { Event, MetaprotocolTransactionResultFailed, NftActivity, NftHistoryEntry } from '../model'
 import { CommentCountersManager } from '../utils/CommentsCountersManager'
-import { VideoRelevanceManager } from '../utils/VideoRelevanceManager'
 import { EntityManagerOverlay } from '../utils/overlay'
 import { OrionVideoLanguageManager } from '../utils/OrionVideoLanguageManager'
+import { RelevanceQueuePublisher } from '../relevance-service/RelevanceQueue'
 
 export const orionVideoLanguageManager = new OrionVideoLanguageManager()
 export const commentCountersManager = new CommentCountersManager()
-export const videoRelevanceManager = new VideoRelevanceManager()
+export const relevanceQueuePublisher = new RelevanceQueuePublisher({
+  autoInitialize: false,
+  defaultPushOptions: {
+    deferred: true,
+    skipIfUninitialized: true,
+  },
+})
 export const JOYSTREAM_SS58_PREFIX = 126
 
 export function bytesToString(b: Uint8Array): string {

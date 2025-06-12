@@ -74,7 +74,13 @@ import {
 import { criticalError } from '../../utils/misc'
 import { addNotification } from '../../utils/notification'
 import { EntityManagerOverlay, Flat } from '../../utils/overlay'
-import { addNftActivity, addNftHistoryEntry, genericEventFields, invalidMetadata } from '../utils'
+import {
+  addNftActivity,
+  addNftHistoryEntry,
+  genericEventFields,
+  invalidMetadata,
+  relevanceQueuePublisher,
+} from '../utils'
 import { parseChannelTitle, parseVideoTitle } from '../../utils/notification/helpers'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -878,17 +884,21 @@ export async function maybeIncreaseChannelCumulativeRevenueAfterNft(
   const nftOwnerType = previousNftOwner ? previousNftOwner.isTypeOf : nft.owner.isTypeOf
 
   if (nftOwnerType === 'NftOwnerChannel') {
-    increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
+    await increaseChannelCumulativeRevenue(channel, assertNotNull(nft.lastSalePrice))
   } else {
     if (nft.creatorRoyalty) {
       const royaltyAmount = computeRoyalty(nft.creatorRoyalty, assertNotNull(nft.lastSalePrice))
-      increaseChannelCumulativeRevenue(channel, royaltyAmount)
+      await increaseChannelCumulativeRevenue(channel, royaltyAmount)
     }
   }
 }
 
-export function increaseChannelCumulativeRevenue(channel: Flat<Channel>, amount: bigint): void {
+export async function increaseChannelCumulativeRevenue(
+  channel: Flat<Channel>,
+  amount: bigint
+): Promise<void> {
   channel.cumulativeRevenue = (channel.cumulativeRevenue || 0n) + amount
+  await relevanceQueuePublisher.pushChannel(channel.id)
 }
 
 export async function memberHandleById(

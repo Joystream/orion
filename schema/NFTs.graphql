@@ -30,7 +30,7 @@ type TransactionalStatusAuction {
 }
 
 "Represents NFT details"
-type OwnedNft @entity @schema(name: "admin") {
+type OwnedNft @entity @schema(name: "curator") {
   "Timestamp of the block the NFT was created at"
   createdAt: DateTime! @index
 
@@ -87,7 +87,7 @@ type AuctionTypeOpen @variant {
 }
 
 "Represents NFT auction"
-type Auction @entity @schema(name: "admin") {
+type Auction @entity @schema(name: "curator") {
   "Unique identifier"
   id: ID!
 
@@ -137,7 +137,7 @@ type AuctionWhitelistedMember @entity @index(fields: ["auction", "member"], uniq
 }
 
 "Represents bid in NFT auction"
-type Bid @entity @schema(name: "admin") {
+type Bid @entity @schema(name: "curator") {
   "Unique identifier"
   id: ID!
 
