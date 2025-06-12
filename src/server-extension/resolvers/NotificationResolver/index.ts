@@ -188,6 +188,10 @@ export class NotificationResolver {
         newPreferences.fundsFromWgReceived,
         account.notificationPreferences.fundsFromWgReceived
       )
+      maybeUpdateNotificationPreference(
+        newPreferences.tipVideoCommentCreated,
+        account.notificationPreferences.tipVideoCommentCreated
+      )
       await em.save(account)
 
       return toOutputGQL(account.notificationPreferences)

@@ -87,6 +87,9 @@ export class AccountNotificationPreferencesInput {
   @Field(() => NotificationPreferenceGQL, { nullable: true })
   channelFundsWithdrawn: NotificationPreference
 
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  tipVideoCommentCreated: NotificationPreference
+
   // member
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
@@ -190,6 +193,9 @@ export class AccountNotificationPreferencesOutput
   @Field(() => NotificationPreferenceOutput, { nullable: true })
   channelFundsWithdrawn: NotificationPreference
 
+  @Field(() => NotificationPreferenceOutput, { nullable: true })
+  tipVideoCommentCreated: NotificationPreference
+
   // member
 
   @Field(() => NotificationPreferenceOutput, { nullable: true })
@@ -277,5 +283,6 @@ export function toOutputGQL(
     fundsFromCouncilReceived: preferences.fundsFromCouncilReceived,
     fundsToExternalWalletSent: preferences.fundsToExternalWalletSent,
     fundsFromWgReceived: preferences.fundsFromWgReceived,
+    tipVideoCommentCreated: preferences.tipVideoCommentCreated,
   }
 }

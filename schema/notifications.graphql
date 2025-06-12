@@ -124,7 +124,7 @@ union NotificationType =
   | CreatorTokenRevenueShareStarted
   | CreatorTokenRevenueSharePlanned
   | CreatorTokenRevenueShareEnded
-
+  | TipCommentPostedToVideo # tip video comment created
 type ChannelSuspended @variant {
   phantom: Int
 }
@@ -586,4 +586,27 @@ type CreatorTokenRevenueShareEnded @variant {
 
   "id of token"
   tokenId: String!
+}
+
+type TipCommentPostedToVideo @variant {
+  "video title used for notification text"
+  videoTitle: String!
+
+  "video Id used for link"
+  videoId: String!
+
+  "commenter id for the avatar"
+  memberId: String!
+
+  "commenter handle for text"
+  memberHandle: String!
+
+  "id for the comment used for the link"
+  commentId: String!
+
+  "Tier received for adding a tip to the comment (if any)"
+  tipTier: CommentTipTier
+
+  "Tip included when adding the comment (in HAPI)"
+  tipAmount: BigInt!
 }
