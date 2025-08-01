@@ -130,6 +130,35 @@ export class AccountNotificationPreferencesInput {
 
   @Field(() => NotificationPreferenceGQL, { nullable: true })
   fundsFromWgReceived: NotificationPreference
+
+  // CRTs
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtIssued: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketMint: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketBurn: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtSaleStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtSaleMint: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueShareStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueSharePlanned: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueShareEnded: NotificationPreference
 }
 
 @ObjectType()
@@ -233,6 +262,35 @@ export class AccountNotificationPreferencesOutput
 
   @Field(() => NotificationPreferenceOutput, { nullable: true })
   fundsFromWgReceived: NotificationPreference
+
+  // CRTs
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtIssued: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketMint: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtMarketBurn: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtSaleStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtSaleMint: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueShareStarted: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueSharePlanned: NotificationPreference
+
+  @Field(() => NotificationPreferenceGQL, { nullable: true })
+  crtRevenueShareEnded: NotificationPreference
 }
 
 @ObjectType()
@@ -277,5 +335,14 @@ export function toOutputGQL(
     fundsFromCouncilReceived: preferences.fundsFromCouncilReceived,
     fundsToExternalWalletSent: preferences.fundsToExternalWalletSent,
     fundsFromWgReceived: preferences.fundsFromWgReceived,
+    crtIssued: preferences.crtIssued,
+    crtMarketStarted: preferences.crtMarketStarted,
+    crtMarketMint: preferences.crtMarketMint,
+    crtMarketBurn: preferences.crtMarketBurn,
+    crtSaleStarted: preferences.crtSaleStarted,
+    crtSaleMint: preferences.crtSaleMint,
+    crtRevenueShareStarted: preferences.crtRevenueShareStarted,
+    crtRevenueSharePlanned: preferences.crtRevenueSharePlanned,
+    crtRevenueShareEnded: preferences.crtRevenueShareEnded,
   }
 }
