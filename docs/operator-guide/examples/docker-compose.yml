@@ -1,161 +1,132 @@
-version: '3.4'
 services:
-  # PostgerSQL database for Orion
-  orion-db:
+  orion_db:
+    container_name: orion_db
+    hostname: orion_db
     image: postgres:14
-    container_name: orion-db
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_DB: squid
+      POSTGRES_PASSWORD: squid
+    logging:
+      driver: 'local'
+      options:
+        max-size: '200m'
+        max-file: '10'
+    networks:
+      - joystream_default
     ports:
       - '127.0.0.1:${DB_PORT}:${DB_PORT}'
+      - '[::1]:${DB_PORT}:${DB_PORT}'
     command: ['postgres', '-c', 'config_file=/etc/postgresql/postgresql.conf', '-p', '${DB_PORT}']
     shm_size: 1g
     volumes:
-      - orion-db-data:/var/lib/postgresql/data
-      - ./postgres.conf:/etc/postgresql/postgresql.conf
-  # Orion processor
-  orion-processor:
-    image: joystream/orion:latest
-    container_name: orion-processor
+      - orion_db_data:/var/lib/postgresql/data
+      - ./db/postgres.conf:/etc/postgresql/postgresql.conf
+
+  orion_processor:
+    container_name: orion_processor
+    hostname: orion_processor
+    image: node:18
     restart: unless-stopped
-    depends_on:
-      - orion-db
+    networks:
+      - joystream_default
     env_file:
       - .env
+      - docker.env
     environment:
-      - DB_HOST=orion-db
-      - GQL_PORT=${GRAPHQL_API_PORT}
-    volumes:
-      - ./db/export:/squid/db/export
-    command: >
-      sh -c "npx squid-typeorm-migration apply && \
-            node lib/processor.js"
+      - TYPEORM_SUBSCRIBERS_DIR=lib/mappings/subscribers
     ports:
       - '127.0.0.1:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
-  # Orion GraphQL API
-  orion-graphql-api:
-    container_name: orion-graphql-api
-    image: joystream/orion:latest
-    restart: unless-stopped
+      - '[::1]:${PROCESSOR_PROMETHEUS_PORT}:${PROCESSOR_PROMETHEUS_PORT}'
     depends_on:
-      - orion-db
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=orion-db
-      - GQL_PORT=${GRAPHQL_API_PORT}
-    command: ['npm', 'run', 'graphql-server-start']
-    ports:
-      - '127.0.0.1:${GRAPHQL_API_PORT}:${GRAPHQL_API_PORT}'
-  # Orion Authentication API
-  orion-auth-api:
-    container_name: orion-auth-api
-    image: joystream/orion:latest
-    restart: unless-stopped
-    depends_on:
-      - orion-db
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=orion-db
-    command: ['npm', 'run', 'auth-server-start']
-    ports:
-      - '127.0.0.1:${AUTH_API_PORT}:${AUTH_API_PORT}'
-  # Caddy
-  orion-caddy:
-    profiles:
-      - deploy
-    container_name: orion-caddy
-    image: caddy:2.6
-    restart: unless-stopped
-    env_file:
-      - .env
-    ports:
-      - '80:80'
-      - '443:443'
-      - '443:443/udp'
+      - orion_db
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./atlas:/srv/atlas
-      - ./caddy/data:/data
-      - ./caddy/config:/config
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'process']
 
-  archive_db:
-    container_name: orion_archive_db
-    hostname: orion_archive_db
-    image: postgres:14 # CockroachDB cluster might be a better fit for production deployment
+  orion_relevance-service:
+    container_name: orion_relevance-service
+    image: node:18
     restart: unless-stopped
+    networks:
+      - joystream_default
+    depends_on:
+      - orion_rabbitmq
+    env_file:
+      - .env
+      - docker.env
     volumes:
-      - orion_archive_db_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: squid-archive
-    ports:
-      - '127.0.0.1:${ARCHIVE_DB_PORT}:${ARCHIVE_DB_PORT}'
-      - '[::1]:${ARCHIVE_DB_PORT}:${ARCHIVE_DB_PORT}'
-    command: ['postgres', '-c', 'log_statement=all', '-p', '${ARCHIVE_DB_PORT}']
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'relevance-service']
 
-  ingest:
-    container_name: orion_archive_ingest
+  orion_rabbitmq:
+    container_name: orion_rabbitmq
+    hostname: orion_rabbitmq
+    image: rabbitmq:4.1
+    networks:
+      - joystream_default
+    ports:
+      - '127.0.0.1:${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+      - '[::1]:${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+
+  orion_graphql-server:
+    container_name: orion_graphql-server
+    hostname: orion_graphql-server
+    image: node:18
+    restart: unless-stopped
+    networks:
+      - joystream_default
+    env_file:
+      - .env
+      - docker.env
+    environment:
+      - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
+      - TYPEORM_SUBSCRIBERS_DIR=lib/server-extension/subscribers
     depends_on:
-      - archive_db
-    restart: unless-stopped
-    image: subsquid/substrate-ingest:firesquid
-    command: [
-        '-e',
-        '${WS_SOURCE}',
-        '-c',
-        '20', # allow up to 20 pending requests for the above endpoint (default is 5)
-        #  "--start-block", "1000000", # uncomment to specify a non-zero start block
-        '--out',
-        'postgres://postgres:postgres@orion_archive_db:${ARCHIVE_DB_PORT}/squid-archive',
-      ]
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'serve']
+    ports:
+      - '4350:4350'
 
-  gateway:
-    container_name: orion_archive_gateway
-    hostname: orion_archive_gateway
+  orion_auth-api:
+    container_name: orion_auth-api
+    hostname: orion_auth-api
+    image: node:18
+    restart: unless-stopped
+    networks:
+      - joystream_default
+    env_file:
+      - .env
+      - docker.env
+    environment:
+      - SQD_TRACE=authentication
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${TELEMETRY_ENDPOINT}
     depends_on:
-      - archive_db
-    restart: unless-stopped
-    image: subsquid/substrate-gateway:firesquid
-    environment:
-      DATABASE_MAX_CONNECTIONS: 5
-      RUST_LOG: 'actix_web=info,actix_server=info'
-    command: [
-        '--database-url',
-        'postgres://postgres:postgres@orion_archive_db:${ARCHIVE_DB_PORT}/squid-archive',
-        # "--evm-support" # uncomment for chains with Frontier EVM pallet
-        # (e.g. Moonbeam/Moonriver or Astar/Shiden)
-      ]
+      - orion_db
+    volumes:
+      - type: bind
+        source: .
+        target: /orion
+    working_dir: /orion
+    command: ['make', 'serve-auth-api']
     ports:
-      - '127.0.0.1:${GATEWAY_PORT}:8000'
-      - '[::1]:${GATEWAY_PORT}:8000'
-
-  # Explorer service is optional.
-  # It provides rich GraphQL API for querying archived data.
-  # Many developers find it very useful for exploration and debugging.
-  explorer:
-    container_name: orion_archive_explorer
-    hostname: orion_archive_explorer
-    restart: unless-stopped
-    image: subsquid/substrate-explorer:firesquid
-    environment:
-      DB_TYPE: postgres # set to `cockroach` for Cockroach DB
-      DB_HOST: archive_db
-      DB_PORT: '12345'
-      DB_NAME: 'squid-archive'
-      DB_USER: 'postgres'
-      DB_PASS: 'postgres'
-    ports:
-      - '${EXPLORER_PORT}:3000'
+      - '${AUTH_API_PORT}:${AUTH_API_PORT}'
 
 volumes:
-  orion_archive_db_data:
-    driver: local
-  orion-db-data:
-    driver: local
+  orion_db_data:
+
+networks:
+  joystream_default:
+    external: true
