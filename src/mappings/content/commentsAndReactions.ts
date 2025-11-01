@@ -218,6 +218,7 @@ async function processVideoReaction(
       --previousReactionTypeCounter.count
       // remove reaction
       videoReactionRepository.remove(existingReaction)
+      await overlay.updateDatabase()
       return
     }
     // otherwise...
@@ -370,6 +371,7 @@ export async function processReactCommentMessage(
     --comment.reactionsCount
     // remove reaction
     commentReactionRepository.remove(existingReaction)
+    await overlay.updateDatabase()
   } else {
     // new reaction
     const id = commentReactionEntityId({ memberId, commentId, reactionId })

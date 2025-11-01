@@ -244,12 +244,13 @@ export async function processTokenMetadata(
     token.description = metadata.description
   }
 
-  // remove all current bnefits
+  // remove all current benefits
   const existingBenefit = await overlay
     .getRepository(Benefit)
     .getManyByRelation('tokenId', token.id)
   if (existingBenefit !== undefined) {
     overlay.getRepository(Benefit).remove(...existingBenefit)
+    await overlay.updateDatabase()
   }
 
   if (isSet(metadata.benefits)) {
@@ -302,6 +303,7 @@ export async function processTokenMetadata(
       }
       if (oldTrailer) {
         trailerVideoRepository.remove(oldTrailer)
+        await overlay.updateDatabase()
       }
 
       const id = overlay.getRepository(TrailerVideo).getNewEntityId()
@@ -316,6 +318,7 @@ export async function processTokenMetadata(
     const oldTrailer = await trailerVideoRepository.getOneByRelation('tokenId', token.id)
     if (oldTrailer) {
       trailerVideoRepository.remove(oldTrailer)
+      await overlay.updateDatabase()
     }
   }
 }

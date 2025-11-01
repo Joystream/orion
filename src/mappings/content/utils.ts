@@ -169,6 +169,7 @@ export async function deleteChannel(overlay: EntityManagerOverlay, channelId: bi
 
   overlay.getRepository(BannedMember).remove(...bannedMembers)
   overlay.getRepository(Channel).remove(channelId.toString())
+  await overlay.updateDatabase()
   // delete channel related notifications
 }
 
@@ -204,6 +205,7 @@ export async function deleteVideo(overlay: EntityManagerOverlay, videoId: bigint
   }
   subtitlesRepository.remove(...subtitles)
   videoRepository.remove(video)
+  await overlay.updateDatabase()
 }
 
 export async function processNft(
