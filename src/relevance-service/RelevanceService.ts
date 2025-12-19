@@ -120,6 +120,10 @@ export class RelevanceService {
       this.logger.warn('Percentile stats missing, skipping channel weights update')
       return
     }
+    if (!this.weights.channel) {
+      this.logger.warn('Channel weights missing, skipping channel weights update')
+      return
+    }
     this.logger.info(`Updating weights of ${channelIds.length} channels`)
     const { percentileStats } = this
     const { crtLiquidityWeight, crtVolumeWeight, followersWeight, revenueWeight, yppTierWeight } =
